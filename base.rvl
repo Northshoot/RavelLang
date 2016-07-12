@@ -1,0 +1,12 @@
+import some_module
+import other_module
+
+object NAME ( object_type ):
+    mandatory_statements:
+        stmt_dependend_name = stmt_dependend_value
+
+
+    funcdef name(arg_list):
+        function_body
+
+EOF

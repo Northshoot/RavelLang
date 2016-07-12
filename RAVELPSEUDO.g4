@@ -6,35 +6,107 @@
 
 grammar RAVELPSEUDO;
 
+//input is only allowed by file
+// file consists of import statements
+// or object declations
 file_input
-  : NEWLINE
-  | import_stmt
-  | ravel
+  : ( import_stmt | object ) + // recursively multiple imports and or  objects
   ;
 
+// import takes name and ends with new line
 import_stmt
-    : IMPORT NAME   #Import
+    : IMPORT NAME NEWLINE
     ;
 
-
-// Ravel allows only declaring objects
-// each object has a type
+// Ravel objects are called primitives
+// lang allows only declaring objects and functions inside the object
+// each primitive has one to the primitive specific type
 // OBJECT name (OBJECT_TYPE):
-ravel
-    : PRIMITIVE  NAME? '(' TYPE '):' suite # Primitive
-    | config_stmt+                         # Config//one or more config statements
-    | funcdef
+object
+    : primitive NAME'(' primitive_decl  '):' NEWLINE
+    | body+
     ;
 
-// config_stmt is mandatory statements and consist of pairs
+//we have different types and declarations for each primitve
+primitive_decl
+    : ( model_decl | controller_decl | transform_decl | view_decl | space_decl)
+    | funcdef+
+    ;
+
+//this could be enforced in application rather than compiler
+model_decl
+    : model_type
+    | property_stmt
+    | schema_stmt
+    ;
+
+model_type
+    : ('Local' | 'Streaming' | 'Realtime' )
+    ;
+//
+controller_decl
+    : controller_type
+    | config_stmt
+    ;
+
+controller_type
+    : ('Timer' | 'Event')
+    ;
+
+//etc with the declations
+transform_decl
+    : ('Math' | 'Filter')
+    ;
+
+view_decl
+    : ('Embedded' | 'Gateway' | 'Cloud')
+    ;
+
+space_decl
+    : (property_stmt | config_stmt | 'models' | 'controllers' | 'transforms' | 'views' | 'sinks' | 'sources')
+    ;
+
+
+
+// object body consist of
+// configuration statement (s) and function declaration (s)
+body
+    : NEWLINE
+    | object_stmt+
+    | funcdef+
+    ;
+// object_stmt is mandatory statements and consist of
+// STRING = value pairs
+//
+object_stmt
+//the choise here is to stmt in grammar or say that
+//arbitary ID will do and check that in run time
+// e.g. parser time error vs compile time error
+    : (property_stmt | config_stmt | schema_stmt) ':'
+    | pair (NEWLINE pair)+
+    ;
+
+property_stmt
+    : 'property'
+    ;
+
 config_stmt
-    : ('configuration' | 'properties' | 'schema') ':'
-    | pair+
+    : 'configuration'
     ;
 
-// pair is a STRING : value
-pair:   STRING ':' value ;
+schema_stmt
+    :
+    ;
+// pair is a STRING amd  value
+// depending on type of config_stmt
+// the ID and value have to match their keywords and values
+pair:   KEYWORD ':' value ;
 
+// depending on the type of config_stmt
+
+value
+    : ID
+    ;
 funcdef
     : 'def' NAME parameters  ':' suite ;
 
@@ -99,7 +171,7 @@ test_list
  * lexer rules
  */
 
-PRIMITIVE   : (MODEL|TRANSFORM|CONTROLLER|VIEW|SPACE|SETTINGS) ;
+primitive   : (MODEL|TRANSFORM|CONTROLLER|VIEW|SPACE|SETTINGS) ;
 MODEL       :   [Mm][o][d][e][l] ; // Allow variation Model model
 TRANSFORM   :   [Tt][r][a][n][s][f][o][r][m] ;
 CONTROLLER  :   [Cc][o][n][t][r][o][l][l][e][r] ;
@@ -130,14 +202,3 @@ IS : 'is';
 NONE : 'None';
 TRUE : 'True';
 FALSE : 'False';
-
-value
-    :   STRING
-    |   NUMBER
-    |   FIELD
-    |   'true'  // keywords
-    |   'false'
-    |   'null'
-    ;
-// teporarely def, annything goes
-STRING :  '"' (ESC | ~["\\])* '"' ;

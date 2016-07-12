@@ -1,0 +1,131 @@
+streaming model Temperature:
+        properties:
+            reliable = None
+            encryption = None
+            sink = space.CloudSpace.sinks.db
+
+        schema:
+            time = TimestampField(auto_add=ON_SAVE)
+            temperature = UnsignedInteger16(source = EmbeddedSpace.source.TEMPERATURE)
+
+
+replicated model NodeConfiguration:
+    properties:
+        reliable = ALL
+
+    schema:
+        time = TimestampField(auto_add=True)
+        origin = Space(auto_add=ON_UPDATE) #denotes where the change occurred
+        frequency = TimeField(unit=MILLI, default = 5000)
+
+
+
+controller TemperatureController:
+     configuration:
+        timer = EmbeddedSpace.Timer.RTC(frequency=NodeConfiguration.frequency)
+        frequency = TimerEvent(MILLI(500))
+        event_rtc = EmbeddedSpace.Timer.RTC(frequency)
+        t_model = Temperature()
+        temp = EmbeddedSpace.source.TEMPERATURE
+
+     event event_rtc(context c):
+        t_model.create_and_save()
+
+
+     event t_model.out_of_storage(context c):
+        delete t_model.local.first()
+
+
+     event NodeConfigurationEvent(context c)
+        if c.event == model.UPDATED:
+            timer.stop()
+            timer.frequency = NodeConfiguration.frequency
+        else if c.event == model.SAVED:
+            pass
+
+
+
+streaming model AggregatedAverage:
+    properties:
+        reliable = True
+        encryption = None
+        sink = space.CloudSpace.sinks.db
+
+    schema:
+        time = TimestampField(auto_add=ON_SAVE)
+        avrg_temp = UnsignedInteger16()
+
+#computes average temperature from two nodes
+controller AggregationController:
+    configuration:
+        t_model = Temperature()
+        config = NodeConfiguration()
+        avrg = AggregatedAverage()
+        model_arrived = t_model
+        temp_dev_1 = []
+        temp_dev_2 = []
+        max_dif = 5
+
+
+    event t_model.arrived(context c):
+        dev = c.device.ID
+        if dev == 1:
+            temp_dev_1.append(c.record)
+        else:
+            temp_dev_2.append(c.record)
+
+        if abs(temp_dev_1.size() - temp_dev_2.size()) > max_dif:
+            config.frequency = 2500
+            config.update()
+
+        else if temp_dev_1.size() == temp_dev_2.size():
+            temp = avrg.create()
+            temp.avrg_temp = transforms.AVRG(temp_dev_1, temp_dev_2)
+            temp.save()
+
+    event avrg.save_done(context c):
+        if c.error == SUCCESS:
+            delete avrg.local.first()
+
+space EmbeddedSpace:
+    properties:
+        max_storage = 324MB
+
+	configuration:
+		templates = 'nrf51/'
+		libs = 'templates/c/dual/'
+
+	models:
+		temp = Temperature
+		config = NodeConfiguration
+
+	controllers:
+		temp_c = TemperatureController
+
+	sources:
+		temperature = device.Temperature
+
+
+space GatewaySpace:
+    properties:
+        max_storage = 5000MB
+
+    configuration:
+        templates = 'Android/API23/'
+
+    models:
+        avrg = AggregatedAverage
+
+    controllers:
+        aggr = AggregationController
+
+space CloudSpace:
+    properties:
+        max_storage = None
+
+    configuration:
+        templates = 'Django'
+
+    sinks:
+        conf = AppConfiguration
+        db = sqlite3

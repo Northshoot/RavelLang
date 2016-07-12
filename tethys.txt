@@ -1,0 +1,123 @@
+replicated model AppDevice:
+    properties:
+        xxx
+
+    schema:
+        id =
+        type =
+        hw_v =
+        last_reboot =
+
+replicated model EmbeddedAppConfig:
+    properties:
+        xxx
+
+    schema:
+        device = AppDevice()
+
+ replicated model GatewayAppConfig:
+     properties:
+         xxx
+
+     schema:
+         device = AppDevice()
+
+replicated model SecurityModel:
+    properties:
+        xxx
+
+    schema:
+
+local model ADCModel:
+    properties:
+        durable = False
+        size = 50
+
+    schema:
+        adc = UnsignedInteger16()
+
+streaming model Measurement:
+        properties:
+            reliable = ALL
+            encryption = OCB(ALL)
+
+        schema:
+            time = TimestampField(auto_add_on_save=True)
+            temperature = UnsignedInteger()
+            voltage = UnsignedInteger16()
+
+controller MeasurementController:
+    configuration:
+        adc_model = ADCModel()
+        measurement_model = Measurement()
+        frequency = TimerEvent(MILLI(500))
+        event_rtc = EmbeddedSpace.Timer.RTC(frequency)
+        event_adc_full = adc_model.outOfSpace
+        temp = EmbeddedSpace.source.TEMPERATURE
+        voltage = EmbeddedSpace.source.VOLTAGE
+        error_margin = 0.9
+
+    event event_adc_full(context c):
+        #we have 50 records lets transform them and create Measurement
+
+
+    event event_rtc(context c):
+        vol = voltage.READ #read new value
+        prev = adc_model.last() #get last value
+        if vol < (prev-error_margin) or vol > (prev+error_margin):
+            #needs error handling
+            v = adc_model.create() # create new record
+            v.adc = vol
+            v.save()
+
+    # model events, produced after save
+    event measurement_model.saveDone(context c):
+        if c.error == SUCCESS:
+            delete measurement_model.local.first()
+
+    event event_adc_full(context c):
+        # we have 50 records of ADC, lets create a measurement
+        m = measurement_model.create()
+        m.temperature = temp.READ
+        m.voltage = transforms.FFT(adc_model.voltage)
+        m.save() #save measurement
+        adc_model.clear() #delete all values in queue
+
+
+
+space EmbeddedSpace:
+    properties:
+        max_storage = 324MB
+
+	configuration:
+		templates = 'nrf51/'
+		libs = 'templates/c/tethys/'
+
+	models:
+		temp = TemperatureModel
+		device = DeviceModel
+
+	controllers:
+		temp_c = MeasurementController
+
+	sources:
+		temperature = device.Temperature
+		voltage = device.VoltageIO
+
+space GatewaySpace:
+    properties:
+        max_storage = 5000MB
+
+    configuration:
+        templates = 'Android/API23/'
+
+space CloudSpace:
+    properties:
+        max_storage = None
+
+    configuration:
+        templates = 'Django'
+
+    sinks:
+        conf = AppConfiguration
+        db = sqlite3
