@@ -1,19 +1,130 @@
+##
+## We want to monitor individual shower usage in student dormitories.
+## Thus, we develop a device that is attached to the showerhead that measures temperature and water flow.
+## The node collects measurements, encrypts them and sens to the backend via Bluetooth suing "data mules" when the connection is available.
+## Data mule is a mobile phone application that forwards the data to the cloud. It counts and shows to the user how many records has passed through.
+## The user can manually add "I showered" event.
+## The device configuration can be sent from web interface to the embedded device
+##
+
+## we identify following sink and sources
+sources:
+temperature sensor
+flow-meter
+weather temperature
+sinks:
+database
+node LED
+
+## we identify following models:
+Application
+Temperature, local model in the node
+Flow, local model in node
+Measurement, streaming model
+Number of records, local model in the gateway
+Device Location, cloud model denoting the location of the device
+Device type, describing various kinds of the devices in the application
+System:
+Application Configuration, updatable parameters in the app
+The device, information about the tier (embedded, gateway, cloud)
+Security, encryption key
+Administrator, application access, and administration
+Permission model, a concatenation of users, devices, and data-model permissions
+
+## transforms
+FFT: ADC measurements to flow-model
+Record counter
+
+## views
+View Number of records on the gateway
+Cloud, view/update/delete records
+
+
+### system MVC
+# model describes the device that is present in the application
+
 replicated model AppDevice:
     properties:
-        xxx
+        origin = EmbeddedSpace, CloudSpace
+        destination = EmbeddedSpace, CloudSpace
+        source = BootstrapController, AppDeviceEditor
+        log = ALL # shortcut for replicated & streaming
+        durable = True
+        size = 10
+        access = SYSTEM(RW), ADMIN(RW, limit=(id,type, hw_v, app_v)), TIERS(E,C)
+        encrypt = AES(ALL)
 
     schema:
-        id =
-        type =
-        hw_v =
-        last_reboot =
+        id = UUID(auto_create=True)
+        type = DeviceType()
+        hw_v = Version()
+        sw_v = Version()
+        first_boot = bool(default=False)
+        last_reboot = TimeDateStamp(auto_add=True)
+        error = ErrorField()
+
+controller BootstrapController:
+    configuration:
+        app_device = AppDevice()
+        system = SyscallWrapper()
+
+    event system.boot(context cntx):
+        rec = app_device.get_or_create()
+        rec.error = cntx.error
+        rec.save()
+
+    event app_device.save_done(context cntx):
+        if cntx.error == SUCCESS:
+            app_device.delete(cntx.record)
+
+    event app_device.full(context cntx):
+        delete app_device.first()
+
+view AppDeviceEditor:
+    # gives access to the records and the model for sync
+    configuration:
+        system = HTTP
+
+    event system.request(context cntx):
+        if cntx.POST:
+            device_config.get_and_update(cntx.model)
+        else:
+            system.render_html(device.get(cntx.QUERY))
 
 replicated model EmbeddedAppConfig:
     properties:
-        xxx
+        log = ALL
+        durable = True
+        encrypt = AES(ALL)
+        access = ADMIN(RW)
 
     schema:
         device = AppDevice()
+        ble_broadcast = Second(default=1.5)
+        adc_sampling = Second(default=1)
+        measurement_size = int8(default=250)
+
+
+controller EmbeddedAppConfigController:
+    configuration:
+        app_model = EmbeddedAppConfig()
+
+
+    event app_model.updated(context ctx):
+        if ctx.error == SUCCESS:
+            #error handling
+        else if ctx.error == ERROR:
+            #error handling
+
+view EmbeddedAppConfigView:
+        configuration:
+            system = HTTP
+
+        event system.request(context cntx):
+            if cntx.POST:
+                device_app_config.get_and_update(cntx.model)
+            else:
+                system.render_html(device.get(cntx.QUERY))
 
  replicated model GatewayAppConfig:
      properties:
@@ -22,11 +133,34 @@ replicated model EmbeddedAppConfig:
      schema:
          device = AppDevice()
 
+controller GatewayAppConfigController:
+    configuration:
+        app_model = GatewayAppConfig()
+
+    event app_model.updated(context ctx):
+        if ctx.error == SUCCESS:
+            #error handling
+        else if ctx.error == ERROR:
+            #error handling
+
 replicated model SecurityModel:
     properties:
         xxx
 
     schema:
+
+controller AppModelController:
+    configuration:
+        app_model = AppModel()
+
+    event app_model.updated(context ctx):
+        if ctx.error == SUCCESS:
+            #error handling
+        else if ctx.error == ERROR:
+            #error handling
+
+
+### Application MVC
 
 local model ADCModel:
     properties:
@@ -87,17 +221,26 @@ controller MeasurementController:
 
 space EmbeddedSpace:
     properties:
-        max_storage = 324MB
+        # should describe the hardware platform
+        # so that Ravel can verify that model size
+        # and other configurations, properties are achievable
+        max_storage = 500 MB
+        communication = BLE(GatewaySpace)
+        language = c
 
 	configuration:
-		templates = 'nrf51/'
+	    language_templates = 'C/'
+		platform_templates = 'nrf51/'
+		user_templates = 'workspace/tethys/templates/'
 		libs = 'templates/c/tethys/'
 
 	models:
+	    device = AppDevice
 		temp = TemperatureModel
 		device = DeviceModel
 
 	controllers:
+	    BootstrapController
 		temp_c = MeasurementController
 
 	sources:
@@ -107,17 +250,34 @@ space EmbeddedSpace:
 space GatewaySpace:
     properties:
         max_storage = 5000MB
+        communication = BLE(EmbeddedSpace), ANY(CloudSpace)
 
     configuration:
         templates = 'Android/API23/'
+
+
 
 space CloudSpace:
     properties:
         max_storage = None
 
     configuration:
-        templates = 'Django'
+	    language_templates = 'python'
+		platform_templates = 'django/'
+		user_templates = 'workspace/tethys/templates/'
+
+	models:
+	    device = AppDevice
+		temp = TemperatureModel
+		device = DeviceModel
+
+	controllers:
+	    BootstrapController
+		temp_c = MeasurementController
+
+	views:
+	    device_config = AppDeviceEditor
+	    device_app_config = EmbeddedAppConfigView
 
     sinks:
-        conf = AppConfiguration
         db = sqlite3

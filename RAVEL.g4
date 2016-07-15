@@ -17,7 +17,7 @@ file_input
   ;
 
 ravel: PROMITIVES  id? '(' prim_type '):' ;
-;
+
 
 /*
  * lexer rules
@@ -55,6 +55,7 @@ PASS        : 'pass';
 CONTINUE    : 'continue';
 BREAK       : 'break';
 
+SPACES      : ' ';
 NEWLINE
  : ( {atStartOfInput()}?   SPACES
    | ( '\r'? '\n' | '\r' ) SPACES?
@@ -90,3 +91,38 @@ NEWLINE
      }
    }
  ;
+
+/*
+ * fields
+ */
+
+
+ /*
+  * field options
+ */
+
+FIELD   : ();
+UINT    : 'uint';
+UINT8   : 'uint8';
+UINT16  : 'uint16';
+UINT32  : 'uint32';
+UINT64  : 'uint64';
+INT     : 'int';
+INT8    : 'int8';
+INT16   : 'int16';
+INT32   : 'int32';
+INT64   : 'int64';
+FLOAT   : 'float';
+DOUBLE  : 'double';
+BOOL    : 'bool';
+BYTE    : 'byte';
+TIME    : 'Time';
+TIMESTAMP   : 'TimeStamp';
+DATE    : 'Date';
+TIMEDATESTAMP   : 'TimeDateStamp';
+UUID   : 'UUID';
+VERSION : 'Version';
+
+OPTIONS : (NUMBER_OPTIONS | TIME_OPTIONS);
+NUMBER_OPTIONS: ();
+TIME_OPTIONS: ();
