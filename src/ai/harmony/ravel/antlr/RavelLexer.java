@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/RavelLangM.g4 by ANTLR 4.5.3
+// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
 package ai.harmony.ravel.antlr;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -79,7 +79,7 @@ public class RavelLexer extends Lexer {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "RavelLangM.g4"; }
+	public String getGrammarFileName() { return "Ravel.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }

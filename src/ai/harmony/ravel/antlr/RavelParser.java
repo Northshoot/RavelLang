@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/RavelLangM.g4 by ANTLR 4.5.3
+// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
 package ai.harmony.ravel.antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -6,9 +6,11 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class RavelLangMParser extends Parser {
+public class RavelParser extends Parser {
 	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
@@ -85,7 +87,7 @@ public class RavelLangMParser extends Parser {
 	@Override
 	public ATN getATN() { return _ATN; }
 
-	public RavelLangMParser(TokenStream input) {
+	public RavelParser(TokenStream input) {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
@@ -108,7 +110,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_file_input; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitFile_input(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFile_input(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -186,14 +188,14 @@ public class RavelLangMParser extends Parser {
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public ModelDeclarationContext(ModelDeclContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitModelDeclaration(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModelDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -260,14 +262,14 @@ public class RavelLangMParser extends Parser {
 	}
 
 	public static class NameContext extends ParserRuleContext {
-		public TerminalNode ID() { return getToken(RavelLangMParser.ID, 0); }
+		public TerminalNode ID() { return getToken(RavelParser.ID, 0); }
 		public NameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_name; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitName(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitName(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -300,7 +302,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_modelType; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitModelType(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModelType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -339,9 +341,9 @@ public class RavelLangMParser extends Parser {
 		public SchemaDeclContext schemaDecl() {
 			return getRuleContext(SchemaDeclContext.class,0);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public ModelBodyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -349,7 +351,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_modelBody; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitModelBody(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModelBody(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -421,7 +423,7 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class ModelPropertiesContext extends PropDeclContext {
-		public TerminalNode NL() { return getToken(RavelLangMParser.NL, 0); }
+		public TerminalNode NL() { return getToken(RavelParser.NL, 0); }
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
@@ -434,7 +436,7 @@ public class RavelLangMParser extends Parser {
 		public ModelPropertiesContext(PropDeclContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitModelProperties(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModelProperties(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -492,19 +494,19 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class PropertyDeclContext extends PropertyContext {
-		public List<TerminalNode> ID() { return getTokens(RavelLangMParser.ID); }
+		public List<TerminalNode> ID() { return getTokens(RavelParser.ID); }
 		public TerminalNode ID(int i) {
-			return getToken(RavelLangMParser.ID, i);
+			return getToken(RavelParser.ID, i);
 		}
-		public TerminalNode INT() { return getToken(RavelLangMParser.INT, 0); }
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public TerminalNode INT() { return getToken(RavelParser.INT, 0); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public PropertyDeclContext(PropertyContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitPropertyDecl(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPropertyDecl(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -562,9 +564,9 @@ public class RavelLangMParser extends Parser {
 		public FieldContext field(int i) {
 			return getRuleContext(FieldContext.class,i);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public SchemaBodyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -572,7 +574,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_schemaBody; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitSchemaBody(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSchemaBody(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -645,9 +647,9 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class ModelSchemaContext extends SchemaDeclContext {
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
@@ -661,7 +663,7 @@ public class RavelLangMParser extends Parser {
 		public ModelSchemaContext(SchemaDeclContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitModelSchema(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModelSchema(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -733,11 +735,11 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class FieldNameContext extends Field_nameContext {
-		public TerminalNode ID() { return getToken(RavelLangMParser.ID, 0); }
+		public TerminalNode ID() { return getToken(RavelParser.ID, 0); }
 		public FieldNameContext(Field_nameContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitFieldName(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFieldName(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -776,11 +778,11 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class FieldTypeContext extends Field_typeContext {
-		public TerminalNode ID() { return getToken(RavelLangMParser.ID, 0); }
+		public TerminalNode ID() { return getToken(RavelParser.ID, 0); }
 		public FieldTypeContext(Field_typeContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitFieldType(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFieldType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -817,9 +819,9 @@ public class RavelLangMParser extends Parser {
 		public Field_optContext field_opt() {
 			return getRuleContext(Field_optContext.class,0);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public FieldContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -827,7 +829,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_field; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitField(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitField(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -909,7 +911,7 @@ public class RavelLangMParser extends Parser {
 		public FieldOptContext(Field_optContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitFieldOpt(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFieldOpt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -974,14 +976,14 @@ public class RavelLangMParser extends Parser {
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public SpaceDeclarationContext(SpaceDeclContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitSpaceDeclaration(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSpaceDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1055,9 +1057,9 @@ public class RavelLangMParser extends Parser {
 		public SpaceModelContext spaceModel() {
 			return getRuleContext(SpaceModelContext.class,0);
 		}
-		public List<TerminalNode> NL() { return getTokens(RavelLangMParser.NL); }
+		public List<TerminalNode> NL() { return getTokens(RavelParser.NL); }
 		public TerminalNode NL(int i) {
-			return getToken(RavelLangMParser.NL, i);
+			return getToken(RavelParser.NL, i);
 		}
 		public SpaceBodyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1065,7 +1067,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_spaceBody; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitSpaceBody(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSpaceBody(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1153,7 +1155,7 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class SpaceConfigContext extends SpaceConfContext {
-		public TerminalNode NL() { return getToken(RavelLangMParser.NL, 0); }
+		public TerminalNode NL() { return getToken(RavelParser.NL, 0); }
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
@@ -1166,7 +1168,7 @@ public class RavelLangMParser extends Parser {
 		public SpaceConfigContext(SpaceConfContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitSpaceConfig(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSpaceConfig(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1224,7 +1226,7 @@ public class RavelLangMParser extends Parser {
 		}
 	}
 	public static class SpaceModelsContext extends SpaceModelContext {
-		public TerminalNode NL() { return getToken(RavelLangMParser.NL, 0); }
+		public TerminalNode NL() { return getToken(RavelParser.NL, 0); }
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
@@ -1237,7 +1239,7 @@ public class RavelLangMParser extends Parser {
 		public SpaceModelsContext(SpaceModelContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitSpaceModels(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSpaceModels(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1284,18 +1286,18 @@ public class RavelLangMParser extends Parser {
 	}
 
 	public static class PairContext extends ParserRuleContext {
-		public List<TerminalNode> ID() { return getTokens(RavelLangMParser.ID); }
+		public List<TerminalNode> ID() { return getTokens(RavelParser.ID); }
 		public TerminalNode ID(int i) {
-			return getToken(RavelLangMParser.ID, i);
+			return getToken(RavelParser.ID, i);
 		}
-		public TerminalNode INT() { return getToken(RavelLangMParser.INT, 0); }
+		public TerminalNode INT() { return getToken(RavelParser.INT, 0); }
 		public PairContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pair; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitPair(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPair(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1338,7 +1340,7 @@ public class RavelLangMParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_end; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelLangMVisitor ) return ((RavelLangMVisitor<? extends T>)visitor).visitEnd(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitEnd(this);
 			else return visitor.visitChildren(this);
 		}
 	}

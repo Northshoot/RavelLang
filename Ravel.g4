@@ -25,7 +25,7 @@ propDecl
     ;
 
 property
-    : ID ' = ' (ID | INT)  NL* #PropertyDecl
+    : ID ' = ' (ID | INT)  NL*  #PropertyDecl
     ;
 
 schemaBody
@@ -48,8 +48,6 @@ field
 field_opt
     : pair (',' pair)*  # FieldOpt
     ;
-
-
 
 spaceDecl
     : 'space' name  ':' NL* spaceBody NL* end # SpaceDeclaration
@@ -84,4 +82,3 @@ INT :   [0-9]+ ;
 
 NL      : '\r'? '\n' ;
 WS      : [ \t]+ -> skip ;
-
