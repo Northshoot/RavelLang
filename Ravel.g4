@@ -1,4 +1,4 @@
-grammar RavelLangM;
+grammar Ravel;
 
 file_input
     : (modelDecl | spaceDecl)+ ;

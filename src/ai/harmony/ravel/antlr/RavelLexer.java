@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class RavelLangMLexer extends Lexer {
+public class RavelLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
@@ -73,13 +73,13 @@ public class RavelLangMLexer extends Lexer {
 	}
 
 
-	public RavelLangMLexer(CharStream input) {
+	public RavelLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
 	@Override
-	public String getGrammarFileName() { return "Ravel.g4"; }
+	public String getGrammarFileName() { return "RavelLangM.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
