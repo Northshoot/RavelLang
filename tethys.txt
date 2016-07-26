@@ -27,9 +27,7 @@ Device type, describing various kinds of the devices in the application
 System:
 Application Configuration, updatable parameters in the app
 The device, information about the tier (embedded, gateway, cloud)
-Security, encryption key
 Administrator, application access, and administration
-Permission model, a concatenation of users, devices, and data-model permissions
 
 ## transforms
 FFT: ADC measurements to flow-model
@@ -44,15 +42,24 @@ Cloud, view/update/delete records
 # model describes the device that is present in the application
 
 replicated model AppDevice:
+    flow:
+        source = self.schema
+        sink = CloudSpace.sinks.db
+        origins = [local, CloudSpace]
+        destinations = [CloudSpace]
+
+
     properties:
         origin = EmbeddedSpace, CloudSpace
         destination = EmbeddedSpace, CloudSpace
-        source = BootstrapController, AppDeviceEditor
+        source = bootstrap, AppDeviceEditor
+        sink = CloudSpace.db
         log = ALL # shortcut for replicated & streaming
         durable = True
         size = 10
         access = SYSTEM(RW), ADMIN(RW, limit=(id,type, hw_v, app_v)), TIERS(E,C)
         encrypt = AES(ALL)
+
 
     schema:
         id = UUID(auto_create=True)
@@ -61,14 +68,15 @@ replicated model AppDevice:
         sw_v = Version()
         first_boot = bool(default=False)
         last_reboot = TimeDateStamp(auto_add=True)
-        error = ErrorField()
+        error = Text()
 
-controller BootstrapController:
+controller EmBootstrapController:
     configuration:
         app_device = AppDevice()
-        system = SyscallWrapper()
+        system = SystemEvents()
 
     event system.boot(context cntx):
+        time.start_and_repeat(embedded_config.adc_sampling)
         rec = app_device.get_or_create()
         rec.error = cntx.error
         rec.save()
@@ -87,11 +95,17 @@ view AppDeviceEditor:
 
     event system.request(context cntx):
         if cntx.POST:
-            device_config.get_and_update(cntx.model)
+            device.get_and_update(cntx.model)
         else:
             system.render_html(device.get(cntx.QUERY))
 
 replicated model EmbeddedAppConfig:
+    flow:
+        source = self.schema
+        sink = CloudSpace.sinks.db
+        origins = ALL # shortcut for [EmbeddedSpace, GatewaySpace, CloudSpace]
+        destinations = [local,GatewaySpace,CloudSpace]
+
     properties:
         log = ALL
         durable = True
@@ -102,7 +116,8 @@ replicated model EmbeddedAppConfig:
         device = AppDevice()
         ble_broadcast = Second(default=1.5)
         adc_sampling = Second(default=1)
-        measurement_size = int8(default=250)
+        measurement_size = Integer(default=250, max=500)
+        key = byte(size=32)
 
 
 controller EmbeddedAppConfigController:
@@ -126,12 +141,32 @@ view EmbeddedAppConfigView:
             else:
                 system.render_html(device.get(cntx.QUERY))
 
- replicated model GatewayAppConfig:
-     properties:
-         xxx
+replicated model GatewayAppConfig:
+    flow:
+        source = self.schema
+        sink = CloudSpace.sinks.db
+        origins = [local, CloudSpace]
+        destinations = [local,CloudSpace]
 
-     schema:
-         device = AppDevice()
+    properties:
+        origin = GatewaySpace, CloudSpace
+        destination = GatewaySpace, CloudSpace
+        source = app_process, AppDeviceEditor
+        sink = CloudSpace.db
+        log = ALL # shortcut for replicated & streaming
+        durable = True
+        size = 10
+        access = SYSTEM(RW), ADMIN(RW, limit=(id,type, hw_v, app_v)), TIERS(G,C)
+        encrypt = AES(ALL)
+
+    schema:
+        id = UUID(auto_create=True)
+        type = DeviceType()
+        hw_v = Version()
+        sw_v = Version()
+        first_boot = boolean(default=False)
+        last_reboot = TimeDateStamp(auto_add=True)
+        error = Text()
 
 controller GatewayAppConfigController:
     configuration:
@@ -143,11 +178,6 @@ controller GatewayAppConfigController:
         else if ctx.error == ERROR:
             #error handling
 
-replicated model SecurityModel:
-    properties:
-        xxx
-
-    schema:
 
 controller AppModelController:
     configuration:
@@ -163,39 +193,44 @@ controller AppModelController:
 ### Application MVC
 
 local model ADCModel:
+    flow:
+        source = self.sources.device.VoltageIO
+        sink = None
+        origins = local
+        destinations = local
+
     properties:
         durable = False
-        size = 50
+        size = 250
 
     schema:
-        adc = UnsignedInteger16()
+        adc = Integer(min)
 
 streaming model Measurement:
+        flow:
+            source = [
+                voltage=self.ADCModel,
+                temperature = self.sources.Temperature
+                ]
+            sink = None
+            origins = local
+            destinations = local
+
         properties:
             reliable = ALL
             encryption = OCB(ALL)
 
         schema:
             time = TimestampField(auto_add_on_save=True)
-            temperature = UnsignedInteger()
-            voltage = UnsignedInteger16()
+            temperature = Integer()
+            voltage = Integer()
 
 controller MeasurementController:
     configuration:
-        adc_model = ADCModel()
-        measurement_model = Measurement()
-        frequency = TimerEvent(MILLI(500))
-        event_rtc = EmbeddedSpace.Timer.RTC(frequency)
-        event_adc_full = adc_model.outOfSpace
         temp = EmbeddedSpace.source.TEMPERATURE
-        voltage = EmbeddedSpace.source.VOLTAGE
         error_margin = 0.9
 
-    event event_adc_full(context c):
-        #we have 50 records lets transform them and create Measurement
-
-
-    event event_rtc(context c):
+    event timer.expired(context c):
         vol = voltage.READ #read new value
         prev = adc_model.last() #get last value
         if vol < (prev-error_margin) or vol > (prev+error_margin):
@@ -209,15 +244,43 @@ controller MeasurementController:
         if c.error == SUCCESS:
             delete measurement_model.local.first()
 
-    event event_adc_full(context c):
-        # we have 50 records of ADC, lets create a measurement
+    event adc_model.full(context c):
+        # we have 250 records of ADC, lets create a measurement
         m = measurement_model.create()
         m.temperature = temp.READ
         m.voltage = transforms.FFT(adc_model.voltage)
         m.save() #save measurement
         adc_model.clear() #delete all values in queue
 
+local model NumberOfPackets:
+    flow:
+        source = None
+        sink = None
+        origins = local
+        destinations = local
 
+    properties:
+        size = 1
+
+    schema:
+        number_of_packets = Counter(auto_update=True, start=0, type=Integer, step=1)
+
+controller NumberOfPacketsController:
+    configuration:
+        packet_arrived = Measurement.arrived
+
+    event packet_arrived(context cntx):
+        num_packets.number_of_packets.update()
+
+view NumberOfPacketsView:
+    config:
+        ui_view = UI.text
+        previous = UnsignedInteger32(default = Null)
+
+    command update(context c):
+        if previous == (null or !c.value):
+            previous = c.value
+            ui_view.refresh(previous)
 
 space EmbeddedSpace:
     properties:
@@ -233,19 +296,23 @@ space EmbeddedSpace:
 		platform_templates = 'nrf51/'
 		user_templates = 'workspace/tethys/templates/'
 		libs = 'templates/c/tethys/'
+		timer = System.Timer.RTC
 
 	models:
-	    device = AppDevice
-		temp = TemperatureModel
+	    app_device = AppDevice
+	    adc_model = ADCModel
+		measurement_model = Measurement
 		device = DeviceModel
+		embedded_config = EmbeddedAppConfig
 
 	controllers:
-	    BootstrapController
-		temp_c = MeasurementController
+	    boot=BootstrapController
+		measure = MeasurementController
 
 	sources:
 		temperature = device.Temperature
 		voltage = device.VoltageIO
+
 
 space GatewaySpace:
     properties:
@@ -253,8 +320,19 @@ space GatewaySpace:
         communication = BLE(EmbeddedSpace), ANY(CloudSpace)
 
     configuration:
-        templates = 'Android/API23/'
+        language_templates = 'java'
+        platform_templates = 'Android/API23/'
 
+    models:
+        app_config = GatewayAppConfig
+        num_packets = NumberOfPackets
+
+    controllers:
+        app_process = GatewayAppConfigController
+        packet_counter = NumberOfPacketsController
+
+    views:
+        number_of_packet_view = NumberOfPacketsView
 
 
 space CloudSpace:
@@ -270,9 +348,10 @@ space CloudSpace:
 	    device = AppDevice
 		temp = TemperatureModel
 		device = DeviceModel
+		embedded_config = EmbeddedAppConfig
 
 	controllers:
-	    BootstrapController
+	    bootstrap = EmBootstrapController
 		temp_c = MeasurementController
 
 	views:

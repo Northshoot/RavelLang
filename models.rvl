@@ -1,0 +1,30 @@
+local model ADCModel:
+    properties:
+        durable = False
+        size = 250
+    END
+
+
+    schema:
+        adc = Integer(min = 25)
+    END
+END
+
+space CloudSpace:
+    properties:
+        max_storage = None
+    END
+
+    configuration:
+	    language_templates = 'python'
+		platform_templates = 'django/'
+		user_templates = 'workspace/tethys/templates/'
+    END
+
+	models:
+	    device = AppDevice
+		temp = TemperatureModel
+		device = DeviceModel
+		embedded_config = EmbeddedAppConfig
+    END
+
