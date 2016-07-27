@@ -47,7 +47,7 @@ replicated model AppDevice:
         sink = CloudSpace.sinks.db
         origins = [local, CloudSpace]
         destinations = [CloudSpace]
-
+	END
 
     properties:
         origin = EmbeddedSpace, CloudSpace
@@ -59,6 +59,7 @@ replicated model AppDevice:
         size = 10
         access = SYSTEM(RW), ADMIN(RW, limit=(id,type, hw_v, app_v)), TIERS(E,C)
         encrypt = AES(ALL)
+	END
 
 
     schema:
@@ -69,35 +70,44 @@ replicated model AppDevice:
         first_boot = bool(default=False)
         last_reboot = TimeDateStamp(auto_add=True)
         error = Text()
+	END
+END
 
 controller EmBootstrapController:
     configuration:
         app_device = AppDevice()
         system = SystemEvents()
+	END
 
     event system.boot(context cntx):
         time.start_and_repeat(embedded_config.adc_sampling)
         rec = app_device.get_or_create()
         rec.error = cntx.error
         rec.save()
+	END
 
     event app_device.save_done(context cntx):
         if cntx.error == SUCCESS:
             app_device.delete(cntx.record)
+	END
 
     event app_device.full(context cntx):
         delete app_device.first()
+	END
+END
 
 view AppDeviceEditor:
     # gives access to the records and the model for sync
     configuration:
         system = HTTP
+	END
 
     event system.request(context cntx):
         if cntx.POST:
             device.get_and_update(cntx.model)
         else:
             system.render_html(device.get(cntx.QUERY))
+	END
 
 replicated model EmbeddedAppConfig:
     flow:
@@ -105,12 +115,14 @@ replicated model EmbeddedAppConfig:
         sink = CloudSpace.sinks.db
         origins = ALL # shortcut for [EmbeddedSpace, GatewaySpace, CloudSpace]
         destinations = [local,GatewaySpace,CloudSpace]
+	END
 
     properties:
         log = ALL
         durable = True
         encrypt = AES(ALL)
         access = ADMIN(RW)
+	END
 
     schema:
         device = AppDevice()
@@ -118,28 +130,34 @@ replicated model EmbeddedAppConfig:
         adc_sampling = Second(default=1)
         measurement_size = Integer(default=250, max=500)
         key = byte(size=32)
-
+	END
+END
 
 controller EmbeddedAppConfigController:
     configuration:
         app_model = EmbeddedAppConfig()
-
+	END
 
     event app_model.updated(context ctx):
         if ctx.error == SUCCESS:
             #error handling
         else if ctx.error == ERROR:
             #error handling
+	END
+END
 
 view EmbeddedAppConfigView:
-        configuration:
-            system = HTTP
+    configuration:
+        system = HTTP
+	END
 
-        event system.request(context cntx):
-            if cntx.POST:
-                device_app_config.get_and_update(cntx.model)
-            else:
-                system.render_html(device.get(cntx.QUERY))
+    event system.request(context cntx):
+        if cntx.POST:
+            device_app_config.get_and_update(cntx.model)
+        else:
+            system.render_html(device.get(cntx.QUERY))
+    END
+END
 
 replicated model GatewayAppConfig:
     flow:
@@ -147,7 +165,7 @@ replicated model GatewayAppConfig:
         sink = CloudSpace.sinks.db
         origins = [local, CloudSpace]
         destinations = [local,CloudSpace]
-
+	END
     properties:
         origin = GatewaySpace, CloudSpace
         destination = GatewaySpace, CloudSpace
@@ -158,6 +176,7 @@ replicated model GatewayAppConfig:
         size = 10
         access = SYSTEM(RW), ADMIN(RW, limit=(id,type, hw_v, app_v)), TIERS(G,C)
         encrypt = AES(ALL)
+	END
 
     schema:
         id = UUID(auto_create=True)
@@ -167,28 +186,34 @@ replicated model GatewayAppConfig:
         first_boot = boolean(default=False)
         last_reboot = TimeDateStamp(auto_add=True)
         error = Text()
+    END
+END
 
 controller GatewayAppConfigController:
     configuration:
         app_model = GatewayAppConfig()
+    END
 
     event app_model.updated(context ctx):
         if ctx.error == SUCCESS:
             #error handling
         else if ctx.error == ERROR:
             #error handling
-
+    END
+END
 
 controller AppModelController:
     configuration:
         app_model = AppModel()
+    END
 
     event app_model.updated(context ctx):
         if ctx.error == SUCCESS:
             #error handling
         else if ctx.error == ERROR:
             #error handling
-
+    END
+END
 
 ### Application MVC
 
@@ -198,37 +223,46 @@ local model ADCModel:
         sink = None
         origins = local
         destinations = local
+    END
 
     properties:
         durable = False
         size = 250
+    EMD
 
     schema:
         adc = Integer(min)
+    END
+END
 
 streaming model Measurement:
-        flow:
-            source = [
-                voltage=self.ADCModel,
-                temperature = self.sources.Temperature
-                ]
-            sink = None
-            origins = local
-            destinations = local
+    flow:
+        source = [
+            voltage=self.ADCModel,
+            temperature = self.sources.Temperature
+            ]
+        sink = None
+        origins = local
+        destinations = local
+    END
 
-        properties:
-            reliable = ALL
-            encryption = OCB(ALL)
+    properties:
+        reliable = ALL
+        encryption = OCB(ALL)
+    END
 
-        schema:
-            time = TimestampField(auto_add_on_save=True)
-            temperature = Integer()
-            voltage = Integer()
+    schema:
+        time = TimestampField(auto_add_on_save=True)
+        temperature = Integer()
+        voltage = Integer()
+    END
+END
 
 controller MeasurementController:
     configuration:
         temp = EmbeddedSpace.source.TEMPERATURE
         error_margin = 0.9
+    END
 
     event timer.expired(context c):
         vol = voltage.READ #read new value
@@ -238,11 +272,13 @@ controller MeasurementController:
             v = adc_model.create() # create new record
             v.adc = vol
             v.save()
+    END
 
     # model events, produced after save
     event measurement_model.saveDone(context c):
         if c.error == SUCCESS:
             delete measurement_model.local.first()
+    END
 
     event adc_model.full(context c):
         # we have 250 records of ADC, lets create a measurement
@@ -251,6 +287,8 @@ controller MeasurementController:
         m.voltage = transforms.FFT(adc_model.voltage)
         m.save() #save measurement
         adc_model.clear() #delete all values in queue
+    END
+END
 
 local model NumberOfPackets:
     flow:
@@ -258,29 +296,38 @@ local model NumberOfPackets:
         sink = None
         origins = local
         destinations = local
+    END
 
     properties:
         size = 1
+    END
 
     schema:
         number_of_packets = Counter(auto_update=True, start=0, type=Integer, step=1)
+    END
+END
 
 controller NumberOfPacketsController:
     configuration:
         packet_arrived = Measurement.arrived
+    END
 
     event packet_arrived(context cntx):
         num_packets.number_of_packets.update()
+    END
+END
 
 view NumberOfPacketsView:
     config:
         ui_view = UI.text
         previous = UnsignedInteger32(default = Null)
+    END
 
     command update(context c):
         if previous == (null or !c.value):
             previous = c.value
             ui_view.refresh(previous)
+    END
 
 space EmbeddedSpace:
     properties:
@@ -290,6 +337,7 @@ space EmbeddedSpace:
         max_storage = 500 MB
         communication = BLE(GatewaySpace)
         language = c
+    END
 
 	configuration:
 	    language_templates = 'C/'
@@ -297,6 +345,7 @@ space EmbeddedSpace:
 		user_templates = 'workspace/tethys/templates/'
 		libs = 'templates/c/tethys/'
 		timer = System.Timer.RTC
+    END
 
 	models:
 	    app_device = AppDevice
@@ -304,59 +353,74 @@ space EmbeddedSpace:
 		measurement_model = Measurement
 		device = DeviceModel
 		embedded_config = EmbeddedAppConfig
+    END
 
 	controllers:
 	    boot=BootstrapController
 		measure = MeasurementController
+    END
 
 	sources:
 		temperature = device.Temperature
 		voltage = device.VoltageIO
-
+    END
+END
 
 space GatewaySpace:
     properties:
         max_storage = 5000MB
         communication = BLE(EmbeddedSpace), ANY(CloudSpace)
+    END
 
     configuration:
         language_templates = 'java'
         platform_templates = 'Android/API23/'
+    END
 
     models:
         app_config = GatewayAppConfig
         num_packets = NumberOfPackets
+    END
 
     controllers:
         app_process = GatewayAppConfigController
         packet_counter = NumberOfPacketsController
+    END
 
     views:
         number_of_packet_view = NumberOfPacketsView
-
+    END
+END
 
 space CloudSpace:
     properties:
         max_storage = None
+    END
 
     configuration:
 	    language_templates = 'python'
 		platform_templates = 'django/'
 		user_templates = 'workspace/tethys/templates/'
+    END
 
 	models:
 	    device = AppDevice
 		temp = TemperatureModel
 		device = DeviceModel
 		embedded_config = EmbeddedAppConfig
+    END
 
 	controllers:
 	    bootstrap = EmBootstrapController
 		temp_c = MeasurementController
+    END
 
 	views:
 	    device_config = AppDeviceEditor
 	    device_app_config = EmbeddedAppConfigView
+    END
 
     sinks:
         db = sqlite3
+    END
+END

@@ -1,14 +1,80 @@
-local model ADCModel:
+local model NumberOfPackets:
     properties:
-        durable = False
-        size = 250
+        size = 1
     END
-
 
     schema:
-        adc = Integer(min = 25)
+        number_of_packets = Counter(auto_update=True, start=0, type=Integer, step=1)
     END
 END
+
+streaming model Measurement:
+    properties:
+        reliable = ALL
+        encryption = OCB(ALL)
+    END
+
+    schema:
+        time = TimestampField(auto_add_on_save=True)
+        temperature = Integer()
+        voltage = Integer()
+    END
+END
+
+space EmbeddedSpace:
+    properties:
+        max_storage = 500 MB
+        communication = BLE(GatewaySpace)
+        language = c
+    END
+
+	configuration:
+	    language_templates = 'C/'
+		platform_templates = 'nrf51/'
+		user_templates = 'workspace/tethys/templates/'
+		libs = 'templates/c/tethys/'
+		timer = System.Timer.RTC
+    END
+
+	models:
+	    app_device = AppDevice
+	    adc_model = ADCModel
+		measurement_model = Measurement
+		device = DeviceModel
+		embedded_config = EmbeddedAppConfig
+    END
+
+	controllers:
+	    boot=BootstrapController
+		measure = MeasurementController
+    END
+
+	sources:
+		temperature = device.Temperature
+		voltage = device.VoltageIO
+    END
+END
+
+space GatewaySpace:
+    properties:
+        max_storage = 5000MB
+        language = 'Java'
+        communication = BLE(EmbeddedSpace), ANY(CloudSpace)
+    END
+
+    configuration:
+        platform_templates = 'Android/API23/'
+    END
+
+    models:
+        app_config = Measurement
+        num_packets = NumberOfPackets
+    END
+
+    controllers:
+        app_process = GatewayAppConfigController
+        packet_counter = NumberOfPacketsController
+    END
 
 space CloudSpace:
     properties:
@@ -22,9 +88,6 @@ space CloudSpace:
     END
 
 	models:
-	    device = AppDevice
-		temp = TemperatureModel
-		device = DeviceModel
-		embedded_config = EmbeddedAppConfig
+		measurement = Measurement
     END
-
+EMD
