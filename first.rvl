@@ -1,0 +1,28 @@
+streaming model Random:
+
+    properties:
+        records=50
+
+    schema:
+         time=TimestampField(auto_add_on_save=True)
+         number = Integer()
+
+
+space EmbeddedSpace:
+
+    properties:
+        radio=BLE(GatewaySpace)
+        language = c
+
+	configuration:
+		platform_templates = nrf52
+
+
+	models:
+        rnd_model = Random()
+        frk = Frequency()
+
+
+	controllers:
+	    rnd_cnt = RandomEmbController()
+		frequency = Frequency()

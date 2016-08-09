@@ -1,16 +1,18 @@
 package ai.harmony.ravel.primitives;
 
+import ai.harmony.ravel.antlr4.RavelParser;
+
 import java.util.List;
 
 /**
  * Created by lauril on 7/21/16.
  */
 public class Model {
-    String name;
-    String type;
+    RavelParser.ModelDeclarationContext ctx;
 
-    List<Controller> controllers;
-    List<Space> spaces;
+    public Model(RavelParser.ModelDeclarationContext ctx){
+        ctx = ctx;
+    }
 
 
 

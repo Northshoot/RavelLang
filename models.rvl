@@ -2,7 +2,6 @@ local model NumberOfPackets:
     properties:
         size = 1
     END
-
     schema:
         number_of_packets = Counter(auto_update=True, start=0, type=Integer, step=1)
     END
@@ -23,8 +22,8 @@ END
 
 space EmbeddedSpace:
     properties:
-        max_storage = 500 MB
-        communication = BLE(GatewaySpace)
+        max_storage = 500
+        radio = BLE(GatewaySpace)
         language = c
     END
 
@@ -57,7 +56,7 @@ END
 
 space GatewaySpace:
     properties:
-        max_storage = 5000MB
+        max_storage = 5000
         language = 'Java'
         communication = BLE(EmbeddedSpace), ANY(CloudSpace)
     END
@@ -75,6 +74,7 @@ space GatewaySpace:
         app_process = GatewayAppConfigController
         packet_counter = NumberOfPacketsController
     END
+END
 
 space CloudSpace:
     properties:
@@ -90,4 +90,4 @@ space CloudSpace:
 	models:
 		measurement = Measurement
     END
-EMD
+END

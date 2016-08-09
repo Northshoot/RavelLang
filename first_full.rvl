@@ -1,0 +1,148 @@
+streaming model Random:
+    properties:
+        records = 50
+
+    schema:
+        time = TimestampField(auto_add_on_save=True)
+        number = Integer
+
+replicated model Frequency:
+    properties:
+        log = False
+
+    schema:
+        frequency = Integer(default=500)
+
+controller RandomEmbController:
+    bool connected = False
+    integer counter = 0
+
+    configuration:
+        rnd_model = space.models.rnd_model
+        frk = space.models.frequency
+        timer = space.source.Timer
+
+
+
+    event timer.fired(context cntx):
+
+    event rnd.arrived(context cntx):
+
+    event frk.arrived(context cntx):
+        if cntx.status == SUCCESS:
+            timer.set_periodic(MILLI(frk.frequency))
+
+    event rnd.departed(context cntx):
+        if not connected:
+            connected = True
+            timer.set_periodic(MILLI(frk.frequency))
+
+
+    event rnd.full(context cntx):
+        if connected:
+            timer.stop()
+
+
+controller RandomGtwController:
+    configuration:
+        rnd_model = models.Random
+        frk = models.Frequency
+        sys = space.system
+
+
+    event rnd.arrived(context cntx):
+        sys.println("Random Arrived")
+
+    event frk.arrived(context cntx):
+         sys.println("Frequency Arrived")
+
+    event rnd.departed(context cntx):
+        sys.println("Random Departed")
+
+    event frk.departed(context cntx):
+        sys.println("Frequency departed")
+
+    event rnd.full(context cntx):
+        sys.println("Model full")
+        rnd_model.get_first().delete()
+
+
+
+controller RandomCloudController:
+    configuration:
+        rnd_model = models.Random
+        frk = models.Frequency
+        end_point = sink.Random
+        timer = source.Timer
+
+
+    event rnd.arrived(context cntx):
+        if cntx.status == SUCCESS:
+            end_point.save(cntx.model)
+
+
+    event frk.departed(context cntx):
+
+    event rnd.full(context cntx):
+
+    event frk.full(context cntx):
+    
+space EmbeddedSpace:
+    properties:
+        radio = BLE(GatewaySpace)
+        language = c
+    
+
+	configuration:
+		platform_templates = 'nrf52/'
+		user_templates = 'workspace/tethys/templates/'
+
+
+	models:
+        rnd_model = Random()
+        frk = Frequency()
+    
+
+	controllers:
+	    rnd_cnt = RandomEmbController()
+		frequency = Frequency()
+    
+
+
+space GatewaySpace:
+    properties:
+        language = 'Java'
+        communication = BLE(EmbeddedSpace), ANY(CloudSpace)
+    
+
+    configuration:
+        platform_templates = 'Android/API23/'
+    
+
+    models:
+        app_config = Measurement
+        num_packets = NumberOfPackets
+    
+
+    controllers:
+        rnd_cntr = RandomGtwController
+    
+
+
+space CloudSpace:
+    properties:
+        max_storage = None
+    
+
+    configuration:
+	    language_templates = 'python'
+		platform_templates = 'django/'
+		user_templates = 'workspace/tethys/templates/'
+    
+    controllers:
+        Random = RandomCloudController()
+
+	models:
+		Random = Random()
+		Frequency = Frequency()
+    

@@ -1,7 +1,7 @@
 
-import ai.harmony.ravel.antlr.*;
-import ai.harmony.ravel.*;
-import ai.harmony.ravel.primitives.PrimitiveListner;
+import ai.harmony.ravel.antlr4.*;
+import ai.harmony.ravel.compiler.IR;
+import ai.harmony.ravel.primitives.PrimitiveVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -32,8 +32,10 @@ public class Main {
         parser.setBuildParseTree(true);
         ParseTree tree = parser.file_input();
         ParseTreeWalker walker = new ParseTreeWalker();
-        PrimitiveListner converter = new PrimitiveListner();
-        walker.walk(converter, tree);
+        IR ir = new IR();
+        PrimitiveVisitor converter = new PrimitiveVisitor(ir);
+        Void result = converter.visit(tree);
+
         //System.out.println(converter.getRavel(tree));
         }
 

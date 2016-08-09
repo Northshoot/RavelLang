@@ -1,0 +1,12 @@
+streaming model Measurement:
+    properties:
+        reliable = ALL
+        encryption = OCB(ALL)
+    END
+
+    schema:
+        time = TimestampField(auto_add_on_save=True)
+        temperature = Integer()
+        voltage = Integer()
+    END
+END
