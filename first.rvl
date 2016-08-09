@@ -4,25 +4,21 @@ streaming model Random:
         records=50
 
     schema:
-         time=TimestampField(auto_add_on_save=True)
-         number = Integer()
+        time=TimestampField
+        number=Integer
 
 
 space EmbeddedSpace:
-
     properties:
-        radio=BLE(GatewaySpace)
-        language = c
+        language=clang
 
-	configuration:
-		platform_templates = nrf52
+    configuration:
+        platform_templates = nrf52
 
-
-	models:
-        rnd_model = Random()
-        frk = Frequency()
+    models:
+        rndmodel=Random
+        frk=Datavalue
 
 
-	controllers:
-	    rnd_cnt = RandomEmbController()
-		frequency = Frequency()
+    controllers:
+        rndcnt = RandomEmbCntr

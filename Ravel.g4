@@ -102,7 +102,7 @@ tokens { INDENT, DEDENT }
 }
 
 file_input
-    : (NEWLINE | comp_def)* EOF
+    : ( NEWLINE | comp_def )* EOF
     ;
 
 comp_def
@@ -111,17 +111,8 @@ comp_def
     ;
 
 modelDecl
-    :  modelType MODEL  NAME  ':' suite # ModelDeclaration
+    :  modelType MODEL NAME  ':' suite # ModelDeclaration
     ;
-
-suite
- :  NEWLINE INDENT modelBody+ DEDENT
- ;
-
-spaceDecl
-    : SPACE NAME  ':' spaceSuite  # SpaceDeclaration
-    ;
-
 
 modelType
     : LOCAL
@@ -129,35 +120,47 @@ modelType
     | REPLICATED
     ;
 
+
+suite
+ :  NEWLINE INDENT modelBody+ DEDENT?
+ ;
+
 modelBody
-    : flowDecl
-    | propDecl
-    | schemaDecl
+    : propDecl+
+    | schemaDecl+
     | NEWLINE
     ;
 
-spaceSuite
-    : NEWLINE INDENT spaceBody+ DEDENT // spaceSrc?  spaceSnk?
-    ;
-
-spaceBody
-    : spaceConf
-    | spaceModel
-    | spaceCntr
-    | spaceProp
-    ;
-//just accepting input for now
-flowDecl
-    : 'flow:' INDENT NAME ( NAME | '[' | ']' | '=' )*  DEDENT # ModelFlow
-    ;
+////just accepting input for now
+//flowDecl
+//    : 'flow:' INDENT NAME ( NAME | '[' | ']' | '=' )*  DEDENT # ModelFlow
+//    ;
 
 propDecl
     :  PROPERTIES ':' NEWLINE INDENT property+  DEDENT # ModelProperties
     ;
 
 schemaDecl
-    :  SCHEMA ':' NEWLINE INDENT field+ DEDENT # ModelSchema
+    :  SCHEMA ':' NEWLINE INDENT property+ DEDENT # ModelSchema
     ;
+
+spaceDecl
+    : SPACE NAME  ':' spaceSuite  # SpaceDeclaration
+    ;
+
+
+spaceSuite
+    : NEWLINE INDENT spaceBody+ DEDENT? // spaceSrc?  spaceSnk?
+    ;
+
+spaceBody
+    : spaceProp
+    | spaceConf
+    | spaceModel
+    | spaceCntr
+    | NEWLINE
+    ;
+
 
 spaceProp
     :  PROPERTIES ':' NEWLINE INDENT property+  DEDENT # SpaceModelProperties
@@ -180,7 +183,7 @@ spaceSrc
     ;
 
 spaceSnk
-    : SINKS ':' INDENT  property+  DEDENT    # SpaceSink
+    : SINKS ':' NEWLINE INDENT  property+  DEDENT    # SpaceSink
     ;
 
 property
@@ -247,6 +250,7 @@ MODELS: 'models';
 CONTROLLERS: 'controllers';
 SINKS: 'sinks' ;
 SOURCES: 'sources' ;
+
 
 NAME
  : ID_START ID_CONTINUE*
