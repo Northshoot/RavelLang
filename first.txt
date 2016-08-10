@@ -28,4 +28,4 @@ space EmbeddedSpace:
 
 
     controllers:
-        rndcnt = RandomController(tier=this)
+        rndcnt = RandomController(space=this)

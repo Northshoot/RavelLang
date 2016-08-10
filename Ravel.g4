@@ -150,7 +150,18 @@ block_suite
     ;
 
 assigment
-    : NAME '=' ( NAME | INT) NEWLINE
+    : NAME '=' ( NAME | INT | field) NEWLINE
+    ;
+
+field
+    : NAME '(' args* ')'
+    ;
+
+args
+    : arg (',' arg)*
+    ;
+arg
+    : NAME '=' ( NAME | INT )
     ;
 
 event
