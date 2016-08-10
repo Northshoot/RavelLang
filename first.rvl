@@ -8,6 +8,14 @@ streaming model Random:
         number=Integer
 
 
+
+controller RandomController:
+    configuration:
+        test = 5
+
+    event test.here():
+        test = 5
+
 space EmbeddedSpace:
     properties:
         language=clang

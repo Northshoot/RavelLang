@@ -22,13 +22,27 @@ public class PrimitiveVisitor extends RavelBaseVisitor<Void> {
     public Void visitModelDeclaration(RavelParser.ModelDeclarationContext ctx) {
         //ctx.modelType().getText()
         System.out.println("Got Model with type: " +  ctx.modelType().getText() + " with name: " + ctx.NAME());
-
         return null;
     }
 
     @Override
+    public Void visitControllerDeclaration(RavelParser.ControllerDeclarationContext ctx){
+        System.out.println("Got Controller name: " + ctx.NAME());
+
+        return null;
+    }
+    @Override
     public Void visitSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
         System.out.println("Got Space name: " + ctx.NAME());
         return null;
+    }
+
+    @Override
+    public Void visitSuiteDecl(RavelParser.SuiteDeclContext cxt){
+
+        System.out.println("block def: " + cxt.block_def().toString());
+
+        return null;
+
     }
 }

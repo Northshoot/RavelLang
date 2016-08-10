@@ -106,13 +106,15 @@ file_input
     ;
 
 comp_def
-    : modelDecl
-    | spaceDecl
+    : model_comp
+    | controller_comp
+    | space_comp
     ;
 
-modelDecl
+model_comp
     :  modelType MODEL NAME  ':' suite # ModelDeclaration
     ;
+
 
 modelType
     : LOCAL
@@ -120,114 +122,76 @@ modelType
     | REPLICATED
     ;
 
-
 suite
- :  NEWLINE INDENT modelBody+ DEDENT?
+    : NEWLINE INDENT block_def+ DEDENT #SuiteDecl
+    ;
+
+block_def
+    : decl
+    | event
+    | NEWLINE
+    ;
+
+ decl
+    : decl_type ':' block_suite
+    ;
+
+decl_type
+    : PROPERTIES
+    | SCHEMA
+    | CONTROLLERS
+    | CONFIGURATION
+    | MODELS
+    ;
+
+
+block_suite
+    : NEWLINE INDENT assigment+ DEDENT
+    ;
+
+assigment
+    : NAME '=' ( NAME | INT) NEWLINE
+    ;
+
+event
+    : EVENT comp '.' trigger '():' stmt
+    ;
+
+comp : NAME;
+trigger: NAME ;
+
+//TODO: placeholder
+stmt
+    : expr_stmt
+    | flow_stmt
+    | NEWLINE
+    ;
+expr_stmt
+    : NEWLINE INDENT assigment DEDENT
+    ;
+
+//TODO: placeholder
+flow_stmt
+ //: break_stmt
+ //| continue_stmt
+ : return_stmt
+// | raise_stmt
+// | yield_stmt
  ;
 
-modelBody
-    : propDecl+
-    | schemaDecl+
-    | NEWLINE
+//TODO: placeholder for now
+return_stmt
+ : RETURN NAME
+ ;
+
+space_comp
+    : SPACE NAME ':' suite # SpaceDeclaration
     ;
 
-////just accepting input for now
-//flowDecl
-//    : 'flow:' INDENT NAME ( NAME | '[' | ']' | '=' )*  DEDENT # ModelFlow
-//    ;
-
-propDecl
-    :  PROPERTIES ':' NEWLINE INDENT property+  DEDENT # ModelProperties
+controller_comp
+    : CONTROLLER NAME ':' suite # ControllerDeclaration
     ;
 
-schemaDecl
-    :  SCHEMA ':' NEWLINE INDENT property+ DEDENT # ModelSchema
-    ;
-
-spaceDecl
-    : SPACE NAME  ':' spaceSuite  # SpaceDeclaration
-    ;
-
-
-spaceSuite
-    : NEWLINE INDENT spaceBody+ DEDENT? // spaceSrc?  spaceSnk?
-    ;
-
-spaceBody
-    : spaceProp
-    | spaceConf
-    | spaceModel
-    | spaceCntr
-    | NEWLINE
-    ;
-
-
-spaceProp
-    :  PROPERTIES ':' NEWLINE INDENT property+  DEDENT # SpaceModelProperties
-    ;
-
-spaceConf
-    : CONFIGURATION':' NEWLINE INDENT property+  DEDENT  # SpaceConfig
-    ;
-
-spaceModel
-    : MODELS ':' NEWLINE INDENT property+  DEDENT # SpaceModels
-    ;
-
-spaceCntr
-    : CONTROLLERS ':'NEWLINE INDENT property+  DEDENT # SpaceControler
-    ;
-
-spaceSrc
-    : SOURCES ':' NEWLINE INDENT  property+   DEDENT   # SpaceSource
-    ;
-
-spaceSnk
-    : SINKS ':' NEWLINE INDENT  property+  DEDENT    # SpaceSink
-    ;
-
-property
-    :  NAME '=' (NAME | INT | exprs)  NEWLINE #PropertyDecl
-    ;
-
-exprs
-    : expr (',' expr)*
-    ;
-
-expr
-    : NAME '(' formalParameters? ')'
-    ;
-formalParameters
-    :   formalParameter (',' formalParameter)*
-    ;
-
-formalParameter
-    :    NAME (',' NAME)*
-    ;
-
- /*
- field declarations
- */
-field_name : NAME # FieldName ;
-field_type : NAME # FieldType ;
-
-field
-    : field_name '='  field_type '(' field_opt? ')' NEWLINE
-    ;
-
-field_opt
-    : pair (',' pair)*  # FieldOpt
-    ;
-
-pair : NAME '=' (NAME | INT)+ ;
-
-
-
-//fragment
-//CONNECTOR : ('_' | '.' | '/') ;
-//fragment
-//LETTER : [a-zA-Z] ; //needs to be cleaned out
-//
 INT :   [0-9]+ ;
 
 
@@ -250,6 +214,9 @@ MODELS: 'models';
 CONTROLLERS: 'controllers';
 SINKS: 'sinks' ;
 SOURCES: 'sources' ;
+EVENT: 'event' ;
+COMMAND:  'command' ;
+RETURN : 'return' ;
 
 
 NAME
