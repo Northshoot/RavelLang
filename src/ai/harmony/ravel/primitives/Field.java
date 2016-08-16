@@ -10,7 +10,7 @@ import java.util.Locale;
  */
 public class Field {
     private final String mName;
-    //will come handy in use to add documanetation when generating
+    //will come handy in use to add documentation when generating
     //eahc field
 //    private final String mDocumentation;
     private Type mType;
@@ -20,11 +20,8 @@ public class Field {
 
     public Field(Model model,
                  String name,
-                 String documentation,
+                // String documentation,
                  Type type,
-                 boolean isId,
-                 boolean isIndex,
-                 boolean isNullable,
                  boolean isAutoIncrement,
                  String defaultValue){
         mModel = model;

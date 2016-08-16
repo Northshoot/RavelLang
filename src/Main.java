@@ -1,7 +1,7 @@
 
 import ai.harmony.ravel.antlr4.*;
 import ai.harmony.ravel.compiler.IR;
-import ai.harmony.ravel.primitives.PrimitiveVisitor;
+import ai.harmony.ravel.compiler.PrimitiveVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;

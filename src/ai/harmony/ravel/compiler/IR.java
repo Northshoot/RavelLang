@@ -1,58 +1,82 @@
 package ai.harmony.ravel.compiler;
 
-import ai.harmony.ravel.primitives.Controller;
-import ai.harmony.ravel.primitives.Model;
-import ai.harmony.ravel.primitives.Space;
+import ai.harmony.ravel.primitives.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class holding all
  * Created by lauril on 8/8/16.
  */
 public class IR {
-    Map<String, Model> modelMap = new LinkedHashMap<>();
-    Map<String, Controller> controllerMap = new LinkedHashMap<>();
-    Map<String, Space> spaceMap = new LinkedHashMap<>();
+    Map<String, Primitive> mModelMap;
+    Map<String, Primitive> mControllerMap;
+    Map<String, Primitive> mSpaceMap;
+    Map<String, Primitive> mFlowMap;
 
-    public IR() {
 
+    public void add(String name, Primitive primitive) {
+        if( primitive instanceof Model ) {
+            this.mModelMap.put(name, primitive);
+        } else if(primitive instanceof Controller){
+            mControllerMap.put(name,primitive);
+        } else if(primitive instanceof Space){
+            mSpaceMap.put(name,primitive);
+        } else if(primitive instanceof Flow){
+            mFlowMap.put(name,primitive);
+        }
     }
 
-    public void addModel(String name, Model model){
-        modelMap.put(name, model);
+    public Model getModel(String name){
+        return (Model) mModelMap.get(name);
     }
 
-    public void addController(String name, Controller c){
-        controllerMap.put(name, c);
+    public List<Model> getModels(){
+        List<Model> modelList = new LinkedList<>();
+        for( Primitive m : mModelMap.values() ){
+            modelList.add((Model)m);
+        }
+        return modelList;
     }
 
-    public void addSpace(String name, Space s){
-        spaceMap.put(name, s);
+    public List<Controller> getControllers(){
+        List<Controller> modelList = new LinkedList<>();
+        for( Primitive m : mControllerMap.values() ){
+            modelList.add((Controller)m);
+        }
+        return modelList;
     }
 
-    public Map<String, Model> getModelMap() {
-        return modelMap;
+    public List<Space> getSpaces(){
+        List<Space> modelList = new LinkedList<>();
+        for( Primitive m : mSpaceMap.values() ){
+            modelList.add((Space) m);
+        }
+        return modelList;
     }
 
-    public void setModelMap(Map<String, Model> modelMap) {
-        this.modelMap = modelMap;
+    public List<Flow> getFlows(){
+        List<Flow> modelList = new LinkedList<>();
+        for( Primitive m : mFlowMap.values() ){
+            modelList.add((Flow) m);
+        }
+        return modelList;
+    }
+    public Controller getController(String name){
+        return (Controller) mControllerMap.get(name);
+    }
+    public Space getSpace(String name){
+        return (Space) mSpaceMap.get(name);
+    }
+    public Flow getFlow(String name){
+        return (Flow) mFlowMap.get(name);
     }
 
-    public Map<String, Controller> getControllerMap() {
-        return controllerMap;
-    }
+    public IR(){
+        mModelMap = new HashMap<>();
+        mControllerMap = new HashMap<>();
+        mSpaceMap = new HashMap<>();
 
-    public void setControllerMap(Map<String, Controller> controllerMap) {
-        this.controllerMap = controllerMap;
-    }
-
-    public Map<String, Space> getSpaceMap() {
-        return spaceMap;
-    }
-
-    public void setSpaceMap(Map<String, Space> spaceMap) {
-        this.spaceMap = spaceMap;
+        mFlowMap = new HashMap<>();
     }
 }

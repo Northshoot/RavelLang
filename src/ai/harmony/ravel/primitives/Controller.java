@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Controller {
+public class Controller extends Primitive{
     RavelParser.ControllerDeclarationContext ctx;
     private List<Configuration> mConfigurations;
     private List<Event> mEvents;
