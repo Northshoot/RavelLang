@@ -44,13 +44,11 @@ public class <name> {
     }
 
         public class <model.name>Record {
-        <model.schema.fields:{field|<field.type> <field.javaName> };separator="\n">
-
-            String random;
+        <model.schema.fields:{field|<field.type.javaType> <field.javaVarName> };separator="\n">
             int local_num=0;
 
-            public <model.name>Record(<model.schema.fields:{field|<field.type> <field.javaName> }separator=",">){
-                <model.schema.fields:{field|this.<field.javaName> = <field.javaName>};separator="\n">
+            public <model.name>Record(<model.schema.fields:{field|<field.type.javaType> <field.javaName> }separator=",">){
+                <model.schema.fields:{field|this.<field.javaVarName> = <field.javaName>};separator="\n">
             }
 
             @Override

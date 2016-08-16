@@ -137,11 +137,11 @@ block_def
     ;
 
 decl_type
-    : PROPERTIES
-    | SCHEMA
-    | CONTROLLERS
-    | CONFIGURATION
-    | MODELS
+    : PROPERTIES    #PropertyDecl
+    | SCHEMA        #SchemaDecl
+    | CONTROLLERS   #ControllersDecl
+    | CONFIGURATION #ConfigurationDecl
+    | MODELS        #ModelsAssigDecl
     ;
 
 
@@ -165,7 +165,7 @@ arg
     ;
 
 event
-    : EVENT comp '.' trigger '():' stmt
+    : EVENT comp '.' trigger '():' stmt #EventDecl
     ;
 
 comp : NAME;

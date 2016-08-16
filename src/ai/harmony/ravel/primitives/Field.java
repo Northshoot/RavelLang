@@ -1,5 +1,6 @@
 package ai.harmony.ravel.primitives;
 
+import ai.harmony.ravel.antlr4.RavelParser;
 import org.apache.commons.lang3.text.WordUtils;
 import java.util.Locale;
 
@@ -9,14 +10,13 @@ import java.util.Locale;
  */
 public class Field {
     private final String mName;
-    private final String mDocumentation;
-    private final Type mType;
-    private boolean mIsId;
-    private final boolean mIsIndex;
-    private final boolean mIsNullable;
-    private final boolean mIsAutoIncrement;
-    private final String mDefaultValue;
-    private final Model mModel;
+    //will come handy in use to add documanetation when generating
+    //eahc field
+//    private final String mDocumentation;
+    private Type mType;
+    private boolean mIsAutoIncrement;
+    private String mDefaultValue;
+    private Model mModel;
 
     public Field(Model model,
                  String name,
@@ -29,14 +29,40 @@ public class Field {
                  String defaultValue){
         mModel = model;
         mName = name;
-        mDocumentation = documentation;
-        mType = type
-        mIsId = isId;
-        mIsIndex = isIndex;
-        mIsNullable = isNullable;
+//        mDocumentation = documentation;
+        mType = type;
+
         mIsAutoIncrement = isAutoIncrement;
         mDefaultValue = defaultValue;
 
+    }
+
+    public Field(Model model, RavelParser.FieldContext ctx){
+        //parse context and create self
+        mModel = model;
+        mName = ctx.NAME().getText();
+
+
+    }
+
+    public String getJavaVarName(){
+        return "m"+getNameCamelCase();
+    }
+
+    public String getVerboseName(){
+        return getNameCamelCase();
+    }
+
+    public String getJavaName(){
+        return getName();
+    }
+
+    public String getCName(){
+        return getName();
+    }
+
+    public String getPythonName(){
+        return getName();
     }
     public String getName() {
         return mName;
@@ -79,9 +105,9 @@ public class Field {
     }
 
 
-    public String getDocumentation() {
-        return mDocumentation;
-    }
+//    public String getDocumentation() {
+//        return mDocumentation;
+//    }
 
 
 }
