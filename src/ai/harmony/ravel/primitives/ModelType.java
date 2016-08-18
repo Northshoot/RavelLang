@@ -1,6 +1,7 @@
 package ai.harmony.ravel.primitives;
 
 import ai.harmony.ravel.antlr4.RavelParser;
+import org.apache.commons.lang3.text.WordUtils;
 
 /**
  * Created by lauril on 8/16/16.
@@ -12,9 +13,11 @@ public class ModelType {
     public static final int REPLICATED = 2;
     int mType;
     String mTypeString;
+    private String _type;
 
-    public ModelType(RavelParser.ModelTypeContext ctx){
-        mTypeString = ctx.getText().toString();
+    public ModelType(String type){
+        _type =type;
+        mTypeString = WordUtils.uncapitalize(_type);
         switch (mTypeString){
             case "streaming" : {
                 mType = ModelType.STREAMING;

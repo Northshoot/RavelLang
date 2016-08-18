@@ -9,11 +9,17 @@ import java.util.*;
  * Created by lauril on 8/8/16.
  */
 public class IR {
-    Map<String, Primitive> mModelMap;
-    Map<String, Primitive> mControllerMap;
-    Map<String, Primitive> mSpaceMap;
-    Map<String, Primitive> mFlowMap;
-
+    Map<String, Primitive> mModelMap = new HashMap<>();
+    Map<String, Primitive> mControllerMap = new HashMap<>();
+    Map<String, Primitive> mSpaceMap = new HashMap<>();
+    Map<String, Primitive> mFlowMap =new HashMap<>();
+    private static IR singleton = null;
+    public static IR getInstance() {
+        if(singleton == null) {
+            singleton = new IR();
+        }
+        return singleton;
+    }
 
     public void add(String name, Primitive primitive) {
         if( primitive instanceof Model ) {
@@ -72,11 +78,7 @@ public class IR {
         return (Flow) mFlowMap.get(name);
     }
 
-    public IR(){
-        mModelMap = new HashMap<>();
-        mControllerMap = new HashMap<>();
-        mSpaceMap = new HashMap<>();
+    public  IR(){
 
-        mFlowMap = new HashMap<>();
     }
 }

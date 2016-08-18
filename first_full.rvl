@@ -4,7 +4,7 @@ streaming model Random:
 
     schema:
         time = TimestampField(auto_add_on_save=True)
-        number = Integer
+        number = Integer()
 
 replicated model Frequency:
     properties:
@@ -21,7 +21,6 @@ controller RandomEmbController:
         rnd_model = space.models.rnd_model
         frk = space.models.frequency
         timer = space.source.Timer
-
 
 
     event timer.fired(context cntx):
@@ -99,7 +98,7 @@ space EmbeddedSpace:
 
 
 	models:
-        rnd_model = Random()
+        rnd_model = Random(size=100)
         frk = Frequency()
     
 

@@ -1,0 +1,31 @@
+user writes models with a particular type.
+Types are local, streaming, replicated.
+type defines synchronization mechanism or lack of it like in case with local model
+Models have properties and schemas
+properties define some model behaviour either globaly or localy.
+When property can be defined in the model or passed during instantiation in the space.
+If model property is defined inside the model, then it applies across all tiers that model is distributed on.
+If property is set during instantiation from the space, then that property is specific to the space.
+Models have commands and generate events. Command allow to create and delete records, events are bounded to the data flow mechanism.
+
+Model commands are:
+create
+delete
+Model events are:
+arrived - when the record arrives to the tier
+departed - when the record depars tier
+full - when the local model queue is full
+
+Controllers have a single instance, and dont have any synchronization mechanism.
+However, the same controller can be instantiated on different tiers.
+Controller has configuration and can subscribe to events.
+
+In controller configuration variable, models of interests and event subscriptions are declared.
+they can either be declared statically or instantiated when initializing controller in the space
+
+space defines the tier configuration and scope.
+In space configuration the details about  the platform are defines, type of platform, language, template directory,
+sources and sink describe the endpoint for data flow.
+model section gives name to local model instances, same for controllers.
+The controllers can access these resources to perform operations, subscribe to events etc.
+

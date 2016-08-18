@@ -13,7 +13,7 @@ public class Field {
     //will come handy in use to add documentation when generating
     //eahc field
 //    private final String mDocumentation;
-    private Type mType;
+    private FieldType mFieldType;
     private boolean mIsAutoIncrement;
     private String mDefaultValue;
     private Model mModel;
@@ -21,20 +21,20 @@ public class Field {
     public Field(Model model,
                  String name,
                 // String documentation,
-                 Type type,
+                 FieldType type,
                  boolean isAutoIncrement,
                  String defaultValue){
         mModel = model;
         mName = name;
 //        mDocumentation = documentation;
-        mType = type;
+        mFieldType = type;
 
         mIsAutoIncrement = isAutoIncrement;
         mDefaultValue = defaultValue;
 
     }
 
-    public Field(Model model, RavelParser.FieldContext ctx){
+    public Field(Model model, RavelParser.FieldDeclarationContext ctx){
         //parse context and create self
         mModel = model;
         mName = ctx.NAME().getText();
@@ -83,8 +83,8 @@ public class Field {
 
 
 
-    public Type getType() {
-        return mType;
+    public FieldType getType() {
+        return mFieldType;
     }
 
 
