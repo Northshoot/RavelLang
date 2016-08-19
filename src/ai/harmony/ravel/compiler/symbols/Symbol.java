@@ -26,6 +26,8 @@ public class Symbol { // A generic programming language symbol
                     T_INTEGER_FIELD, T_NUMBER_FIELD, T_DATE_FIELD,
                     T_DATE_TIME_FIELD, T_TIME_STAMP_FIELD, T_BYTE_FIELD,
                     T_STRING_FIELD, T_BOOLEAN_FIELD,
+                    /** block */
+                    BLOCK,
                     /** components */
                     MODEL, CONTROLLER, VIEW, FLOW
     }
