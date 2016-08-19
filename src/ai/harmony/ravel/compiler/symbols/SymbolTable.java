@@ -16,7 +16,7 @@ import ai.harmony.ravel.compiler.scopes.GlobalScope;
  ***/
 public class SymbolTable {
     GlobalScope globals = new GlobalScope();
-    PrimitiveSymbol objectRoot;
+    Symbol objectRoot;
 
     public SymbolTable() { initTypeSystem(); }
 
@@ -30,10 +30,7 @@ public class SymbolTable {
         objectRoot.define(hashCode);
         globals.define(objectRoot);
 */
-        // define predefined atomic types
-        globals.define(new BuiltInTypeSymbol("int"));
-        globals.define(new BuiltInTypeSymbol("float"));
-        globals.define(new BuiltInTypeSymbol("void")); // pseudo-type
+
     }
 
 //    public static Symbol resolveID(RavelAST idAST) {

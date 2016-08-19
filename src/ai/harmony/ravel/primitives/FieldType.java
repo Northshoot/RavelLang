@@ -5,124 +5,112 @@ import ai.harmony.ravel.compiler.symbols.Symbol;
 /**
  * Created by lauril on 8/15/16.
  */
-public class FieldType extends Symbol implements Type {
-    public static final int TYPE_STRING = 0; //"String";
-    public static final int TYPE_INTEGER = 1; //"Integer";
-    public static final int TYPE_LONG = 2; //"Long";
-    public static final int TYPE_FLOAT = 3; // "Float";
-    public static final int TYPE_DOUBLE = 4; //"Double";
-    public static final int TYPE_BOOLEAN = 5; //"Boolean";
-    public static final int TYPE_DATE = 6; //"Date";
-    public static final int TYPE_BYTE_ARRAY = 7;//"byte[]";
-    public static final int TYPE_DATE_TIME = 8; //DateTime
+public class FieldType  {
 
-    private int mType;
+    private Symbol.Type mType;
     private String name;
 
 
-    public FieldType(int type){
-        super("");
+    public FieldType(Symbol.Type type){
         mType = type;
         switch (mType){
-            case FieldType.TYPE_BOOLEAN:
-                name =  "boolean";
-            case FieldType.TYPE_BYTE_ARRAY:
-                name =  "byte[]";
-            case FieldType.TYPE_DATE:
-                name =  "Date";
-            case FieldType.TYPE_DOUBLE:
-                name =  "Double";
-            case FieldType.TYPE_FLOAT:
-                name =  "Float";
-            case FieldType.TYPE_INTEGER:
-                name =  "integer";
-            case FieldType.TYPE_LONG:
-                name =  "long";
-            case FieldType.TYPE_STRING:
-                name =  "String";
-            case TYPE_DATE_TIME:
-                name = "DateTime";
-
+            case T_BOOLEAN_FIELD:
+                name =  "BooleanField";
+            case T_BYTE_FIELD:
+                name =  "ByteField";
+            case T_DATE_FIELD:
+                name =  "DateField";
+            case T_DATE_TIME_FIELD:
+                name =  "DateTimeField";
+            case T_INTEGER_FIELD:
+                name =  "IntegerField";
+            case T_NUMBER_FIELD:
+                name =  "NumberField";
+            case T_TIME_STAMP_FIELD:
+                name =  "TimeStampField";
+            case T_STRING_FIELD:
+                name =  "StringField";
         }
-        super.name = name;
+
     }
-
-
 
     public String getVerboseName(){
-
         return name;
     }
-    public String getJavaType(){
-        switch (mType){
-            case FieldType.TYPE_BOOLEAN:
-                return "boolean";
-            case FieldType.TYPE_BYTE_ARRAY:
-                return "byte[]";
-            case FieldType.TYPE_DATE:
-                return "Date";
-            case FieldType.TYPE_DOUBLE:
-                return "";
-            case FieldType.TYPE_FLOAT:
-                return "float";
-            case FieldType.TYPE_INTEGER:
-                return "int";
-            case FieldType.TYPE_LONG:
-                return "long";
-            case FieldType.TYPE_STRING:
-                return "String";
 
+    public String getJavaType(){
+        switch (mType) {
+            case T_BOOLEAN_FIELD:
+                return "boolean";
+            case T_BYTE_FIELD:
+                return "byte[]";
+            case T_DATE_FIELD:
+                return "Date";
+            case T_DATE_TIME_FIELD:
+                return "LocalDateTime";
+            case T_INTEGER_FIELD:
+                return "int";
+            case T_NUMBER_FIELD:
+                return "float";
+            case T_TIME_STAMP_FIELD:
+                return "long";
+            case T_STRING_FIELD:
+                return "String";
+            default:
+                //TODO: through an error
+                return null;
         }
-        return null;
     }
 
     public String getCType(){
-        switch (mType){
-            case FieldType.TYPE_BOOLEAN:
+        switch (mType) {
+            case T_BOOLEAN_FIELD:
                 return "bool";
-            case FieldType.TYPE_BYTE_ARRAY:
+            case T_BYTE_FIELD:
                 return "char[]";
-            case FieldType.TYPE_DATE:
-                return "int"; //milliseconds
-            case FieldType.TYPE_DOUBLE:
-                return "double";
-            case FieldType.TYPE_FLOAT:
+            case T_DATE_FIELD:
+                return "uint32_t";
+            case T_DATE_TIME_FIELD:
+                return "uint32_t";
+            case T_INTEGER_FIELD:
+                return "uint32_t";
+            case T_NUMBER_FIELD:
                 return "float";
-            case FieldType.TYPE_INTEGER:
-                return "int32_t";
-            case FieldType.TYPE_LONG:
-                return "int64_t";
-            case FieldType.TYPE_STRING:
+            case T_TIME_STAMP_FIELD:
+                return "uint32_t";
+            case T_STRING_FIELD:
                 return "char[]";
-
+            default:
+                //TODO: through an error
+                return null;
         }
-        return null;
     }
 
     public String getPythonType(){
         return "";
     }
 
-    public String getDjangoType(){
-        switch (mType){
-            case FieldType.TYPE_BOOLEAN:
-                return "fields.NullBooleanField()";
-            case FieldType.TYPE_BYTE_ARRAY:
-                return "fields.BinaryField()";
-            case FieldType.TYPE_DATE:
-                return "fields.DateTimeField()";
-            case FieldType.TYPE_DOUBLE:
-                return "fields.DecimalField()";
-            case FieldType.TYPE_FLOAT:
-                return "fields.FloatField()";
-            case FieldType.TYPE_INTEGER:
-                return "fields.IntegerField()";
-            case FieldType.TYPE_LONG:
-                return "fields.BigIntegerField()";
-            case FieldType.TYPE_STRING:
-                return "fields.textField()";
-
+    public String getDjangoType() {
+        switch (mType) {
+            case T_BOOLEAN_FIELD:
+                return "BooleanField";
+            case T_BYTE_FIELD:
+                return "ByteField";
+            case T_DATE_FIELD:
+                return "DateField";
+            case T_DATE_TIME_FIELD:
+                return "DateTimeField";
+            case T_INTEGER_FIELD:
+                return "IntegerField";
+            case T_NUMBER_FIELD:
+                return "NumberField";
+            case T_TIME_STAMP_FIELD:
+                return "TimeStampField";
+            case T_STRING_FIELD:
+                return "StringField";
+            default:
+                //TODO: through an error
+                return null;
         }
-        return null;
     }
 }

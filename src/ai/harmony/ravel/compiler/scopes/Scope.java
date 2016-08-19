@@ -16,18 +16,14 @@ import ai.harmony.ravel.primitives.Primitive;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book information.
  ***/
 public interface Scope {
-     String getScopeName();
+    public String getScopeName();
 
-    /** Where to look next for symbols; superclass or enclosing scope */
-    Scope getParentScope();
-    /** Scope in which this scope defined. For global scope, it's null */
-    Scope getEnclosingScope();
+    /** Where to look next for symbols */
+    public Scope getEnclosingScope();
 
     /** Define a symbol in the current scope */
-    void define(Symbol sym);
+    public void define(Symbol sym);
 
-    Primitive getPrimitive();
-
-    /** Look up name in this scope or in parent scope if not here */
-    Symbol resolve(String name);
+    /** Look up name in this scope or in enclosing scope if not here */
+    public Symbol resolve(String name);
 }

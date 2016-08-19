@@ -154,11 +154,18 @@ block_suite
     ;
 
 assigment
-    : NAME '=' ( NAME | INT | field) NEWLINE #AssignmentDec
+    : prim_assig
+    | field
+    | instanciation
+    | reference
+    | NEWLINE
+    ;
+prim_assig
+    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #PrimitiveAssig
     ;
 
 field
-    : NAME '(' args* ')' #FieldDeclaration
+    : NAME '=' field_type '(' args* ')' #FieldDeclaration
     ;
 
 args
@@ -167,7 +174,12 @@ args
 arg
     : NAME '=' ( NAME | INT )
     ;
-
+instanciation
+    : NAME '=' NAME '(' args* ')' #InstansDecl
+    ;
+reference
+    : NAME '=' '"' NAME '"' #RefDecl
+    ;
 event
     : EVENT comp '.' trigger '():' stmt #EventDecl
     ;
@@ -234,13 +246,38 @@ SOURCES: 'sources' ;
 EVENT: 'event' ;
 COMMAND:  'command' ;
 RETURN : 'return' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+
+primitive_type
+    : T_INTEGER
+    | T_NUMBER
+    | T_BOOL
+    ;
 
 T_INTEGER : 'integer' ;
 T_NUMBER : 'number' ;
-T_INTEGER_FIED : 'IntegerField';
-T_NUMBER_FIED : 'IntegerField' ;
-T_DATE_FIED : 'IntegerField' ;
-T_DATE_TIME_FIED : 'IntegerField' ;
+T_BOOL: 'bool' ;
+
+field_type
+    : T_BYTE_FIELD
+    | T_STRING_FIELD
+    | T_BOOLEAN_FIELD
+    | T_INTEGER_FIELD
+    | T_NUMBER_FIELD
+    | T_DATE_FIELD
+    | T_DATE_TIME_FIELD
+    | T_TIME_STAMP_FIELD
+    ;
+
+
+T_BYTE_FIELD: 'ByteField' ;
+T_STRING_FIELD: 'StringField' ;
+T_BOOLEAN_FIELD: 'Boolean' ;
+T_INTEGER_FIELD : 'IntegerField';
+T_NUMBER_FIELD : 'IntegerField' ;
+T_DATE_FIELD : 'IntegerField' ;
+T_DATE_TIME_FIELD : 'IntegerField' ;
 T_TIME_STAMP_FIELD: 'TimestampField' ;
 
 

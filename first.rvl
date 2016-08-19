@@ -1,7 +1,7 @@
 streaming model Random:
     properties:
-        records=50
-        test=name
+        integer records=50
+        bool test=true
 
     schema:
         time=TimestampField(auto_add=True)
@@ -9,19 +9,19 @@ streaming model Random:
 
 controller RandomController:
     configuration:
-        test=5
+        integer test=5
 
 
 
     event test.here():
-        test=5
+        integer test=5
 
 space EmbeddedSpace:
     properties:
-        language=clang
+        language="clang"
 
     configuration:
-        platform_templates=nrf52
+        platform_templates="nrf52"
 
     models:
         rndmodel=Random(size=10)

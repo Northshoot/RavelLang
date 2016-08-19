@@ -21,13 +21,13 @@ public class Symbol { // A generic programming language symbol
     public  enum Type {
                     tINVALID,
                      /** basic types */
-                    T_INTEGER, T_NUMBER,
+                    T_INTEGER, T_NUMBER, T_BOOL,
                     /** fields */
-                    T_INTEGER_FIED, T_NUMBER_FIED, T_DATE_FIED,
-                    T_DATE_TIME_FIED, T_TIME_STAMP_FIELD,
+                    T_INTEGER_FIELD, T_NUMBER_FIELD, T_DATE_FIELD,
+                    T_DATE_TIME_FIELD, T_TIME_STAMP_FIELD, T_BYTE_FIELD,
+                    T_STRING_FIELD, T_BOOLEAN_FIELD,
                     /** components */
                     MODEL, CONTROLLER, VIEW, FLOW
-
     }
 
     public String name;
@@ -59,18 +59,23 @@ public class Symbol { // A generic programming language symbol
 
     public static Symbol.Type getType(int tokenType) {
         switch ( tokenType ) {
-            case RavelParser.T_DATE_FIED :  return Type.T_DATE_FIED;
-            case RavelParser.T_DATE_TIME_FIED :   return Type.T_DATE_TIME_FIED;
             case RavelParser.T_INTEGER :   return Type.T_INTEGER;
-            case RavelParser.T_INTEGER_FIED :   return Type.T_INTEGER_FIED;
             case RavelParser.T_NUMBER :   return Type.T_NUMBER;
-            case RavelParser.T_NUMBER_FIED :   return Type.T_NUMBER_FIED;
+            case RavelParser.T_BOOL :   return Type.T_BOOL;
+
+            case RavelParser.T_BOOLEAN_FIELD :   return Type.T_BOOLEAN_FIELD;
+            case RavelParser.T_BYTE_FIELD :   return Type.T_BYTE_FIELD;
+            case RavelParser.T_DATE_FIELD :  return Type.T_DATE_FIELD;
+            case RavelParser.T_DATE_TIME_FIELD :   return Type.T_DATE_TIME_FIELD;
+            case RavelParser.T_INTEGER_FIELD :   return Type.T_INTEGER_FIELD;
+            case RavelParser.T_NUMBER_FIELD :   return Type.T_NUMBER_FIELD;
             case RavelParser.T_TIME_STAMP_FIELD :   return Type.T_TIME_STAMP_FIELD;
+            case RavelParser.T_STRING_FIELD :   return Type.T_STRING_FIELD;
+
             case RavelParser.MODEL :   return Type.MODEL;
             case RavelParser.CONTROLLER :   return Type.CONTROLLER;
             case RavelParser.FLOW :   return Type.FLOW;
             case RavelParser.VIEW :   return Type.VIEW;
-            //case RavelParser :   return Type;
             //case RavelParser :   return Type;
         }
         return Symbol.Type.tINVALID;

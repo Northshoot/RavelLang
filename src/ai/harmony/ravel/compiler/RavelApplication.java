@@ -1,38 +1,51 @@
 package ai.harmony.ravel.compiler;
 
 import ai.harmony.ravel.compiler.scopes.GlobalScope;
-import ai.harmony.ravel.compiler.scopes.Scope;
-import ai.harmony.ravel.compiler.symbols.BuiltInTypeSymbol;
-import ai.harmony.ravel.compiler.symbols.PrimitiveSymbol;
-import ai.harmony.ravel.primitives.FieldType;
+import ai.harmony.ravel.primitives.*;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by lauril on 8/18/16.
  */
 public class RavelApplication  {
-    PrimitiveSymbol objectRoot;
-    GlobalScope globals = new GlobalScope();
+    Map<String, Model> mModels = new LinkedHashMap<>();
+    Map<String, Controller> mControllers = new LinkedHashMap<>();
+    Map<String, Space> mSpace = new LinkedHashMap<>();
+    Map<String, View> mViews = new LinkedHashMap<>();
+    Map<String, Source> mSource = new LinkedHashMap<>();
+    Map<String, Sink> mSink = new LinkedHashMap<>();
+    Map<String, Flow> mFlow = new LinkedHashMap<>();
 
-    public RavelApplication() { initTypeSystem(); }
 
-    public void initTypeSystem(){
-        //Build in types
-        globals.define(new BuiltInTypeSymbol("integer"));
-        globals.define(new BuiltInTypeSymbol("number"));
-        globals.define(new BuiltInTypeSymbol("void")) ;
 
-        //build in fields
-        globals.define(new FieldType(FieldType.TYPE_BOOLEAN));
-        globals.define(new FieldType(FieldType.TYPE_BYTE_ARRAY));
-        globals.define(new FieldType(FieldType.TYPE_DATE));
-        globals.define(new FieldType(FieldType.TYPE_DATE_TIME));
-        globals.define(new FieldType(FieldType.TYPE_DOUBLE));
-        globals.define(new FieldType(FieldType.TYPE_FLOAT));
-        globals.define(new FieldType(FieldType.TYPE_INTEGER));
-        globals.define(new FieldType(FieldType.TYPE_LONG));
-        globals.define(new FieldType(FieldType.TYPE_STRING));
+    public RavelApplication() {
 
     }
 
-    public String toString() { return globals.toString(); }
+    public void addModel(String name, Model m){
+        mModels.put(name, m);
+    }
+
+    public void addController(String name, Controller c){
+        mControllers.put(name, c);
+    }
+    public void addSpace(String name, Space s){
+        mSpace.put(name, s);
+    }
+    public void addView(String name, View v){
+        mViews.put(name, v);
+    }
+    public void addVSource(String name, Source s){
+        mSource.put(name, s);
+    }
+    public void addSink(String name, Sink s){
+        mSink.put(name, s);
+    }
+    public void addFlow(String name, Flow f){
+        mFlow.put(name, f);
+    }
+
+
 }
