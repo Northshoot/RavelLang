@@ -185,14 +185,41 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void enterInstansDecl(RavelParser.InstansDeclContext ctx) { }
+    public void enterInstansDecl(RavelParser.InstansDeclContext ctx) {
+        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
+            intend++;
+            String name = ctx.NAME(0).getText();
+            String instanceName = ctx.NAME(1).getText();
+            InstantiationSymbol is = new InstantiationSymbol(name, instanceName);
+            //TODO: skipping args for now
+            currentScope.define(is);
+            System.out.println(getTab() + "Entered Reference: " + is);
+        } else {
+            System.err.println(getTab() + "Components can only be instantiated in the space");
+        }
+    }
 
 
     @Override
-    public void exitInstansDecl(RavelParser.InstansDeclContext ctx) { }
+    public void exitInstansDecl(RavelParser.InstansDeclContext ctx) {
+        intend--;
+    }
 
     @Override
-    public void enterRefDecl(RavelParser.RefDeclContext ctx) { }
+    public void enterRefDecl(RavelParser.RefDeclContext ctx) {
+        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
+            intend++;
+            String name = ctx.NAME(0).getText();
+            String refered = ctx.NAME(1).getText();
+            //TODO: skipping args for now
+            ReferenceSymbol rs = new ReferenceSymbol(name, refered);
+            currentScope.define(rs);
+            System.out.println(getTab() + "Entered Reference: " + rs);
+
+        } else {
+            System.err.println(getTab() + "Reference can only made in space" + currentScope);
+        }
+    }
 
 
     @Override

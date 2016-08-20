@@ -29,7 +29,9 @@ public class Symbol { // A generic programming language symbol
                     /** block */
                     BLOCK,
                     /** components */
-                    MODEL, CONTROLLER, VIEW, EVENT, FLOW
+                    MODEL, CONTROLLER, VIEW, EVENT, FLOW,
+                    /** space stuff */
+                    INSTANTIATION, REFERENCE
     }
 
     public String name;
