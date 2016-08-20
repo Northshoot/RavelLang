@@ -161,11 +161,23 @@ assigment
     | NEWLINE
     ;
 prim_assig
-    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #PrimitiveAssig
+    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #VarAssig
     ;
 
 field
     : NAME '=' field_type '(' args* ')' #FieldDeclaration
+    ;
+
+
+field_type
+    : T_BYTE_FIELD
+    | T_STRING_FIELD
+    | T_BOOLEAN_FIELD
+    | T_INTEGER_FIELD
+    | T_NUMBER_FIELD
+    | T_DATE_FIELD
+    | T_DATE_TIME_FIELD
+    | T_TIME_STAMP_FIELD
     ;
 
 args
@@ -259,16 +271,6 @@ T_INTEGER : 'integer' ;
 T_NUMBER : 'number' ;
 T_BOOL: 'bool' ;
 
-field_type
-    : T_BYTE_FIELD
-    | T_STRING_FIELD
-    | T_BOOLEAN_FIELD
-    | T_INTEGER_FIELD
-    | T_NUMBER_FIELD
-    | T_DATE_FIELD
-    | T_DATE_TIME_FIELD
-    | T_TIME_STAMP_FIELD
-    ;
 
 
 T_BYTE_FIELD: 'ByteField' ;

@@ -18,6 +18,6 @@ public class SourceSymbol extends BlockSymbol {
 
     @Override
     public String toString() {
-        return null;
+        return "Source Symbol: " + name;
     }
 }

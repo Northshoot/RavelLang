@@ -1,6 +1,6 @@
 package ai.harmony.ravel.compiler.symbols;
 
-import ai.harmony.ravel.compiler.exceptions.SymbolNotAllowedInScopeException;
+
 import ai.harmony.ravel.compiler.scopes.Scope;
 
 import java.util.LinkedHashMap;
@@ -40,5 +40,5 @@ public class ControllerSymbol extends Symbol implements Scope {
     public Scope getEnclosingScope() { return enclosingScope; }
     public String getScopeName() { return name; }
 
-    public String toString() { return "Controller"+super.toString()+":"+arguments.values(); }
+    public String toString() { return "Controller Symbol: "+super.toString()+":"+arguments.values(); }
 }

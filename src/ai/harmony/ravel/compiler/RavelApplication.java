@@ -27,7 +27,6 @@ public class RavelApplication  {
     public void addModel(String name, Model m){
         mModels.put(name, m);
     }
-
     public void addController(String name, Controller c){
         mControllers.put(name, c);
     }
@@ -37,7 +36,7 @@ public class RavelApplication  {
     public void addView(String name, View v){
         mViews.put(name, v);
     }
-    public void addVSource(String name, Source s){
+    public void addSource(String name, Source s){
         mSource.put(name, s);
     }
     public void addSink(String name, Sink s){
@@ -48,4 +47,71 @@ public class RavelApplication  {
     }
 
 
+    public String toString(){
+        String ret ="Ravel applications: \n";
+        if(mModels.size() >0) {
+            ret += "\tModels: \n\t";
+            for (Map.Entry<String, Model> entry : mModels.entrySet()) {
+                ret += "Model : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No models";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mControllers.size() >0) {
+            ret += "\tControllers: \n\t";
+            for (Map.Entry<String, Controller> entry : mControllers.entrySet()) {
+                ret += "Key : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No Controllers";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mSpace.size() >0) {
+            ret += "\tSpace: \n\t";
+            for (Map.Entry<String, Space> entry : mSpace.entrySet()) {
+                ret += "Space : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No Spaces";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mViews.size() >0) {
+            ret += "\tViews: \n\t";
+            for (Map.Entry<String, View> entry : mViews.entrySet()) {
+                ret += "View : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No Views";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mSource.size() >0) {
+            ret += "\tSource: \n\t";
+            for (Map.Entry<String, Source> entry : mSource.entrySet()) {
+                ret += "Source : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No models";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mSink.size() >0) {
+            ret += "\tSinks: \n\t";
+            for (Map.Entry<String, Sink> entry : mSink.entrySet()) {
+                ret += "Sink : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No Sinks";
+        }
+        ret+="\n/**********************************************************/\n";
+        if(mFlow.size() >0) {
+            ret += "\tModels: \n\t";
+            for (Map.Entry<String, Flow> entry : mFlow.entrySet()) {
+                ret += "Flow : " + entry.getKey() + "\n\t" + entry.getValue();
+            }
+        } else {
+            ret+="\t No Flow";
+        }
+
+        return ret;
+    }
 }

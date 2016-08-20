@@ -19,6 +19,6 @@ public class SpaceModelsSymbol extends BlockSymbol{
 
     @Override
     public String toString() {
-        return null;
+        return "SpaceModels Symbol: " + name;
     }
 }

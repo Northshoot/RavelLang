@@ -18,6 +18,6 @@ public class SinkSymbol extends BlockSymbol{
 
     @Override
     public String toString() {
-        return null;
+        return "Sink Symbol: " + name;
     }
 }

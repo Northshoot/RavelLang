@@ -21,7 +21,9 @@ public abstract class BaseScope implements Scope {
     Scope enclosingScope; // null if global (outermost) scope
     Map<String, Symbol> symbols = new LinkedHashMap<>();
 
-    public BaseScope(Scope enclosingScope) { this.enclosingScope = enclosingScope;  }
+    public BaseScope(Scope enclosingScope) {
+        this.enclosingScope = enclosingScope;
+    }
 
     public Symbol resolve(String name) {
         Symbol s = symbols.get(name);

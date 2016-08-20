@@ -23,6 +23,6 @@ public class SchemaSymbol extends BlockSymbol {
 
     @Override
     public String toString() {
-        return null;
+        return "Schema Symbol: " + name;
     }
 }

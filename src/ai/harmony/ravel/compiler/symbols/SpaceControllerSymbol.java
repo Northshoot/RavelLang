@@ -18,6 +18,6 @@ public class SpaceControllerSymbol extends BlockSymbol {
 
     @Override
     public String toString() {
-        return null;
+        return "SpaceController Symbol: " + name;
     }
 }

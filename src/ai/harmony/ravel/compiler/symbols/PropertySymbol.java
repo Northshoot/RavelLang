@@ -15,11 +15,11 @@ public class PropertySymbol extends BlockSymbol{
 
     @Override
     public void lexerCheck() throws SymbolNotAllowedInScopeException {
-        System.out.println("Enclosing scope: " + super.getEnclosingScope().getScopeName() );
+
     }
 
     @Override
     public String toString() {
-        return null;
+        return "Property Symbol:" + name;
     }
 }

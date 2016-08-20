@@ -23,6 +23,6 @@ public class ConfigurationSymbol extends BlockSymbol {
 
     @Override
     public String toString() {
-        return null;
+        return "Configuration Symbol: " +name;
     }
 }

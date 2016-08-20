@@ -10,11 +10,9 @@ import java.util.Map;
  * Created by lauril on 8/19/16.
  */
 public abstract class BlockSymbol extends Symbol implements Scope {
-    Map<String, Symbol> assigments = new LinkedHashMap<>();
+    Map<String, Symbol> mVars = new LinkedHashMap<>();
     Scope enclosingScope;
 
-    //models will take arguments
-    Map<String, Symbol> orderedArgs = new LinkedHashMap<>();
 
     public BlockSymbol(String name, Scope currentScope) throws SymbolNotAllowedInScopeException {
         super(name, Type.BLOCK);
@@ -25,7 +23,7 @@ public abstract class BlockSymbol extends Symbol implements Scope {
 
 
     public Symbol resolve(String name) {
-        Symbol s = assigments.get(name);
+        Symbol s = mVars.get(name);
         if ( s!=null ) return s;
         // if not here, check any enclosing scope
         if ( getEnclosingScope() != null ) {
@@ -35,9 +33,14 @@ public abstract class BlockSymbol extends Symbol implements Scope {
     }
 
     public void define(Symbol sym) {
-        assigments.put(sym.name, sym);
+        if(sym == null){
+            System.err.println("can't define null symbol!");
+            System.exit(-1);
+        }
+        mVars.put(sym.name, sym);
         sym.scope = this; // track the scope in each symbol
     }
+
 
     public Scope getEnclosingScope() { return enclosingScope; }
     public String getScopeName() { return name; }

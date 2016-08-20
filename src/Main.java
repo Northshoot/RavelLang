@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 ;
 
@@ -18,7 +19,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String inputFile = null;
         System.out.println("Starting Build");
-        System.out.println(new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
+        Date t = Calendar.getInstance().getTime();
+        System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
         if ( inputFile!=null ) {
@@ -73,7 +75,14 @@ public class Main {
          *Generate code
          */
 
-        //System.out.println(converter.getRavel(tree));
+        Date now = Calendar.getInstance().getTime();
+        long diff = now.getTime() -t.getTime();
+        long diffMilliSeconds = diff  % 60;
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        System.out.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
+                        " in " + diffMinutes + ":" + diffSeconds + ":" +diffMilliSeconds);
+
         }
 
 }

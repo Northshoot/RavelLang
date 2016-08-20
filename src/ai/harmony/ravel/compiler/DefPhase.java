@@ -19,6 +19,7 @@ public class DefPhase extends RavelBaseListener {
     Scope currentScope;
     //will be imports eventually
     GlobalScope  globalScope;
+    int intend = 0;
 
     void saveScope(ParserRuleContext ctx, Scope s) {
         scopes.put(ctx, s);
@@ -27,7 +28,7 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
         ravelApp = new RavelApplication();
-        globalScope = new GlobalScope();
+        globalScope = new GlobalScope(null);
         currentScope = globalScope;
         System.out.println("Entering enterFile_input");
     }
@@ -51,49 +52,77 @@ public class DefPhase extends RavelBaseListener {
         currentScope.define(modelScope);
         saveScope(ctx,modelScope);
         currentScope = modelScope;
+        System.out.println(getTab() +"Current scope: " + currentScope);
     }
     @Override
     public void enterBlockSuite(RavelParser.BlockSuiteContext ctx) {
+        intend++;
         String blockTypeName = ctx.declType().getText();
         int blockType = ctx.declType().start.getType();
-        System.out.println("Entering enterBlockSuite: " + blockTypeName);
-        System.out.println("Current scope: " + currentScope);
+        System.out.println(getTab() + "Entering enterBlockSuite: " + blockTypeName);
         BlockSymbol blockScope;
         try {
             blockScope = BlockSymbolFactory.getBlockSymbol(blockType,  blockTypeName, currentScope);
             currentScope.define(blockScope);
-            saveScope(ctx,blockScope);
+            saveScope(ctx, blockScope);
             currentScope = blockScope;
-
+            System.out.println(getTab() +"blockScope: " + blockScope);
         } catch (NoSuchBlockSymbolException e){
             int line = ctx.declType().start.getLine();
             int charp = ctx.declType().start.getCharPositionInLine();
-            System.err.println("Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
+            System.err.println(getTab() +"Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
         } catch (SymbolNotAllowedInScopeException e) {
             int line = ctx.declType().start.getLine();
             int charp = ctx.declType().start.getCharPositionInLine();
-            System.err.println("Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
+            System.err.println(getTab() +"Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
 
         }
     }
 
     @Override
-    public void enterPrimitiveAssig(RavelParser.PrimitiveAssigContext ctx) {
-        System.out.println("Entering enterPrimitiveAssig");
+    public void enterVarAssig(RavelParser.VarAssigContext ctx) {
+        intend ++;
+        System.out.println(getTab() +"Entering enterVarAssig");
         /**
          * Create assignment scope and add it
          */
+        String varType = ctx.primitive_type().getText();
+        String name = ctx.NAME().getText();
+        System.out.println(getTab() + "Var declaration found: " + name + " of type " + varType);
+//        if( currentScope instanceof BlockSymbol) {
+
+            currentScope.define(new VarSymbol(varType, name,
+                    Symbol.getType(ctx.primitive_type().start.getType())
+            ));
+//        } else {
+//            //TODO: variables can only be defines in the
+//            System.err.println(getTab() +"Should not end up there: ");
+//            System.err.print(currentScope.getScopeName());
+//        }
+
 
     }
 
     @Override
-    public void exitPrimitiveAssig(RavelParser.PrimitiveAssigContext ctx) {
-        System.out.println("Exitint exitPrimitiveAssig ");
+    public void exitVarAssig(RavelParser.VarAssigContext ctx) {
+
+        System.out.println(getTab()+"Exit enterVarAssig ");
+        intend--;
     }
 
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-        System.out.println("Entering enterFieldDeclaration ");
+        intend++;
+        System.out.println(getTab() +"Entering enterFieldDeclaration ");
+        if(currentScope instanceof SchemaSymbol) {
+            String name = ctx.NAME().getText();
+            currentScope.define(new FieldSymbol(
+                        name, Symbol.getType(ctx.field_type().start.getType())
+            ));
+            System.out.println(getTab()+"field: " + name);
+        } else {
+            System.err.println(getTab()+"Can not define fields outside the schema");
+        }
 //        Field field = new Field(ctx);
 //        currentScope.getPrimitive().addField(field);
 
@@ -102,19 +131,23 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-        System.out.println("Exit exitFieldDeclaration ");
+
+        System.out.println(getTab() +"Exit exitFieldDeclaration ");
+        intend--;
 
     }
 
     @Override
     public void exitBlockSuite(RavelParser.BlockSuiteContext ctx ){
-        System.out.println("Exit exitBlockSuite");
+        System.out.println(getTab() + "Exit exitBlockSuite");
         currentScope = currentScope.getEnclosingScope();
+        intend--;
     }
 
     @Override
     public void enterControllerDeclaration(RavelParser.ControllerDeclarationContext ctx) {
-        System.out.println("Entering enterControllerDeclaration");
+        System.out.println(getTab()+"Entering enterControllerDeclaration");
+        intend++;
         String name = ctx.NAME().getText();
         ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.MODEL, currentScope);
         currentScope.define(controllerScope);
@@ -124,6 +157,7 @@ public class DefPhase extends RavelBaseListener {
 
     public void enterSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
         System.out.println("Entering enterSpaceDeclaration ");
+        intend++;
         String name = ctx.NAME().getText();
         SpaceSymbol spaceScope = new SpaceSymbol(name, Symbol.Type.MODEL, currentScope);
         currentScope.define(spaceScope);
@@ -140,22 +174,34 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitModelDeclaration(RavelParser.ModelDeclarationContext ctx) {
-        System.out.println("Exit exitModelDeclaration");
+        System.out.println(getTab()+"Exit exitModelDeclaration");
         currentScope = currentScope.getEnclosingScope();
+        intend--;
     }
 
     @Override public void exitControllerDeclaration(RavelParser.ControllerDeclarationContext ctx) {
-        System.out.println("Exit exitControllerDeclaration");
+        System.out.println(getTab()+"Exit exitControllerDeclaration");
         currentScope = currentScope.getEnclosingScope();
+        intend--;
     }
     @Override public void exitSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
-        System.out.println("Exit exitSpaceDeclaration");
+        System.out.println(getTab()+"Exit exitSpaceDeclaration");
        currentScope = currentScope.getEnclosingScope();
+        intend--;
     }
     @Override
     public void exitFile_input(RavelParser.File_inputContext ctx) {
-        System.out.println("Exit exitFile_input");
-        System.out.println(ravelApp);
+        System.out.println(getTab()+"Exit exitFile_input");
+        System.out.println(globalScope);
+        //System.out.println(ravelApp);
+        intend--;
     }
 
+    private String getTab(){
+        String tab="";
+        for(int i=0; i<intend; i++){
+            tab+="\t";
+        }
+        return tab;
+    }
 }

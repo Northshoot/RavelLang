@@ -15,6 +15,6 @@ import ai.harmony.ravel.compiler.scopes.BaseScope;
  * Visit http://www.pragmaticprogrammer.com/titles/tpdsl for more book information.
  ***/
 public class GlobalScope extends BaseScope {
-    public GlobalScope() { super(null); }
-    public String getScopeName() { return "global"; }
+    public GlobalScope(Scope enclosingScope) { super(enclosingScope); }
+    public String getScopeName() { return "globals"; }
 }

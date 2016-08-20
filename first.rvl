@@ -5,6 +5,7 @@ streaming model Random:
 
     schema:
         time=TimestampField(auto_add=True)
+        value = IntegerField()
 
 
 controller RandomController:
