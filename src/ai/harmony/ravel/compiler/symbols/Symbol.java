@@ -29,7 +29,7 @@ public class Symbol { // A generic programming language symbol
                     /** block */
                     BLOCK,
                     /** components */
-                    MODEL, CONTROLLER, VIEW, FLOW
+                    MODEL, CONTROLLER, VIEW, EVENT, FLOW
     }
 
     public String name;

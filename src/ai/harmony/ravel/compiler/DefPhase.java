@@ -52,7 +52,6 @@ public class DefPhase extends RavelBaseListener {
         currentScope.define(modelScope);
         saveScope(ctx,modelScope);
         currentScope = modelScope;
-        System.out.println(getTab() +"Current scope: " + currentScope);
     }
     @Override
     public void enterBlockSuite(RavelParser.BlockSuiteContext ctx) {
@@ -123,9 +122,6 @@ public class DefPhase extends RavelBaseListener {
         } else {
             System.err.println(getTab()+"Can not define fields outside the schema");
         }
-//        Field field = new Field(ctx);
-//        currentScope.getPrimitive().addField(field);
-
     }
 
 
@@ -154,6 +150,29 @@ public class DefPhase extends RavelBaseListener {
         saveScope(ctx,controllerScope);
         currentScope = controllerScope;
     }
+    @Override
+    public void enterEventDecl(RavelParser.EventDeclContext ctx) {
+        System.out.println(getTab()+"Enter enterEventDecl");
+        if ( currentScope instanceof ControllerSymbol ){
+            intend++;
+            String name = ctx.comp().getText()+ctx.trigger().getText();
+            EventSymbol eventScope = new EventSymbol(name, Symbol.Type.EVENT, currentScope);
+            currentScope.define(eventScope);
+            saveScope(ctx,eventScope);
+            currentScope = eventScope;
+
+        } else {
+            System.err.println(getTab() + "Events only allowed in the controller");
+        }
+    }
+
+    @Override
+    public void exitEventDecl(RavelParser.EventDeclContext ctx) {
+        System.out.println(getTab()+"Exit exitEventDecl");
+        currentScope = currentScope.getEnclosingScope();
+        intend--;
+    }
+
 
     public void enterSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
         System.out.println("Entering enterSpaceDeclaration ");
@@ -165,6 +184,19 @@ public class DefPhase extends RavelBaseListener {
         currentScope = spaceScope;
     }
 
+    @Override
+    public void enterInstansDecl(RavelParser.InstansDeclContext ctx) { }
+
+
+    @Override
+    public void exitInstansDecl(RavelParser.InstansDeclContext ctx) { }
+
+    @Override
+    public void enterRefDecl(RavelParser.RefDeclContext ctx) { }
+
+
+    @Override
+    public void exitRefDecl(RavelParser.RefDeclContext ctx) { }
 
     /**
       * Exit all components
