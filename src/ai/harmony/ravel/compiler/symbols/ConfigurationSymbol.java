@@ -10,16 +10,9 @@ public class ConfigurationSymbol extends BlockSymbol {
 
     public ConfigurationSymbol(String name, Scope currentScope) throws SymbolNotAllowedInScopeException {
         super(name, currentScope);
-        lexerCheck();
+
     }
 
-    @Override
-    public void lexerCheck() throws SymbolNotAllowedInScopeException {
-//        if(! enclosingScope.getScopeName().equals("controller") ||
-//                ! enclosingScope.getScopeName().equals("space")    ){
-//            throw new SymbolNotAllowedInScopeException("Found schema in " + name + " allowed only in model");
-//        }
-    }
 
     @Override
     public String toString() {

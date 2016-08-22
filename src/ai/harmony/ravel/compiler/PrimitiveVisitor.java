@@ -48,21 +48,6 @@ public class PrimitiveVisitor extends RavelBaseVisitor<Void> {
         return visitChildren(ctx);
     }
 
-    @Override
-    public Void visitBlockSuite(RavelParser.BlockSuiteContext ctx) {
-//        System.out.println("visitBlockSuite: " + ctx.decl_type().getText());
-//        switch (current){
-//            case MODEL:
-//                break;
-//            case CONROLLER:
-//                break;
-//            case SPACE:
-//                break;
-//
-//            }
-
-        return visitChildren(ctx);
-    }
 
 
     @Override

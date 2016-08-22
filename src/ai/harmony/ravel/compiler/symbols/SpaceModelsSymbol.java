@@ -9,13 +9,8 @@ import ai.harmony.ravel.compiler.scopes.Scope;
 public class SpaceModelsSymbol extends BlockSymbol{
     public SpaceModelsSymbol(String name, Scope currentScope) throws SymbolNotAllowedInScopeException {
         super(name, currentScope);
-        lexerCheck();
     }
 
-    @Override
-    public void lexerCheck() throws SymbolNotAllowedInScopeException {
-
-    }
 
     @Override
     public String toString() {

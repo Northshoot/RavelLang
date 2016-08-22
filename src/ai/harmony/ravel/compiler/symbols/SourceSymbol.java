@@ -11,10 +11,7 @@ public class SourceSymbol extends BlockSymbol {
         super(name, currentScope);
     }
 
-    @Override
-    public void lexerCheck() throws SymbolNotAllowedInScopeException {
 
-    }
 
     @Override
     public String toString() {

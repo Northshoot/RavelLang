@@ -6,16 +6,16 @@ import ai.harmony.ravel.compiler.scopes.Scope;
 /**
  * Created by lauril on 8/19/16.
  */
-public class SchemaSymbol extends BlockSymbol {
+public class ModelPropertySymbol extends BlockSymbol{
 
-    public SchemaSymbol(String name, Scope currentScope) throws SymbolNotAllowedInScopeException {
-        super(name, currentScope);
+    public ModelPropertySymbol(String name, Symbol.Type mType, Scope currentScope) {
+        super(name,mType, currentScope);
 
     }
 
 
     @Override
     public String toString() {
-        return "Schema Symbol: " + name;
+        return "Property Symbol:" + name;
     }
 }

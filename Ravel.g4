@@ -1,12 +1,9 @@
 grammar Ravel;
 
 tokens { INDENT, DEDENT }
-@header {
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-}
-@lexer::members {
 
+@lexer::members {
+   //from Ter
   // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
   private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
 
@@ -115,9 +112,8 @@ comp_def
     ;
 
 model_comp
-    :  modelType MODEL NAME  ':' suite # ModelDeclaration
+    :  modelType MODEL NAME  ':' model_suite # ModelDeclaration
     ;
-
 
 modelType
     : LOCAL
@@ -125,49 +121,46 @@ modelType
     | REPLICATED
     ;
 
-suite
-    : NEWLINE INDENT block_def+ DEDENT
+model_suite
+    : NEWLINE INDENT model_block_def+ DEDENT
     ;
 
-block_def
-    : decl
-    | event
+/** Just model particularities */
+model_block_def
+    : property_decl
+    | schema_decl
     | NEWLINE
     ;
 
- decl
-    : declType ':' NEWLINE block_suite #BlockSuite
+property_decl
+    : PROPERTIES ':' NEWLINE property_block #ModelPropertyBlock
     ;
 
-declType
-    : PROPERTIES
-    | SCHEMA
-    | CONTROLLERS
-    | CONFIGURATION
-    | MODELS
-    ;
-
-
-block_suite
-    :  INDENT assigment+ DEDENT
+property_block
+    : INDENT model_property+ DEDENT
     | NEWLINE
     ;
 
-assigment
-    : prim_assig
-    | field
-    | instanciation
-    | reference
-    | NEWLINE
+ model_property
+    : model_property_opt '=' ( INT | TRUE | FALSE | property_expression) #ModelProperty
     ;
-prim_assig
-    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #VarAssig
+
+property_expression
+    : NAME '(' NAME ')'
+    ;
+
+schema_decl
+    : SCHEMA ':' NEWLINE schema_block #ModelSchemaBlock
+    ;
+
+schema_block
+    : INDENT field+ DEDENT
+    | NEWLINE
     ;
 
 field
     : NAME '=' field_type '(' args* ')' #FieldDeclaration
     ;
-
 
 field_type
     : T_BYTE_FIELD
@@ -180,33 +173,70 @@ field_type
     | T_TIME_STAMP_FIELD
     ;
 
+/** Just controller particularities */
+controller_comp
+    : CONTROLLER NAME ':' cntr_suite # ControllerDeclaration
+    ;
+
+cntr_suite
+    : NEWLINE INDENT cntr_block_def+ DEDENT
+    ;
+
+cntr_block_def
+    : config_decl
+    | event
+    | NEWLINE
+    ;
+
+config_decl
+    : CONFIGURATION ':' NEWLINE config_block #CntrConfigBlock
+    ;
+
+config_block
+    : INDENT controller_config+ DEDENT
+    | NEWLINE
+    ;
+controller_config
+    : reference
+    | var_assig
+    | NEWLINE
+    ;
+reference
+    : NAME '=' dotted_name #RefDecl
+    ;
+ /// dotted_name: NAME ('.' NAME)*
+dotted_name
+    : NAME ( '.' NAME )*
+    ;
+var_assig
+    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #VarAssig
+    ;
+
+event
+    : EVENT refName '.' trigEvent '(' args'):' expr_stmt #EventDecl
+    ;
+
+refName : NAME;
+trigEvent: NAME ;
+
 args
     : arg (',' arg)*
     ;
 arg
     : NAME '=' ( NAME | INT )
     ;
-instanciation
-    : NAME '=' NAME '(' args* ')' #InstansDecl
-    ;
-reference
-    : NAME '=' '"' NAME '"' #RefDecl
-    ;
-event
-    : EVENT comp '.' trigger '():' stmt #EventDecl
-    ;
 
-comp : NAME;
-trigger: NAME ;
-
-//TODO: placeholder
-stmt
-    : expr_stmt
-    | flow_stmt
-    | NEWLINE
-    ;
 expr_stmt
-    : NEWLINE INDENT assigment+ DEDENT
+    : NEWLINE INDENT stmt+ DEDENT
+    ;
+
+stmt
+    : var_assig
+    | expr_stmt
+    | flow_stmt
+    | del_stmt
+    | string_comps_stmt
+    | NEWLINE
     ;
 
 //TODO: placeholder
@@ -217,19 +247,121 @@ flow_stmt
 // | raise_stmt
 // | yield_stmt
  ;
-
+del_stmt
+    : DELETE recordRef
+    ;
+recordRef
+    : recName '.' position '(' args* ')'
+    ;
+recName : NAME;
+position
+    : FIRST
+    | LAST
+    | GET
+    ;
 //TODO: placeholder for now
 return_stmt
- : RETURN NAME
- ;
+    : RETURN NAME
+    ;
+string_comps_stmt
+    : (NAME | dotted_name) '=' string_stmt
+    ;
+
+string_stmt
+    : INT
+    | '"' NAME '"'
+    | '+'
+    ;
 
 space_comp
-    : SPACE NAME ':' suite # SpaceDeclaration
+    : SPACE NAME ':' space_suite # SpaceDeclaration
+    ;
+space_suite
+    : NEWLINE INDENT space_block_def+ DEDENT
     ;
 
-controller_comp
-    : CONTROLLER NAME ':' suite # ControllerDeclaration
+space_block_def
+    : space_property_block
+    | space_platform_block
+    | space_models_block
+    | space_controllers_block
+    | space_sources_block
+    | space_sinks_block
+    | NEWLINE
     ;
+space_property_block
+    : PROPERTIES ':' NEWLINE space_properties #SpacePropertiesBlock
+    ;
+space_properties
+    : INDENT space_property+ DEDENT
+    | NEWLINE
+    ;
+space_property
+    : spaceProp_lang '=' lang_opt #SpaceProperty
+    ;
+spaceProp_lang: LANGUAGE;
+
+space_platform_block
+    : PLATFORM ':' NEWLINE space_platform_dec #SpacePlatformBlock
+    ;
+space_platform_dec
+     : INDENT space_platform+ DEDENT
+     | NEWLINE
+     ;
+space_platform
+     : templates_dir
+     | api_ref
+     | event_dec
+     | NEWLINE
+     ;
+templates_dir
+    : TEMPLATES '=' dir #PlatformTemplates
+    ;
+dir: NAME;
+
+api_ref
+    : PLATFORM '=' base '.' api_version #PlatformAPI
+    ;
+
+base: NAME;
+api_version: 'api.' INT ;
+event_dec
+    : NAME '=' PLATFORM '.' event_ref #PlatformEvent
+    ;
+event_ref: NAME ;
+
+space_models_block
+    : MODELS ':' NEWLINE space_inst_block #SpaceModelsBlock
+    ;
+space_inst_block
+    : INDENT instanciation+ DEDENT
+    | NEWLINE
+    ;
+instanciation
+    : refName '=' compName '(' args* ')' #InstansDecl
+    ;
+compName: 'NAME' ;
+
+space_controllers_block
+    : CONTROLLERS ':' NEWLINE space_inst_block #SpaceControllerBlock
+    ;
+
+space_sources_block
+    : SOURCES ':' NEWLINE space_sources #SpaceSourceBlock
+    ;
+space_sources
+    : INDENT instanciation+ DEDENT
+    | NEWLINE
+    ;
+space_sinks_block
+    : SINKS ':' NEWLINE space_sinks #SapceSinkBlock
+    ;
+space_sinks
+    : INDENT instanciation+ DEDENT
+    | NEWLINE
+    ;
+
+
 
 INT :   [0-9]+ ;
 
@@ -239,27 +371,62 @@ INT :   [0-9]+ ;
 /*
  * lexer rules
  */
-
+// components
 MODEL : 'model' ;
 SPACE : 'space' ;
 CONTROLLER: 'controller' ;
 VIEW: 'view';
 FLOW: 'flow' ;
+//model types
 LOCAL    : 'local' ;
 STREAMING: 'streaming' ;
 REPLICATED: 'replicated';
+//blocks
 PROPERTIES: 'properties' ;
-SCHEMA: 'schema' ;
+//property statements
+DURABLE: 'durable' ;
+RELIABLE: 'reliable' ;
+ENCRYPTON: 'encryption';
+//configuration
 CONFIGURATION: 'configuration' ;
+//schema
+SCHEMA: 'schema' ;
+
+//space
+PLATFORM: 'platform' ;
 MODELS: 'models';
 CONTROLLERS: 'controllers';
 SINKS: 'sinks' ;
 SOURCES: 'sources' ;
+TEMPLATES:'templates';
+LANGUAGE: 'language';
+CLANG : 'clang';
+JLANG: 'java';
+PLANG: 'python';
+//events commands
 EVENT: 'event' ;
 COMMAND:  'command' ;
 RETURN : 'return' ;
+DELETE: 'delete';
 TRUE : 'true' ;
 FALSE : 'false' ;
+
+//local queries
+LAST: 'last' ;
+FIRST: 'first';
+GET : 'get' ;
+
+lang_opt
+    : CLANG
+    | JLANG
+    | PLANG
+    ;
+
+model_property_opt
+    : DURABLE
+    | RELIABLE
+    | ENCRYPTON
+    ;
 
 primitive_type
     : T_INTEGER
@@ -269,7 +436,7 @@ primitive_type
 
 T_INTEGER : 'integer' ;
 T_NUMBER : 'number' ;
-T_BOOL: 'bool' ;
+T_BOOL: 'boolean' ;
 
 
 

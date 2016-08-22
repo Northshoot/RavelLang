@@ -14,14 +14,19 @@ public abstract class BlockSymbol extends Symbol implements Scope {
     Scope enclosingScope;
 
 
-    public BlockSymbol(String name, Scope currentScope) throws SymbolNotAllowedInScopeException {
+    public BlockSymbol(String name, Scope currentScope){
         super(name, Type.BLOCK);
         this.enclosingScope = currentScope;
 
 
     }
 
+    public BlockSymbol(String name, Symbol.Type mType, Scope currentScope){
+        super(name, mType);
+        this.enclosingScope = currentScope;
 
+
+    }
     public Symbol resolve(String name) {
         Symbol s = mVars.get(name);
         if ( s!=null ) return s;
@@ -45,7 +50,6 @@ public abstract class BlockSymbol extends Symbol implements Scope {
     public Scope getEnclosingScope() { return enclosingScope; }
     public String getScopeName() { return name; }
 
-    public abstract void lexerCheck() throws SymbolNotAllowedInScopeException;
     public abstract String toString();
 
 }
