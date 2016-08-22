@@ -29,7 +29,7 @@ public class DefPhase extends RavelBaseListener {
     }
     void enterScope(String blockTypeName, Scope blockScope, ParserRuleContext ctx){
         intend++;
-        System.out.println(getTab() + "Entering enterScope: " + blockTypeName);
+        System.out.println(getTab() + "Entering Scope: " + blockTypeName);
         currentScope.define((Symbol)blockScope);
         saveScope(ctx, blockScope);
         currentScope = blockScope;
@@ -66,7 +66,7 @@ public class DefPhase extends RavelBaseListener {
         System.out.println(getTab() +"Entering enterModelProperty ");
         String name = ctx.model_property_opt().getText();
         currentScope.define(new ModelPropertySymbol(
-                name, Symbol.getType(ctx.model_property_opt().start.getType()),
+                name, Symbol.Type.tINVALID,
                 currentScope ));
         System.out.println(getTab()+"property: " + name);
     }
