@@ -1,147 +1,205 @@
 streaming model Random:
     properties:
-        records = 50
+        durable=false
+        reliable=false
 
     schema:
-        time = TimestampField(auto_add_on_save=True)
-        number = Integer()
+        time=TimestampField(auto_add=True)
+        value = IntegerField()
 
 replicated model Frequency:
     properties:
-        log = False
+        durable = false
+        reliable = false
 
     schema:
-        frequency = Integer(default=500)
+        frequency = IntegerField(default=1000)
 
-controller RandomEmbController:
-    bool connected = False
-    integer counter = 0
+streaming model BootError:
+    properties:
+        durable = false
+        reliable = false
 
+    schema:
+        time=TimestampField(auto_add=True)
+        occurred = StringField()
+        context = ContextField()
+
+streaming model DelayError:
+    properties:
+        durable = false
+        reliable = false
+
+    schema:
+        time=TimestampField(auto_add=True)
+        source = StringField()
+        reason = StringField()
+        context = ContextField()
+
+streaming model RandomError:
+    properties:
+        records = 1
+        durable = false
+        reliable = false
+
+    schema:
+        time=TimestampField(auto_add=True)
+        source = StringField()
+        reason = StringField()
+        context = ContextField()
+
+controller RandomControllerEmbedded:
     configuration:
-        rnd_model = space.models.rnd_model
-        frk = space.models.frequency
-        timer = space.source.Timer
+        mFreq = frequency
+        mRandom = random
+        mError = error
+        random_source = random
+        random_timer = timer
+        boot_event = boot
+        boolean running = false
 
+    event boot_event(context ctx):
+        if ctx.error is SUCCESS:
+            random_timer.start_periodic(mFreq.frequency)
+            running = true
+        else:
+            error = mError.create()
+            error.occurred(this)
+            error.context(ctx)
+            error.save()
 
-    event timer.fired(context cntx):
+    event mFreq.arrived(context ctx):
+        random_timer.stop()
+        random_timer.start_periodic(mFreq.frequency)
 
-    event rnd.arrived(context cntx):
+    event random_timer.fired(context ctx):
+        rand = mRandom.create()
+        rand.value = random_source.read()
+        rand.save()
 
-    event frk.arrived(context cntx):
-        if cntx.status == SUCCESS:
-            timer.set_periodic(MILLI(frk.frequency))
+    event mRandom.full(context ctx):
+        random_timer.stop()
+        running = false
 
-    event rnd.departed(context cntx):
-        if not connected:
-            connected = True
-            timer.set_periodic(MILLI(frk.frequency))
+    event mRandom.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(mFreq.frequency)
+            running = true
 
-
-    event rnd.full(context cntx):
-        if connected:
-            timer.stop()
-
-
-controller RandomGtwController:
+controller RandomControllerGateway:
     configuration:
-        rnd_model = models.Random
-        frk = models.Frequency
-        sys = space.system
-
-
-    event rnd.arrived(context cntx):
-        sys.println("Random Arrived")
-
-    event frk.arrived(context cntx):
-         sys.println("Frequency Arrived")
-
-    event rnd.departed(context cntx):
-        sys.println("Random Departed")
-
-    event frk.departed(context cntx):
-        sys.println("Frequency departed")
-
-    event rnd.full(context cntx):
-        sys.println("Model full")
-        rnd_model.get_first().delete()
+        mFreq = frequency
+        mRandom = random
+        mDelayError = delay_error
+        timer = timer
+        integer delay_max = 10000
+        integer last_depart = 0
 
 
 
-controller RandomCloudController:
+    event mRandom.arrived(context ctx):
+        if ctx.error is SUCCESS:
+            current = ctx.mRandom
+            last = mRandom.query.last
+            integer diff = current.time - last.time
+            if diff > delay_max:
+                error = DelayError.create()
+                error.source = this
+                error.reason = "too long time in between data samples from device: " + diff
+                error.context = ctx
+                error.save()
+
+    event mRandom.departed(context ctx):
+        integer now = timer.now()
+        integer diff = now - last_depart
+        if diff > delay_max:
+            error = DelayError.create()
+            error.source = this
+            error.reason = "delay not cloud: " + diff
+            error.context = ctx
+            error.save()
+
+    event mDelayError.full(context ctx):
+        delete mDelayError.first()
+
+    event mRandom.full(context ctx):
+        delete mRandom.last()
+
+controller RandomControllerCloud:
     configuration:
-        rnd_model = models.Random
-        frk = models.Frequency
-        end_point = sink.Random
-        timer = source.Timer
+        mFreq = frequency
+        mRandom = random
+        mRandomError = random_error
+        random_sink = db
 
 
-    event rnd.arrived(context cntx):
-        if cntx.status == SUCCESS:
-            end_point.save(cntx.model)
+    event mRandom.arrived(context ctx):
+        if ctx.error is SUCCESS:
+            current = ctx.mRandom
+            last = mRandom.query.last
+            integer diff = current.time - last.time
+            if last.value == current.value:
+                    rnd_error = mRandomError.create()
+                    rnd_error.source = this
+                    rnd_error.reason = "Same random value as last time: " + current.value
+                    rnd_error.context = ctx
+                    rnd_error.save()
+
+            random_sink.write(current)
 
 
-    event frk.departed(context cntx):
-
-    event rnd.full(context cntx):
-
-    event frk.full(context cntx):
-    
 space EmbeddedSpace:
     properties:
-        radio = BLE(GatewaySpace)
-        language = c
-    
+        language="clang"
 
-	configuration:
-		platform_templates = 'nrf52/'
-		user_templates = 'workspace/tethys/templates/'
+    platform:
+        templates="nrf52"
+        platform = android.apiv1
+        boot = platform.boot
 
+    models:
+        random=Random(records=10)
+        frequency=Frequency(records=1)
+        boor_error = BootError(records=10)
 
-	models:
-        rnd_model = Random(size=100)
-        frk = Frequency()
-    
+    controllers:
+        rndcnt = RandomController(tier=this)
 
-	controllers:
-	    rnd_cnt = RandomEmbController()
-		frequency = Frequency()
-    
-
+    sources:
+        random = platform.source.random
 
 space GatewaySpace:
     properties:
-        language = 'Java'
-        communication = BLE(EmbeddedSpace), ANY(CloudSpace)
-    
+        language="java"
 
-    configuration:
-        platform_templates = 'Android/API23/'
-    
+    platform:
+        templates="android"
+        platform = android.apiv1
+
 
     models:
-        app_config = Measurement
-        num_packets = NumberOfPackets
-    
+        random=Random(size=100)
 
     controllers:
-        rnd_cntr = RandomGtwController
-    
-
+        rndcnt = RandomControllerGateway(tier=this)
 
 space CloudSpace:
     properties:
-        max_storage = None
-    
+        language="python"
 
-    configuration:
-	    language_templates = 'python'
-		platform_templates = 'django/'
-		user_templates = 'workspace/tethys/templates/'
-    
+    platform:
+        templates="django
+        platform = django.apiv1
+
+    models:
+        random=Random(records=10)
+        frequency=Frequency(records=1)
+        boor_error = BootError(records=10)
+        random_error = RandomError()
+
+
     controllers:
-        Random = RandomCloudController()
+        rndcnt = RandomControllerCloud(tier=this)
 
-	models:
-		Random = Random()
-		Frequency = Frequency()
-    
+    sinks:
+        db = platform.sinks.db

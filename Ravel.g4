@@ -1,5 +1,108 @@
-parser grammar Ravel;
-options { tokenVocab=RavelLexer; }
+grammar Ravel;
+
+tokens { INDENT, DEDENT }
+@header {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+}
+@lexer::members {
+
+  // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
+  private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
+
+  // The stack that keeps track of the indentation level.
+  private java.util.Stack<Integer> indents = new java.util.Stack<>();
+
+  // The amount of opened braces, brackets and parenthesis.
+  private int opened = 0;
+
+  // The most recently produced token.
+  private Token lastToken = null;
+
+  @Override
+  public void emit(Token t) {
+    super.setToken(t);
+    tokens.offer(t);
+  }
+
+  @Override
+  public Token nextToken() {
+
+    // Check if the end-of-file is ahead and there are still some DEDENTS expected.
+    if (_input.LA(1) == EOF && !this.indents.isEmpty()) {
+
+      // Remove any trailing EOF tokens from our buffer.
+      for (int i = tokens.size() - 1; i >= 0; i--) {
+        if (tokens.get(i).getType() == EOF) {
+          tokens.remove(i);
+        }
+      }
+
+      // First emit an extra line break that serves as the end of the statement.
+      this.emit(commonToken(RavelParser.NEWLINE, "\n"));
+
+      // Now emit as much DEDENT tokens as needed.
+      while (!indents.isEmpty()) {
+        this.emit(createDedent());
+        indents.pop();
+      }
+
+      // Put the EOF back on the token stream.
+      this.emit(commonToken(RavelParser.EOF, "<EOF>"));
+    }
+
+    Token next = super.nextToken();
+
+    if (next.getChannel() == Token.DEFAULT_CHANNEL) {
+      // Keep track of the last token on the default channel.
+      this.lastToken = next;
+    }
+
+    return tokens.isEmpty() ? next : tokens.poll();
+  }
+
+  private Token createDedent() {
+    CommonToken dedent = commonToken(RavelParser.DEDENT, "");
+    dedent.setLine(this.lastToken.getLine());
+    return dedent;
+  }
+
+  private CommonToken commonToken(int type, String text) {
+    int stop = this.getCharIndex() - 1;
+    int start = text.isEmpty() ? stop : stop - text.length() + 1;
+    return new CommonToken(this._tokenFactorySourcePair, type, DEFAULT_TOKEN_CHANNEL, start, stop);
+  }
+
+  // Calculates the indentation of the provided spaces, taking the
+  // following rules into account:
+  //
+  // "Tabs are replaced (from left to right) by one to eight spaces
+  //  such that the total number of characters up to and including
+  //  the replacement is a multiple of eight [...]"
+  //
+  //  -- https://docs.python.org/3.1/reference/lexical_analysis.html#indentation
+  static int getIndentationCount(String spaces) {
+
+    int count = 0;
+
+    for (char ch : spaces.toCharArray()) {
+      switch (ch) {
+        case '\t':
+          count += 8 - (count % 8);
+          break;
+        default:
+          // A normal space char.
+          count++;
+      }
+    }
+
+    return count;
+  }
+
+  boolean atStartOfInput() {
+    return super.getCharPositionInLine() == 0 && super.getLine() == 1;
+  }
+}
 
 file_input
     : ( NEWLINE | comp_def )* EOF
@@ -12,8 +115,9 @@ comp_def
     ;
 
 model_comp
-    :  modelType MODEL NAME LEFT_BRACKET RIGHTBRAKET BLOCKSTART model_suite # ModelDeclaration
+    :  modelType MODEL NAME  ':' suite # ModelDeclaration
     ;
+
 
 modelType
     : LOCAL
@@ -21,50 +125,67 @@ modelType
     | REPLICATED
     ;
 
-model_suite
-    : NEWLINE INDENT model_block_def+ DEDENT
+suite
+    : NEWLINE INDENT block_def+ DEDENT
     ;
 
-/** Just model particularities */
-model_block_def
-    : property_decl
-    | schema_decl
+block_def
+    : decl
+    | event
     | NEWLINE
     ;
 
-property_decl
-    : PROPERTIES BLOCKSTART NEWLINE property_block #ModelPropertyBlock
+
+prop_assigment
+    : NAME '=' ( INT| TRUE| FALSE )#ModelProperty
     ;
 
-property_block
-    : INDENT model_property+ DEDENT
+ decl
+    : declType ':' NEWLINE block_suite #BlockSuite
     ;
 
-model_property
-    : model_property_opt EQUAL ( INT | TRUE | FALSE | property_expression) #ModelProperty
+declType
+    : SCHEMA
+    | PROPERTIES
+    | CONFIGURATION
+    | CONTROLLERS
+    | PLATFORM
+    | MODELS
+    | SINKS
+    | SOURCES
     ;
 
-model_property_opt
-    : DURABLE
-    | RELIABLE
-    | ENCRYPTON
-    ;
-property_expression
-    : NAME LEFT_BRACKET NAME RIGHT_BRACKET
-    ;
 
-schema_decl
-    : SCHEMA BLOCKSTART NEWLINE schema_block #ModelSchemaBlock
-    ;
-
-schema_block
-    : INDENT field+ DEDENT
+block_suite
+    : INDENT assigment+ DEDENT
     | NEWLINE
+    ;
+
+assigment
+    : assig_stmt
+    | variable
+    | field
+    | instanciation
+    | reference
+    | prop_assigment
+    | NEWLINE
+    ;
+
+assig_stmt
+    : NAME '=' (NAME | dotted_expr)
+    ;
+dotted_expr
+    : NAME ('.' NAME)*
+    ;
+
+variable
+    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #VarAssig
     ;
 
 field
-    : NAME EQUAL field_type LEFT_BRACKET args* RIGHT_BRACKET #FieldDeclaration
+    : 'field' NAME '=' field_type ('(' args* ')'| '()') #FieldDeclaration
     ;
+
 
 field_type
     : T_BYTE_FIELD
@@ -75,72 +196,98 @@ field_type
     | T_DATE_FIELD
     | T_DATE_TIME_FIELD
     | T_TIME_STAMP_FIELD
+    | T_CONTEXT_FIELD
     ;
-
-/** Just controller particularities */
-controller_comp
-    : CONTROLLER NAME BLOCKSTART cntr_suite # ControllerDeclaration
-    ;
-
-cntr_suite
-    : NEWLINE INDENT cntr_block_def+ DEDENT
-    ;
-
-cntr_block_def
-    : config_decl
-    | event
-    | NEWLINE
-    ;
-
-config_decl
-    : CONFIGURATION BLOCKSTART NEWLINE config_block #CntrConfigBlock
-    ;
-
-config_block
-    : INDENT controller_config+ DEDENT
-    | NEWLINE
-    ;
-controller_config
-    : reference
-    | var_assig
-    | NEWLINE
-    ;
-reference
-    : NAME EQUAL dotted_name #RefDecl
-    ;
- /// dotted_name: NAME (DOT NAME)*
-dotted_name
-    : NAME ( DOT NAME )*
-    ;
-var_assig
-    : primitive_type NAME EQUAL ( INT | TRUE | FALSE ) #VarAssig
-    ;
-
-event
-    : EVENT refName DOT trigEvent LEFT_BRACKET args RIGHT_BRACKET BLOCKSTART expr_stmt #EventDecl
-    ;
-
-refName : NAME;
-trigEvent: NAME ;
 
 args
-    : arg (COMMA arg)*
+    : arg (',' arg)*
     ;
 arg
-    : NAME EQUAL ( NAME | INT )
+    : NAME '=' ( NAME | INT )
+    ;
+instanciation
+    : NAME '=' NAME '(' args* ')' #InstansDecl
+    ;
+reference
+    : NAME '=' '"' NAME '"' #RefDecl
+    ;
+event
+    : EVENT comp '.' trigger '(' NAME NAME '):' stmt #EventDecl
     ;
 
-expr_stmt
-    : NEWLINE INDENT stmt+ DEDENT
-    ;
+comp : NAME;
+trigger: NAME ;
 
+//TODO: placeholder
 stmt
-    : var_assig
+    : if_stmt
+    | variable
     | expr_stmt
     | flow_stmt
     | del_stmt
-    | string_comps_stmt
     | NEWLINE
+    ;
+
+if_stmt
+    : IF test ':' f_suite ( ELIF test ':' f_suite )* ( ELSE ':' f_suite )?
+    ;
+
+f_suite
+    :
+    | NEWLINE INDENT stmt+ DEDENT
+    ;
+
+/// test: or_test ['if' or_test 'else' test] | lambdef
+test
+    : or_test ( IF or_test ELSE test )?
+    ;
+
+or_test
+    : and_test ( OR and_test )*
+    ;
+and_test
+    : not_test ( AND not_test )*
+    ;
+
+not_test
+    : NOT not_test
+    |comparison
+    ;
+
+comparison
+    : expr comp_op expr_stmt
+    ;
+
+expr
+  : NAME
+  | INT
+  | TRUE
+  | FALSE
+  ;
+del_stmt
+    : DELETE modelName '.' localQuery '()'
+    ;
+modelName: NAME ;
+localQuery
+    : 'first'
+    | 'last'
+    ;
+
+
+comp_op
+    : '<'
+    | '>'
+    | '=='
+    | '>='
+    | '<='
+    | '!='
+    | IN
+    | NOT IN
+    | IS
+    | IS NOT
+    ;
+expr_stmt
+    : NEWLINE INDENT assigment+ DEDENT
     ;
 
 //TODO: placeholder
@@ -151,125 +298,59 @@ flow_stmt
 // | raise_stmt
 // | yield_stmt
  ;
-del_stmt
-    : DELETE recordRef
-    ;
-recordRef
-    : recName DOT position LEFT_BRACKET args* RIGHT_BRACKET
-    ;
-recName : NAME;
-position
-    : FIRST
-    | LAST
-    | GET
-    ;
+
 //TODO: placeholder for now
 return_stmt
-    : RETURN NAME
-    ;
-string_comps_stmt
-    : (NAME | dotted_name) EQUAL string_stmt
-    ;
-
-string_stmt
-    : INT
-    | DOUBLE_APPOS NAME DOUBLE_APPOS
-    | PLUS
-    ;
+ : RETURN NAME
+ ;
 
 space_comp
-    : SPACE NAME BLOCKSTART space_suite # SpaceDeclaration
-    ;
-space_suite
-    : NEWLINE INDENT space_block_def+ DEDENT
+    : SPACE NAME ':' suite # SpaceDeclaration
     ;
 
-space_block_def
-    : space_property_block
-    | space_platform_block
-    | space_models_block
-    | space_controllers_block
-    | space_sources_block
-    | space_sinks_block
-    | NEWLINE
-    ;
-space_property_block
-    : PROPERTIES BLOCKSTART NEWLINE space_properties #SpacePropertiesBlock
-    ;
-space_properties
-    : INDENT space_property+ DEDENT
-    | NEWLINE
-    ;
-space_property
-    : spaceProp_lang EQUAL lang_opt #SpaceProperty
-    ;
-spaceProp_lang: LANGUAGE;
-
-space_platform_block
-    : PLATFORM BLOCKSTART NEWLINE space_platform_dec #SpacePlatformBlock
-    ;
-space_platform_dec
-     : INDENT space_platform+ DEDENT
-     | NEWLINE
-     ;
-space_platform
-     : templates_dir
-     | api_ref
-     | event_dec
-     | NEWLINE
-     ;
-templates_dir
-    : TEMPLATES EQUAL dir #PlatformTemplates
-    ;
-dir: NAME;
-
-api_ref
-    : PLATFORM EQUAL base DOT api_version #PlatformAPI
+controller_comp
+    : CONTROLLER NAME ':' suite # ControllerDeclaration
     ;
 
-base: NAME;
-api_version: 'api.' INT ;
-event_dec
-    : NAME EQUAL PLATFORM DOT event_ref #PlatformEvent
-    ;
-event_ref: NAME ;
+INT :   [0-9]+ ;
 
-space_models_block
-    : MODELS BLOCKSTART NEWLINE space_inst_block #SpaceModelsBlock
-    ;
-space_inst_block
-    : INDENT instanciation+ DEDENT
-    | NEWLINE
-    ;
-instanciation
-    : refName EQUAL compName LEFT_BRACKET args* RIGHT_BRACKET #InstansDecl
-    ;
-compName: NAME ;
 
-space_controllers_block
-    : CONTROLLERS BLOCKSTART NEWLINE space_inst_block #SpaceControllerBlock
-    ;
+//NL: ('\r'? '\n' ' '*);
+//WS      : [' ' \t]+ -> skip ;
+/*
+ * lexer rules
+ */
 
-space_sources_block
-    : SOURCES BLOCKSTART NEWLINE space_sources #SpaceSourceBlock
-    ;
-space_sources
-    : INDENT instanciation+ DEDENT
-    | NEWLINE
-    ;
-space_sinks_block
-    : SINKS BLOCKSTART NEWLINE space_sinks #SapceSinkBlock
-    ;
-space_sinks
-    : INDENT instanciation+ DEDENT
-    | NEWLINE
-    ;
-
-lang_opt
-    : CLANG
-    | JLANG
-    | PLANG
-    ;
+MODEL : 'model' ;
+SPACE : 'space' ;
+CONTROLLER: 'controller' ;
+VIEW: 'view';
+FLOW: 'flow' ;
+LOCAL    : 'local' ;
+STREAMING: 'streaming' ;
+REPLICATED: 'replicated';
+PROPERTIES: 'properties' ;
+SCHEMA: 'schema' ;
+CONFIGURATION: 'configuration' ;
+MODELS: 'models';
+CONTROLLERS: 'controllers';
+PLATFORM: 'platform' ;
+SINKS: 'sinks' ;
+SOURCES: 'sources' ;
+EVENT: 'event' ;
+COMMAND:  'command' ;
+RETURN : 'return' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+IF: 'if' ;
+ELIF: 'elif' ;
+ELSE: 'else';
+AND: 'and' ;
+NOT: 'not';
+OR: 'or' ;
+IN: 'in' ;
+IS: 'is' ;
+DELETE: 'delete' ;
 
 
 primitive_type
@@ -277,3 +358,90 @@ primitive_type
     | T_NUMBER
     | T_BOOL
     ;
+
+T_INTEGER : 'integer' ;
+T_NUMBER : 'number' ;
+T_BOOL: 'boolean' ;
+
+
+
+T_BYTE_FIELD: 'ByteField' ;
+T_STRING_FIELD: 'StringField' ;
+T_BOOLEAN_FIELD: 'Boolean' ;
+T_INTEGER_FIELD : 'IntegerField';
+T_NUMBER_FIELD : 'NumberField' ;
+T_DATE_FIELD : 'DateField' ;
+T_DATE_TIME_FIELD : 'DateTime' ;
+T_TIME_STAMP_FIELD: 'TimestampField' ;
+T_CONTEXT_FIELD: 'ContextField' ;
+
+
+NAME
+ : ID_START ID_CONTINUE*
+ ;
+
+
+fragment SPACES
+ : [ \t]+
+ ;
+
+NEWLINE
+ : ( {atStartOfInput()}?   SPACES
+   | ( '\r'? '\n' | '\r' ) SPACES?
+   )
+   {
+     String newLine = getText().replaceAll("[^\r\n]+", "");
+     String spaces = getText().replaceAll("[\r\n]+", "");
+     int next = _input.LA(1);
+
+     if (opened > 0 || next == '\r' || next == '\n' || next == '#') {
+       // If we're inside a list or on a blank line, ignore all indents,
+       // dedents and line breaks.
+       skip();
+     }
+     else {
+       emit(commonToken(NEWLINE, newLine));
+
+       int indent = getIndentationCount(spaces);
+       int previous = indents.isEmpty() ? 0 : indents.peek();
+
+       if (indent == previous) {
+         // skip indents of the same size as the present indent-size
+         skip();
+       }
+       else if (indent > previous) {
+         indents.push(indent);
+         emit(commonToken(RavelParser.INDENT, spaces));
+       }
+       else {
+         // Possibly emit more than 1 DEDENT token.
+         while(!indents.isEmpty() && indents.peek() > indent) {
+           this.emit(createDedent());
+           indents.pop();
+         }
+       }
+     }
+   }
+ ;
+
+SKIP_
+ : ( SPACES | COMMENT ) -> skip
+ ;
+
+fragment COMMENT
+ : '//' ~[\r\n]*
+ ;
+
+//https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4
+/// id_start     ::=  <all characters in general categories Lu, Ll, Lt, Lm, Lo, Nl, the underscore, and characters with the Other_ID_Start property>
+fragment ID_START
+ : '_'
+ | [A-Z]
+ | [a-z]
+ ;
+
+/// id_continue  ::=  <all characters in id_start, plus characters in the categories Mn, Mc, Nd, Pc and others with the Other_ID_Continue property>
+fragment ID_CONTINUE
+ : ID_START
+ | [0-9]
+ ;

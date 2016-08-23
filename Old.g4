@@ -1,9 +1,12 @@
-lexer grammar RavelLexer;
+grammar Old;
 
 tokens { INDENT, DEDENT }
-
+@header {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+}
 @lexer::members {
-   //from Ter
+
   // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
   private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
 
@@ -101,64 +104,172 @@ tokens { INDENT, DEDENT }
   }
 }
 
+file_input
+    : ( NEWLINE | comp_def )* EOF
+    ;
+
+comp_def
+    : model_comp
+    | controller_comp
+    | space_comp
+    ;
+
+model_comp
+    :  modelType MODEL NAME  ':' suite # ModelDeclaration
+    ;
+
+
+modelType
+    : LOCAL
+    | STREAMING
+    | REPLICATED
+    ;
+
+suite
+    : NEWLINE INDENT block_def+ DEDENT
+    ;
+
+block_def
+    : decl
+    | event
+    | NEWLINE
+    ;
+
+ decl
+    : declType ':' NEWLINE block_suite #BlockSuite
+    ;
+
+declType
+    : PROPERTIES
+    | SCHEMA
+    | CONTROLLERS
+    | CONFIGURATION
+    | MODELS
+    ;
+
+
+block_suite
+    :  INDENT assigment+ DEDENT
+    | NEWLINE
+    ;
+
+assigment
+    : prim_assig
+    | field
+    | instanciation
+    | reference
+    | NEWLINE
+    ;
+prim_assig
+    : primitive_type NAME '=' ( INT | TRUE | FALSE ) #VarAssig
+    ;
+
+field
+    : NAME '=' field_type '(' args* ')' #FieldDeclaration
+    ;
+
+
+field_type
+    : T_BYTE_FIELD
+    | T_STRING_FIELD
+    | T_BOOLEAN_FIELD
+    | T_INTEGER_FIELD
+    | T_NUMBER_FIELD
+    | T_DATE_FIELD
+    | T_DATE_TIME_FIELD
+    | T_TIME_STAMP_FIELD
+    ;
+
+args
+    : arg (',' arg)*
+    ;
+arg
+    : NAME '=' ( NAME | INT )
+    ;
+instanciation
+    : NAME '=' NAME '(' args* ')' #InstansDecl
+    ;
+reference
+    : NAME '=' '"' NAME '"' #RefDecl
+    ;
+event
+    : EVENT comp '.' trigger '():' stmt #EventDecl
+    ;
+
+comp : NAME;
+trigger: NAME ;
+
+//TODO: placeholder
+stmt
+    : expr_stmt
+    | flow_stmt
+    | NEWLINE
+    ;
+expr_stmt
+    : NEWLINE INDENT assigment+ DEDENT
+    ;
+
+//TODO: placeholder
+flow_stmt
+ //: break_stmt
+ //| continue_stmt
+ : return_stmt
+// | raise_stmt
+// | yield_stmt
+ ;
+
+//TODO: placeholder for now
+return_stmt
+ : RETURN NAME
+ ;
+
+space_comp
+    : SPACE NAME ':' suite # SpaceDeclaration
+    ;
+
+controller_comp
+    : CONTROLLER NAME ':' suite # ControllerDeclaration
+    ;
 
 INT :   [0-9]+ ;
+
 
 //NL: ('\r'? '\n' ' '*);
 //WS      : [' ' \t]+ -> skip ;
 /*
  * lexer rules
  */
-// components
+
 MODEL : 'model' ;
 SPACE : 'space' ;
 CONTROLLER: 'controller' ;
 VIEW: 'view';
 FLOW: 'flow' ;
-//model types
 LOCAL    : 'local' ;
 STREAMING: 'streaming' ;
 REPLICATED: 'replicated';
-//blocks
 PROPERTIES: 'properties' ;
-//property statements
-DURABLE: 'durable' ;
-RELIABLE: 'reliable' ;
-ENCRYPTON: 'encryption';
-//configuration
-CONFIGURATION: 'configuration' ;
-//schema
 SCHEMA: 'schema' ;
-
-//space
-PLATFORM: 'platform' ;
+CONFIGURATION: 'configuration' ;
 MODELS: 'models';
 CONTROLLERS: 'controllers';
 SINKS: 'sinks' ;
 SOURCES: 'sources' ;
-TEMPLATES:'templates';
-LANGUAGE: 'language';
-CLANG : 'clang';
-JLANG: 'java';
-PLANG: 'python';
-
-//events commands
 EVENT: 'event' ;
 COMMAND:  'command' ;
 RETURN : 'return' ;
-DELETE: 'delete';
 TRUE : 'true' ;
 FALSE : 'false' ;
 
-//local queries
-LAST: 'last' ;
-FIRST: 'first';
-GET : 'get' ;
-
+primitive_type
+    : T_INTEGER
+    | T_NUMBER
+    | T_BOOL
+    ;
 
 T_INTEGER : 'integer' ;
 T_NUMBER : 'number' ;
-T_BOOL: 'boolean' ;
+T_BOOL: 'bool' ;
 
 
 
@@ -170,17 +281,6 @@ T_NUMBER_FIELD : 'IntegerField' ;
 T_DATE_FIELD : 'IntegerField' ;
 T_DATE_TIME_FIELD : 'IntegerField' ;
 T_TIME_STAMP_FIELD: 'TimestampField' ;
-
-
-BLOCKSTART: ':' ;
-EQUAL: '=' ;
-PLUS: '+' ;
-MINUS: '-' ;
-DOT: '.' ;
-COMMA: ',' ;
-LEFT_BRACKET: '(' ;
-RIGHT_BRACKET: ')' ;
-DOUBLE_APPOS: '"' ;
 
 
 NAME
