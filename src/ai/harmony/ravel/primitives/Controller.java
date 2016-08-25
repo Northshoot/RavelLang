@@ -9,12 +9,12 @@ import java.util.List;
  * Created by lauril on 7/21/16.
  */
 public class Controller extends Primitive{
-    RavelParser.ControllerDeclarationContext ctx;
+
     private List<Configuration> mConfigurations;
     private List<Event> mEvents;
 
-    public Controller(RavelParser.ControllerDeclarationContext ctx){
-        ctx = ctx;
+    public Controller(String name){
+        super(name);
         mConfigurations = new LinkedList<>();
         //create configurations from context
         mEvents = new LinkedList<>();

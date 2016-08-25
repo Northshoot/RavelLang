@@ -1,5 +1,6 @@
 package ai.harmony.ravel.compiler;
 
+import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.exceptions.NoSuchBlockSymbolException;
@@ -7,6 +8,7 @@ import ai.harmony.ravel.compiler.exceptions.SymbolNotAllowedInScopeException;
 import ai.harmony.ravel.compiler.scopes.GlobalScope;
 import ai.harmony.ravel.compiler.scopes.Scope;
 import ai.harmony.ravel.compiler.symbols.*;
+import ai.harmony.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
@@ -18,13 +20,25 @@ public class DefPhase extends RavelBaseListener {
     RavelApplication ravelApp;
     Scope currentScope;
     //will be imports eventually
-    GlobalScope  globalScope;
+    GlobalScope globalScope;
     int intend = 0;
+    boolean walked = false;
+
+    public RavelApplication getRavelApp() {
+        if (walked) {
+            return ravelApp;
+        } else {
+            return null;
+        }
+    }
 
     void saveScope(ParserRuleContext ctx, Scope s) {
         scopes.put(ctx, s);
     }
 
+    void prettyPrint(String s){
+        System.out.println(getTab() + s);
+    }
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
         ravelApp = new RavelApplication();
@@ -33,231 +47,219 @@ public class DefPhase extends RavelBaseListener {
         System.out.println("Entering enterFile_input");
     }
 
-    /**
-     * We dont cate about component definitions, mostly for grammar
-     * public void enterComp_def(RavelParser.Comp_defContext ctx) { }
-     *
-     */
-
-    /**
-     * First we enter a components which declares the current scope
-     *
-     */
 
     @Override
-    public void enterModelDeclaration(RavelParser.ModelDeclarationContext ctx) {
-        System.out.println("Entering enterModelDeclaration");
-        String name = ctx.NAME().getText();
-        ModelSymbol modelScope = new ModelSymbol(name, Symbol.Type.MODEL, currentScope);
+    public void enterModelScope(RavelParser.ModelScopeContext ctx) {
+        String name = ctx.identifier().getText();
+        String type = ctx.modelType().getText();
+        prettyPrint("Entering model: " + name + " of type " + type + " with args " + ctx.parameters().getText());
+        ModelSymbol modelScope = new ModelSymbol(name, Symbol.Type.MODEL, type, currentScope);
         currentScope.define(modelScope);
-        saveScope(ctx,modelScope);
+        saveScope(ctx, modelScope);
         currentScope = modelScope;
     }
+
     @Override
-    public void enterBlockSuite(RavelParser.BlockSuiteContext ctx) {
+    public void enterPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
         intend++;
-        String blockTypeName = ctx.declType().getText();
-        int blockType = ctx.declType().start.getType();
-        System.out.println(getTab() + "Entering enterBlockSuite: " + blockTypeName);
-        BlockSymbol blockScope;
-        try {
-            blockScope = BlockSymbolFactory.getBlockSymbol(blockType,  blockTypeName, currentScope);
-            currentScope.define(blockScope);
-            saveScope(ctx, blockScope);
-            currentScope = blockScope;
-            System.out.println(getTab() +"blockScope: " + blockScope);
-        } catch (NoSuchBlockSymbolException e){
-            int line = ctx.declType().start.getLine();
-            int charp = ctx.declType().start.getCharPositionInLine();
-            System.err.println(getTab() +"Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
-        } catch (SymbolNotAllowedInScopeException e) {
-            int line = ctx.declType().start.getLine();
-            int charp = ctx.declType().start.getCharPositionInLine();
-            System.err.println(getTab() +"Error " + e.getMessage() + " on line: " + line + " at position " + charp + " ");
-
-        }
-    }
-    @Override
-    public void enterModelProperty(RavelParser.ModelPropertyContext ctx) {
-        intend++;
-        String name = ctx.NAME().getText();
-        System.out.println(getTab() + "Model property: " + name );
-//        if( currentScope instanceof BlockSymbol) {
-
-        currentScope.define(new ModelPropertySymbol(name, Symbol.Type.tINVALID, currentScope));
+        prettyPrint("Entering PropertiesScope");
+        //can only be defined ONCE per model, through error otherwise
     }
 
-    @Override
-    public void exitModelProperty(RavelParser.ModelPropertyContext ctx) { intend--;}
-    @Override
-    public void enterVarAssig(RavelParser.VarAssigContext ctx) {
-        intend ++;
-        System.out.println(getTab() +"Entering enterVarAssig");
-        /**
-         * Create assignment scope and add it
-         */
-        String varType = ctx.primitive_type().getText();
-        String name = ctx.NAME().getText();
-        System.out.println(getTab() + "Var declaration found: " + name + " of type " + varType);
-        currentScope.define(new VarSymbol(varType, name,
-                Symbol.getType(ctx.primitive_type().start.getType())
-        ));
-
-
-
-    }
 
     @Override
-    public void exitVarAssig(RavelParser.VarAssigContext ctx) {
-
-        System.out.println(getTab()+"Exit enterVarAssig ");
+    public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
         intend--;
+        prettyPrint("exit PropertiesScope");
+    }
+
+    @Override
+    public void enterSchemaScope(RavelParser.SchemaScopeContext ctx) {
+        intend++;
+        //can only be defined ONCE per model, through error otherwise
+
     }
 
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
         intend++;
-        System.out.println(getTab() +"Entering enterFieldDeclaration ");
+        prettyPrint("Field: " + ctx.identifier().getText() + " type: " + ctx.field_type().getText() + " args: " + ctx.parameters().getText());
         if(currentScope instanceof SchemaSymbol) {
-            String name = ctx.NAME().getText();
+            String name = ctx.identifier().getText();
             currentScope.define(new FieldSymbol(
-                    name, Symbol.getType(ctx.field_type().start.getType())
+                    name,ctx.field_type().getText(),  Symbol.getType(ctx.field_type().start.getType())
             ));
-            System.out.println(getTab()+"field: " + name);
+            prettyPrint("field: " + name);
         } else {
             System.err.println(getTab()+"Can not define fields outside the schema");
         }
     }
 
-
     @Override
     public void exitFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-
-        System.out.println(getTab() +"Exit exitFieldDeclaration ");
         intend--;
-
+    }
+    @Override
+    public void exitSchemaScope(RavelParser.SchemaScopeContext ctx) {
+        intend--;
+        prettyPrint("Exit SchemaScope");
     }
 
     @Override
-    public void exitBlockSuite(RavelParser.BlockSuiteContext ctx ){
-        System.out.println(getTab() + "Exit exitBlockSuite");
+    public void exitModelScope(RavelParser.ModelScopeContext ctx) {
+        prettyPrint("Exit exitModelDeclaration");
+//        ((ModelSymbol)currentScope).makeObjects();
+//        Model m = ((ModelSymbol)currentScope).getModel();
+//        ravelApp.addModel(m.getName(), m);
         currentScope = currentScope.getEnclosingScope();
         intend--;
     }
 
     @Override
-    public void enterControllerDeclaration(RavelParser.ControllerDeclarationContext ctx) {
-        System.out.println(getTab()+"Entering enterControllerDeclaration");
+    public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
+        prettyPrint("Entering enterControllerDeclaration");
         intend++;
-        String name = ctx.NAME().getText();
-        ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.MODEL, currentScope);
+        String name = ctx.identifier().getText();
+        ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.CONTROLLER, currentScope);
         currentScope.define(controllerScope);
         saveScope(ctx,controllerScope);
         currentScope = controllerScope;
     }
     @Override
-    public void enterEventDecl(RavelParser.EventDeclContext ctx) {
-        System.out.println(getTab()+"Enter enterEventDecl");
-        if ( currentScope instanceof ControllerSymbol ){
-            intend++;
-            String name = ctx.comp().getText()+ctx.trigger().getText();
-            EventSymbol eventScope = new EventSymbol(name, Symbol.Type.EVENT, currentScope);
-            currentScope.define(eventScope);
-            saveScope(ctx,eventScope);
-            currentScope = eventScope;
-
-        } else {
-            System.err.println(getTab() + "Events only allowed in the controller");
-        }
-    }
-
-    @Override
-    public void exitEventDecl(RavelParser.EventDeclContext ctx) {
-        System.out.println(getTab()+"Exit exitEventDecl");
-        currentScope = currentScope.getEnclosingScope();
-        intend--;
-    }
-
-
-    public void enterSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
-        System.out.println("Entering enterSpaceDeclaration ");
+    public void enterEventScope(RavelParser.EventScopeContext ctx) {
+        prettyPrint("Event Scope");
         intend++;
-        String name = ctx.NAME().getText();
-        SpaceSymbol spaceScope = new SpaceSymbol(name, Symbol.Type.MODEL, currentScope);
-        currentScope.define(spaceScope);
-        saveScope(ctx,spaceScope);
-        currentScope = spaceScope;
+        //define event scope
+        //define parameters in the scope
     }
 
     @Override
-    public void enterInstansDecl(RavelParser.InstansDeclContext ctx) {
-        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
-            intend++;
-            String name = ctx.NAME(0).getText();
-            String instanceName = ctx.NAME(1).getText();
-            InstantiationSymbol is = new InstantiationSymbol(name, instanceName);
-            //TODO: skipping args for now
-            currentScope.define(is);
-            System.out.println(getTab() + "Entered Reference: " + is);
-        } else {
-            System.err.println(getTab() + "Components can only be instantiated in the space");
-        }
-    }
-
+    public void enterQueryOperations(RavelParser.QueryOperationsContext ctx) { }
 
     @Override
-    public void exitInstansDecl(RavelParser.InstansDeclContext ctx) {
+    public void exitQueryOperations(RavelParser.QueryOperationsContext ctx) { }
+
+    @Override
+    public void exitEventScope(RavelParser.EventScopeContext ctx) {
         intend--;
     }
 
     @Override
-    public void enterRefDecl(RavelParser.RefDeclContext ctx) {
-        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
-            intend++;
-            String name = ctx.NAME(0).getText();
-            String refered = ctx.NAME(1).getText();
-            //TODO: skipping args for now
-            ReferenceSymbol rs = new ReferenceSymbol(name, refered);
-            currentScope.define(rs);
-            System.out.println(getTab() + "Entered Reference: " + rs);
-
-        } else {
-            System.err.println(getTab() + "Reference can only made in space" + currentScope);
-        }
-    }
-
-
-    @Override
-    public void exitRefDecl(RavelParser.RefDeclContext ctx) { }
-
-    /**
-     Â Â Â Â  * Exit all components
-     Â Â Â Â  *
-     Â Â Â Â  */
-
-
-    @Override
-    public void exitModelDeclaration(RavelParser.ModelDeclarationContext ctx) {
-        System.out.println(getTab()+"Exit exitModelDeclaration");
+    public void exitControllerScope(RavelParser.ControllerScopeContext ctx) {
+        intend--;
+        prettyPrint("Exit exitControllerDeclaration");
         currentScope = currentScope.getEnclosingScope();
-        intend--;
+
     }
 
-    @Override public void exitControllerDeclaration(RavelParser.ControllerDeclarationContext ctx) {
-        System.out.println(getTab()+"Exit exitControllerDeclaration");
-        currentScope = currentScope.getEnclosingScope();
-        intend--;
+
+    @Override
+    public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) {
+        prettyPrint("enterVarAssigment@ ident: " + ctx.identifier().getText() + " value: " + ctx.tdefvar().getText());
     }
-    @Override public void exitSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
-        System.out.println(getTab()+"Exit exitSpaceDeclaration");
-        currentScope = currentScope.getEnclosingScope();
-        intend--;
+
+    @Override
+    public void exitVarAssigment(RavelParser.VarAssigmentContext ctx) {
+
     }
+    @Override
+    public void enterReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) {
+        prettyPrint("enterReferenceAssigment@ ident: " + ctx.identifier().getText() + " value: " + ctx.dotted_name().getText());
+    }
+
+    @Override
+    public void exitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) { }
+
+
+//    @Override
+//    public void enterEventDecl(RavelParser.EventDeclContext ctx) {
+//        System.out.println(getTab()+"Enter enterEventDecl");
+//        if ( currentScope instanceof ControllerSymbol ){
+//            intend++;
+//            String name = ctx.comp().getText()+ctx.trigger().getText();
+//            EventSymbol eventScope = new EventSymbol(name, Symbol.Type.EVENT, currentScope);
+//            currentScope.define(eventScope);
+//            saveScope(ctx,eventScope);
+//            currentScope = eventScope;
+//
+//        } else {
+//            System.err.println(getTab() + "Events only allowed in the controller");
+//        }
+//    }
+//
+//    @Override
+//    public void exitEventDecl(RavelParser.EventDeclContext ctx) {
+//        System.out.println(getTab()+"Exit exitEventDecl");
+//        currentScope = currentScope.getEnclosingScope();
+//        intend--;
+//    }
+//
+//
+//    public void enterSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
+//        System.out.println("Entering enterSpaceDeclaration ");
+//        intend++;
+//        String name = ctx.NAME().getText();
+//        SpaceSymbol spaceScope = new SpaceSymbol(name, Symbol.Type.MODEL, currentScope);
+//        currentScope.define(spaceScope);
+//        saveScope(ctx,spaceScope);
+//        currentScope = spaceScope;
+//    }
+//
+//    @Override
+//    public void enterInstansDecl(RavelParser.InstansDeclContext ctx) {
+//        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
+//            intend++;
+//            String name = ctx.NAME(0).getText();
+//            String instanceName = ctx.NAME(1).getText();
+//            InstantiationSymbol is = new InstantiationSymbol(name, instanceName);
+//            //TODO: skipping args for now
+//            currentScope.define(is);
+//            System.out.println(getTab() + "Entered Reference: " + is);
+//        } else {
+//            System.err.println(getTab() + "Components can only be instantiated in the space");
+//        }
+//    }
+//
+//
+//    @Override
+//    public void exitInstansDecl(RavelParser.InstansDeclContext ctx) {
+//        intend--;
+//    }
+//
+//    @Override
+//    public void enterRefDecl(RavelParser.RefDeclContext ctx) {
+//        if ( currentScope.getEnclosingScope() instanceof SpaceSymbol ){
+//            intend++;
+//            String name = ctx.NAME(0).getText();
+//            String refered = ctx.NAME(1).getText();
+//            //TODO: skipping args for now
+//            ReferenceSymbol rs = new ReferenceSymbol(name, refered);
+//            currentScope.define(rs);
+//            System.out.println(getTab() + "Entered Reference: " + rs);
+//
+//        } else {
+//            System.err.println(getTab() + "Reference can only made in space" + currentScope);
+//        }
+//    }
+//
+//
+//    @Override
+//    public void exitRefDecl(RavelParser.RefDeclContext ctx) { }
+//
+//
+
+
+
+//    @Override public void exitSpaceDeclaration(RavelParser.SpaceDeclarationContext ctx) {
+//        System.out.println(getTab()+"Exit exitSpaceDeclaration");
+//        currentScope = currentScope.getEnclosingScope();
+//        intend--;
+//    }
     @Override
     public void exitFile_input(RavelParser.File_inputContext ctx) {
         System.out.println(getTab()+"Exit exitFile_input");
         System.out.println(globalScope);
-        //System.out.println(ravelApp);
+        walked = true;
         intend--;
     }
 

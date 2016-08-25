@@ -1,9 +1,15 @@
 
 import ai.harmony.ravel.antlr4.*;
 import ai.harmony.ravel.compiler.DefPhase;
+import ai.harmony.ravel.RavelApplication;
+import ai.harmony.ravel.primitives.Model;
+import ai.harmony.ravel.primitives.Space;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -11,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-;
 
 public class Main {
 
@@ -39,11 +44,30 @@ public class Main {
         ParseTreeWalker walker = new ParseTreeWalker();
         DefPhase def = new DefPhase();
         walker.walk(def,tree);
-
-//        IR ir = new IR();
-//        PrimitiveVisitor converter = new PrimitiveVisitor(ir);
-//        Void result = converter.visit(tree);
-
+//        RavelApplication rApp = def.getRavelApp();
+//        if (rApp != null){
+//            System.out.println("**************** RAVEL APP ****************");
+//            System.out.println(rApp);
+//        }
+//        STGroup group = new STGroupFile("tmpl/model_c.stg");
+////        ST model = group.getInstanceOf("modelDecl");
+////        ST create_record = group.getInstanceOf("create_record");
+////        ST ble_record_instans = group.getInstanceOf("ble_record_init");
+//
+//        Space s = new Space("embedded");
+//        for(Model m: rApp.getModels()) {
+//            ST model = group.getInstanceOf("modelDecl");
+//            ST create_record = group.getInstanceOf("create_record");
+//            ST ble_record_instans = group.getInstanceOf("ble_record_init");
+//            model.add("model", m);
+//            create_record.add("model", m);
+//            ble_record_instans.add("model", m);
+//            System.out.println(m);
+//            System.out.println("**************** templates ****************");
+//            System.out.println(model.render());
+//            System.out.println(create_record.render());
+//            System.out.println(ble_record_instans.render());
+//        }
         /**
          * First create Defined symbols
          */
@@ -76,7 +100,7 @@ public class Main {
          */
 
         Date now = Calendar.getInstance().getTime();
-        long diff = now.getTime() -t.getTime();
+        long diff = now.getTime() - t.getTime();
         long diffMilliSeconds = diff  % 60;
         long diffSeconds = diff / 1000 % 60;
         long diffMinutes = diff / (60 * 1000) % 60;

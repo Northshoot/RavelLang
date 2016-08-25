@@ -5,9 +5,10 @@ package ai.harmony.ravel.compiler.symbols;
  */
 public class FieldSymbol extends Symbol  {
 
-
-    public FieldSymbol( String name,  Symbol.Type type) {
+    String mTypeName;
+    public FieldSymbol( String name,  String typeName, Symbol.Type type) {
         super(name, type);
+        this.mTypeName = typeName;
 
     }
 }

@@ -1,9 +1,11 @@
-package ai.harmony.ravel.compiler;
+package ai.harmony.ravel;
 
 import ai.harmony.ravel.compiler.scopes.GlobalScope;
 import ai.harmony.ravel.primitives.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +29,9 @@ public class RavelApplication  {
     public void addModel(String name, Model m){
         mModels.put(name, m);
     }
+    public Model getModel() { return (Model) getFirst(mModels); }
+    public List<Model> getModels(){ return new ArrayList<>(mModels.values());}
+
     public void addController(String name, Controller c){
         mControllers.put(name, c);
     }
@@ -46,7 +51,10 @@ public class RavelApplication  {
         mFlow.put(name, f);
     }
 
-
+    private Object getFirst(Map m){
+        Object firstKey = m.keySet().toArray()[0];
+        return m.get(firstKey);
+    }
     public String toString(){
         String ret ="Ravel applications: \n";
         if(mModels.size() >0) {

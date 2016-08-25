@@ -1,0 +1,18 @@
+controller RandomControllerEmbedded(tier):
+    mFreq = tier.models.frequency
+    mRandom = tier.models.random
+    mError = tier.models.error
+    random_source = tier.sources.random
+    random_timer = tier.platform.timer
+    boot_event = tier.platform.boot
+    running = false
+
+    event boot_event(context ctx):
+        if ctx.error is SUCCESS:
+            random_timer.start_periodic(mFreq.frequency)
+            running = true
+        else:
+            error = mError.create()
+            error.occurred=self
+            error.context=ctx
+            error.save()

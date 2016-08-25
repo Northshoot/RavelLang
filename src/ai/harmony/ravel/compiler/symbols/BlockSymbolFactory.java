@@ -16,20 +16,20 @@ public class BlockSymbolFactory {
 
     {
         switch (type){
-            case RavelParser.CONFIGURATION:
-                return new ConfigurationSymbol(name, currentScope);
-            case RavelParser.CONTROLLERS:
-                return new SpaceControllerSymbol(name, currentScope);
-            case RavelParser.MODELS:
-                return new SpaceModelsSymbol(name, currentScope);
-            case RavelParser.PROPERTIES:
-                return new PropertySymbol(name, currentScope);
-            case RavelParser.SCHEMA:
-                return new SchemaSymbol(name, currentScope);
-            case RavelParser.SINKS:
-                return new SinkSymbol(name, currentScope);
-            case RavelParser.SOURCES:
-                return new SourceSymbol(name, currentScope);
+//            case RavelParser.CONTROLLERS:
+//                return new SpaceControllerSymbol(name, currentScope);
+//            case RavelParser.MODELS:
+//                return new SpaceModelsSymbol(name, currentScope);
+//            case RavelParser.PROPERTIES:
+//                return new ModelPropertySymbol(name, currentScope);
+//            case RavelParser.SCHEMA:
+//                return new SchemaSymbol(name, currentScope);
+//            case RavelParser.SINKS:
+//                return new SinkSymbol(name, currentScope);
+//            case RavelParser.SOURCES:
+//                return new SourceSymbol(name, currentScope);
+//            case RavelParser.PLATFORM:
+//                return new SpacePlatformSymbol(name, currentScope);
             default:
                 throw new NoSuchBlockSymbolException("Block symbol >>" + name +   "<< does not exist");
 

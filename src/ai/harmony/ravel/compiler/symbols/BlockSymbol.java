@@ -27,6 +27,7 @@ public abstract class BlockSymbol extends Symbol implements Scope {
 
 
     }
+    public Map<String, Symbol> getChildSymbols() {return  mVars; }
     public Symbol resolve(String name) {
         Symbol s = mVars.get(name);
         if ( s!=null ) return s;

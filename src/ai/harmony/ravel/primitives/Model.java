@@ -1,59 +1,104 @@
 package ai.harmony.ravel.primitives;
 
-import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.ravel.compiler.symbols.FieldSymbol;
+import ai.harmony.ravel.compiler.symbols.Symbol;
+import ai.harmony.ravel.translators.Translator;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by lauril on 7/21/16.
  */
 public class Model extends Primitive {
-    ModelType mModelType;
-    String mName;
-    private List<Field> mFields;
-    private List<Property> mProperties;
+
+    public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
+
+    Model.Type mModelType;
+    private Map<String, Field> mFields = new LinkedHashMap<>();
+    private Map<String, Property> mProperties = new LinkedHashMap<>();
 
 
-    public ModelType getModelType() {
+    public Model.Type getModelType() {
         return mModelType;
     }
 
-    public void setmModelType(ModelType mModelType) {
+    public void setModelType(Model.Type mModelType) {
         this.mModelType = mModelType;
     }
-
-    public String getName() {
-        return mName;
+    public String getService(){
+        return "ravel_service";
+    }
+    public String getTransmitFunction(){
+        return getNameLowerCase() + "_char_update";
+    }
+    public List<Field> getFields() {
+        return new ArrayList<>(mFields.values());
     }
 
-    public void setName(String mName) {
-        this.mName = mName;
-    }
-
-    public List<Field> getmFields() {
-        return mFields;
-    }
-
-    public void setFields(List<Field> mFields) {
-        this.mFields = mFields;
+    public void addField(String name, Field mFields) {
+        this.mFields.put(name, mFields);
     }
 
 
-
-    public void setField(Field mFields) {
-        this.mFields.add(mFields);
+    public void setProperty(String name, Property mProperties) {
+        //TODO: implement property setter
+        this.mProperties.put(name, mProperties);
     }
 
 
-    public void setProperty(Property mProperties) {
-        this.mProperties.add(mProperties);
+    public int getsizeCbuffer(){
+        int total=0;
+        Iterator it = mFields.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            total += ((Field)(pair.getValue())).getByteSize();
+        }
+        return total;
+    }
+    public Model(String name, Model.Type t){
+        super(name);
+        //TODO: implement real error handling
+        if (t == Type.tINVALID ) {
+            System.err.println("Invalid model type! ");
+        }
+        this.mModelType = t;
     }
 
-    public Model(){
-
+    @Override
+    public String toString(){
+        String ret = "Concrete Model:" + " type : " + getTypeString() + " name: " + getVerboseName() +
+                " # of Fields " + mFields.size() + "\n\t values: \n" ;
+        Iterator it = mFields.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            ret +="\t\t" + pair.getValue().toString();
+            ret+="\n";
+        }
+        return ret;
     }
 
-
-
+    public String getTypeString(){
+        switch (mModelType){
+            case LOCAL:
+                return "local";
+            case STREAMING:
+                return "streaming";
+            case REPLICATED:
+                return "replicated";
+            default:
+                return "Invalid";
+        }
+    }
+    public static Model.Type getType(String name){
+        switch ( name ){
+            case "local":
+                return Type.LOCAL;
+            case "streaming":
+                return Type.STREAMING;
+            case "replicated":
+                return Type.REPLICATED;
+            default:
+                return Type.tINVALID;
+        }
+    }
 }

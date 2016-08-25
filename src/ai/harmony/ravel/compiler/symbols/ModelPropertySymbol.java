@@ -8,10 +8,10 @@ import ai.harmony.ravel.compiler.scopes.Scope;
  */
 public class ModelPropertySymbol extends BlockSymbol{
 
-    public ModelPropertySymbol(String name, Symbol.Type mType, Scope currentScope) {
-        super(name,mType, currentScope);
-
+    public ModelPropertySymbol(String name, Scope currentScope){
+        super(name, currentScope);
     }
+
 
 
     @Override

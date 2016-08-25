@@ -7,8 +7,8 @@ import ai.harmony.ravel.compiler.scopes.Scope;
  */
 public class SpacePlatformSymbol extends BlockSymbol{
 
-    public SpacePlatformSymbol(String name, Type mType, Scope currentScope) {
-        super(name,mType, currentScope);
+    public SpacePlatformSymbol(String name, Scope currentScope) {
+        super(name, currentScope);
 
     }
 
