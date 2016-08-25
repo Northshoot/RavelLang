@@ -113,7 +113,7 @@ tokens { INDENT, DEDENT }
  //only file inputs are accepted
 
 //the file can be newlines or components definitions
-
+//TODO: add imports
 file_input
     : ( NEWLINE | comp_def )* EOF
     ;
@@ -138,12 +138,21 @@ tdefvar
     | identifier
     ;
 
+/**
+ *
+ * Ravel application consists of componets
+ */
 //we have models, views, controllers, spaces, transform, flow?
 comp_def
     : model_comp
     | controller_comp
     | space_comp
     ;
+
+/**
+ *
+ * Space parser rules
+ */
 space_comp
     : SPACE identifier ':' space_body #SpaceScope
     ;
@@ -186,7 +195,10 @@ references
 source_scope
     : 'sources:' references #SourceLinks
     ;
-
+/**
+ *
+ * Model parser rules
+ */
 model_comp
     :  modelType MODEL identifier  parameters ':' model_body # ModelScope
     ;
@@ -228,6 +240,12 @@ field
     : identifier '=' field_type parameters NEWLINE? #FieldDeclaration
     ;
 
+/**
+ *
+ * Field types, currently only in parser. But maybe it should be like a Ravel library
+ * that you can write your own field in Ravel and then get it translated
+ *
+ */
 field_type
     : T_BYTE_FIELD
     | T_STRING_FIELD
