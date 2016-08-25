@@ -1,7 +1,7 @@
 package ai.harmony.ravel.compiler;
 
-import ai.harmony.ravel.compiler.scopes.GlobalScope;
-import ai.harmony.ravel.compiler.scopes.Scope;
+import ai.harmony.ravel.compiler.old.GlobalScope;
+import ai.harmony.ravel.compiler.old.Scope;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 /**

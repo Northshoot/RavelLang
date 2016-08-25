@@ -1,9 +1,5 @@
 package ai.harmony.ravel.primitives;
 
-import ai.harmony.ravel.compiler.symbols.FieldSymbol;
-import ai.harmony.ravel.compiler.symbols.Symbol;
-import ai.harmony.ravel.translators.Translator;
-
 import java.util.*;
 
 /**

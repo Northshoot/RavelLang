@@ -1,6 +1,6 @@
 package ai.harmony.ravel.primitives;
 
-import ai.harmony.ravel.compiler.symbols.Symbol;
+import ai.harmony.ravel.compiler.old.Symbol;
 import static ai.harmony.ravel.primitives.Field.Type.*;
 
 

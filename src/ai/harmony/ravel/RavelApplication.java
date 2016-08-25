@@ -1,6 +1,5 @@
 package ai.harmony.ravel;
 
-import ai.harmony.ravel.compiler.scopes.GlobalScope;
 import ai.harmony.ravel.primitives.*;
 
 import java.util.ArrayList;

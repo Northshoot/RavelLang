@@ -1,5 +1,8 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
 package ai.harmony.ravel.antlr4;
+
+import ai.harmony.ravel.compiler.scope.*;
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**

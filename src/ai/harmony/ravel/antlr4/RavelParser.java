@@ -1,5 +1,8 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
 package ai.harmony.ravel.antlr4;
+
+import ai.harmony.ravel.compiler.scope.*;
+
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -169,6 +172,7 @@ public class RavelParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class File_inputContext extends ParserRuleContext {
+		public Scope scope;
 		public TerminalNode EOF() { return getToken(RavelParser.EOF, 0); }
 		public List<TerminalNode> NEWLINE() { return getTokens(RavelParser.NEWLINE); }
 		public TerminalNode NEWLINE(int i) {
@@ -622,6 +626,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Space_compContext extends ParserRuleContext {
+		public Scope scope;
 		public Space_compContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -630,6 +635,7 @@ public class RavelParser extends Parser {
 		public Space_compContext() { }
 		public void copyFrom(Space_compContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class SpaceScopeContext extends Space_compContext {
@@ -845,6 +851,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Platform_scopeContext extends ParserRuleContext {
+		public Scope scope;
 		public Platform_scopeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -853,6 +860,7 @@ public class RavelParser extends Parser {
 		public Platform_scopeContext() { }
 		public void copyFrom(Platform_scopeContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class PlatformScopeContext extends Platform_scopeContext {
@@ -900,6 +908,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Models_scopeContext extends ParserRuleContext {
+		public Scope scope;
 		public Models_scopeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -908,6 +917,7 @@ public class RavelParser extends Parser {
 		public Models_scopeContext() { }
 		public void copyFrom(Models_scopeContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class ModelInstanciationContext extends Models_scopeContext {
@@ -1122,6 +1132,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Controllers_scopeContext extends ParserRuleContext {
+		public Scope scope;
 		public Controllers_scopeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1130,6 +1141,7 @@ public class RavelParser extends Parser {
 		public Controllers_scopeContext() { }
 		public void copyFrom(Controllers_scopeContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class ControllerInstanciationContext extends Controllers_scopeContext {
@@ -1177,6 +1189,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Sink_scopeContext extends ParserRuleContext {
+		public Scope scope;
 		public Sink_scopeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1185,6 +1198,7 @@ public class RavelParser extends Parser {
 		public Sink_scopeContext() { }
 		public void copyFrom(Sink_scopeContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class SinkLinksContext extends Sink_scopeContext {
@@ -1232,6 +1246,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class ReferencesContext extends ParserRuleContext {
+		public Scope scope;
 		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public TerminalNode INDENT() { return getToken(RavelParser.INDENT, 0); }
 		public TerminalNode DEDENT() { return getToken(RavelParser.DEDENT, 0); }
@@ -1301,6 +1316,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Source_scopeContext extends ParserRuleContext {
+		public Scope scope;
 		public Source_scopeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1309,6 +1325,7 @@ public class RavelParser extends Parser {
 		public Source_scopeContext() { }
 		public void copyFrom(Source_scopeContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class SourceLinksContext extends Source_scopeContext {
@@ -1356,6 +1373,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Model_compContext extends ParserRuleContext {
+		public Scope scope;
 		public Model_compContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1364,6 +1382,7 @@ public class RavelParser extends Parser {
 		public Model_compContext() { }
 		public void copyFrom(Model_compContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class ModelScopeContext extends Model_compContext {
@@ -1606,6 +1625,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Properties_blockContext extends ParserRuleContext {
+		public Scope scope;
 		public Properties_blockContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1614,6 +1634,7 @@ public class RavelParser extends Parser {
 		public Properties_blockContext() { }
 		public void copyFrom(Properties_blockContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class PropertiesScopeContext extends Properties_blockContext {
@@ -1801,6 +1822,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Schema_blockContext extends ParserRuleContext {
+		public Scope scope;
 		public Schema_blockContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1809,6 +1831,7 @@ public class RavelParser extends Parser {
 		public Schema_blockContext() { }
 		public void copyFrom(Schema_blockContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class SchemaScopeContext extends Schema_blockContext {
@@ -2101,6 +2124,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Controller_compContext extends ParserRuleContext {
+		public Scope scope;
 		public Controller_compContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2109,6 +2133,7 @@ public class RavelParser extends Parser {
 		public Controller_compContext() { }
 		public void copyFrom(Controller_compContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class ControllerScopeContext extends Controller_compContext {
@@ -2376,6 +2401,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class EventdefContext extends ParserRuleContext {
+		public Scope scope;
 		public EventdefContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2384,6 +2410,7 @@ public class RavelParser extends Parser {
 		public EventdefContext() { }
 		public void copyFrom(EventdefContext ctx) {
 			super.copyFrom(ctx);
+			this.scope = ctx.scope;
 		}
 	}
 	public static class EventScopeContext extends EventdefContext {

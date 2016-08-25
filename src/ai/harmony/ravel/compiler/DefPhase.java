@@ -3,20 +3,15 @@ package ai.harmony.ravel.compiler;
 import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
-import ai.harmony.ravel.compiler.exceptions.NoSuchBlockSymbolException;
-import ai.harmony.ravel.compiler.exceptions.SymbolNotAllowedInScopeException;
-import ai.harmony.ravel.compiler.scopes.GlobalScope;
-import ai.harmony.ravel.compiler.scopes.Scope;
-import ai.harmony.ravel.compiler.symbols.*;
+import ai.harmony.ravel.compiler.scope.GlobalScope;
+import ai.harmony.ravel.compiler.scope.Scope;
+import ai.harmony.ravel.compiler.symbol.ModelScope;
 import ai.harmony.ravel.primitives.Model;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 /**
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
-    ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     RavelApplication ravelApp;
     Scope currentScope;
     //will be imports eventually
@@ -32,9 +27,7 @@ public class DefPhase extends RavelBaseListener {
         }
     }
 
-    void saveScope(ParserRuleContext ctx, Scope s) {
-        scopes.put(ctx, s);
-    }
+
 
     void prettyPrint(String s){
         System.out.println(getTab() + s);
@@ -42,9 +35,9 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
         ravelApp = new RavelApplication();
-        globalScope = new GlobalScope(null);
-        currentScope = globalScope;
-        System.out.println("Entering enterFile_input");
+        GlobalScope g = new GlobalScope(null);
+        ctx.scope = g;
+        pushScope(g);
     }
 
 
@@ -53,10 +46,13 @@ public class DefPhase extends RavelBaseListener {
         String name = ctx.identifier().getText();
         String type = ctx.modelType().getText();
         prettyPrint("Entering model: " + name + " of type " + type + " with args " + ctx.parameters().getText());
-        ModelSymbol modelScope = new ModelSymbol(name, Symbol.Type.MODEL, type, currentScope);
-        currentScope.define(modelScope);
-        saveScope(ctx, modelScope);
-        currentScope = modelScope;
+        ModelScope model = new ModelScope(name, Model.getType(type));
+        ctx.scope = model;
+        pushScope(model);
+//        ModelSymbol modelScope = new ModelSymbol(name, Symbol.Type.MODEL, type, currentScope);
+//        currentScope.define(modelScope);
+//        saveScope(ctx, modelScope);
+//        currentScope = modelScope;
     }
 
     @Override
@@ -82,17 +78,17 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-        intend++;
-        prettyPrint("Field: " + ctx.identifier().getText() + " type: " + ctx.field_type().getText() + " args: " + ctx.parameters().getText());
-        if(currentScope instanceof SchemaSymbol) {
-            String name = ctx.identifier().getText();
-            currentScope.define(new FieldSymbol(
-                    name,ctx.field_type().getText(),  Symbol.getType(ctx.field_type().start.getType())
-            ));
-            prettyPrint("field: " + name);
-        } else {
-            System.err.println(getTab()+"Can not define fields outside the schema");
-        }
+//        intend++;
+//        prettyPrint("Field: " + ctx.identifier().getText() + " type: " + ctx.field_type().getText() + " args: " + ctx.parameters().getText());
+//        if(currentScope instanceof SchemaSymbol) {
+//            String name = ctx.identifier().getText();
+//            currentScope.define(new FieldSymbol(
+//                    name,ctx.field_type().getText(),  Symbol.getType(ctx.field_type().start.getType())
+//            ));
+//            prettyPrint("field: " + name);
+//        } else {
+//            System.err.println(getTab()+"Can not define fields outside the schema");
+//        }
     }
 
     @Override
@@ -117,13 +113,13 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
-        prettyPrint("Entering enterControllerDeclaration");
-        intend++;
-        String name = ctx.identifier().getText();
-        ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.CONTROLLER, currentScope);
-        currentScope.define(controllerScope);
-        saveScope(ctx,controllerScope);
-        currentScope = controllerScope;
+//        prettyPrint("Entering enterControllerDeclaration");
+//        intend++;
+//        String name = ctx.identifier().getText();
+//        ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.CONTROLLER, currentScope);
+//        currentScope.define(controllerScope);
+//        saveScope(ctx,controllerScope);
+//        currentScope = controllerScope;
     }
 
     @Override
@@ -211,9 +207,19 @@ public class DefPhase extends RavelBaseListener {
      */
     @Override
     public void exitFile_input(RavelParser.File_inputContext ctx) {
-        System.out.println(getTab()+"Exit exitFile_input");
-        System.out.println(globalScope);
+        popScope();
         walked = true;
+
+    }
+    private void pushScope(Scope s) {
+        currentScope = s;
+        prettyPrint("entering: "+currentScope.getName()+":"+s);
+        intend++;
+    }
+
+    private void popScope() {
+        prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
+        currentScope = currentScope.getEnclosingScope();
         intend--;
     }
 

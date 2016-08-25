@@ -1,6 +1,8 @@
 grammar Ravel;
 
-
+@header{
+import ai.harmony.ravel.compiler.scope.*;
+}
 tokens { INDENT, DEDENT }
 
 @lexer::members {
@@ -114,7 +116,7 @@ tokens { INDENT, DEDENT }
 
 //the file can be newlines or components definitions
 //TODO: add imports
-file_input
+file_input returns [Scope scope]
     : ( NEWLINE | comp_def )* EOF
     ;
 
@@ -153,7 +155,7 @@ comp_def
  *
  * Space parser rules
  */
-space_comp
+space_comp returns [Scope scope]
     : SPACE identifier ':' space_body #SpaceScope
     ;
 space_body
@@ -167,10 +169,10 @@ space_block
     | source_scope
     ;
 
-platform_scope
+platform_scope returns [Scope scope]
     : 'platform:' properties #PlatformScope
     ;
-models_scope
+models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstanciation
     ;
 instantiations
@@ -182,24 +184,24 @@ instance
 instance_name
     : NAME
     ;
-controllers_scope
+controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstanciation
     ;
-sink_scope
+sink_scope returns [Scope scope]
     : 'sinks:' references #SinkLinks
     ;
 
-references
+references returns [Scope scope]
     : NEWLINE INDENT ref_assig+ DEDENT
     ;
-source_scope
+source_scope returns [Scope scope]
     : 'sources:' references #SourceLinks
     ;
 /**
  *
  * Model parser rules
  */
-model_comp
+model_comp returns [Scope scope]
     :  modelType MODEL identifier  parameters ':' model_body # ModelScope
     ;
 
@@ -218,7 +220,7 @@ model_block
     : properties_block
     | schema_block
     ;
-properties_block
+properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
     ;
 properties
@@ -228,7 +230,7 @@ properties
 tdefvar_assig
     : identifier '=' tdefvar NEWLINE? #VarAssigment
     ;
-schema_block
+schema_block returns [Scope scope]
     :'schema:' fields #SchemaScope
     ;
 
@@ -261,7 +263,7 @@ field_type
 model_field_identifier
     : dotted_name
     ;
-controller_comp
+controller_comp returns [Scope scope]
     : CONTROLLER identifier parameters ':' controller_scope # ControllerScope
     ;
 
@@ -280,7 +282,7 @@ controller_body
 ref_assig
     : identifier '=' dotted_name #ReferenceAssigment
     ;
-eventdef
+eventdef returns [Scope scope]
     : EVENT identifier  function_args ':' suite #EventScope
     ;
 function_args
