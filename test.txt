@@ -16,7 +16,6 @@ controller RandomControllerEmbedded(tier):
     random_timer = tier.platform.timer
     boot_event = tier.platform.boot
     running = false
-    value = IntegerField()
 
     event boot_event(context ctx):
         if ctx.error is SUCCESS:

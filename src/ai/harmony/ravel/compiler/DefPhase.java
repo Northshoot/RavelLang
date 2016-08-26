@@ -4,6 +4,7 @@ import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
+import ai.harmony.ravel.compiler.scope.LocalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
 import ai.harmony.ravel.primitives.Model;
@@ -117,6 +118,10 @@ public class DefPhase extends RavelBaseListener {
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope
+        String name = ctx.identifier().getText();
+        EventSymbol es = new EventSymbol(name);
+        ctx.scope = es;
+        pushScope(es);
     }
 
     @Override
