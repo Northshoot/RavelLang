@@ -9,6 +9,7 @@ package ai.harmony.ravel.compiler.symbol;
  *  as well as the type trees used for languages like C.
  */
 public interface Type {
+
     public String getName();
 
     /** It is useful during type computation and code gen to assign an int

@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.LexerNoViableAltException;
 public class ExitLexer extends RavelLexer {
     public ExitLexer(CharStream input) { super(input); }
     public void recover(LexerNoViableAltException e) {
+
         throw new RuntimeException(e); // Bail out
     }
 }

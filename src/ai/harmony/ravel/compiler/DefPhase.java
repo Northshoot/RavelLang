@@ -5,8 +5,9 @@ import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
-import ai.harmony.ravel.compiler.symbol.ModelScope;
+import ai.harmony.ravel.compiler.symbol.*;
 import ai.harmony.ravel.primitives.Model;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 /**
  * Created by lauril on 8/17/16.
@@ -46,86 +47,74 @@ public class DefPhase extends RavelBaseListener {
         String name = ctx.identifier().getText();
         String type = ctx.modelType().getText();
         prettyPrint("Entering model: " + name + " of type " + type + " with args " + ctx.parameters().getText());
-        ModelScope model = new ModelScope(name, Model.getType(type));
+        ModelSymbol model = new ModelSymbol(name, Model.getType(type));
         ctx.scope = model;
         pushScope(model);
-//        ModelSymbol modelScope = new ModelSymbol(name, Symbol.Type.MODEL, type, currentScope);
-//        currentScope.define(modelScope);
-//        saveScope(ctx, modelScope);
-//        currentScope = modelScope;
     }
 
     @Override
     public void enterPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
-        intend++;
-        prettyPrint("Entering PropertiesScope");
+        LocalScope ls = new LocalScope("properties", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
         //can only be defined ONCE per model, through error otherwise
     }
 
 
     @Override
     public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
-        intend--;
-        prettyPrint("exit PropertiesScope");
+        popScope();
     }
 
     @Override
     public void enterSchemaScope(RavelParser.SchemaScopeContext ctx) {
-        intend++;
         //can only be defined ONCE per model, through error otherwise
-
+        LocalScope ls = new LocalScope("schema", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
     }
 
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-//        intend++;
-//        prettyPrint("Field: " + ctx.identifier().getText() + " type: " + ctx.field_type().getText() + " args: " + ctx.parameters().getText());
-//        if(currentScope instanceof SchemaSymbol) {
-//            String name = ctx.identifier().getText();
-//            currentScope.define(new FieldSymbol(
-//                    name,ctx.field_type().getText(),  Symbol.getType(ctx.field_type().start.getType())
-//            ));
-//            prettyPrint("field: " + name);
-//        } else {
-//            System.err.println(getTab()+"Can not define fields outside the schema");
-//        }
-    }
+        // can only be inside the schema scope!
+        String name = ctx.identifier().getText();
+        String fType = ctx.field_type().getText();
+        FieldSymbol fs = new FieldSymbol(name);
+        //TODO: do we need type here?
+        currentScope.define(fs);
+
+     }
 
     @Override
     public void exitFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
-        intend--;
+
     }
+
     @Override
     public void exitSchemaScope(RavelParser.SchemaScopeContext ctx) {
-        intend--;
-        prettyPrint("Exit SchemaScope");
+        if(currentScope.getName().equals("schema")) {
+            popScope();
+        } else {
+            throw new RuntimeException("Exiting Schema scope while in " + currentScope.getName());
+        }
     }
 
     @Override
     public void exitModelScope(RavelParser.ModelScopeContext ctx) {
-        prettyPrint("Exit exitModelDeclaration");
-//        ((ModelSymbol)currentScope).makeObjects();
-//        Model m = ((ModelSymbol)currentScope).getModel();
-//        ravelApp.addModel(m.getName(), m);
-        currentScope = currentScope.getEnclosingScope();
-        intend--;
+        popScope();
     }
 
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
-//        prettyPrint("Entering enterControllerDeclaration");
-//        intend++;
-//        String name = ctx.identifier().getText();
-//        ControllerSymbol controllerScope = new ControllerSymbol(name, Symbol.Type.CONTROLLER, currentScope);
-//        currentScope.define(controllerScope);
-//        saveScope(ctx,controllerScope);
-//        currentScope = controllerScope;
+        String name = ctx.identifier().getText();
+        ControllerSymbol ctr = new ControllerSymbol(name);
+        ctx.scope = ctr;
+        pushScope(ctr);
+
     }
 
     @Override
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
-        prettyPrint("Event Scope");
-        intend++;
         //define event scope
         //define parameters in the scope
     }
@@ -143,9 +132,7 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitControllerScope(RavelParser.ControllerScopeContext ctx) {
-        intend--;
-        prettyPrint("Exit exitControllerDeclaration");
-        currentScope = currentScope.getEnclosingScope();
+        popScope();
 
     }
 
@@ -166,28 +153,64 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void exitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) { }
 
-    @Override public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) { }
+    @Override
+    public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
+        String name = ctx.identifier().getText();
+        SpaceSymbol ssb = new SpaceSymbol(name);
+        ctx.scope = ssb;
+        pushScope(ssb);
+    }
 
-    @Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) { }
+    @Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) {
+        LocalScope ls = new LocalScope("platform", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
+    }
 
-    @Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) { }
-
-
-    @Override public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) { }
-
-    @Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) { }
-
-    @Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
-
-    @Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
-
-    @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) { }
-    @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) { }
+    @Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) {
+        popScope();
+    }
 
 
-    @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) { }
+    @Override public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+        LocalScope ls = new LocalScope("models", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
+    }
 
-    @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) { }
+    @Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+        popScope();
+    }
+
+    @Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
+        LocalScope ls = new LocalScope("controllers", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
+    }
+
+    @Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
+        popScope();
+    }
+
+    @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) {
+        LocalScope ls = new LocalScope("sinks", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
+    }
+    @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) {
+        popScope();
+    }
+
+
+    @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) {
+        LocalScope ls = new LocalScope("sources", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
+    }
+
+    @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) {
+        popScope();
+    }
 
 
     @Override public void enterInstance(RavelParser.InstanceContext ctx) { }
@@ -196,7 +219,9 @@ public class DefPhase extends RavelBaseListener {
 
 
 
-    @Override public void exitSpaceScope(RavelParser.SpaceScopeContext ctx) { }
+    @Override public void exitSpaceScope(RavelParser.SpaceScopeContext ctx) {
+        popScope();
+    }
 
 
 
@@ -207,7 +232,6 @@ public class DefPhase extends RavelBaseListener {
      */
     @Override
     public void exitFile_input(RavelParser.File_inputContext ctx) {
-        popScope();
         walked = true;
 
     }
@@ -223,6 +247,11 @@ public class DefPhase extends RavelBaseListener {
         intend--;
     }
 
+    void abortParsing(ParserRuleContext rctx, String reason){
+        String exception = reason;
+        exception+=" found on line " +String.valueOf(rctx.start.getLine());
+        throw new RuntimeException(exception);
+    }
     private String getTab(){
         String tab="";
         for(int i=0; i<intend; i++){

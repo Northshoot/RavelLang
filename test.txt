@@ -1,3 +1,13 @@
+streaming model Random(size):
+    properties:
+        durable=false
+        reliable=false
+        records = size
+
+    schema:
+        time=TimestampField(auto_add=True)
+        value = IntegerField()
+
 controller RandomControllerEmbedded(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
@@ -6,6 +16,7 @@ controller RandomControllerEmbedded(tier):
     random_timer = tier.platform.timer
     boot_event = tier.platform.boot
     running = false
+    value = IntegerField()
 
     event boot_event(context ctx):
         if ctx.error is SUCCESS:
