@@ -3,7 +3,6 @@ import ai.harmony.ravel.antlr4.*;
 import ai.harmony.ravel.compiler.DefPhase;
 import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.error.ExitLexer;
-import ai.harmony.ravel.error.ExitParserStrategy;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.primitives.Space;
 import org.antlr.v4.runtime.*;
@@ -37,12 +36,11 @@ public class Main {
         }
         ANTLRInputStream input = new ANTLRInputStream(is);
 
-        ExitLexer lexer = new ExitLexer(input);
+        RavelLexer lexer = new RavelLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
         RavelParser parser = new RavelParser(tokens);
         parser.setBuildParseTree(true);
-        parser.setErrorHandler(new ExitParserStrategy());
         ParseTree tree = parser.file_input();
         ParseTreeWalker walker = new ParseTreeWalker();
         DefPhase def = new DefPhase();

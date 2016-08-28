@@ -20,30 +20,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFile_input(RavelParser.File_inputContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#parameters}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParameters(RavelParser.ParametersContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#typedargslist}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypedargslist(RavelParser.TypedargslistContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#identifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifier(RavelParser.IdentifierContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#tdefvar}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTdefvar(RavelParser.TdefvarContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link RavelParser#comp_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -75,6 +51,25 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPlatformScope(RavelParser.PlatformScopeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#platforms}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPlatforms(RavelParser.PlatformsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PlatformAssigment}
+	 * labeled alternative in {@link RavelParser#platform}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPlatformAssigment(RavelParser.PlatformAssigmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#assigment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssigment(RavelParser.AssigmentContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ModelInstanciation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
@@ -167,11 +162,17 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	T visitProperties(RavelParser.PropertiesContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code VarAssigment}
-	 * labeled alternative in {@link RavelParser#tdefvar_assig}.
+	 * labeled alternative in {@link RavelParser#property}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitVarAssigment(RavelParser.VarAssigmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProp(RavelParser.PropContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code SchemaScope}
 	 * labeled alternative in {@link RavelParser#schema_block}.
@@ -224,13 +225,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitController_body(RavelParser.Controller_bodyContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ReferenceAssigment}
-	 * labeled alternative in {@link RavelParser#ref_assig}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.
 	 * @param ctx the parse tree
@@ -238,192 +232,60 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEventScope(RavelParser.EventScopeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#function_args}.
+	 * Visit a parse tree produced by {@link RavelParser#block_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunction_args(RavelParser.Function_argsContext ctx);
+	T visitBlock_stmt(RavelParser.Block_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#function_param}.
+	 * Visit a parse tree produced by {@link RavelParser#blockStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunction_param(RavelParser.Function_paramContext ctx);
+	T visitBlockStatement(RavelParser.BlockStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#param_prair}.
+	 * Visit a parse tree produced by {@link RavelParser#variableDeclarators}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParam_prair(RavelParser.Param_prairContext ctx);
+	T visitVariableDeclarators(RavelParser.VariableDeclaratorsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#param_type}.
+	 * Visit a parse tree produced by {@link RavelParser#variableDeclarator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParam_type(RavelParser.Param_typeContext ctx);
+	T visitVariableDeclarator(RavelParser.VariableDeclaratorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#param_name}.
+	 * Visit a parse tree produced by {@link RavelParser#variableInitializer}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParam_name(RavelParser.Param_nameContext ctx);
+	T visitVariableInitializer(RavelParser.VariableInitializerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#suite}.
+	 * Visit a parse tree produced by {@link RavelParser#arrayInitializer}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSuite(RavelParser.SuiteContext ctx);
+	T visitArrayInitializer(RavelParser.ArrayInitializerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#stmt}.
+	 * Visit a parse tree produced by {@link RavelParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStmt(RavelParser.StmtContext ctx);
+	T visitStatement(RavelParser.StatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#small_stmt}.
+	 * Visit a parse tree produced by the {@code IfStatement}
+	 * labeled alternative in {@link RavelParser#if_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSmall_stmt(RavelParser.Small_stmtContext ctx);
+	T visitIfStatement(RavelParser.IfStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#model_field_assig}.
+	 * Visit a parse tree produced by {@link RavelParser#comp_expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitModel_field_assig(RavelParser.Model_field_assigContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#model_assig_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitModel_assig_expr(RavelParser.Model_assig_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#compound_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompound_stmt(RavelParser.Compound_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#assert_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAssert_stmt(RavelParser.Assert_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#del_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDel_stmt(RavelParser.Del_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#function_call}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunction_call(RavelParser.Function_callContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#query_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitQuery_expr(RavelParser.Query_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code QueryOperations}
-	 * labeled alternative in {@link RavelParser#local_query}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitQueryOperations(RavelParser.QueryOperationsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#query_operation}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitQuery_operation(RavelParser.Query_operationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#db_query}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDb_query(RavelParser.Db_queryContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#funct_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunct_expr(RavelParser.Funct_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#func_no_return}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunc_no_return(RavelParser.Func_no_returnContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#func_with_return}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunc_with_return(RavelParser.Func_with_returnContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#dotted_name}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDotted_name(RavelParser.Dotted_nameContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#pass_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPass_stmt(RavelParser.Pass_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#flow_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFlow_stmt(RavelParser.Flow_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#break_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBreak_stmt(RavelParser.Break_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#continue_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitContinue_stmt(RavelParser.Continue_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#return_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReturn_stmt(RavelParser.Return_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#if_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIf_stmt(RavelParser.If_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#while_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWhile_stmt(RavelParser.While_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#for_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFor_stmt(RavelParser.For_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#test}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTest(RavelParser.TestContext ctx);
+	T visitComp_expr(RavelParser.Comp_exprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#or_test}.
 	 * @param ctx the parse tree
@@ -449,59 +311,11 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison(RavelParser.ComparisonContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#comp_op}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComp_op(RavelParser.Comp_opContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link RavelParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpr(RavelParser.ExprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#xor_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitXor_expr(RavelParser.Xor_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#and_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnd_expr(RavelParser.And_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#shift_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitShift_expr(RavelParser.Shift_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#arith_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArith_expr(RavelParser.Arith_exprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#term}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTerm(RavelParser.TermContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#factor}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFactor(RavelParser.FactorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#power}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPower(RavelParser.PowerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#atom}.
 	 * @param ctx the parse tree
@@ -509,99 +323,160 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAtom(RavelParser.AtomContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#testlist_comp}.
+	 * Visit a parse tree produced by {@link RavelParser#statementExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTestlist_comp(RavelParser.Testlist_compContext ctx);
+	T visitStatementExpression(RavelParser.StatementExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#trailer}.
+	 * Visit a parse tree produced by {@link RavelParser#forControl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTrailer(RavelParser.TrailerContext ctx);
+	T visitForControl(RavelParser.ForControlContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#arglist}.
+	 * Visit a parse tree produced by {@link RavelParser#forInit}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitArglist(RavelParser.ArglistContext ctx);
+	T visitForInit(RavelParser.ForInitContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#argument}.
+	 * Visit a parse tree produced by {@link RavelParser#forUpdate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitArgument(RavelParser.ArgumentContext ctx);
+	T visitForUpdate(RavelParser.ForUpdateContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#subscriptlist}.
+	 * Visit a parse tree produced by {@link RavelParser#function_args}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSubscriptlist(RavelParser.SubscriptlistContext ctx);
+	T visitFunction_args(RavelParser.Function_argsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#subscript}.
+	 * Visit a parse tree produced by {@link RavelParser#functionArgsList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSubscript(RavelParser.SubscriptContext ctx);
+	T visitFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#sliceop}.
+	 * Visit a parse tree produced by {@link RavelParser#functionArg}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSliceop(RavelParser.SliceopContext ctx);
+	T visitFunctionArg(RavelParser.FunctionArgContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#exprlist}.
+	 * Visit a parse tree produced by {@link RavelParser#component_parameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprlist(RavelParser.ExprlistContext ctx);
+	T visitComponent_parameters(RavelParser.Component_parametersContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#testlist}.
+	 * Visit a parse tree produced by {@link RavelParser#params}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTestlist(RavelParser.TestlistContext ctx);
+	T visitParams(RavelParser.ParamsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#comp_iter}.
+	 * Visit a parse tree produced by {@link RavelParser#elementValuePairs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComp_iter(RavelParser.Comp_iterContext ctx);
+	T visitElementValuePairs(RavelParser.ElementValuePairsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#comp_for}.
+	 * Visit a parse tree produced by {@link RavelParser#elementValuePair}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComp_for(RavelParser.Comp_forContext ctx);
+	T visitElementValuePair(RavelParser.ElementValuePairContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#comp_if}.
+	 * Visit a parse tree produced by {@link RavelParser#elementValue}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComp_if(RavelParser.Comp_ifContext ctx);
+	T visitElementValue(RavelParser.ElementValueContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#string}.
+	 * Visit a parse tree produced by {@link RavelParser#elementValueArrayInitializer}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitString(RavelParser.StringContext ctx);
+	T visitElementValueArrayInitializer(RavelParser.ElementValueArrayInitializerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#number}.
+	 * Visit a parse tree produced by {@link RavelParser#expressionList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNumber(RavelParser.NumberContext ctx);
+	T visitExpressionList(RavelParser.ExpressionListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#integer}.
+	 * Visit a parse tree produced by {@link RavelParser#increament_expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInteger(RavelParser.IntegerContext ctx);
+	T visitIncreament_expr(RavelParser.Increament_exprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#bool}.
+	 * Visit a parse tree produced by {@link RavelParser#decrement_exp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBool(RavelParser.BoolContext ctx);
+	T visitDecrement_exp(RavelParser.Decrement_expContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpression(RavelParser.ExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#primary}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimary(RavelParser.PrimaryContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ReferenceAssigment}
+	 * labeled alternative in {@link RavelParser#ref_assig}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#funct_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunct_expr(RavelParser.Funct_exprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#func_no_return}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunc_no_return(RavelParser.Func_no_returnContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#func_with_return}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunc_with_return(RavelParser.Func_with_returnContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#qualified_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitQualified_name(RavelParser.Qualified_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#comp_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComp_op(RavelParser.Comp_opContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#literal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteral(RavelParser.LiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#boolean_r}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolean_r(RavelParser.Boolean_rContext ctx);
 }

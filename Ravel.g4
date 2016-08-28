@@ -119,27 +119,6 @@ tokens { INDENT, DEDENT }
 file_input returns [Scope scope]
     : ( NEWLINE | comp_def )* EOF
     ;
-
-parameters
-    : '(' typedargslist? ')'
-    ;
-//variable assigments
-typedargslist
-    : identifier ( '=' tdefvar )? ( ',' identifier ( '=' tdefvar )? )*
-    | dotted_name
-    ;
-//variable
-identifier
-    : NAME
-    ;
-tdefvar
-    : integer
-    | number
-    | string
-    | bool
-    | identifier
-    ;
-
 /**
  *
  * Ravel application consists of componets
@@ -156,7 +135,7 @@ comp_def
  * Space parser rules
  */
 space_comp returns [Scope scope]
-    : SPACE identifier ':' space_body #SpaceScope
+    : SPACE Identifier ':' space_body #SpaceScope
     ;
 space_body
     : NEWLINE INDENT space_block+ DEDENT
@@ -167,22 +146,37 @@ space_block
     | controllers_scope
     | sink_scope
     | source_scope
+    | NEWLINE
     ;
 
 platform_scope returns [Scope scope]
-    : 'platform:' properties #PlatformScope
+    : 'platform:' platforms #PlatformScope
     ;
+
+platforms
+    : NEWLINE INDENT platform+ DEDENT
+    ;
+
+platform
+    : assigment NEWLINE #PlatformAssigment
+    ;
+
+assigment
+    : Identifier '=' ( Identifier | literal |qualified_name)
+    ;
+
 models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstanciation
     ;
 instantiations
     : NEWLINE INDENT instance+ DEDENT
     ;
+
 instance
-    : identifier '=' instance_name parameters
+    : Identifier '=' instance_name '(' elementValuePairs ')' NEWLINE?
     ;
 instance_name
-    : NAME
+    : Identifier
     ;
 controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstanciation
@@ -202,7 +196,7 @@ source_scope returns [Scope scope]
  * Model parser rules
  */
 model_comp returns [Scope scope]
-    :  modelType MODEL identifier  parameters ':' model_body # ModelScope
+    :  modelType MODEL Identifier  component_parameters ':' model_body # ModelScope
     ;
 
 
@@ -224,11 +218,18 @@ properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
     ;
 properties
-    : NEWLINE INDENT tdefvar_assig+ DEDENT
+    : NEWLINE INDENT property+ DEDENT
     ;
 
-tdefvar_assig
-    : identifier '=' tdefvar NEWLINE? #VarAssigment
+property
+    : Identifier '=' prop NEWLINE #VarAssigment
+    ;
+// we are just very specific what it is allowed in the property definirion
+prop
+    : Identifier
+    | boolean_r
+    | IntegerLiteral
+    | FloatingPointLiteral
     ;
 schema_block returns [Scope scope]
     :'schema:' fields #SchemaScope
@@ -239,13 +240,14 @@ fields
     ;
 
 field
-    : identifier '=' field_type parameters NEWLINE? #FieldDeclaration
+    : Identifier '=' field_type '(' elementValuePairs ')'  NEWLINE? #FieldDeclaration
     ;
 
 /**
  *
  * Field types, currently only in parser. But maybe it should be like a Ravel library
  * that you can write your own field in Ravel and then get it translated
+ * TODO: dynamic field loading
  *
  */
 field_type
@@ -260,11 +262,15 @@ field_type
     | T_CONTEXT_FIELD
     ;
 
+/**
+ * Controller stuff
+ */
 model_field_identifier
-    : dotted_name
+    : qualified_name
     ;
+
 controller_comp returns [Scope scope]
-    : CONTROLLER identifier parameters ':' controller_scope # ControllerScope
+    : CONTROLLER Identifier component_parameters ':' controller_scope # ControllerScope
     ;
 
 controller_scope
@@ -274,167 +280,205 @@ controller_scope
 controller_body
     : eventdef // can only be events
     | ref_assig // reference
-    | tdefvar_assig // or variable assigment
+    | variableDeclarator // or variable assigment
+    | funct_expr
     | NEWLINE
     ;
 
-//reference is a dottend name accesesing scopes
-ref_assig
-    : identifier '=' dotted_name #ReferenceAssigment
-    ;
+/**
+ *All here for handling normal language statements and expressions
+ *
+ */
+
 eventdef returns [Scope scope]
-    : EVENT identifier  function_args ':' suite #EventScope
+    : EVENT qualified_name  function_args ':' block_stmt #EventScope
+    ;
+block_stmt
+    : NEWLINE INDENT blockStatement+ DEDENT
+    ;
+blockStatement
+    : controller_body
+    | statement
+    | if_stmt
+    ;
+variableDeclarators
+    :   variableDeclarator (',' variableDeclarator)*
+    ;
+variableDeclarator
+    :   Identifier ('=' variableInitializer)?
+    ;
+variableInitializer
+    :   arrayInitializer
+    |   expression
+    ;
+arrayInitializer
+    :   '{' (variableInitializer (',' variableInitializer)* (',')? )? '}'
+    ;
+
+statement
+    :   ASSERT expression
+    |   'for'  forControl ':' block_stmt
+    |   'return' expression?
+    |   'break' Identifier?
+    |   'continue' Identifier?
+    |   'delete'  Identifier
+    |   statementExpression
+    |   NEWLINE
+    ;
+if_stmt
+    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
+    ;
+comp_expr
+    : or_test ( IF or_test ELSE comp_expr )?
+    ;
+or_test
+    : and_test (OR and_test)*
+    ;
+and_test
+    : not_test (AND not_test)*
+    ;
+not_test
+    : NOT not_test
+    | comparison
+    ;
+comparison
+    : expr (comp_op expr)*
+    ;
+expr
+    : atom //this is prep for future to implement advance comparisons
+    ;
+atom
+    : Identifier
+    | IntegerLiteral
+    | FloatingPointLiteral
+    | boolean_r
+    | qualified_name
+    ;
+
+statementExpression
+    :  expression
+    ;
+
+//for_stmt
+// : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
+// ;
+forControl
+    :   forInit? ';' expression? ';' forUpdate?
+    ;
+
+forInit
+    :   variableDeclarators
+    |   expressionList
+    ;
+
+forUpdate
+    :   expressionList
     ;
 function_args
-    : '(' function_param? ')'
+    : '(' functionArgsList? ')'
     ;
-function_param
-    : param_prair (',' param_prair)*
-    ;
-param_prair
-    : param_type param_name
+functionArgsList
+    :functionArg (',' functionArg)?
     ;
 
-param_type : NAME;
-param_name : NAME;
-
-suite
-    :
-    | NEWLINE INDENT stmt+ DEDENT
+functionArg
+    : Identifier Identifier
     ;
-stmt
-    : small_stmt
-    | compound_stmt
+component_parameters
+    : '(' params? ')'
     ;
-
-small_stmt
-    : tdefvar_assig
-    | model_field_assig
-    | del_stmt
-    | function_call
-    | flow_stmt
-    | assert_stmt
+params
+    : Identifier (',' Identifier)?
+    ;
+elementValuePairs
+    :   elementValuePair (',' elementValuePair)*
+    ;
+elementValuePair
+    :   Identifier '=' elementValue
     ;
 
-model_field_assig
-    : model_field_identifier '=' model_assig_expr NEWLINE
+elementValue
+    :   expression
+    |   elementValueArrayInitializer
+    ;
+elementValueArrayInitializer
+    :   '{' (elementValue (',' elementValue)*)? (',')? '}'
     ;
 
-model_assig_expr
-    : SELF
-    | tdefvar
-    | funct_expr
-    | local_query
+
+expressionList
+    :   expression (',' expression)*
     ;
-compound_stmt
-    : if_stmt
-    | while_stmt
-    | for_stmt
+increament_expr
+    : Identifier '++'
     ;
-assert_stmt
-    : ASSERT test ( ',' test )?
+decrement_exp
+    : Identifier '--'
     ;
-del_stmt
-    : DELETE query_expr
+expression
+    :   primary
+    |   expression '.' Identifier
+    |   expression '[' expression ']'
+    |   expression '(' expressionList? ')'
+    |   increament_expr
+    |   decrement_exp
+    |   ('+'|'-') expression
+    |   ('~'|'!') expression
+    |   expression ('*'|'/'|'%') expression
+    |   expression ('+'|'-') expression
+    |   expression comp_op expression
+    |   expression '&' expression
+    |   expression '^' expression
+    |   expression '|' expression
+    |   expression '&&' expression
+    |   expression '||' expression
+    |   <assoc=right> expression
+        (   '='
+        |   '+='
+        |   '-='
+        |   '*='
+        |   '/='
+        |   '&='
+        |   '|='
+        |   '^='
+        |   '>>='
+        |   '>>>='
+        |   '<<='
+        |   '%='
+        )
+        expression
+    | NEWLINE
     ;
 
-function_call
-    : query_expr
-    | funct_expr
+primary
+    :   '(' expression ')'
+    |   'self'
+    |   literal
+    |   Identifier
     ;
-query_expr
-    : local_query
-    | db_query
+//reference is a dottend name accesesing scopes
+ref_assig
+    : Identifier '=' qualified_name NEWLINE #ReferenceAssigment
     ;
-local_query
-    : identifier '.' query_operation #QueryOperations
-    ;
-query_operation
-    : 'first()'
-    | 'last()'
-    ;
-db_query
-    : 'query' '.' query_operation
-    ;
+
+
+
 funct_expr
     : func_no_return
     | func_with_return
     ;
 
 func_no_return
-    : identifier ('.' identifier)? parameters NEWLINE
+    : qualified_name component_parameters NEWLINE
     ;
 
 func_with_return
-    : identifier '=' func_no_return
-    ;
-dotted_name
-    : NAME ( '.' NAME )*
+    : Identifier '=' func_no_return NEWLINE
     ;
 
-pass_stmt
-    : PASS
+qualified_name
+    :   Identifier ('.' Identifier)*
     ;
-flow_stmt
-    : break_stmt
-    | continue_stmt
-    | return_stmt
-    ;
-
-
-break_stmt
-    : BREAK
-    ;
-
-continue_stmt
-    : CONTINUE
-    ;
-
-return_stmt
-    : RETURN identifier
-    ;
-
-if_stmt
-    : IF test ':' suite ( ELIF test ':' suite )* ( ELSE ':' suite )?
-    ;
-
-while_stmt
-    : WHILE test ':' suite ( ELSE ':' suite )?
-    ;
-
-    /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
-for_stmt
-    : FOR identifier IN identifier ':' suite
-    ;
-
-test
-    : or_test ( IF or_test ELSE test )?
-    ;
-
-or_test
-    : and_test ( OR and_test )*
-    ;
-
-/// and_test: not_test ('and' not_test)*
-and_test
-    : not_test ( AND not_test )*
-    ;
-
-/// not_test: 'not' not_test | comparison
-not_test
-    : NOT not_test
-    | comparison
-    ;
-
-/// comparison: star_expr (comp_op star_expr)*
-comparison
-    : expr ( comp_op expr )*
-    ;
-
-
-/// # <> isn't actually a valid comparison operator in Python. It's here for the
-/// # sake of a __future__ import described in PEP 401
-/// comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
 comp_op
     : '<'
     | '>'
@@ -447,165 +491,7 @@ comp_op
     | IS
     | IS NOT
     ;
-/// expr: xor_expr ('|' xor_expr)*
-expr
- : xor_expr ( '|' xor_expr )*
- ;
 
-/// xor_expr: and_expr ('^' and_expr)*
-xor_expr
- : and_expr ( '^' and_expr )*
- ;
-
-/// and_expr: shift_expr ('&' shift_expr)*
-and_expr
- : shift_expr ( '&' shift_expr )*
- ;
-
-/// shift_expr: arith_expr (('<<'|'>>') arith_expr)*
-shift_expr
- : arith_expr ( '<<' arith_expr
-              | '>>' arith_expr
-              )*
- ;
-
-/// arith_expr: term (('+'|'-') term)*
-arith_expr
- : term ( '+' term
-        | '-' term
-        )*
- ;
-
-/// term: factor (('*'|'/'|'%'|'//') factor)*
-term
- : factor ( '*' factor
-          | '/' factor
-          | '%' factor
-          | '//' factor
-          | '@' factor // PEP 465
-          )*
- ;
-
-/// factor: ('+'|'-'|'~') factor | power
-factor
- : '+' factor
- | '-' factor
- | '~' factor
- | power
- ;
-
-/// power: atom trailer* ['**' factor]
-power
- : atom trailer* ( '**' factor )?
- ;
-
-/// atom: ('(' [yield_expr|testlist_comp] ')' |
-///        '[' [testlist_comp] ']' |
-///        '{' [dictorsetmaker] '}' |
-///        NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
-atom
- : '(' ( testlist_comp )? ')'
- | '[' testlist_comp? ']'
- | NAME
- | number
- | string+
- | '...'
- | NONE
- | TRUE
- | FALSE
- ;
-
-/// testlist_comp: test ( comp_for | (',' test)* [','] )
-testlist_comp
- : test ( comp_for
-        | ( ',' test )* ','?
-        )
- ;
-
-/// trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
-trailer
- : '(' arglist? ')'
- | '[' subscriptlist ']'
- | '.' NAME
- ;
-
-arglist
- : ( argument ',' )* ( argument ','?
-                     | '*' test ( ',' argument )* ( ',' '**' test )?
-                     | '**' test
-                     )
- ;
-
-/// # The reason that keywords are test nodes instead of NAME is that using NAME
-/// # results in an ambiguity. ast.c makes sure it's a NAME.
-/// argument: test [comp_for] | test '=' test  # Really [keyword '='] test
-argument
- : test comp_for?
- | test '=' test
- ;
-/// subscriptlist: subscript (',' subscript)* [',']
-subscriptlist
- : subscript ( ',' subscript )* ','?
- ;
-
-/// subscript: test | [test] ':' [test] [sliceop]
-subscript
- : test
- | test? ':' test? sliceop?
- ;
-
-/// sliceop: ':' [test]
-sliceop
- : ':' test?
- ;
-
-/// exprlist: star_expr (',' star_expr)* [',']
-exprlist
- : expr ( ',' expr )* ','?
- ;
-
-/// testlist: test (',' test)* [',']
-testlist
- : test ( ',' test )* ','?
- ;
-
-/// comp_iter: comp_for | comp_if
-comp_iter
- : comp_for
- | comp_if
- ;
-
-/// comp_for: 'for' exprlist 'in' or_test [comp_iter]
-comp_for
- : FOR exprlist IN or_test comp_iter?
- ;
-
-/// comp_if: 'if' test_nocond [comp_iter]
-comp_if
- : IF or_test comp_iter?
- ;
-string
-    : STRING_LITERAL
-    | BYTES_LITERAL
-    ;
-
-number
-    : integer
-    | FLOAT_NUMBER
-    | IMAG_NUMBER
-    ;
-
-/// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
-integer
-    : DECIMAL_INTEGER
-    | OCT_INTEGER
-    | HEX_INTEGER
-    | BIN_INTEGER
-    ;
-bool
-    : TRUE
-    | FALSE
-    ;
 /*
  * lexer rules
  */
@@ -651,7 +537,7 @@ RETURN              : 'return' ;
 TRUE                : 'true' ;
 FALSE               : 'false' ;
 IF                  : 'if' ;
-ELIF                : 'elif' ;
+ELIF                : 'else if' ;
 ELSE                : 'else';
 FOR                 : 'for' ;
 WHILE               : 'while' ;
@@ -704,99 +590,342 @@ NEWLINE
      }
    }
  ;
-NAME
- : ID_START ID_CONTINUE*
- ;
+literal
+    :   IntegerLiteral
+    |   FloatingPointLiteral
+    |   CharacterLiteral
+    | boolean_r
+    |   StringLiteral
+    |   'null'
+    ;
+// §3.10.1 Integer Literals
+
+IntegerLiteral
+    :   DecimalIntegerLiteral
+    |   HexIntegerLiteral
+    |   OctalIntegerLiteral
+    |   BinaryIntegerLiteral
+    ;
+
+fragment
+DecimalIntegerLiteral
+    :   DecimalNumeral IntegerTypeSuffix?
+    ;
+
+fragment
+HexIntegerLiteral
+    :   HexNumeral IntegerTypeSuffix?
+    ;
+
+fragment
+OctalIntegerLiteral
+    :   OctalNumeral IntegerTypeSuffix?
+    ;
+
+fragment
+BinaryIntegerLiteral
+    :   BinaryNumeral IntegerTypeSuffix?
+    ;
+
+fragment
+IntegerTypeSuffix
+    :   [lL]
+    ;
+
+fragment
+DecimalNumeral
+    :   '0'
+    |   NonZeroDigit (Digits? | Underscores Digits)
+    ;
+
+fragment
+Digits
+    :   Digit (DigitOrUnderscore* Digit)?
+    ;
+
+fragment
+Digit
+    :   '0'
+    |   NonZeroDigit
+    ;
+
+fragment
+NonZeroDigit
+    :   [1-9]
+    ;
+
+fragment
+DigitOrUnderscore
+    :   Digit
+    |   '_'
+    ;
+
+fragment
+Underscores
+    :   '_'+
+    ;
+
+fragment
+HexNumeral
+    :   '0' [xX] HexDigits
+    ;
+
+fragment
+HexDigits
+    :   HexDigit (HexDigitOrUnderscore* HexDigit)?
+    ;
+
+fragment
+HexDigit
+    :   [0-9a-fA-F]
+    ;
+
+fragment
+HexDigitOrUnderscore
+    :   HexDigit
+    |   '_'
+    ;
+
+fragment
+OctalNumeral
+    :   '0' Underscores? OctalDigits
+    ;
+
+fragment
+OctalDigits
+    :   OctalDigit (OctalDigitOrUnderscore* OctalDigit)?
+    ;
+
+fragment
+OctalDigit
+    :   [0-7]
+    ;
+
+fragment
+OctalDigitOrUnderscore
+    :   OctalDigit
+    |   '_'
+    ;
+
+fragment
+BinaryNumeral
+    :   '0' [bB] BinaryDigits
+    ;
+
+fragment
+BinaryDigits
+    :   BinaryDigit (BinaryDigitOrUnderscore* BinaryDigit)?
+    ;
+
+fragment
+BinaryDigit
+    :   [01]
+    ;
+
+fragment
+BinaryDigitOrUnderscore
+    :   BinaryDigit
+    |   '_'
+    ;
+
+// §3.10.2 Floating-Point Literals
+
+FloatingPointLiteral
+    :   DecimalFloatingPointLiteral
+    |   HexadecimalFloatingPointLiteral
+    ;
+
+fragment
+DecimalFloatingPointLiteral
+    :   Digits '.' Digits? ExponentPart? FloatTypeSuffix?
+    |   '.' Digits ExponentPart? FloatTypeSuffix?
+    |   Digits ExponentPart FloatTypeSuffix?
+    |   Digits FloatTypeSuffix
+    ;
+
+fragment
+ExponentPart
+    :   ExponentIndicator SignedInteger
+    ;
+
+fragment
+ExponentIndicator
+    :   [eE]
+    ;
+
+fragment
+SignedInteger
+    :   Sign? Digits
+    ;
+
+fragment
+Sign
+    :   [+-]
+    ;
+
+fragment
+FloatTypeSuffix
+    :   [fFdD]
+    ;
+
+fragment
+HexadecimalFloatingPointLiteral
+    :   HexSignificand BinaryExponent FloatTypeSuffix?
+    ;
+
+fragment
+HexSignificand
+    :   HexNumeral '.'?
+    |   '0' [xX] HexDigits? '.' HexDigits
+    ;
+
+fragment
+BinaryExponent
+    :   BinaryExponentIndicator SignedInteger
+    ;
+
+fragment
+BinaryExponentIndicator
+    :   [pP]
+    ;
+
+// §3.10.3 Boolean Literals
+
+boolean_r
+    : TRUE
+    | FALSE
+    ;
+
+// §3.10.4 Character Literals
+
+CharacterLiteral
+    :   '\'' SingleCharacter '\''
+    ;
+
+fragment
+SingleCharacter
+    :   ~['\\]
+    ;
+
+// §3.10.5 String Literals
+
+StringLiteral
+    :   '"' StringCharacters? '"'
+    ;
+
+fragment
+StringCharacters
+    :   StringCharacter+
+    ;
+
+fragment
+StringCharacter
+    :   ~["\\]
+    ;
 
 
-/// stringliteral   ::=  [stringprefix](shortstring | longstring)
-/// stringprefix    ::=  "r" | "R"
-STRING_LITERAL
- : [uU]? [rR]? ( SHORT_STRING | LONG_STRING )
- ;
 
-/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
-/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
-BYTES_LITERAL
- : [bB] [rR]? ( SHORT_BYTES | LONG_BYTES )
- ;
+fragment
+OctalEscape
+    :   '\\' OctalDigit
+    |   '\\' OctalDigit OctalDigit
+    |   '\\' ZeroToThree OctalDigit OctalDigit
+    ;
 
-/// decimalinteger ::=  nonzerodigit digit* | "0"+
-DECIMAL_INTEGER
- : NON_ZERO_DIGIT DIGIT*
- | '0'+
- ;
+fragment
+UnicodeEscape
+    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
+    ;
 
-/// octinteger     ::=  "0" ("o" | "O") octdigit+
-OCT_INTEGER
- : '0' [oO] OCT_DIGIT+
- ;
+fragment
+ZeroToThree
+    :   [0-3]
+    ;
 
-/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
-HEX_INTEGER
- : '0' [xX] HEX_DIGIT+
- ;
+// §3.10.7 The Null Literal
 
-/// bininteger     ::=  "0" ("b" | "B") bindigit+
-BIN_INTEGER
- : '0' [bB] BIN_DIGIT+
- ;
+NullLiteral
+    :   'null'
+    ;
 
-/// floatnumber   ::=  pointfloat | exponentfloat
-FLOAT_NUMBER
- : POINT_FLOAT
- | EXPONENT_FLOAT
- ;
+// §3.11 Separators
 
-/// imagnumber ::=  (floatnumber | intpart) ("j" | "J")
-IMAG_NUMBER
- : ( FLOAT_NUMBER | INT_PART ) [jJ]
- ;
-
-DOT             : '.';
-STAR            : '*';
-OPEN_PAREN      : '(' {opened++;};
-CLOSE_PAREN     : ')' {opened--;};
+LPAREN          : '(';
+RPAREN          : ')';
+LBRACE          : '{';
+RBRACE          : '}';
+LBRACK          : '[';
+RBRACK          : ']';
+SEMI            : ';';
 COMMA           : ',';
-COLON           : ':';
-SEMI_COLON      : ';';
+DOT             : '.';
+
+// §3.12 Operators
+
 ASSIGN          : '=';
-OPEN_BRACK      : '[' {opened++;};
-CLOSE_BRACK     : ']' {opened--;};
-OR_OP           : '|';
-XOR             : '^';
-AND_OP          : '&';
-LEFT_SHIFT      : '<<';
-RIGHT_SHIFT     : '>>';
+GT              : '>';
+LT              : '<';
+BANG            : '!';
+TILDE           : '~';
+QUESTION        : '?';
+COLON           : ':';
+EQUAL           : '==';
+LE              : '<=';
+GE              : '>=';
+NOTEQUAL        : '!=';
+AND_S           : '&&';
+OR_S             : '||';
+INC             : '++';
+DEC             : '--';
 ADD             : '+';
-MINUS           : '-';
+SUB             : '-';
+MUL             : '*';
 DIV             : '/';
+BITAND          : '&';
+BITOR           : '|';
+CARET           : '^';
 MOD             : '%';
-IDIV            : '//';
-NOT_OP          : '~';
-OPEN_BRACE      : '{' {opened++;};
-CLOSE_BRACE     : '}' {opened--;};
-LESS_THAN       : '<';
-GREATER_THAN    : '>';
-EQUALS          : '==';
-GT_EQ           : '>=';
-LT_EQ           : '<=';
-NOT_EQ          : '!=';
-AT              : '@';
-ARROW           : '->';
+
 ADD_ASSIGN      : '+=';
 SUB_ASSIGN      : '-=';
-MULT_ASSIGN     : '*=';
-AT_ASSIGN       : '@=';
+MUL_ASSIGN      : '*=';
 DIV_ASSIGN      : '/=';
-MOD_ASSIGN      : '%=';
 AND_ASSIGN      : '&=';
 OR_ASSIGN       : '|=';
 XOR_ASSIGN      : '^=';
-LEFT_SHIFT_ASSIGN : '<<=';
-RIGHT_SHIFT_ASSIGN : '>>=';
-POWER_ASSIGN    : '**=';
-IDIV_ASSIGN     : '//=';
+MOD_ASSIGN      : '%=';
+LSHIFT_ASSIGN   : '<<=';
+RSHIFT_ASSIGN   : '>>=';
+URSHIFT_ASSIGN  : '>>>=';
+
+// §3.8 Identifiers (must appear after all keywords in the grammar)
+
+Identifier
+    :   JavaLetter JavaLetterOrDigit*
+    ;
+
+fragment
+JavaLetter
+    :   [a-zA-Z$_] // these are the "java letters" below 0x7F
+    |   // covers all characters above 0x7F which are not a surrogate
+        ~[\u0000-\u007F\uD800-\uDBFF]
+        {Character.isJavaIdentifierStart(_input.LA(-1))}?
+    |   // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
+        [\uD800-\uDBFF] [\uDC00-\uDFFF]
+        {Character.isJavaIdentifierStart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)))}?
+    ;
+
+fragment
+JavaLetterOrDigit
+    :   [a-zA-Z0-9$_] // these are the "java letters or digits" below 0x7F
+    |   // covers all characters above 0x7F which are not a surrogate
+        ~[\u0000-\u007F\uD800-\uDBFF]
+        {Character.isJavaIdentifierPart(_input.LA(-1))}?
+    |   // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
+        [\uD800-\uDBFF] [\uDC00-\uDFFF]
+        {Character.isJavaIdentifierPart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)))}?
+    ;
+
 
 SKIP_
     : ( SPACES | COMMENT | LINE_JOINING ) -> skip
@@ -806,130 +935,6 @@ SKIP_
 /*
  * fragments
  */
-fragment SHORT_STRING
- : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
- | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
- ;
-
-/// longstring      ::=  "'''" longstringitem* "'''" | '"""' longstringitem* '"""'
-fragment LONG_STRING
- : '\'\'\'' LONG_STRING_ITEM*? '\'\'\''
- | '"""' LONG_STRING_ITEM*? '"""'
- ;
-
-/// longstringitem  ::=  longstringchar | stringescapeseq
-fragment LONG_STRING_ITEM
- : LONG_STRING_CHAR
- | STRING_ESCAPE_SEQ
- ;
-
-/// longstringchar  ::=  <any source character except "\">
-fragment LONG_STRING_CHAR
- : ~'\\'
- ;
-
-/// stringescapeseq ::=  "\" <any source character>
-fragment STRING_ESCAPE_SEQ
- : '\\' .
- ;
-
-/// nonzerodigit   ::=  "1"..."9"
-fragment NON_ZERO_DIGIT
- : [1-9]
- ;
-
-/// digit          ::=  "0"..."9"
-fragment DIGIT
- : [0-9]
- ;
-
-/// octdigit       ::=  "0"..."7"
-fragment OCT_DIGIT
- : [0-7]
- ;
-
-/// hexdigit       ::=  digit | "a"..."f" | "A"..."F"
-fragment HEX_DIGIT
- : [0-9a-fA-F]
- ;
-
-/// bindigit       ::=  "0" | "1"
-fragment BIN_DIGIT
- : [01]
- ;
-
-/// pointfloat    ::=  [intpart] fraction | intpart "."
-fragment POINT_FLOAT
- : INT_PART? FRACTION
- | INT_PART '.'
- ;
-
-/// exponentfloat ::=  (intpart | pointfloat) exponent
-fragment EXPONENT_FLOAT
- : ( INT_PART | POINT_FLOAT ) EXPONENT
- ;
-
-/// intpart       ::=  digit+
-fragment INT_PART
- : DIGIT+
- ;
-
-/// fraction      ::=  "." digit+
-fragment FRACTION
- : '.' DIGIT+
- ;
-
-/// exponent      ::=  ("e" | "E") ["+" | "-"] digit+
-fragment EXPONENT
- : [eE] [+-]? DIGIT+
- ;
-
-/// shortbytes     ::=  "'" shortbytesitem* "'" | '"' shortbytesitem* '"'
-/// shortbytesitem ::=  shortbyteschar | bytesescapeseq
-fragment SHORT_BYTES
- : '\'' ( SHORT_BYTES_CHAR_NO_SINGLE_QUOTE | BYTES_ESCAPE_SEQ )* '\''
- | '"' ( SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE | BYTES_ESCAPE_SEQ )* '"'
- ;
-
-/// longbytes      ::=  "'''" longbytesitem* "'''" | '"""' longbytesitem* '"""'
-fragment LONG_BYTES
- : '\'\'\'' LONG_BYTES_ITEM*? '\'\'\''
- | '"""' LONG_BYTES_ITEM*? '"""'
- ;
-
-/// longbytesitem  ::=  longbyteschar | bytesescapeseq
-fragment LONG_BYTES_ITEM
- : LONG_BYTES_CHAR
- | BYTES_ESCAPE_SEQ
- ;
-
-/// shortbyteschar ::=  <any ASCII character except "\" or newline or the quote>
-fragment SHORT_BYTES_CHAR_NO_SINGLE_QUOTE
- : [\u0000-\u0009]
- | [\u000B-\u000C]
- | [\u000E-\u0026]
- | [\u0028-\u005B]
- | [\u005D-\u007F]
- ;
-
-fragment SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE
- : [\u0000-\u0009]
- | [\u000B-\u000C]
- | [\u000E-\u0021]
- | [\u0023-\u005B]
- | [\u005D-\u007F]
- ;
-
-/// longbyteschar  ::=  <any ASCII character except "\">
-fragment LONG_BYTES_CHAR
- : [\u0000-\u005B]
- | [\u005D-\u007F]
- ;
-
-/// bytesescapeseq ::=  "\" <any ASCII character>
-fragment BYTES_ESCAPE_SEQ
- : '\\' [\u0000-\u007F]
- ;
 
 fragment SPACES
  : [ \t]+
@@ -944,16 +949,3 @@ fragment LINE_JOINING
  ;
 
 
-//https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4
-/// id_start     ::=  <all characters in general categories Lu, Ll, Lt, Lm, Lo, Nl, the underscore, and characters with the Other_ID_Start property>
-fragment ID_START
- : '_'
- | [A-Z]
- | [a-z]
- ;
-
-/// id_continue  ::=  <all characters in id_start, plus characters in the categories Mn, Mc, Nd, Pc and others with the Other_ID_Continue property>
-fragment ID_CONTINUE
- : ID_START
- | [0-9]
- ;

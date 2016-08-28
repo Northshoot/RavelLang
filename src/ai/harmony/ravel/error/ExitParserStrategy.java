@@ -24,6 +24,7 @@ public class ExitParserStrategy extends DefaultErrorStrategy {
     public Token recoverInline(Parser recognizer)
             throws RecognitionException
     {
+        System.err.println(" Error on line: " + recognizer.getCurrentToken().getLine());
         throw new RuntimeException(new InputMismatchException(recognizer));
     }
 

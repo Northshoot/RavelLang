@@ -20,107 +20,93 @@ public class RavelParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
-		T__9=10, T__10=11, T__11=12, SELF=13, MODEL=14, SPACE=15, CONTROLLER=16, 
-		VIEW=17, FLOW=18, LOCAL=19, STREAMING=20, REPLICATED=21, PROPERTIES=22, 
-		SCHEMA=23, EVENT=24, COMMAND=25, T_BYTE_FIELD=26, T_STRING_FIELD=27, T_BOOLEAN_FIELD=28, 
-		T_INTEGER_FIELD=29, T_NUMBER_FIELD=30, T_DATE_FIELD=31, T_DATE_TIME_FIELD=32, 
-		T_TIME_STAMP_FIELD=33, T_CONTEXT_FIELD=34, ASSERT=35, RETURN=36, TRUE=37, 
-		FALSE=38, IF=39, ELIF=40, ELSE=41, FOR=42, WHILE=43, AND=44, NOT=45, OR=46, 
-		IN=47, IS=48, DELETE=49, PASS=50, CONTINUE=51, BREAK=52, NONE=53, NEWLINE=54, 
-		NAME=55, STRING_LITERAL=56, BYTES_LITERAL=57, DECIMAL_INTEGER=58, OCT_INTEGER=59, 
-		HEX_INTEGER=60, BIN_INTEGER=61, FLOAT_NUMBER=62, IMAG_NUMBER=63, DOT=64, 
-		STAR=65, OPEN_PAREN=66, CLOSE_PAREN=67, COMMA=68, COLON=69, SEMI_COLON=70, 
-		ASSIGN=71, OPEN_BRACK=72, CLOSE_BRACK=73, OR_OP=74, XOR=75, AND_OP=76, 
-		LEFT_SHIFT=77, RIGHT_SHIFT=78, ADD=79, MINUS=80, DIV=81, MOD=82, IDIV=83, 
-		NOT_OP=84, OPEN_BRACE=85, CLOSE_BRACE=86, LESS_THAN=87, GREATER_THAN=88, 
-		EQUALS=89, GT_EQ=90, LT_EQ=91, NOT_EQ=92, AT=93, ARROW=94, ADD_ASSIGN=95, 
-		SUB_ASSIGN=96, MULT_ASSIGN=97, AT_ASSIGN=98, DIV_ASSIGN=99, MOD_ASSIGN=100, 
-		AND_ASSIGN=101, OR_ASSIGN=102, XOR_ASSIGN=103, LEFT_SHIFT_ASSIGN=104, 
-		RIGHT_SHIFT_ASSIGN=105, POWER_ASSIGN=106, IDIV_ASSIGN=107, SKIP_=108, 
-		INDENT=109, DEDENT=110;
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, SELF=8, MODEL=9, 
+		SPACE=10, CONTROLLER=11, VIEW=12, FLOW=13, LOCAL=14, STREAMING=15, REPLICATED=16, 
+		PROPERTIES=17, SCHEMA=18, EVENT=19, COMMAND=20, T_BYTE_FIELD=21, T_STRING_FIELD=22, 
+		T_BOOLEAN_FIELD=23, T_INTEGER_FIELD=24, T_NUMBER_FIELD=25, T_DATE_FIELD=26, 
+		T_DATE_TIME_FIELD=27, T_TIME_STAMP_FIELD=28, T_CONTEXT_FIELD=29, ASSERT=30, 
+		RETURN=31, TRUE=32, FALSE=33, IF=34, ELIF=35, ELSE=36, FOR=37, WHILE=38, 
+		AND=39, NOT=40, OR=41, IN=42, IS=43, DELETE=44, PASS=45, CONTINUE=46, 
+		BREAK=47, NONE=48, NEWLINE=49, IntegerLiteral=50, FloatingPointLiteral=51, 
+		CharacterLiteral=52, StringLiteral=53, NullLiteral=54, LPAREN=55, RPAREN=56, 
+		LBRACE=57, RBRACE=58, LBRACK=59, RBRACK=60, SEMI=61, COMMA=62, DOT=63, 
+		ASSIGN=64, GT=65, LT=66, BANG=67, TILDE=68, QUESTION=69, COLON=70, EQUAL=71, 
+		LE=72, GE=73, NOTEQUAL=74, AND_S=75, OR_S=76, INC=77, DEC=78, ADD=79, 
+		SUB=80, MUL=81, DIV=82, BITAND=83, BITOR=84, CARET=85, MOD=86, ADD_ASSIGN=87, 
+		SUB_ASSIGN=88, MUL_ASSIGN=89, DIV_ASSIGN=90, AND_ASSIGN=91, OR_ASSIGN=92, 
+		XOR_ASSIGN=93, MOD_ASSIGN=94, LSHIFT_ASSIGN=95, RSHIFT_ASSIGN=96, URSHIFT_ASSIGN=97, 
+		Identifier=98, SKIP_=99, INDENT=100, DEDENT=101;
 	public static final int
-		RULE_file_input = 0, RULE_parameters = 1, RULE_typedargslist = 2, RULE_identifier = 3, 
-		RULE_tdefvar = 4, RULE_comp_def = 5, RULE_space_comp = 6, RULE_space_body = 7, 
-		RULE_space_block = 8, RULE_platform_scope = 9, RULE_models_scope = 10, 
-		RULE_instantiations = 11, RULE_instance = 12, RULE_instance_name = 13, 
-		RULE_controllers_scope = 14, RULE_sink_scope = 15, RULE_references = 16, 
-		RULE_source_scope = 17, RULE_model_comp = 18, RULE_modelType = 19, RULE_model_body = 20, 
-		RULE_model_block = 21, RULE_properties_block = 22, RULE_properties = 23, 
-		RULE_tdefvar_assig = 24, RULE_schema_block = 25, RULE_fields = 26, RULE_field = 27, 
-		RULE_field_type = 28, RULE_model_field_identifier = 29, RULE_controller_comp = 30, 
-		RULE_controller_scope = 31, RULE_controller_body = 32, RULE_ref_assig = 33, 
-		RULE_eventdef = 34, RULE_function_args = 35, RULE_function_param = 36, 
-		RULE_param_prair = 37, RULE_param_type = 38, RULE_param_name = 39, RULE_suite = 40, 
-		RULE_stmt = 41, RULE_small_stmt = 42, RULE_model_field_assig = 43, RULE_model_assig_expr = 44, 
-		RULE_compound_stmt = 45, RULE_assert_stmt = 46, RULE_del_stmt = 47, RULE_function_call = 48, 
-		RULE_query_expr = 49, RULE_local_query = 50, RULE_query_operation = 51, 
-		RULE_db_query = 52, RULE_funct_expr = 53, RULE_func_no_return = 54, RULE_func_with_return = 55, 
-		RULE_dotted_name = 56, RULE_pass_stmt = 57, RULE_flow_stmt = 58, RULE_break_stmt = 59, 
-		RULE_continue_stmt = 60, RULE_return_stmt = 61, RULE_if_stmt = 62, RULE_while_stmt = 63, 
-		RULE_for_stmt = 64, RULE_test = 65, RULE_or_test = 66, RULE_and_test = 67, 
-		RULE_not_test = 68, RULE_comparison = 69, RULE_comp_op = 70, RULE_expr = 71, 
-		RULE_xor_expr = 72, RULE_and_expr = 73, RULE_shift_expr = 74, RULE_arith_expr = 75, 
-		RULE_term = 76, RULE_factor = 77, RULE_power = 78, RULE_atom = 79, RULE_testlist_comp = 80, 
-		RULE_trailer = 81, RULE_arglist = 82, RULE_argument = 83, RULE_subscriptlist = 84, 
-		RULE_subscript = 85, RULE_sliceop = 86, RULE_exprlist = 87, RULE_testlist = 88, 
-		RULE_comp_iter = 89, RULE_comp_for = 90, RULE_comp_if = 91, RULE_string = 92, 
-		RULE_number = 93, RULE_integer = 94, RULE_bool = 95;
+		RULE_file_input = 0, RULE_comp_def = 1, RULE_space_comp = 2, RULE_space_body = 3, 
+		RULE_space_block = 4, RULE_platform_scope = 5, RULE_platforms = 6, RULE_platform = 7, 
+		RULE_assigment = 8, RULE_models_scope = 9, RULE_instantiations = 10, RULE_instance = 11, 
+		RULE_instance_name = 12, RULE_controllers_scope = 13, RULE_sink_scope = 14, 
+		RULE_references = 15, RULE_source_scope = 16, RULE_model_comp = 17, RULE_modelType = 18, 
+		RULE_model_body = 19, RULE_model_block = 20, RULE_properties_block = 21, 
+		RULE_properties = 22, RULE_property = 23, RULE_prop = 24, RULE_schema_block = 25, 
+		RULE_fields = 26, RULE_field = 27, RULE_field_type = 28, RULE_model_field_identifier = 29, 
+		RULE_controller_comp = 30, RULE_controller_scope = 31, RULE_controller_body = 32, 
+		RULE_eventdef = 33, RULE_block_stmt = 34, RULE_blockStatement = 35, RULE_variableDeclarators = 36, 
+		RULE_variableDeclarator = 37, RULE_variableInitializer = 38, RULE_arrayInitializer = 39, 
+		RULE_statement = 40, RULE_if_stmt = 41, RULE_comp_expr = 42, RULE_or_test = 43, 
+		RULE_and_test = 44, RULE_not_test = 45, RULE_comparison = 46, RULE_expr = 47, 
+		RULE_atom = 48, RULE_statementExpression = 49, RULE_forControl = 50, RULE_forInit = 51, 
+		RULE_forUpdate = 52, RULE_function_args = 53, RULE_functionArgsList = 54, 
+		RULE_functionArg = 55, RULE_component_parameters = 56, RULE_params = 57, 
+		RULE_elementValuePairs = 58, RULE_elementValuePair = 59, RULE_elementValue = 60, 
+		RULE_elementValueArrayInitializer = 61, RULE_expressionList = 62, RULE_increament_expr = 63, 
+		RULE_decrement_exp = 64, RULE_expression = 65, RULE_primary = 66, RULE_ref_assig = 67, 
+		RULE_funct_expr = 68, RULE_func_no_return = 69, RULE_func_with_return = 70, 
+		RULE_qualified_name = 71, RULE_comp_op = 72, RULE_literal = 73, RULE_boolean_r = 74;
 	public static final String[] ruleNames = {
-		"file_input", "parameters", "typedargslist", "identifier", "tdefvar", 
-		"comp_def", "space_comp", "space_body", "space_block", "platform_scope", 
-		"models_scope", "instantiations", "instance", "instance_name", "controllers_scope", 
-		"sink_scope", "references", "source_scope", "model_comp", "modelType", 
-		"model_body", "model_block", "properties_block", "properties", "tdefvar_assig", 
-		"schema_block", "fields", "field", "field_type", "model_field_identifier", 
-		"controller_comp", "controller_scope", "controller_body", "ref_assig", 
-		"eventdef", "function_args", "function_param", "param_prair", "param_type", 
-		"param_name", "suite", "stmt", "small_stmt", "model_field_assig", "model_assig_expr", 
-		"compound_stmt", "assert_stmt", "del_stmt", "function_call", "query_expr", 
-		"local_query", "query_operation", "db_query", "funct_expr", "func_no_return", 
-		"func_with_return", "dotted_name", "pass_stmt", "flow_stmt", "break_stmt", 
-		"continue_stmt", "return_stmt", "if_stmt", "while_stmt", "for_stmt", "test", 
-		"or_test", "and_test", "not_test", "comparison", "comp_op", "expr", "xor_expr", 
-		"and_expr", "shift_expr", "arith_expr", "term", "factor", "power", "atom", 
-		"testlist_comp", "trailer", "arglist", "argument", "subscriptlist", "subscript", 
-		"sliceop", "exprlist", "testlist", "comp_iter", "comp_for", "comp_if", 
-		"string", "number", "integer", "bool"
+		"file_input", "comp_def", "space_comp", "space_body", "space_block", "platform_scope", 
+		"platforms", "platform", "assigment", "models_scope", "instantiations", 
+		"instance", "instance_name", "controllers_scope", "sink_scope", "references", 
+		"source_scope", "model_comp", "modelType", "model_body", "model_block", 
+		"properties_block", "properties", "property", "prop", "schema_block", 
+		"fields", "field", "field_type", "model_field_identifier", "controller_comp", 
+		"controller_scope", "controller_body", "eventdef", "block_stmt", "blockStatement", 
+		"variableDeclarators", "variableDeclarator", "variableInitializer", "arrayInitializer", 
+		"statement", "if_stmt", "comp_expr", "or_test", "and_test", "not_test", 
+		"comparison", "expr", "atom", "statementExpression", "forControl", "forInit", 
+		"forUpdate", "function_args", "functionArgsList", "functionArg", "component_parameters", 
+		"params", "elementValuePairs", "elementValuePair", "elementValue", "elementValueArrayInitializer", 
+		"expressionList", "increament_expr", "decrement_exp", "expression", "primary", 
+		"ref_assig", "funct_expr", "func_no_return", "func_with_return", "qualified_name", 
+		"comp_op", "literal", "boolean_r"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
 		null, "'platform:'", "'models:'", "'controllers:'", "'sinks:'", "'sources:'", 
-		"'properties:'", "'schema:'", "'first()'", "'last()'", "'query'", "'**'", 
-		"'...'", "'self'", "'model'", "'space'", "'controller'", "'view'", "'flow'", 
-		"'local'", "'streaming'", "'replicated'", "'properties'", "'schema'", 
-		"'event'", "'command'", "'ByteField'", "'StringField'", "'Boolean'", "'IntegerField'", 
-		"'NumberField'", "'DateField'", "'DateTime'", "'TimestampField'", "'ContextField'", 
-		"'assert'", "'return'", "'true'", "'false'", "'if'", "'elif'", "'else'", 
-		"'for'", "'while'", "'and'", "'not'", "'or'", "'in'", "'is'", "'delete'", 
-		"'pass'", "'continue'", "'break'", "'none'", null, null, null, null, null, 
-		null, null, null, null, null, "'.'", "'*'", "'('", "')'", "','", "':'", 
-		"';'", "'='", "'['", "']'", "'|'", "'^'", "'&'", "'<<'", "'>>'", "'+'", 
-		"'-'", "'/'", "'%'", "'//'", "'~'", "'{'", "'}'", "'<'", "'>'", "'=='", 
-		"'>='", "'<='", "'!='", "'@'", "'->'", "'+='", "'-='", "'*='", "'@='", 
-		"'/='", "'%='", "'&='", "'|='", "'^='", "'<<='", "'>>='", "'**='", "'//='"
+		"'properties:'", "'schema:'", "'self'", "'model'", "'space'", "'controller'", 
+		"'view'", "'flow'", "'local'", "'streaming'", "'replicated'", "'properties'", 
+		"'schema'", "'event'", "'command'", "'ByteField'", "'StringField'", "'Boolean'", 
+		"'IntegerField'", "'NumberField'", "'DateField'", "'DateTime'", "'TimestampField'", 
+		"'ContextField'", "'assert'", "'return'", "'true'", "'false'", "'if'", 
+		"'else if'", "'else'", "'for'", "'while'", "'and'", "'not'", "'or'", "'in'", 
+		"'is'", "'delete'", "'pass'", "'continue'", "'break'", "'none'", null, 
+		null, null, null, null, "'null'", "'('", "')'", "'{'", "'}'", "'['", "']'", 
+		"';'", "','", "'.'", "'='", "'>'", "'<'", "'!'", "'~'", "'?'", "':'", 
+		"'=='", "'<='", "'>='", "'!='", "'&&'", "'||'", "'++'", "'--'", "'+'", 
+		"'-'", "'*'", "'/'", "'&'", "'|'", "'^'", "'%'", "'+='", "'-='", "'*='", 
+		"'/='", "'&='", "'|='", "'^='", "'%='", "'<<='", "'>>='", "'>>>='"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, "SELF", "MODEL", "SPACE", "CONTROLLER", "VIEW", "FLOW", "LOCAL", 
-		"STREAMING", "REPLICATED", "PROPERTIES", "SCHEMA", "EVENT", "COMMAND", 
-		"T_BYTE_FIELD", "T_STRING_FIELD", "T_BOOLEAN_FIELD", "T_INTEGER_FIELD", 
-		"T_NUMBER_FIELD", "T_DATE_FIELD", "T_DATE_TIME_FIELD", "T_TIME_STAMP_FIELD", 
-		"T_CONTEXT_FIELD", "ASSERT", "RETURN", "TRUE", "FALSE", "IF", "ELIF", 
-		"ELSE", "FOR", "WHILE", "AND", "NOT", "OR", "IN", "IS", "DELETE", "PASS", 
-		"CONTINUE", "BREAK", "NONE", "NEWLINE", "NAME", "STRING_LITERAL", "BYTES_LITERAL", 
-		"DECIMAL_INTEGER", "OCT_INTEGER", "HEX_INTEGER", "BIN_INTEGER", "FLOAT_NUMBER", 
-		"IMAG_NUMBER", "DOT", "STAR", "OPEN_PAREN", "CLOSE_PAREN", "COMMA", "COLON", 
-		"SEMI_COLON", "ASSIGN", "OPEN_BRACK", "CLOSE_BRACK", "OR_OP", "XOR", "AND_OP", 
-		"LEFT_SHIFT", "RIGHT_SHIFT", "ADD", "MINUS", "DIV", "MOD", "IDIV", "NOT_OP", 
-		"OPEN_BRACE", "CLOSE_BRACE", "LESS_THAN", "GREATER_THAN", "EQUALS", "GT_EQ", 
-		"LT_EQ", "NOT_EQ", "AT", "ARROW", "ADD_ASSIGN", "SUB_ASSIGN", "MULT_ASSIGN", 
-		"AT_ASSIGN", "DIV_ASSIGN", "MOD_ASSIGN", "AND_ASSIGN", "OR_ASSIGN", "XOR_ASSIGN", 
-		"LEFT_SHIFT_ASSIGN", "RIGHT_SHIFT_ASSIGN", "POWER_ASSIGN", "IDIV_ASSIGN", 
-		"SKIP_", "INDENT", "DEDENT"
+		null, null, null, null, null, null, null, null, "SELF", "MODEL", "SPACE", 
+		"CONTROLLER", "VIEW", "FLOW", "LOCAL", "STREAMING", "REPLICATED", "PROPERTIES", 
+		"SCHEMA", "EVENT", "COMMAND", "T_BYTE_FIELD", "T_STRING_FIELD", "T_BOOLEAN_FIELD", 
+		"T_INTEGER_FIELD", "T_NUMBER_FIELD", "T_DATE_FIELD", "T_DATE_TIME_FIELD", 
+		"T_TIME_STAMP_FIELD", "T_CONTEXT_FIELD", "ASSERT", "RETURN", "TRUE", "FALSE", 
+		"IF", "ELIF", "ELSE", "FOR", "WHILE", "AND", "NOT", "OR", "IN", "IS", 
+		"DELETE", "PASS", "CONTINUE", "BREAK", "NONE", "NEWLINE", "IntegerLiteral", 
+		"FloatingPointLiteral", "CharacterLiteral", "StringLiteral", "NullLiteral", 
+		"LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", 
+		"DOT", "ASSIGN", "GT", "LT", "BANG", "TILDE", "QUESTION", "COLON", "EQUAL", 
+		"LE", "GE", "NOTEQUAL", "AND_S", "OR_S", "INC", "DEC", "ADD", "SUB", "MUL", 
+		"DIV", "BITAND", "BITOR", "CARET", "MOD", "ADD_ASSIGN", "SUB_ASSIGN", 
+		"MUL_ASSIGN", "DIV_ASSIGN", "AND_ASSIGN", "OR_ASSIGN", "XOR_ASSIGN", "MOD_ASSIGN", 
+		"LSHIFT_ASSIGN", "RSHIFT_ASSIGN", "URSHIFT_ASSIGN", "Identifier", "SKIP_", 
+		"INDENT", "DEDENT"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -210,16 +196,16 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(196);
+			setState(154);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SPACE) | (1L << CONTROLLER) | (1L << LOCAL) | (1L << STREAMING) | (1L << REPLICATED) | (1L << NEWLINE))) != 0)) {
 				{
-				setState(194);
+				setState(152);
 				switch (_input.LA(1)) {
 				case NEWLINE:
 					{
-					setState(192);
+					setState(150);
 					match(NEWLINE);
 					}
 					break;
@@ -229,7 +215,7 @@ public class RavelParser extends Parser {
 				case STREAMING:
 				case REPLICATED:
 					{
-					setState(193);
+					setState(151);
 					comp_def();
 					}
 					break;
@@ -237,308 +223,12 @@ public class RavelParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				setState(198);
+				setState(156);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(199);
+			setState(157);
 			match(EOF);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ParametersContext extends ParserRuleContext {
-		public TypedargslistContext typedargslist() {
-			return getRuleContext(TypedargslistContext.class,0);
-		}
-		public ParametersContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_parameters; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterParameters(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitParameters(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitParameters(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final ParametersContext parameters() throws RecognitionException {
-		ParametersContext _localctx = new ParametersContext(_ctx, getState());
-		enterRule(_localctx, 2, RULE_parameters);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(201);
-			match(OPEN_PAREN);
-			setState(203);
-			_la = _input.LA(1);
-			if (_la==NAME) {
-				{
-				setState(202);
-				typedargslist();
-				}
-			}
-
-			setState(205);
-			match(CLOSE_PAREN);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TypedargslistContext extends ParserRuleContext {
-		public List<IdentifierContext> identifier() {
-			return getRuleContexts(IdentifierContext.class);
-		}
-		public IdentifierContext identifier(int i) {
-			return getRuleContext(IdentifierContext.class,i);
-		}
-		public List<TdefvarContext> tdefvar() {
-			return getRuleContexts(TdefvarContext.class);
-		}
-		public TdefvarContext tdefvar(int i) {
-			return getRuleContext(TdefvarContext.class,i);
-		}
-		public Dotted_nameContext dotted_name() {
-			return getRuleContext(Dotted_nameContext.class,0);
-		}
-		public TypedargslistContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_typedargslist; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTypedargslist(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTypedargslist(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTypedargslist(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final TypedargslistContext typedargslist() throws RecognitionException {
-		TypedargslistContext _localctx = new TypedargslistContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_typedargslist);
-		int _la;
-		try {
-			setState(224);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(207);
-				identifier();
-				setState(210);
-				_la = _input.LA(1);
-				if (_la==ASSIGN) {
-					{
-					setState(208);
-					match(ASSIGN);
-					setState(209);
-					tdefvar();
-					}
-				}
-
-				setState(220);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				while (_la==COMMA) {
-					{
-					{
-					setState(212);
-					match(COMMA);
-					setState(213);
-					identifier();
-					setState(216);
-					_la = _input.LA(1);
-					if (_la==ASSIGN) {
-						{
-						setState(214);
-						match(ASSIGN);
-						setState(215);
-						tdefvar();
-						}
-					}
-
-					}
-					}
-					setState(222);
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				}
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(223);
-				dotted_name();
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class IdentifierContext extends ParserRuleContext {
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
-		public IdentifierContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_identifier; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterIdentifier(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitIdentifier(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitIdentifier(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final IdentifierContext identifier() throws RecognitionException {
-		IdentifierContext _localctx = new IdentifierContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_identifier);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(226);
-			match(NAME);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TdefvarContext extends ParserRuleContext {
-		public IntegerContext integer() {
-			return getRuleContext(IntegerContext.class,0);
-		}
-		public NumberContext number() {
-			return getRuleContext(NumberContext.class,0);
-		}
-		public StringContext string() {
-			return getRuleContext(StringContext.class,0);
-		}
-		public BoolContext bool() {
-			return getRuleContext(BoolContext.class,0);
-		}
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public TdefvarContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_tdefvar; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTdefvar(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTdefvar(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTdefvar(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final TdefvarContext tdefvar() throws RecognitionException {
-		TdefvarContext _localctx = new TdefvarContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_tdefvar);
-		try {
-			setState(233);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(228);
-				integer();
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(229);
-				number();
-				}
-				break;
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(230);
-				string();
-				}
-				break;
-			case 4:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(231);
-				bool();
-				}
-				break;
-			case 5:
-				enterOuterAlt(_localctx, 5);
-				{
-				setState(232);
-				identifier();
-				}
-				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -583,30 +273,30 @@ public class RavelParser extends Parser {
 
 	public final Comp_defContext comp_def() throws RecognitionException {
 		Comp_defContext _localctx = new Comp_defContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_comp_def);
+		enterRule(_localctx, 2, RULE_comp_def);
 		try {
-			setState(238);
+			setState(162);
 			switch (_input.LA(1)) {
 			case LOCAL:
 			case STREAMING:
 			case REPLICATED:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(235);
+				setState(159);
 				model_comp();
 				}
 				break;
 			case CONTROLLER:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(236);
+				setState(160);
 				controller_comp();
 				}
 				break;
 			case SPACE:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(237);
+				setState(161);
 				space_comp();
 				}
 				break;
@@ -640,9 +330,7 @@ public class RavelParser extends Parser {
 	}
 	public static class SpaceScopeContext extends Space_compContext {
 		public TerminalNode SPACE() { return getToken(RavelParser.SPACE, 0); }
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
 		public Space_bodyContext space_body() {
 			return getRuleContext(Space_bodyContext.class,0);
 		}
@@ -664,18 +352,18 @@ public class RavelParser extends Parser {
 
 	public final Space_compContext space_comp() throws RecognitionException {
 		Space_compContext _localctx = new Space_compContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_space_comp);
+		enterRule(_localctx, 4, RULE_space_comp);
 		try {
 			_localctx = new SpaceScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(240);
+			setState(164);
 			match(SPACE);
-			setState(241);
-			identifier();
-			setState(242);
+			setState(165);
+			match(Identifier);
+			setState(166);
 			match(COLON);
-			setState(243);
+			setState(167);
 			space_body();
 			}
 		}
@@ -721,30 +409,30 @@ public class RavelParser extends Parser {
 
 	public final Space_bodyContext space_body() throws RecognitionException {
 		Space_bodyContext _localctx = new Space_bodyContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_space_body);
+		enterRule(_localctx, 6, RULE_space_body);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(245);
+			setState(169);
 			match(NEWLINE);
-			setState(246);
+			setState(170);
 			match(INDENT);
-			setState(248); 
+			setState(172); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(247);
+				setState(171);
 				space_block();
 				}
 				}
-				setState(250); 
+				setState(174); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__2) | (1L << T__3) | (1L << T__4))) != 0) );
-			setState(252);
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__2) | (1L << T__3) | (1L << T__4) | (1L << NEWLINE))) != 0) );
+			setState(176);
 			match(DEDENT);
 			}
 		}
@@ -775,6 +463,7 @@ public class RavelParser extends Parser {
 		public Source_scopeContext source_scope() {
 			return getRuleContext(Source_scopeContext.class,0);
 		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public Space_blockContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -796,43 +485,50 @@ public class RavelParser extends Parser {
 
 	public final Space_blockContext space_block() throws RecognitionException {
 		Space_blockContext _localctx = new Space_blockContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_space_block);
+		enterRule(_localctx, 8, RULE_space_block);
 		try {
-			setState(259);
+			setState(184);
 			switch (_input.LA(1)) {
 			case T__0:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(254);
+				setState(178);
 				platform_scope();
 				}
 				break;
 			case T__1:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(255);
+				setState(179);
 				models_scope();
 				}
 				break;
 			case T__2:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(256);
+				setState(180);
 				controllers_scope();
 				}
 				break;
 			case T__3:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(257);
+				setState(181);
 				sink_scope();
 				}
 				break;
 			case T__4:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(258);
+				setState(182);
 				source_scope();
+				}
+				break;
+			case NEWLINE:
+				enterOuterAlt(_localctx, 6);
+				{
+				setState(183);
+				match(NEWLINE);
 				}
 				break;
 			default:
@@ -864,8 +560,8 @@ public class RavelParser extends Parser {
 		}
 	}
 	public static class PlatformScopeContext extends Platform_scopeContext {
-		public PropertiesContext properties() {
-			return getRuleContext(PropertiesContext.class,0);
+		public PlatformsContext platforms() {
+			return getRuleContext(PlatformsContext.class,0);
 		}
 		public PlatformScopeContext(Platform_scopeContext ctx) { copyFrom(ctx); }
 		@Override
@@ -885,15 +581,215 @@ public class RavelParser extends Parser {
 
 	public final Platform_scopeContext platform_scope() throws RecognitionException {
 		Platform_scopeContext _localctx = new Platform_scopeContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_platform_scope);
+		enterRule(_localctx, 10, RULE_platform_scope);
 		try {
 			_localctx = new PlatformScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(261);
+			setState(186);
 			match(T__0);
-			setState(262);
-			properties();
+			setState(187);
+			platforms();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PlatformsContext extends ParserRuleContext {
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public TerminalNode INDENT() { return getToken(RavelParser.INDENT, 0); }
+		public TerminalNode DEDENT() { return getToken(RavelParser.DEDENT, 0); }
+		public List<PlatformContext> platform() {
+			return getRuleContexts(PlatformContext.class);
+		}
+		public PlatformContext platform(int i) {
+			return getRuleContext(PlatformContext.class,i);
+		}
+		public PlatformsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_platforms; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterPlatforms(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitPlatforms(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPlatforms(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PlatformsContext platforms() throws RecognitionException {
+		PlatformsContext _localctx = new PlatformsContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_platforms);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(189);
+			match(NEWLINE);
+			setState(190);
+			match(INDENT);
+			setState(192); 
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			do {
+				{
+				{
+				setState(191);
+				platform();
+				}
+				}
+				setState(194); 
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			} while ( _la==Identifier );
+			setState(196);
+			match(DEDENT);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PlatformContext extends ParserRuleContext {
+		public PlatformContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_platform; }
+	 
+		public PlatformContext() { }
+		public void copyFrom(PlatformContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class PlatformAssigmentContext extends PlatformContext {
+		public AssigmentContext assigment() {
+			return getRuleContext(AssigmentContext.class,0);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public PlatformAssigmentContext(PlatformContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterPlatformAssigment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitPlatformAssigment(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPlatformAssigment(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PlatformContext platform() throws RecognitionException {
+		PlatformContext _localctx = new PlatformContext(_ctx, getState());
+		enterRule(_localctx, 14, RULE_platform);
+		try {
+			_localctx = new PlatformAssigmentContext(_localctx);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(198);
+			assigment();
+			setState(199);
+			match(NEWLINE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class AssigmentContext extends ParserRuleContext {
+		public List<TerminalNode> Identifier() { return getTokens(RavelParser.Identifier); }
+		public TerminalNode Identifier(int i) {
+			return getToken(RavelParser.Identifier, i);
+		}
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
+		}
+		public AssigmentContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_assigment; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterAssigment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitAssigment(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitAssigment(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final AssigmentContext assigment() throws RecognitionException {
+		AssigmentContext _localctx = new AssigmentContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_assigment);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(201);
+			match(Identifier);
+			setState(202);
+			match(ASSIGN);
+			setState(206);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+			case 1:
+				{
+				setState(203);
+				match(Identifier);
+				}
+				break;
+			case 2:
+				{
+				setState(204);
+				literal();
+				}
+				break;
+			case 3:
+				{
+				setState(205);
+				qualified_name();
+				}
+				break;
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -942,14 +838,14 @@ public class RavelParser extends Parser {
 
 	public final Models_scopeContext models_scope() throws RecognitionException {
 		Models_scopeContext _localctx = new Models_scopeContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_models_scope);
+		enterRule(_localctx, 18, RULE_models_scope);
 		try {
 			_localctx = new ModelInstanciationContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(264);
+			setState(208);
 			match(T__1);
-			setState(265);
+			setState(209);
 			instantiations();
 			}
 		}
@@ -995,30 +891,30 @@ public class RavelParser extends Parser {
 
 	public final InstantiationsContext instantiations() throws RecognitionException {
 		InstantiationsContext _localctx = new InstantiationsContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_instantiations);
+		enterRule(_localctx, 20, RULE_instantiations);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(267);
+			setState(211);
 			match(NEWLINE);
-			setState(268);
+			setState(212);
 			match(INDENT);
-			setState(270); 
+			setState(214); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(269);
+				setState(213);
 				instance();
 				}
 				}
-				setState(272); 
+				setState(216); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==NAME );
-			setState(274);
+			} while ( _la==Identifier );
+			setState(218);
 			match(DEDENT);
 			}
 		}
@@ -1034,15 +930,14 @@ public class RavelParser extends Parser {
 	}
 
 	public static class InstanceContext extends ParserRuleContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
 		public Instance_nameContext instance_name() {
 			return getRuleContext(Instance_nameContext.class,0);
 		}
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
+		public ElementValuePairsContext elementValuePairs() {
+			return getRuleContext(ElementValuePairsContext.class,0);
 		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public InstanceContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1064,18 +959,32 @@ public class RavelParser extends Parser {
 
 	public final InstanceContext instance() throws RecognitionException {
 		InstanceContext _localctx = new InstanceContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_instance);
+		enterRule(_localctx, 22, RULE_instance);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(276);
-			identifier();
-			setState(277);
+			setState(220);
+			match(Identifier);
+			setState(221);
 			match(ASSIGN);
-			setState(278);
+			setState(222);
 			instance_name();
-			setState(279);
-			parameters();
+			setState(223);
+			match(LPAREN);
+			setState(224);
+			elementValuePairs();
+			setState(225);
+			match(RPAREN);
+			setState(227);
+			_la = _input.LA(1);
+			if (_la==NEWLINE) {
+				{
+				setState(226);
+				match(NEWLINE);
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -1090,7 +999,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Instance_nameContext extends ParserRuleContext {
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
 		public Instance_nameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1112,12 +1021,12 @@ public class RavelParser extends Parser {
 
 	public final Instance_nameContext instance_name() throws RecognitionException {
 		Instance_nameContext _localctx = new Instance_nameContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_instance_name);
+		enterRule(_localctx, 24, RULE_instance_name);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(281);
-			match(NAME);
+			setState(229);
+			match(Identifier);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1166,14 +1075,14 @@ public class RavelParser extends Parser {
 
 	public final Controllers_scopeContext controllers_scope() throws RecognitionException {
 		Controllers_scopeContext _localctx = new Controllers_scopeContext(_ctx, getState());
-		enterRule(_localctx, 28, RULE_controllers_scope);
+		enterRule(_localctx, 26, RULE_controllers_scope);
 		try {
 			_localctx = new ControllerInstanciationContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(283);
+			setState(231);
 			match(T__2);
-			setState(284);
+			setState(232);
 			instantiations();
 			}
 		}
@@ -1223,14 +1132,14 @@ public class RavelParser extends Parser {
 
 	public final Sink_scopeContext sink_scope() throws RecognitionException {
 		Sink_scopeContext _localctx = new Sink_scopeContext(_ctx, getState());
-		enterRule(_localctx, 30, RULE_sink_scope);
+		enterRule(_localctx, 28, RULE_sink_scope);
 		try {
 			_localctx = new SinkLinksContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(286);
+			setState(234);
 			match(T__3);
-			setState(287);
+			setState(235);
 			references();
 			}
 		}
@@ -1277,30 +1186,30 @@ public class RavelParser extends Parser {
 
 	public final ReferencesContext references() throws RecognitionException {
 		ReferencesContext _localctx = new ReferencesContext(_ctx, getState());
-		enterRule(_localctx, 32, RULE_references);
+		enterRule(_localctx, 30, RULE_references);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(289);
+			setState(237);
 			match(NEWLINE);
-			setState(290);
+			setState(238);
 			match(INDENT);
-			setState(292); 
+			setState(240); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(291);
+				setState(239);
 				ref_assig();
 				}
 				}
-				setState(294); 
+				setState(242); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==NAME );
-			setState(296);
+			} while ( _la==Identifier );
+			setState(244);
 			match(DEDENT);
 			}
 		}
@@ -1350,14 +1259,14 @@ public class RavelParser extends Parser {
 
 	public final Source_scopeContext source_scope() throws RecognitionException {
 		Source_scopeContext _localctx = new Source_scopeContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_source_scope);
+		enterRule(_localctx, 32, RULE_source_scope);
 		try {
 			_localctx = new SourceLinksContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(298);
+			setState(246);
 			match(T__4);
-			setState(299);
+			setState(247);
 			references();
 			}
 		}
@@ -1390,11 +1299,9 @@ public class RavelParser extends Parser {
 			return getRuleContext(ModelTypeContext.class,0);
 		}
 		public TerminalNode MODEL() { return getToken(RavelParser.MODEL, 0); }
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Component_parametersContext component_parameters() {
+			return getRuleContext(Component_parametersContext.class,0);
 		}
 		public Model_bodyContext model_body() {
 			return getRuleContext(Model_bodyContext.class,0);
@@ -1417,22 +1324,22 @@ public class RavelParser extends Parser {
 
 	public final Model_compContext model_comp() throws RecognitionException {
 		Model_compContext _localctx = new Model_compContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_model_comp);
+		enterRule(_localctx, 34, RULE_model_comp);
 		try {
 			_localctx = new ModelScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(301);
+			setState(249);
 			modelType();
-			setState(302);
+			setState(250);
 			match(MODEL);
-			setState(303);
-			identifier();
-			setState(304);
-			parameters();
-			setState(305);
+			setState(251);
+			match(Identifier);
+			setState(252);
+			component_parameters();
+			setState(253);
 			match(COLON);
-			setState(306);
+			setState(254);
 			model_body();
 			}
 		}
@@ -1469,12 +1376,12 @@ public class RavelParser extends Parser {
 
 	public final ModelTypeContext modelType() throws RecognitionException {
 		ModelTypeContext _localctx = new ModelTypeContext(_ctx, getState());
-		enterRule(_localctx, 38, RULE_modelType);
+		enterRule(_localctx, 36, RULE_modelType);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(308);
+			setState(256);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LOCAL) | (1L << STREAMING) | (1L << REPLICATED))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -1525,30 +1432,30 @@ public class RavelParser extends Parser {
 
 	public final Model_bodyContext model_body() throws RecognitionException {
 		Model_bodyContext _localctx = new Model_bodyContext(_ctx, getState());
-		enterRule(_localctx, 40, RULE_model_body);
+		enterRule(_localctx, 38, RULE_model_body);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(310);
+			setState(258);
 			match(NEWLINE);
-			setState(311);
+			setState(259);
 			match(INDENT);
-			setState(313); 
+			setState(261); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(312);
+				setState(260);
 				model_block();
 				}
 				}
-				setState(315); 
+				setState(263); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( _la==T__5 || _la==T__6 );
-			setState(317);
+			setState(265);
 			match(DEDENT);
 			}
 		}
@@ -1591,21 +1498,21 @@ public class RavelParser extends Parser {
 
 	public final Model_blockContext model_block() throws RecognitionException {
 		Model_blockContext _localctx = new Model_blockContext(_ctx, getState());
-		enterRule(_localctx, 42, RULE_model_block);
+		enterRule(_localctx, 40, RULE_model_block);
 		try {
-			setState(321);
+			setState(269);
 			switch (_input.LA(1)) {
 			case T__5:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(319);
+				setState(267);
 				properties_block();
 				}
 				break;
 			case T__6:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(320);
+				setState(268);
 				schema_block();
 				}
 				break;
@@ -1659,14 +1566,14 @@ public class RavelParser extends Parser {
 
 	public final Properties_blockContext properties_block() throws RecognitionException {
 		Properties_blockContext _localctx = new Properties_blockContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_properties_block);
+		enterRule(_localctx, 42, RULE_properties_block);
 		try {
 			_localctx = new PropertiesScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(323);
+			setState(271);
 			match(T__5);
-			setState(324);
+			setState(272);
 			properties();
 			}
 		}
@@ -1685,11 +1592,11 @@ public class RavelParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public TerminalNode INDENT() { return getToken(RavelParser.INDENT, 0); }
 		public TerminalNode DEDENT() { return getToken(RavelParser.DEDENT, 0); }
-		public List<Tdefvar_assigContext> tdefvar_assig() {
-			return getRuleContexts(Tdefvar_assigContext.class);
+		public List<PropertyContext> property() {
+			return getRuleContexts(PropertyContext.class);
 		}
-		public Tdefvar_assigContext tdefvar_assig(int i) {
-			return getRuleContext(Tdefvar_assigContext.class,i);
+		public PropertyContext property(int i) {
+			return getRuleContext(PropertyContext.class,i);
 		}
 		public PropertiesContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1712,30 +1619,30 @@ public class RavelParser extends Parser {
 
 	public final PropertiesContext properties() throws RecognitionException {
 		PropertiesContext _localctx = new PropertiesContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_properties);
+		enterRule(_localctx, 44, RULE_properties);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(326);
+			setState(274);
 			match(NEWLINE);
-			setState(327);
+			setState(275);
 			match(INDENT);
-			setState(329); 
+			setState(277); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(328);
-				tdefvar_assig();
+				setState(276);
+				property();
 				}
 				}
-				setState(331); 
+				setState(279); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==NAME );
-			setState(333);
+			} while ( _la==Identifier );
+			setState(281);
 			match(DEDENT);
 			}
 		}
@@ -1750,26 +1657,24 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Tdefvar_assigContext extends ParserRuleContext {
-		public Tdefvar_assigContext(ParserRuleContext parent, int invokingState) {
+	public static class PropertyContext extends ParserRuleContext {
+		public PropertyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_tdefvar_assig; }
+		@Override public int getRuleIndex() { return RULE_property; }
 	 
-		public Tdefvar_assigContext() { }
-		public void copyFrom(Tdefvar_assigContext ctx) {
+		public PropertyContext() { }
+		public void copyFrom(PropertyContext ctx) {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class VarAssigmentContext extends Tdefvar_assigContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public TdefvarContext tdefvar() {
-			return getRuleContext(TdefvarContext.class,0);
+	public static class VarAssigmentContext extends PropertyContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public PropContext prop() {
+			return getRuleContext(PropContext.class,0);
 		}
 		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
-		public VarAssigmentContext(Tdefvar_assigContext ctx) { copyFrom(ctx); }
+		public VarAssigmentContext(PropertyContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterVarAssigment(this);
@@ -1785,29 +1690,97 @@ public class RavelParser extends Parser {
 		}
 	}
 
-	public final Tdefvar_assigContext tdefvar_assig() throws RecognitionException {
-		Tdefvar_assigContext _localctx = new Tdefvar_assigContext(_ctx, getState());
-		enterRule(_localctx, 48, RULE_tdefvar_assig);
+	public final PropertyContext property() throws RecognitionException {
+		PropertyContext _localctx = new PropertyContext(_ctx, getState());
+		enterRule(_localctx, 46, RULE_property);
 		try {
 			_localctx = new VarAssigmentContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(335);
-			identifier();
-			setState(336);
+			setState(283);
+			match(Identifier);
+			setState(284);
 			match(ASSIGN);
-			setState(337);
-			tdefvar();
-			setState(339);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,16,_ctx) ) {
-			case 1:
+			setState(285);
+			prop();
+			setState(286);
+			match(NEWLINE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PropContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Boolean_rContext boolean_r() {
+			return getRuleContext(Boolean_rContext.class,0);
+		}
+		public TerminalNode IntegerLiteral() { return getToken(RavelParser.IntegerLiteral, 0); }
+		public TerminalNode FloatingPointLiteral() { return getToken(RavelParser.FloatingPointLiteral, 0); }
+		public PropContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_prop; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterProp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitProp(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitProp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PropContext prop() throws RecognitionException {
+		PropContext _localctx = new PropContext(_ctx, getState());
+		enterRule(_localctx, 48, RULE_prop);
+		try {
+			setState(292);
+			switch (_input.LA(1)) {
+			case Identifier:
+				enterOuterAlt(_localctx, 1);
 				{
-				setState(338);
-				match(NEWLINE);
+				setState(288);
+				match(Identifier);
 				}
 				break;
-			}
+			case TRUE:
+			case FALSE:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(289);
+				boolean_r();
+				}
+				break;
+			case IntegerLiteral:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(290);
+				match(IntegerLiteral);
+				}
+				break;
+			case FloatingPointLiteral:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(291);
+				match(FloatingPointLiteral);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1861,9 +1834,9 @@ public class RavelParser extends Parser {
 			_localctx = new SchemaScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(341);
+			setState(294);
 			match(T__6);
-			setState(342);
+			setState(295);
 			fields();
 			}
 		}
@@ -1914,25 +1887,25 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(344);
+			setState(297);
 			match(NEWLINE);
-			setState(345);
+			setState(298);
 			match(INDENT);
-			setState(347); 
+			setState(300); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(346);
+				setState(299);
 				field();
 				}
 				}
-				setState(349); 
+				setState(302); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==NAME );
-			setState(351);
+			} while ( _la==Identifier );
+			setState(304);
 			match(DEDENT);
 			}
 		}
@@ -1959,14 +1932,12 @@ public class RavelParser extends Parser {
 		}
 	}
 	public static class FieldDeclarationContext extends FieldContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
 		public Field_typeContext field_type() {
 			return getRuleContext(Field_typeContext.class,0);
 		}
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
+		public ElementValuePairsContext elementValuePairs() {
+			return getRuleContext(ElementValuePairsContext.class,0);
 		}
 		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public FieldDeclarationContext(FieldContext ctx) { copyFrom(ctx); }
@@ -1993,19 +1964,23 @@ public class RavelParser extends Parser {
 			_localctx = new FieldDeclarationContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(353);
-			identifier();
-			setState(354);
+			setState(306);
+			match(Identifier);
+			setState(307);
 			match(ASSIGN);
-			setState(355);
+			setState(308);
 			field_type();
-			setState(356);
-			parameters();
-			setState(358);
+			setState(309);
+			match(LPAREN);
+			setState(310);
+			elementValuePairs();
+			setState(311);
+			match(RPAREN);
+			setState(313);
 			_la = _input.LA(1);
 			if (_la==NEWLINE) {
 				{
-				setState(357);
+				setState(312);
 				match(NEWLINE);
 				}
 			}
@@ -2059,7 +2034,7 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(360);
+			setState(315);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T_BYTE_FIELD) | (1L << T_STRING_FIELD) | (1L << T_BOOLEAN_FIELD) | (1L << T_INTEGER_FIELD) | (1L << T_NUMBER_FIELD) | (1L << T_DATE_FIELD) | (1L << T_DATE_TIME_FIELD) | (1L << T_TIME_STAMP_FIELD) | (1L << T_CONTEXT_FIELD))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2080,8 +2055,8 @@ public class RavelParser extends Parser {
 	}
 
 	public static class Model_field_identifierContext extends ParserRuleContext {
-		public Dotted_nameContext dotted_name() {
-			return getRuleContext(Dotted_nameContext.class,0);
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
 		}
 		public Model_field_identifierContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2108,8 +2083,8 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(362);
-			dotted_name();
+			setState(317);
+			qualified_name();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2138,11 +2113,9 @@ public class RavelParser extends Parser {
 	}
 	public static class ControllerScopeContext extends Controller_compContext {
 		public TerminalNode CONTROLLER() { return getToken(RavelParser.CONTROLLER, 0); }
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Component_parametersContext component_parameters() {
+			return getRuleContext(Component_parametersContext.class,0);
 		}
 		public Controller_scopeContext controller_scope() {
 			return getRuleContext(Controller_scopeContext.class,0);
@@ -2170,15 +2143,15 @@ public class RavelParser extends Parser {
 			_localctx = new ControllerScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(364);
+			setState(319);
 			match(CONTROLLER);
-			setState(365);
-			identifier();
-			setState(366);
-			parameters();
-			setState(367);
+			setState(320);
+			match(Identifier);
+			setState(321);
+			component_parameters();
+			setState(322);
 			match(COLON);
-			setState(368);
+			setState(323);
 			controller_scope();
 			}
 		}
@@ -2229,25 +2202,25 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(370);
+			setState(325);
 			match(NEWLINE);
-			setState(371);
+			setState(326);
 			match(INDENT);
-			setState(373); 
+			setState(328); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(372);
+				setState(327);
 				controller_body();
 				}
 				}
-				setState(375); 
+				setState(330); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EVENT) | (1L << NEWLINE) | (1L << NAME))) != 0) );
-			setState(377);
+			} while ( _la==EVENT || _la==NEWLINE || _la==Identifier );
+			setState(332);
 			match(DEDENT);
 			}
 		}
@@ -2269,8 +2242,11 @@ public class RavelParser extends Parser {
 		public Ref_assigContext ref_assig() {
 			return getRuleContext(Ref_assigContext.class,0);
 		}
-		public Tdefvar_assigContext tdefvar_assig() {
-			return getRuleContext(Tdefvar_assigContext.class,0);
+		public VariableDeclaratorContext variableDeclarator() {
+			return getRuleContext(VariableDeclaratorContext.class,0);
+		}
+		public Funct_exprContext funct_expr() {
+			return getRuleContext(Funct_exprContext.class,0);
 		}
 		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
 		public Controller_bodyContext(ParserRuleContext parent, int invokingState) {
@@ -2296,97 +2272,44 @@ public class RavelParser extends Parser {
 		Controller_bodyContext _localctx = new Controller_bodyContext(_ctx, getState());
 		enterRule(_localctx, 64, RULE_controller_body);
 		try {
-			setState(383);
+			setState(339);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,20,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,17,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(379);
+				setState(334);
 				eventdef();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(380);
+				setState(335);
 				ref_assig();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(381);
-				tdefvar_assig();
+				setState(336);
+				variableDeclarator();
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(382);
+				setState(337);
+				funct_expr();
+				}
+				break;
+			case 5:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(338);
 				match(NEWLINE);
 				}
 				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Ref_assigContext extends ParserRuleContext {
-		public Ref_assigContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_ref_assig; }
-	 
-		public Ref_assigContext() { }
-		public void copyFrom(Ref_assigContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class ReferenceAssigmentContext extends Ref_assigContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public Dotted_nameContext dotted_name() {
-			return getRuleContext(Dotted_nameContext.class,0);
-		}
-		public ReferenceAssigmentContext(Ref_assigContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterReferenceAssigment(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitReferenceAssigment(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitReferenceAssigment(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Ref_assigContext ref_assig() throws RecognitionException {
-		Ref_assigContext _localctx = new Ref_assigContext(_ctx, getState());
-		enterRule(_localctx, 66, RULE_ref_assig);
-		try {
-			_localctx = new ReferenceAssigmentContext(_localctx);
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(385);
-			identifier();
-			setState(386);
-			match(ASSIGN);
-			setState(387);
-			dotted_name();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2415,14 +2338,14 @@ public class RavelParser extends Parser {
 	}
 	public static class EventScopeContext extends EventdefContext {
 		public TerminalNode EVENT() { return getToken(RavelParser.EVENT, 0); }
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
 		}
 		public Function_argsContext function_args() {
 			return getRuleContext(Function_argsContext.class,0);
 		}
-		public SuiteContext suite() {
-			return getRuleContext(SuiteContext.class,0);
+		public Block_stmtContext block_stmt() {
+			return getRuleContext(Block_stmtContext.class,0);
 		}
 		public EventScopeContext(EventdefContext ctx) { copyFrom(ctx); }
 		@Override
@@ -2442,21 +2365,21 @@ public class RavelParser extends Parser {
 
 	public final EventdefContext eventdef() throws RecognitionException {
 		EventdefContext _localctx = new EventdefContext(_ctx, getState());
-		enterRule(_localctx, 68, RULE_eventdef);
+		enterRule(_localctx, 66, RULE_eventdef);
 		try {
 			_localctx = new EventScopeContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(389);
+			setState(341);
 			match(EVENT);
-			setState(390);
-			identifier();
-			setState(391);
+			setState(342);
+			qualified_name();
+			setState(343);
 			function_args();
-			setState(392);
+			setState(344);
 			match(COLON);
-			setState(393);
-			suite();
+			setState(345);
+			block_stmt();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2470,49 +2393,62 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Function_argsContext extends ParserRuleContext {
-		public Function_paramContext function_param() {
-			return getRuleContext(Function_paramContext.class,0);
+	public static class Block_stmtContext extends ParserRuleContext {
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public TerminalNode INDENT() { return getToken(RavelParser.INDENT, 0); }
+		public TerminalNode DEDENT() { return getToken(RavelParser.DEDENT, 0); }
+		public List<BlockStatementContext> blockStatement() {
+			return getRuleContexts(BlockStatementContext.class);
 		}
-		public Function_argsContext(ParserRuleContext parent, int invokingState) {
+		public BlockStatementContext blockStatement(int i) {
+			return getRuleContext(BlockStatementContext.class,i);
+		}
+		public Block_stmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_function_args; }
+		@Override public int getRuleIndex() { return RULE_block_stmt; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunction_args(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterBlock_stmt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunction_args(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitBlock_stmt(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunction_args(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitBlock_stmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Function_argsContext function_args() throws RecognitionException {
-		Function_argsContext _localctx = new Function_argsContext(_ctx, getState());
-		enterRule(_localctx, 70, RULE_function_args);
+	public final Block_stmtContext block_stmt() throws RecognitionException {
+		Block_stmtContext _localctx = new Block_stmtContext(_ctx, getState());
+		enterRule(_localctx, 68, RULE_block_stmt);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(395);
-			match(OPEN_PAREN);
-			setState(397);
+			setState(347);
+			match(NEWLINE);
+			setState(348);
+			match(INDENT);
+			setState(350); 
+			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==NAME) {
+			do {
 				{
-				setState(396);
-				function_param();
+				{
+				setState(349);
+				blockStatement();
 				}
-			}
-
-			setState(399);
-			match(CLOSE_PAREN);
+				}
+				setState(352); 
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << EVENT) | (1L << ASSERT) | (1L << RETURN) | (1L << TRUE) | (1L << FALSE) | (1L << IF) | (1L << FOR) | (1L << DELETE) | (1L << CONTINUE) | (1L << BREAK) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0) );
+			setState(354);
+			match(DEDENT);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2526,54 +2462,124 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Function_paramContext extends ParserRuleContext {
-		public List<Param_prairContext> param_prair() {
-			return getRuleContexts(Param_prairContext.class);
+	public static class BlockStatementContext extends ParserRuleContext {
+		public Controller_bodyContext controller_body() {
+			return getRuleContext(Controller_bodyContext.class,0);
 		}
-		public Param_prairContext param_prair(int i) {
-			return getRuleContext(Param_prairContext.class,i);
+		public StatementContext statement() {
+			return getRuleContext(StatementContext.class,0);
 		}
-		public Function_paramContext(ParserRuleContext parent, int invokingState) {
+		public If_stmtContext if_stmt() {
+			return getRuleContext(If_stmtContext.class,0);
+		}
+		public BlockStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_function_param; }
+		@Override public int getRuleIndex() { return RULE_blockStatement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunction_param(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterBlockStatement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunction_param(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitBlockStatement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunction_param(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitBlockStatement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Function_paramContext function_param() throws RecognitionException {
-		Function_paramContext _localctx = new Function_paramContext(_ctx, getState());
-		enterRule(_localctx, 72, RULE_function_param);
+	public final BlockStatementContext blockStatement() throws RecognitionException {
+		BlockStatementContext _localctx = new BlockStatementContext(_ctx, getState());
+		enterRule(_localctx, 70, RULE_blockStatement);
+		try {
+			setState(359);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,19,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(356);
+				controller_body();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(357);
+				statement();
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(358);
+				if_stmt();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class VariableDeclaratorsContext extends ParserRuleContext {
+		public List<VariableDeclaratorContext> variableDeclarator() {
+			return getRuleContexts(VariableDeclaratorContext.class);
+		}
+		public VariableDeclaratorContext variableDeclarator(int i) {
+			return getRuleContext(VariableDeclaratorContext.class,i);
+		}
+		public VariableDeclaratorsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_variableDeclarators; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterVariableDeclarators(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitVariableDeclarators(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitVariableDeclarators(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final VariableDeclaratorsContext variableDeclarators() throws RecognitionException {
+		VariableDeclaratorsContext _localctx = new VariableDeclaratorsContext(_ctx, getState());
+		enterRule(_localctx, 72, RULE_variableDeclarators);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(401);
-			param_prair();
-			setState(406);
+			setState(361);
+			variableDeclarator();
+			setState(366);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(402);
+				setState(362);
 				match(COMMA);
-				setState(403);
-				param_prair();
+				setState(363);
+				variableDeclarator();
 				}
 				}
-				setState(408);
+				setState(368);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -2590,206 +2596,50 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Param_prairContext extends ParserRuleContext {
-		public Param_typeContext param_type() {
-			return getRuleContext(Param_typeContext.class,0);
+	public static class VariableDeclaratorContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public VariableInitializerContext variableInitializer() {
+			return getRuleContext(VariableInitializerContext.class,0);
 		}
-		public Param_nameContext param_name() {
-			return getRuleContext(Param_nameContext.class,0);
-		}
-		public Param_prairContext(ParserRuleContext parent, int invokingState) {
+		public VariableDeclaratorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_param_prair; }
+		@Override public int getRuleIndex() { return RULE_variableDeclarator; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterParam_prair(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterVariableDeclarator(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitParam_prair(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitVariableDeclarator(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitParam_prair(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitVariableDeclarator(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Param_prairContext param_prair() throws RecognitionException {
-		Param_prairContext _localctx = new Param_prairContext(_ctx, getState());
-		enterRule(_localctx, 74, RULE_param_prair);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(409);
-			param_type();
-			setState(410);
-			param_name();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Param_typeContext extends ParserRuleContext {
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
-		public Param_typeContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_param_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterParam_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitParam_type(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitParam_type(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Param_typeContext param_type() throws RecognitionException {
-		Param_typeContext _localctx = new Param_typeContext(_ctx, getState());
-		enterRule(_localctx, 76, RULE_param_type);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(412);
-			match(NAME);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Param_nameContext extends ParserRuleContext {
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
-		public Param_nameContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_param_name; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterParam_name(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitParam_name(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitParam_name(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Param_nameContext param_name() throws RecognitionException {
-		Param_nameContext _localctx = new Param_nameContext(_ctx, getState());
-		enterRule(_localctx, 78, RULE_param_name);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(414);
-			match(NAME);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class SuiteContext extends ParserRuleContext {
-		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
-		public TerminalNode INDENT() { return getToken(RavelParser.INDENT, 0); }
-		public TerminalNode DEDENT() { return getToken(RavelParser.DEDENT, 0); }
-		public List<StmtContext> stmt() {
-			return getRuleContexts(StmtContext.class);
-		}
-		public StmtContext stmt(int i) {
-			return getRuleContext(StmtContext.class,i);
-		}
-		public SuiteContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_suite; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterSuite(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitSuite(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSuite(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final SuiteContext suite() throws RecognitionException {
-		SuiteContext _localctx = new SuiteContext(_ctx, getState());
-		enterRule(_localctx, 80, RULE_suite);
+	public final VariableDeclaratorContext variableDeclarator() throws RecognitionException {
+		VariableDeclaratorContext _localctx = new VariableDeclaratorContext(_ctx, getState());
+		enterRule(_localctx, 74, RULE_variableDeclarator);
 		int _la;
 		try {
-			setState(426);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,24,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(369);
+			match(Identifier);
+			setState(372);
+			_la = _input.LA(1);
+			if (_la==ASSIGN) {
 				{
+				setState(370);
+				match(ASSIGN);
+				setState(371);
+				variableInitializer();
 				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(417);
-				match(NEWLINE);
-				setState(418);
-				match(INDENT);
-				setState(420); 
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				do {
-					{
-					{
-					setState(419);
-					stmt();
-					}
-					}
-					setState(422); 
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__9) | (1L << ASSERT) | (1L << RETURN) | (1L << IF) | (1L << FOR) | (1L << WHILE) | (1L << DELETE) | (1L << CONTINUE) | (1L << BREAK) | (1L << NAME))) != 0) );
-				setState(424);
-				match(DEDENT);
-				}
-				break;
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -2803,58 +2653,64 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class StmtContext extends ParserRuleContext {
-		public Small_stmtContext small_stmt() {
-			return getRuleContext(Small_stmtContext.class,0);
+	public static class VariableInitializerContext extends ParserRuleContext {
+		public ArrayInitializerContext arrayInitializer() {
+			return getRuleContext(ArrayInitializerContext.class,0);
 		}
-		public Compound_stmtContext compound_stmt() {
-			return getRuleContext(Compound_stmtContext.class,0);
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
 		}
-		public StmtContext(ParserRuleContext parent, int invokingState) {
+		public VariableInitializerContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_stmt; }
+		@Override public int getRuleIndex() { return RULE_variableInitializer; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterStmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterVariableInitializer(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitStmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitVariableInitializer(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitStmt(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitVariableInitializer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final StmtContext stmt() throws RecognitionException {
-		StmtContext _localctx = new StmtContext(_ctx, getState());
-		enterRule(_localctx, 82, RULE_stmt);
+	public final VariableInitializerContext variableInitializer() throws RecognitionException {
+		VariableInitializerContext _localctx = new VariableInitializerContext(_ctx, getState());
+		enterRule(_localctx, 76, RULE_variableInitializer);
 		try {
-			setState(430);
+			setState(376);
 			switch (_input.LA(1)) {
-			case T__9:
-			case ASSERT:
-			case RETURN:
-			case DELETE:
-			case CONTINUE:
-			case BREAK:
-			case NAME:
+			case LBRACE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(428);
-				small_stmt();
+				setState(374);
+				arrayInitializer();
 				}
 				break;
-			case IF:
-			case FOR:
-			case WHILE:
+			case SELF:
+			case TRUE:
+			case FALSE:
+			case NEWLINE:
+			case IntegerLiteral:
+			case FloatingPointLiteral:
+			case CharacterLiteral:
+			case StringLiteral:
+			case NullLiteral:
+			case LPAREN:
+			case BANG:
+			case TILDE:
+			case ADD:
+			case SUB:
+			case Identifier:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(429);
-				compound_stmt();
+				setState(375);
+				expression(0);
 				}
 				break;
 			default:
@@ -2872,1165 +2728,231 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Small_stmtContext extends ParserRuleContext {
-		public Tdefvar_assigContext tdefvar_assig() {
-			return getRuleContext(Tdefvar_assigContext.class,0);
+	public static class ArrayInitializerContext extends ParserRuleContext {
+		public List<VariableInitializerContext> variableInitializer() {
+			return getRuleContexts(VariableInitializerContext.class);
 		}
-		public Model_field_assigContext model_field_assig() {
-			return getRuleContext(Model_field_assigContext.class,0);
+		public VariableInitializerContext variableInitializer(int i) {
+			return getRuleContext(VariableInitializerContext.class,i);
 		}
-		public Del_stmtContext del_stmt() {
-			return getRuleContext(Del_stmtContext.class,0);
-		}
-		public Function_callContext function_call() {
-			return getRuleContext(Function_callContext.class,0);
-		}
-		public Flow_stmtContext flow_stmt() {
-			return getRuleContext(Flow_stmtContext.class,0);
-		}
-		public Assert_stmtContext assert_stmt() {
-			return getRuleContext(Assert_stmtContext.class,0);
-		}
-		public Small_stmtContext(ParserRuleContext parent, int invokingState) {
+		public ArrayInitializerContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_small_stmt; }
+		@Override public int getRuleIndex() { return RULE_arrayInitializer; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterSmall_stmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterArrayInitializer(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitSmall_stmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitArrayInitializer(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSmall_stmt(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitArrayInitializer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Small_stmtContext small_stmt() throws RecognitionException {
-		Small_stmtContext _localctx = new Small_stmtContext(_ctx, getState());
-		enterRule(_localctx, 84, RULE_small_stmt);
+	public final ArrayInitializerContext arrayInitializer() throws RecognitionException {
+		ArrayInitializerContext _localctx = new ArrayInitializerContext(_ctx, getState());
+		enterRule(_localctx, 78, RULE_arrayInitializer);
+		int _la;
 		try {
-			setState(438);
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(378);
+			match(LBRACE);
+			setState(390);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN) | (1L << LBRACE))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+				{
+				setState(379);
+				variableInitializer();
+				setState(384);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
+				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+					if ( _alt==1 ) {
+						{
+						{
+						setState(380);
+						match(COMMA);
+						setState(381);
+						variableInitializer();
+						}
+						} 
+					}
+					setState(386);
+					_errHandler.sync(this);
+					_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
+				}
+				setState(388);
+				_la = _input.LA(1);
+				if (_la==COMMA) {
+					{
+					setState(387);
+					match(COMMA);
+					}
+				}
+
+				}
+			}
+
+			setState(392);
+			match(RBRACE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class StatementContext extends ParserRuleContext {
+		public TerminalNode ASSERT() { return getToken(RavelParser.ASSERT, 0); }
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public ForControlContext forControl() {
+			return getRuleContext(ForControlContext.class,0);
+		}
+		public Block_stmtContext block_stmt() {
+			return getRuleContext(Block_stmtContext.class,0);
+		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public StatementExpressionContext statementExpression() {
+			return getRuleContext(StatementExpressionContext.class,0);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public StatementContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_statement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitStatement(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final StatementContext statement() throws RecognitionException {
+		StatementContext _localctx = new StatementContext(_ctx, getState());
+		enterRule(_localctx, 80, RULE_statement);
+		try {
+			setState(417);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,26,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,29,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(432);
-				tdefvar_assig();
+				setState(394);
+				match(ASSERT);
+				setState(395);
+				expression(0);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(433);
-				model_field_assig();
+				setState(396);
+				match(FOR);
+				setState(397);
+				forControl();
+				setState(398);
+				match(COLON);
+				setState(399);
+				block_stmt();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(434);
-				del_stmt();
+				setState(401);
+				match(RETURN);
+				setState(403);
+				_errHandler.sync(this);
+				switch ( getInterpreter().adaptivePredict(_input,26,_ctx) ) {
+				case 1:
+					{
+					setState(402);
+					expression(0);
+					}
+					break;
+				}
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(435);
-				function_call();
+				setState(405);
+				match(BREAK);
+				setState(407);
+				_errHandler.sync(this);
+				switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
+				case 1:
+					{
+					setState(406);
+					match(Identifier);
+					}
+					break;
+				}
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(436);
-				flow_stmt();
+				setState(409);
+				match(CONTINUE);
+				setState(411);
+				_errHandler.sync(this);
+				switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
+				case 1:
+					{
+					setState(410);
+					match(Identifier);
+					}
+					break;
+				}
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(437);
-				assert_stmt();
+				setState(413);
+				match(DELETE);
+				setState(414);
+				match(Identifier);
 				}
 				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Model_field_assigContext extends ParserRuleContext {
-		public Model_field_identifierContext model_field_identifier() {
-			return getRuleContext(Model_field_identifierContext.class,0);
-		}
-		public Model_assig_exprContext model_assig_expr() {
-			return getRuleContext(Model_assig_exprContext.class,0);
-		}
-		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
-		public Model_field_assigContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_model_field_assig; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterModel_field_assig(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitModel_field_assig(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModel_field_assig(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Model_field_assigContext model_field_assig() throws RecognitionException {
-		Model_field_assigContext _localctx = new Model_field_assigContext(_ctx, getState());
-		enterRule(_localctx, 86, RULE_model_field_assig);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(440);
-			model_field_identifier();
-			setState(441);
-			match(ASSIGN);
-			setState(442);
-			model_assig_expr();
-			setState(443);
-			match(NEWLINE);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Model_assig_exprContext extends ParserRuleContext {
-		public TerminalNode SELF() { return getToken(RavelParser.SELF, 0); }
-		public TdefvarContext tdefvar() {
-			return getRuleContext(TdefvarContext.class,0);
-		}
-		public Funct_exprContext funct_expr() {
-			return getRuleContext(Funct_exprContext.class,0);
-		}
-		public Local_queryContext local_query() {
-			return getRuleContext(Local_queryContext.class,0);
-		}
-		public Model_assig_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_model_assig_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterModel_assig_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitModel_assig_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitModel_assig_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Model_assig_exprContext model_assig_expr() throws RecognitionException {
-		Model_assig_exprContext _localctx = new Model_assig_exprContext(_ctx, getState());
-		enterRule(_localctx, 88, RULE_model_assig_expr);
-		try {
-			setState(449);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
+			case 7:
+				enterOuterAlt(_localctx, 7);
 				{
-				setState(445);
-				match(SELF);
+				setState(415);
+				statementExpression();
 				}
 				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
+			case 8:
+				enterOuterAlt(_localctx, 8);
 				{
-				setState(446);
-				tdefvar();
+				setState(416);
+				match(NEWLINE);
 				}
 				break;
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(447);
-				funct_expr();
-				}
-				break;
-			case 4:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(448);
-				local_query();
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Compound_stmtContext extends ParserRuleContext {
-		public If_stmtContext if_stmt() {
-			return getRuleContext(If_stmtContext.class,0);
-		}
-		public While_stmtContext while_stmt() {
-			return getRuleContext(While_stmtContext.class,0);
-		}
-		public For_stmtContext for_stmt() {
-			return getRuleContext(For_stmtContext.class,0);
-		}
-		public Compound_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_compound_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterCompound_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitCompound_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitCompound_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Compound_stmtContext compound_stmt() throws RecognitionException {
-		Compound_stmtContext _localctx = new Compound_stmtContext(_ctx, getState());
-		enterRule(_localctx, 90, RULE_compound_stmt);
-		try {
-			setState(454);
-			switch (_input.LA(1)) {
-			case IF:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(451);
-				if_stmt();
-				}
-				break;
-			case WHILE:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(452);
-				while_stmt();
-				}
-				break;
-			case FOR:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(453);
-				for_stmt();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Assert_stmtContext extends ParserRuleContext {
-		public TerminalNode ASSERT() { return getToken(RavelParser.ASSERT, 0); }
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public Assert_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_assert_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterAssert_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitAssert_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitAssert_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Assert_stmtContext assert_stmt() throws RecognitionException {
-		Assert_stmtContext _localctx = new Assert_stmtContext(_ctx, getState());
-		enterRule(_localctx, 92, RULE_assert_stmt);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(456);
-			match(ASSERT);
-			setState(457);
-			test();
-			setState(460);
-			_la = _input.LA(1);
-			if (_la==COMMA) {
-				{
-				setState(458);
-				match(COMMA);
-				setState(459);
-				test();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Del_stmtContext extends ParserRuleContext {
-		public TerminalNode DELETE() { return getToken(RavelParser.DELETE, 0); }
-		public Query_exprContext query_expr() {
-			return getRuleContext(Query_exprContext.class,0);
-		}
-		public Del_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_del_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterDel_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitDel_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitDel_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Del_stmtContext del_stmt() throws RecognitionException {
-		Del_stmtContext _localctx = new Del_stmtContext(_ctx, getState());
-		enterRule(_localctx, 94, RULE_del_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(462);
-			match(DELETE);
-			setState(463);
-			query_expr();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Function_callContext extends ParserRuleContext {
-		public Query_exprContext query_expr() {
-			return getRuleContext(Query_exprContext.class,0);
-		}
-		public Funct_exprContext funct_expr() {
-			return getRuleContext(Funct_exprContext.class,0);
-		}
-		public Function_callContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_function_call; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunction_call(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunction_call(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunction_call(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Function_callContext function_call() throws RecognitionException {
-		Function_callContext _localctx = new Function_callContext(_ctx, getState());
-		enterRule(_localctx, 96, RULE_function_call);
-		try {
-			setState(467);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,30,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(465);
-				query_expr();
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(466);
-				funct_expr();
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Query_exprContext extends ParserRuleContext {
-		public Local_queryContext local_query() {
-			return getRuleContext(Local_queryContext.class,0);
-		}
-		public Db_queryContext db_query() {
-			return getRuleContext(Db_queryContext.class,0);
-		}
-		public Query_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_query_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterQuery_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitQuery_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitQuery_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Query_exprContext query_expr() throws RecognitionException {
-		Query_exprContext _localctx = new Query_exprContext(_ctx, getState());
-		enterRule(_localctx, 98, RULE_query_expr);
-		try {
-			setState(471);
-			switch (_input.LA(1)) {
-			case NAME:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(469);
-				local_query();
-				}
-				break;
-			case T__9:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(470);
-				db_query();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Local_queryContext extends ParserRuleContext {
-		public Local_queryContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_local_query; }
-	 
-		public Local_queryContext() { }
-		public void copyFrom(Local_queryContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class QueryOperationsContext extends Local_queryContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public Query_operationContext query_operation() {
-			return getRuleContext(Query_operationContext.class,0);
-		}
-		public QueryOperationsContext(Local_queryContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterQueryOperations(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitQueryOperations(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitQueryOperations(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Local_queryContext local_query() throws RecognitionException {
-		Local_queryContext _localctx = new Local_queryContext(_ctx, getState());
-		enterRule(_localctx, 100, RULE_local_query);
-		try {
-			_localctx = new QueryOperationsContext(_localctx);
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(473);
-			identifier();
-			setState(474);
-			match(DOT);
-			setState(475);
-			query_operation();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Query_operationContext extends ParserRuleContext {
-		public Query_operationContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_query_operation; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterQuery_operation(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitQuery_operation(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitQuery_operation(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Query_operationContext query_operation() throws RecognitionException {
-		Query_operationContext _localctx = new Query_operationContext(_ctx, getState());
-		enterRule(_localctx, 102, RULE_query_operation);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(477);
-			_la = _input.LA(1);
-			if ( !(_la==T__7 || _la==T__8) ) {
-			_errHandler.recoverInline(this);
-			} else {
-				consume();
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Db_queryContext extends ParserRuleContext {
-		public Query_operationContext query_operation() {
-			return getRuleContext(Query_operationContext.class,0);
-		}
-		public Db_queryContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_db_query; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterDb_query(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitDb_query(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitDb_query(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Db_queryContext db_query() throws RecognitionException {
-		Db_queryContext _localctx = new Db_queryContext(_ctx, getState());
-		enterRule(_localctx, 104, RULE_db_query);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(479);
-			match(T__9);
-			setState(480);
-			match(DOT);
-			setState(481);
-			query_operation();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Funct_exprContext extends ParserRuleContext {
-		public Func_no_returnContext func_no_return() {
-			return getRuleContext(Func_no_returnContext.class,0);
-		}
-		public Func_with_returnContext func_with_return() {
-			return getRuleContext(Func_with_returnContext.class,0);
-		}
-		public Funct_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_funct_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunct_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunct_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunct_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Funct_exprContext funct_expr() throws RecognitionException {
-		Funct_exprContext _localctx = new Funct_exprContext(_ctx, getState());
-		enterRule(_localctx, 106, RULE_funct_expr);
-		try {
-			setState(485);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,32,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(483);
-				func_no_return();
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(484);
-				func_with_return();
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Func_no_returnContext extends ParserRuleContext {
-		public List<IdentifierContext> identifier() {
-			return getRuleContexts(IdentifierContext.class);
-		}
-		public IdentifierContext identifier(int i) {
-			return getRuleContext(IdentifierContext.class,i);
-		}
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
-		}
-		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
-		public Func_no_returnContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_func_no_return; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunc_no_return(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunc_no_return(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunc_no_return(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Func_no_returnContext func_no_return() throws RecognitionException {
-		Func_no_returnContext _localctx = new Func_no_returnContext(_ctx, getState());
-		enterRule(_localctx, 108, RULE_func_no_return);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(487);
-			identifier();
-			setState(490);
-			_la = _input.LA(1);
-			if (_la==DOT) {
-				{
-				setState(488);
-				match(DOT);
-				setState(489);
-				identifier();
-				}
-			}
-
-			setState(492);
-			parameters();
-			setState(493);
-			match(NEWLINE);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Func_with_returnContext extends ParserRuleContext {
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public Func_no_returnContext func_no_return() {
-			return getRuleContext(Func_no_returnContext.class,0);
-		}
-		public Func_with_returnContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_func_with_return; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunc_with_return(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunc_with_return(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunc_with_return(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Func_with_returnContext func_with_return() throws RecognitionException {
-		Func_with_returnContext _localctx = new Func_with_returnContext(_ctx, getState());
-		enterRule(_localctx, 110, RULE_func_with_return);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(495);
-			identifier();
-			setState(496);
-			match(ASSIGN);
-			setState(497);
-			func_no_return();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Dotted_nameContext extends ParserRuleContext {
-		public List<TerminalNode> NAME() { return getTokens(RavelParser.NAME); }
-		public TerminalNode NAME(int i) {
-			return getToken(RavelParser.NAME, i);
-		}
-		public Dotted_nameContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_dotted_name; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterDotted_name(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitDotted_name(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitDotted_name(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Dotted_nameContext dotted_name() throws RecognitionException {
-		Dotted_nameContext _localctx = new Dotted_nameContext(_ctx, getState());
-		enterRule(_localctx, 112, RULE_dotted_name);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(499);
-			match(NAME);
-			setState(504);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==DOT) {
-				{
-				{
-				setState(500);
-				match(DOT);
-				setState(501);
-				match(NAME);
-				}
-				}
-				setState(506);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Pass_stmtContext extends ParserRuleContext {
-		public TerminalNode PASS() { return getToken(RavelParser.PASS, 0); }
-		public Pass_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_pass_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterPass_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitPass_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPass_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Pass_stmtContext pass_stmt() throws RecognitionException {
-		Pass_stmtContext _localctx = new Pass_stmtContext(_ctx, getState());
-		enterRule(_localctx, 114, RULE_pass_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(507);
-			match(PASS);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Flow_stmtContext extends ParserRuleContext {
-		public Break_stmtContext break_stmt() {
-			return getRuleContext(Break_stmtContext.class,0);
-		}
-		public Continue_stmtContext continue_stmt() {
-			return getRuleContext(Continue_stmtContext.class,0);
-		}
-		public Return_stmtContext return_stmt() {
-			return getRuleContext(Return_stmtContext.class,0);
-		}
-		public Flow_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_flow_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFlow_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFlow_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFlow_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Flow_stmtContext flow_stmt() throws RecognitionException {
-		Flow_stmtContext _localctx = new Flow_stmtContext(_ctx, getState());
-		enterRule(_localctx, 116, RULE_flow_stmt);
-		try {
-			setState(512);
-			switch (_input.LA(1)) {
-			case BREAK:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(509);
-				break_stmt();
-				}
-				break;
-			case CONTINUE:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(510);
-				continue_stmt();
-				}
-				break;
-			case RETURN:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(511);
-				return_stmt();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Break_stmtContext extends ParserRuleContext {
-		public TerminalNode BREAK() { return getToken(RavelParser.BREAK, 0); }
-		public Break_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_break_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterBreak_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitBreak_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitBreak_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Break_stmtContext break_stmt() throws RecognitionException {
-		Break_stmtContext _localctx = new Break_stmtContext(_ctx, getState());
-		enterRule(_localctx, 118, RULE_break_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(514);
-			match(BREAK);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Continue_stmtContext extends ParserRuleContext {
-		public TerminalNode CONTINUE() { return getToken(RavelParser.CONTINUE, 0); }
-		public Continue_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_continue_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterContinue_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitContinue_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitContinue_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Continue_stmtContext continue_stmt() throws RecognitionException {
-		Continue_stmtContext _localctx = new Continue_stmtContext(_ctx, getState());
-		enterRule(_localctx, 120, RULE_continue_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(516);
-			match(CONTINUE);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Return_stmtContext extends ParserRuleContext {
-		public TerminalNode RETURN() { return getToken(RavelParser.RETURN, 0); }
-		public IdentifierContext identifier() {
-			return getRuleContext(IdentifierContext.class,0);
-		}
-		public Return_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_return_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterReturn_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitReturn_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitReturn_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Return_stmtContext return_stmt() throws RecognitionException {
-		Return_stmtContext _localctx = new Return_stmtContext(_ctx, getState());
-		enterRule(_localctx, 122, RULE_return_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(518);
-			match(RETURN);
-			setState(519);
-			identifier();
 			}
 		}
 		catch (RecognitionException re) {
@@ -4045,88 +2967,97 @@ public class RavelParser extends Parser {
 	}
 
 	public static class If_stmtContext extends ParserRuleContext {
+		public If_stmtContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_if_stmt; }
+	 
+		public If_stmtContext() { }
+		public void copyFrom(If_stmtContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class IfStatementContext extends If_stmtContext {
 		public TerminalNode IF() { return getToken(RavelParser.IF, 0); }
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
+		public List<Comp_exprContext> comp_expr() {
+			return getRuleContexts(Comp_exprContext.class);
 		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
+		public Comp_exprContext comp_expr(int i) {
+			return getRuleContext(Comp_exprContext.class,i);
 		}
-		public List<SuiteContext> suite() {
-			return getRuleContexts(SuiteContext.class);
+		public List<Block_stmtContext> block_stmt() {
+			return getRuleContexts(Block_stmtContext.class);
 		}
-		public SuiteContext suite(int i) {
-			return getRuleContext(SuiteContext.class,i);
+		public Block_stmtContext block_stmt(int i) {
+			return getRuleContext(Block_stmtContext.class,i);
 		}
 		public List<TerminalNode> ELIF() { return getTokens(RavelParser.ELIF); }
 		public TerminalNode ELIF(int i) {
 			return getToken(RavelParser.ELIF, i);
 		}
 		public TerminalNode ELSE() { return getToken(RavelParser.ELSE, 0); }
-		public If_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_if_stmt; }
+		public IfStatementContext(If_stmtContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterIf_stmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterIfStatement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitIf_stmt(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitIfStatement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitIf_stmt(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitIfStatement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
 	public final If_stmtContext if_stmt() throws RecognitionException {
 		If_stmtContext _localctx = new If_stmtContext(_ctx, getState());
-		enterRule(_localctx, 124, RULE_if_stmt);
+		enterRule(_localctx, 82, RULE_if_stmt);
 		int _la;
 		try {
+			_localctx = new IfStatementContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(521);
+			setState(419);
 			match(IF);
-			setState(522);
-			test();
-			setState(523);
+			setState(420);
+			comp_expr();
+			setState(421);
 			match(COLON);
-			setState(524);
-			suite();
-			setState(532);
+			setState(422);
+			block_stmt();
+			setState(430);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==ELIF) {
 				{
 				{
-				setState(525);
+				setState(423);
 				match(ELIF);
-				setState(526);
-				test();
-				setState(527);
+				setState(424);
+				comp_expr();
+				setState(425);
 				match(COLON);
-				setState(528);
-				suite();
+				setState(426);
+				block_stmt();
 				}
 				}
-				setState(534);
+				setState(432);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(538);
+			setState(436);
 			_la = _input.LA(1);
 			if (_la==ELSE) {
 				{
-				setState(535);
+				setState(433);
 				match(ELSE);
-				setState(536);
+				setState(434);
 				match(COLON);
-				setState(537);
-				suite();
+				setState(435);
+				block_stmt();
 				}
 			}
 
@@ -4143,141 +3074,7 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class While_stmtContext extends ParserRuleContext {
-		public TerminalNode WHILE() { return getToken(RavelParser.WHILE, 0); }
-		public TestContext test() {
-			return getRuleContext(TestContext.class,0);
-		}
-		public List<SuiteContext> suite() {
-			return getRuleContexts(SuiteContext.class);
-		}
-		public SuiteContext suite(int i) {
-			return getRuleContext(SuiteContext.class,i);
-		}
-		public TerminalNode ELSE() { return getToken(RavelParser.ELSE, 0); }
-		public While_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_while_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterWhile_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitWhile_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitWhile_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final While_stmtContext while_stmt() throws RecognitionException {
-		While_stmtContext _localctx = new While_stmtContext(_ctx, getState());
-		enterRule(_localctx, 126, RULE_while_stmt);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(540);
-			match(WHILE);
-			setState(541);
-			test();
-			setState(542);
-			match(COLON);
-			setState(543);
-			suite();
-			setState(547);
-			_la = _input.LA(1);
-			if (_la==ELSE) {
-				{
-				setState(544);
-				match(ELSE);
-				setState(545);
-				match(COLON);
-				setState(546);
-				suite();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class For_stmtContext extends ParserRuleContext {
-		public TerminalNode FOR() { return getToken(RavelParser.FOR, 0); }
-		public List<IdentifierContext> identifier() {
-			return getRuleContexts(IdentifierContext.class);
-		}
-		public IdentifierContext identifier(int i) {
-			return getRuleContext(IdentifierContext.class,i);
-		}
-		public TerminalNode IN() { return getToken(RavelParser.IN, 0); }
-		public SuiteContext suite() {
-			return getRuleContext(SuiteContext.class,0);
-		}
-		public For_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_for_stmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFor_stmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFor_stmt(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFor_stmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final For_stmtContext for_stmt() throws RecognitionException {
-		For_stmtContext _localctx = new For_stmtContext(_ctx, getState());
-		enterRule(_localctx, 128, RULE_for_stmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(549);
-			match(FOR);
-			setState(550);
-			identifier();
-			setState(551);
-			match(IN);
-			setState(552);
-			identifier();
-			setState(553);
-			match(COLON);
-			setState(554);
-			suite();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TestContext extends ParserRuleContext {
+	public static class Comp_exprContext extends ParserRuleContext {
 		public List<Or_testContext> or_test() {
 			return getRuleContexts(Or_testContext.class);
 		}
@@ -4286,52 +3083,52 @@ public class RavelParser extends Parser {
 		}
 		public TerminalNode IF() { return getToken(RavelParser.IF, 0); }
 		public TerminalNode ELSE() { return getToken(RavelParser.ELSE, 0); }
-		public TestContext test() {
-			return getRuleContext(TestContext.class,0);
+		public Comp_exprContext comp_expr() {
+			return getRuleContext(Comp_exprContext.class,0);
 		}
-		public TestContext(ParserRuleContext parent, int invokingState) {
+		public Comp_exprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_test; }
+		@Override public int getRuleIndex() { return RULE_comp_expr; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTest(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterComp_expr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTest(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitComp_expr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTest(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitComp_expr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final TestContext test() throws RecognitionException {
-		TestContext _localctx = new TestContext(_ctx, getState());
-		enterRule(_localctx, 130, RULE_test);
+	public final Comp_exprContext comp_expr() throws RecognitionException {
+		Comp_exprContext _localctx = new Comp_exprContext(_ctx, getState());
+		enterRule(_localctx, 84, RULE_comp_expr);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(556);
+			setState(438);
 			or_test();
-			setState(562);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,39,_ctx) ) {
-			case 1:
+			setState(444);
+			_la = _input.LA(1);
+			if (_la==IF) {
 				{
-				setState(557);
+				setState(439);
 				match(IF);
-				setState(558);
+				setState(440);
 				or_test();
-				setState(559);
+				setState(441);
 				match(ELSE);
-				setState(560);
-				test();
+				setState(442);
+				comp_expr();
 				}
-				break;
 			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -4377,26 +3174,26 @@ public class RavelParser extends Parser {
 
 	public final Or_testContext or_test() throws RecognitionException {
 		Or_testContext _localctx = new Or_testContext(_ctx, getState());
-		enterRule(_localctx, 132, RULE_or_test);
+		enterRule(_localctx, 86, RULE_or_test);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(564);
+			setState(446);
 			and_test();
-			setState(569);
+			setState(451);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==OR) {
 				{
 				{
-				setState(565);
+				setState(447);
 				match(OR);
-				setState(566);
+				setState(448);
 				and_test();
 				}
 				}
-				setState(571);
+				setState(453);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -4445,26 +3242,26 @@ public class RavelParser extends Parser {
 
 	public final And_testContext and_test() throws RecognitionException {
 		And_testContext _localctx = new And_testContext(_ctx, getState());
-		enterRule(_localctx, 134, RULE_and_test);
+		enterRule(_localctx, 88, RULE_and_test);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(572);
+			setState(454);
 			not_test();
-			setState(577);
+			setState(459);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==AND) {
 				{
 				{
-				setState(573);
+				setState(455);
 				match(AND);
-				setState(574);
+				setState(456);
 				not_test();
 				}
 				}
-				setState(579);
+				setState(461);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -4510,40 +3307,27 @@ public class RavelParser extends Parser {
 
 	public final Not_testContext not_test() throws RecognitionException {
 		Not_testContext _localctx = new Not_testContext(_ctx, getState());
-		enterRule(_localctx, 136, RULE_not_test);
+		enterRule(_localctx, 90, RULE_not_test);
 		try {
-			setState(583);
+			setState(465);
 			switch (_input.LA(1)) {
 			case NOT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(580);
+				setState(462);
 				match(NOT);
-				setState(581);
+				setState(463);
 				not_test();
 				}
 				break;
-			case T__11:
 			case TRUE:
 			case FALSE:
-			case NONE:
-			case NAME:
-			case STRING_LITERAL:
-			case BYTES_LITERAL:
-			case DECIMAL_INTEGER:
-			case OCT_INTEGER:
-			case HEX_INTEGER:
-			case BIN_INTEGER:
-			case FLOAT_NUMBER:
-			case IMAG_NUMBER:
-			case OPEN_PAREN:
-			case OPEN_BRACK:
-			case ADD:
-			case MINUS:
-			case NOT_OP:
+			case IntegerLiteral:
+			case FloatingPointLiteral:
+			case Identifier:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(582);
+				setState(464);
 				comparison();
 				}
 				break;
@@ -4596,26 +3380,1772 @@ public class RavelParser extends Parser {
 
 	public final ComparisonContext comparison() throws RecognitionException {
 		ComparisonContext _localctx = new ComparisonContext(_ctx, getState());
-		enterRule(_localctx, 138, RULE_comparison);
+		enterRule(_localctx, 92, RULE_comparison);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(585);
+			setState(467);
 			expr();
-			setState(591);
+			setState(473);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((((_la - 45)) & ~0x3f) == 0 && ((1L << (_la - 45)) & ((1L << (NOT - 45)) | (1L << (IN - 45)) | (1L << (IS - 45)) | (1L << (LESS_THAN - 45)) | (1L << (GREATER_THAN - 45)) | (1L << (EQUALS - 45)) | (1L << (GT_EQ - 45)) | (1L << (LT_EQ - 45)) | (1L << (NOT_EQ - 45)))) != 0)) {
+			while (((((_la - 40)) & ~0x3f) == 0 && ((1L << (_la - 40)) & ((1L << (NOT - 40)) | (1L << (IN - 40)) | (1L << (IS - 40)) | (1L << (GT - 40)) | (1L << (LT - 40)) | (1L << (EQUAL - 40)) | (1L << (LE - 40)) | (1L << (GE - 40)) | (1L << (NOTEQUAL - 40)))) != 0)) {
 				{
 				{
-				setState(586);
+				setState(468);
 				comp_op();
-				setState(587);
+				setState(469);
 				expr();
 				}
 				}
-				setState(593);
+				setState(475);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ExprContext extends ParserRuleContext {
+		public AtomContext atom() {
+			return getRuleContext(AtomContext.class,0);
+		}
+		public ExprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitExpr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitExpr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ExprContext expr() throws RecognitionException {
+		ExprContext _localctx = new ExprContext(_ctx, getState());
+		enterRule(_localctx, 94, RULE_expr);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(476);
+			atom();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class AtomContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public TerminalNode IntegerLiteral() { return getToken(RavelParser.IntegerLiteral, 0); }
+		public TerminalNode FloatingPointLiteral() { return getToken(RavelParser.FloatingPointLiteral, 0); }
+		public Boolean_rContext boolean_r() {
+			return getRuleContext(Boolean_rContext.class,0);
+		}
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
+		}
+		public AtomContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_atom; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterAtom(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitAtom(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitAtom(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final AtomContext atom() throws RecognitionException {
+		AtomContext _localctx = new AtomContext(_ctx, getState());
+		enterRule(_localctx, 96, RULE_atom);
+		try {
+			setState(483);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,37,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(478);
+				match(Identifier);
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(479);
+				match(IntegerLiteral);
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(480);
+				match(FloatingPointLiteral);
+				}
+				break;
+			case 4:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(481);
+				boolean_r();
+				}
+				break;
+			case 5:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(482);
+				qualified_name();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class StatementExpressionContext extends ParserRuleContext {
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public StatementExpressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_statementExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterStatementExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitStatementExpression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitStatementExpression(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final StatementExpressionContext statementExpression() throws RecognitionException {
+		StatementExpressionContext _localctx = new StatementExpressionContext(_ctx, getState());
+		enterRule(_localctx, 98, RULE_statementExpression);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(485);
+			expression(0);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ForControlContext extends ParserRuleContext {
+		public ForInitContext forInit() {
+			return getRuleContext(ForInitContext.class,0);
+		}
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public ForUpdateContext forUpdate() {
+			return getRuleContext(ForUpdateContext.class,0);
+		}
+		public ForControlContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_forControl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterForControl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitForControl(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitForControl(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ForControlContext forControl() throws RecognitionException {
+		ForControlContext _localctx = new ForControlContext(_ctx, getState());
+		enterRule(_localctx, 100, RULE_forControl);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(488);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+				{
+				setState(487);
+				forInit();
+				}
+			}
+
+			setState(490);
+			match(SEMI);
+			setState(492);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+				{
+				setState(491);
+				expression(0);
+				}
+			}
+
+			setState(494);
+			match(SEMI);
+			setState(496);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+				{
+				setState(495);
+				forUpdate();
+				}
+			}
+
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ForInitContext extends ParserRuleContext {
+		public VariableDeclaratorsContext variableDeclarators() {
+			return getRuleContext(VariableDeclaratorsContext.class,0);
+		}
+		public ExpressionListContext expressionList() {
+			return getRuleContext(ExpressionListContext.class,0);
+		}
+		public ForInitContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_forInit; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterForInit(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitForInit(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitForInit(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ForInitContext forInit() throws RecognitionException {
+		ForInitContext _localctx = new ForInitContext(_ctx, getState());
+		enterRule(_localctx, 102, RULE_forInit);
+		try {
+			setState(500);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,41,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(498);
+				variableDeclarators();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(499);
+				expressionList();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ForUpdateContext extends ParserRuleContext {
+		public ExpressionListContext expressionList() {
+			return getRuleContext(ExpressionListContext.class,0);
+		}
+		public ForUpdateContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_forUpdate; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterForUpdate(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitForUpdate(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitForUpdate(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ForUpdateContext forUpdate() throws RecognitionException {
+		ForUpdateContext _localctx = new ForUpdateContext(_ctx, getState());
+		enterRule(_localctx, 104, RULE_forUpdate);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(502);
+			expressionList();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Function_argsContext extends ParserRuleContext {
+		public FunctionArgsListContext functionArgsList() {
+			return getRuleContext(FunctionArgsListContext.class,0);
+		}
+		public Function_argsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_function_args; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunction_args(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunction_args(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunction_args(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Function_argsContext function_args() throws RecognitionException {
+		Function_argsContext _localctx = new Function_argsContext(_ctx, getState());
+		enterRule(_localctx, 106, RULE_function_args);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(504);
+			match(LPAREN);
+			setState(506);
+			_la = _input.LA(1);
+			if (_la==Identifier) {
+				{
+				setState(505);
+				functionArgsList();
+				}
+			}
+
+			setState(508);
+			match(RPAREN);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FunctionArgsListContext extends ParserRuleContext {
+		public List<FunctionArgContext> functionArg() {
+			return getRuleContexts(FunctionArgContext.class);
+		}
+		public FunctionArgContext functionArg(int i) {
+			return getRuleContext(FunctionArgContext.class,i);
+		}
+		public FunctionArgsListContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_functionArgsList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunctionArgsList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunctionArgsList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunctionArgsList(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final FunctionArgsListContext functionArgsList() throws RecognitionException {
+		FunctionArgsListContext _localctx = new FunctionArgsListContext(_ctx, getState());
+		enterRule(_localctx, 108, RULE_functionArgsList);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(510);
+			functionArg();
+			setState(513);
+			_la = _input.LA(1);
+			if (_la==COMMA) {
+				{
+				setState(511);
+				match(COMMA);
+				setState(512);
+				functionArg();
+				}
+			}
+
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FunctionArgContext extends ParserRuleContext {
+		public List<TerminalNode> Identifier() { return getTokens(RavelParser.Identifier); }
+		public TerminalNode Identifier(int i) {
+			return getToken(RavelParser.Identifier, i);
+		}
+		public FunctionArgContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_functionArg; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunctionArg(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunctionArg(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunctionArg(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final FunctionArgContext functionArg() throws RecognitionException {
+		FunctionArgContext _localctx = new FunctionArgContext(_ctx, getState());
+		enterRule(_localctx, 110, RULE_functionArg);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(515);
+			match(Identifier);
+			setState(516);
+			match(Identifier);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Component_parametersContext extends ParserRuleContext {
+		public ParamsContext params() {
+			return getRuleContext(ParamsContext.class,0);
+		}
+		public Component_parametersContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_component_parameters; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterComponent_parameters(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitComponent_parameters(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitComponent_parameters(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Component_parametersContext component_parameters() throws RecognitionException {
+		Component_parametersContext _localctx = new Component_parametersContext(_ctx, getState());
+		enterRule(_localctx, 112, RULE_component_parameters);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(518);
+			match(LPAREN);
+			setState(520);
+			_la = _input.LA(1);
+			if (_la==Identifier) {
+				{
+				setState(519);
+				params();
+				}
+			}
+
+			setState(522);
+			match(RPAREN);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ParamsContext extends ParserRuleContext {
+		public List<TerminalNode> Identifier() { return getTokens(RavelParser.Identifier); }
+		public TerminalNode Identifier(int i) {
+			return getToken(RavelParser.Identifier, i);
+		}
+		public ParamsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_params; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterParams(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitParams(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitParams(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ParamsContext params() throws RecognitionException {
+		ParamsContext _localctx = new ParamsContext(_ctx, getState());
+		enterRule(_localctx, 114, RULE_params);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(524);
+			match(Identifier);
+			setState(527);
+			_la = _input.LA(1);
+			if (_la==COMMA) {
+				{
+				setState(525);
+				match(COMMA);
+				setState(526);
+				match(Identifier);
+				}
+			}
+
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ElementValuePairsContext extends ParserRuleContext {
+		public List<ElementValuePairContext> elementValuePair() {
+			return getRuleContexts(ElementValuePairContext.class);
+		}
+		public ElementValuePairContext elementValuePair(int i) {
+			return getRuleContext(ElementValuePairContext.class,i);
+		}
+		public ElementValuePairsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_elementValuePairs; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterElementValuePairs(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitElementValuePairs(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitElementValuePairs(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ElementValuePairsContext elementValuePairs() throws RecognitionException {
+		ElementValuePairsContext _localctx = new ElementValuePairsContext(_ctx, getState());
+		enterRule(_localctx, 116, RULE_elementValuePairs);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(529);
+			elementValuePair();
+			setState(534);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==COMMA) {
+				{
+				{
+				setState(530);
+				match(COMMA);
+				setState(531);
+				elementValuePair();
+				}
+				}
+				setState(536);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ElementValuePairContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public ElementValueContext elementValue() {
+			return getRuleContext(ElementValueContext.class,0);
+		}
+		public ElementValuePairContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_elementValuePair; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterElementValuePair(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitElementValuePair(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitElementValuePair(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ElementValuePairContext elementValuePair() throws RecognitionException {
+		ElementValuePairContext _localctx = new ElementValuePairContext(_ctx, getState());
+		enterRule(_localctx, 118, RULE_elementValuePair);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(537);
+			match(Identifier);
+			setState(538);
+			match(ASSIGN);
+			setState(539);
+			elementValue();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ElementValueContext extends ParserRuleContext {
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public ElementValueArrayInitializerContext elementValueArrayInitializer() {
+			return getRuleContext(ElementValueArrayInitializerContext.class,0);
+		}
+		public ElementValueContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_elementValue; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterElementValue(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitElementValue(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitElementValue(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ElementValueContext elementValue() throws RecognitionException {
+		ElementValueContext _localctx = new ElementValueContext(_ctx, getState());
+		enterRule(_localctx, 120, RULE_elementValue);
+		try {
+			setState(543);
+			switch (_input.LA(1)) {
+			case SELF:
+			case TRUE:
+			case FALSE:
+			case NEWLINE:
+			case IntegerLiteral:
+			case FloatingPointLiteral:
+			case CharacterLiteral:
+			case StringLiteral:
+			case NullLiteral:
+			case LPAREN:
+			case BANG:
+			case TILDE:
+			case ADD:
+			case SUB:
+			case Identifier:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(541);
+				expression(0);
+				}
+				break;
+			case LBRACE:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(542);
+				elementValueArrayInitializer();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ElementValueArrayInitializerContext extends ParserRuleContext {
+		public List<ElementValueContext> elementValue() {
+			return getRuleContexts(ElementValueContext.class);
+		}
+		public ElementValueContext elementValue(int i) {
+			return getRuleContext(ElementValueContext.class,i);
+		}
+		public ElementValueArrayInitializerContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_elementValueArrayInitializer; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterElementValueArrayInitializer(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitElementValueArrayInitializer(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitElementValueArrayInitializer(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ElementValueArrayInitializerContext elementValueArrayInitializer() throws RecognitionException {
+		ElementValueArrayInitializerContext _localctx = new ElementValueArrayInitializerContext(_ctx, getState());
+		enterRule(_localctx, 122, RULE_elementValueArrayInitializer);
+		int _la;
+		try {
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(545);
+			match(LBRACE);
+			setState(554);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN) | (1L << LBRACE))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+				{
+				setState(546);
+				elementValue();
+				setState(551);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,48,_ctx);
+				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+					if ( _alt==1 ) {
+						{
+						{
+						setState(547);
+						match(COMMA);
+						setState(548);
+						elementValue();
+						}
+						} 
+					}
+					setState(553);
+					_errHandler.sync(this);
+					_alt = getInterpreter().adaptivePredict(_input,48,_ctx);
+				}
+				}
+			}
+
+			setState(557);
+			_la = _input.LA(1);
+			if (_la==COMMA) {
+				{
+				setState(556);
+				match(COMMA);
+				}
+			}
+
+			setState(559);
+			match(RBRACE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ExpressionListContext extends ParserRuleContext {
+		public List<ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public ExpressionListContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_expressionList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterExpressionList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitExpressionList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitExpressionList(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ExpressionListContext expressionList() throws RecognitionException {
+		ExpressionListContext _localctx = new ExpressionListContext(_ctx, getState());
+		enterRule(_localctx, 124, RULE_expressionList);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(561);
+			expression(0);
+			setState(566);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==COMMA) {
+				{
+				{
+				setState(562);
+				match(COMMA);
+				setState(563);
+				expression(0);
+				}
+				}
+				setState(568);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Increament_exprContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Increament_exprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_increament_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterIncreament_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitIncreament_expr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitIncreament_expr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Increament_exprContext increament_expr() throws RecognitionException {
+		Increament_exprContext _localctx = new Increament_exprContext(_ctx, getState());
+		enterRule(_localctx, 126, RULE_increament_expr);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(569);
+			match(Identifier);
+			setState(570);
+			match(INC);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Decrement_expContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Decrement_expContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_decrement_exp; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterDecrement_exp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitDecrement_exp(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitDecrement_exp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Decrement_expContext decrement_exp() throws RecognitionException {
+		Decrement_expContext _localctx = new Decrement_expContext(_ctx, getState());
+		enterRule(_localctx, 128, RULE_decrement_exp);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(572);
+			match(Identifier);
+			setState(573);
+			match(DEC);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ExpressionContext extends ParserRuleContext {
+		public PrimaryContext primary() {
+			return getRuleContext(PrimaryContext.class,0);
+		}
+		public Increament_exprContext increament_expr() {
+			return getRuleContext(Increament_exprContext.class,0);
+		}
+		public Decrement_expContext decrement_exp() {
+			return getRuleContext(Decrement_expContext.class,0);
+		}
+		public List<ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public Comp_opContext comp_op() {
+			return getRuleContext(Comp_opContext.class,0);
+		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public ExpressionListContext expressionList() {
+			return getRuleContext(ExpressionListContext.class,0);
+		}
+		public ExpressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_expression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitExpression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitExpression(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ExpressionContext expression() throws RecognitionException {
+		return expression(0);
+	}
+
+	private ExpressionContext expression(int _p) throws RecognitionException {
+		ParserRuleContext _parentctx = _ctx;
+		int _parentState = getState();
+		ExpressionContext _localctx = new ExpressionContext(_ctx, _parentState);
+		ExpressionContext _prevctx = _localctx;
+		int _startState = 130;
+		enterRecursionRule(_localctx, 130, RULE_expression, _p);
+		int _la;
+		try {
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(584);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,52,_ctx) ) {
+			case 1:
+				{
+				setState(576);
+				primary();
+				}
+				break;
+			case 2:
+				{
+				setState(577);
+				increament_expr();
+				}
+				break;
+			case 3:
+				{
+				setState(578);
+				decrement_exp();
+				}
+				break;
+			case 4:
+				{
+				setState(579);
+				_la = _input.LA(1);
+				if ( !(_la==ADD || _la==SUB) ) {
+				_errHandler.recoverInline(this);
+				} else {
+					consume();
+				}
+				setState(580);
+				expression(12);
+				}
+				break;
+			case 5:
+				{
+				setState(581);
+				_la = _input.LA(1);
+				if ( !(_la==BANG || _la==TILDE) ) {
+				_errHandler.recoverInline(this);
+				} else {
+					consume();
+				}
+				setState(582);
+				expression(11);
+				}
+				break;
+			case 6:
+				{
+				setState(583);
+				match(NEWLINE);
+				}
+				break;
+			}
+			_ctx.stop = _input.LT(-1);
+			setState(630);
+			_errHandler.sync(this);
+			_alt = getInterpreter().adaptivePredict(_input,55,_ctx);
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+				if ( _alt==1 ) {
+					if ( _parseListeners!=null ) triggerExitRuleEvent();
+					_prevctx = _localctx;
+					{
+					setState(628);
+					_errHandler.sync(this);
+					switch ( getInterpreter().adaptivePredict(_input,54,_ctx) ) {
+					case 1:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(586);
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
+						setState(587);
+						_la = _input.LA(1);
+						if ( !(((((_la - 81)) & ~0x3f) == 0 && ((1L << (_la - 81)) & ((1L << (MUL - 81)) | (1L << (DIV - 81)) | (1L << (MOD - 81)))) != 0)) ) {
+						_errHandler.recoverInline(this);
+						} else {
+							consume();
+						}
+						setState(588);
+						expression(11);
+						}
+						break;
+					case 2:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(589);
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
+						setState(590);
+						_la = _input.LA(1);
+						if ( !(_la==ADD || _la==SUB) ) {
+						_errHandler.recoverInline(this);
+						} else {
+							consume();
+						}
+						setState(591);
+						expression(10);
+						}
+						break;
+					case 3:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(592);
+						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						setState(593);
+						comp_op();
+						setState(594);
+						expression(9);
+						}
+						break;
+					case 4:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(596);
+						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						setState(597);
+						match(BITAND);
+						setState(598);
+						expression(8);
+						}
+						break;
+					case 5:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(599);
+						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
+						setState(600);
+						match(CARET);
+						setState(601);
+						expression(7);
+						}
+						break;
+					case 6:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(602);
+						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
+						setState(603);
+						match(BITOR);
+						setState(604);
+						expression(6);
+						}
+						break;
+					case 7:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(605);
+						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
+						setState(606);
+						match(AND_S);
+						setState(607);
+						expression(5);
+						}
+						break;
+					case 8:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(608);
+						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
+						setState(609);
+						match(OR_S);
+						setState(610);
+						expression(4);
+						}
+						break;
+					case 9:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(611);
+						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
+						setState(612);
+						_la = _input.LA(1);
+						if ( !(((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (ASSIGN - 64)) | (1L << (ADD_ASSIGN - 64)) | (1L << (SUB_ASSIGN - 64)) | (1L << (MUL_ASSIGN - 64)) | (1L << (DIV_ASSIGN - 64)) | (1L << (AND_ASSIGN - 64)) | (1L << (OR_ASSIGN - 64)) | (1L << (XOR_ASSIGN - 64)) | (1L << (MOD_ASSIGN - 64)) | (1L << (LSHIFT_ASSIGN - 64)) | (1L << (RSHIFT_ASSIGN - 64)) | (1L << (URSHIFT_ASSIGN - 64)))) != 0)) ) {
+						_errHandler.recoverInline(this);
+						} else {
+							consume();
+						}
+						setState(613);
+						expression(2);
+						}
+						break;
+					case 10:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(614);
+						if (!(precpred(_ctx, 17))) throw new FailedPredicateException(this, "precpred(_ctx, 17)");
+						setState(615);
+						match(DOT);
+						setState(616);
+						match(Identifier);
+						}
+						break;
+					case 11:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(617);
+						if (!(precpred(_ctx, 16))) throw new FailedPredicateException(this, "precpred(_ctx, 16)");
+						setState(618);
+						match(LBRACK);
+						setState(619);
+						expression(0);
+						setState(620);
+						match(RBRACK);
+						}
+						break;
+					case 12:
+						{
+						_localctx = new ExpressionContext(_parentctx, _parentState);
+						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(622);
+						if (!(precpred(_ctx, 15))) throw new FailedPredicateException(this, "precpred(_ctx, 15)");
+						setState(623);
+						match(LPAREN);
+						setState(625);
+						_la = _input.LA(1);
+						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral) | (1L << LPAREN))) != 0) || ((((_la - 67)) & ~0x3f) == 0 && ((1L << (_la - 67)) & ((1L << (BANG - 67)) | (1L << (TILDE - 67)) | (1L << (ADD - 67)) | (1L << (SUB - 67)) | (1L << (Identifier - 67)))) != 0)) {
+							{
+							setState(624);
+							expressionList();
+							}
+						}
+
+						setState(627);
+						match(RPAREN);
+						}
+						break;
+					}
+					} 
+				}
+				setState(632);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,55,_ctx);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			unrollRecursionContexts(_parentctx);
+		}
+		return _localctx;
+	}
+
+	public static class PrimaryContext extends ParserRuleContext {
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public PrimaryContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_primary; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterPrimary(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitPrimary(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPrimary(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PrimaryContext primary() throws RecognitionException {
+		PrimaryContext _localctx = new PrimaryContext(_ctx, getState());
+		enterRule(_localctx, 132, RULE_primary);
+		try {
+			setState(640);
+			switch (_input.LA(1)) {
+			case LPAREN:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(633);
+				match(LPAREN);
+				setState(634);
+				expression(0);
+				setState(635);
+				match(RPAREN);
+				}
+				break;
+			case SELF:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(637);
+				match(SELF);
+				}
+				break;
+			case TRUE:
+			case FALSE:
+			case IntegerLiteral:
+			case FloatingPointLiteral:
+			case CharacterLiteral:
+			case StringLiteral:
+			case NullLiteral:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(638);
+				literal();
+				}
+				break;
+			case Identifier:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(639);
+				match(Identifier);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Ref_assigContext extends ParserRuleContext {
+		public Ref_assigContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_ref_assig; }
+	 
+		public Ref_assigContext() { }
+		public void copyFrom(Ref_assigContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class ReferenceAssigmentContext extends Ref_assigContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public ReferenceAssigmentContext(Ref_assigContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterReferenceAssigment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitReferenceAssigment(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitReferenceAssigment(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Ref_assigContext ref_assig() throws RecognitionException {
+		Ref_assigContext _localctx = new Ref_assigContext(_ctx, getState());
+		enterRule(_localctx, 134, RULE_ref_assig);
+		try {
+			_localctx = new ReferenceAssigmentContext(_localctx);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(642);
+			match(Identifier);
+			setState(643);
+			match(ASSIGN);
+			setState(644);
+			qualified_name();
+			setState(645);
+			match(NEWLINE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Funct_exprContext extends ParserRuleContext {
+		public Func_no_returnContext func_no_return() {
+			return getRuleContext(Func_no_returnContext.class,0);
+		}
+		public Func_with_returnContext func_with_return() {
+			return getRuleContext(Func_with_returnContext.class,0);
+		}
+		public Funct_exprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_funct_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunct_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunct_expr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunct_expr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Funct_exprContext funct_expr() throws RecognitionException {
+		Funct_exprContext _localctx = new Funct_exprContext(_ctx, getState());
+		enterRule(_localctx, 136, RULE_funct_expr);
+		try {
+			setState(649);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,57,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(647);
+				func_no_return();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(648);
+				func_with_return();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Func_no_returnContext extends ParserRuleContext {
+		public Qualified_nameContext qualified_name() {
+			return getRuleContext(Qualified_nameContext.class,0);
+		}
+		public Component_parametersContext component_parameters() {
+			return getRuleContext(Component_parametersContext.class,0);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public Func_no_returnContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_func_no_return; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunc_no_return(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunc_no_return(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunc_no_return(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Func_no_returnContext func_no_return() throws RecognitionException {
+		Func_no_returnContext _localctx = new Func_no_returnContext(_ctx, getState());
+		enterRule(_localctx, 138, RULE_func_no_return);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(651);
+			qualified_name();
+			setState(652);
+			component_parameters();
+			setState(653);
+			match(NEWLINE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Func_with_returnContext extends ParserRuleContext {
+		public TerminalNode Identifier() { return getToken(RavelParser.Identifier, 0); }
+		public Func_no_returnContext func_no_return() {
+			return getRuleContext(Func_no_returnContext.class,0);
+		}
+		public TerminalNode NEWLINE() { return getToken(RavelParser.NEWLINE, 0); }
+		public Func_with_returnContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_func_with_return; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFunc_with_return(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFunc_with_return(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFunc_with_return(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Func_with_returnContext func_with_return() throws RecognitionException {
+		Func_with_returnContext _localctx = new Func_with_returnContext(_ctx, getState());
+		enterRule(_localctx, 140, RULE_func_with_return);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(655);
+			match(Identifier);
+			setState(656);
+			match(ASSIGN);
+			setState(657);
+			func_no_return();
+			setState(658);
+			match(NEWLINE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Qualified_nameContext extends ParserRuleContext {
+		public List<TerminalNode> Identifier() { return getTokens(RavelParser.Identifier); }
+		public TerminalNode Identifier(int i) {
+			return getToken(RavelParser.Identifier, i);
+		}
+		public Qualified_nameContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_qualified_name; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterQualified_name(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitQualified_name(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitQualified_name(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Qualified_nameContext qualified_name() throws RecognitionException {
+		Qualified_nameContext _localctx = new Qualified_nameContext(_ctx, getState());
+		enterRule(_localctx, 142, RULE_qualified_name);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(660);
+			match(Identifier);
+			setState(665);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==DOT) {
+				{
+				{
+				setState(661);
+				match(DOT);
+				setState(662);
+				match(Identifier);
+				}
+				}
+				setState(667);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -4657,82 +5187,82 @@ public class RavelParser extends Parser {
 
 	public final Comp_opContext comp_op() throws RecognitionException {
 		Comp_opContext _localctx = new Comp_opContext(_ctx, getState());
-		enterRule(_localctx, 140, RULE_comp_op);
+		enterRule(_localctx, 144, RULE_comp_op);
 		try {
-			setState(606);
+			setState(680);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,44,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,59,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(594);
-				match(LESS_THAN);
+				setState(668);
+				match(LT);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(595);
-				match(GREATER_THAN);
+				setState(669);
+				match(GT);
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(596);
-				match(EQUALS);
+				setState(670);
+				match(EQUAL);
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(597);
-				match(GT_EQ);
+				setState(671);
+				match(GE);
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(598);
-				match(LT_EQ);
+				setState(672);
+				match(LE);
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(599);
-				match(NOT_EQ);
+				setState(673);
+				match(NOTEQUAL);
 				}
 				break;
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(600);
+				setState(674);
 				match(IN);
 				}
 				break;
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(601);
+				setState(675);
 				match(NOT);
-				setState(602);
+				setState(676);
 				match(IN);
 				}
 				break;
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(603);
+				setState(677);
 				match(IS);
 				}
 				break;
 			case 10:
 				enterOuterAlt(_localctx, 10);
 				{
-				setState(604);
+				setState(678);
 				match(IS);
-				setState(605);
+				setState(679);
 				match(NOT);
 				}
 				break;
@@ -4749,777 +5279,80 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExprContext extends ParserRuleContext {
-		public List<Xor_exprContext> xor_expr() {
-			return getRuleContexts(Xor_exprContext.class);
+	public static class LiteralContext extends ParserRuleContext {
+		public TerminalNode IntegerLiteral() { return getToken(RavelParser.IntegerLiteral, 0); }
+		public TerminalNode FloatingPointLiteral() { return getToken(RavelParser.FloatingPointLiteral, 0); }
+		public TerminalNode CharacterLiteral() { return getToken(RavelParser.CharacterLiteral, 0); }
+		public Boolean_rContext boolean_r() {
+			return getRuleContext(Boolean_rContext.class,0);
 		}
-		public Xor_exprContext xor_expr(int i) {
-			return getRuleContext(Xor_exprContext.class,i);
-		}
-		public ExprContext(ParserRuleContext parent, int invokingState) {
+		public TerminalNode StringLiteral() { return getToken(RavelParser.StringLiteral, 0); }
+		public LiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override public int getRuleIndex() { return RULE_literal; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterExpr(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterLiteral(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitExpr(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitLiteral(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitExpr(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitLiteral(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final ExprContext expr() throws RecognitionException {
-		ExprContext _localctx = new ExprContext(_ctx, getState());
-		enterRule(_localctx, 142, RULE_expr);
-		int _la;
+	public final LiteralContext literal() throws RecognitionException {
+		LiteralContext _localctx = new LiteralContext(_ctx, getState());
+		enterRule(_localctx, 146, RULE_literal);
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(608);
-			xor_expr();
-			setState(613);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==OR_OP) {
-				{
-				{
-				setState(609);
-				match(OR_OP);
-				setState(610);
-				xor_expr();
-				}
-				}
-				setState(615);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Xor_exprContext extends ParserRuleContext {
-		public List<And_exprContext> and_expr() {
-			return getRuleContexts(And_exprContext.class);
-		}
-		public And_exprContext and_expr(int i) {
-			return getRuleContext(And_exprContext.class,i);
-		}
-		public Xor_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_xor_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterXor_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitXor_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitXor_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Xor_exprContext xor_expr() throws RecognitionException {
-		Xor_exprContext _localctx = new Xor_exprContext(_ctx, getState());
-		enterRule(_localctx, 144, RULE_xor_expr);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(616);
-			and_expr();
-			setState(621);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==XOR) {
-				{
-				{
-				setState(617);
-				match(XOR);
-				setState(618);
-				and_expr();
-				}
-				}
-				setState(623);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class And_exprContext extends ParserRuleContext {
-		public List<Shift_exprContext> shift_expr() {
-			return getRuleContexts(Shift_exprContext.class);
-		}
-		public Shift_exprContext shift_expr(int i) {
-			return getRuleContext(Shift_exprContext.class,i);
-		}
-		public And_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_and_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterAnd_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitAnd_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitAnd_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final And_exprContext and_expr() throws RecognitionException {
-		And_exprContext _localctx = new And_exprContext(_ctx, getState());
-		enterRule(_localctx, 146, RULE_and_expr);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(624);
-			shift_expr();
-			setState(629);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==AND_OP) {
-				{
-				{
-				setState(625);
-				match(AND_OP);
-				setState(626);
-				shift_expr();
-				}
-				}
-				setState(631);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Shift_exprContext extends ParserRuleContext {
-		public List<Arith_exprContext> arith_expr() {
-			return getRuleContexts(Arith_exprContext.class);
-		}
-		public Arith_exprContext arith_expr(int i) {
-			return getRuleContext(Arith_exprContext.class,i);
-		}
-		public Shift_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_shift_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterShift_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitShift_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitShift_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Shift_exprContext shift_expr() throws RecognitionException {
-		Shift_exprContext _localctx = new Shift_exprContext(_ctx, getState());
-		enterRule(_localctx, 148, RULE_shift_expr);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(632);
-			arith_expr();
-			setState(639);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==LEFT_SHIFT || _la==RIGHT_SHIFT) {
-				{
-				setState(637);
-				switch (_input.LA(1)) {
-				case LEFT_SHIFT:
-					{
-					setState(633);
-					match(LEFT_SHIFT);
-					setState(634);
-					arith_expr();
-					}
-					break;
-				case RIGHT_SHIFT:
-					{
-					setState(635);
-					match(RIGHT_SHIFT);
-					setState(636);
-					arith_expr();
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
-				}
-				}
-				setState(641);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Arith_exprContext extends ParserRuleContext {
-		public List<TermContext> term() {
-			return getRuleContexts(TermContext.class);
-		}
-		public TermContext term(int i) {
-			return getRuleContext(TermContext.class,i);
-		}
-		public Arith_exprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_arith_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterArith_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitArith_expr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitArith_expr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Arith_exprContext arith_expr() throws RecognitionException {
-		Arith_exprContext _localctx = new Arith_exprContext(_ctx, getState());
-		enterRule(_localctx, 150, RULE_arith_expr);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(642);
-			term();
-			setState(649);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==ADD || _la==MINUS) {
-				{
-				setState(647);
-				switch (_input.LA(1)) {
-				case ADD:
-					{
-					setState(643);
-					match(ADD);
-					setState(644);
-					term();
-					}
-					break;
-				case MINUS:
-					{
-					setState(645);
-					match(MINUS);
-					setState(646);
-					term();
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
-				}
-				}
-				setState(651);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TermContext extends ParserRuleContext {
-		public List<FactorContext> factor() {
-			return getRuleContexts(FactorContext.class);
-		}
-		public FactorContext factor(int i) {
-			return getRuleContext(FactorContext.class,i);
-		}
-		public TermContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_term; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTerm(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTerm(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTerm(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final TermContext term() throws RecognitionException {
-		TermContext _localctx = new TermContext(_ctx, getState());
-		enterRule(_localctx, 152, RULE_term);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(652);
-			factor();
-			setState(665);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (STAR - 65)) | (1L << (DIV - 65)) | (1L << (MOD - 65)) | (1L << (IDIV - 65)) | (1L << (AT - 65)))) != 0)) {
-				{
-				setState(663);
-				switch (_input.LA(1)) {
-				case STAR:
-					{
-					setState(653);
-					match(STAR);
-					setState(654);
-					factor();
-					}
-					break;
-				case DIV:
-					{
-					setState(655);
-					match(DIV);
-					setState(656);
-					factor();
-					}
-					break;
-				case MOD:
-					{
-					setState(657);
-					match(MOD);
-					setState(658);
-					factor();
-					}
-					break;
-				case IDIV:
-					{
-					setState(659);
-					match(IDIV);
-					setState(660);
-					factor();
-					}
-					break;
-				case AT:
-					{
-					setState(661);
-					match(AT);
-					setState(662);
-					factor();
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
-				}
-				}
-				setState(667);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class FactorContext extends ParserRuleContext {
-		public FactorContext factor() {
-			return getRuleContext(FactorContext.class,0);
-		}
-		public PowerContext power() {
-			return getRuleContext(PowerContext.class,0);
-		}
-		public FactorContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_factor; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterFactor(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitFactor(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitFactor(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final FactorContext factor() throws RecognitionException {
-		FactorContext _localctx = new FactorContext(_ctx, getState());
-		enterRule(_localctx, 154, RULE_factor);
-		try {
-			setState(675);
+			setState(688);
 			switch (_input.LA(1)) {
-			case ADD:
+			case IntegerLiteral:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(668);
-				match(ADD);
-				setState(669);
-				factor();
+				setState(682);
+				match(IntegerLiteral);
 				}
 				break;
-			case MINUS:
+			case FloatingPointLiteral:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(670);
-				match(MINUS);
-				setState(671);
-				factor();
-				}
-				break;
-			case NOT_OP:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(672);
-				match(NOT_OP);
-				setState(673);
-				factor();
-				}
-				break;
-			case T__11:
-			case TRUE:
-			case FALSE:
-			case NONE:
-			case NAME:
-			case STRING_LITERAL:
-			case BYTES_LITERAL:
-			case DECIMAL_INTEGER:
-			case OCT_INTEGER:
-			case HEX_INTEGER:
-			case BIN_INTEGER:
-			case FLOAT_NUMBER:
-			case IMAG_NUMBER:
-			case OPEN_PAREN:
-			case OPEN_BRACK:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(674);
-				power();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class PowerContext extends ParserRuleContext {
-		public AtomContext atom() {
-			return getRuleContext(AtomContext.class,0);
-		}
-		public List<TrailerContext> trailer() {
-			return getRuleContexts(TrailerContext.class);
-		}
-		public TrailerContext trailer(int i) {
-			return getRuleContext(TrailerContext.class,i);
-		}
-		public FactorContext factor() {
-			return getRuleContext(FactorContext.class,0);
-		}
-		public PowerContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_power; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterPower(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitPower(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitPower(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final PowerContext power() throws RecognitionException {
-		PowerContext _localctx = new PowerContext(_ctx, getState());
-		enterRule(_localctx, 156, RULE_power);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(677);
-			atom();
-			setState(681);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & ((1L << (DOT - 64)) | (1L << (OPEN_PAREN - 64)) | (1L << (OPEN_BRACK - 64)))) != 0)) {
-				{
-				{
-				setState(678);
-				trailer();
-				}
-				}
 				setState(683);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			setState(686);
-			_la = _input.LA(1);
-			if (_la==T__10) {
+				match(FloatingPointLiteral);
+				}
+				break;
+			case CharacterLiteral:
+				enterOuterAlt(_localctx, 3);
 				{
 				setState(684);
-				match(T__10);
-				setState(685);
-				factor();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class AtomContext extends ParserRuleContext {
-		public Testlist_compContext testlist_comp() {
-			return getRuleContext(Testlist_compContext.class,0);
-		}
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
-		public NumberContext number() {
-			return getRuleContext(NumberContext.class,0);
-		}
-		public List<StringContext> string() {
-			return getRuleContexts(StringContext.class);
-		}
-		public StringContext string(int i) {
-			return getRuleContext(StringContext.class,i);
-		}
-		public TerminalNode NONE() { return getToken(RavelParser.NONE, 0); }
-		public TerminalNode TRUE() { return getToken(RavelParser.TRUE, 0); }
-		public TerminalNode FALSE() { return getToken(RavelParser.FALSE, 0); }
-		public AtomContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_atom; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterAtom(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitAtom(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitAtom(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final AtomContext atom() throws RecognitionException {
-		AtomContext _localctx = new AtomContext(_ctx, getState());
-		enterRule(_localctx, 158, RULE_atom);
-		int _la;
-		try {
-			setState(709);
-			switch (_input.LA(1)) {
-			case OPEN_PAREN:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(688);
-				match(OPEN_PAREN);
-				setState(690);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & ((1L << (OPEN_PAREN - 66)) | (1L << (OPEN_BRACK - 66)) | (1L << (ADD - 66)) | (1L << (MINUS - 66)) | (1L << (NOT_OP - 66)))) != 0)) {
-					{
-					setState(689);
-					testlist_comp();
-					}
-				}
-
-				setState(692);
-				match(CLOSE_PAREN);
+				match(CharacterLiteral);
 				}
 				break;
-			case OPEN_BRACK:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(693);
-				match(OPEN_BRACK);
-				setState(695);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & ((1L << (OPEN_PAREN - 66)) | (1L << (OPEN_BRACK - 66)) | (1L << (ADD - 66)) | (1L << (MINUS - 66)) | (1L << (NOT_OP - 66)))) != 0)) {
-					{
-					setState(694);
-					testlist_comp();
-					}
-				}
-
-				setState(697);
-				match(CLOSE_BRACK);
-				}
-				break;
-			case NAME:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(698);
-				match(NAME);
-				}
-				break;
-			case DECIMAL_INTEGER:
-			case OCT_INTEGER:
-			case HEX_INTEGER:
-			case BIN_INTEGER:
-			case FLOAT_NUMBER:
-			case IMAG_NUMBER:
+			case TRUE:
+			case FALSE:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(699);
-				number();
+				setState(685);
+				boolean_r();
 				}
 				break;
-			case STRING_LITERAL:
-			case BYTES_LITERAL:
+			case StringLiteral:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(701); 
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				do {
-					{
-					{
-					setState(700);
-					string();
-					}
-					}
-					setState(703); 
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				} while ( _la==STRING_LITERAL || _la==BYTES_LITERAL );
+				setState(686);
+				match(StringLiteral);
 				}
 				break;
-			case T__11:
+			case NullLiteral:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(705);
-				match(T__11);
-				}
-				break;
-			case NONE:
-				enterOuterAlt(_localctx, 7);
-				{
-				setState(706);
-				match(NONE);
-				}
-				break;
-			case TRUE:
-				enterOuterAlt(_localctx, 8);
-				{
-				setState(707);
-				match(TRUE);
-				}
-				break;
-			case FALSE:
-				enterOuterAlt(_localctx, 9);
-				{
-				setState(708);
-				match(FALSE);
+				setState(687);
+				match(NullLiteral);
 				}
 				break;
 			default:
@@ -5537,1184 +5370,36 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Testlist_compContext extends ParserRuleContext {
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public Comp_forContext comp_for() {
-			return getRuleContext(Comp_forContext.class,0);
-		}
-		public Testlist_compContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_testlist_comp; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTestlist_comp(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTestlist_comp(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTestlist_comp(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Testlist_compContext testlist_comp() throws RecognitionException {
-		Testlist_compContext _localctx = new Testlist_compContext(_ctx, getState());
-		enterRule(_localctx, 160, RULE_testlist_comp);
-		int _la;
-		try {
-			int _alt;
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(711);
-			test();
-			setState(723);
-			switch (_input.LA(1)) {
-			case FOR:
-				{
-				setState(712);
-				comp_for();
-				}
-				break;
-			case CLOSE_PAREN:
-			case COMMA:
-			case CLOSE_BRACK:
-				{
-				setState(717);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,61,_ctx);
-				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-					if ( _alt==1 ) {
-						{
-						{
-						setState(713);
-						match(COMMA);
-						setState(714);
-						test();
-						}
-						} 
-					}
-					setState(719);
-					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,61,_ctx);
-				}
-				setState(721);
-				_la = _input.LA(1);
-				if (_la==COMMA) {
-					{
-					setState(720);
-					match(COMMA);
-					}
-				}
-
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TrailerContext extends ParserRuleContext {
-		public ArglistContext arglist() {
-			return getRuleContext(ArglistContext.class,0);
-		}
-		public SubscriptlistContext subscriptlist() {
-			return getRuleContext(SubscriptlistContext.class,0);
-		}
-		public TerminalNode NAME() { return getToken(RavelParser.NAME, 0); }
-		public TrailerContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_trailer; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTrailer(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTrailer(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTrailer(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final TrailerContext trailer() throws RecognitionException {
-		TrailerContext _localctx = new TrailerContext(_ctx, getState());
-		enterRule(_localctx, 162, RULE_trailer);
-		int _la;
-		try {
-			setState(736);
-			switch (_input.LA(1)) {
-			case OPEN_PAREN:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(725);
-				match(OPEN_PAREN);
-				setState(727);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__10) | (1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (STAR - 65)) | (1L << (OPEN_PAREN - 65)) | (1L << (OPEN_BRACK - 65)) | (1L << (ADD - 65)) | (1L << (MINUS - 65)) | (1L << (NOT_OP - 65)))) != 0)) {
-					{
-					setState(726);
-					arglist();
-					}
-				}
-
-				setState(729);
-				match(CLOSE_PAREN);
-				}
-				break;
-			case OPEN_BRACK:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(730);
-				match(OPEN_BRACK);
-				setState(731);
-				subscriptlist();
-				setState(732);
-				match(CLOSE_BRACK);
-				}
-				break;
-			case DOT:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(734);
-				match(DOT);
-				setState(735);
-				match(NAME);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ArglistContext extends ParserRuleContext {
-		public List<ArgumentContext> argument() {
-			return getRuleContexts(ArgumentContext.class);
-		}
-		public ArgumentContext argument(int i) {
-			return getRuleContext(ArgumentContext.class,i);
-		}
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public ArglistContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_arglist; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterArglist(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitArglist(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitArglist(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final ArglistContext arglist() throws RecognitionException {
-		ArglistContext _localctx = new ArglistContext(_ctx, getState());
-		enterRule(_localctx, 164, RULE_arglist);
-		int _la;
-		try {
-			int _alt;
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(743);
-			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,66,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-				if ( _alt==1 ) {
-					{
-					{
-					setState(738);
-					argument();
-					setState(739);
-					match(COMMA);
-					}
-					} 
-				}
-				setState(745);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,66,_ctx);
-			}
-			setState(766);
-			switch (_input.LA(1)) {
-			case T__11:
-			case TRUE:
-			case FALSE:
-			case NOT:
-			case NONE:
-			case NAME:
-			case STRING_LITERAL:
-			case BYTES_LITERAL:
-			case DECIMAL_INTEGER:
-			case OCT_INTEGER:
-			case HEX_INTEGER:
-			case BIN_INTEGER:
-			case FLOAT_NUMBER:
-			case IMAG_NUMBER:
-			case OPEN_PAREN:
-			case OPEN_BRACK:
-			case ADD:
-			case MINUS:
-			case NOT_OP:
-				{
-				setState(746);
-				argument();
-				setState(748);
-				_la = _input.LA(1);
-				if (_la==COMMA) {
-					{
-					setState(747);
-					match(COMMA);
-					}
-				}
-
-				}
-				break;
-			case STAR:
-				{
-				setState(750);
-				match(STAR);
-				setState(751);
-				test();
-				setState(756);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,68,_ctx);
-				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-					if ( _alt==1 ) {
-						{
-						{
-						setState(752);
-						match(COMMA);
-						setState(753);
-						argument();
-						}
-						} 
-					}
-					setState(758);
-					_errHandler.sync(this);
-					_alt = getInterpreter().adaptivePredict(_input,68,_ctx);
-				}
-				setState(762);
-				_la = _input.LA(1);
-				if (_la==COMMA) {
-					{
-					setState(759);
-					match(COMMA);
-					setState(760);
-					match(T__10);
-					setState(761);
-					test();
-					}
-				}
-
-				}
-				break;
-			case T__10:
-				{
-				setState(764);
-				match(T__10);
-				setState(765);
-				test();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ArgumentContext extends ParserRuleContext {
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public Comp_forContext comp_for() {
-			return getRuleContext(Comp_forContext.class,0);
-		}
-		public ArgumentContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_argument; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterArgument(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitArgument(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitArgument(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final ArgumentContext argument() throws RecognitionException {
-		ArgumentContext _localctx = new ArgumentContext(_ctx, getState());
-		enterRule(_localctx, 166, RULE_argument);
-		int _la;
-		try {
-			setState(776);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,72,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(768);
-				test();
-				setState(770);
-				_la = _input.LA(1);
-				if (_la==FOR) {
-					{
-					setState(769);
-					comp_for();
-					}
-				}
-
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(772);
-				test();
-				setState(773);
-				match(ASSIGN);
-				setState(774);
-				test();
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class SubscriptlistContext extends ParserRuleContext {
-		public List<SubscriptContext> subscript() {
-			return getRuleContexts(SubscriptContext.class);
-		}
-		public SubscriptContext subscript(int i) {
-			return getRuleContext(SubscriptContext.class,i);
-		}
-		public SubscriptlistContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_subscriptlist; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterSubscriptlist(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitSubscriptlist(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSubscriptlist(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final SubscriptlistContext subscriptlist() throws RecognitionException {
-		SubscriptlistContext _localctx = new SubscriptlistContext(_ctx, getState());
-		enterRule(_localctx, 168, RULE_subscriptlist);
-		int _la;
-		try {
-			int _alt;
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(778);
-			subscript();
-			setState(783);
-			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,73,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-				if ( _alt==1 ) {
-					{
-					{
-					setState(779);
-					match(COMMA);
-					setState(780);
-					subscript();
-					}
-					} 
-				}
-				setState(785);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,73,_ctx);
-			}
-			setState(787);
-			_la = _input.LA(1);
-			if (_la==COMMA) {
-				{
-				setState(786);
-				match(COMMA);
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class SubscriptContext extends ParserRuleContext {
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public SliceopContext sliceop() {
-			return getRuleContext(SliceopContext.class,0);
-		}
-		public SubscriptContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_subscript; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterSubscript(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitSubscript(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSubscript(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final SubscriptContext subscript() throws RecognitionException {
-		SubscriptContext _localctx = new SubscriptContext(_ctx, getState());
-		enterRule(_localctx, 170, RULE_subscript);
-		int _la;
-		try {
-			setState(800);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,78,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(789);
-				test();
-				}
-				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(791);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & ((1L << (OPEN_PAREN - 66)) | (1L << (OPEN_BRACK - 66)) | (1L << (ADD - 66)) | (1L << (MINUS - 66)) | (1L << (NOT_OP - 66)))) != 0)) {
-					{
-					setState(790);
-					test();
-					}
-				}
-
-				setState(793);
-				match(COLON);
-				setState(795);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & ((1L << (OPEN_PAREN - 66)) | (1L << (OPEN_BRACK - 66)) | (1L << (ADD - 66)) | (1L << (MINUS - 66)) | (1L << (NOT_OP - 66)))) != 0)) {
-					{
-					setState(794);
-					test();
-					}
-				}
-
-				setState(798);
-				_la = _input.LA(1);
-				if (_la==COLON) {
-					{
-					setState(797);
-					sliceop();
-					}
-				}
-
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class SliceopContext extends ParserRuleContext {
-		public TestContext test() {
-			return getRuleContext(TestContext.class,0);
-		}
-		public SliceopContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_sliceop; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterSliceop(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitSliceop(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitSliceop(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final SliceopContext sliceop() throws RecognitionException {
-		SliceopContext _localctx = new SliceopContext(_ctx, getState());
-		enterRule(_localctx, 172, RULE_sliceop);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(802);
-			match(COLON);
-			setState(804);
-			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << NAME) | (1L << STRING_LITERAL) | (1L << BYTES_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << IMAG_NUMBER))) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & ((1L << (OPEN_PAREN - 66)) | (1L << (OPEN_BRACK - 66)) | (1L << (ADD - 66)) | (1L << (MINUS - 66)) | (1L << (NOT_OP - 66)))) != 0)) {
-				{
-				setState(803);
-				test();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ExprlistContext extends ParserRuleContext {
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public ExprlistContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_exprlist; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterExprlist(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitExprlist(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitExprlist(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final ExprlistContext exprlist() throws RecognitionException {
-		ExprlistContext _localctx = new ExprlistContext(_ctx, getState());
-		enterRule(_localctx, 174, RULE_exprlist);
-		int _la;
-		try {
-			int _alt;
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(806);
-			expr();
-			setState(811);
-			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,80,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-				if ( _alt==1 ) {
-					{
-					{
-					setState(807);
-					match(COMMA);
-					setState(808);
-					expr();
-					}
-					} 
-				}
-				setState(813);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,80,_ctx);
-			}
-			setState(815);
-			_la = _input.LA(1);
-			if (_la==COMMA) {
-				{
-				setState(814);
-				match(COMMA);
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class TestlistContext extends ParserRuleContext {
-		public List<TestContext> test() {
-			return getRuleContexts(TestContext.class);
-		}
-		public TestContext test(int i) {
-			return getRuleContext(TestContext.class,i);
-		}
-		public TestlistContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_testlist; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterTestlist(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitTestlist(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitTestlist(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final TestlistContext testlist() throws RecognitionException {
-		TestlistContext _localctx = new TestlistContext(_ctx, getState());
-		enterRule(_localctx, 176, RULE_testlist);
-		int _la;
-		try {
-			int _alt;
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(817);
-			test();
-			setState(822);
-			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,82,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-				if ( _alt==1 ) {
-					{
-					{
-					setState(818);
-					match(COMMA);
-					setState(819);
-					test();
-					}
-					} 
-				}
-				setState(824);
-				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,82,_ctx);
-			}
-			setState(826);
-			_la = _input.LA(1);
-			if (_la==COMMA) {
-				{
-				setState(825);
-				match(COMMA);
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Comp_iterContext extends ParserRuleContext {
-		public Comp_forContext comp_for() {
-			return getRuleContext(Comp_forContext.class,0);
-		}
-		public Comp_ifContext comp_if() {
-			return getRuleContext(Comp_ifContext.class,0);
-		}
-		public Comp_iterContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_comp_iter; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterComp_iter(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitComp_iter(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitComp_iter(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Comp_iterContext comp_iter() throws RecognitionException {
-		Comp_iterContext _localctx = new Comp_iterContext(_ctx, getState());
-		enterRule(_localctx, 178, RULE_comp_iter);
-		try {
-			setState(830);
-			switch (_input.LA(1)) {
-			case FOR:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(828);
-				comp_for();
-				}
-				break;
-			case IF:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(829);
-				comp_if();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Comp_forContext extends ParserRuleContext {
-		public TerminalNode FOR() { return getToken(RavelParser.FOR, 0); }
-		public ExprlistContext exprlist() {
-			return getRuleContext(ExprlistContext.class,0);
-		}
-		public TerminalNode IN() { return getToken(RavelParser.IN, 0); }
-		public Or_testContext or_test() {
-			return getRuleContext(Or_testContext.class,0);
-		}
-		public Comp_iterContext comp_iter() {
-			return getRuleContext(Comp_iterContext.class,0);
-		}
-		public Comp_forContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_comp_for; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterComp_for(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitComp_for(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitComp_for(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Comp_forContext comp_for() throws RecognitionException {
-		Comp_forContext _localctx = new Comp_forContext(_ctx, getState());
-		enterRule(_localctx, 180, RULE_comp_for);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(832);
-			match(FOR);
-			setState(833);
-			exprlist();
-			setState(834);
-			match(IN);
-			setState(835);
-			or_test();
-			setState(837);
-			_la = _input.LA(1);
-			if (_la==IF || _la==FOR) {
-				{
-				setState(836);
-				comp_iter();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Comp_ifContext extends ParserRuleContext {
-		public TerminalNode IF() { return getToken(RavelParser.IF, 0); }
-		public Or_testContext or_test() {
-			return getRuleContext(Or_testContext.class,0);
-		}
-		public Comp_iterContext comp_iter() {
-			return getRuleContext(Comp_iterContext.class,0);
-		}
-		public Comp_ifContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_comp_if; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterComp_if(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitComp_if(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitComp_if(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Comp_ifContext comp_if() throws RecognitionException {
-		Comp_ifContext _localctx = new Comp_ifContext(_ctx, getState());
-		enterRule(_localctx, 182, RULE_comp_if);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(839);
-			match(IF);
-			setState(840);
-			or_test();
-			setState(842);
-			_la = _input.LA(1);
-			if (_la==IF || _la==FOR) {
-				{
-				setState(841);
-				comp_iter();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class StringContext extends ParserRuleContext {
-		public TerminalNode STRING_LITERAL() { return getToken(RavelParser.STRING_LITERAL, 0); }
-		public TerminalNode BYTES_LITERAL() { return getToken(RavelParser.BYTES_LITERAL, 0); }
-		public StringContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_string; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterString(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitString(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitString(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final StringContext string() throws RecognitionException {
-		StringContext _localctx = new StringContext(_ctx, getState());
-		enterRule(_localctx, 184, RULE_string);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(844);
-			_la = _input.LA(1);
-			if ( !(_la==STRING_LITERAL || _la==BYTES_LITERAL) ) {
-			_errHandler.recoverInline(this);
-			} else {
-				consume();
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class NumberContext extends ParserRuleContext {
-		public IntegerContext integer() {
-			return getRuleContext(IntegerContext.class,0);
-		}
-		public TerminalNode FLOAT_NUMBER() { return getToken(RavelParser.FLOAT_NUMBER, 0); }
-		public TerminalNode IMAG_NUMBER() { return getToken(RavelParser.IMAG_NUMBER, 0); }
-		public NumberContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_number; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterNumber(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitNumber(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitNumber(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final NumberContext number() throws RecognitionException {
-		NumberContext _localctx = new NumberContext(_ctx, getState());
-		enterRule(_localctx, 186, RULE_number);
-		try {
-			setState(849);
-			switch (_input.LA(1)) {
-			case DECIMAL_INTEGER:
-			case OCT_INTEGER:
-			case HEX_INTEGER:
-			case BIN_INTEGER:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(846);
-				integer();
-				}
-				break;
-			case FLOAT_NUMBER:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(847);
-				match(FLOAT_NUMBER);
-				}
-				break;
-			case IMAG_NUMBER:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(848);
-				match(IMAG_NUMBER);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class IntegerContext extends ParserRuleContext {
-		public TerminalNode DECIMAL_INTEGER() { return getToken(RavelParser.DECIMAL_INTEGER, 0); }
-		public TerminalNode OCT_INTEGER() { return getToken(RavelParser.OCT_INTEGER, 0); }
-		public TerminalNode HEX_INTEGER() { return getToken(RavelParser.HEX_INTEGER, 0); }
-		public TerminalNode BIN_INTEGER() { return getToken(RavelParser.BIN_INTEGER, 0); }
-		public IntegerContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_integer; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterInteger(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitInteger(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitInteger(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final IntegerContext integer() throws RecognitionException {
-		IntegerContext _localctx = new IntegerContext(_ctx, getState());
-		enterRule(_localctx, 188, RULE_integer);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(851);
-			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER))) != 0)) ) {
-			_errHandler.recoverInline(this);
-			} else {
-				consume();
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class BoolContext extends ParserRuleContext {
+	public static class Boolean_rContext extends ParserRuleContext {
 		public TerminalNode TRUE() { return getToken(RavelParser.TRUE, 0); }
 		public TerminalNode FALSE() { return getToken(RavelParser.FALSE, 0); }
-		public BoolContext(ParserRuleContext parent, int invokingState) {
+		public Boolean_rContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_bool; }
+		@Override public int getRuleIndex() { return RULE_boolean_r; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterBool(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).enterBoolean_r(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitBool(this);
+			if ( listener instanceof RavelListener ) ((RavelListener)listener).exitBoolean_r(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitBool(this);
+			if ( visitor instanceof RavelVisitor ) return ((RavelVisitor<? extends T>)visitor).visitBoolean_r(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final BoolContext bool() throws RecognitionException {
-		BoolContext _localctx = new BoolContext(_ctx, getState());
-		enterRule(_localctx, 190, RULE_bool);
+	public final Boolean_rContext boolean_r() throws RecognitionException {
+		Boolean_rContext _localctx = new Boolean_rContext(_ctx, getState());
+		enterRule(_localctx, 148, RULE_boolean_r);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(853);
+			setState(690);
 			_la = _input.LA(1);
 			if ( !(_la==TRUE || _la==FALSE) ) {
 			_errHandler.recoverInline(this);
@@ -6734,8 +5419,45 @@ public class RavelParser extends Parser {
 		return _localctx;
 	}
 
+	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
+		switch (ruleIndex) {
+		case 65:
+			return expression_sempred((ExpressionContext)_localctx, predIndex);
+		}
+		return true;
+	}
+	private boolean expression_sempred(ExpressionContext _localctx, int predIndex) {
+		switch (predIndex) {
+		case 0:
+			return precpred(_ctx, 10);
+		case 1:
+			return precpred(_ctx, 9);
+		case 2:
+			return precpred(_ctx, 8);
+		case 3:
+			return precpred(_ctx, 7);
+		case 4:
+			return precpred(_ctx, 6);
+		case 5:
+			return precpred(_ctx, 5);
+		case 6:
+			return precpred(_ctx, 4);
+		case 7:
+			return precpred(_ctx, 3);
+		case 8:
+			return precpred(_ctx, 2);
+		case 9:
+			return precpred(_ctx, 17);
+		case 10:
+			return precpred(_ctx, 16);
+		case 11:
+			return precpred(_ctx, 15);
+		}
+		return true;
+	}
+
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3p\u035a\4\2\t\2\4"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3g\u02b7\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -6744,309 +5466,248 @@ public class RavelParser extends Parser {
 		",\t,\4-\t-\4.\t.\4/\t/\4\60\t\60\4\61\t\61\4\62\t\62\4\63\t\63\4\64\t"+
 		"\64\4\65\t\65\4\66\t\66\4\67\t\67\48\t8\49\t9\4:\t:\4;\t;\4<\t<\4=\t="+
 		"\4>\t>\4?\t?\4@\t@\4A\tA\4B\tB\4C\tC\4D\tD\4E\tE\4F\tF\4G\tG\4H\tH\4I"+
-		"\tI\4J\tJ\4K\tK\4L\tL\4M\tM\4N\tN\4O\tO\4P\tP\4Q\tQ\4R\tR\4S\tS\4T\tT"+
-		"\4U\tU\4V\tV\4W\tW\4X\tX\4Y\tY\4Z\tZ\4[\t[\4\\\t\\\4]\t]\4^\t^\4_\t_\4"+
-		"`\t`\4a\ta\3\2\3\2\7\2\u00c5\n\2\f\2\16\2\u00c8\13\2\3\2\3\2\3\3\3\3\5"+
-		"\3\u00ce\n\3\3\3\3\3\3\4\3\4\3\4\5\4\u00d5\n\4\3\4\3\4\3\4\3\4\5\4\u00db"+
-		"\n\4\7\4\u00dd\n\4\f\4\16\4\u00e0\13\4\3\4\5\4\u00e3\n\4\3\5\3\5\3\6\3"+
-		"\6\3\6\3\6\3\6\5\6\u00ec\n\6\3\7\3\7\3\7\5\7\u00f1\n\7\3\b\3\b\3\b\3\b"+
-		"\3\b\3\t\3\t\3\t\6\t\u00fb\n\t\r\t\16\t\u00fc\3\t\3\t\3\n\3\n\3\n\3\n"+
-		"\3\n\5\n\u0106\n\n\3\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r\6\r\u0111\n"+
-		"\r\r\r\16\r\u0112\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\17\3\17\3\20\3\20"+
-		"\3\20\3\21\3\21\3\21\3\22\3\22\3\22\6\22\u0127\n\22\r\22\16\22\u0128\3"+
-		"\22\3\22\3\23\3\23\3\23\3\24\3\24\3\24\3\24\3\24\3\24\3\24\3\25\3\25\3"+
-		"\26\3\26\3\26\6\26\u013c\n\26\r\26\16\26\u013d\3\26\3\26\3\27\3\27\5\27"+
-		"\u0144\n\27\3\30\3\30\3\30\3\31\3\31\3\31\6\31\u014c\n\31\r\31\16\31\u014d"+
-		"\3\31\3\31\3\32\3\32\3\32\3\32\5\32\u0156\n\32\3\33\3\33\3\33\3\34\3\34"+
-		"\3\34\6\34\u015e\n\34\r\34\16\34\u015f\3\34\3\34\3\35\3\35\3\35\3\35\3"+
-		"\35\5\35\u0169\n\35\3\36\3\36\3\37\3\37\3 \3 \3 \3 \3 \3 \3!\3!\3!\6!"+
-		"\u0178\n!\r!\16!\u0179\3!\3!\3\"\3\"\3\"\3\"\5\"\u0182\n\"\3#\3#\3#\3"+
-		"#\3$\3$\3$\3$\3$\3$\3%\3%\5%\u0190\n%\3%\3%\3&\3&\3&\7&\u0197\n&\f&\16"+
-		"&\u019a\13&\3\'\3\'\3\'\3(\3(\3)\3)\3*\3*\3*\3*\6*\u01a7\n*\r*\16*\u01a8"+
-		"\3*\3*\5*\u01ad\n*\3+\3+\5+\u01b1\n+\3,\3,\3,\3,\3,\3,\5,\u01b9\n,\3-"+
-		"\3-\3-\3-\3-\3.\3.\3.\3.\5.\u01c4\n.\3/\3/\3/\5/\u01c9\n/\3\60\3\60\3"+
-		"\60\3\60\5\60\u01cf\n\60\3\61\3\61\3\61\3\62\3\62\5\62\u01d6\n\62\3\63"+
-		"\3\63\5\63\u01da\n\63\3\64\3\64\3\64\3\64\3\65\3\65\3\66\3\66\3\66\3\66"+
-		"\3\67\3\67\5\67\u01e8\n\67\38\38\38\58\u01ed\n8\38\38\38\39\39\39\39\3"+
-		":\3:\3:\7:\u01f9\n:\f:\16:\u01fc\13:\3;\3;\3<\3<\3<\5<\u0203\n<\3=\3="+
-		"\3>\3>\3?\3?\3?\3@\3@\3@\3@\3@\3@\3@\3@\3@\7@\u0215\n@\f@\16@\u0218\13"+
-		"@\3@\3@\3@\5@\u021d\n@\3A\3A\3A\3A\3A\3A\3A\5A\u0226\nA\3B\3B\3B\3B\3"+
-		"B\3B\3B\3C\3C\3C\3C\3C\3C\5C\u0235\nC\3D\3D\3D\7D\u023a\nD\fD\16D\u023d"+
-		"\13D\3E\3E\3E\7E\u0242\nE\fE\16E\u0245\13E\3F\3F\3F\5F\u024a\nF\3G\3G"+
-		"\3G\3G\7G\u0250\nG\fG\16G\u0253\13G\3H\3H\3H\3H\3H\3H\3H\3H\3H\3H\3H\3"+
-		"H\5H\u0261\nH\3I\3I\3I\7I\u0266\nI\fI\16I\u0269\13I\3J\3J\3J\7J\u026e"+
-		"\nJ\fJ\16J\u0271\13J\3K\3K\3K\7K\u0276\nK\fK\16K\u0279\13K\3L\3L\3L\3"+
-		"L\3L\7L\u0280\nL\fL\16L\u0283\13L\3M\3M\3M\3M\3M\7M\u028a\nM\fM\16M\u028d"+
-		"\13M\3N\3N\3N\3N\3N\3N\3N\3N\3N\3N\3N\7N\u029a\nN\fN\16N\u029d\13N\3O"+
-		"\3O\3O\3O\3O\3O\3O\5O\u02a6\nO\3P\3P\7P\u02aa\nP\fP\16P\u02ad\13P\3P\3"+
-		"P\5P\u02b1\nP\3Q\3Q\5Q\u02b5\nQ\3Q\3Q\3Q\5Q\u02ba\nQ\3Q\3Q\3Q\3Q\6Q\u02c0"+
-		"\nQ\rQ\16Q\u02c1\3Q\3Q\3Q\3Q\5Q\u02c8\nQ\3R\3R\3R\3R\7R\u02ce\nR\fR\16"+
-		"R\u02d1\13R\3R\5R\u02d4\nR\5R\u02d6\nR\3S\3S\5S\u02da\nS\3S\3S\3S\3S\3"+
-		"S\3S\3S\5S\u02e3\nS\3T\3T\3T\7T\u02e8\nT\fT\16T\u02eb\13T\3T\3T\5T\u02ef"+
-		"\nT\3T\3T\3T\3T\7T\u02f5\nT\fT\16T\u02f8\13T\3T\3T\3T\5T\u02fd\nT\3T\3"+
-		"T\5T\u0301\nT\3U\3U\5U\u0305\nU\3U\3U\3U\3U\5U\u030b\nU\3V\3V\3V\7V\u0310"+
-		"\nV\fV\16V\u0313\13V\3V\5V\u0316\nV\3W\3W\5W\u031a\nW\3W\3W\5W\u031e\n"+
-		"W\3W\5W\u0321\nW\5W\u0323\nW\3X\3X\5X\u0327\nX\3Y\3Y\3Y\7Y\u032c\nY\f"+
-		"Y\16Y\u032f\13Y\3Y\5Y\u0332\nY\3Z\3Z\3Z\7Z\u0337\nZ\fZ\16Z\u033a\13Z\3"+
-		"Z\5Z\u033d\nZ\3[\3[\5[\u0341\n[\3\\\3\\\3\\\3\\\3\\\5\\\u0348\n\\\3]\3"+
-		"]\3]\5]\u034d\n]\3^\3^\3_\3_\3_\5_\u0354\n_\3`\3`\3a\3a\3a\2\2b\2\4\6"+
-		"\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRT"+
-		"VXZ\\^`bdfhjlnprtvxz|~\u0080\u0082\u0084\u0086\u0088\u008a\u008c\u008e"+
-		"\u0090\u0092\u0094\u0096\u0098\u009a\u009c\u009e\u00a0\u00a2\u00a4\u00a6"+
-		"\u00a8\u00aa\u00ac\u00ae\u00b0\u00b2\u00b4\u00b6\u00b8\u00ba\u00bc\u00be"+
-		"\u00c0\2\b\3\2\25\27\3\2\34$\3\2\n\13\3\2:;\3\2<?\3\2\'(\u0379\2\u00c6"+
-		"\3\2\2\2\4\u00cb\3\2\2\2\6\u00e2\3\2\2\2\b\u00e4\3\2\2\2\n\u00eb\3\2\2"+
-		"\2\f\u00f0\3\2\2\2\16\u00f2\3\2\2\2\20\u00f7\3\2\2\2\22\u0105\3\2\2\2"+
-		"\24\u0107\3\2\2\2\26\u010a\3\2\2\2\30\u010d\3\2\2\2\32\u0116\3\2\2\2\34"+
-		"\u011b\3\2\2\2\36\u011d\3\2\2\2 \u0120\3\2\2\2\"\u0123\3\2\2\2$\u012c"+
-		"\3\2\2\2&\u012f\3\2\2\2(\u0136\3\2\2\2*\u0138\3\2\2\2,\u0143\3\2\2\2."+
-		"\u0145\3\2\2\2\60\u0148\3\2\2\2\62\u0151\3\2\2\2\64\u0157\3\2\2\2\66\u015a"+
-		"\3\2\2\28\u0163\3\2\2\2:\u016a\3\2\2\2<\u016c\3\2\2\2>\u016e\3\2\2\2@"+
-		"\u0174\3\2\2\2B\u0181\3\2\2\2D\u0183\3\2\2\2F\u0187\3\2\2\2H\u018d\3\2"+
-		"\2\2J\u0193\3\2\2\2L\u019b\3\2\2\2N\u019e\3\2\2\2P\u01a0\3\2\2\2R\u01ac"+
-		"\3\2\2\2T\u01b0\3\2\2\2V\u01b8\3\2\2\2X\u01ba\3\2\2\2Z\u01c3\3\2\2\2\\"+
-		"\u01c8\3\2\2\2^\u01ca\3\2\2\2`\u01d0\3\2\2\2b\u01d5\3\2\2\2d\u01d9\3\2"+
-		"\2\2f\u01db\3\2\2\2h\u01df\3\2\2\2j\u01e1\3\2\2\2l\u01e7\3\2\2\2n\u01e9"+
-		"\3\2\2\2p\u01f1\3\2\2\2r\u01f5\3\2\2\2t\u01fd\3\2\2\2v\u0202\3\2\2\2x"+
-		"\u0204\3\2\2\2z\u0206\3\2\2\2|\u0208\3\2\2\2~\u020b\3\2\2\2\u0080\u021e"+
-		"\3\2\2\2\u0082\u0227\3\2\2\2\u0084\u022e\3\2\2\2\u0086\u0236\3\2\2\2\u0088"+
-		"\u023e\3\2\2\2\u008a\u0249\3\2\2\2\u008c\u024b\3\2\2\2\u008e\u0260\3\2"+
-		"\2\2\u0090\u0262\3\2\2\2\u0092\u026a\3\2\2\2\u0094\u0272\3\2\2\2\u0096"+
-		"\u027a\3\2\2\2\u0098\u0284\3\2\2\2\u009a\u028e\3\2\2\2\u009c\u02a5\3\2"+
-		"\2\2\u009e\u02a7\3\2\2\2\u00a0\u02c7\3\2\2\2\u00a2\u02c9\3\2\2\2\u00a4"+
-		"\u02e2\3\2\2\2\u00a6\u02e9\3\2\2\2\u00a8\u030a\3\2\2\2\u00aa\u030c\3\2"+
-		"\2\2\u00ac\u0322\3\2\2\2\u00ae\u0324\3\2\2\2\u00b0\u0328\3\2\2\2\u00b2"+
-		"\u0333\3\2\2\2\u00b4\u0340\3\2\2\2\u00b6\u0342\3\2\2\2\u00b8\u0349\3\2"+
-		"\2\2\u00ba\u034e\3\2\2\2\u00bc\u0353\3\2\2\2\u00be\u0355\3\2\2\2\u00c0"+
-		"\u0357\3\2\2\2\u00c2\u00c5\78\2\2\u00c3\u00c5\5\f\7\2\u00c4\u00c2\3\2"+
-		"\2\2\u00c4\u00c3\3\2\2\2\u00c5\u00c8\3\2\2\2\u00c6\u00c4\3\2\2\2\u00c6"+
-		"\u00c7\3\2\2\2\u00c7\u00c9\3\2\2\2\u00c8\u00c6\3\2\2\2\u00c9\u00ca\7\2"+
-		"\2\3\u00ca\3\3\2\2\2\u00cb\u00cd\7D\2\2\u00cc\u00ce\5\6\4\2\u00cd\u00cc"+
-		"\3\2\2\2\u00cd\u00ce\3\2\2\2\u00ce\u00cf\3\2\2\2\u00cf\u00d0\7E\2\2\u00d0"+
-		"\5\3\2\2\2\u00d1\u00d4\5\b\5\2\u00d2\u00d3\7I\2\2\u00d3\u00d5\5\n\6\2"+
-		"\u00d4\u00d2\3\2\2\2\u00d4\u00d5\3\2\2\2\u00d5\u00de\3\2\2\2\u00d6\u00d7"+
-		"\7F\2\2\u00d7\u00da\5\b\5\2\u00d8\u00d9\7I\2\2\u00d9\u00db\5\n\6\2\u00da"+
-		"\u00d8\3\2\2\2\u00da\u00db\3\2\2\2\u00db\u00dd\3\2\2\2\u00dc\u00d6\3\2"+
-		"\2\2\u00dd\u00e0\3\2\2\2\u00de\u00dc\3\2\2\2\u00de\u00df\3\2\2\2\u00df"+
-		"\u00e3\3\2\2\2\u00e0\u00de\3\2\2\2\u00e1\u00e3\5r:\2\u00e2\u00d1\3\2\2"+
-		"\2\u00e2\u00e1\3\2\2\2\u00e3\7\3\2\2\2\u00e4\u00e5\79\2\2\u00e5\t\3\2"+
-		"\2\2\u00e6\u00ec\5\u00be`\2\u00e7\u00ec\5\u00bc_\2\u00e8\u00ec\5\u00ba"+
-		"^\2\u00e9\u00ec\5\u00c0a\2\u00ea\u00ec\5\b\5\2\u00eb\u00e6\3\2\2\2\u00eb"+
-		"\u00e7\3\2\2\2\u00eb\u00e8\3\2\2\2\u00eb\u00e9\3\2\2\2\u00eb\u00ea\3\2"+
-		"\2\2\u00ec\13\3\2\2\2\u00ed\u00f1\5&\24\2\u00ee\u00f1\5> \2\u00ef\u00f1"+
-		"\5\16\b\2\u00f0\u00ed\3\2\2\2\u00f0\u00ee\3\2\2\2\u00f0\u00ef\3\2\2\2"+
-		"\u00f1\r\3\2\2\2\u00f2\u00f3\7\21\2\2\u00f3\u00f4\5\b\5\2\u00f4\u00f5"+
-		"\7G\2\2\u00f5\u00f6\5\20\t\2\u00f6\17\3\2\2\2\u00f7\u00f8\78\2\2\u00f8"+
-		"\u00fa\7o\2\2\u00f9\u00fb\5\22\n\2\u00fa\u00f9\3\2\2\2\u00fb\u00fc\3\2"+
-		"\2\2\u00fc\u00fa\3\2\2\2\u00fc\u00fd\3\2\2\2\u00fd\u00fe\3\2\2\2\u00fe"+
-		"\u00ff\7p\2\2\u00ff\21\3\2\2\2\u0100\u0106\5\24\13\2\u0101\u0106\5\26"+
-		"\f\2\u0102\u0106\5\36\20\2\u0103\u0106\5 \21\2\u0104\u0106\5$\23\2\u0105"+
-		"\u0100\3\2\2\2\u0105\u0101\3\2\2\2\u0105\u0102\3\2\2\2\u0105\u0103\3\2"+
-		"\2\2\u0105\u0104\3\2\2\2\u0106\23\3\2\2\2\u0107\u0108\7\3\2\2\u0108\u0109"+
-		"\5\60\31\2\u0109\25\3\2\2\2\u010a\u010b\7\4\2\2\u010b\u010c\5\30\r\2\u010c"+
-		"\27\3\2\2\2\u010d\u010e\78\2\2\u010e\u0110\7o\2\2\u010f\u0111\5\32\16"+
-		"\2\u0110\u010f\3\2\2\2\u0111\u0112\3\2\2\2\u0112\u0110\3\2\2\2\u0112\u0113"+
-		"\3\2\2\2\u0113\u0114\3\2\2\2\u0114\u0115\7p\2\2\u0115\31\3\2\2\2\u0116"+
-		"\u0117\5\b\5\2\u0117\u0118\7I\2\2\u0118\u0119\5\34\17\2\u0119\u011a\5"+
-		"\4\3\2\u011a\33\3\2\2\2\u011b\u011c\79\2\2\u011c\35\3\2\2\2\u011d\u011e"+
-		"\7\5\2\2\u011e\u011f\5\30\r\2\u011f\37\3\2\2\2\u0120\u0121\7\6\2\2\u0121"+
-		"\u0122\5\"\22\2\u0122!\3\2\2\2\u0123\u0124\78\2\2\u0124\u0126\7o\2\2\u0125"+
-		"\u0127\5D#\2\u0126\u0125\3\2\2\2\u0127\u0128\3\2\2\2\u0128\u0126\3\2\2"+
-		"\2\u0128\u0129\3\2\2\2\u0129\u012a\3\2\2\2\u012a\u012b\7p\2\2\u012b#\3"+
-		"\2\2\2\u012c\u012d\7\7\2\2\u012d\u012e\5\"\22\2\u012e%\3\2\2\2\u012f\u0130"+
-		"\5(\25\2\u0130\u0131\7\20\2\2\u0131\u0132\5\b\5\2\u0132\u0133\5\4\3\2"+
-		"\u0133\u0134\7G\2\2\u0134\u0135\5*\26\2\u0135\'\3\2\2\2\u0136\u0137\t"+
-		"\2\2\2\u0137)\3\2\2\2\u0138\u0139\78\2\2\u0139\u013b\7o\2\2\u013a\u013c"+
-		"\5,\27\2\u013b\u013a\3\2\2\2\u013c\u013d\3\2\2\2\u013d\u013b\3\2\2\2\u013d"+
-		"\u013e\3\2\2\2\u013e\u013f\3\2\2\2\u013f\u0140\7p\2\2\u0140+\3\2\2\2\u0141"+
-		"\u0144\5.\30\2\u0142\u0144\5\64\33\2\u0143\u0141\3\2\2\2\u0143\u0142\3"+
-		"\2\2\2\u0144-\3\2\2\2\u0145\u0146\7\b\2\2\u0146\u0147\5\60\31\2\u0147"+
-		"/\3\2\2\2\u0148\u0149\78\2\2\u0149\u014b\7o\2\2\u014a\u014c\5\62\32\2"+
-		"\u014b\u014a\3\2\2\2\u014c\u014d\3\2\2\2\u014d\u014b\3\2\2\2\u014d\u014e"+
-		"\3\2\2\2\u014e\u014f\3\2\2\2\u014f\u0150\7p\2\2\u0150\61\3\2\2\2\u0151"+
-		"\u0152\5\b\5\2\u0152\u0153\7I\2\2\u0153\u0155\5\n\6\2\u0154\u0156\78\2"+
-		"\2\u0155\u0154\3\2\2\2\u0155\u0156\3\2\2\2\u0156\63\3\2\2\2\u0157\u0158"+
-		"\7\t\2\2\u0158\u0159\5\66\34\2\u0159\65\3\2\2\2\u015a\u015b\78\2\2\u015b"+
-		"\u015d\7o\2\2\u015c\u015e\58\35\2\u015d\u015c\3\2\2\2\u015e\u015f\3\2"+
-		"\2\2\u015f\u015d\3\2\2\2\u015f\u0160\3\2\2\2\u0160\u0161\3\2\2\2\u0161"+
-		"\u0162\7p\2\2\u0162\67\3\2\2\2\u0163\u0164\5\b\5\2\u0164\u0165\7I\2\2"+
-		"\u0165\u0166\5:\36\2\u0166\u0168\5\4\3\2\u0167\u0169\78\2\2\u0168\u0167"+
-		"\3\2\2\2\u0168\u0169\3\2\2\2\u01699\3\2\2\2\u016a\u016b\t\3\2\2\u016b"+
-		";\3\2\2\2\u016c\u016d\5r:\2\u016d=\3\2\2\2\u016e\u016f\7\22\2\2\u016f"+
-		"\u0170\5\b\5\2\u0170\u0171\5\4\3\2\u0171\u0172\7G\2\2\u0172\u0173\5@!"+
-		"\2\u0173?\3\2\2\2\u0174\u0175\78\2\2\u0175\u0177\7o\2\2\u0176\u0178\5"+
-		"B\"\2\u0177\u0176\3\2\2\2\u0178\u0179\3\2\2\2\u0179\u0177\3\2\2\2\u0179"+
-		"\u017a\3\2\2\2\u017a\u017b\3\2\2\2\u017b\u017c\7p\2\2\u017cA\3\2\2\2\u017d"+
-		"\u0182\5F$\2\u017e\u0182\5D#\2\u017f\u0182\5\62\32\2\u0180\u0182\78\2"+
-		"\2\u0181\u017d\3\2\2\2\u0181\u017e\3\2\2\2\u0181\u017f\3\2\2\2\u0181\u0180"+
-		"\3\2\2\2\u0182C\3\2\2\2\u0183\u0184\5\b\5\2\u0184\u0185\7I\2\2\u0185\u0186"+
-		"\5r:\2\u0186E\3\2\2\2\u0187\u0188\7\32\2\2\u0188\u0189\5\b\5\2\u0189\u018a"+
-		"\5H%\2\u018a\u018b\7G\2\2\u018b\u018c\5R*\2\u018cG\3\2\2\2\u018d\u018f"+
-		"\7D\2\2\u018e\u0190\5J&\2\u018f\u018e\3\2\2\2\u018f\u0190\3\2\2\2\u0190"+
-		"\u0191\3\2\2\2\u0191\u0192\7E\2\2\u0192I\3\2\2\2\u0193\u0198\5L\'\2\u0194"+
-		"\u0195\7F\2\2\u0195\u0197\5L\'\2\u0196\u0194\3\2\2\2\u0197\u019a\3\2\2"+
-		"\2\u0198\u0196\3\2\2\2\u0198\u0199\3\2\2\2\u0199K\3\2\2\2\u019a\u0198"+
-		"\3\2\2\2\u019b\u019c\5N(\2\u019c\u019d\5P)\2\u019dM\3\2\2\2\u019e\u019f"+
-		"\79\2\2\u019fO\3\2\2\2\u01a0\u01a1\79\2\2\u01a1Q\3\2\2\2\u01a2\u01ad\3"+
-		"\2\2\2\u01a3\u01a4\78\2\2\u01a4\u01a6\7o\2\2\u01a5\u01a7\5T+\2\u01a6\u01a5"+
-		"\3\2\2\2\u01a7\u01a8\3\2\2\2\u01a8\u01a6\3\2\2\2\u01a8\u01a9\3\2\2\2\u01a9"+
-		"\u01aa\3\2\2\2\u01aa\u01ab\7p\2\2\u01ab\u01ad\3\2\2\2\u01ac\u01a2\3\2"+
-		"\2\2\u01ac\u01a3\3\2\2\2\u01adS\3\2\2\2\u01ae\u01b1\5V,\2\u01af\u01b1"+
-		"\5\\/\2\u01b0\u01ae\3\2\2\2\u01b0\u01af\3\2\2\2\u01b1U\3\2\2\2\u01b2\u01b9"+
-		"\5\62\32\2\u01b3\u01b9\5X-\2\u01b4\u01b9\5`\61\2\u01b5\u01b9\5b\62\2\u01b6"+
-		"\u01b9\5v<\2\u01b7\u01b9\5^\60\2\u01b8\u01b2\3\2\2\2\u01b8\u01b3\3\2\2"+
-		"\2\u01b8\u01b4\3\2\2\2\u01b8\u01b5\3\2\2\2\u01b8\u01b6\3\2\2\2\u01b8\u01b7"+
-		"\3\2\2\2\u01b9W\3\2\2\2\u01ba\u01bb\5<\37\2\u01bb\u01bc\7I\2\2\u01bc\u01bd"+
-		"\5Z.\2\u01bd\u01be\78\2\2\u01beY\3\2\2\2\u01bf\u01c4\7\17\2\2\u01c0\u01c4"+
-		"\5\n\6\2\u01c1\u01c4\5l\67\2\u01c2\u01c4\5f\64\2\u01c3\u01bf\3\2\2\2\u01c3"+
-		"\u01c0\3\2\2\2\u01c3\u01c1\3\2\2\2\u01c3\u01c2\3\2\2\2\u01c4[\3\2\2\2"+
-		"\u01c5\u01c9\5~@\2\u01c6\u01c9\5\u0080A\2\u01c7\u01c9\5\u0082B\2\u01c8"+
-		"\u01c5\3\2\2\2\u01c8\u01c6\3\2\2\2\u01c8\u01c7\3\2\2\2\u01c9]\3\2\2\2"+
-		"\u01ca\u01cb\7%\2\2\u01cb\u01ce\5\u0084C\2\u01cc\u01cd\7F\2\2\u01cd\u01cf"+
-		"\5\u0084C\2\u01ce\u01cc\3\2\2\2\u01ce\u01cf\3\2\2\2\u01cf_\3\2\2\2\u01d0"+
-		"\u01d1\7\63\2\2\u01d1\u01d2\5d\63\2\u01d2a\3\2\2\2\u01d3\u01d6\5d\63\2"+
-		"\u01d4\u01d6\5l\67\2\u01d5\u01d3\3\2\2\2\u01d5\u01d4\3\2\2\2\u01d6c\3"+
-		"\2\2\2\u01d7\u01da\5f\64\2\u01d8\u01da\5j\66\2\u01d9\u01d7\3\2\2\2\u01d9"+
-		"\u01d8\3\2\2\2\u01dae\3\2\2\2\u01db\u01dc\5\b\5\2\u01dc\u01dd\7B\2\2\u01dd"+
-		"\u01de\5h\65\2\u01deg\3\2\2\2\u01df\u01e0\t\4\2\2\u01e0i\3\2\2\2\u01e1"+
-		"\u01e2\7\f\2\2\u01e2\u01e3\7B\2\2\u01e3\u01e4\5h\65\2\u01e4k\3\2\2\2\u01e5"+
-		"\u01e8\5n8\2\u01e6\u01e8\5p9\2\u01e7\u01e5\3\2\2\2\u01e7\u01e6\3\2\2\2"+
-		"\u01e8m\3\2\2\2\u01e9\u01ec\5\b\5\2\u01ea\u01eb\7B\2\2\u01eb\u01ed\5\b"+
-		"\5\2\u01ec\u01ea\3\2\2\2\u01ec\u01ed\3\2\2\2\u01ed\u01ee\3\2\2\2\u01ee"+
-		"\u01ef\5\4\3\2\u01ef\u01f0\78\2\2\u01f0o\3\2\2\2\u01f1\u01f2\5\b\5\2\u01f2"+
-		"\u01f3\7I\2\2\u01f3\u01f4\5n8\2\u01f4q\3\2\2\2\u01f5\u01fa\79\2\2\u01f6"+
-		"\u01f7\7B\2\2\u01f7\u01f9\79\2\2\u01f8\u01f6\3\2\2\2\u01f9\u01fc\3\2\2"+
-		"\2\u01fa\u01f8\3\2\2\2\u01fa\u01fb\3\2\2\2\u01fbs\3\2\2\2\u01fc\u01fa"+
-		"\3\2\2\2\u01fd\u01fe\7\64\2\2\u01feu\3\2\2\2\u01ff\u0203\5x=\2\u0200\u0203"+
-		"\5z>\2\u0201\u0203\5|?\2\u0202\u01ff\3\2\2\2\u0202\u0200\3\2\2\2\u0202"+
-		"\u0201\3\2\2\2\u0203w\3\2\2\2\u0204\u0205\7\66\2\2\u0205y\3\2\2\2\u0206"+
-		"\u0207\7\65\2\2\u0207{\3\2\2\2\u0208\u0209\7&\2\2\u0209\u020a\5\b\5\2"+
-		"\u020a}\3\2\2\2\u020b\u020c\7)\2\2\u020c\u020d\5\u0084C\2\u020d\u020e"+
-		"\7G\2\2\u020e\u0216\5R*\2\u020f\u0210\7*\2\2\u0210\u0211\5\u0084C\2\u0211"+
-		"\u0212\7G\2\2\u0212\u0213\5R*\2\u0213\u0215\3\2\2\2\u0214\u020f\3\2\2"+
-		"\2\u0215\u0218\3\2\2\2\u0216\u0214\3\2\2\2\u0216\u0217\3\2\2\2\u0217\u021c"+
-		"\3\2\2\2\u0218\u0216\3\2\2\2\u0219\u021a\7+\2\2\u021a\u021b\7G\2\2\u021b"+
-		"\u021d\5R*\2\u021c\u0219\3\2\2\2\u021c\u021d\3\2\2\2\u021d\177\3\2\2\2"+
-		"\u021e\u021f\7-\2\2\u021f\u0220\5\u0084C\2\u0220\u0221\7G\2\2\u0221\u0225"+
-		"\5R*\2\u0222\u0223\7+\2\2\u0223\u0224\7G\2\2\u0224\u0226\5R*\2\u0225\u0222"+
-		"\3\2\2\2\u0225\u0226\3\2\2\2\u0226\u0081\3\2\2\2\u0227\u0228\7,\2\2\u0228"+
-		"\u0229\5\b\5\2\u0229\u022a\7\61\2\2\u022a\u022b\5\b\5\2\u022b\u022c\7"+
-		"G\2\2\u022c\u022d\5R*\2\u022d\u0083\3\2\2\2\u022e\u0234\5\u0086D\2\u022f"+
-		"\u0230\7)\2\2\u0230\u0231\5\u0086D\2\u0231\u0232\7+\2\2\u0232\u0233\5"+
-		"\u0084C\2\u0233\u0235\3\2\2\2\u0234\u022f\3\2\2\2\u0234\u0235\3\2\2\2"+
-		"\u0235\u0085\3\2\2\2\u0236\u023b\5\u0088E\2\u0237\u0238\7\60\2\2\u0238"+
-		"\u023a\5\u0088E\2\u0239\u0237\3\2\2\2\u023a\u023d\3\2\2\2\u023b\u0239"+
-		"\3\2\2\2\u023b\u023c\3\2\2\2\u023c\u0087\3\2\2\2\u023d\u023b\3\2\2\2\u023e"+
-		"\u0243\5\u008aF\2\u023f\u0240\7.\2\2\u0240\u0242\5\u008aF\2\u0241\u023f"+
-		"\3\2\2\2\u0242\u0245\3\2\2\2\u0243\u0241\3\2\2\2\u0243\u0244\3\2\2\2\u0244"+
-		"\u0089\3\2\2\2\u0245\u0243\3\2\2\2\u0246\u0247\7/\2\2\u0247\u024a\5\u008a"+
-		"F\2\u0248\u024a\5\u008cG\2\u0249\u0246\3\2\2\2\u0249\u0248\3\2\2\2\u024a"+
-		"\u008b\3\2\2\2\u024b\u0251\5\u0090I\2\u024c\u024d\5\u008eH\2\u024d\u024e"+
-		"\5\u0090I\2\u024e\u0250\3\2\2\2\u024f\u024c\3\2\2\2\u0250\u0253\3\2\2"+
-		"\2\u0251\u024f\3\2\2\2\u0251\u0252\3\2\2\2\u0252\u008d\3\2\2\2\u0253\u0251"+
-		"\3\2\2\2\u0254\u0261\7Y\2\2\u0255\u0261\7Z\2\2\u0256\u0261\7[\2\2\u0257"+
-		"\u0261\7\\\2\2\u0258\u0261\7]\2\2\u0259\u0261\7^\2\2\u025a\u0261\7\61"+
-		"\2\2\u025b\u025c\7/\2\2\u025c\u0261\7\61\2\2\u025d\u0261\7\62\2\2\u025e"+
-		"\u025f\7\62\2\2\u025f\u0261\7/\2\2\u0260\u0254\3\2\2\2\u0260\u0255\3\2"+
-		"\2\2\u0260\u0256\3\2\2\2\u0260\u0257\3\2\2\2\u0260\u0258\3\2\2\2\u0260"+
-		"\u0259\3\2\2\2\u0260\u025a\3\2\2\2\u0260\u025b\3\2\2\2\u0260\u025d\3\2"+
-		"\2\2\u0260\u025e\3\2\2\2\u0261\u008f\3\2\2\2\u0262\u0267\5\u0092J\2\u0263"+
-		"\u0264\7L\2\2\u0264\u0266\5\u0092J\2\u0265\u0263\3\2\2\2\u0266\u0269\3"+
-		"\2\2\2\u0267\u0265\3\2\2\2\u0267\u0268\3\2\2\2\u0268\u0091\3\2\2\2\u0269"+
-		"\u0267\3\2\2\2\u026a\u026f\5\u0094K\2\u026b\u026c\7M\2\2\u026c\u026e\5"+
-		"\u0094K\2\u026d\u026b\3\2\2\2\u026e\u0271\3\2\2\2\u026f\u026d\3\2\2\2"+
-		"\u026f\u0270\3\2\2\2\u0270\u0093\3\2\2\2\u0271\u026f\3\2\2\2\u0272\u0277"+
-		"\5\u0096L\2\u0273\u0274\7N\2\2\u0274\u0276\5\u0096L\2\u0275\u0273\3\2"+
-		"\2\2\u0276\u0279\3\2\2\2\u0277\u0275\3\2\2\2\u0277\u0278\3\2\2\2\u0278"+
-		"\u0095\3\2\2\2\u0279\u0277\3\2\2\2\u027a\u0281\5\u0098M\2\u027b\u027c"+
-		"\7O\2\2\u027c\u0280\5\u0098M\2\u027d\u027e\7P\2\2\u027e\u0280\5\u0098"+
-		"M\2\u027f\u027b\3\2\2\2\u027f\u027d\3\2\2\2\u0280\u0283\3\2\2\2\u0281"+
-		"\u027f\3\2\2\2\u0281\u0282\3\2\2\2\u0282\u0097\3\2\2\2\u0283\u0281\3\2"+
-		"\2\2\u0284\u028b\5\u009aN\2\u0285\u0286\7Q\2\2\u0286\u028a\5\u009aN\2"+
-		"\u0287\u0288\7R\2\2\u0288\u028a\5\u009aN\2\u0289\u0285\3\2\2\2\u0289\u0287"+
-		"\3\2\2\2\u028a\u028d\3\2\2\2\u028b\u0289\3\2\2\2\u028b\u028c\3\2\2\2\u028c"+
-		"\u0099\3\2\2\2\u028d\u028b\3\2\2\2\u028e\u029b\5\u009cO\2\u028f\u0290"+
-		"\7C\2\2\u0290\u029a\5\u009cO\2\u0291\u0292\7S\2\2\u0292\u029a\5\u009c"+
-		"O\2\u0293\u0294\7T\2\2\u0294\u029a\5\u009cO\2\u0295\u0296\7U\2\2\u0296"+
-		"\u029a\5\u009cO\2\u0297\u0298\7_\2\2\u0298\u029a\5\u009cO\2\u0299\u028f"+
-		"\3\2\2\2\u0299\u0291\3\2\2\2\u0299\u0293\3\2\2\2\u0299\u0295\3\2\2\2\u0299"+
-		"\u0297\3\2\2\2\u029a\u029d\3\2\2\2\u029b\u0299\3\2\2\2\u029b\u029c\3\2"+
-		"\2\2\u029c\u009b\3\2\2\2\u029d\u029b\3\2\2\2\u029e\u029f\7Q\2\2\u029f"+
-		"\u02a6\5\u009cO\2\u02a0\u02a1\7R\2\2\u02a1\u02a6\5\u009cO\2\u02a2\u02a3"+
-		"\7V\2\2\u02a3\u02a6\5\u009cO\2\u02a4\u02a6\5\u009eP\2\u02a5\u029e\3\2"+
-		"\2\2\u02a5\u02a0\3\2\2\2\u02a5\u02a2\3\2\2\2\u02a5\u02a4\3\2\2\2\u02a6"+
-		"\u009d\3\2\2\2\u02a7\u02ab\5\u00a0Q\2\u02a8\u02aa\5\u00a4S\2\u02a9\u02a8"+
-		"\3\2\2\2\u02aa\u02ad\3\2\2\2\u02ab\u02a9\3\2\2\2\u02ab\u02ac\3\2\2\2\u02ac"+
-		"\u02b0\3\2\2\2\u02ad\u02ab\3\2\2\2\u02ae\u02af\7\r\2\2\u02af\u02b1\5\u009c"+
-		"O\2\u02b0\u02ae\3\2\2\2\u02b0\u02b1\3\2\2\2\u02b1\u009f\3\2\2\2\u02b2"+
-		"\u02b4\7D\2\2\u02b3\u02b5\5\u00a2R\2\u02b4\u02b3\3\2\2\2\u02b4\u02b5\3"+
-		"\2\2\2\u02b5\u02b6\3\2\2\2\u02b6\u02c8\7E\2\2\u02b7\u02b9\7J\2\2\u02b8"+
-		"\u02ba\5\u00a2R\2\u02b9\u02b8\3\2\2\2\u02b9\u02ba\3\2\2\2\u02ba\u02bb"+
-		"\3\2\2\2\u02bb\u02c8\7K\2\2\u02bc\u02c8\79\2\2\u02bd\u02c8\5\u00bc_\2"+
-		"\u02be\u02c0\5\u00ba^\2\u02bf\u02be\3\2\2\2\u02c0\u02c1\3\2\2\2\u02c1"+
-		"\u02bf\3\2\2\2\u02c1\u02c2\3\2\2\2\u02c2\u02c8\3\2\2\2\u02c3\u02c8\7\16"+
-		"\2\2\u02c4\u02c8\7\67\2\2\u02c5\u02c8\7\'\2\2\u02c6\u02c8\7(\2\2\u02c7"+
-		"\u02b2\3\2\2\2\u02c7\u02b7\3\2\2\2\u02c7\u02bc\3\2\2\2\u02c7\u02bd\3\2"+
-		"\2\2\u02c7\u02bf\3\2\2\2\u02c7\u02c3\3\2\2\2\u02c7\u02c4\3\2\2\2\u02c7"+
-		"\u02c5\3\2\2\2\u02c7\u02c6\3\2\2\2\u02c8\u00a1\3\2\2\2\u02c9\u02d5\5\u0084"+
-		"C\2\u02ca\u02d6\5\u00b6\\\2\u02cb\u02cc\7F\2\2\u02cc\u02ce\5\u0084C\2"+
-		"\u02cd\u02cb\3\2\2\2\u02ce\u02d1\3\2\2\2\u02cf\u02cd\3\2\2\2\u02cf\u02d0"+
-		"\3\2\2\2\u02d0\u02d3\3\2\2\2\u02d1\u02cf\3\2\2\2\u02d2\u02d4\7F\2\2\u02d3"+
-		"\u02d2\3\2\2\2\u02d3\u02d4\3\2\2\2\u02d4\u02d6\3\2\2\2\u02d5\u02ca\3\2"+
-		"\2\2\u02d5\u02cf\3\2\2\2\u02d6\u00a3\3\2\2\2\u02d7\u02d9\7D\2\2\u02d8"+
-		"\u02da\5\u00a6T\2\u02d9\u02d8\3\2\2\2\u02d9\u02da\3\2\2\2\u02da\u02db"+
-		"\3\2\2\2\u02db\u02e3\7E\2\2\u02dc\u02dd\7J\2\2\u02dd\u02de\5\u00aaV\2"+
-		"\u02de\u02df\7K\2\2\u02df\u02e3\3\2\2\2\u02e0\u02e1\7B\2\2\u02e1\u02e3"+
-		"\79\2\2\u02e2\u02d7\3\2\2\2\u02e2\u02dc\3\2\2\2\u02e2\u02e0\3\2\2\2\u02e3"+
-		"\u00a5\3\2\2\2\u02e4\u02e5\5\u00a8U\2\u02e5\u02e6\7F\2\2\u02e6\u02e8\3"+
-		"\2\2\2\u02e7\u02e4\3\2\2\2\u02e8\u02eb\3\2\2\2\u02e9\u02e7\3\2\2\2\u02e9"+
-		"\u02ea\3\2\2\2\u02ea\u0300\3\2\2\2\u02eb\u02e9\3\2\2\2\u02ec\u02ee\5\u00a8"+
-		"U\2\u02ed\u02ef\7F\2\2\u02ee\u02ed\3\2\2\2\u02ee\u02ef\3\2\2\2\u02ef\u0301"+
-		"\3\2\2\2\u02f0\u02f1\7C\2\2\u02f1\u02f6\5\u0084C\2\u02f2\u02f3\7F\2\2"+
-		"\u02f3\u02f5\5\u00a8U\2\u02f4\u02f2\3\2\2\2\u02f5\u02f8\3\2\2\2\u02f6"+
-		"\u02f4\3\2\2\2\u02f6\u02f7\3\2\2\2\u02f7\u02fc\3\2\2\2\u02f8\u02f6\3\2"+
-		"\2\2\u02f9\u02fa\7F\2\2\u02fa\u02fb\7\r\2\2\u02fb\u02fd\5\u0084C\2\u02fc"+
-		"\u02f9\3\2\2\2\u02fc\u02fd\3\2\2\2\u02fd\u0301\3\2\2\2\u02fe\u02ff\7\r"+
-		"\2\2\u02ff\u0301\5\u0084C\2\u0300\u02ec\3\2\2\2\u0300\u02f0\3\2\2\2\u0300"+
-		"\u02fe\3\2\2\2\u0301\u00a7\3\2\2\2\u0302\u0304\5\u0084C\2\u0303\u0305"+
-		"\5\u00b6\\\2\u0304\u0303\3\2\2\2\u0304\u0305\3\2\2\2\u0305\u030b\3\2\2"+
-		"\2\u0306\u0307\5\u0084C\2\u0307\u0308\7I\2\2\u0308\u0309\5\u0084C\2\u0309"+
-		"\u030b\3\2\2\2\u030a\u0302\3\2\2\2\u030a\u0306\3\2\2\2\u030b\u00a9\3\2"+
-		"\2\2\u030c\u0311\5\u00acW\2\u030d\u030e\7F\2\2\u030e\u0310\5\u00acW\2"+
-		"\u030f\u030d\3\2\2\2\u0310\u0313\3\2\2\2\u0311\u030f\3\2\2\2\u0311\u0312"+
-		"\3\2\2\2\u0312\u0315\3\2\2\2\u0313\u0311\3\2\2\2\u0314\u0316\7F\2\2\u0315"+
-		"\u0314\3\2\2\2\u0315\u0316\3\2\2\2\u0316\u00ab\3\2\2\2\u0317\u0323\5\u0084"+
-		"C\2\u0318\u031a\5\u0084C\2\u0319\u0318\3\2\2\2\u0319\u031a\3\2\2\2\u031a"+
-		"\u031b\3\2\2\2\u031b\u031d\7G\2\2\u031c\u031e\5\u0084C\2\u031d\u031c\3"+
-		"\2\2\2\u031d\u031e\3\2\2\2\u031e\u0320\3\2\2\2\u031f\u0321\5\u00aeX\2"+
-		"\u0320\u031f\3\2\2\2\u0320\u0321\3\2\2\2\u0321\u0323\3\2\2\2\u0322\u0317"+
-		"\3\2\2\2\u0322\u0319\3\2\2\2\u0323\u00ad\3\2\2\2\u0324\u0326\7G\2\2\u0325"+
-		"\u0327\5\u0084C\2\u0326\u0325\3\2\2\2\u0326\u0327\3\2\2\2\u0327\u00af"+
-		"\3\2\2\2\u0328\u032d\5\u0090I\2\u0329\u032a\7F\2\2\u032a\u032c\5\u0090"+
-		"I\2\u032b\u0329\3\2\2\2\u032c\u032f\3\2\2\2\u032d\u032b\3\2\2\2\u032d"+
-		"\u032e\3\2\2\2\u032e\u0331\3\2\2\2\u032f\u032d\3\2\2\2\u0330\u0332\7F"+
-		"\2\2\u0331\u0330\3\2\2\2\u0331\u0332\3\2\2\2\u0332\u00b1\3\2\2\2\u0333"+
-		"\u0338\5\u0084C\2\u0334\u0335\7F\2\2\u0335\u0337\5\u0084C\2\u0336\u0334"+
-		"\3\2\2\2\u0337\u033a\3\2\2\2\u0338\u0336\3\2\2\2\u0338\u0339\3\2\2\2\u0339"+
-		"\u033c\3\2\2\2\u033a\u0338\3\2\2\2\u033b\u033d\7F\2\2\u033c\u033b\3\2"+
-		"\2\2\u033c\u033d\3\2\2\2\u033d\u00b3\3\2\2\2\u033e\u0341\5\u00b6\\\2\u033f"+
-		"\u0341\5\u00b8]\2\u0340\u033e\3\2\2\2\u0340\u033f\3\2\2\2\u0341\u00b5"+
-		"\3\2\2\2\u0342\u0343\7,\2\2\u0343\u0344\5\u00b0Y\2\u0344\u0345\7\61\2"+
-		"\2\u0345\u0347\5\u0086D\2\u0346\u0348\5\u00b4[\2\u0347\u0346\3\2\2\2\u0347"+
-		"\u0348\3\2\2\2\u0348\u00b7\3\2\2\2\u0349\u034a\7)\2\2\u034a\u034c\5\u0086"+
-		"D\2\u034b\u034d\5\u00b4[\2\u034c\u034b\3\2\2\2\u034c\u034d\3\2\2\2\u034d"+
-		"\u00b9\3\2\2\2\u034e\u034f\t\5\2\2\u034f\u00bb\3\2\2\2\u0350\u0354\5\u00be"+
-		"`\2\u0351\u0354\7@\2\2\u0352\u0354\7A\2\2\u0353\u0350\3\2\2\2\u0353\u0351"+
-		"\3\2\2\2\u0353\u0352\3\2\2\2\u0354\u00bd\3\2\2\2\u0355\u0356\t\6\2\2\u0356"+
-		"\u00bf\3\2\2\2\u0357\u0358\t\7\2\2\u0358\u00c1\3\2\2\2Z\u00c4\u00c6\u00cd"+
-		"\u00d4\u00da\u00de\u00e2\u00eb\u00f0\u00fc\u0105\u0112\u0128\u013d\u0143"+
-		"\u014d\u0155\u015f\u0168\u0179\u0181\u018f\u0198\u01a8\u01ac\u01b0\u01b8"+
-		"\u01c3\u01c8\u01ce\u01d5\u01d9\u01e7\u01ec\u01fa\u0202\u0216\u021c\u0225"+
-		"\u0234\u023b\u0243\u0249\u0251\u0260\u0267\u026f\u0277\u027f\u0281\u0289"+
-		"\u028b\u0299\u029b\u02a5\u02ab\u02b0\u02b4\u02b9\u02c1\u02c7\u02cf\u02d3"+
-		"\u02d5\u02d9\u02e2\u02e9\u02ee\u02f6\u02fc\u0300\u0304\u030a\u0311\u0315"+
-		"\u0319\u031d\u0320\u0322\u0326\u032d\u0331\u0338\u033c\u0340\u0347\u034c"+
-		"\u0353";
+		"\tI\4J\tJ\4K\tK\4L\tL\3\2\3\2\7\2\u009b\n\2\f\2\16\2\u009e\13\2\3\2\3"+
+		"\2\3\3\3\3\3\3\5\3\u00a5\n\3\3\4\3\4\3\4\3\4\3\4\3\5\3\5\3\5\6\5\u00af"+
+		"\n\5\r\5\16\5\u00b0\3\5\3\5\3\6\3\6\3\6\3\6\3\6\3\6\5\6\u00bb\n\6\3\7"+
+		"\3\7\3\7\3\b\3\b\3\b\6\b\u00c3\n\b\r\b\16\b\u00c4\3\b\3\b\3\t\3\t\3\t"+
+		"\3\n\3\n\3\n\3\n\3\n\5\n\u00d1\n\n\3\13\3\13\3\13\3\f\3\f\3\f\6\f\u00d9"+
+		"\n\f\r\f\16\f\u00da\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\r\5\r\u00e6\n\r"+
+		"\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\21\3\21\3\21\6\21\u00f3\n\21"+
+		"\r\21\16\21\u00f4\3\21\3\21\3\22\3\22\3\22\3\23\3\23\3\23\3\23\3\23\3"+
+		"\23\3\23\3\24\3\24\3\25\3\25\3\25\6\25\u0108\n\25\r\25\16\25\u0109\3\25"+
+		"\3\25\3\26\3\26\5\26\u0110\n\26\3\27\3\27\3\27\3\30\3\30\3\30\6\30\u0118"+
+		"\n\30\r\30\16\30\u0119\3\30\3\30\3\31\3\31\3\31\3\31\3\31\3\32\3\32\3"+
+		"\32\3\32\5\32\u0127\n\32\3\33\3\33\3\33\3\34\3\34\3\34\6\34\u012f\n\34"+
+		"\r\34\16\34\u0130\3\34\3\34\3\35\3\35\3\35\3\35\3\35\3\35\3\35\5\35\u013c"+
+		"\n\35\3\36\3\36\3\37\3\37\3 \3 \3 \3 \3 \3 \3!\3!\3!\6!\u014b\n!\r!\16"+
+		"!\u014c\3!\3!\3\"\3\"\3\"\3\"\3\"\5\"\u0156\n\"\3#\3#\3#\3#\3#\3#\3$\3"+
+		"$\3$\6$\u0161\n$\r$\16$\u0162\3$\3$\3%\3%\3%\5%\u016a\n%\3&\3&\3&\7&\u016f"+
+		"\n&\f&\16&\u0172\13&\3\'\3\'\3\'\5\'\u0177\n\'\3(\3(\5(\u017b\n(\3)\3"+
+		")\3)\3)\7)\u0181\n)\f)\16)\u0184\13)\3)\5)\u0187\n)\5)\u0189\n)\3)\3)"+
+		"\3*\3*\3*\3*\3*\3*\3*\3*\3*\5*\u0196\n*\3*\3*\5*\u019a\n*\3*\3*\5*\u019e"+
+		"\n*\3*\3*\3*\3*\5*\u01a4\n*\3+\3+\3+\3+\3+\3+\3+\3+\3+\7+\u01af\n+\f+"+
+		"\16+\u01b2\13+\3+\3+\3+\5+\u01b7\n+\3,\3,\3,\3,\3,\3,\5,\u01bf\n,\3-\3"+
+		"-\3-\7-\u01c4\n-\f-\16-\u01c7\13-\3.\3.\3.\7.\u01cc\n.\f.\16.\u01cf\13"+
+		".\3/\3/\3/\5/\u01d4\n/\3\60\3\60\3\60\3\60\7\60\u01da\n\60\f\60\16\60"+
+		"\u01dd\13\60\3\61\3\61\3\62\3\62\3\62\3\62\3\62\5\62\u01e6\n\62\3\63\3"+
+		"\63\3\64\5\64\u01eb\n\64\3\64\3\64\5\64\u01ef\n\64\3\64\3\64\5\64\u01f3"+
+		"\n\64\3\65\3\65\5\65\u01f7\n\65\3\66\3\66\3\67\3\67\5\67\u01fd\n\67\3"+
+		"\67\3\67\38\38\38\58\u0204\n8\39\39\39\3:\3:\5:\u020b\n:\3:\3:\3;\3;\3"+
+		";\5;\u0212\n;\3<\3<\3<\7<\u0217\n<\f<\16<\u021a\13<\3=\3=\3=\3=\3>\3>"+
+		"\5>\u0222\n>\3?\3?\3?\3?\7?\u0228\n?\f?\16?\u022b\13?\5?\u022d\n?\3?\5"+
+		"?\u0230\n?\3?\3?\3@\3@\3@\7@\u0237\n@\f@\16@\u023a\13@\3A\3A\3A\3B\3B"+
+		"\3B\3C\3C\3C\3C\3C\3C\3C\3C\3C\5C\u024b\nC\3C\3C\3C\3C\3C\3C\3C\3C\3C"+
+		"\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C\3C"+
+		"\3C\3C\3C\3C\3C\3C\3C\5C\u0274\nC\3C\7C\u0277\nC\fC\16C\u027a\13C\3D\3"+
+		"D\3D\3D\3D\3D\3D\5D\u0283\nD\3E\3E\3E\3E\3E\3F\3F\5F\u028c\nF\3G\3G\3"+
+		"G\3G\3H\3H\3H\3H\3H\3I\3I\3I\7I\u029a\nI\fI\16I\u029d\13I\3J\3J\3J\3J"+
+		"\3J\3J\3J\3J\3J\3J\3J\3J\5J\u02ab\nJ\3K\3K\3K\3K\3K\3K\5K\u02b3\nK\3L"+
+		"\3L\3L\2\3\u0084M\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62"+
+		"\64\668:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\u0080\u0082\u0084\u0086\u0088"+
+		"\u008a\u008c\u008e\u0090\u0092\u0094\u0096\2\t\3\2\20\22\3\2\27\37\3\2"+
+		"QR\3\2EF\4\2STXX\4\2BBYc\3\2\"#\u02d9\2\u009c\3\2\2\2\4\u00a4\3\2\2\2"+
+		"\6\u00a6\3\2\2\2\b\u00ab\3\2\2\2\n\u00ba\3\2\2\2\f\u00bc\3\2\2\2\16\u00bf"+
+		"\3\2\2\2\20\u00c8\3\2\2\2\22\u00cb\3\2\2\2\24\u00d2\3\2\2\2\26\u00d5\3"+
+		"\2\2\2\30\u00de\3\2\2\2\32\u00e7\3\2\2\2\34\u00e9\3\2\2\2\36\u00ec\3\2"+
+		"\2\2 \u00ef\3\2\2\2\"\u00f8\3\2\2\2$\u00fb\3\2\2\2&\u0102\3\2\2\2(\u0104"+
+		"\3\2\2\2*\u010f\3\2\2\2,\u0111\3\2\2\2.\u0114\3\2\2\2\60\u011d\3\2\2\2"+
+		"\62\u0126\3\2\2\2\64\u0128\3\2\2\2\66\u012b\3\2\2\28\u0134\3\2\2\2:\u013d"+
+		"\3\2\2\2<\u013f\3\2\2\2>\u0141\3\2\2\2@\u0147\3\2\2\2B\u0155\3\2\2\2D"+
+		"\u0157\3\2\2\2F\u015d\3\2\2\2H\u0169\3\2\2\2J\u016b\3\2\2\2L\u0173\3\2"+
+		"\2\2N\u017a\3\2\2\2P\u017c\3\2\2\2R\u01a3\3\2\2\2T\u01a5\3\2\2\2V\u01b8"+
+		"\3\2\2\2X\u01c0\3\2\2\2Z\u01c8\3\2\2\2\\\u01d3\3\2\2\2^\u01d5\3\2\2\2"+
+		"`\u01de\3\2\2\2b\u01e5\3\2\2\2d\u01e7\3\2\2\2f\u01ea\3\2\2\2h\u01f6\3"+
+		"\2\2\2j\u01f8\3\2\2\2l\u01fa\3\2\2\2n\u0200\3\2\2\2p\u0205\3\2\2\2r\u0208"+
+		"\3\2\2\2t\u020e\3\2\2\2v\u0213\3\2\2\2x\u021b\3\2\2\2z\u0221\3\2\2\2|"+
+		"\u0223\3\2\2\2~\u0233\3\2\2\2\u0080\u023b\3\2\2\2\u0082\u023e\3\2\2\2"+
+		"\u0084\u024a\3\2\2\2\u0086\u0282\3\2\2\2\u0088\u0284\3\2\2\2\u008a\u028b"+
+		"\3\2\2\2\u008c\u028d\3\2\2\2\u008e\u0291\3\2\2\2\u0090\u0296\3\2\2\2\u0092"+
+		"\u02aa\3\2\2\2\u0094\u02b2\3\2\2\2\u0096\u02b4\3\2\2\2\u0098\u009b\7\63"+
+		"\2\2\u0099\u009b\5\4\3\2\u009a\u0098\3\2\2\2\u009a\u0099\3\2\2\2\u009b"+
+		"\u009e\3\2\2\2\u009c\u009a\3\2\2\2\u009c\u009d\3\2\2\2\u009d\u009f\3\2"+
+		"\2\2\u009e\u009c\3\2\2\2\u009f\u00a0\7\2\2\3\u00a0\3\3\2\2\2\u00a1\u00a5"+
+		"\5$\23\2\u00a2\u00a5\5> \2\u00a3\u00a5\5\6\4\2\u00a4\u00a1\3\2\2\2\u00a4"+
+		"\u00a2\3\2\2\2\u00a4\u00a3\3\2\2\2\u00a5\5\3\2\2\2\u00a6\u00a7\7\f\2\2"+
+		"\u00a7\u00a8\7d\2\2\u00a8\u00a9\7H\2\2\u00a9\u00aa\5\b\5\2\u00aa\7\3\2"+
+		"\2\2\u00ab\u00ac\7\63\2\2\u00ac\u00ae\7f\2\2\u00ad\u00af\5\n\6\2\u00ae"+
+		"\u00ad\3\2\2\2\u00af\u00b0\3\2\2\2\u00b0\u00ae\3\2\2\2\u00b0\u00b1\3\2"+
+		"\2\2\u00b1\u00b2\3\2\2\2\u00b2\u00b3\7g\2\2\u00b3\t\3\2\2\2\u00b4\u00bb"+
+		"\5\f\7\2\u00b5\u00bb\5\24\13\2\u00b6\u00bb\5\34\17\2\u00b7\u00bb\5\36"+
+		"\20\2\u00b8\u00bb\5\"\22\2\u00b9\u00bb\7\63\2\2\u00ba\u00b4\3\2\2\2\u00ba"+
+		"\u00b5\3\2\2\2\u00ba\u00b6\3\2\2\2\u00ba\u00b7\3\2\2\2\u00ba\u00b8\3\2"+
+		"\2\2\u00ba\u00b9\3\2\2\2\u00bb\13\3\2\2\2\u00bc\u00bd\7\3\2\2\u00bd\u00be"+
+		"\5\16\b\2\u00be\r\3\2\2\2\u00bf\u00c0\7\63\2\2\u00c0\u00c2\7f\2\2\u00c1"+
+		"\u00c3\5\20\t\2\u00c2\u00c1\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4\u00c2\3"+
+		"\2\2\2\u00c4\u00c5\3\2\2\2\u00c5\u00c6\3\2\2\2\u00c6\u00c7\7g\2\2\u00c7"+
+		"\17\3\2\2\2\u00c8\u00c9\5\22\n\2\u00c9\u00ca\7\63\2\2\u00ca\21\3\2\2\2"+
+		"\u00cb\u00cc\7d\2\2\u00cc\u00d0\7B\2\2\u00cd\u00d1\7d\2\2\u00ce\u00d1"+
+		"\5\u0094K\2\u00cf\u00d1\5\u0090I\2\u00d0\u00cd\3\2\2\2\u00d0\u00ce\3\2"+
+		"\2\2\u00d0\u00cf\3\2\2\2\u00d1\23\3\2\2\2\u00d2\u00d3\7\4\2\2\u00d3\u00d4"+
+		"\5\26\f\2\u00d4\25\3\2\2\2\u00d5\u00d6\7\63\2\2\u00d6\u00d8\7f\2\2\u00d7"+
+		"\u00d9\5\30\r\2\u00d8\u00d7\3\2\2\2\u00d9\u00da\3\2\2\2\u00da\u00d8\3"+
+		"\2\2\2\u00da\u00db\3\2\2\2\u00db\u00dc\3\2\2\2\u00dc\u00dd\7g\2\2\u00dd"+
+		"\27\3\2\2\2\u00de\u00df\7d\2\2\u00df\u00e0\7B\2\2\u00e0\u00e1\5\32\16"+
+		"\2\u00e1\u00e2\79\2\2\u00e2\u00e3\5v<\2\u00e3\u00e5\7:\2\2\u00e4\u00e6"+
+		"\7\63\2\2\u00e5\u00e4\3\2\2\2\u00e5\u00e6\3\2\2\2\u00e6\31\3\2\2\2\u00e7"+
+		"\u00e8\7d\2\2\u00e8\33\3\2\2\2\u00e9\u00ea\7\5\2\2\u00ea\u00eb\5\26\f"+
+		"\2\u00eb\35\3\2\2\2\u00ec\u00ed\7\6\2\2\u00ed\u00ee\5 \21\2\u00ee\37\3"+
+		"\2\2\2\u00ef\u00f0\7\63\2\2\u00f0\u00f2\7f\2\2\u00f1\u00f3\5\u0088E\2"+
+		"\u00f2\u00f1\3\2\2\2\u00f3\u00f4\3\2\2\2\u00f4\u00f2\3\2\2\2\u00f4\u00f5"+
+		"\3\2\2\2\u00f5\u00f6\3\2\2\2\u00f6\u00f7\7g\2\2\u00f7!\3\2\2\2\u00f8\u00f9"+
+		"\7\7\2\2\u00f9\u00fa\5 \21\2\u00fa#\3\2\2\2\u00fb\u00fc\5&\24\2\u00fc"+
+		"\u00fd\7\13\2\2\u00fd\u00fe\7d\2\2\u00fe\u00ff\5r:\2\u00ff\u0100\7H\2"+
+		"\2\u0100\u0101\5(\25\2\u0101%\3\2\2\2\u0102\u0103\t\2\2\2\u0103\'\3\2"+
+		"\2\2\u0104\u0105\7\63\2\2\u0105\u0107\7f\2\2\u0106\u0108\5*\26\2\u0107"+
+		"\u0106\3\2\2\2\u0108\u0109\3\2\2\2\u0109\u0107\3\2\2\2\u0109\u010a\3\2"+
+		"\2\2\u010a\u010b\3\2\2\2\u010b\u010c\7g\2\2\u010c)\3\2\2\2\u010d\u0110"+
+		"\5,\27\2\u010e\u0110\5\64\33\2\u010f\u010d\3\2\2\2\u010f\u010e\3\2\2\2"+
+		"\u0110+\3\2\2\2\u0111\u0112\7\b\2\2\u0112\u0113\5.\30\2\u0113-\3\2\2\2"+
+		"\u0114\u0115\7\63\2\2\u0115\u0117\7f\2\2\u0116\u0118\5\60\31\2\u0117\u0116"+
+		"\3\2\2\2\u0118\u0119\3\2\2\2\u0119\u0117\3\2\2\2\u0119\u011a\3\2\2\2\u011a"+
+		"\u011b\3\2\2\2\u011b\u011c\7g\2\2\u011c/\3\2\2\2\u011d\u011e\7d\2\2\u011e"+
+		"\u011f\7B\2\2\u011f\u0120\5\62\32\2\u0120\u0121\7\63\2\2\u0121\61\3\2"+
+		"\2\2\u0122\u0127\7d\2\2\u0123\u0127\5\u0096L\2\u0124\u0127\7\64\2\2\u0125"+
+		"\u0127\7\65\2\2\u0126\u0122\3\2\2\2\u0126\u0123\3\2\2\2\u0126\u0124\3"+
+		"\2\2\2\u0126\u0125\3\2\2\2\u0127\63\3\2\2\2\u0128\u0129\7\t\2\2\u0129"+
+		"\u012a\5\66\34\2\u012a\65\3\2\2\2\u012b\u012c\7\63\2\2\u012c\u012e\7f"+
+		"\2\2\u012d\u012f\58\35\2\u012e\u012d\3\2\2\2\u012f\u0130\3\2\2\2\u0130"+
+		"\u012e\3\2\2\2\u0130\u0131\3\2\2\2\u0131\u0132\3\2\2\2\u0132\u0133\7g"+
+		"\2\2\u0133\67\3\2\2\2\u0134\u0135\7d\2\2\u0135\u0136\7B\2\2\u0136\u0137"+
+		"\5:\36\2\u0137\u0138\79\2\2\u0138\u0139\5v<\2\u0139\u013b\7:\2\2\u013a"+
+		"\u013c\7\63\2\2\u013b\u013a\3\2\2\2\u013b\u013c\3\2\2\2\u013c9\3\2\2\2"+
+		"\u013d\u013e\t\3\2\2\u013e;\3\2\2\2\u013f\u0140\5\u0090I\2\u0140=\3\2"+
+		"\2\2\u0141\u0142\7\r\2\2\u0142\u0143\7d\2\2\u0143\u0144\5r:\2\u0144\u0145"+
+		"\7H\2\2\u0145\u0146\5@!\2\u0146?\3\2\2\2\u0147\u0148\7\63\2\2\u0148\u014a"+
+		"\7f\2\2\u0149\u014b\5B\"\2\u014a\u0149\3\2\2\2\u014b\u014c\3\2\2\2\u014c"+
+		"\u014a\3\2\2\2\u014c\u014d\3\2\2\2\u014d\u014e\3\2\2\2\u014e\u014f\7g"+
+		"\2\2\u014fA\3\2\2\2\u0150\u0156\5D#\2\u0151\u0156\5\u0088E\2\u0152\u0156"+
+		"\5L\'\2\u0153\u0156\5\u008aF\2\u0154\u0156\7\63\2\2\u0155\u0150\3\2\2"+
+		"\2\u0155\u0151\3\2\2\2\u0155\u0152\3\2\2\2\u0155\u0153\3\2\2\2\u0155\u0154"+
+		"\3\2\2\2\u0156C\3\2\2\2\u0157\u0158\7\25\2\2\u0158\u0159\5\u0090I\2\u0159"+
+		"\u015a\5l\67\2\u015a\u015b\7H\2\2\u015b\u015c\5F$\2\u015cE\3\2\2\2\u015d"+
+		"\u015e\7\63\2\2\u015e\u0160\7f\2\2\u015f\u0161\5H%\2\u0160\u015f\3\2\2"+
+		"\2\u0161\u0162\3\2\2\2\u0162\u0160\3\2\2\2\u0162\u0163\3\2\2\2\u0163\u0164"+
+		"\3\2\2\2\u0164\u0165\7g\2\2\u0165G\3\2\2\2\u0166\u016a\5B\"\2\u0167\u016a"+
+		"\5R*\2\u0168\u016a\5T+\2\u0169\u0166\3\2\2\2\u0169\u0167\3\2\2\2\u0169"+
+		"\u0168\3\2\2\2\u016aI\3\2\2\2\u016b\u0170\5L\'\2\u016c\u016d\7@\2\2\u016d"+
+		"\u016f\5L\'\2\u016e\u016c\3\2\2\2\u016f\u0172\3\2\2\2\u0170\u016e\3\2"+
+		"\2\2\u0170\u0171\3\2\2\2\u0171K\3\2\2\2\u0172\u0170\3\2\2\2\u0173\u0176"+
+		"\7d\2\2\u0174\u0175\7B\2\2\u0175\u0177\5N(\2\u0176\u0174\3\2\2\2\u0176"+
+		"\u0177\3\2\2\2\u0177M\3\2\2\2\u0178\u017b\5P)\2\u0179\u017b\5\u0084C\2"+
+		"\u017a\u0178\3\2\2\2\u017a\u0179\3\2\2\2\u017bO\3\2\2\2\u017c\u0188\7"+
+		";\2\2\u017d\u0182\5N(\2\u017e\u017f\7@\2\2\u017f\u0181\5N(\2\u0180\u017e"+
+		"\3\2\2\2\u0181\u0184\3\2\2\2\u0182\u0180\3\2\2\2\u0182\u0183\3\2\2\2\u0183"+
+		"\u0186\3\2\2\2\u0184\u0182\3\2\2\2\u0185\u0187\7@\2\2\u0186\u0185\3\2"+
+		"\2\2\u0186\u0187\3\2\2\2\u0187\u0189\3\2\2\2\u0188\u017d\3\2\2\2\u0188"+
+		"\u0189\3\2\2\2\u0189\u018a\3\2\2\2\u018a\u018b\7<\2\2\u018bQ\3\2\2\2\u018c"+
+		"\u018d\7 \2\2\u018d\u01a4\5\u0084C\2\u018e\u018f\7\'\2\2\u018f\u0190\5"+
+		"f\64\2\u0190\u0191\7H\2\2\u0191\u0192\5F$\2\u0192\u01a4\3\2\2\2\u0193"+
+		"\u0195\7!\2\2\u0194\u0196\5\u0084C\2\u0195\u0194\3\2\2\2\u0195\u0196\3"+
+		"\2\2\2\u0196\u01a4\3\2\2\2\u0197\u0199\7\61\2\2\u0198\u019a\7d\2\2\u0199"+
+		"\u0198\3\2\2\2\u0199\u019a\3\2\2\2\u019a\u01a4\3\2\2\2\u019b\u019d\7\60"+
+		"\2\2\u019c\u019e\7d\2\2\u019d\u019c\3\2\2\2\u019d\u019e\3\2\2\2\u019e"+
+		"\u01a4\3\2\2\2\u019f\u01a0\7.\2\2\u01a0\u01a4\7d\2\2\u01a1\u01a4\5d\63"+
+		"\2\u01a2\u01a4\7\63\2\2\u01a3\u018c\3\2\2\2\u01a3\u018e\3\2\2\2\u01a3"+
+		"\u0193\3\2\2\2\u01a3\u0197\3\2\2\2\u01a3\u019b\3\2\2\2\u01a3\u019f\3\2"+
+		"\2\2\u01a3\u01a1\3\2\2\2\u01a3\u01a2\3\2\2\2\u01a4S\3\2\2\2\u01a5\u01a6"+
+		"\7$\2\2\u01a6\u01a7\5V,\2\u01a7\u01a8\7H\2\2\u01a8\u01b0\5F$\2\u01a9\u01aa"+
+		"\7%\2\2\u01aa\u01ab\5V,\2\u01ab\u01ac\7H\2\2\u01ac\u01ad\5F$\2\u01ad\u01af"+
+		"\3\2\2\2\u01ae\u01a9\3\2\2\2\u01af\u01b2\3\2\2\2\u01b0\u01ae\3\2\2\2\u01b0"+
+		"\u01b1\3\2\2\2\u01b1\u01b6\3\2\2\2\u01b2\u01b0\3\2\2\2\u01b3\u01b4\7&"+
+		"\2\2\u01b4\u01b5\7H\2\2\u01b5\u01b7\5F$\2\u01b6\u01b3\3\2\2\2\u01b6\u01b7"+
+		"\3\2\2\2\u01b7U\3\2\2\2\u01b8\u01be\5X-\2\u01b9\u01ba\7$\2\2\u01ba\u01bb"+
+		"\5X-\2\u01bb\u01bc\7&\2\2\u01bc\u01bd\5V,\2\u01bd\u01bf\3\2\2\2\u01be"+
+		"\u01b9\3\2\2\2\u01be\u01bf\3\2\2\2\u01bfW\3\2\2\2\u01c0\u01c5\5Z.\2\u01c1"+
+		"\u01c2\7+\2\2\u01c2\u01c4\5Z.\2\u01c3\u01c1\3\2\2\2\u01c4\u01c7\3\2\2"+
+		"\2\u01c5\u01c3\3\2\2\2\u01c5\u01c6\3\2\2\2\u01c6Y\3\2\2\2\u01c7\u01c5"+
+		"\3\2\2\2\u01c8\u01cd\5\\/\2\u01c9\u01ca\7)\2\2\u01ca\u01cc\5\\/\2\u01cb"+
+		"\u01c9\3\2\2\2\u01cc\u01cf\3\2\2\2\u01cd\u01cb\3\2\2\2\u01cd\u01ce\3\2"+
+		"\2\2\u01ce[\3\2\2\2\u01cf\u01cd\3\2\2\2\u01d0\u01d1\7*\2\2\u01d1\u01d4"+
+		"\5\\/\2\u01d2\u01d4\5^\60\2\u01d3\u01d0\3\2\2\2\u01d3\u01d2\3\2\2\2\u01d4"+
+		"]\3\2\2\2\u01d5\u01db\5`\61\2\u01d6\u01d7\5\u0092J\2\u01d7\u01d8\5`\61"+
+		"\2\u01d8\u01da\3\2\2\2\u01d9\u01d6\3\2\2\2\u01da\u01dd\3\2\2\2\u01db\u01d9"+
+		"\3\2\2\2\u01db\u01dc\3\2\2\2\u01dc_\3\2\2\2\u01dd\u01db\3\2\2\2\u01de"+
+		"\u01df\5b\62\2\u01dfa\3\2\2\2\u01e0\u01e6\7d\2\2\u01e1\u01e6\7\64\2\2"+
+		"\u01e2\u01e6\7\65\2\2\u01e3\u01e6\5\u0096L\2\u01e4\u01e6\5\u0090I\2\u01e5"+
+		"\u01e0\3\2\2\2\u01e5\u01e1\3\2\2\2\u01e5\u01e2\3\2\2\2\u01e5\u01e3\3\2"+
+		"\2\2\u01e5\u01e4\3\2\2\2\u01e6c\3\2\2\2\u01e7\u01e8\5\u0084C\2\u01e8e"+
+		"\3\2\2\2\u01e9\u01eb\5h\65\2\u01ea\u01e9\3\2\2\2\u01ea\u01eb\3\2\2\2\u01eb"+
+		"\u01ec\3\2\2\2\u01ec\u01ee\7?\2\2\u01ed\u01ef\5\u0084C\2\u01ee\u01ed\3"+
+		"\2\2\2\u01ee\u01ef\3\2\2\2\u01ef\u01f0\3\2\2\2\u01f0\u01f2\7?\2\2\u01f1"+
+		"\u01f3\5j\66\2\u01f2\u01f1\3\2\2\2\u01f2\u01f3\3\2\2\2\u01f3g\3\2\2\2"+
+		"\u01f4\u01f7\5J&\2\u01f5\u01f7\5~@\2\u01f6\u01f4\3\2\2\2\u01f6\u01f5\3"+
+		"\2\2\2\u01f7i\3\2\2\2\u01f8\u01f9\5~@\2\u01f9k\3\2\2\2\u01fa\u01fc\79"+
+		"\2\2\u01fb\u01fd\5n8\2\u01fc\u01fb\3\2\2\2\u01fc\u01fd\3\2\2\2\u01fd\u01fe"+
+		"\3\2\2\2\u01fe\u01ff\7:\2\2\u01ffm\3\2\2\2\u0200\u0203\5p9\2\u0201\u0202"+
+		"\7@\2\2\u0202\u0204\5p9\2\u0203\u0201\3\2\2\2\u0203\u0204\3\2\2\2\u0204"+
+		"o\3\2\2\2\u0205\u0206\7d\2\2\u0206\u0207\7d\2\2\u0207q\3\2\2\2\u0208\u020a"+
+		"\79\2\2\u0209\u020b\5t;\2\u020a\u0209\3\2\2\2\u020a\u020b\3\2\2\2\u020b"+
+		"\u020c\3\2\2\2\u020c\u020d\7:\2\2\u020ds\3\2\2\2\u020e\u0211\7d\2\2\u020f"+
+		"\u0210\7@\2\2\u0210\u0212\7d\2\2\u0211\u020f\3\2\2\2\u0211\u0212\3\2\2"+
+		"\2\u0212u\3\2\2\2\u0213\u0218\5x=\2\u0214\u0215\7@\2\2\u0215\u0217\5x"+
+		"=\2\u0216\u0214\3\2\2\2\u0217\u021a\3\2\2\2\u0218\u0216\3\2\2\2\u0218"+
+		"\u0219\3\2\2\2\u0219w\3\2\2\2\u021a\u0218\3\2\2\2\u021b\u021c\7d\2\2\u021c"+
+		"\u021d\7B\2\2\u021d\u021e\5z>\2\u021ey\3\2\2\2\u021f\u0222\5\u0084C\2"+
+		"\u0220\u0222\5|?\2\u0221\u021f\3\2\2\2\u0221\u0220\3\2\2\2\u0222{\3\2"+
+		"\2\2\u0223\u022c\7;\2\2\u0224\u0229\5z>\2\u0225\u0226\7@\2\2\u0226\u0228"+
+		"\5z>\2\u0227\u0225\3\2\2\2\u0228\u022b\3\2\2\2\u0229\u0227\3\2\2\2\u0229"+
+		"\u022a\3\2\2\2\u022a\u022d\3\2\2\2\u022b\u0229\3\2\2\2\u022c\u0224\3\2"+
+		"\2\2\u022c\u022d\3\2\2\2\u022d\u022f\3\2\2\2\u022e\u0230\7@\2\2\u022f"+
+		"\u022e\3\2\2\2\u022f\u0230\3\2\2\2\u0230\u0231\3\2\2\2\u0231\u0232\7<"+
+		"\2\2\u0232}\3\2\2\2\u0233\u0238\5\u0084C\2\u0234\u0235\7@\2\2\u0235\u0237"+
+		"\5\u0084C\2\u0236\u0234\3\2\2\2\u0237\u023a\3\2\2\2\u0238\u0236\3\2\2"+
+		"\2\u0238\u0239\3\2\2\2\u0239\177\3\2\2\2\u023a\u0238\3\2\2\2\u023b\u023c"+
+		"\7d\2\2\u023c\u023d\7O\2\2\u023d\u0081\3\2\2\2\u023e\u023f\7d\2\2\u023f"+
+		"\u0240\7P\2\2\u0240\u0083\3\2\2\2\u0241\u0242\bC\1\2\u0242\u024b\5\u0086"+
+		"D\2\u0243\u024b\5\u0080A\2\u0244\u024b\5\u0082B\2\u0245\u0246\t\4\2\2"+
+		"\u0246\u024b\5\u0084C\16\u0247\u0248\t\5\2\2\u0248\u024b\5\u0084C\r\u0249"+
+		"\u024b\7\63\2\2\u024a\u0241\3\2\2\2\u024a\u0243\3\2\2\2\u024a\u0244\3"+
+		"\2\2\2\u024a\u0245\3\2\2\2\u024a\u0247\3\2\2\2\u024a\u0249\3\2\2\2\u024b"+
+		"\u0278\3\2\2\2\u024c\u024d\f\f\2\2\u024d\u024e\t\6\2\2\u024e\u0277\5\u0084"+
+		"C\r\u024f\u0250\f\13\2\2\u0250\u0251\t\4\2\2\u0251\u0277\5\u0084C\f\u0252"+
+		"\u0253\f\n\2\2\u0253\u0254\5\u0092J\2\u0254\u0255\5\u0084C\13\u0255\u0277"+
+		"\3\2\2\2\u0256\u0257\f\t\2\2\u0257\u0258\7U\2\2\u0258\u0277\5\u0084C\n"+
+		"\u0259\u025a\f\b\2\2\u025a\u025b\7W\2\2\u025b\u0277\5\u0084C\t\u025c\u025d"+
+		"\f\7\2\2\u025d\u025e\7V\2\2\u025e\u0277\5\u0084C\b\u025f\u0260\f\6\2\2"+
+		"\u0260\u0261\7M\2\2\u0261\u0277\5\u0084C\7\u0262\u0263\f\5\2\2\u0263\u0264"+
+		"\7N\2\2\u0264\u0277\5\u0084C\6\u0265\u0266\f\4\2\2\u0266\u0267\t\7\2\2"+
+		"\u0267\u0277\5\u0084C\4\u0268\u0269\f\23\2\2\u0269\u026a\7A\2\2\u026a"+
+		"\u0277\7d\2\2\u026b\u026c\f\22\2\2\u026c\u026d\7=\2\2\u026d\u026e\5\u0084"+
+		"C\2\u026e\u026f\7>\2\2\u026f\u0277\3\2\2\2\u0270\u0271\f\21\2\2\u0271"+
+		"\u0273\79\2\2\u0272\u0274\5~@\2\u0273\u0272\3\2\2\2\u0273\u0274\3\2\2"+
+		"\2\u0274\u0275\3\2\2\2\u0275\u0277\7:\2\2\u0276\u024c\3\2\2\2\u0276\u024f"+
+		"\3\2\2\2\u0276\u0252\3\2\2\2\u0276\u0256\3\2\2\2\u0276\u0259\3\2\2\2\u0276"+
+		"\u025c\3\2\2\2\u0276\u025f\3\2\2\2\u0276\u0262\3\2\2\2\u0276\u0265\3\2"+
+		"\2\2\u0276\u0268\3\2\2\2\u0276\u026b\3\2\2\2\u0276\u0270\3\2\2\2\u0277"+
+		"\u027a\3\2\2\2\u0278\u0276\3\2\2\2\u0278\u0279\3\2\2\2\u0279\u0085\3\2"+
+		"\2\2\u027a\u0278\3\2\2\2\u027b\u027c\79\2\2\u027c\u027d\5\u0084C\2\u027d"+
+		"\u027e\7:\2\2\u027e\u0283\3\2\2\2\u027f\u0283\7\n\2\2\u0280\u0283\5\u0094"+
+		"K\2\u0281\u0283\7d\2\2\u0282\u027b\3\2\2\2\u0282\u027f\3\2\2\2\u0282\u0280"+
+		"\3\2\2\2\u0282\u0281\3\2\2\2\u0283\u0087\3\2\2\2\u0284\u0285\7d\2\2\u0285"+
+		"\u0286\7B\2\2\u0286\u0287\5\u0090I\2\u0287\u0288\7\63\2\2\u0288\u0089"+
+		"\3\2\2\2\u0289\u028c\5\u008cG\2\u028a\u028c\5\u008eH\2\u028b\u0289\3\2"+
+		"\2\2\u028b\u028a\3\2\2\2\u028c\u008b\3\2\2\2\u028d\u028e\5\u0090I\2\u028e"+
+		"\u028f\5r:\2\u028f\u0290\7\63\2\2\u0290\u008d\3\2\2\2\u0291\u0292\7d\2"+
+		"\2\u0292\u0293\7B\2\2\u0293\u0294\5\u008cG\2\u0294\u0295\7\63\2\2\u0295"+
+		"\u008f\3\2\2\2\u0296\u029b\7d\2\2\u0297\u0298\7A\2\2\u0298\u029a\7d\2"+
+		"\2\u0299\u0297\3\2\2\2\u029a\u029d\3\2\2\2\u029b\u0299\3\2\2\2\u029b\u029c"+
+		"\3\2\2\2\u029c\u0091\3\2\2\2\u029d\u029b\3\2\2\2\u029e\u02ab\7D\2\2\u029f"+
+		"\u02ab\7C\2\2\u02a0\u02ab\7I\2\2\u02a1\u02ab\7K\2\2\u02a2\u02ab\7J\2\2"+
+		"\u02a3\u02ab\7L\2\2\u02a4\u02ab\7,\2\2\u02a5\u02a6\7*\2\2\u02a6\u02ab"+
+		"\7,\2\2\u02a7\u02ab\7-\2\2\u02a8\u02a9\7-\2\2\u02a9\u02ab\7*\2\2\u02aa"+
+		"\u029e\3\2\2\2\u02aa\u029f\3\2\2\2\u02aa\u02a0\3\2\2\2\u02aa\u02a1\3\2"+
+		"\2\2\u02aa\u02a2\3\2\2\2\u02aa\u02a3\3\2\2\2\u02aa\u02a4\3\2\2\2\u02aa"+
+		"\u02a5\3\2\2\2\u02aa\u02a7\3\2\2\2\u02aa\u02a8\3\2\2\2\u02ab\u0093\3\2"+
+		"\2\2\u02ac\u02b3\7\64\2\2\u02ad\u02b3\7\65\2\2\u02ae\u02b3\7\66\2\2\u02af"+
+		"\u02b3\5\u0096L\2\u02b0\u02b3\7\67\2\2\u02b1\u02b3\78\2\2\u02b2\u02ac"+
+		"\3\2\2\2\u02b2\u02ad\3\2\2\2\u02b2\u02ae\3\2\2\2\u02b2\u02af\3\2\2\2\u02b2"+
+		"\u02b0\3\2\2\2\u02b2\u02b1\3\2\2\2\u02b3\u0095\3\2\2\2\u02b4\u02b5\t\b"+
+		"\2\2\u02b5\u0097\3\2\2\2?\u009a\u009c\u00a4\u00b0\u00ba\u00c4\u00d0\u00da"+
+		"\u00e5\u00f4\u0109\u010f\u0119\u0126\u0130\u013b\u014c\u0155\u0162\u0169"+
+		"\u0170\u0176\u017a\u0182\u0186\u0188\u0195\u0199\u019d\u01a3\u01b0\u01b6"+
+		"\u01be\u01c5\u01cd\u01d3\u01db\u01e5\u01ea\u01ee\u01f2\u01f6\u01fc\u0203"+
+		"\u020a\u0211\u0218\u0221\u0229\u022c\u022f\u0238\u024a\u0273\u0276\u0278"+
+		"\u0282\u028b\u029b\u02aa\u02b2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

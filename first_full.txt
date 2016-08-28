@@ -101,7 +101,7 @@ controller RandomControllerGateway(tier):
         if ctx.error is SUCCESS:
             current = ctx.mRandom
             last = mRandom.query.last()
-            integer diff = current.time - last.time
+            diff = current.time - last.time
             if diff > delay_max:
                 error = mDelayError.create()
                 error.source = self
@@ -110,8 +110,8 @@ controller RandomControllerGateway(tier):
                 error.save()
 
     event mRandom.departed(context ctx):
-        integer now = timer.now()
-        integer diff = now - last_depart
+        now = timer.now()
+        diff = now - last_depart
         if diff > delay_max:
             error = DelayError.create()
             error.source = self
@@ -135,7 +135,7 @@ controller RandomControllerCloud(tier):
         if ctx.error is SUCCESS:
             current = ctx.mRandom
             last = mRandom.query.last
-            integer diff = current.time - last.time
+            diff = current.time - last.time
             if last.value == current.value:
                     rnd_error = mRandomError.create()
                     rnd_error.source = self
@@ -148,7 +148,7 @@ controller RandomControllerCloud(tier):
 
 space EmbeddedSpace:
     platform:
-        language =clang
+        language = clang
         templates=nrf52
         platform = android.apiv1
         boot = platform.boot

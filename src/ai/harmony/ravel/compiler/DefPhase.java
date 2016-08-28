@@ -7,6 +7,7 @@ import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.LocalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
+import ai.harmony.ravel.primitives.InstanceSymbol;
 import ai.harmony.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -45,9 +46,8 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
-        String name = ctx.identifier().getText();
+        String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
-        prettyPrint("Entering model: " + name + " of type " + type + " with args " + ctx.parameters().getText());
         ModelSymbol model = new ModelSymbol(name, Model.getType(type));
         ctx.scope = model;
         pushScope(model);
@@ -78,7 +78,7 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
         // can only be inside the schema scope!
-        String name = ctx.identifier().getText();
+        String name = ctx.Identifier().getText();
         String fType = ctx.field_type().getText();
         FieldSymbol fs = new FieldSymbol(name);
         //TODO: do we need type here?
@@ -107,7 +107,7 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
-        String name = ctx.identifier().getText();
+        String name = ctx.Identifier().getText();
         ControllerSymbol ctr = new ControllerSymbol(name);
         ctx.scope = ctr;
         pushScope(ctr);
@@ -118,17 +118,17 @@ public class DefPhase extends RavelBaseListener {
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope
-        String name = ctx.identifier().getText();
+        String name = ctx.qualified_name().getText();
         EventSymbol es = new EventSymbol(name);
         ctx.scope = es;
         pushScope(es);
     }
 
-    @Override
-    public void enterQueryOperations(RavelParser.QueryOperationsContext ctx) { }
-
-    @Override
-    public void exitQueryOperations(RavelParser.QueryOperationsContext ctx) { }
+//    @Override
+//    public void enterQueryOperations(RavelParser.QueryOperationsContext ctx) { }
+//
+//    @Override
+//    public void exitQueryOperations(RavelParser.QueryOperationsContext ctx) { }
 
     @Override
     public void exitEventScope(RavelParser.EventScopeContext ctx) {
@@ -143,7 +143,11 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) {
-        prettyPrint("enterVarAssigment@ ident: " + ctx.identifier().getText() + " value: " + ctx.tdefvar().getText());
+        String name = ctx.Identifier().getText();
+        VariableSymbol vs = new VariableSymbol(name);
+        vs.setScope(currentScope);
+        vs.setDefNode(ctx);
+        currentScope.define(vs);
     }
 
     @Override
@@ -152,7 +156,10 @@ public class DefPhase extends RavelBaseListener {
     }
     @Override
     public void enterReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) {
-        prettyPrint("enterReferenceAssigment@ ident: " + ctx.identifier().getText() + " value: " + ctx.dotted_name().getText());
+        ReferenceSymbol rs = new ReferenceSymbol(ctx.Identifier().getText(), ctx.qualified_name().getText());
+        rs.setScope(currentScope);
+        rs.setDefNode(ctx);
+        currentScope.define(rs);
     }
 
     @Override
@@ -160,7 +167,7 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
-        String name = ctx.identifier().getText();
+        String name = ctx.Identifier().getText();
         SpaceSymbol ssb = new SpaceSymbol(name);
         ctx.scope = ssb;
         pushScope(ssb);
@@ -218,7 +225,12 @@ public class DefPhase extends RavelBaseListener {
     }
 
 
-    @Override public void enterInstance(RavelParser.InstanceContext ctx) { }
+    @Override public void enterInstance(RavelParser.InstanceContext ctx) {
+        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText());
+        is.setScope(currentScope);
+        is.setDefNode(ctx);
+        currentScope.define(is);
+    }
 
     @Override public void exitInstance(RavelParser.InstanceContext ctx) { }
 
@@ -232,7 +244,7 @@ public class DefPhase extends RavelBaseListener {
 
     /**
      * The end of the file and the end of the app
-     * TODO: hadle multiple files and imports
+     * TODO: handle multiple files and imports
      * @param ctx
      */
     @Override
