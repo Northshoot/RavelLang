@@ -244,6 +244,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlockStatement(RavelParser.BlockStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code DeleteStmt}
+	 * labeled alternative in {@link RavelParser#del_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeleteStmt(RavelParser.DeleteStmtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#variableDeclarators}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

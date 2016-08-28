@@ -173,7 +173,7 @@ instantiations
     ;
 
 instance
-    : Identifier '=' instance_name '(' elementValuePairs ')' NEWLINE?
+    : Identifier '=' instance_name '(' elementValuePairs? ')' NEWLINE?
     ;
 instance_name
     : Identifier
@@ -240,7 +240,7 @@ fields
     ;
 
 field
-    : Identifier '=' field_type '(' elementValuePairs ')'  NEWLINE? #FieldDeclaration
+    : Identifier '=' field_type '(' elementValuePairs? ')'  NEWLINE? #FieldDeclaration
     ;
 
 /**
@@ -300,6 +300,10 @@ blockStatement
     : controller_body
     | statement
     | if_stmt
+    | del_stmt
+    ;
+del_stmt
+    : DELETE qualified_name '(' elementValuePairs? ')' #DeleteStmt
     ;
 variableDeclarators
     :   variableDeclarator (',' variableDeclarator)*
@@ -321,7 +325,6 @@ statement
     |   'return' expression?
     |   'break' Identifier?
     |   'continue' Identifier?
-    |   'delete'  Identifier
     |   statementExpression
     |   NEWLINE
     ;
