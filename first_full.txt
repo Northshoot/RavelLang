@@ -1,3 +1,12 @@
+replicated model Device():
+    properties:
+        durable=false
+        reliable=false
+        records = size
+    schema:
+        id = DeviceId(unique=true)
+        booted = TimeStampField(auto_update=True)
+
 streaming model Random(size):
     properties:
         durable=false

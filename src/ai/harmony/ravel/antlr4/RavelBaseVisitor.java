@@ -223,13 +223,6 @@ public class RavelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitModel_field_identifier(RavelParser.Model_field_identifierContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitControllerScope(RavelParser.ControllerScopeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

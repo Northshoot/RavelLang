@@ -265,9 +265,6 @@ field_type
 /**
  * Controller stuff
  */
-model_field_identifier
-    : qualified_name
-    ;
 
 controller_comp returns [Scope scope]
     : CONTROLLER Identifier component_parameters ':' controller_scope # ControllerScope

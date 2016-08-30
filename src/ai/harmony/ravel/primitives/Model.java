@@ -1,5 +1,7 @@
 package ai.harmony.ravel.primitives;
 
+import ai.harmony.ravel.primitives.Fields.Field;
+
 import java.util.*;
 
 /**

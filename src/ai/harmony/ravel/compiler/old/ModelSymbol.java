@@ -1,6 +1,6 @@
 package ai.harmony.ravel.compiler.old;
 
-import ai.harmony.ravel.primitives.Field;
+import ai.harmony.ravel.primitives.Fields.Field;
 import ai.harmony.ravel.primitives.Model;
 
 import java.util.Iterator;

@@ -367,18 +367,6 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterModel_field_identifier(RavelParser.Model_field_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitModel_field_identifier(RavelParser.Model_field_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterControllerScope(RavelParser.ControllerScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
