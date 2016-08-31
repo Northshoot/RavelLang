@@ -1,4 +1,4 @@
-package ai.harmony.ravel.primitives;
+package ai.harmony.ravel.compiler.symbol;
 
 import ai.harmony.ravel.compiler.symbol.BaseSymbol;
 import ai.harmony.ravel.compiler.symbol.Type;

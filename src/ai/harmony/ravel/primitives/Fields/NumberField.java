@@ -3,7 +3,7 @@ package ai.harmony.ravel.primitives.Fields;
 /**
  * Created by lauril on 8/30/16.
  */
-public class DecimalField<Decimal> extends Field {
+public class NumberField<Decimal> extends Field {
     private int baz;
 
     @Override
@@ -12,18 +12,18 @@ public class DecimalField<Decimal> extends Field {
     }
 
 
-    public static final class Builder extends Field.Builder<DecimalField, DecimalField.Builder> {
+    public static final class Builder extends Field.Builder<NumberField, NumberField.Builder> {
 
-        protected DecimalField createObject() {
-            return new DecimalField();
+        protected NumberField createObject() {
+            return new NumberField();
         }
 
-        protected DecimalField.Builder thisObject() {
+        protected NumberField.Builder thisObject() {
             return this;
         }
 
         //add all field specific setters
-        public DecimalField.Builder baz(int baz) {
+        public NumberField.Builder baz(int baz) {
             obj.baz = baz;
             return thisObj;
         }

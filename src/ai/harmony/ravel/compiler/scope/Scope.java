@@ -70,6 +70,19 @@ public interface Scope {
      */
     List<Scope> getNestedScopes();
 
+    /**
+     * get scope by name
+     * @param name
+     * @return
+     */
+    Scope getNestedScope(String name);
+
+    /**
+     * verify if the nested scope has been defined
+     * @param name
+     * @return
+     */
+    boolean hasNestedScope(String name);
     // ------------ Convenience methods --------------------------------
 
     /** Return (inclusive) list of all scopes on path to root scope.

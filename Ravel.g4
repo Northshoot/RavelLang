@@ -527,8 +527,8 @@ T_BOOLEAN_FIELD     : 'Boolean' ;
 T_INTEGER_FIELD     : 'IntegerField';
 T_NUMBER_FIELD      : 'NumberField' ;
 T_DATE_FIELD        : 'DateField' ;
-T_DATE_TIME_FIELD   : 'DateTime' ;
-T_TIME_STAMP_FIELD  : 'TimestampField' ;
+T_DATE_TIME_FIELD   : 'DateTimeField' ;
+T_TIME_STAMP_FIELD  : 'TimeStampField' ;
 T_CONTEXT_FIELD     : 'ContextField' ;
 
 //expression operators

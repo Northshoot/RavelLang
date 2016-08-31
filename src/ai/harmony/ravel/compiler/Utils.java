@@ -6,13 +6,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -237,5 +231,16 @@ public class Utils {
             buf.append(s.getName());
         }
         return buf.toString();
+    }
+
+    public static Map<String, Scope> listToNameMap(List<Scope> ls){
+        Map<String, Scope> map = new HashMap<>();
+        Iterator<Scope> iter = ls.iterator();
+        while (iter.hasNext()) {
+            Scope o = iter.next();
+            map.put(o.getName(), o);
+        }
+
+        return map;
     }
 }

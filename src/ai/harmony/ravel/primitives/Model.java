@@ -13,7 +13,7 @@ public class Model extends Primitive {
 
     Model.Type mModelType;
     private Map<String, Field> mFields = new LinkedHashMap<>();
-    private Map<String, Property> mProperties = new LinkedHashMap<>();
+    private Map<String, String> mProperties = new LinkedHashMap<>();
 
 
     public Model.Type getModelType() {
@@ -38,7 +38,7 @@ public class Model extends Primitive {
     }
 
 
-    public void setProperty(String name, Property mProperties) {
+    public void setProperty(String name, String mProperties) {
         //TODO: implement property setter
         this.mProperties.put(name, mProperties);
     }

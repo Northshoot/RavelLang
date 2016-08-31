@@ -1,6 +1,7 @@
 package ai.harmony.ravel.primitives.Fields;
 
-import ai.harmony.ravel.compiler.old.Symbol;
+import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.ravel.compiler.symbol.Symbol;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.translators.Translator;
 import org.apache.commons.lang3.text.WordUtils;
@@ -44,7 +45,7 @@ public abstract class Field<T> implements Translator{
 
     protected Field() {}
 
-    protected static abstract class Builder<T extends Field, B extends Builder<T, B>> {
+    public static abstract class Builder<T extends Field, B extends Builder<T, B>> {
         protected T obj;
         protected B thisObj;
 
@@ -243,22 +244,20 @@ public abstract class Field<T> implements Translator{
                 mTypeName + ", model: " + mModel.getName()+
                 "]";
     }
-    public static Field.Type getType(Symbol.Type tokenType) {
+    public static Field.Type getType(int tokenType) {
         switch (tokenType){
-            case T_BOOLEAN_FIELD :   return Type.T_BOOLEAN;
-            case T_BYTE_FIELD :   return T_BYTE;
-            case T_DATE_FIELD :  return T_DATE;
-            case T_DATE_TIME_FIELD :   return T_DATE_TIME;
-            case T_INTEGER_FIELD :   return T_INTEGER;
-            case T_NUMBER_FIELD :   return T_NUMBER;
-            case T_TIME_STAMP_FIELD :   return T_TIME_STAMP;
-            case T_STRING_FIELD :   return T_STRING;
-            case T_CONTEXT_FIELD :   return T_CONTEXT;
-
-            case tINVALID:
-                break;
+            case RavelParser.T_BOOLEAN_FIELD :   return T_BOOLEAN;
+            case RavelParser.T_BYTE_FIELD :   return T_BYTE;
+            case RavelParser.T_DATE_FIELD :  return T_DATE;
+            case RavelParser.T_DATE_TIME_FIELD :   return T_DATE_TIME;
+            case RavelParser.T_INTEGER_FIELD :   return T_INTEGER;
+            case RavelParser.T_NUMBER_FIELD :   return T_NUMBER;
+            case RavelParser.T_TIME_STAMP_FIELD :   return T_TIME_STAMP;
+            case RavelParser.T_STRING_FIELD :   return T_STRING;
+            case RavelParser.T_CONTEXT_FIELD :   return T_CONTEXT;
+            default: return tINVALID;
         }
-        return tINVALID;
+
     }
 
 

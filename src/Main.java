@@ -2,6 +2,8 @@
 import ai.harmony.ravel.antlr4.*;
 import ai.harmony.ravel.compiler.DefPhase;
 import ai.harmony.ravel.RavelApplication;
+import ai.harmony.ravel.compiler.InternalRepPhase;
+import ai.harmony.ravel.compiler.RefPhase;
 import ai.harmony.ravel.error.ExitLexer;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.primitives.Space;
@@ -43,9 +45,47 @@ public class Main {
         parser.setBuildParseTree(true);
         ParseTree tree = parser.file_input();
         ParseTreeWalker walker = new ParseTreeWalker();
+
+
+        /**
+         * First create Defined symbols
+         */
         DefPhase def = new DefPhase();
         walker.walk(def,tree);
-//        RavelApplication rApp = def.getRavelApp();
+
+        /**
+         * Second create reference symbols and resolve definitions
+         * What do we want to validate?
+         * Added: 18/8/2016 09:06:04 For a starter:
+         * (1) Variable references have corresponding definitions in the scope
+         * (2) Event declarations have corresponding definitions in the scope
+         * (3) Variables are not used as functions
+         * (4) Functions are not used as variables
+         * (5) Referenced functions context has definitions in it
+         * (6) Components are using appropriate component blocks
+         * (7) Models, Controller and views are instantiated on to a particular space
+         * (8) components are instantiated with allowed keywords
+         * (9) schema fields have required and allowed keywords, parameters
+         * (10) Model fields are accessed with correct privileges that are defined in model properties
+         *
+         *
+         */
+        //TODO: this is just a sample testing if models and controllers are defined and
+        //if model scopes are defined
+        RefPhase ref = new RefPhase(def.globalScope);
+        walker.walk(ref, tree);
+        /**
+         *  Morph to an complete internal representation
+         *  Create concreate instances of models
+         *
+         */
+        RavelApplication rApp = new RavelApplication();
+        InternalRepPhase inter = new InternalRepPhase(def.globalScope, rApp);
+        walker.walk(inter, tree);
+        //System.out.println(rApp);
+         /**
+         *Generate code
+         */
 //        if (rApp != null){
 //            System.out.println("**************** RAVEL APP ****************");
 //            System.out.println(rApp);
@@ -69,37 +109,6 @@ public class Main {
 //            System.out.println(create_record.render());
 //            System.out.println(ble_record_instans.render());
 //        }
-        /**
-         * First create Defined symbols
-         */
-
-        /**
-         * Second create reference symbols and resolve definitions
-         * What do we want to validate?
-         * Added: 18/8/2016 09:06:04 For a starter:
-         * (1) Variable references have corresponding definitions in the scope
-         * (2) Event declarations have corresponding definitions in the scope
-         * (3) Variables are not used as functions
-         * (4) Functions are not used as variables
-         * (5) Referenced functions context has definitions in it
-         * (6) Components are using appropriate component blocks
-         * (7) Models, Controller and views are instantiated on to a particular space
-         * (8) components are instantiated with allowed keywords
-         * (9) schema fields have required and allowed keywords, parameters
-         * (10) Model fields are accessed with correct privileges that are defined in model properties
-         *
-         *
-         */
-
-        /**
-         *  Morph to an complete internal representation
-         *
-         * /
-
-         /**
-         *Generate code
-         */
-
         Date now = Calendar.getInstance().getTime();
         long diff = now.getTime() - t.getTime();
         long diffMilliSeconds = diff  % 60;

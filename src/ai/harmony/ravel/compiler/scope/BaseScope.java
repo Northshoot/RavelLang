@@ -8,16 +8,11 @@ import ai.harmony.ravel.compiler.symbol.MethodSymbol;
 import ai.harmony.ravel.compiler.symbol.Symbol;
 import ai.harmony.ravel.compiler.symbol.SymbolWithScope;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /** An abstract base class that houses common functionality for scopes. */
 public abstract class BaseScope implements Scope {
-    protected Scope enclosingScope; // null if this scope is the root of the scope tree
+    protected Scope enclosingScope = null; // null if this scope is the root of the scope tree
 
     /** All symbols defined in this scope; can include classes, functions,
      *  variables, or anything else that is a Symbol impl. It does NOT
@@ -30,6 +25,7 @@ public abstract class BaseScope implements Scope {
      *  include SymbolWithScope objects.
      */
     protected List<Scope> nestedScopesNotSymbols = new ArrayList<>();
+    protected Map<String, Scope> nestedScopeMap = new HashMap<>();
 
     public BaseScope() { }
 
@@ -78,7 +74,21 @@ public abstract class BaseScope implements Scope {
             throw new IllegalArgumentException("Add SymbolWithScope instance "+
                     scope.getName()+" via define()");
         }
+        String scopeName = scope.getName();
+        if(hasNestedScope(scopeName)) {
+            throw new IllegalArgumentException("Nested scope " + scopeName +
+                    " is already defined with symbols: " +getNestedScope(scopeName));
+        }
         nestedScopesNotSymbols.add(scope);
+        nestedScopeMap.put(scopeName,scope);
+    }
+
+    public Scope getNestedScope(String name){
+        return nestedScopeMap.get(name);
+    }
+
+    public boolean hasNestedScope(String name){
+        return nestedScopeMap.containsKey(name);
     }
 
     @Override
@@ -131,6 +141,19 @@ public abstract class BaseScope implements Scope {
         }
         return null;
     }
+
+    public List<Scope> getNestedScopesOfType(Class<?> type) {
+        List<Scope> nestedScope = getAllNestedScopedSymbols();
+        Iterator<Scope> iter = nestedScope.iterator();
+        while (iter.hasNext()) {
+            Scope s = iter.next();
+            if (s.getClass()!=type)
+                iter.remove();
+                }
+
+        return nestedScope;
+    }
+
 
     @Override
     public List<Scope> getEnclosingPathToRoot() {

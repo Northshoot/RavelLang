@@ -81,7 +81,7 @@ public class RavelParser extends Parser {
 		"'properties:'", "'schema:'", "'self'", "'model'", "'space'", "'controller'", 
 		"'view'", "'flow'", "'local'", "'streaming'", "'replicated'", "'properties'", 
 		"'schema'", "'event'", "'command'", "'ByteField'", "'StringField'", "'Boolean'", 
-		"'IntegerField'", "'NumberField'", "'DateField'", "'DateTime'", "'TimestampField'", 
+		"'IntegerField'", "'NumberField'", "'DateField'", "'DateTimeField'", "'TimeStampField'", 
 		"'ContextField'", "'assert'", "'return'", "'true'", "'false'", "'if'", 
 		"'else if'", "'else'", "'for'", "'while'", "'and'", "'not'", "'or'", "'in'", 
 		"'is'", "'delete'", "'pass'", "'continue'", "'break'", "'none'", null, 
