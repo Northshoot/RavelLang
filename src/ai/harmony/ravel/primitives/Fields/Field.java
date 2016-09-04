@@ -6,7 +6,10 @@ import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.translators.Translator;
 import org.apache.commons.lang3.text.WordUtils;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static ai.harmony.ravel.primitives.Fields.Field.Type.*;
 
@@ -33,9 +36,11 @@ public abstract class Field<T> implements Translator{
     //each field belongs to a model
     protected Model mModel;
     //we always save a copy of default value as a string
+    protected boolean mHasOptions = false;
     protected String mDefaultValueString;
     protected T mDefaultValue;
     protected String mDocumentation ="Auto Generated";
+    protected Map<String, String> mFieldOptions = new HashMap<>();
 
 
     public enum Type {  T_INTEGER, T_NUMBER, T_DATE,
@@ -63,11 +68,12 @@ public abstract class Field<T> implements Translator{
         //builder methods for setting property
         public B model(Model m){obj.mModel = m; return thisObj; }
         public B name(String name){obj.mName=name; return thisObj; }
-        public B documentation(String docs) {obj.mDocumentation = docs; return thisObj; }
         public B fieldType(Field.Type ft){obj.mFieldType = ft; return thisObj; }
         public B defaultValueString(String d){obj.mDefaultValueString = d; return thisObj; }
         public B defaultValue(T value){obj.mDefaultValue = value; return thisObj; }
         public B fieldTypeName(String ftn){obj.mTypeName = ftn; return thisObj; }
+        public B hasOptions(boolean opt){obj.mHasOptions = opt; return thisObj; }
+        public B addOption(String name, String value){obj.mFieldOptions.put(name, value); return thisObj;}
 
     }
 
@@ -156,6 +162,26 @@ public abstract class Field<T> implements Translator{
 
     public String getNameCamelCase() {
         return WordUtils.capitalizeFully(mName, new char[] { '_' }).replaceAll("_", "");
+    }
+
+    public  String getCdocumentation(){
+        return "// " + getDocumentation();
+    }
+
+    public String getJavaDocumentation(){
+        return getCdocumentation();
+    }
+    public  String getPythondocumentation(){
+        return "# " + getDocumentation();
+    }
+
+    private String getDocumentation(){
+        //TODO: the string has to be tokenized to fit 80 chars per line
+        if(mHasOptions && mFieldOptions.containsKey("documentations")){
+            return mFieldOptions.get("documentations");
+        } else {
+            return "AUTOGEN-DOCS: " + this.toString();
+        }
     }
 
     public String getNameCamelCaseLowerCase() {

@@ -5,22 +5,26 @@ import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
-import ai.harmony.ravel.compiler.symbol.*;
+import ai.harmony.ravel.compiler.symbol.FieldSymbol;
+import ai.harmony.ravel.compiler.symbol.VariableSymbol;
 import ai.harmony.ravel.primitives.Fields.*;
-import ai.harmony.ravel.primitives.Fields.Field.*;
+import ai.harmony.ravel.primitives.Fields.Field.Builder;
 import ai.harmony.ravel.primitives.Model;
-import org.antlr.v4.runtime.misc.Pair;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * Created by lauril on 8/30/16.
  */
 public class InternalRepPhase extends RavelBaseListener {
-    GlobalScope globals;
-    Scope currentScope;
-    RavelApplication rApp;
-    String field_path = "ai.harmony.ravel.primitives.Fields.";
+    private static Logger LOGGER = Logger.getLogger(InternalRepPhase.class.getName());
+    private GlobalScope globals;
+    private Scope currentScope;
+    private RavelApplication rApp;
 
     public InternalRepPhase(GlobalScope globals, RavelApplication rApp) {
         this.globals = globals;
@@ -33,54 +37,58 @@ public class InternalRepPhase extends RavelBaseListener {
         //first instantiate components
     }
 
+    /**
+     * Lets build the model representation
+     * Models consist of properties and schema
+     * (1) set app properties to the model
+     * (2) set schema fields to the model
+     * (3) add model to the app
+     * (4) NOTE: we add models to the spaces in the next step, which is done for the ravel app
+     *
+     * @param ctx
+     */
     @Override
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
         //Create models and fields set properties, add to
+
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
         Model m = new Model(name, Model.getType(type));
+        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
-        System.out.println(ctx.scope.getName());
         Scope propScope = ctx.scope.getNestedScope("properties");
+        LOGGER.info("Adding models properties: [");
+        String propertyDebug = "";
         List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();
         Iterator<VariableSymbol> p = prop.iterator();
-        while(p.hasNext()){
+        while (p.hasNext()) {
             VariableSymbol vs = p.next();
-            m.setProperty(vs.getName(), vs.getValue());
-
+            String prope_name = vs.getName();
+            String value = vs.getValue();
+            propertyDebug += prope_name + ":" + value + ",";
+            m.setProperty(prope_name, value);
         }
+        LOGGER.info(propertyDebug + "]");
+
         // create fields for the schema
         Scope schemaScope = ctx.scope.getNestedScope("schema");
+        LOGGER.info("Adding model fields to the schema:");
         List<FieldSymbol> schema = (List<FieldSymbol>) schemaScope.getAllSymbols();
+        LOGGER.info("Adding model # " + schema.size() + " fields to the schema:");
         Iterator<FieldSymbol> s = schema.iterator();
-        while(s.hasNext()){
+        while (s.hasNext()) {
+            boolean field_has_options = false;
             FieldSymbol fs = s.next();
             RavelParser.FieldDeclarationContext field_ctx = (RavelParser.FieldDeclarationContext) fs.getDefNode();
             //Field type name
             String field_type = field_ctx.field_type().getText();
             //get field type
             Field.Type ft = Field.getType(field_ctx.field_type().start.getType());
-            //deal with parameters
-            RavelParser.ElementValuePairsContext elementValuePairContext = field_ctx.elementValuePairs();
-            Map<String, String> field_args = null;
 
-            if( elementValuePairContext != null ) {
-                field_args = new HashMap<>();
-                List<RavelParser.ElementValuePairContext> valp;
-                valp = elementValuePairContext.elementValuePair();
-                Iterator<RavelParser.ElementValuePairContext> elementpair = valp.iterator();
-                while ( elementpair.hasNext() ) {
-                    RavelParser.ElementValuePairContext el = elementpair.next();
-                    //This is assums that field can not have expression
-                    //TODO: needs redesign
-                    field_args.put(el.Identifier().getText(), el.elementValue().getText());
-                }
-            }
-
-            Builder f_concreate  = null;
+            Builder f_concreate = null;
             //first we only create a specific field builder
             //and add leaf methods
-            switch ( ft ){
+            switch (ft) {
                 case T_INTEGER:
                     f_concreate = new IntegerField.Builder();
                     break;
@@ -114,26 +122,59 @@ public class InternalRepPhase extends RavelBaseListener {
             }
             //Now we add generic field properties
             f_concreate
-                    .fieldType(ft)
-                    .fieldTypeName(field_type)
-                    .name(fs.getName())
-                    .model(m)
-                    .documentation(field_args.getOrDefault("documentation", "Field or type " + field_type));
+                    .fieldType(ft) //set type
+                    .fieldTypeName(field_type) // give string value of type name
+                    .name(fs.getName()) // set name
+                    .model(m); //ad model to the field (for reverse name creation
+            // now we add field options if any
+            RavelParser.ElementValuePairsContext fieldOpt = field_ctx.elementValuePairs();
 
+
+            if (fieldOpt != null) {
+                field_has_options = true;
+                List<RavelParser.ElementValuePairContext> valp;
+                valp = fieldOpt.elementValuePair();
+                Iterator<RavelParser.ElementValuePairContext> optPair = valp.iterator();
+                String args = "";
+                while (optPair.hasNext()) {
+                    RavelParser.ElementValuePairContext el = optPair.next();
+                    //This is assums that field can not have expression
+                    //TODO: needs redesign
+                    String optName = el.Identifier().getText();
+                    String optValue = el.elementValue().getText();
+                    args += optName + ":" + optValue + ",";
+                    f_concreate.addOption(optName, optValue);
+                }
+                LOGGER.info("field arguments: [" + args + "]");
+            }
+            f_concreate.hasOptions(field_has_options);
             m.addField(fs.getName(), f_concreate.build());
             rApp.addModel(m.getName(), m);
-
-
-        }
+        }//end field constructions
 
     }
 
+    /**
+     * Lets build controller representations
+     * (1) set all declarations
+     * (2) create and add all event to controller
+     * (3) add controller to ravel app
+     * (4) all references to the spaces is done in next build step
+     * @param ctx
+     */
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
         //create controllers
 
     }
+    /**
+     * TODO: build views
+     */
 
+    /**
+     * NOTE: Space is build in the next step, because we need to be sure of the order
+     * @param ctx
+     */
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
 

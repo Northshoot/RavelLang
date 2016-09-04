@@ -28,7 +28,11 @@ public class RefPhase extends RavelBaseListener {
     }
 
 
-
+    /**
+     * (1) Bellow we check if the models and controllers in the sapce are are declared before
+     * (2) we add innit parameters to the models
+     * @param ctx
+     */
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
         currentScope = ctx.scope;
@@ -38,8 +42,6 @@ public class RefPhase extends RavelBaseListener {
         isDeclared( ModelSymbol.class, (List<InstanceSymbol>) ctx.scope.getAllSymbols() );
 
     }
-
-
     @Override
     public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
         isDeclared( ControllerSymbol.class, (List<InstanceSymbol>) ctx.scope.getAllSymbols() );

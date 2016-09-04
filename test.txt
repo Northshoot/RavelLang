@@ -7,3 +7,192 @@ streaming model Random(size):
     schema:
         time=TimeStampField(auto_add=True)
         value = IntegerField()
+
+replicated model Frequency(size):
+    properties:
+        durable = false
+        reliable = false
+        buffer_size = size
+
+    schema:
+        frequency = IntegerField(default=1000)
+
+streaming model BootError():
+    properties:
+        durable = false
+        reliable = false
+        records = 10
+
+    schema:
+        time=TimeStampField(auto_add=True)
+        occurred = StringField()
+        context = ContextField()
+
+streaming model DelayError(size):
+    properties:
+        durable = false
+        reliable = false
+        records = size
+
+    schema:
+        time=TimeStampField(auto_add=True)
+        source = StringField()
+        reason = StringField()
+        context = ContextField()
+
+streaming model RandomError():
+    properties:
+        records = 1
+        durable = false
+        reliable = false
+
+    schema:
+        time=TimeStampField(auto_add=True)
+        source = StringField()
+        reason = StringField()
+        context = ContextField()
+
+controller RandomControllerEmbedded(tier):
+    mFreq = tier.models.frequency
+    mRandom = tier.models.random
+    mError = tier.models.error
+    random_source = tier.sources.random
+    random_timer = tier.platform.timer
+    boot_event = tier.platform.boot
+    running = false
+
+    event boot_event(context ctx):
+        if ctx.error is SUCCESS:
+            random_timer.start_periodic(mFreq.frequency)
+            running = true
+        else:
+            error = mError.create()
+            error.occurred=self
+            error.context=ctx
+            error.save()
+
+    event mFreq.arrived(context ctx):
+        random_timer.stop()
+        random_timer.start_periodic(mFreq.frequency)
+
+    event random_timer.fired(context ctx):
+        rand = mRandom.create()
+        rand.value = random_source.read()
+        rand.save()
+
+    event mRandom.full(context ctx):
+        random_timer.stop()
+        running = false
+
+    event mRandom.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(mFreq.frequency)
+            running = true
+
+controller RandomControllerGateway(tier):
+    mFreq = tier.models.frequency
+    mRandom = tier.models.random
+    mDelayError = tier.models.delay_error
+    timer = tier.platform.timer
+    delay_max = 10000
+    last_depart = 0
+
+    event mRandom.arrived(context ctx):
+        if ctx.error is SUCCESS:
+            current = ctx.mRandom
+            last = mRandom.query.last()
+            diff = current.time - last.time
+            if diff > delay_max:
+                error = mDelayError.create()
+                error.source = self
+                error.reason = "too long time in between data samples from device: " + diff
+                error.context = ctx
+                error.save()
+
+    event mRandom.departed(context ctx):
+        now = timer.now()
+        diff = now - last_depart
+        if diff > delay_max:
+            error = DelayError.create()
+            error.source = self
+            error.reason = "delay not cloud: " + diff
+            error.context = ctx
+            error.save()
+
+    event mDelayError.full(context ctx):
+        delete mDelayError.first()
+
+    event mRandom.full(context ctx):
+        delete mRandom.last()
+
+controller RandomControllerCloud(tier):
+    mFreq = tier.models.frequency
+    mRandom = tier.models.random
+    mRandomError = tier.models.random_error
+    random_sink = tier.sources.db
+
+    event mRandom.arrived(context ctx):
+        if ctx.error is SUCCESS:
+            current = ctx.mRandom
+            last = mRandom.query.last
+            diff = current.time - last.time
+            if last.value == current.value:
+                    rnd_error = mRandomError.create()
+                    rnd_error.source = self
+                    rnd_error.reason = "Same random value as last time: " + current.value
+                    rnd_error.context = ctx
+                    rnd_error.save()
+
+            random_sink.write(current)
+
+
+space EmbeddedSpace:
+    platform:
+        language = clang
+        templates=nrf52
+        platform = android.apiv1
+        boot = platform.boot
+
+    models:
+        random=Random(records=10)
+        frequency=Frequency(records=1)
+        boor_error = BootError(records=10)
+
+    controllers:
+        rndcnt = RandomControllerEmbedded(tier=self)
+
+    sources:
+        random = platform.source.random
+
+
+space GatewaySpace:
+    platform:
+        language=java
+        templates=android
+        platform = android.apiv1
+
+
+    models:
+        random=Random(size=100)
+
+    controllers:
+        rndcnt = RandomControllerGateway(tier=self)
+
+space CloudSpace:
+    platform:
+        language=python
+        templates=django
+        platform = django.apiv1
+
+    models:
+        random=Random(records=10)
+        frequency=Frequency(records=1)
+        boor_error = BootError(records=10)
+        random_error = RandomError()
+
+
+    controllers:
+        rndcnt = RandomControllerCloud(tier=self)
+
+    sinks:
+        db = platform.sinks.db

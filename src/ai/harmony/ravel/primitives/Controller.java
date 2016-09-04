@@ -2,23 +2,25 @@ package ai.harmony.ravel.primitives;
 
 import ai.harmony.ravel.antlr4.RavelParser;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by lauril on 7/21/16.
  */
 public class Controller extends Primitive{
 
-    private List<Configuration> mConfigurations;
-    private List<Event> mEvents;
+    private Map<String, String> mDeclarations = new LinkedHashMap<>();
+    private Map<String, Event> mEvents = new LinkedHashMap<>();
 
     public Controller(String name){
         super(name);
-        mConfigurations = new LinkedList<>();
-        //create configurations from context
-        mEvents = new LinkedList<>();
-        //create events from context
     }
+
+    public void add(String name, String value) { this.mDeclarations.put(name, value) ;}
+    public void add(String name, Event event) {
+        this.mEvents.put(name, event);
+        event.setController(this);
+    }
+
 
 }
