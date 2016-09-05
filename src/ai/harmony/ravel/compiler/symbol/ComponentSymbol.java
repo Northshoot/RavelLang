@@ -90,17 +90,17 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
     public int getNumberOfFields() { return getNumberOfDefinedFields(); }
 
     /** Return the list of fields in this specific aggregate */
-    public List<? extends LocalVariableSymbol> getDefinedFields() {
-        List<LocalVariableSymbol> fields = new ArrayList<>();
+    public List<VariableSymbol> getDefinedFields() {
+        List<VariableSymbol> fields = new ArrayList<>();
         for (MemberSymbol s : getSymbols()) {
-            if (s instanceof LocalVariableSymbol) {
-                fields.add((LocalVariableSymbol)s);
+            if (s instanceof VariableSymbol) {
+                fields.add((VariableSymbol)s);
             }
         }
         return fields;
     }
 
-    public List<? extends LocalVariableSymbol> getFields() { return getDefinedFields(); }
+    public List<VariableSymbol> getFields() { return getDefinedFields(); }
 
     public void setSlotNumber(Symbol sym) {
         if ( sym instanceof LocalVariableSymbol) {

@@ -16,6 +16,9 @@ public class ReferenceSymbol extends BaseSymbol implements TypedSymbol, MemberSy
         super.setType(type);
     }
 
+    public String getReference(){
+        return mReference;
+    }
     @Override
     public int getSlotNumber() {
         return slot;

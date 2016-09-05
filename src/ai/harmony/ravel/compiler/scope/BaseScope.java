@@ -4,16 +4,16 @@ package ai.harmony.ravel.compiler.scope;
  * Created by lauril on 8/25/16.
  */
 import ai.harmony.ravel.compiler.Utils;
-import ai.harmony.ravel.compiler.symbol.MethodSymbol;
-import ai.harmony.ravel.compiler.symbol.Symbol;
-import ai.harmony.ravel.compiler.symbol.SymbolWithScope;
+import ai.harmony.ravel.compiler.symbol.*;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /** An abstract base class that houses common functionality for scopes. */
 public abstract class BaseScope implements Scope {
     protected Scope enclosingScope = null; // null if this scope is the root of the scope tree
-
+    protected ParserRuleContext defNode; // points at definition node in tree
     /** All symbols defined in this scope; can include classes, functions,
      *  variables, or anything else that is a Symbol impl. It does NOT
      *  include non-Symbol-based things like LocalScope. See nestedScopes.
@@ -64,7 +64,12 @@ public abstract class BaseScope implements Scope {
         all.addAll(nestedScopesNotSymbols);
         return all;
     }
-
+    public void setDefNode(ParserRuleContext defNode) {
+        this.defNode = defNode;
+    }
+    public ParserRuleContext getDefNode() {
+        return defNode;
+    }
     /** Add a nested scope to this scope; could also be a FunctionSymbol
      *  if your language allows nested functions.
      */
@@ -175,6 +180,12 @@ public abstract class BaseScope implements Scope {
         return new ArrayList<>(values);
     }
 
+    public List<ReferenceSymbol> getRefenceSymbols(){
+        return getSymbols().stream()
+                .filter(s -> s instanceof ReferenceSymbol)
+                .map(s -> (ReferenceSymbol) s)
+                .collect(Collectors.toList());
+    }
     public List<? extends Symbol> getAllSymbols() {
         List<Symbol> syms = new ArrayList<>();
         syms.addAll(getSymbols());

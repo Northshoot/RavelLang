@@ -277,6 +277,7 @@ controller_scope
 controller_body
     : eventdef // can only be events
     | ref_assig // reference
+    | property // simple var assigment
     | variableDeclarator // or variable assigment
     | funct_expr
     | NEWLINE

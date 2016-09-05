@@ -3,13 +3,16 @@ package ai.harmony.ravel.compiler;
 import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.antlr4.RavelBaseListener;
 import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.ravel.antlr4.RavelParser.VarAssigmentContext;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
-import ai.harmony.ravel.compiler.symbol.FieldSymbol;
-import ai.harmony.ravel.compiler.symbol.VariableSymbol;
+import ai.harmony.ravel.compiler.symbol.*;
+import ai.harmony.ravel.primitives.Controller;
+import ai.harmony.ravel.primitives.Event;
 import ai.harmony.ravel.primitives.Fields.*;
 import ai.harmony.ravel.primitives.Fields.Field.Builder;
 import ai.harmony.ravel.primitives.Model;
+import ai.harmony.ravel.primitives.Variable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +53,6 @@ public class InternalRepPhase extends RavelBaseListener {
     @Override
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
         //Create models and fields set properties, add to
-
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
         Model m = new Model(name, Model.getType(type));
@@ -165,7 +167,78 @@ public class InternalRepPhase extends RavelBaseListener {
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
         //create controllers
+        String name = ctx.Identifier().getText();
+        List<VariableSymbol> cntrVars =  ((ComponentSymbol)ctx.scope).getDefinedFields();
+        List<EventSymbol> events = ((ControllerSymbol)ctx.scope).getEvents();
+        List<ReferenceSymbol> referenceSymbols = ((ControllerSymbol) ctx.scope).getRefenceSymbols();
+        LOGGER.info( name + "controller: " + "#-vars in "
+                + cntrVars.size() + " #-events: " + events.size()
+                + " #-ref: " + referenceSymbols.size());
+        LOGGER.info(ctx.scope.toString());
+        Controller ctrl = new Controller(name);
+        for (VariableSymbol s: cntrVars) {
+            Variable var = makeVariable(s);
+            if(s == null){
+                throw new IllegalArgumentException("Line: " + ctx.start.getLine()
+                        + "Could not create variable" +s.toString());
+            }
+            LOGGER.info(var.toString());
+            ctrl.addVar(s.getName(), var);
+        }
+        for(ReferenceSymbol r: referenceSymbols){
+            //TODO: needs a clever way to create ref objects pointing to the right object
+            ctrl.addRef(r.getName(), r.getReference());
+        }
+        //create events. pew!
+        for(EventSymbol e: events){
+            String ename = e.getName();
+            Event event = new Event(ename);
 
+            ctrl.addEvent(ename, event);
+        }
+
+
+    }
+    private Variable makeVariable(VariableSymbol vs) {
+        Variable.Builder var  = new Variable.Builder();
+        var.name(vs.getName())
+                .stringValue(vs.getValue());
+        //determine the type of the value
+        RavelParser.PropContext node = ((VarAssigmentContext)vs.getDefNode()).prop();
+//        prop
+//                : Identifier
+//                | boolean_r
+//                | IntegerLiteral
+//                | FloatingPointLiteral
+//        ;
+        LOGGER.fine(node.getText());
+        LOGGER.fine("Parent to string" + node.parent.toString());
+        try {
+            String value = node.boolean_r().getText();
+            var.stringType("boolean");
+           return var.value(Boolean.parseBoolean(value)).build();
+        } catch (NullPointerException e){ }
+
+        try{
+            String value = node.IntegerLiteral().getText();
+            var.stringType("integer");
+            return var.value(Integer.parseInt(value)).build();
+        }catch (NullPointerException e){ }
+        try{
+            String value = node.FloatingPointLiteral().getText();
+
+            var.stringType("number");
+            return var.value(Float.parseFloat(value)).build();
+        } catch (NullPointerException e){ }
+        try{
+            String value = node.Identifier().getText();
+            var.stringType("string");
+            return  var.value(value).build();
+        } catch (NullPointerException e){ }
+        //we could build and return here, but we need to be sure that parsing has identified
+        //the right value.
+        //merge prop and varAssigments
+        return null;
     }
     /**
      * TODO: build views

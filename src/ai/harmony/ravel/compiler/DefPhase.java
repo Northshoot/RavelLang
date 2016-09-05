@@ -12,11 +12,13 @@ import ai.harmony.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
+    private static Logger LOGGER = Logger.getLogger(DefPhase.class.getName());
     Scope currentScope;
     //will be imports eventually
     public GlobalScope globalScope;
@@ -131,12 +133,12 @@ public class DefPhase extends RavelBaseListener {
         //define parameters in the scope
         String name = ctx.qualified_name().getText();
         //we create a local scope for each event
-        Scope s = new LocalScope("event: " + name, currentScope);
-        ctx.scope = s;
-        pushScope(s);
-        //when we push event symbol on the scope
         EventSymbol es = new EventSymbol(name);
+        ctx.scope = es;
+        es.setDefNode(ctx);
+        LOGGER.info(currentScope.getName());
         currentScope.define(es);
+        pushScope(es);
 
     }
 
@@ -160,6 +162,7 @@ public class DefPhase extends RavelBaseListener {
     public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) {
         intend++;
         String name = ctx.Identifier().getText();
+        LOGGER.info("VARIABLE NAME: " + name);
         VariableSymbol vs = new VariableSymbol(name);
         vs.setValue(ctx.prop().getText());
         vs.setScope(currentScope);
