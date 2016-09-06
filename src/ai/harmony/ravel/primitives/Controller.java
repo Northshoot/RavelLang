@@ -1,7 +1,5 @@
 package ai.harmony.ravel.primitives;
 
-import ai.harmony.ravel.antlr4.RavelParser;
-
 import java.util.*;
 
 /**
@@ -12,6 +10,7 @@ public class Controller extends Primitive{
     private Map<String, Variable> mDeclarations = new LinkedHashMap<>();
     private Map<String, String> mReference = new LinkedHashMap<>();
     private Map<String, Event> mEvents = new LinkedHashMap<>();
+    private List<String> mParams = new ArrayList<>();
 
     public Controller(String name){
         super(name);
@@ -23,8 +22,19 @@ public class Controller extends Primitive{
 
     public void addEvent(String name, Event event) {
         this.mEvents.put(name, event);
-        event.setController(this);
     }
 
+    public void addParam(String p){
+        mParams.add(p);
+    }
 
+    public boolean hasParam(String p){
+        for(String str: mParams) {
+            if(str.trim().contains(p))
+                return true;
+        }
+        return false;
+    }
+
+    public List<String> getParams() { return  this.mParams; }
 }

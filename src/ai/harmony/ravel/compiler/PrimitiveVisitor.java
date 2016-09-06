@@ -1,7 +1,7 @@
 //package ai.harmony.ravel.compiler;
 //
-//import ai.harmony.ravel.antlr4.RavelParserBaseVisitor;
-//import ai.harmony.ravel.antlr4.RavelParser;
+//import ai.harmony.antlr4.RavelParserBaseVisitor;
+//import ai.harmony.antlr4.RavelParser;
 //import ai.harmony.ravel.primitives.Controller;
 //import ai.harmony.ravel.primitives.Model;
 //import ai.harmony.ravel.primitives.ModelType;

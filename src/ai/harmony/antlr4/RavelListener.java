@@ -1,5 +1,5 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
-package ai.harmony.ravel.antlr4;
+package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
 
@@ -75,37 +75,25 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitPlatformScope(RavelParser.PlatformScopeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#platforms}.
+	 * Enter a parse tree produced by {@link RavelParser#space_assigments}.
 	 * @param ctx the parse tree
 	 */
-	void enterPlatforms(RavelParser.PlatformsContext ctx);
+	void enterSpace_assigments(RavelParser.Space_assigmentsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#platforms}.
+	 * Exit a parse tree produced by {@link RavelParser#space_assigments}.
 	 * @param ctx the parse tree
 	 */
-	void exitPlatforms(RavelParser.PlatformsContext ctx);
+	void exitSpace_assigments(RavelParser.Space_assigmentsContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code PlatformAssigment}
-	 * labeled alternative in {@link RavelParser#platform}.
+	 * Enter a parse tree produced by {@link RavelParser#space_assigment}.
 	 * @param ctx the parse tree
 	 */
-	void enterPlatformAssigment(RavelParser.PlatformAssigmentContext ctx);
+	void enterSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code PlatformAssigment}
-	 * labeled alternative in {@link RavelParser#platform}.
+	 * Exit a parse tree produced by {@link RavelParser#space_assigment}.
 	 * @param ctx the parse tree
 	 */
-	void exitPlatformAssigment(RavelParser.PlatformAssigmentContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#assigment}.
-	 * @param ctx the parse tree
-	 */
-	void enterAssigment(RavelParser.AssigmentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#assigment}.
-	 * @param ctx the parse tree
-	 */
-	void exitAssigment(RavelParser.AssigmentContext ctx);
+	void exitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ModelInstanciation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
@@ -270,6 +258,26 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVarAssigment(RavelParser.VarAssigmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#propValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropValue(RavelParser.PropValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#propValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropValue(RavelParser.PropValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#propArray}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropArray(RavelParser.PropArrayContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#propArray}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropArray(RavelParser.PropArrayContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#prop}.
 	 * @param ctx the parse tree
@@ -623,6 +631,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitParams(RavelParser.ParamsContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#param}.
+	 * @param ctx the parse tree
+	 */
+	void enterParam(RavelParser.ParamContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#param}.
+	 * @param ctx the parse tree
+	 */
+	void exitParam(RavelParser.ParamContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#elementValuePairs}.
 	 * @param ctx the parse tree
 	 */
@@ -725,6 +743,26 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#key}.
+	 * @param ctx the parse tree
+	 */
+	void enterKey(RavelParser.KeyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#key}.
+	 * @param ctx the parse tree
+	 */
+	void exitKey(RavelParser.KeyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void enterValue(RavelParser.ValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void exitValue(RavelParser.ValueContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#funct_expr}.
 	 * @param ctx the parse tree
 	 */
@@ -735,25 +773,49 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitFunct_expr(RavelParser.Funct_exprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#func_no_return}.
+	 * Enter a parse tree produced by the {@code FunctionRet}
+	 * labeled alternative in {@link RavelParser#func_no_return}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunc_no_return(RavelParser.Func_no_returnContext ctx);
+	void enterFunctionRet(RavelParser.FunctionRetContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#func_no_return}.
+	 * Exit a parse tree produced by the {@code FunctionRet}
+	 * labeled alternative in {@link RavelParser#func_no_return}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunc_no_return(RavelParser.Func_no_returnContext ctx);
+	void exitFunctionRet(RavelParser.FunctionRetContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#func_with_return}.
+	 * Enter a parse tree produced by {@link RavelParser#function_name}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunc_with_return(RavelParser.Func_with_returnContext ctx);
+	void enterFunction_name(RavelParser.Function_nameContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#func_with_return}.
+	 * Exit a parse tree produced by {@link RavelParser#function_name}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunc_with_return(RavelParser.Func_with_returnContext ctx);
+	void exitFunction_name(RavelParser.Function_nameContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FunctionWithReturn}
+	 * labeled alternative in {@link RavelParser#func_with_return}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionWithReturn(RavelParser.FunctionWithReturnContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FunctionWithReturn}
+	 * labeled alternative in {@link RavelParser#func_with_return}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionWithReturn(RavelParser.FunctionWithReturnContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#ident}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdent(RavelParser.IdentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#ident}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdent(RavelParser.IdentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

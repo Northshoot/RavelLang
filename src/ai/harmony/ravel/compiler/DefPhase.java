@@ -1,8 +1,8 @@
 package ai.harmony.ravel.compiler;
 
 
-import ai.harmony.ravel.antlr4.RavelBaseListener;
-import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.antlr4.RavelBaseListener;
+import ai.harmony.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.LocalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
@@ -81,6 +81,7 @@ public class DefPhase extends RavelBaseListener {
         fs.setScope(currentScope);
         //TODO: do we need type here?
         currentScope.define(fs);
+        LOGGER.info("ADDING FIELD: " +fs.toString());
 
      }
 
@@ -136,7 +137,6 @@ public class DefPhase extends RavelBaseListener {
         EventSymbol es = new EventSymbol(name);
         ctx.scope = es;
         es.setDefNode(ctx);
-        LOGGER.info(currentScope.getName());
         currentScope.define(es);
         pushScope(es);
 
@@ -164,7 +164,8 @@ public class DefPhase extends RavelBaseListener {
         String name = ctx.Identifier().getText();
         LOGGER.info("VARIABLE NAME: " + name);
         VariableSymbol vs = new VariableSymbol(name);
-        vs.setValue(ctx.prop().getText());
+
+        //vs.setValue(ctx.prop().getText());
         vs.setScope(currentScope);
         vs.setDefNode(ctx);
         currentScope.define(vs);
@@ -177,7 +178,7 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) {
         intend++;
-        ReferenceSymbol rs = new ReferenceSymbol(ctx.Identifier().getText(), ctx.qualified_name().getText());
+        ReferenceSymbol rs = new ReferenceSymbol(ctx.key().getText(), ctx.value().getText());
         rs.setScope(currentScope);
         rs.setDefNode(ctx);
         currentScope.define(rs);

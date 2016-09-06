@@ -1,13 +1,11 @@
 package ai.harmony.ravel.primitives.Fields;
 
-import ai.harmony.ravel.antlr4.RavelParser;
-import ai.harmony.ravel.compiler.symbol.Symbol;
+import ai.harmony.antlr4.RavelParser;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.translators.Translator;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -45,7 +43,7 @@ public abstract class Field<T> implements Translator{
 
     public enum Type {  T_INTEGER, T_NUMBER, T_DATE,
                         T_DATE_TIME, T_TIME_STAMP, T_BYTE,
-                        T_STRING, T_BOOLEAN, T_CONTEXT, tINVALID
+                        T_STRING, T_BOOLEAN, T_CONTEXT, T_MODEL, tINVALID
                     }
 
     protected Field() {}
@@ -281,6 +279,7 @@ public abstract class Field<T> implements Translator{
             case RavelParser.T_TIME_STAMP_FIELD :   return T_TIME_STAMP;
             case RavelParser.T_STRING_FIELD :   return T_STRING;
             case RavelParser.T_CONTEXT_FIELD :   return T_CONTEXT;
+            case RavelParser.T_MODEL_FIELD: return T_MODEL;
             default: return tINVALID;
         }
 

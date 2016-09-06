@@ -1,9 +1,9 @@
 package ai.harmony.ravel.compiler;
 
 import ai.harmony.ravel.RavelApplication;
-import ai.harmony.ravel.antlr4.RavelBaseListener;
-import ai.harmony.ravel.antlr4.RavelParser;
-import ai.harmony.ravel.antlr4.RavelParser.VarAssigmentContext;
+import ai.harmony.antlr4.RavelBaseListener;
+import ai.harmony.antlr4.RavelParser;
+import ai.harmony.antlr4.RavelParser.VarAssigmentContext;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
@@ -13,7 +13,9 @@ import ai.harmony.ravel.primitives.Fields.*;
 import ai.harmony.ravel.primitives.Fields.Field.Builder;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.primitives.Variable;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -62,13 +64,13 @@ public class InternalRepPhase extends RavelBaseListener {
         LOGGER.info("Adding models properties: [");
         String propertyDebug = "";
         List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();
-        Iterator<VariableSymbol> p = prop.iterator();
-        while (p.hasNext()) {
-            VariableSymbol vs = p.next();
-            String prope_name = vs.getName();
-            String value = vs.getValue();
-            propertyDebug += prope_name + ":" + value + ",";
-            m.setProperty(prope_name, value);
+        for (VariableSymbol s: prop) {
+            Variable var = makeVariable(s);
+            if(var == null){
+                throw new IllegalArgumentException("Line: " + s.getDefNode().start.getLine()
+                        + " Could not create variable " +s.toString());
+            }
+            m.setProperty(var);
         }
         LOGGER.info(propertyDebug + "]");
 
@@ -117,6 +119,9 @@ public class InternalRepPhase extends RavelBaseListener {
                     break;
                 case T_CONTEXT:
                     f_concreate = new ContextField.Builder();
+                    break;
+                case T_MODEL:
+                    f_concreate = new ModelField.Builder();
                     break;
                 case tINVALID:
                     throw new RuntimeException("Could not instantiate field: " + field_type + " got tINVALID");
@@ -167,15 +172,18 @@ public class InternalRepPhase extends RavelBaseListener {
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
         //create controllers
-        String name = ctx.Identifier().getText();
+        String name = ctx.Identifier().getText(); //
+        Controller ctrl = new Controller(name);
+        //get controller args
+        List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
+        for(RavelParser.ParamContext t: component_parametersContext){
+            ctrl.addParam(t.getText());
+        }
+        //get all variables
         List<VariableSymbol> cntrVars =  ((ComponentSymbol)ctx.scope).getDefinedFields();
+        //get all events
         List<EventSymbol> events = ((ControllerSymbol)ctx.scope).getEvents();
         List<ReferenceSymbol> referenceSymbols = ((ControllerSymbol) ctx.scope).getRefenceSymbols();
-        LOGGER.info( name + "controller: " + "#-vars in "
-                + cntrVars.size() + " #-events: " + events.size()
-                + " #-ref: " + referenceSymbols.size());
-        LOGGER.info(ctx.scope.toString());
-        Controller ctrl = new Controller(name);
         for (VariableSymbol s: cntrVars) {
             Variable var = makeVariable(s);
             if(s == null){
@@ -187,57 +195,104 @@ public class InternalRepPhase extends RavelBaseListener {
         }
         for(ReferenceSymbol r: referenceSymbols){
             //TODO: needs a clever way to create ref objects pointing to the right object
-            ctrl.addRef(r.getName(), r.getReference());
+            String ref = r.getReference();
+            String[] ref_array = ref.split("\\.");
+            if(ctrl.hasParam(ref_array[0])) {
+                ctrl.addRef(r.getName(), r.getReference());
+            } else {
+                throw new IllegalArgumentException("Line: " + r.getDefNode().start.getLine()
+                        +" Could not find parameter for var " + r.getName() + " with reference "
+                        + ref + "\nAlternatives: " + ctrl.getParams());
+            }
         }
         //create events. pew!
-        for(EventSymbol e: events){
-            String ename = e.getName();
-            Event event = new Event(ename);
+        for(EventSymbol es: events){
+            Event e = makeEvent(es);
 
-            ctrl.addEvent(ename, event);
+            ctrl.addEvent(e.getName(), e);
         }
 
 
     }
+
+    private Event makeEvent(EventSymbol e) {
+        Event.Builder event = new Event.Builder();
+        event.name(e.getName());
+        RavelParser.EventScopeContext ectx = (RavelParser.EventScopeContext) e.getDefNode();
+        //currently only context is passed
+        RavelParser.FunctionArgsListContext args  =  ectx.function_args().functionArgsList();
+        List<RavelParser.FunctionArgContext> functionArgContexts = args.functionArg();
+        Iterator<RavelParser.FunctionArgContext> arg = functionArgContexts.iterator();
+        while(arg.hasNext()){
+            RavelParser.FunctionArgContext argContext = arg.next();
+            //TODO: doubtfully the best way, fix when time (HA!)
+            event.addArg(argContext.Identifier(0).getText(), argContext.Identifier(1).getText());
+        }
+        //get all variables
+        List<VariableSymbol> eventVars =  ((EventSymbol)ectx.scope).getDefinedFields();
+        for (VariableSymbol s: eventVars) {
+            Variable var = makeVariable(s);
+            if(s == null){
+                throw new IllegalArgumentException("Line: " + ectx.start.getLine()
+                        + "Could not create variable" +s.toString());
+            }
+            event.addVariable(var);
+        }
+        LOGGER.info(event.build().toString());
+        return event.build();
+    }
     private Variable makeVariable(VariableSymbol vs) {
-        Variable.Builder var  = new Variable.Builder();
-        var.name(vs.getName())
-                .stringValue(vs.getValue());
+        Variable.Builder var = new Variable.Builder();
+        var.name(vs.getName());
         //determine the type of the value
-        RavelParser.PropContext node = ((VarAssigmentContext)vs.getDefNode()).prop();
+        RavelParser.PropContext node = ((VarAssigmentContext) vs.getDefNode()).propValue().prop();
+
 //        prop
 //                : Identifier
 //                | boolean_r
 //                | IntegerLiteral
 //                | FloatingPointLiteral
 //        ;
-        LOGGER.fine(node.getText());
-        LOGGER.fine("Parent to string" + node.parent.toString());
-        try {
-            String value = node.boolean_r().getText();
-            var.stringType("boolean");
-           return var.value(Boolean.parseBoolean(value)).build();
-        } catch (NullPointerException e){ }
 
-        try{
-            String value = node.IntegerLiteral().getText();
-            var.stringType("integer");
-            return var.value(Integer.parseInt(value)).build();
-        }catch (NullPointerException e){ }
-        try{
-            String value = node.FloatingPointLiteral().getText();
+        if (node != null) {
+            try {
+                String value = node.boolean_r().getText();
+                var.stringType("boolean");
+                return var.value(Boolean.parseBoolean(value)).build();
+            } catch (NullPointerException e) { }
+            try {
+                String value = node.IntegerLiteral().getText();
+                var.stringType("integer");
+                return var.value(Integer.parseInt(value)).build();
+            } catch (NullPointerException e) { }
+            try {
+                String value = node.FloatingPointLiteral().getText();
 
-            var.stringType("number");
-            return var.value(Float.parseFloat(value)).build();
-        } catch (NullPointerException e){ }
-        try{
-            String value = node.Identifier().getText();
-            var.stringType("string");
-            return  var.value(value).build();
-        } catch (NullPointerException e){ }
-        //we could build and return here, but we need to be sure that parsing has identified
-        //the right value.
-        //merge prop and varAssigments
+                var.stringType("number");
+                return var.value(Float.parseFloat(value)).build();
+            } catch (NullPointerException e) { }
+            try {
+                String value = node.StringLiteral().getText();
+                var.stringType("string");
+                return var.value(value).build();
+            } catch (NullPointerException e) { }
+            try {
+                String value = node.Identifier().getText();
+                var.stringType("assignment");
+                return var.value(value).build();
+            } catch (NullPointerException e ) {}
+            //we could build and return here, but we need to be sure that parsing has identified
+            //the right value.
+            //merge prop and varAssigments
+        } else {
+            //either one has to be not null
+            RavelParser.PropArrayContext propArrayContext = ((VarAssigmentContext) vs.getDefNode()).propValue().propArray();
+            List<RavelParser.PropContext> prop = propArrayContext.prop();
+            var.stringType("array");
+            List<String> valList = new ArrayList<>();
+            for(RavelParser.PropContext p: prop) valList.add(p.getText());
+            return var.value(valList).build();
+        }
         return null;
     }
     /**

@@ -1,5 +1,5 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
-package ai.harmony.ravel.antlr4;
+package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
 
@@ -52,24 +52,17 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPlatformScope(RavelParser.PlatformScopeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#platforms}.
+	 * Visit a parse tree produced by {@link RavelParser#space_assigments}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPlatforms(RavelParser.PlatformsContext ctx);
+	T visitSpace_assigments(RavelParser.Space_assigmentsContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code PlatformAssigment}
-	 * labeled alternative in {@link RavelParser#platform}.
+	 * Visit a parse tree produced by {@link RavelParser#space_assigment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPlatformAssigment(RavelParser.PlatformAssigmentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#assigment}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAssigment(RavelParser.AssigmentContext ctx);
+	T visitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ModelInstanciation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
@@ -167,6 +160,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVarAssigment(RavelParser.VarAssigmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#propValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropValue(RavelParser.PropValueContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#propArray}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropArray(RavelParser.PropArrayContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#prop}.
 	 * @param ctx the parse tree
@@ -378,6 +383,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParams(RavelParser.ParamsContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#param}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParam(RavelParser.ParamContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#elementValuePairs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -439,23 +450,49 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#key}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitKey(RavelParser.KeyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValue(RavelParser.ValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#funct_expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunct_expr(RavelParser.Funct_exprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#func_no_return}.
+	 * Visit a parse tree produced by the {@code FunctionRet}
+	 * labeled alternative in {@link RavelParser#func_no_return}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunc_no_return(RavelParser.Func_no_returnContext ctx);
+	T visitFunctionRet(RavelParser.FunctionRetContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#func_with_return}.
+	 * Visit a parse tree produced by {@link RavelParser#function_name}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunc_with_return(RavelParser.Func_with_returnContext ctx);
+	T visitFunction_name(RavelParser.Function_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FunctionWithReturn}
+	 * labeled alternative in {@link RavelParser#func_with_return}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionWithReturn(RavelParser.FunctionWithReturnContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#ident}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdent(RavelParser.IdentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

@@ -1,5 +1,5 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
-package ai.harmony.ravel.antlr4;
+package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
 
@@ -91,37 +91,25 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPlatforms(RavelParser.PlatformsContext ctx) { }
+	@Override public void enterSpace_assigments(RavelParser.Space_assigmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPlatforms(RavelParser.PlatformsContext ctx) { }
+	@Override public void exitSpace_assigments(RavelParser.Space_assigmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPlatformAssigment(RavelParser.PlatformAssigmentContext ctx) { }
+	@Override public void enterSpace_assigment(RavelParser.Space_assigmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPlatformAssigment(RavelParser.PlatformAssigmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAssigment(RavelParser.AssigmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAssigment(RavelParser.AssigmentContext ctx) { }
+	@Override public void exitSpace_assigment(RavelParser.Space_assigmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -302,6 +290,30 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVarAssigment(RavelParser.VarAssigmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPropValue(RavelParser.PropValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPropValue(RavelParser.PropValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPropArray(RavelParser.PropArrayContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPropArray(RavelParser.PropArrayContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -715,6 +727,18 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterParam(RavelParser.ParamContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParam(RavelParser.ParamContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterElementValuePairs(RavelParser.ElementValuePairsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -835,6 +859,30 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterKey(RavelParser.KeyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitKey(RavelParser.KeyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterValue(RavelParser.ValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitValue(RavelParser.ValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterFunct_expr(RavelParser.Funct_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -847,25 +895,49 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFunc_no_return(RavelParser.Func_no_returnContext ctx) { }
+	@Override public void enterFunctionRet(RavelParser.FunctionRetContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFunc_no_return(RavelParser.Func_no_returnContext ctx) { }
+	@Override public void exitFunctionRet(RavelParser.FunctionRetContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFunc_with_return(RavelParser.Func_with_returnContext ctx) { }
+	@Override public void enterFunction_name(RavelParser.Function_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFunc_with_return(RavelParser.Func_with_returnContext ctx) { }
+	@Override public void exitFunction_name(RavelParser.Function_nameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunctionWithReturn(RavelParser.FunctionWithReturnContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunctionWithReturn(RavelParser.FunctionWithReturnContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdent(RavelParser.IdentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdent(RavelParser.IdentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

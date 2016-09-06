@@ -3,17 +3,18 @@ package ai.harmony.ravel.primitives;
 import ai.harmony.ravel.primitives.Fields.Field;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 7/21/16.
  */
 public class Model extends Primitive {
-
+    private static Logger LOGGER = Logger.getLogger(Model.class.getName());
     public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
 
     Model.Type mModelType;
     private Map<String, Field> mFields = new LinkedHashMap<>();
-    private Map<String, String> mProperties = new LinkedHashMap<>();
+    private Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
 
 
     public Model.Type getModelType() {
@@ -38,9 +39,9 @@ public class Model extends Primitive {
     }
 
 
-    public void setProperty(String name, String mProperties) {
-        //TODO: implement property setter
-        this.mProperties.put(name, mProperties);
+    public void setProperty(Variable v) {
+        LOGGER.info("Variable: " + v);
+        this.mPropertiesMap.put(v.getName(), v);
     }
 
 

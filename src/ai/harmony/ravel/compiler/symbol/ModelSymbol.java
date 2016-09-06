@@ -1,6 +1,6 @@
 package ai.harmony.ravel.compiler.symbol;
 
-import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.antlr4.RavelParser;
 import ai.harmony.ravel.primitives.Model;
 
 /**

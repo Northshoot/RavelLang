@@ -1,6 +1,5 @@
 package ai.harmony.ravel.primitives;
 
-import ai.harmony.ravel.antlr4.RavelParser;
 import org.apache.commons.lang3.text.WordUtils;
 
 /**

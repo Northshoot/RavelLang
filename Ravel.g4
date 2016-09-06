@@ -150,19 +150,16 @@ space_block
     ;
 
 platform_scope returns [Scope scope]
-    : 'platform:' platforms #PlatformScope
+    : 'platform:' space_assigments #PlatformScope
     ;
 
-platforms
-    : NEWLINE INDENT platform+ DEDENT
+space_assigments
+    : NEWLINE INDENT space_assigment+ DEDENT
     ;
 
-platform
-    : assigment NEWLINE #PlatformAssigment
-    ;
-
-assigment
-    : Identifier '=' ( Identifier | literal |qualified_name)
+space_assigment
+    : ref_assig
+    | NEWLINE
     ;
 
 models_scope returns [Scope scope]
@@ -182,14 +179,14 @@ controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstanciation
     ;
 sink_scope returns [Scope scope]
-    : 'sinks:' references #SinkLinks
+    : 'sinks:' space_assigments #SinkLinks
     ;
 
-references returns [Scope scope]
-    : NEWLINE INDENT ref_assig+ DEDENT
+references
+    : NEWLINE INDENT space_assigment+ DEDENT
     ;
 source_scope returns [Scope scope]
-    : 'sources:' references #SourceLinks
+    : 'sources:' space_assigments #SourceLinks
     ;
 /**
  *
@@ -213,6 +210,7 @@ model_body
 model_block
     : properties_block
     | schema_block
+    | NEWLINE
     ;
 properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
@@ -222,14 +220,24 @@ properties
     ;
 
 property
-    : Identifier '=' prop NEWLINE #VarAssigment
+    : Identifier '=' propValue NEWLINE #VarAssigment
+    ;
+
+propValue
+    : propArray
+    | prop
+    ;
+
+propArray
+    : '[' prop (',' prop)* ']'
     ;
 // we are just very specific what it is allowed in the property definirion
 prop
-    : Identifier
+    : StringLiteral
     | boolean_r
     | IntegerLiteral
     | FloatingPointLiteral
+    | Identifier
     ;
 schema_block returns [Scope scope]
     :'schema:' fields #SchemaScope
@@ -260,6 +268,7 @@ field_type
     | T_DATE_TIME_FIELD
     | T_TIME_STAMP_FIELD
     | T_CONTEXT_FIELD
+    | T_MODEL_FIELD
     ;
 
 /**
@@ -389,7 +398,10 @@ component_parameters
     : '(' params? ')'
     ;
 params
-    : Identifier (',' Identifier)?
+    : param (',' param)?
+    ;
+param
+    : qualified_name
     ;
 elementValuePairs
     :   elementValuePair (',' elementValuePair)*
@@ -399,8 +411,8 @@ elementValuePair
     ;
 
 elementValue
-    :   expression
-    |   elementValueArrayInitializer
+    : expression
+    | elementValueArrayInitializer
     ;
 elementValueArrayInitializer
     :   '{' (elementValue (',' elementValue)*)? (',')? '}'
@@ -418,7 +430,6 @@ decrement_exp
     ;
 expression
     :   primary
-    |   expression '.' Identifier
     |   expression '[' expression ']'
     |   expression '(' expressionList? ')'
     |   increament_expr
@@ -452,15 +463,17 @@ expression
     ;
 
 primary
-    :   '(' expression ')'
-    |   'self'
-    |   literal
-    |   Identifier
+    : '(' expression ')'
+    | 'self'
+    | literal
+    | qualified_name
     ;
 //reference is a dottend name accesesing scopes
 ref_assig
-    : Identifier '=' qualified_name NEWLINE #ReferenceAssigment
+    : key '=' value  #ReferenceAssigment
     ;
+key: qualified_name;
+value: qualified_name ;
 
 
 
@@ -470,13 +483,20 @@ funct_expr
     ;
 
 func_no_return
-    : qualified_name component_parameters NEWLINE
+    : function_name component_parameters  #FunctionRet
     ;
 
+function_name
+    : qualified_name
+    ;
 func_with_return
-    : Identifier '=' func_no_return NEWLINE
+    : ident '=' func_no_return  #FunctionWithReturn
     ;
 
+ident
+    : Identifier
+    | qualified_name
+    ;
 qualified_name
     :   Identifier ('.' Identifier)*
     ;
@@ -524,19 +544,20 @@ COMMAND             :  'command' ;
 //fields
 T_BYTE_FIELD        : 'ByteField' ;
 T_STRING_FIELD      : 'StringField' ;
-T_BOOLEAN_FIELD     : 'Boolean' ;
+T_BOOLEAN_FIELD     : 'BooleanField' ;
 T_INTEGER_FIELD     : 'IntegerField';
 T_NUMBER_FIELD      : 'NumberField' ;
 T_DATE_FIELD        : 'DateField' ;
 T_DATE_TIME_FIELD   : 'DateTimeField' ;
 T_TIME_STAMP_FIELD  : 'TimeStampField' ;
 T_CONTEXT_FIELD     : 'ContextField' ;
+T_MODEL_FIELD       : 'ModelField' ;
 
 //expression operators
 ASSERT              : 'assert' ;
 RETURN              : 'return' ;
-TRUE                : 'true' ;
-FALSE               : 'false' ;
+TRUE                : 'True' ;
+FALSE               : 'False' ;
 IF                  : 'if' ;
 ELIF                : 'else if' ;
 ELSE                : 'else';

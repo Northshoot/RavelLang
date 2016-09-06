@@ -1,14 +1,12 @@
 package ai.harmony.ravel.compiler;
 
-import ai.harmony.ravel.antlr4.RavelBaseListener;
-import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.antlr4.RavelBaseListener;
+import ai.harmony.antlr4.RavelParser;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
-import ai.harmony.ravel.compiler.scope.LocalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.ControllerSymbol;
 import ai.harmony.ravel.compiler.symbol.ModelSymbol;
 import ai.harmony.ravel.compiler.symbol.InstanceSymbol;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +54,8 @@ public class RefPhase extends RavelBaseListener {
              String instance_name =
                      ((RavelParser.InstanceContext) is.getDefNode()).instance_name().getText();
              if(! name_map.containsKey(instance_name)) {
-                 throw new RuntimeException("Cant find symbol "
+                 int line_err = is.getDefNode().start.getLine();
+                 throw new RuntimeException("line: " + line_err + " Cant find symbol "
                          + instance_name + " for variable " + is.getName() );
              }
          }

@@ -1,20 +1,14 @@
 package ai.harmony.ravel.compiler.symbol;
 
-import ai.harmony.ravel.antlr4.RavelParser;
+import ai.harmony.antlr4.RavelParser;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Created by lauril on 8/25/16.
  */
 public class ControllerSymbol extends ComponentSymbol {
-    private static Logger LOGGER = Logger.getLogger(ControllerSymbol.class.getName());
-    protected Map<String, Symbol> eventSymbols = new LinkedHashMap<>();
 
     public ControllerSymbol(String name) {
         super(name);
@@ -51,7 +45,8 @@ public class ControllerSymbol extends ComponentSymbol {
             throw new IllegalArgumentException("line: " + line_err + " " + declared + dotted);
         }
         if ( ! symbols.containsKey(objEvent[0]) ) {
-            throw new IllegalArgumentException("cant find event object " + objEvent[0] + " declaration for event "+esym.getName());
+            int line_err = esym.getDefNode().start.getLine();
+            throw new IllegalArgumentException("line: " + line_err + " cant find event object " + objEvent[0] + " declaration for event "+esym.getName());
         }
         esym.setScope(this);
         esym.setInsertionOrderNumber(symbols.size()); // set to insertion position from 0

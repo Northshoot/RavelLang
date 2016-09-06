@@ -1,8 +1,9 @@
 package ai.harmony.ravel.compiler.symbol;
 
-public class VariableSymbol extends BaseSymbol implements MemberSymbol{
+public class VariableSymbol<T> extends BaseSymbol implements MemberSymbol{
 
-    private String value;
+    private T value;
+    private boolean mArray = false;
 
     public VariableSymbol(String name) {
         super(name);
@@ -13,11 +14,14 @@ public class VariableSymbol extends BaseSymbol implements MemberSymbol{
         super.setType(type);
     }
 
-    public void setValue(String value){
+    public void setValue(T value){
         this.value = value;
     }
 
-    public String getValue() {return this.value ;};
+    public T getValue() {return this.value ;}
+
+    public boolean isArray(){return mArray; }
+    public void setArray(){mArray = true ; }
     @Override
     public int getSlotNumber() {
         return 0;

@@ -1,8 +1,7 @@
 package ai.harmony.ravel.error;
 
-import ai.harmony.ravel.antlr4.RavelLexer;
+import ai.harmony.antlr4.RavelLexer;
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.LexerNoViableAltException;
 
 
