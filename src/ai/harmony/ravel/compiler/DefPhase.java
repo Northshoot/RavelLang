@@ -162,7 +162,6 @@ public class DefPhase extends RavelBaseListener {
     public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) {
         intend++;
         String name = ctx.Identifier().getText();
-        LOGGER.info("VARIABLE NAME: " + name);
         VariableSymbol vs = new VariableSymbol(name);
 
         //vs.setValue(ctx.prop().getText());

@@ -246,14 +246,14 @@ public class InternalRepPhase extends RavelBaseListener {
         var.name(vs.getName());
         //determine the type of the value
         RavelParser.PropContext node = ((VarAssigmentContext) vs.getDefNode()).propValue().prop();
-
+        LOGGER.info("\t\t\t " + ((VarAssigmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
 //        prop
 //                : Identifier
 //                | boolean_r
 //                | IntegerLiteral
 //                | FloatingPointLiteral
-//        ;
-
+//
+        //get class of next child, we know it only can be one
         if (node != null) {
             try {
                 String value = node.boolean_r().getText();
