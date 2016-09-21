@@ -59,6 +59,7 @@ public class xLingual implements Translator {
         return mName.toLowerCase(Locale.US);
     }
 
+
     public String getNameCamelCase() {
         return WordUtils.capitalizeFully(mName, new char[] { '_' }).replaceAll("_", "");
     }

@@ -1,6 +1,5 @@
-package ai.harmony.ravel.compiler;
+package ai.harmony.ravel;
 
-import ai.harmony.ravel.RavelApplication;
 import ai.harmony.antlr4.RavelBaseListener;
 import ai.harmony.antlr4.RavelParser;
 import ai.harmony.antlr4.RavelParser.VarAssigmentContext;
@@ -13,7 +12,6 @@ import ai.harmony.ravel.primitives.Fields.*;
 import ai.harmony.ravel.primitives.Fields.Field.Builder;
 import ai.harmony.ravel.primitives.Model;
 import ai.harmony.ravel.primitives.Variable;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,21 +23,16 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 8/30/16.
  */
-public class InternalRepPhase extends RavelBaseListener {
-    private static Logger LOGGER = Logger.getLogger(InternalRepPhase.class.getName());
+public class PrimitiveRepPhase extends RavelBaseListener {
+    private static Logger LOGGER = Logger.getLogger(PrimitiveRepPhase.class.getName());
     private GlobalScope globals;
     private Scope currentScope;
     private RavelApplication rApp;
 
-    public InternalRepPhase(GlobalScope globals, RavelApplication rApp) {
+    public PrimitiveRepPhase(GlobalScope globals, RavelApplication rApp) {
         this.globals = globals;
         this.rApp = rApp;
         currentScope = globals;
-    }
-
-    @Override
-    public void enterFile_input(RavelParser.File_inputContext ctx) {
-        //first instantiate components
     }
 
     /**
@@ -208,7 +201,6 @@ public class InternalRepPhase extends RavelBaseListener {
         //create events. pew!
         for(EventSymbol es: events){
             Event e = makeEvent(es);
-
             ctrl.addEvent(e.getName(), e);
         }
 
@@ -216,6 +208,9 @@ public class InternalRepPhase extends RavelBaseListener {
     }
 
     private Event makeEvent(EventSymbol e) {
+        //TODO: this is simplified version of the event
+        // no if, else, for are handled for now
+
         Event.Builder event = new Event.Builder();
         event.name(e.getName());
         RavelParser.EventScopeContext ectx = (RavelParser.EventScopeContext) e.getDefNode();
@@ -244,9 +239,8 @@ public class InternalRepPhase extends RavelBaseListener {
     private Variable makeVariable(VariableSymbol vs) {
         Variable.Builder var = new Variable.Builder();
         var.name(vs.getName());
-        //determine the type of the value
-        RavelParser.PropContext node = ((VarAssigmentContext) vs.getDefNode()).propValue().prop();
-        LOGGER.info("\t\t\t " + ((VarAssigmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
+        RavelParser.PropValueContext propValueContext = ((VarAssigmentContext) vs.getDefNode()).propValue();
+
 //        prop
 //                : Identifier
 //                | boolean_r
@@ -254,7 +248,8 @@ public class InternalRepPhase extends RavelBaseListener {
 //                | FloatingPointLiteral
 //
         //get class of next child, we know it only can be one
-        if (node != null) {
+        if (propValueContext.getChild(0) instanceof RavelParser.PropContext) {
+            RavelParser.PropContext node = propValueContext.prop();
             try {
                 String value = node.boolean_r().getText();
                 var.stringType("boolean");
@@ -284,14 +279,17 @@ public class InternalRepPhase extends RavelBaseListener {
             //we could build and return here, but we need to be sure that parsing has identified
             //the right value.
             //merge prop and varAssigments
-        } else {
+        } else if (propValueContext.getChild(0) instanceof RavelParser.PropArrayContext){
             //either one has to be not null
-            RavelParser.PropArrayContext propArrayContext = ((VarAssigmentContext) vs.getDefNode()).propValue().propArray();
+            RavelParser.PropArrayContext propArrayContext = propValueContext.propArray();
             List<RavelParser.PropContext> prop = propArrayContext.prop();
             var.stringType("array");
             List<String> valList = new ArrayList<>();
             for(RavelParser.PropContext p: prop) valList.add(p.getText());
             return var.value(valList).build();
+        } else {
+            throw new RuntimeException("Illegal child when creating variable, expecting property or property array, got: " +
+                    ((VarAssigmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
         }
         return null;
     }
@@ -299,12 +297,5 @@ public class InternalRepPhase extends RavelBaseListener {
      * TODO: build views
      */
 
-    /**
-     * NOTE: Space is build in the next step, because we need to be sure of the order
-     * @param ctx
-     */
-    @Override
-    public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
 
-    }
 }

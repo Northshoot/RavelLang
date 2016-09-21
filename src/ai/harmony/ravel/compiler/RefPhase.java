@@ -10,12 +10,13 @@ import ai.harmony.ravel.compiler.symbol.InstanceSymbol;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 8/19/16.
  */
 public class RefPhase extends RavelBaseListener {
-
+    private static Logger LOGGER = Logger.getLogger(RefPhase.class.getName());
     GlobalScope globals;
     Scope currentScope; // resolve symbols starting in this scope
 
@@ -37,6 +38,7 @@ public class RefPhase extends RavelBaseListener {
     }
     @Override
     public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+        LOGGER.info("Instantiating: " + ctx.getText());
         isDeclared( ModelSymbol.class, (List<InstanceSymbol>) ctx.scope.getAllSymbols() );
 
     }
@@ -49,13 +51,15 @@ public class RefPhase extends RavelBaseListener {
      private void isDeclared(Class<?> type, List<InstanceSymbol> mInstances){
          List<Scope> s = globals.getNestedScopesOfType(type);
          Map<String, Scope> name_map = Utils.listToNameMap(s);
+         String sym_type =type.getSimpleName();
 
          for(InstanceSymbol is: mInstances){
              String instance_name =
                      ((RavelParser.InstanceContext) is.getDefNode()).instance_name().getText();
+             LOGGER.info("Instantiating: " + instance_name);
              if(! name_map.containsKey(instance_name)) {
                  int line_err = is.getDefNode().start.getLine();
-                 throw new RuntimeException("line: " + line_err + " Cant find symbol "
+                 throw new RuntimeException("line: >>" + line_err + " Can't find " + sym_type + "<< symbol "
                          + instance_name + " for variable " + is.getName() );
              }
          }

@@ -46,6 +46,7 @@ public class DefPhase extends RavelBaseListener {
         currentScope.define(model);
         ctx.scope=model;
         pushScope(model);
+        LOGGER.info("ADDING " + type +" Model: " + name);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class DefPhase extends RavelBaseListener {
         fs.setScope(currentScope);
         //TODO: do we need type here?
         currentScope.define(fs);
-        LOGGER.info("ADDING FIELD: " +fs.toString());
+        //LOGGER.info("ADDING FIELD: " +fs.toString());
 
      }
 

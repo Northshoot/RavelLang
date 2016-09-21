@@ -1,0 +1,164 @@
+/**
+ * this files contains model declarationa dn inteaction primitives that are used with C
+ * any modification in post generation state will cause core dumps, crashes and all nasty things
+ *
+ */
+//create application level model definitions
+application_models(ir)::=<<
+/*
+ * models.h
+ *
+ *  Created on: <ir.date_time>
+ */
+
+#ifndef MODELS_H_
+#define MODELS_H_
+#include <string.h>
+#include <unistd.h>
+
+/**
+ * a generic Ravel context used internally
+ */
+ typedef struct _rCntx {
+ 	uint32_t error;
+ 	void* model; //this points to the model after it "gets out" from model packet
+ } RavelContext;
+
+/**
+ * Creating models, model packets, and funchooks
+ *
+ */
+<ir.models:{model| $model_schema(model)$
+                   $modelPacket(model)$
+                   $specific_model_calls(model)$
+                   };separator="\n">
+#endif /* MODELS_H_ */
+>>
+//model_name_model.h used for models definition
+specific_model_calls(model)::= <<
+void <model.name>_model__save(<model.name>Model *rm) ;
+int <model.name>_model__first(<model.name>Model *rm);
+int <model.name>_model__get(uint32_t possition, <model.name>Model *rm);
+
+void <model.name>_model__queue_innit_sized(int size);
+void <model.name>_model__queue_innit();
+void <model.name>_model__destroy_queue();
+>>
+
+//specific model implementation
+specific_model_implementation(model)::= <<
+#include "string.h"
+#include "unistd.h"
+
+#include "stdlib.h"
+#include "stdint.h"
+#include "unistd.h"
+
+#include "api/ringbuf.h"
+#include "models.h"
+#include "random_model_ctr.h"
+//TODO: add error handling
+
+#define RAMDOM_MODEL_QUEUE_SIZE 100
+
+ghpringbuf *random_model__queue_buf ;
+uint32_t random_model__buff_size = RAMDOM_MODEL_QUEUE_SIZE;
+bool random_model__buff_full = false;
+uint32_t random_model__rec_id=0;
+uint32_t random_model__rec_discarded=0;
+
+
+ghpringbuf *buf;
+
+inline static bool random_model__is_full(){
+	return random_model__queue_buf->capacity == random_model__queue_buf->count;
+}
+
+void random_model__save(RandomModel *mr) {
+	//SEGGER_RTT_WriteString(0,"RD_MD: save -- ");
+	if(!random_model__buff_full) {
+		ghpringbuf_put(random_model__queue_buf, mr);
+		random_model__rec_id++;
+		//SEGGER_RTT_printf(0," rec: %d model->rec_id %d OK\r\n", random_model__rec_id, mr->rec_id);
+	} else {
+		random_model__rec_discarded++;
+		//SEGGER_RTT_WriteString(0,"error\r\n");
+	}
+	random_model__buff_full = random_model__is_full();
+	if(random_model__buff_full){
+		//SEGGER_RTT_WriteString(0,"full\r\n");
+		random_model_ctr__random_model_full();
+	}
+	random_model__data_added();
+
+}
+
+
+int random_model__first(RandomModel *a){
+	RandomModel *a_ptr;
+	if( (a_ptr = ghpringbuf_at(random_model__queue_buf, 0)) ){
+		a = a_ptr;
+		ghpringbuf_pop(random_model__queue_buf);
+		return 0;
+	} else {
+		return 1;
+	}
+
+}
+
+int random_model__get(uint32_t possition, RandomModel *rm){
+	RandomModel *a_ptr;
+	if( (a_ptr = ghpringbuf_at(random_model__queue_buf, possition)) ){
+		memcpy(&rm, a_ptr, sizeof(RandomModel));
+		return 0;
+	} else {
+		return 1;
+	}
+
+
+}
+
+void random_model__queue_innit_sized(int size){
+	random_model__buff_size = size;
+	random_model__queue_buf = ghpringbuf_create(size, sizeof(RandomModel), 1, NULL);
+}
+
+void random_model__queue_innit(){
+	random_model__queue_buf = ghpringbuf_create(RAMDOM_MODEL_QUEUE_SIZE, sizeof(RandomModel), 1, NULL);
+}
+
+void random_model__destroy_queue(){
+ghpringbuf_destroy(random_model__queue_buf);
+}
+
+>>
+//model schema
+model_schema(model)::= <<
+typedef struct
+{
+<model.fields:{field|<\t><field.CType> <\ ><field.CVarName>;};separator="\n">
+}<model.name>;
+
+<model.name> <model.CVarName>;<\n>
+>>
+
+//create a record packet
+modelPacket(model)::= <<
+typedef struct _metaConfigModel {
+	uint32_t node_UUID;
+	uint8_t origin;
+	uint8_t rqACK;
+	uint8_t size;
+	<model.name> model;
+}Ravel<model.name>Packet;
+>>
+
+
+//template for initializing BLE
+ble_record_init(model)::=<<
+attr_char_value.max_len     = sizeof(<model.name>);
+attr_char_value.init_len    = sizeof(<model.name>);
+uint8_t value [<model.sizeCbuffer>] = {
+        <model.schema.fields:{field|<if(field.defaultValue)>field.defaultValue<else>0<endif> };separator=", ">};
+attr_char_value.p_value     = value;
+>>

@@ -2,7 +2,7 @@
 import ai.harmony.antlr4.*;
 import ai.harmony.ravel.compiler.DefPhase;
 import ai.harmony.ravel.RavelApplication;
-import ai.harmony.ravel.compiler.InternalRepPhase;
+import ai.harmony.ravel.PrimitiveRepPhase;
 import ai.harmony.ravel.compiler.RefPhase;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -74,7 +74,7 @@ public class Main {
          *
          */
         RavelApplication rApp = new RavelApplication();
-        InternalRepPhase inter = new InternalRepPhase(def.globalScope, rApp);
+        PrimitiveRepPhase inter = new PrimitiveRepPhase(def.globalScope, rApp);
         walker.walk(inter, tree);
         //System.out.println(rApp);
          /**
