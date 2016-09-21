@@ -1,0 +1,23 @@
+namespace nrf.api.v12
+version 1.0.0
+displayname "Temperature"
+category source
+
+device_object Temperature:
+    dependencies:
+
+    configuration:
+        language = c
+        returns = uint32_t
+        method = pull
+
+    operations:
+          get_temperature =
+          """uint32_t get_temperature(uint32_t temperature_value) {
+                uint32_t error;
+                error = sd_temp_get(&temperature_value);
+                return error;
+            }"""
+
+
+
