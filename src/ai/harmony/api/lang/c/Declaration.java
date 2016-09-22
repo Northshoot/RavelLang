@@ -12,11 +12,11 @@ public class Declaration {
 
     public Declaration(String mName) {
         this.mName = mName;
-        this.mComment = "Autogenrated comment for declations type with name " + this.mName;
+        this.mComment = "//** Autogenrated comment for declations type with name " + this.mName + " */";
     }
 
-    public Declaration(String mComment, String mName) {
-        this.mComment = mComment;
+    public Declaration(String mName, String mComment) {
+        this.mComment = "//** " + mComment + " */";
         this.mName = mName;
     }
 
@@ -25,7 +25,7 @@ public class Declaration {
     }
 
     public void setComment(String mComment) {
-        this.mComment = "//**\\n *" + mComment + "*/";
+        this.mComment = "//** " + mComment + " */";
     }
 
     public String getName() {

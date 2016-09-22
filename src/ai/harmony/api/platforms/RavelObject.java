@@ -31,7 +31,7 @@ public class RavelObject  {
      * @param val
      */
     protected void addToInclues(Declaration val){
-        this.depenencies.get("includes").add(val);
+        this.depenencies.get("imports").add(val);
     }
     protected void addToDefines(Declaration val){
         this.depenencies.get("defines").add(val);
@@ -48,12 +48,15 @@ public class RavelObject  {
      * get all the thingies
      * @return
      */
+    //for Makefile fun this need to be aggregated
     public List<Declaration> getMakeObjects(){
         return this.depenencies.get("make_object");
     }
     public List<Declaration> getMakeIncludePath(){
         return this.depenencies.get("make_include_path");
     }
+
+    //This file specific
     public List<Declaration> getImports(){
         return this.depenencies.get("imports");
     }
@@ -64,6 +67,10 @@ public class RavelObject  {
         return this.depenencies.get("declarations");
     }
 
+    /**
+     * get time current
+     * @return
+     */
     public String getTimeDate(){
          Date t = Calendar.getInstance().getTime();
         return new SimpleDateFormat("HH:mm:ss").format(t).toString();
@@ -73,6 +80,13 @@ public class RavelObject  {
         return null;
     }
 
+    public boolean isStandAlone() {
+        return isStandAlone;
+    }
+    /**
+     * kind of platform specific
+     * @return
+     */
     public String getInitMethodName(){
         return mInitMethodName;
     }
@@ -83,9 +97,7 @@ public class RavelObject  {
     public String getReadMethod() {
         return null;
     }
-    public boolean isStandAlone() {
-        return isStandAlone;
-    }
+
     public String getReturnType() {
         return mReturnType;
     }

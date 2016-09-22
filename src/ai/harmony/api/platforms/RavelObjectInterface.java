@@ -1,5 +1,9 @@
 package ai.harmony.api.platforms;
 
+import ai.harmony.api.lang.c.Declaration;
+
+import java.util.List;
+
 /**
  * Created by lauril on 9/21/16.
  */
@@ -24,7 +28,9 @@ public interface RavelObjectInterface {
      * @return
      */
 
-    public String getFuncDeclaration();
+    public List<Declaration> getImports();
+    public List<Declaration> getDefines();
+    public List<Declaration> getFuncDeclaration();
     public boolean isStandAlone();
 
     public String getReadMethod();

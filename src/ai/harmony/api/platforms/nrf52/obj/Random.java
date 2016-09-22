@@ -11,4 +11,9 @@ public class Random  extends RavelObject implements RavelObjectInterface {
     public String getImplementation() {
         return null;
     }
+
+    @Override
+    public String getHeaderDefName() {
+        return null;
+    }
 }

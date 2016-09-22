@@ -1,5 +1,6 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
+import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.platforms.RavelObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 
@@ -23,9 +24,9 @@ public class Temperature extends RavelObject implements RavelObjectInterface {
         docs = "This is Temperature documentation";
         mReturnType = "int32_t";
         mMethodName = "getTemperature()";
-        addToInclues("softdevice_handler.h");
-        addToMakeIncludePath("/components/softdevice/common/softdevice_handler");
-        addToMakeObj("/components/softdevice/common/softdevice_handler/softdevice_handler.c ");
+        addToInclues(new Declaration("softdevice_handler.h"));
+        addToMakeIncludePath(new Declaration("/components/softdevice/common/softdevice_handler"));
+        addToMakeObj(new Declaration("/components/softdevice/common/softdevice_handler/softdevice_handler.c"));
     }
 
     //TODO: allow configuration with the variable naming
@@ -39,6 +40,11 @@ public class Temperature extends RavelObject implements RavelObjectInterface {
                 "   return temperature;" +
                 "}";
         return implementation;
+    }
+
+    @Override
+    public String getHeaderDefName() {
+        return null;
     }
 
     @Override
