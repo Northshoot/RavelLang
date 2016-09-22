@@ -33,6 +33,12 @@ public class FuncDeclaration extends Declaration {
 
     public FuncDeclaration() { super(); }
 
+    @Override
+    public void setName(String name){
+        super.mName = name;
+        setCallFunction( super.mName+"();");
+    }
+
     public String getMethodDeclaration() {
         return mMethodDeclaration;
     }

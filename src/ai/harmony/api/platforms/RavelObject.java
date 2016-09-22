@@ -31,17 +31,17 @@ public class RavelObject  {
      * Add all the necessary thingies
      * @param val
      */
-    protected void addToInclues(Declaration val){
+    public void addToInclues(Declaration val){
         this.depenencies.get("imports").add(val);
     }
-    protected void addToDefines(Declaration val){
+    public void addToDefines(Declaration val){
         this.depenencies.get("defines").add(val);
     }
-    protected void addToMakeIncludePath(Declaration val){
+    public void addToMakeIncludePath(Declaration val){
         this.depenencies.get("make_include_path").add(val);
     }
-    protected void addToMakeObj(Declaration obj){ this.depenencies.get("make_object").add(obj); }
-    protected void addFuncDeclaration(FuncDeclaration obj){
+    public void addToMakeObj(Declaration obj){ this.depenencies.get("make_object").add(obj); }
+    public void addFuncDeclaration(FuncDeclaration obj){
         this.depenencies.get("functions").add(obj);
     }
 

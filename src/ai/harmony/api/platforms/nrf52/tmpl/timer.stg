@@ -3,22 +3,33 @@ timers_init(timers) ::= <<
     {
         // Initialize timer module.
         APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-        <timers:{timer|app_timer_create(&timer.defName, timer.mode, timer.callback);\n}>
+        <timers:{timer|app_timer_create(&timer.name, timer.timerMode, timer.callback);\n}>
 >>
 
-timer_start_periodic(timer, period) ::= <<
+timer_start_periodic_declaration(timer, comment) ::="void <timer.name>__startTimerPeriodic(uint32_t period) <\t><\t> //<comment>"
 
->>
-
-timer_start_single(timer) ::= <<
-void random_ctr__startTimerPeriodic(uint32_t <timer.frequency>){
+timer_start_periodic_implementation(timer) ::= <<
+void <timer.name>__startTimerPeriodic(uint32_t period){
+	uint32_t time =  APP_TIMER_TICKS(period,  APP_TIMER_PRESCALER) ; <\t><\t> //prescale should a parameter
 <if(timer.debug)>
-    NRF_LOG_INFO("Bonds erased!\r\n");
+    NRF_LOG_INFO("<timer.name> started\r\n");
 <endif>
-	uint32_t time =  APP_TIMER_TICKS(<timer.frequency>,  APP_TIMER_PRESCALER) ;
-	app_timer_start(timer.defName, time,  NULL);
+	app_timer_start(<timer.name>, time,  NULL);
 }
 >>
-timer_stop(timer, period) ::= <<
 
+timer_start_once_implementation(timer) ::= <<
+void <timer.name>__startTimerOnce(uint64_t next, app_timer_id_t  t){
+<if(timer.debug)>
+    NRF_LOG_INFO("<timer.name>__startTimerOnce started\r\n");
+<endif>
+    app_timer_start(t, next, NULL);
+}
+
+>>
+timer_stop(timer) ::= <<
+<if(timer.debug)>
+    NRF_LOG_INFO("stopping <timer.name>\r\n");
+<endif>
+	app_timer_stop(<timer.name>); // <timer.comment>
 >>

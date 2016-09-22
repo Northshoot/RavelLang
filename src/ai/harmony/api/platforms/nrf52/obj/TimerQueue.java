@@ -35,6 +35,7 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
     public String fileName = "api_timer";
     public String innit_name = "timers_init";
 
+
     public TimerQueue( ){
         super();
         mTimerMap = new HashMap<>();
@@ -52,6 +53,7 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         addToMakeIncludePath(new Declaration("/components/drivers_nrf/timer"));
         addToMakeIncludePath(new Declaration("/components/libraries/timer"));
         addToMakeObj(new Declaration("/components/libraries/timer/app_timer.c"));
+        addToMakeObj(new Declaration("/api/" + this.fileName +".c"));
     }
 
     private void make_init() {
@@ -61,9 +63,12 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         ST tmpl = tmpl_group.getInstanceOf("timers_init");
         //show the map of timers and puf!
         tmpl.add("timers", mTimerMap);
-        f.setmFunctionImplementation( tmpl.render() );
+        f.setFunctionImplementation( tmpl.render() );
     }
 
+    public ST getTemplate(String name){
+        return tmpl_group.getInstanceOf(name);
+    }
     public String CallInnit(){
         return mInitMethodName + "();";
     }
@@ -79,8 +84,8 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
     }
 
 
-    public void addTime(String timer_name) {
-        mTimerMap.put(timer_name, new Timer(timer_name));
+    public void addTime(String timer_name, boolean periodic) {
+        mTimerMap.put(timer_name, new Timer(timer_name, this, periodic));
     }
 
     public Timer getTimer(String timer_name) {
