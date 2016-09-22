@@ -7,14 +7,10 @@ device_object GoogleFinance:
     dependencies:
         http
     configuration:
-        language = c
-        returns = uint32_t
-        params = [uint32_t]
-        method = pull
+        language = java
+
 
     operations:
-          get_stock_value =
-          """int get_temperature(String stock, String name) {
-                http://finance.google.com/finance/info?client=ig&q=stock%3name
-            }"""
+          stockValue returns StockObject
+          currencryExchange returns CurrencyObject
 

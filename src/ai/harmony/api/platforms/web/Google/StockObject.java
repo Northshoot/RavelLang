@@ -91,7 +91,7 @@ public class StockObject {
     @Override
     public String toString(){
         return "On market " + this.e +
-                " " +
+                " "  + this.t +
                 " price " + this.l +
                 " time "+ lt;
     }

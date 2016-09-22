@@ -1,0 +1,24 @@
+timers_init(timers) ::= <<
+"void timers.initMethodName(void)
+    {
+        // Initialize timer module.
+        APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+        <timers:{timer|app_timer_create(&timer.defName, timer.mode, timer.callback);\n}>
+>>
+
+timer_start_periodic(timer, period) ::= <<
+
+>>
+
+timer_start_single(timer) ::= <<
+void random_ctr__startTimerPeriodic(uint32_t <timer.frequency>){
+<if(timer.debug)>
+    NRF_LOG_INFO("Bonds erased!\r\n");
+<endif>
+	uint32_t time =  APP_TIMER_TICKS(<timer.frequency>,  APP_TIMER_PRESCALER) ;
+	app_timer_start(timer.defName, time,  NULL);
+}
+>>
+timer_stop(timer, period) ::= <<
+
+>>

@@ -159,7 +159,7 @@ space EmbeddedSpace:
     platform:
         language = clang
         templates=nrf52
-        platform = android.apiv1
+        platform = nrf52.apiv1
         boot = platform.boot
 
     models:

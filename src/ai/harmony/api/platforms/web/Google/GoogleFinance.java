@@ -36,14 +36,12 @@ public class GoogleFinance{
 
     public StockObject getStock(String market_name, String compony_name) throws  IOException {
         Call<StockObject> call = API.stockValue(market_name+":"+compony_name);
-        System.out.println(call.request().url());
         return call.execute().body();
 
     }
 
     public CurrencyObject currencryExchange(String from, String to) throws  IOException{
         Call<CurrencyObject> call = API.currencryExchange("CURRENCY"+":"+from+to);
-        System.out.println(call.request().url());
         return call.execute().body();
 
     }
