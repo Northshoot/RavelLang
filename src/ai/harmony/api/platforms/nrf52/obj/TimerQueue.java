@@ -1,6 +1,7 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
 import ai.harmony.api.lang.c.Declaration;
+import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.RavelObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import ai.harmony.ravel.primitives.Controller;
@@ -18,28 +19,32 @@ import static ai.harmony.api.platforms.nrf52.nrf52Platform.BASE_PALTFORM_TMPL_PA
 
 /**
  * Created by lauril on 9/21/16.
+ * This file is example of the platform specific API for code deneration
+ * It allwos dynamic creation of timers so you can add "unlimited" number of them
+ *
+ *
  */
 public class TimerQueue extends RavelObject implements RavelObjectInterface {
 
     STGroup tmpl_group;
     STGroup tmpl_header;
     STGroup tmpl_obj;
-    private Map<String, Timer> mTimerMap;
+    private Map<String, Timer> mTimerMap = new HashMap<>();
 
     public Controller controller;
     public String fileName = "api_timer";
-    public String innit_name = "innit_timer";
+    public String innit_name = "timers_init";
 
     public TimerQueue( ){
         super();
         mTimerMap = new HashMap<>();
         tmpl_group = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/timer.stg");
         tmpl_header = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/h_file.stg");
-        docs = "This is timer documentation";
-        mReturnType = "int32_t";
-        mMethodName = "";
-        mInitMethodName = "timers_init";
+        docs = "This is timer file documentation documentation" +
+                "All timers are collected in the single file";
 
+
+        //to all timers needed includes
         addToInclues(new Declaration("<stdint.h>", "Used for uint type"));
         addToInclues(new Declaration("\"app_error.h\"", "Used to deterime error"));
         addToInclues(new Declaration("\"softdevice_handler.h\""));
@@ -47,6 +52,16 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         addToMakeIncludePath(new Declaration("/components/drivers_nrf/timer"));
         addToMakeIncludePath(new Declaration("/components/libraries/timer"));
         addToMakeObj(new Declaration("/components/libraries/timer/app_timer.c"));
+    }
+
+    private void make_init() {
+        FuncDeclaration f = new FuncDeclaration();
+        f.setCallFunction(innit_name +"()");
+        f.setMethodDeclaration("void " + f.getCallFunction());
+        ST tmpl = tmpl_group.getInstanceOf("timers_init");
+        //show the map of timers and puf!
+        tmpl.add("timers", mTimerMap);
+        f.setmFunctionImplementation( tmpl.render() );
     }
 
     public String CallInnit(){
@@ -57,21 +72,12 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         return fileName + ".h";
     }
 
+
     @Override
     public String getHeaderDefName(){
         return fileName.toUpperCase() + "_H";
     }
-    @Override
-    public String getImplementation() {
-        return null;
-    }
 
-
-    @Override
-    public String getInitImplementation() {
-        String implementation = "";
-        return implementation;
-    }
 
     public void addTime(String timer_name) {
         mTimerMap.put(timer_name, new Timer(timer_name));
@@ -83,6 +89,8 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
 
     @Override
     public String toString(){
+        //create the init method
+        make_init();
         ST r = tmpl_header.getInstanceOf("header");
         r.add("header_data", this);
         return r.render();

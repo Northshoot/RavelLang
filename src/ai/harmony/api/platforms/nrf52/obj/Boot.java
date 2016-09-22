@@ -7,10 +7,7 @@ import ai.harmony.api.platforms.RavelObjectInterface;
  * Created by lauril on 9/21/16.
  */
 public class Boot  extends RavelObject implements RavelObjectInterface {
-    @Override
-    public String getImplementation() {
-        return null;
-    }
+
 
     @Override
     public String getHeaderDefName() {

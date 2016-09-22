@@ -1,9 +1,13 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
+import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.RavelObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import ai.harmony.ravel.primitives.Controller;
 import org.stringtemplate.v4.ST;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by lauril on 9/21/16.
@@ -16,23 +20,45 @@ public class Timer extends RavelObject implements RavelObjectInterface {
     String mCallBack;
     String mDefName;
     String name ;
+    String mPostfix =
     Controller controller;
+    Map<String, FuncDeclaration> mFunctions;
+    TimerQueue tm;
 
-    public Timer( String name){
+    public Timer( String name, TimerQueue tm){
         super();
-
+        this.tm = tm;
         name = name;
-        docs = "This is timer documentation";
-        mReturnType = "int32_t";
-        mMethodName = "";
-        mInitMethodName = "timers_init();";
+        docs = "This is timer " + name + " documentation";
         mTimerMode = "APP_TIMER_MODE_REPEATED";
+        mFunctions = new HashMap<>();
+        // implementation of timer functions
+        //create function object
+        FuncDeclaration mFunction = new FuncDeclaration();
+        //set function name
+        mFunction.setName(name);
+        // add call name
+
+        //add return type
+
+        //add include to parent
+
+        //add defines to parent
+        //create default period
+        tm.
+
+        //add declaration
+
+        //add implementation
+
+
+        mFunction.
 //        #define RANDOM_MODEL_CNTR_PERIODIC_TIME APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 //#define RANDOM_MODEL_CNTR_SINGLE_TIME APP_TIMER_TICKS(25000, APP_TIMER_PRESCALER)
 //        APP_TIMER_DEF(random_model__ctr_timer_periodic);
 //        APP_TIMER_DEF(random_model__ctr_timer_single);
 
-//        void timers_init(void);
+//
 
 
 /**

@@ -1,6 +1,7 @@
 package ai.harmony.api.platforms;
 
 import ai.harmony.api.lang.c.Declaration;
+import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.ravel.error.NotImplementedException;
 
 import java.text.SimpleDateFormat;
@@ -12,7 +13,6 @@ import java.util.*;
 public class RavelObject  {
     protected String docs = "Object documentation is not set";
     protected boolean isStandAlone = false;
-    protected String mReturnType = "void";
     protected String mMethodName = "";
     protected String mInitMethodName = "";
 
@@ -24,10 +24,11 @@ public class RavelObject  {
         this.depenencies.put("make_include_path", new ArrayList<>());
         this.depenencies.put("defines", new ArrayList<>());
         this.depenencies.put("declarations", new ArrayList<>());
+        this.depenencies.put("functions", new ArrayList<>());
     }
 
     /**
-     * Add all the necessery thingies
+     * Add all the necessary thingies
      * @param val
      */
     protected void addToInclues(Declaration val){
@@ -40,8 +41,8 @@ public class RavelObject  {
         this.depenencies.get("make_include_path").add(val);
     }
     protected void addToMakeObj(Declaration obj){ this.depenencies.get("make_object").add(obj); }
-    protected void addFuncDeclaration(Declaration obj){
-        this.depenencies.get("declarations").add(obj);
+    protected void addFuncDeclaration(FuncDeclaration obj){
+        this.depenencies.get("functions").add(obj);
     }
 
     /**
@@ -63,8 +64,9 @@ public class RavelObject  {
     public List<Declaration> getDefines(){
         return this.depenencies.get("defines");
     }
-    public List<Declaration> getFuncDeclaration(){
-        return this.depenencies.get("declarations");
+    //trix to fix the casting
+    public List<FuncDeclaration> getFuncDeclaration(){
+        return  (List<FuncDeclaration>) (Object) this.depenencies.get("functions");
     }
 
     /**
@@ -98,8 +100,14 @@ public class RavelObject  {
         return null;
     }
 
-    public String getReturnType() {
-        return mReturnType;
+    public String getReturnType(String functionName) {
+        List<FuncDeclaration> flist = (List<FuncDeclaration>) (Object) this.depenencies.get("functions");
+        for(FuncDeclaration f: flist) {
+            if (f.getName().equals(functionName))
+                return f.getReturnType();
+        }
+        //TODO: should probably through and error here
+        return "void";
     }
     public String getInitImplementation() {
         return "";

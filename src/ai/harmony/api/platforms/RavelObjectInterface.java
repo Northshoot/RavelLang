@@ -1,6 +1,7 @@
 package ai.harmony.api.platforms;
 
 import ai.harmony.api.lang.c.Declaration;
+import ai.harmony.api.lang.c.FuncDeclaration;
 
 import java.util.List;
 
@@ -8,8 +9,6 @@ import java.util.List;
  * Created by lauril on 9/21/16.
  */
 public interface RavelObjectInterface {
-    public String getImplementation();
-
     /**
      * if object is build separately it has file name
      * @return
@@ -30,14 +29,12 @@ public interface RavelObjectInterface {
 
     public List<Declaration> getImports();
     public List<Declaration> getDefines();
-    public List<Declaration> getFuncDeclaration();
+    public List<FuncDeclaration> getFuncDeclaration();
+
     public boolean isStandAlone();
-
     public String getReadMethod();
-
     public String getTimeDate();
+    public String getReturnType(String functionName);
 
-    public String getReturnType();
 
-    public String getInitImplementation();
 }
