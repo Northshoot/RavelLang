@@ -29,7 +29,7 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
     STGroup tmpl_group;
     STGroup tmpl_header;
     STGroup tmpl_obj;
-    private Map<String, Timer> mTimerMap = new HashMap<>();
+    private Map<String, Timer> mTimerMap;
 
     public Controller controller;
     public String fileName = "api_timer";
@@ -43,7 +43,7 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         tmpl_header = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/h_file.stg");
         docs = "This is timer file documentation documentation" +
                 "All timers are collected in the single file";
-
+        mTimerMap = new HashMap<>();
 
         //to all timers needed includes
         addToInclues(new Declaration("<stdint.h>", "Used for uint type"));
@@ -58,20 +58,19 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
 
     private void make_init() {
         FuncDeclaration f = new FuncDeclaration();
-        f.setCallFunction(innit_name +"()");
+        f.setCallFunction(innit_name +"();");
         f.setMethodDeclaration("void " + f.getCallFunction());
         ST tmpl = tmpl_group.getInstanceOf("timers_init");
         //show the map of timers and puf!
         tmpl.add("timers", mTimerMap);
         f.setFunctionImplementation( tmpl.render() );
+        addFuncDeclaration(f);
     }
 
     public ST getTemplate(String name){
         return tmpl_group.getInstanceOf(name);
     }
-    public String CallInnit(){
-        return mInitMethodName + "();";
-    }
+
 
     public String getHeaderFileName(){
         return fileName + ".h";
@@ -96,6 +95,7 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
     public String toString(){
         //create the init method
         make_init();
+
         ST r = tmpl_header.getInstanceOf("header");
         r.add("header_data", this);
         return r.render();

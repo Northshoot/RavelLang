@@ -66,6 +66,7 @@ public class RavelObject  {
     }
     //trix to fix the casting
     public List<FuncDeclaration> getFuncDeclaration(){
+        System.out.println("function decl");
         return  (List<FuncDeclaration>) (Object) this.depenencies.get("functions");
     }
 

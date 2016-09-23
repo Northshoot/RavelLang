@@ -22,7 +22,6 @@ public class Temperature extends RavelObject implements RavelObjectInterface {
     public Temperature() {
         super();
         docs = "This is Temperature documentation";
-        mReturnType = "int32_t";
         mMethodName = "getTemperature()";
         addToInclues(new Declaration("softdevice_handler.h"));
         addToMakeIncludePath(new Declaration("/components/softdevice/common/softdevice_handler"));
@@ -30,7 +29,7 @@ public class Temperature extends RavelObject implements RavelObjectInterface {
     }
 
     //TODO: allow configuration with the variable naming
-    @Override
+
     public String getImplementation(){
         String implementation;
         implementation = "" +

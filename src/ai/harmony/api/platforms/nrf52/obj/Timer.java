@@ -16,11 +16,12 @@ import java.util.Map;
  *
  * Timmer queu is used to generate timer_api file
  */
-public class Timer extends RavelObject implements RavelObjectInterface {
+public class Timer extends RavelObject {
     String mTimerMode;
     String mCallBack;
-    String name ;
-    Controller controller;
+    String mVarName ;
+    String mShortName;
+    String mTemplateName;
     Map<String, FuncDeclaration> mFunctions;
     TimerQueue tm;
     FuncDeclaration start;
@@ -28,59 +29,62 @@ public class Timer extends RavelObject implements RavelObjectInterface {
     public boolean debug = true;
     private boolean periodic = true;
 
-    public Timer( String name, TimerQueue tm, boolean periodic){
+    public Timer( String n, TimerQueue tm, boolean periodic){
         super();
         this.tm = tm;
         this.periodic = periodic;
-        name = name;
-        docs = "This is timer " + name + " documentation";
+        this.mShortName = n;
+        this.mVarName = n;
+        docs = "This is timer " + this.mVarName + " documentation";
         mTimerMode = "APP_TIMER_MODE_REPEATED";
         mFunctions = new HashMap<>();
         // implementation of timer functions
-        //create function object
+        //timers have two functions, start and stop,
          start = new FuncDeclaration();
          stop = new FuncDeclaration();
-
-        //add include to parent
-
-        //add defines to parent
-        //create default period
+        //fixing naming depending on the periodic or not
         if(periodic ) {
-            tm.addToDefines(new Declaration(name.toUpperCase()+"__PERIODIC_TIME APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)",
+            this.mVarName = mShortName+"__timer_periodic";
+            this.mTemplateName = "__timer_periodic";
+            tm.addToDefines(new Declaration(this.mVarName.toUpperCase() + " APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)",
                     "Default value for the timer" ));
-            this.name = name+"__timer_periodic";
             //set function name
-            start.setName(name+"__startTimerPeriodic");
-            ST decl = tm.getTemplate("timer_start_periodic_declaration");
-            decl.add("timer", this);
-            decl.add("comment", start.getName() + " declaration");
-            start.setMethodDeclaration(decl.render());
-
-            ST impl = tm.getTemplate("timer_start_periodic_implementation");
-            impl.add("timer", this);
-            start.setFunctionImplementation(impl.render());
-
+            start.setName(mShortName+"__startTimerPeriodic");
+            stop.setName(mShortName+"__stopTimerPeriodic");
         } else {
-            tm.addToDefines(new Declaration(name.toUpperCase()+"__SINGLE_TIME APP_TIMER_TICKS(25000, APP_TIMER_PRESCALER)",
+            this.mVarName = mShortName+"__timer_periodic";
+            tm.addToDefines(new Declaration(this.mVarName +" APP_TIMER_TICKS(25000, APP_TIMER_PRESCALER)",
                     "Default value for the timer" ));
-            this.name = name+"__timer_single";
             //set function name
-            start.setName(name+"__startTimerOneShoot");
-
-
+            start.setName(mShortName+"__startTimerOneShoot");
+            stop.setName(mShortName+"__stopTimerOneShoot");
         }
+        //creating fucntions and all other stuff
+        mCallBack = this.mVarName+"__callback()";
 
-        tm.addToDefines(new Declaration("APP_TIMER_DEF(" + this.name +")", "Initializing timer"));
-        //timers have two functions, start and stop,
+        ST decl = getTemplate("start", "__declaration");
+        decl.add("timer", start);
+        start.setMethodDeclaration(decl.render());
+
+        ST impl = getTemplate("start" , "__implementation");
+        impl.add("timer", start);
+        start.setFunctionImplementation(impl.render());
+
+        ST stop_decl = getTemplateStop("__declaration");
+        stop_decl.add("timer", stop);
+        stop.setMethodDeclaration(decl.render());
+
+        ST stop_impl = getTemplateStop("__implementation");
+        stop_impl.add("timer", stop);
+        stop.setFunctionImplementation(impl.render());
+
         //add functions
-        if (periodic ) {
-            start.setMethodDeclaration("");
-        } else {
-
-        }
+        tm.addToDefines(new Declaration("APP_TIMER_DEF(" + this.mVarName +")", "Initializing timer"));
         tm.addFuncDeclaration(start);
         tm.addFuncDeclaration(stop);
     }
+
+    public String getCallBack() {return this.mCallBack; }
 
     public String getStopCall(){
         if (periodic ) {
@@ -99,5 +103,10 @@ public class Timer extends RavelObject implements RavelObjectInterface {
         return this.mTimerMode;
     }
 
-
+    private ST getTemplateStop(String post){
+        return tm.getTemplate("stop__timer"+post);
+    }
+    private ST getTemplate(String pre, String post){
+        return tm.getTemplate(pre + this.mTemplateName + post);
+    }
 }

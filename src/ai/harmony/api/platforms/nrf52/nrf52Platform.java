@@ -38,7 +38,7 @@ public class nrf52Platform {
             this.tQueue = new TimerQueue();
             mFiles.put("timers", this.tQueue);
         }
-        tQueue.addTime(timer_name);
+        tQueue.addTime(timer_name, true);
     }
 
     public Timer getTimer(String timer_name){
