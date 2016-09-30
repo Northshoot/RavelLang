@@ -120,6 +120,13 @@ local model Measurement():
         temperature = IntegerField()
         voltage = IntegerField()
     
+local model EncryptedBlob(size):
+    properties:
+        durable = true
+        buffer_size = size
+
+    schema:
+        measurement = ByteField()
 
 streaming model MeasurementPacket(size):
     properties:
@@ -129,6 +136,9 @@ streaming model MeasurementPacket(size):
         buffer_size = size
 
     schema:
+        blob = IntegerField()
+        sequence = IntegerField(auto_increment=True)
+        acked = BooleanField(default=False)
         measurement = ByteField()
 
 controller MeasurementController(tier, source):
@@ -141,6 +151,7 @@ controller MeasurementController(tier, source):
     config = tier.models.AppConfig
     measurement_model = tier.models.Measurement
     measurement_pkt = tier.models.MeasurementPacket
+    eBlob = tiers.models.EncryptedBlob
     adc_model = tier.models.ADCMode
 
     
@@ -159,13 +170,29 @@ controller MeasurementController(tier, source):
         rec.save()
         adc_model.clear()
 
-
-    event measurement_model.full(context c):
-        rec = MeasurementPacket.create()
+    event measurement_model.full(Context c):
+        rec = MeasurementBlob.create()
         rec.measurement = ocb.encrypt(measurement_model)
         rec.save()
         measurement_model.clear()
 
+    event eBlob.save_done(Context c):
+        blob_rec = eBlob.getLast()
+        pkt_size = measurement_pkt.record_size()
+        number_of_pkt = eBlob.record_size()/pkt_size
+        current = 0
+        while current < number_of_pkt:
+            rec = measurement_pkt.create()
+            rec.measurement = blob_rec.getBytes(pkt_size)
+            rec.save()
+
+    event measurement_pkt.save_done(Context c):
+        if c.error == SUCCESS:
+            rec = c.model
+            if rec.acked == True:
+                last = measurement_pkt.getLast()
+                if rec.blob == last.blob and rec.sequence ==last.sequence:
+                    delete eBlob.get(blob = rec.blob)
 
 local model NumberOfPackets():
     properties:
@@ -256,10 +283,12 @@ space EmbeddedSpace:
 	    ADCMode = ADCModel()
 	    Measurement = Measurement()
 	    MeasurementPacket = MeasurementPacket(size=500)
+	    eBlob= EncryptedBlob()
 
     controllers:
         boot_ctr=EmBootstrapController(tier=self, source=source)
         measurement_ctr = MeasurementController(tier=self)
+
     
     sources:
 		temperature = platform.system.Temperature
