@@ -1,20 +1,15 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
 import ai.harmony.api.lang.c.Declaration;
-import ai.harmony.api.platforms.RavelObject;
+import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lauril on 9/21/16.
  * TODO: for now we assume that this API is only for C and we never try to build it in java
  *
  */
-public class Temperature extends RavelObject implements RavelObjectInterface {
+public class Temperature extends RavelAPIObject implements RavelObjectInterface {
 
 
 

@@ -1,5 +1,6 @@
 package ai.harmony.api.platforms;
 
+import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
 
@@ -35,6 +36,7 @@ public interface RavelObjectInterface {
     public String getReadMethod();
     public String getTimeDate();
     public String getReturnType(String functionName);
+    public List<FileObject> getFiles() ;
 
 
 }

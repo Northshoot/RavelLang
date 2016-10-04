@@ -1,17 +1,19 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
+import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
-import ai.harmony.api.platforms.RavelObject;
+import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import ai.harmony.ravel.primitives.Controller;
-import org.apache.commons.lang3.text.WordUtils;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static ai.harmony.api.lang.c.CLang.BASE_C_LANG_TMPL_PATH;
@@ -24,7 +26,7 @@ import static ai.harmony.api.platforms.nrf52.nrf52Platform.BASE_PALTFORM_TMPL_PA
  *
  *
  */
-public class TimerQueue extends RavelObject implements RavelObjectInterface {
+public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
 
     STGroup tmpl_group;
     STGroup tmpl_header;
@@ -32,18 +34,26 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
     private Map<String, Timer> mTimerMap;
 
     public Controller controller;
-    public String fileName = "api_timer";
+    private String fileName = "api_timer";
     public String innit_name = "timers_init";
 
 
-    public TimerQueue( ){
+    public TimerQueue(String mBuildPath){
         super();
         mTimerMap = new HashMap<>();
         tmpl_group = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/timer.stg");
         tmpl_header = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/h_file.stg");
+        tmpl_obj = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/c_obj.stg");
         docs = "This is timer file documentation documentation" +
                 "All timers are collected in the single file";
         mTimerMap = new HashMap<>();
+
+        mBuildPath = mBuildPath;
+        header.setFileName(fileName + ".h");
+        header.setPath(mBuildPath);
+        obj.setFileName(fileName + ".c");
+        obj.setPath(mBuildPath);
+
 
         //to all timers needed includes
         addToInclues(new Declaration("<stdint.h>", "Used for uint type"));
@@ -60,9 +70,9 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         FuncDeclaration f = new FuncDeclaration();
         f.setCallFunction(innit_name +"();");
         f.setMethodDeclaration("void " + f.getCallFunction());
-        ST tmpl = tmpl_group.getInstanceOf("timers_init");
+        ST tmpl = tmpl_group.getInstanceOf(innit_name);
         //show the map of timers and puf!
-        tmpl.add("timers", mTimerMap);
+        tmpl.add("timers", this);
         f.setFunctionImplementation( tmpl.render() );
         addFuncDeclaration(f);
     }
@@ -71,19 +81,29 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         return tmpl_group.getInstanceOf(name);
     }
 
+    public List<FuncDeclaration> getFuncDeclaration(){
 
+        return  super.getFuncDeclaration();
+    }
     public String getHeaderFileName(){
         return fileName + ".h";
     }
 
-
+    public List<Timer> getTimers(){
+        List<Timer> t = new ArrayList<>();
+        t.addAll(mTimerMap.values());
+        return t;
+    }
+    public String getinitMethodName(){
+        return innit_name;
+    }
     @Override
     public String getHeaderDefName(){
         return fileName.toUpperCase() + "_H";
     }
 
 
-    public void addTime(String timer_name, boolean periodic) {
+    public void addTimer(String timer_name, boolean periodic) {
         mTimerMap.put(timer_name, new Timer(timer_name, this, periodic));
     }
 
@@ -91,6 +111,19 @@ public class TimerQueue extends RavelObject implements RavelObjectInterface {
         return mTimerMap.get(timer_name);
     }
 
+    public List<FileObject> getFiles() {
+        make_init();
+        ST r = tmpl_header.getInstanceOf("header");
+        r.add("header_data", this);
+        header.setContent(r.render());
+        ST t_obj = tmpl_obj.getInstanceOf("obj_file");
+
+        t_obj.add("obj_data", this);
+        System.out.println(t_obj.render());
+        obj.setContent(t_obj.render());
+
+        return super.getFiles();
+    }
     @Override
     public String toString(){
         //create the init method

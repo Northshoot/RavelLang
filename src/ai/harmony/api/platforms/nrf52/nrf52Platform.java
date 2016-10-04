@@ -1,44 +1,45 @@
 package ai.harmony.api.platforms.nrf52;
 
+import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.platforms.nrf52.obj.Boot;
 import ai.harmony.api.platforms.nrf52.obj.Random;
 import ai.harmony.api.platforms.nrf52.obj.Timer;
 import ai.harmony.api.platforms.nrf52.obj.TimerQueue;
 import ai.harmony.ravel.primitives.Controller;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lauril on 9/21/16.
  */
 public class nrf52Platform {
+    private String mBuildPath;
     private TimerQueue tQueue;
     private Random mRandom;
     private Boot mBoot;
     private Controller ctr;
-    Map<String, Object> mFiles;
+    List<FileObject> mFiles;
     public final static String BASE_PALTFORM_TMPL_PATH = "src/ai/harmony/api/platforms/nrf52/tmpl";
-    public nrf52Platform (Controller ctr){
+    public nrf52Platform (Controller ctr, String path){
         this.ctr = ctr;
-        mFiles = new HashMap<>();
+        mFiles = new ArrayList<>();
         this.mRandom  = new Random();
-
+        mBuildPath = path+"api/";
     }
 
     public void addBoot(String name){
         if(mBoot == null) {
-            this.mBoot = new Boot();
+            this.mBoot = new Boot(mBuildPath);
         }
-        mFiles.put(name, this.mBoot);
+        mFiles.addAll(mBoot.getFiles());
     }
     public void addTimer(String timer_name){
         if(tQueue == null) {
-            this.tQueue = new TimerQueue();
-            mFiles.put("timers", this.tQueue);
+            this.tQueue = new TimerQueue(mBuildPath);
+
         }
-        tQueue.addTime(timer_name, true);
+        tQueue.addTimer(timer_name, true);
     }
 
     public Timer getTimer(String timer_name){
@@ -48,7 +49,8 @@ public class nrf52Platform {
 
     public Random getRandom() { return mRandom; }
 
-    public Map<String, Object> getFiles(){
+    public List<FileObject> getFiles(){
+        mFiles.addAll(this.tQueue.getFiles());
         return mFiles;
 
     }

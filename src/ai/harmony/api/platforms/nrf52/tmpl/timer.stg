@@ -1,9 +1,12 @@
 timers_init(timers) ::= <<
-"void <timers.initMethodName>(void)
-    {
-        // Initialize timer module.
-        APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-        <timers:{timer|app_timer_create(&<timer.name>, <timer.timerMode>, <timer.callback>);\n}>
+/**
+ * Initialization method for timers
+ */
+void <timers.innit_name>(void){
+    // Initialize timer module.
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+    <timers.timers:{timer|app_timer_create(&<timer.name>, <timer.timerMode>, <timer.callBack>);\n}>
+}
 >>
 
 start__timer_periodic__declaration(timer) ::=<<
@@ -18,7 +21,7 @@ start__timer_periodic__implementation(timer) ::= <<
  * <timer.comment >
  */
 void <timer.name>(uint32_t period){
-	uint32_t time =  APP_TIMER_TICKS(period,  APP_TIMER_PRESCALER) ; <\t><\t> //prescale should a parameter
+	uint32_t time =  APP_TIMER_TICKS(period,  APP_TIMER_PRESCALER) ; <\t><\t> //pre-scale should a parameter
 <if(timer.debug)>
     NRF_LOG_INFO("<timer.name> started\r\n");
 <endif>
@@ -42,7 +45,7 @@ stop__timer__declaration(timer) ::=<<
  * Stop function for <timer.name>
  * <timer.comment >
  */
- void <timer.name>(); <\t><\t> //<comment>
+void <timer.name>(); <\t><\t> //<comment>
  >>
 
 stop__timer__implementation(timer) ::= <<
@@ -51,5 +54,5 @@ void <timer.name>(uint32_t period){
     NRF_LOG_INFO("stopping <timer.name>\r\n");
 <endif>
 	app_timer_stop(<timer.name>); // <timer.comment>
-	}
+}
 >>

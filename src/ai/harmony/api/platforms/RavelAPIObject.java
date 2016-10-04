@@ -1,5 +1,6 @@
 package ai.harmony.api.platforms;
 
+import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.ravel.error.NotImplementedException;
@@ -10,15 +11,18 @@ import java.util.*;
 /**
  * Created by lauril on 9/21/16.
  */
-public class RavelObject  {
+public class RavelAPIObject {
     protected String docs = "Object documentation is not set";
     protected boolean isStandAlone = false;
     protected String mMethodName = "";
     protected String mInitMethodName = "";
+    protected String mBuildPath;
+    protected FileObject header = new FileObject();
+    protected FileObject obj = new FileObject();
 
     private Map<String, List<Declaration>> depenencies = new LinkedHashMap();
 
-    public RavelObject(){
+    public RavelAPIObject(){
         this.depenencies.put("imports", new ArrayList<>());
         this.depenencies.put("make_object", new ArrayList<>());
         this.depenencies.put("make_include_path", new ArrayList<>());
@@ -66,7 +70,6 @@ public class RavelObject  {
     }
     //trix to fix the casting
     public List<FuncDeclaration> getFuncDeclaration(){
-        System.out.println("function decl");
         return  (List<FuncDeclaration>) (Object) this.depenencies.get("functions");
     }
 
@@ -117,4 +120,12 @@ public class RavelObject  {
     public String getDocs(){
         return this.docs;
     }
+
+    public List<FileObject> getFiles() {
+        List<FileObject> ret = new ArrayList<>();
+        ret.add(header);
+        ret.add(obj);
+        return ret;
+    }
+
 }

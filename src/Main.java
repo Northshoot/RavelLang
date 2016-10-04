@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,6 +21,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         String inputFile = null;
+        String mBuildPath = null;
         System.out.println("Starting Build");
         Date t = Calendar.getInstance().getTime();
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
@@ -27,9 +29,13 @@ public class Main {
         InputStream is = System.in;
         if ( inputFile!=null ) {
             is = new FileInputStream(inputFile);
+            mBuildPath = Paths.get(args[0]).toAbsolutePath().getParent().toString();
+            System.out.println("Build path " + mBuildPath);
         } else {
             System.out.println("File is null");
         }
+        mBuildPath+="/src/";
+        
         ANTLRInputStream input = new ANTLRInputStream(is);
 
         RavelLexer lexer = new RavelLexer(input);
