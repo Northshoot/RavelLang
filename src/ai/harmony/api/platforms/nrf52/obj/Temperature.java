@@ -18,7 +18,7 @@ public class Temperature extends RavelAPIObject implements RavelObjectInterface 
         super();
         docs = "This is Temperature documentation";
         mMethodName = "getTemperature()";
-        addToInclues(new Declaration("softdevice_handler.h"));
+        addToIncludes(new Declaration("softdevice_handler.h"));
         addToMakeIncludePath(new Declaration("/components/softdevice/common/softdevice_handler"));
         addToMakeObj(new Declaration("/components/softdevice/common/softdevice_handler/softdevice_handler.c"));
     }

@@ -10,7 +10,6 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,14 +55,16 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
 
 
         //to all timers needed includes
-        addToInclues(new Declaration("<stdint.h>", "Used for uint type"));
-        addToInclues(new Declaration("\"app_error.h\"", "Used to deterime error"));
-        addToInclues(new Declaration("\"softdevice_handler.h\""));
-        addToInclues(new Declaration("\"app_timer.h\""));
-        addToMakeIncludePath(new Declaration("/components/drivers_nrf/timer"));
-        addToMakeIncludePath(new Declaration("/components/libraries/timer"));
-        addToMakeObj(new Declaration("/components/libraries/timer/app_timer.c"));
-        addToMakeObj(new Declaration("/api/" + this.fileName +".c"));
+        addToIncludes(new Declaration("<stdint.h>", "Used for uint type"));
+        addToIncludes(new Declaration("\"app_error.h\"", "Used to deterime error"));
+        addToIncludes(new Declaration("\"softdevice_handler.h\""));
+        addToIncludes(new Declaration("\"app_timer.h\""));
+
+        addToMakeIncludePathSDK("/components/drivers_nrf/timer");
+        addToMakeIncludePathSDK("/components/libraries/timer");
+        addToMakeObjSDK("/components/libraries/timer/app_timer.c");
+
+        addToMakeObj("/api/" + this.fileName +".c");
     }
 
     private void make_init() {
@@ -94,9 +95,10 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         t.addAll(mTimerMap.values());
         return t;
     }
-    public String getinitMethodName(){
+    public String getInitMethodName(){
         return innit_name;
     }
+
     @Override
     public String getHeaderDefName(){
         return fileName.toUpperCase() + "_H";
@@ -119,7 +121,6 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         ST t_obj = tmpl_obj.getInstanceOf("obj_file");
 
         t_obj.add("obj_data", this);
-        System.out.println(t_obj.render());
         obj.setContent(t_obj.render());
 
         return super.getFiles();

@@ -14,7 +14,9 @@ import java.util.Map;
  * Created by lauril on 9/21/16.
  * This class deals simply with one timer creating naming and calling conventions
  *
- * Timmer queu is used to generate timer_api file
+ * Timer queue is used to generate timer_api file
+ * TODO: optimize the implementation too much writing for a single timer
+ *
  */
 public class Timer extends RavelAPIObject {
     String mTimerMode;

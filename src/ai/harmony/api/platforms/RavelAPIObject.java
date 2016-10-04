@@ -3,10 +3,14 @@ package ai.harmony.api.platforms;
 import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
+import ai.harmony.api.platforms.nrf52.obj.MainApp;
 import ai.harmony.ravel.error.NotImplementedException;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_PRJ_PREFIX;
+import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_SDK_PREFIX;
 
 /**
  * Created by lauril on 9/21/16.
@@ -20,6 +24,7 @@ public class RavelAPIObject {
     protected FileObject header = new FileObject();
     protected FileObject obj = new FileObject();
 
+    private MainApp mMainApp = null;
     private Map<String, List<Declaration>> depenencies = new LinkedHashMap();
 
     public RavelAPIObject(){
@@ -29,31 +34,61 @@ public class RavelAPIObject {
         this.depenencies.put("defines", new ArrayList<>());
         this.depenencies.put("declarations", new ArrayList<>());
         this.depenencies.put("functions", new ArrayList<>());
+
     }
+
 
     /**
      * Add all the necessary thingies
+     * TODO: add to the list only if it does not exist
+     * TODO: lists need sorting and clensing
+     * right not it can crete multiple addon's  due to cross over dependencies
      * @param val
      */
-    public void addToInclues(Declaration val){
+    public void addToIncludes(Declaration val){
         this.depenencies.get("imports").add(val);
     }
     public void addToDefines(Declaration val){
         this.depenencies.get("defines").add(val);
     }
+    public void addToDeclarations(Declaration val) {this.depenencies.get("declarations").add(val);}
+    public void addFuncDeclaration(FuncDeclaration obj){
+        this.depenencies.get("functions").add(obj);
+    }
+
     public void addToMakeIncludePath(Declaration val){
         this.depenencies.get("make_include_path").add(val);
     }
     public void addToMakeObj(Declaration obj){ this.depenencies.get("make_object").add(obj); }
-    public void addFuncDeclaration(FuncDeclaration obj){
-        this.depenencies.get("functions").add(obj);
+    //Overload for string and format for project
+    public void addToMakeIncludePath(String val){
+
+        this.depenencies.get("make_include_path")
+                .add(new Declaration(MAKE_PRJ_PREFIX +val));
+    }
+    public void addToMakeObj(String obj){ this.depenencies.get("make_object")
+            .add(new Declaration(MAKE_PRJ_PREFIX +obj));
+    }
+
+    //Overloading with lists
+    public void addToMakeIncludePath(List<Declaration> val){
+        this.depenencies.get("make_include_path").addAll(val);
+    }
+    public void addToMakeObj(List<Declaration> obj){ this.depenencies.get("make_object").addAll(obj); }
+
+    //Pass on to the SDK make
+    public void addToMakeIncludePathSDK(String val){
+        this.addToMakeIncludePath(new Declaration((MAKE_SDK_PREFIX+val)));
+    }
+    public void addToMakeObjSDK(String obj){
+        this.addToMakeObj(new Declaration(MAKE_SDK_PREFIX +obj));
     }
 
     /**
      * get all the thingies
      * @return
      */
-    //for Makefile fun this need to be aggregated
+    //TODO: for Makefile fun this need to be aggregated
     public List<Declaration> getMakeObjects(){
         return this.depenencies.get("make_object");
     }
@@ -67,6 +102,9 @@ public class RavelAPIObject {
     }
     public List<Declaration> getDefines(){
         return this.depenencies.get("defines");
+    }
+    public List<Declaration> getDeclarations(){
+        return this.depenencies.get("declarations");
     }
     //trix to fix the casting
     public List<FuncDeclaration> getFuncDeclaration(){
@@ -93,9 +131,10 @@ public class RavelAPIObject {
      * kind of platform specific
      * @return
      */
-    public String getInitMethodName(){
-        return mInitMethodName;
+    public String getInitMethodCall(){
+        return mInitMethodName+"();";
     }
+
     public String getHeaderFileName() {
         return null;
     }
