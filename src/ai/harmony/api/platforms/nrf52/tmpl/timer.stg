@@ -5,7 +5,7 @@ timers_init(timers) ::= <<
 void <timers.innit_name>(void){
     // Initialize timer module.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-    <timers.timers:{timer|app_timer_create(&<timer.name>, <timer.timerMode>, <timer.callBack>);\n}>
+    <timers.timers:{timer|app_timer_create(&<timer.name>, <timer.timerMode>, <timer.callBack>);};separator="\n">
 }
 >>
 

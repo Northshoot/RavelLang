@@ -18,6 +18,8 @@ public class nrf52Platform {
     public final static String BASE_PALTFORM_TMPL_PATH = "src/ai/harmony/api/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
     public final static String MAKE_PRJ_PREFIX = "$(PROJ_DIR)";
+
+    public final static String VERSION = "nrf52Platform.v12";
     //provided API objects
     private TimerQueue tQueue=null;
     private Random mRandom=null;
@@ -54,6 +56,10 @@ public class nrf52Platform {
 
         }
         tQueue.addTimer(timer_name, true);
+    }
+
+    public static boolean providesAPI(String v){
+        return VERSION.contentEquals(v);
     }
 
     public Timer getTimer(String timer_name){

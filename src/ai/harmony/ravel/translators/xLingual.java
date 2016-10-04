@@ -51,7 +51,7 @@ public class xLingual implements Translator {
         return mName;
     }
 
-    public String getNameUpperCase() {
+    public String getNameUpper() {
         return mName.toUpperCase(Locale.US);
     }
 
