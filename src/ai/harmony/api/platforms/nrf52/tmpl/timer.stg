@@ -45,7 +45,7 @@ stop__timer__declaration(timer) ::=<<
  * Stop function for <timer.name>
  * <timer.comment >
  */
-void <timer.name>(); <\t><\t> //<comment>
+void <timer.name>(); <\t><\t> //<timer.comment>
  >>
 
 stop__timer__implementation(timer) ::= <<

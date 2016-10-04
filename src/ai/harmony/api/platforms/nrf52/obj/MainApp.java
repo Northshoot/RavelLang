@@ -6,9 +6,13 @@ import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import static ai.harmony.api.platforms.nrf52.nrf52Platform.BASE_PALTFORM_TMPL_PATH;
 import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_SDK_PREFIX;
 
 /**
@@ -23,17 +27,25 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     private String fileName = "main.c";
     private STGroup mMainTmlp;
-    private FileObject mMainAppObj;
+    private STGroup mCnfgTmlp;
 
 
-    public MainApp() {
+
+
+    public MainApp(String bp) {
+        mBuildPath = bp;
+        mMainTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/main.stg");
+        mCnfgTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/config.stg");
         //create main app
-
-
+        obj.setPath(mBuildPath);
+        obj.setFileName(fileName);
         //Base stuff that is needed by nrf
         addBaseMake();
         //this app
         addMainAppMake();
+        //make config section
+        //TODO: add dynamic app config based on params
+        makeCnf();
 
     }
 
@@ -42,7 +54,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         ST t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
         obj.appendContent(t_obj.render());
         // Function for handling File Data Storage events.
-        t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
+        t_obj = mMainTmlp.getInstanceOf("fds_evt_handler");
         obj.appendContent(t_obj.render());
         //Function for handling Peer Manager events.
         t_obj = mMainTmlp.getInstanceOf("pm_evt_handler");
@@ -56,10 +68,10 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         //main
         t_obj = mMainTmlp.getInstanceOf("main");
         obj.appendContent(t_obj.render());
-        t_obj.add("obj_data", this);
+        t_obj.add("components", this);
         obj.setContent(t_obj.render());
-
-        return super.getFiles();
+        mFileList.add(obj);
+        return mFileList;
     }
 
     @Override
@@ -67,6 +79,33 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         return null;
     }
 
+    private void makeCnf(){
+        ST t_obj = mCnfgTmlp.getInstanceOf("ravel_gcc_nrf52_ld");
+        addCnfFile("ravel_gcc_nrf52_ld.ld",t_obj.render());
+
+        t_obj = mCnfgTmlp.getInstanceOf("app_cnfg");
+        addCnfFile("app_cnfg.h",t_obj.render());
+
+        t_obj = mCnfgTmlp.getInstanceOf("device_manager_cnfg");
+        addCnfFile("device_manager_cnfg.h",t_obj.render());
+
+        t_obj = mCnfgTmlp.getInstanceOf("nrf_drv_config");
+        addCnfFile("nrf_drv_config.h",t_obj.render());
+
+        t_obj = mCnfgTmlp.getInstanceOf("sdk_config");
+        addCnfFile("sdk_config.h",t_obj.render());
+
+    }
+
+    private void addCnfFile(String name, String content){
+        FileObject fo = new FileObject();
+        fo.setPath(mBuildPath + "config/");
+        fo.setFileName(name);
+        fo.setContent(content);
+        mFileList.add(fo);
+
+
+    }
     private void addMainAppMake(){
         /**
          * Fix includes for this project
@@ -92,10 +131,6 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
             addToDefines(new Declaration("NRF_LOG_MODULE_NAME \"APP\""));
             addToIncludes(new Declaration("nrf_log.h"));
             addToIncludes(new Declaration("nrf_log_ctrl.h"));
-
-
-
-
         }
         if(debug_segger_rtt){
             addToMakeIncludePathSDK("/external/segger_rtt");

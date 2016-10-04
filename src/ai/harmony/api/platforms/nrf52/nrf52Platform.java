@@ -28,8 +28,8 @@ public class nrf52Platform {
 
     //build files
     List<FileObject> mFiles;
-    private String mBuildPath;
-    private String mBuildPathApi;
+    private String mBuildPath="";
+    private String mBuildPathApi="";
     private Controller ctr;
 
 
@@ -38,7 +38,7 @@ public class nrf52Platform {
         mBuildPathApi = mBuildPath+"api/";
         this.ctr = ctr;
         mFiles = new ArrayList<>();
-        mMainApp = new MainApp();
+        mMainApp = new MainApp(mBuildPath);
 
     }
 
@@ -65,6 +65,7 @@ public class nrf52Platform {
 
 
     public List<FileObject> getFiles(){
+        mFiles.addAll(mMainApp.getFiles());
         mFiles.addAll(this.tQueue.getFiles());
         mFiles.add(getMakeFile());
         return mFiles;

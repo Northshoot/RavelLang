@@ -23,11 +23,12 @@ public class RavelAPIObject {
     protected String mBuildPath;
     protected FileObject header = new FileObject();
     protected FileObject obj = new FileObject();
-
+    protected List<FileObject> mFileList;
     private MainApp mMainApp = null;
     private Map<String, List<Declaration>> depenencies = new LinkedHashMap();
 
     public RavelAPIObject(){
+        mFileList = new ArrayList<>();
         this.depenencies.put("imports", new ArrayList<>());
         this.depenencies.put("make_object", new ArrayList<>());
         this.depenencies.put("make_include_path", new ArrayList<>());
@@ -161,10 +162,9 @@ public class RavelAPIObject {
     }
 
     public List<FileObject> getFiles() {
-        List<FileObject> ret = new ArrayList<>();
-        ret.add(header);
-        ret.add(obj);
-        return ret;
+        mFileList.add(header);
+        mFileList.add(obj);
+        return mFileList;
     }
 
 }

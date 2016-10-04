@@ -29,11 +29,6 @@ SRC_FILES +=
   $(SDK_ROOT)/components/toolchain/system_nrf52.c \
   $(SDK_ROOT)/components/softdevice/common/softdevice_handler/softdevice_handler.c \
   $(SDK_ROOT)/components/drivers_nrf/uart/nrf_drv_uart.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
-  $(SDK_ROOT)/external/segger_rtt/RTT_Syscalls_GCC.c \
-  $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
-  $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
@@ -120,9 +115,6 @@ INC_FOLDERS +=
   $(SDK_ROOT)/components/softdevice/s132/headers/nrf52 \
   $(SDK_ROOT)/components/softdevice/common/softdevice_handler \
   $(SDK_ROOT) \
-  $(SDK_ROOT)/components/libraries/log \
-  $(SDK_ROOT)/components/libraries/log/src \
-  $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/ble/ble_services/ble_lbs_c \
   $(SDK_ROOT)/components/ble/ble_racp \
   $(SDK_ROOT)/components/ble/ble_services/ble_cscs \
