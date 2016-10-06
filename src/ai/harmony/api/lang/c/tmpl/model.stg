@@ -146,7 +146,6 @@ int <model.name_c>__get(uint32_t position, <model.name> *rm){
 	}
 }
 
-
 void <model.name_c>__queue_innit(){
 	memset(&cm, 0, sizeof(cm));
 	<model.schema:{s|
@@ -207,9 +206,6 @@ base_includes()::=<<
 >>
 model_ctr_includes(models)::=<<
 <! For  each model add controller for call backs!>
-<models:{model:#include "<model.model_controller.Cname>.h"};separator="\n">
+<models:{model:#include "<model.model_controller.name_c>.h"};separator="\n">
 >>
 
-models_header_file(space)::=<<
-
->>

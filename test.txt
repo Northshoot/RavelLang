@@ -197,3 +197,39 @@ space CloudSpace:
     sinks:
         db = platform.sinks.db
 
+
+controller RandomControllerEmbedded(tier):
+    mFreq = tier.models.frequency
+    mRandom = tier.models.random
+    mError = tier.models.error
+    random_source = tier.sources.random
+    random_timer = tier.platform.timer
+    boot_event = tier.platform.boot
+    running = False
+
+    event boot_event.booted(context ctx):
+        if ctx.error is SUCCESS:
+            random_timer.start_periodic(mFreq.frequency)
+            running = True
+        else:
+            error = mError.create()
+            error.context=ctx
+            error.save()
+
+    event mFreq.arrived(context ctx):
+        random_timer.stop()
+        random_timer.start_periodic(mFreq.frequency)
+
+    event random_timer.fired(context ctx):
+        rand = mRandom.create()
+        rand.value = random_source.read()
+        rand.save()
+
+    event mRandom.full(context ctx):
+        random_timer.stop()
+        running = False
+
+    event mRandom.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(mFreq.frequency)
+            running = True

@@ -76,20 +76,19 @@ public class Main {
         walker.walk(ref, tree);
         /**
          *  Morph to an complete internal representation
-         *  Create concreate instances of models
+         *  Create concrete instances of models
          *
          */
         RavelApplication rApp = new RavelApplication();
         PrimitiveRepPhase inter = new PrimitiveRepPhase(def.globalScope, rApp);
         walker.walk(inter, tree);
-        //System.out.println(rApp);
          /**
          *Generate code
          */
-//        if (rApp != null){
-//            System.out.println("**************** RAVEL APP ****************");
-//            System.out.println(rApp);
-//        }
+        if (rApp != null){
+            System.out.println("**************** RAVEL APP ****************");
+            //System.out.println(rApp);
+        }
 //        STGroup group = new STGroupFile("tmpl/model_c.stg");
 ////        ST model = group.getInstanceOf("modelDecl");
 ////        ST create_record = group.getInstanceOf("create_record");

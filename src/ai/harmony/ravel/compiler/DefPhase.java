@@ -9,9 +9,11 @@ import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
 import ai.harmony.ravel.compiler.symbol.InstanceSymbol;
 import ai.harmony.ravel.primitives.Model;
+import javafx.util.Pair;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -58,6 +60,10 @@ public class DefPhase extends RavelBaseListener {
         //can only be defined ONCE per model, through error otherwise
     }
 
+    @Override
+    public void exitParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
+
+    }
 
     @Override
     public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
@@ -143,12 +149,6 @@ public class DefPhase extends RavelBaseListener {
 
     }
 
-//    @Override
-//    public void enterQueryOperations(RavelParser.QueryOperationsContext ctx) { }
-//
-//    @Override
-//    public void exitQueryOperations(RavelParser.QueryOperationsContext ctx) { }
-
     @Override
     public void exitEventScope(RavelParser.EventScopeContext ctx) {
         popScope();
@@ -160,23 +160,22 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) {
+    public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) {
         intend++;
         String name = ctx.Identifier().getText();
         VariableSymbol vs = new VariableSymbol(name);
-
-        //vs.setValue(ctx.prop().getText());
         vs.setScope(currentScope);
         vs.setDefNode(ctx);
         currentScope.define(vs);
     }
 
     @Override
-    public void exitVarAssigment(RavelParser.VarAssigmentContext ctx) {
+    public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) {
         intend--;
     }
+
     @Override
-    public void enterReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) {
+    public void enterReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) {
         intend++;
         ReferenceSymbol rs = new ReferenceSymbol(ctx.key().getText(), ctx.value().getText());
         rs.setScope(currentScope);
@@ -185,7 +184,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void exitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) { intend--;}
+    public void exitReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) { intend--;}
 
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
@@ -203,6 +202,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) {
+        System.out.println("::::::::::::: " + ctx.scope.getSymbolNames());
         popScope();
     }
 
@@ -212,8 +212,43 @@ public class DefPhase extends RavelBaseListener {
         ctx.scope = ls;
         pushScope(ls);
     }
+    @Override public void enterInstance(RavelParser.InstanceContext ctx) {
+        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText(), ctx);
+        ctx.symbol = is;
+        is.setScope(currentScope);
+        is.setDefNode(ctx);
+        currentScope.define(is);
 
+    }
+
+
+
+    @Override public void enterParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
+        RavelParser.InstanceContext instance = (RavelParser.InstanceContext) ctx.getParent();
+        List<RavelParser.Param_assigContext> paramAssigContexts = ctx.param_assig();
+        for(RavelParser.Param_assigContext p: ctx.param_assig()) {
+            ((InstanceSymbol) instance.symbol).addParameter(p.Identifier().getText(), p.param_val().getText());
+        }
+    }
+
+    @Override public void exitInstance(RavelParser.InstanceContext ctx) {
+        if(currentScope.getEnclosingScope() instanceof SpaceSymbol){
+            SpaceSymbol ss = (SpaceSymbol) currentScope.getEnclosingScope();
+            String cn = currentScope.getName();
+           if(cn == "model"){
+               ss.addModels(ctx.Identifier().getText(), (InstanceSymbol)ctx.symbol);
+           } else if (cn == "controllers") {
+               ss.addControllers(ctx.Identifier().getText(), (InstanceSymbol)ctx.symbol);
+           } else {
+               LOGGER.severe("Not applicable here exitInstance with name: " + cn);
+           }
+        } else {
+            LOGGER.severe("Should be only in space!");
+        }
+
+    }
     @Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+
         popScope();
     }
 
@@ -248,14 +283,6 @@ public class DefPhase extends RavelBaseListener {
     }
 
 
-    @Override public void enterInstance(RavelParser.InstanceContext ctx) {
-        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText());
-        is.setScope(currentScope);
-        is.setDefNode(ctx);
-        currentScope.define(is);
-    }
-
-    @Override public void exitInstance(RavelParser.InstanceContext ctx) { }
 
 
 

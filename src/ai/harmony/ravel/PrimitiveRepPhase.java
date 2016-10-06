@@ -2,7 +2,7 @@ package ai.harmony.ravel;
 
 import ai.harmony.antlr4.RavelBaseListener;
 import ai.harmony.antlr4.RavelParser;
-import ai.harmony.antlr4.RavelParser.VarAssigmentContext;
+import ai.harmony.antlr4.RavelParser.VarAssignmentContext;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
@@ -188,10 +188,10 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         }
         for(ReferenceSymbol r: referenceSymbols){
             //TODO: needs a clever way to create ref objects pointing to the right object
-            String ref = r.getReference();
+            String ref = r.getValue();
             String[] ref_array = ref.split("\\.");
             if(ctrl.hasParam(ref_array[0])) {
-                ctrl.addRef(r.getName(), r.getReference());
+                ctrl.addRef(r.getName(), r.getValue());
             } else {
                 throw new IllegalArgumentException("Line: " + r.getDefNode().start.getLine()
                         +" Could not find parameter for var " + r.getName() + " with reference "
@@ -204,7 +204,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             ctrl.addEvent(e.getName(), e);
         }
 
-
+        rApp.addController(name, ctrl);
     }
 
     private Event makeEvent(EventSymbol e) {
@@ -236,10 +236,11 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         LOGGER.info(event.build().toString());
         return event.build();
     }
+
     private Variable makeVariable(VariableSymbol vs) {
         Variable.Builder var = new Variable.Builder();
         var.name(vs.getName());
-        RavelParser.PropValueContext propValueContext = ((VarAssigmentContext) vs.getDefNode()).propValue();
+        RavelParser.PropValueContext propValueContext = ((VarAssignmentContext) vs.getDefNode()).propValue();
 
 //        prop
 //                : Identifier
@@ -278,7 +279,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             } catch (NullPointerException e ) {}
             //we could build and return here, but we need to be sure that parsing has identified
             //the right value.
-            //merge prop and varAssigments
+            //merge prop and varAssignments
         } else if (propValueContext.getChild(0) instanceof RavelParser.PropArrayContext){
             //either one has to be not null
             RavelParser.PropArrayContext propArrayContext = propValueContext.propArray();
@@ -289,13 +290,18 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             return var.value(valList).build();
         } else {
             throw new RuntimeException("Illegal child when creating variable, expecting property or property array, got: " +
-                    ((VarAssigmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
+                    ((VarAssignmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
         }
         return null;
     }
+
+    public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
+        String name = ctx.Identifier().getText();
+        SpaceSymbol ssb = (SpaceSymbol)ctx.scope;
+        ssb.getAllNestedScopedSymbols();
+    }
+
     /**
      * TODO: build views
      */
-
-
 }

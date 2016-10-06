@@ -110,7 +110,7 @@ public abstract class BaseScope implements Scope {
 
     public void define(Symbol sym) throws IllegalArgumentException {
         if ( symbols.containsKey(sym.getName()) ) {
-            throw new IllegalArgumentException("duplicate symbol "+sym.getName());
+            throw new IllegalArgumentException("duplicate symbol >>>"+sym.getName() + "<<<");
         }
         sym.setScope(this);
         sym.setInsertionOrderNumber(symbols.size()); // set to insertion position from 0

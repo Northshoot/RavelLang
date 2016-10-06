@@ -1,14 +1,17 @@
 package ai.harmony.ravel.compiler.symbol;
 
+import javafx.util.Pair;
+
 /**
  * Created by lauril on 8/26/16.
  */
 public class ReferenceSymbol extends BaseSymbol implements TypedSymbol, MemberSymbol {
-    private String mReference;
+
+    private String mValue;
     private int slot = -1;
-    public ReferenceSymbol(String name, String ref) {
+    public ReferenceSymbol(String name, String val) {
         super(name);
-        this.mReference = ref;
+        this.mValue = val;
     }
 
     @Override
@@ -16,8 +19,9 @@ public class ReferenceSymbol extends BaseSymbol implements TypedSymbol, MemberSy
         super.setType(type);
     }
 
-    public String getReference(){
-        return mReference;
+
+    public String getValue(){
+        return mValue;
     }
     @Override
     public int getSlotNumber() {

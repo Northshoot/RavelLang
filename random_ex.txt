@@ -6,9 +6,9 @@ streaming model Random(size):
 
     schema:
         time=TimeStampField(auto_add=True)
-        value = IntegerField()
+        value = IntegerField(default=1000)
 
-replicated model Frequency(size):
+replicated model UpdateFrequency(size):
     properties:
         durable = False
         reliable = False
@@ -20,7 +20,6 @@ replicated model Frequency(size):
 controller RandomControllerEmbedded(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
-    mError = tier.models.error
     random_source = tier.sources.random
     random_timer = tier.platform.timer
     boot_event = tier.platform.boot
@@ -62,8 +61,7 @@ space EmbeddedSpace:
 
     models:
         random=Random(records=10)
-        frequency=Frequency(records=1)
-        boor_error = BootError(records=10)
+        frequency=UpdateFrequency(records=1)
 
     controllers:
         rndcnt = RandomControllerEmbedded(tier=self)

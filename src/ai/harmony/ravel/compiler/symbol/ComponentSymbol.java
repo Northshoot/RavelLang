@@ -34,11 +34,11 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
 
     @Override
     public void define(Symbol sym) throws IllegalArgumentException {
-        if ( !(sym instanceof MemberSymbol) ) {
-            throw new IllegalArgumentException(
-                    "sym is "+sym.getClass().getSimpleName()+" not MemberSymbol"
-            );
-        }
+//        if ( !(sym instanceof MemberSymbol) ) {
+//            throw new IllegalArgumentException(
+//                    "sym is "+sym.getClass().getSimpleName()+" not MemberSymbol"
+//            );
+//        }
         super.define(sym);
         setSlotNumber(sym);
     }

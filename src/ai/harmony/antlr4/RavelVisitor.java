@@ -2,6 +2,7 @@
 package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
+import ai.harmony.ravel.compiler.symbol.*;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -52,11 +53,11 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPlatformScope(RavelParser.PlatformScopeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#space_assigments}.
+	 * Visit a parse tree produced by {@link RavelParser#space_assignments}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSpace_assigments(RavelParser.Space_assigmentsContext ctx);
+	T visitSpace_assignments(RavelParser.Space_assignmentsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#space_assigment}.
 	 * @param ctx the parse tree
@@ -77,11 +78,31 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstantiations(RavelParser.InstantiationsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#instance}.
+	 * Visit a parse tree produced by the {@code Instance}
+	 * labeled alternative in {@link RavelParser#instance_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitInstance(RavelParser.InstanceContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ParameterAssignments}
+	 * labeled alternative in {@link RavelParser#param_assig_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterAssignments(RavelParser.ParameterAssignmentsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#param_assig}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParam_assig(RavelParser.Param_assigContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#param_val}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParam_val(RavelParser.Param_valContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#instance_name}.
 	 * @param ctx the parse tree
@@ -102,12 +123,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSinkLinks(RavelParser.SinkLinksContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#references}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReferences(RavelParser.ReferencesContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code SourceLinks}
 	 * labeled alternative in {@link RavelParser#source_scope}.
@@ -154,12 +169,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProperties(RavelParser.PropertiesContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code VarAssigment}
+	 * Visit a parse tree produced by the {@code VarAssignment}
 	 * labeled alternative in {@link RavelParser#property}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarAssigment(RavelParser.VarAssigmentContext ctx);
+	T visitVarAssignment(RavelParser.VarAssignmentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#propValue}.
 	 * @param ctx the parse tree
@@ -443,12 +458,19 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimary(RavelParser.PrimaryContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ReferenceAssigment}
+	 * Visit a parse tree produced by the {@code ReferenceAssignmentsList}
+	 * labeled alternative in {@link RavelParser#ref_assig_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReferenceAssignmentsList(RavelParser.ReferenceAssignmentsListContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ReferenceAssignment}
 	 * labeled alternative in {@link RavelParser#ref_assig}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx);
+	T visitReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#key}.
 	 * @param ctx the parse tree

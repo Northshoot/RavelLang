@@ -2,6 +2,7 @@ grammar Ravel;
 
 @header{
 import ai.harmony.ravel.compiler.scope.*;
+import ai.harmony.ravel.compiler.symbol.*;
 }
 tokens { INDENT, DEDENT }
 
@@ -150,10 +151,10 @@ space_block
     ;
 
 platform_scope returns [Scope scope]
-    : 'platform:' space_assigments #PlatformScope
+    : 'platform:' space_assignments #PlatformScope
     ;
 
-space_assigments
+space_assignments returns [Symbol symbol]
     : NEWLINE INDENT space_assigment+ DEDENT
     ;
 
@@ -166,12 +167,22 @@ models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstanciation
     ;
 instantiations
-    : NEWLINE INDENT instance+ DEDENT
+    : NEWLINE INDENT instance_def+ DEDENT
     ;
 
-instance
-    : Identifier '=' instance_name '(' elementValuePairs? ')' NEWLINE?
+instance_def returns [Symbol symbol]
+    : Identifier '=' instance_name '(' param_assig_list? ')' NEWLINE? #Instance
     ;
+
+param_assig_list
+    : param_assig (',' param_assig)? #ParameterAssignments
+    ;
+
+param_assig
+    : Identifier '=' param_val
+    ;
+
+param_val : literal;
 instance_name
     : Identifier
     ;
@@ -179,14 +190,11 @@ controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstanciation
     ;
 sink_scope returns [Scope scope]
-    : 'sinks:' space_assigments #SinkLinks
+    : 'sinks:' space_assignments #SinkLinks
     ;
 
-references
-    : NEWLINE INDENT space_assigment+ DEDENT
-    ;
 source_scope returns [Scope scope]
-    : 'sources:' space_assigments #SourceLinks
+    : 'sources:' space_assignments #SourceLinks
     ;
 /**
  *
@@ -220,7 +228,7 @@ properties
     ;
 
 property
-    : Identifier '=' propValue NEWLINE #VarAssigment
+    : Identifier '=' propValue NEWLINE #VarAssignment
     ;
 
 propValue
@@ -286,8 +294,8 @@ controller_scope
 controller_body
     : eventdef // can only be events
     | ref_assig // reference
-    | property // simple var assigment
-    | variableDeclarator // or variable assigment
+    | property // simple var assignment
+    | variableDeclarator // or variable assignment
     | funct_expr
     | NEWLINE
     ;
@@ -469,8 +477,12 @@ primary
     | qualified_name
     ;
 //reference is a dottend name accesesing scopes
+ref_assig_list
+    :ref_assig (',' ref_assig)? #ReferenceAssignmentsList
+    ;
+
 ref_assig
-    : key '=' value  #ReferenceAssigment
+    : key '=' value  #ReferenceAssignment
     ;
 key: qualified_name;
 value: qualified_name ;

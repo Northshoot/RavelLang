@@ -2,6 +2,7 @@
 package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
+import ai.harmony.ravel.compiler.symbol.*;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

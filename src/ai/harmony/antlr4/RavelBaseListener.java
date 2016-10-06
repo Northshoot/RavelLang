@@ -2,6 +2,7 @@
 package ai.harmony.antlr4;
 
 import ai.harmony.ravel.compiler.scope.*;
+import ai.harmony.ravel.compiler.symbol.*;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -91,13 +92,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSpace_assigments(RavelParser.Space_assigmentsContext ctx) { }
+	@Override public void enterSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSpace_assigments(RavelParser.Space_assigmentsContext ctx) { }
+	@Override public void exitSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -151,6 +152,42 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParam_assig(RavelParser.Param_assigContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParam_assig(RavelParser.Param_assigContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParam_val(RavelParser.Param_valContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParam_val(RavelParser.Param_valContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInstance_name(RavelParser.Instance_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -182,18 +219,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterReferences(RavelParser.ReferencesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitReferences(RavelParser.ReferencesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -283,13 +308,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterVarAssigment(RavelParser.VarAssigmentContext ctx) { }
+	@Override public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitVarAssigment(RavelParser.VarAssigmentContext ctx) { }
+	@Override public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -847,13 +872,25 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) { }
+	@Override public void enterReferenceAssignmentsList(RavelParser.ReferenceAssignmentsListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReferenceAssigment(RavelParser.ReferenceAssigmentContext ctx) { }
+	@Override public void exitReferenceAssignmentsList(RavelParser.ReferenceAssignmentsListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
