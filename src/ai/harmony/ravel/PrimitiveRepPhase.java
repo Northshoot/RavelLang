@@ -4,18 +4,17 @@ import ai.harmony.antlr4.RavelBaseListener;
 import ai.harmony.antlr4.RavelParser;
 import ai.harmony.antlr4.RavelParser.VarAssignmentContext;
 import ai.harmony.ravel.compiler.scope.GlobalScope;
+import ai.harmony.ravel.compiler.scope.LocalScope;
 import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
-import ai.harmony.ravel.primitives.Controller;
-import ai.harmony.ravel.primitives.Event;
+import ai.harmony.ravel.primitives.*;
 import ai.harmony.ravel.primitives.Fields.*;
 import ai.harmony.ravel.primitives.Fields.Field.Builder;
-import ai.harmony.ravel.primitives.Model;
-import ai.harmony.ravel.primitives.Variable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -298,7 +297,8 @@ public class PrimitiveRepPhase extends RavelBaseListener {
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
         String name = ctx.Identifier().getText();
         SpaceSymbol ssb = (SpaceSymbol)ctx.scope;
-        ssb.getAllNestedScopedSymbols();
+        Space space  = new Space()
+        Map<String, ReferenceSymbol> prop = ssb.getPlatform();
     }
 
     /**

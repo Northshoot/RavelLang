@@ -47,13 +47,6 @@ public class SpaceSymbol extends ComponentSymbol {
         this.ctrInitMap.put(name, ls);
     }
 
-    public Map<String, ReferenceSymbol> getProperties() {
-        return propInitMap;
-    }
-
-    public void addProperties(String name, ReferenceSymbol ls) {
-        this.propInitMap.put(name, ls);
-    }
 
     public Map<String, ReferenceSymbol> getPlatform() {
         return platInitMap;

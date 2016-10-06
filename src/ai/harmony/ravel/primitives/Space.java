@@ -20,7 +20,7 @@ public class Space extends Primitive{
         super(name);
     }
 
-    /** add componets to the particular space */
+    /** add components to the particular space */
     public void add(Model m) { this.mModels.put(m.getName(), m); }
     public void add(Controller c) { this.mControllers.put(c.getName(), c); }
     public void add(View v) { this.mViews.put(v.getName(), v); }
