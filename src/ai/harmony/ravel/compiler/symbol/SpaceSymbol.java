@@ -14,10 +14,10 @@ public class SpaceSymbol extends ComponentSymbol {
 
     private Map<String, InstanceSymbol> modelInitMap;
     private Map<String, InstanceSymbol> ctrInitMap;
-    private Map<String, InstanceSymbol> propInitMap;
-    private Map<String, InstanceSymbol> platInitMap;
-    private Map<String, InstanceSymbol> srcInitMap;
-    private Map<String, InstanceSymbol> sinkInitMap;
+    private Map<String, ReferenceSymbol> propInitMap;
+    private Map<String, ReferenceSymbol> platInitMap;
+    private Map<String, ReferenceSymbol> srcInitMap;
+    private Map<String, ReferenceSymbol> sinkInitMap;
 
     public SpaceSymbol(String name) {
         super(name);
@@ -47,35 +47,35 @@ public class SpaceSymbol extends ComponentSymbol {
         this.ctrInitMap.put(name, ls);
     }
 
-    public Map<String, InstanceSymbol> getProperties() {
+    public Map<String, ReferenceSymbol> getProperties() {
         return propInitMap;
     }
 
-    public void addProperties(String name, InstanceSymbol ls) {
+    public void addProperties(String name, ReferenceSymbol ls) {
         this.propInitMap.put(name, ls);
     }
 
-    public Map<String, InstanceSymbol> getPlatform() {
+    public Map<String, ReferenceSymbol> getPlatform() {
         return platInitMap;
     }
 
-    public void addPlatform(String name, InstanceSymbol ls) {
+    public void addPlatform(String name, ReferenceSymbol ls) {
         this.platInitMap.put(name, ls);
     }
 
-    public Map<String, InstanceSymbol> getSource() {
+    public Map<String, ReferenceSymbol> getSource() {
         return srcInitMap;
     }
 
-    public void addSource(String name, InstanceSymbol ls) {
+    public void addSource(String name, ReferenceSymbol ls) {
         this.srcInitMap.put(name, ls);
     }
 
-    public Map<String, InstanceSymbol> getSink() {
+    public Map<String, ReferenceSymbol> getSink() {
         return sinkInitMap;
     }
 
-    public void addSink(String name, InstanceSymbol ls) {
+    public void addSink(String name, ReferenceSymbol ls) {
         this.sinkInitMap.put(name, ls);
     }
 

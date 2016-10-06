@@ -9,6 +9,7 @@ import ai.harmony.ravel.compiler.scope.Scope;
 import ai.harmony.ravel.compiler.symbol.*;
 import ai.harmony.ravel.compiler.symbol.InstanceSymbol;
 import ai.harmony.ravel.primitives.Model;
+import ai.harmony.ravel.primitives.Space;
 import javafx.util.Pair;
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -67,6 +68,11 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
+        if(currentScope instanceof SpaceSymbol) {
+            for(Symbol re: ctx.scope.getSymbols()) {
+                ((SpaceSymbol) currentScope.getEnclosingScope()).addPlatform(re.getName(),(ReferenceSymbol) re);
+            }
+        }
         popScope();
     }
 
@@ -202,7 +208,11 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) {
-        System.out.println("::::::::::::: " + ctx.scope.getSymbolNames());
+
+        for(Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addPlatform(re.getName(),(ReferenceSymbol) re);
+        }
+
         popScope();
     }
 
@@ -268,6 +278,10 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
     @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) {
+
+        for(Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addSink(re.getName(),(ReferenceSymbol) re);
+        }
         popScope();
     }
 
@@ -279,13 +293,12 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) {
+
+        for(Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addSource(re.getName(),(ReferenceSymbol) re);
+        }
         popScope();
     }
-
-
-
-
-
     @Override public void exitSpaceScope(RavelParser.SpaceScopeContext ctx) {
         popScope();
     }
