@@ -19,4 +19,6 @@ public class ModelSymbol extends ComponentSymbol {
         // this is the type of the component
         super.setTypeIndex(RavelParser.MODEL);
     }
+
+
 }

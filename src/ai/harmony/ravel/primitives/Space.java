@@ -13,7 +13,7 @@ public class Space extends Primitive{
     private Map<String, View> mViews = new LinkedHashMap<>();
     private Map<String, Sink> mSink = new LinkedHashMap<>();
     private Map<String, Source> mSource = new LinkedHashMap<>();
-
+    private Platform mPlatform;
 
 
     public Space(String name){
@@ -37,4 +37,7 @@ public class Space extends Primitive{
     }
 
 
+    public void add(Platform build) {
+        mPlatform = build;
+    }
 }

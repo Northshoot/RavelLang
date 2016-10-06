@@ -8,8 +8,12 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Model extends Primitive {
+public class Model extends ParametrizedComponent {
+
     private static Logger LOGGER = Logger.getLogger(Model.class.getName());
+
+
+
     public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
 
     Model.Type mModelType;

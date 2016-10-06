@@ -4,13 +4,12 @@ import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.nrf52.obj.MainApp;
-import ai.harmony.ravel.error.NotImplementedException;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_PRJ_PREFIX;
-import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_SDK_PREFIX;
+import static ai.harmony.api.platforms.nrf52Platform.MAKE_PRJ_PREFIX;
+import static ai.harmony.api.platforms.nrf52Platform.MAKE_SDK_PREFIX;
 
 /**
  * Created by lauril on 9/21/16.

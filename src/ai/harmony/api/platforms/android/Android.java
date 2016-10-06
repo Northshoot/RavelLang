@@ -7,4 +7,8 @@ import ai.harmony.api.platforms.SystemApi;
  */
 public class Android implements SystemApi {
 
+    @Override
+    public void setAPILevel(String name) {
+
+    }
 }

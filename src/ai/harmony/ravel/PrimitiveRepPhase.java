@@ -10,6 +10,7 @@ import ai.harmony.ravel.compiler.symbol.*;
 import ai.harmony.ravel.primitives.*;
 import ai.harmony.ravel.primitives.Fields.*;
 import ai.harmony.ravel.primitives.Fields.Field.Builder;
+import sun.jvm.hotspot.oops.Instance;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,6 +53,10 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         Model m = new Model(name, Model.getType(type));
         LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
+        List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
+        for(RavelParser.ParamContext t: component_parametersContext){
+            m.addParam(t.getText());
+        }
         Scope propScope = ctx.scope.getNestedScope("properties");
         LOGGER.info("Adding models properties: [");
         String propertyDebug = "";
@@ -194,7 +199,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             } else {
                 throw new IllegalArgumentException("Line: " + r.getDefNode().start.getLine()
                         +" Could not find parameter for var " + r.getName() + " with reference "
-                        + ref + "\nAlternatives: " + ctrl.getParams());
+                        + ref + "\nAlternatives: " + ctrl.getParamsNames());
             }
         }
         //create events. pew!
@@ -294,11 +299,67 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         return null;
     }
 
+    @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
+        LOGGER.info("******* Entering Space scope *******");
         String name = ctx.Identifier().getText();
         SpaceSymbol ssb = (SpaceSymbol)ctx.scope;
-        Space space  = new Space()
+        Space space  = new Space(ssb.getName());
+        //TODO: makes this static part of the process rather than hardcoded strings
+
+        /** build platform */
         Map<String, ReferenceSymbol> prop = ssb.getPlatform();
+        Platform.Builder p = new Platform.Builder();
+        p.name(prop.get("language").getName());
+        p.template(prop.get("templates").getValue());
+        p.system(prop.get("system").getValue());
+        /** build sinks */
+        Map<String, ReferenceSymbol> sinks = ssb.getSink();
+        for(ReferenceSymbol re: sinks.values()){
+            //TODO: is reference starting good?
+            String identifier = re.getName();
+            String reference = re.getValue();
+            //must start with platform.system.
+            if(reference.startsWith("platform.system.")){
+                p.sink(identifier, reference);
+            }
+        }
+        /** build sources */
+        Map<String, ReferenceSymbol> source = ssb.getSource();
+
+        for(ReferenceSymbol re: source.values()){
+            //TODO: is reference starting good?
+            String identifier = re.getName();
+            String reference = re.getValue();
+            //must start with platform.system.
+            if(reference.startsWith("platform.system.")){
+                p.source(identifier, reference);
+            }
+        }
+        space.add(p.build());
+
+        /** build models */
+        Map<String, InstanceSymbol> modelInst = ssb.getModels();
+
+        //add model and set all the parameters to the parameter map
+        for(String mName: modelInst.keySet()){
+            //get the instance symbol
+            InstanceSymbol is = modelInst.get(mName);
+            //get the model
+            Model m = rApp.getModel(is.getInstanceName());
+            //set parameters
+            Map<String, String> ismap = is.getParameterMap();
+            for(Map.Entry<String, String> entry : ismap.entrySet()) {
+                m.setParam(entry.getKey(), entry.getValue());
+            }
+        }
+
+        /** build controllers */
+        Map<String, InstanceSymbol> ctrInst = ssb.getControllers();
+
+
+
+
     }
 
     /**

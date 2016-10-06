@@ -258,7 +258,9 @@ public class DefPhase extends RavelBaseListener {
 
     }
     @Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
-
+        for(Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addModels(re.getName(),(InstanceSymbol) re);
+        }
         popScope();
     }
 

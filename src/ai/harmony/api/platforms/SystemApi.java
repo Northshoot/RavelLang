@@ -5,5 +5,5 @@ package ai.harmony.api.platforms;
  */
 public interface SystemApi {
 
-
+    void setAPILevel(String name);
 }

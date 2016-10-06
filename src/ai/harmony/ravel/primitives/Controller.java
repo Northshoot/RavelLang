@@ -5,12 +5,13 @@ import java.util.*;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Controller extends Primitive{
+public class Controller extends ParametrizedComponent{
+
 
     private Map<String, Variable> mDeclarations = new LinkedHashMap<>();
     private Map<String, String> mReference = new LinkedHashMap<>();
     private Map<String, Event> mEvents = new LinkedHashMap<>();
-    private List<String> mParams = new ArrayList<>();
+
 
     public Controller(String name){
         super(name);
@@ -24,17 +25,6 @@ public class Controller extends Primitive{
         this.mEvents.put(name, event);
     }
 
-    public void addParam(String p){
-        mParams.add(p);
-    }
 
-    public boolean hasParam(String p){
-        for(String str: mParams) {
-            if(str.trim().contains(p))
-                return true;
-        }
-        return false;
-    }
 
-    public List<String> getParams() { return  this.mParams; }
 }

@@ -8,12 +8,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import static ai.harmony.api.platforms.nrf52.nrf52Platform.BASE_PALTFORM_TMPL_PATH;
-import static ai.harmony.api.platforms.nrf52.nrf52Platform.MAKE_SDK_PREFIX;
+import static ai.harmony.api.platforms.nrf52Platform.BASE_PALTFORM_TMPL_PATH;
 
 /**
  * Created by lauril on 10/4/16.

@@ -1,4 +1,4 @@
-package ai.harmony.api.platforms.nrf52;
+package ai.harmony.api.platforms;
 
 import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.platforms.RavelAPIObject;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by lauril on 9/21/16.
  */
-public class nrf52Platform {
+public class nrf52Platform implements SystemApi{
     public final static String BASE_PALTFORM_TMPL_PATH = "src/ai/harmony/api/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
     public final static String MAKE_PRJ_PREFIX = "$(PROJ_DIR)";
@@ -36,14 +36,23 @@ public class nrf52Platform {
 
 
     public nrf52Platform (Controller ctr, String path){
-        mBuildPath = path;
-        mBuildPathApi = mBuildPath+"api/";
-        this.ctr = ctr;
-        mFiles = new ArrayList<>();
-        mMainApp = new MainApp(mBuildPath);
-
+        this();
+        this.setPath(path);
+        this.setController( ctr );
     }
 
+    public nrf52Platform() {
+        mFiles = new ArrayList<>();
+    }
+
+    public void setController(Controller ctrl){
+        this.ctr = ctrl;
+    }
+    public void setPath(String path) {
+        mBuildPath = path;
+        mBuildPathApi = mBuildPath+"api/";
+        mMainApp = new MainApp(mBuildPath);
+    }
     public void addBoot(String name){
         if(mBoot == null) {
             this.mBoot = new Boot(mBuildPathApi);
@@ -113,5 +122,8 @@ public class nrf52Platform {
     }
 
 
+    @Override
+    public void setAPILevel(String name) {
 
+    }
 }

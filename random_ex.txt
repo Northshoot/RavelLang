@@ -57,14 +57,15 @@ space EmbeddedSpace:
         language = clang
         templates=nrf52
         system = nrf52Platform.v12
-        boot = system.boot
+
 
     models:
-        random=Random(records=10)
-        frequency=UpdateFrequency(records=1)
+        random=Random(size=10)
+        frequency=UpdateFrequency(size=1)
 
     controllers:
         rndcnt = RandomControllerEmbedded(tier=self)
 
     sources:
         random = platform.source.random
+        boot = platform.system.boot

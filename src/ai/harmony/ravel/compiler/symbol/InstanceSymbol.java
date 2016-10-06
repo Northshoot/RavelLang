@@ -24,8 +24,8 @@ public class InstanceSymbol extends BaseSymbol implements TypedSymbol {
     public InstanceSymbol(String name, RavelParser.InstanceContext ictx) {
         super(name);
         parameterMap = new LinkedHashMap<>();
-        identifier = ictx.Identifier().toString();
-        instance_name = ictx.instance_name().toString();
+        identifier = ictx.Identifier().getText();
+        instance_name = ictx.instance_name().getText();
         context = ictx;
 
        // parameterMap = refList;

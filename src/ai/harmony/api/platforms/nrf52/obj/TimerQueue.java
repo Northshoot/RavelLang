@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ai.harmony.api.lang.c.CLang.BASE_C_LANG_TMPL_PATH;
-import static ai.harmony.api.platforms.nrf52.nrf52Platform.BASE_PALTFORM_TMPL_PATH;
+import static ai.harmony.api.platforms.nrf52Platform.BASE_PALTFORM_TMPL_PATH;
 
 /**
  * Created by lauril on 9/21/16.

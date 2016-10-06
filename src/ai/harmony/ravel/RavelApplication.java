@@ -29,6 +29,7 @@ public class RavelApplication  {
         mModels.put(name, m);
     }
     public Model getModel() { return (Model) getFirst(mModels); }
+    public Model getModel(String name) { return mModels.get(name); }
     public List<Model> getModels(){ return new ArrayList<>(mModels.values());}
 
     public void addController(String name, Controller c){
