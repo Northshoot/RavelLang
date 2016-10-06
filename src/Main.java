@@ -1,23 +1,27 @@
-
-import ai.harmony.antlr4.*;
-import ai.harmony.ravel.compiler.DefPhase;
-import ai.harmony.ravel.RavelApplication;
+import ai.harmony.antlr4.RavelLexer;
+import ai.harmony.antlr4.RavelParser;
+import ai.harmony.api.builder.PlatformBuilder;
 import ai.harmony.ravel.PrimitiveRepPhase;
+import ai.harmony.ravel.RavelApplication;
+import ai.harmony.ravel.compiler.DefPhase;
 import ai.harmony.ravel.compiler.RefPhase;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Logger;
 
 
 public class Main {
-
+    private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws Exception {
         String inputFile = null;
@@ -25,17 +29,18 @@ public class Main {
         System.out.println("Starting Build");
         Date t = Calendar.getInstance().getTime();
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
-        if ( args.length>0 ) inputFile = args[0];
+        if (args.length > 0) inputFile = args[0];
         InputStream is = System.in;
-        if ( inputFile!=null ) {
+        if (inputFile != null) {
             is = new FileInputStream(inputFile);
             mBuildPath = Paths.get(args[0]).toAbsolutePath().getParent().toString();
+            mBuildPath+="rout/";
             System.out.println("Build path " + mBuildPath);
         } else {
             System.out.println("File is null");
         }
-        mBuildPath+="/src/";
-        
+        mBuildPath += "/src/";
+
         ANTLRInputStream input = new ANTLRInputStream(is);
 
         RavelLexer lexer = new RavelLexer(input);
@@ -51,7 +56,7 @@ public class Main {
          * First create Defined symbols
          */
         DefPhase def = new DefPhase();
-        walker.walk(def,tree);
+        walker.walk(def, tree);
 
         /**
          * Second create reference symbols and resolve definitions
@@ -82,40 +87,25 @@ public class Main {
         RavelApplication rApp = new RavelApplication();
         PrimitiveRepPhase inter = new PrimitiveRepPhase(def.globalScope, rApp);
         walker.walk(inter, tree);
-         /**
+        LOGGER.info("Internal representation is created!");
+        /**
          *Generate code
          */
-        if (rApp != null){
-            System.out.println("**************** RAVEL APP ****************");
-            //System.out.println(rApp);
-        }
-//        STGroup group = new STGroupFile("tmpl/model_c.stg");
-////        ST model = group.getInstanceOf("modelDecl");
-////        ST create_record = group.getInstanceOf("create_record");
-////        ST ble_record_instans = group.getInstanceOf("ble_record_init");
-//
-//        Space s = new Space("embedded");
-//        for(Model m: rApp.getModels()) {
-//            ST model = group.getInstanceOf("modelDecl");
-//            ST create_record = group.getInstanceOf("create_record");
-//            ST ble_record_instans = group.getInstanceOf("ble_record_init");
-//            model.add("model", m);
-//            create_record.add("model", m);
-//            ble_record_instans.add("model", m);
-//            System.out.println(m);
-//            System.out.println("**************** templates ****************");
-//            System.out.println(model.render());
-//            System.out.println(create_record.render());
-//            System.out.println(ble_record_instans.render());
+        //TODO: need settings file
+        PlatformBuilder builder = PlatformBuilder.getInstance();
+        builder.setApp(rApp);
+        builder.setPath(mBuildPath);
+        builder.buildAll();
+
 //        }
         Date now = Calendar.getInstance().getTime();
         long diff = now.getTime() - t.getTime();
-        long diffMilliSeconds = diff  % 60;
+        long diffMilliSeconds = diff % 60;
         long diffSeconds = diff / 1000 % 60;
         long diffMinutes = diff / (60 * 1000) % 60;
         System.out.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
-                        " in " + diffMinutes + ":" + diffSeconds + ":" +diffMilliSeconds);
+                " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
 
-        }
+    }
 
 }

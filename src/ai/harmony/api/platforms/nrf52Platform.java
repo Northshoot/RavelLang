@@ -4,18 +4,24 @@ import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.nrf52.obj.*;
 import ai.harmony.ravel.primitives.Controller;
+import ai.harmony.ravel.primitives.Source;
+import ai.harmony.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ai.harmony.api.Settings.BASE_TMPL_PATH;
 
 /**
  * Created by lauril on 9/21/16.
  */
-public class nrf52Platform implements SystemApi{
-    public final static String BASE_PALTFORM_TMPL_PATH = "src/ai/harmony/api/platforms/nrf52/tmpl";
+public class nrf52Platform extends ConcretePlatform{
+    public final static String BASE_PALTFORM_TMPL_PATH = BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
     public final static String MAKE_PRJ_PREFIX = "$(PROJ_DIR)";
 
@@ -32,25 +38,22 @@ public class nrf52Platform implements SystemApi{
     List<FileObject> mFiles;
     private String mBuildPath="";
     private String mBuildPathApi="";
-    private Controller ctr;
 
 
-    public nrf52Platform (Controller ctr, String path){
+    public nrf52Platform (String path){
         this();
         this.setPath(path);
-        this.setController( ctr );
     }
 
     public nrf52Platform() {
+        super();
         mFiles = new ArrayList<>();
     }
 
-    public void setController(Controller ctrl){
-        this.ctr = ctrl;
-    }
+
     public void setPath(String path) {
         mBuildPath = path;
-        mBuildPathApi = mBuildPath+"api/";
+        mBuildPathApi += "api/";
         mMainApp = new MainApp(mBuildPath);
     }
     public void addBoot(String name){
@@ -59,12 +62,17 @@ public class nrf52Platform implements SystemApi{
         }
         mFiles.addAll(mBoot.getFiles());
     }
+
     public void addTimer(String timer_name){
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi);
 
         }
         tQueue.addTimer(timer_name, true);
+    }
+
+    public void addRandom(String name) {
+
     }
 
     public static boolean providesAPI(String v){
@@ -78,6 +86,27 @@ public class nrf52Platform implements SystemApi{
 
     public Random getRandom() { return mRandom; }
 
+    public List<FileObject> build(Space s){
+        setPath(s.getBuildPath());
+        //TODO: add a check first that api provides methods
+        for(Source src: s.getSources()){
+            // get the method
+            String n = src.getSinkReference().replace("platform.system.", "");
+            String name = "add" + n.substring(0, 1).toUpperCase() + n.substring(1);
+            try {
+                Method addSourceMethod  = nrf52Platform.class.getMethod(name, String.class);
+                addSourceMethod.invoke(this, src.getSinkIdentifier());
+
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return getFiles();
+    }
 
     public List<FileObject> getFiles(){
         mFiles.addAll(mMainApp.getFiles());

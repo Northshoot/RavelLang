@@ -7,7 +7,22 @@ import org.stringtemplate.v4.*;
  */
 public class Source extends Primitive{
 
-    public Source(String name) {
+    private String identifier;
+    private String resolve;
+
+    public Source(String name, String res) {
         super(name);
+        identifier = name;
+        resolve = res;
     }
+
+
+
+        public void source(String name, String resolve){
+            this.identifier = name;
+            this.resolve = resolve;
+        }
+
+        public String getSinkIdentifier() {return this.identifier; }
+        public String getSinkReference() {return this.resolve; }
 }

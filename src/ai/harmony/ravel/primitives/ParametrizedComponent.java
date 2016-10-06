@@ -22,7 +22,6 @@ public class ParametrizedComponent extends Primitive{
     public void setParam(String key, String value){
         if(mParameterMap.containsKey(key)){
             mParameterMap.put(key, value);
-            LOGGER.info("Setting parameters for model: " + mName + " " + key + ":" + value);
         } else {
             LOGGER.severe("No such paramer in the mParameterMap");
             throw new NoSuchElementException("Parameter with the name: " + key +

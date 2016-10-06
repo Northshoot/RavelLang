@@ -301,7 +301,6 @@ public class PrimitiveRepPhase extends RavelBaseListener {
 
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
-        LOGGER.info("******* Entering Space scope *******");
         String name = ctx.Identifier().getText();
         SpaceSymbol ssb = (SpaceSymbol)ctx.scope;
         Space space  = new Space(ssb.getName());
@@ -311,6 +310,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         Map<String, ReferenceSymbol> prop = ssb.getPlatform();
         Platform.Builder p = new Platform.Builder();
         p.name(prop.get("language").getName());
+        p.language(prop.get("language").getValue());
         p.template(prop.get("templates").getValue());
         p.system(prop.get("system").getValue());
         /** build sinks */
@@ -321,7 +321,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             String reference = re.getValue();
             //must start with platform.system.
             if(reference.startsWith("platform.system.")){
-                p.sink(identifier, reference);
+                space.add(new Sink(identifier, reference));
             }
         }
         /** build sources */
@@ -333,14 +333,13 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             String reference = re.getValue();
             //must start with platform.system.
             if(reference.startsWith("platform.system.")){
-                p.source(identifier, reference);
+                space.add(new Source(identifier, reference));
             }
         }
         space.add(p.build());
 
         /** build models */
         Map<String, InstanceSymbol> modelInst = ssb.getModels();
-
         //add model and set all the parameters to the parameter map
         for(String mName: modelInst.keySet()){
             //get the instance symbol
@@ -352,14 +351,27 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             for(Map.Entry<String, String> entry : ismap.entrySet()) {
                 m.setParam(entry.getKey(), entry.getValue());
             }
+            space.add(m);
         }
 
         /** build controllers */
         Map<String, InstanceSymbol> ctrInst = ssb.getControllers();
 
+        //add model and set all the parameters to the parameter map
+        for(String mName: ctrInst.keySet()){
+            //get the instance symbol
+            InstanceSymbol is = ctrInst.get(mName);
+            //get the model
+            Controller m = rApp.getController(is.getInstanceName());
+            //set parameters
+            Map<String, String> ismap = is.getParameterMap();
+            for(Map.Entry<String, String> entry : ismap.entrySet()) {
+                m.setParam(entry.getKey(), entry.getValue());
+            }
+            space.add(m);
+        }
 
-
-
+        rApp.addSpace(name, space);
     }
 
     /**

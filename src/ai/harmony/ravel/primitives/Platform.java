@@ -1,9 +1,13 @@
 package ai.harmony.ravel.primitives;
 
+import ai.harmony.api.builder.FileObject;
+import ai.harmony.api.lang.ConcreteLanguage;
+import ai.harmony.api.platforms.ConcretePlatform;
 import ai.harmony.api.platforms.SystemApi;
 import ai.harmony.ravel.primitives.lang.IfStatement;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,28 +15,28 @@ import java.util.Map;
  */
 public class Platform {
 
-    private String path;
+
     protected String mName;
     protected String mSystem;
-    protected String mLanguage;
+    protected String mLang;
     protected String mTempalte;
-    protected Map<String, String> mSource;
-    protected Map<String, String> mSink;
-    private Object mPlatform;
+
+    private ConcretePlatform mPlatform;
+    private ConcreteLanguage mLanguage;
+    private String path;
 
     //we instantiate a real platform that will provide API
 
     protected Platform() {
-        mSource = new LinkedHashMap<>();
-        mSink = new LinkedHashMap<>();
     }
 
     protected void makePlatform(){
         //create a real platform object from the data
         try {
             String[] pAPI = mSystem.split("\\.");
-            mPlatform = Class.forName("ai.harmony.api.platforms." + pAPI[0]).newInstance();
-            ((SystemApi)mPlatform).setAPILevel(pAPI[1]);
+            mPlatform = (ConcretePlatform) Class.forName("ai.harmony.api.platforms." + pAPI[0]).newInstance();
+            mPlatform.setAPILevel(pAPI[1]);
+            mLanguage = (ConcreteLanguage) Class.forName("ai.harmony.api.lang." + mLang).newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -43,8 +47,20 @@ public class Platform {
             e.printStackTrace();
         }
         //TODO: resolve existence of the references to sinks and sources
-
     }
+
+    public List<FileObject> buildLanguage(Space s) {
+        return mLanguage.build(s);
+    }
+
+    public List<FileObject> buildPlatform(Space s) {
+        return mPlatform.build(s);
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public static class Builder {
         protected Platform varObj;
         protected Builder thisObj;
@@ -59,12 +75,10 @@ public class Platform {
             return varObj;
         }
         public Builder name(String name) {varObj.mName = name; return thisObj; }
-        public Builder language(String lang){varObj.mLanguage=lang; return thisObj; }
+        public Builder language(String lang){varObj.mLang=lang; return thisObj; }
         public Builder system(String sys){varObj.mSystem=sys; return thisObj; }
         public Builder template(String tempalte){varObj.mTempalte=tempalte; return thisObj; }
 
-        public Builder sink(String name, String resolve){varObj.mSource.put(name,resolve); return thisObj; }
-        public Builder source(String name, String resolve){varObj.mSink.put(name, resolve); return thisObj; }
 
 
 

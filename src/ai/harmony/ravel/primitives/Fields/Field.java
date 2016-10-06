@@ -37,7 +37,7 @@ public abstract class Field<T> implements Translator{
     protected boolean mHasOptions = false;
     protected String mDefaultValueString;
     protected T mDefaultValue;
-    protected String mDocumentation ="Auto Generated";
+    protected String mComment ="Auto Generated";
     protected Map<String, String> mFieldOptions = new HashMap<>();
 
 
@@ -80,6 +80,9 @@ public abstract class Field<T> implements Translator{
         return mFieldType;
     }
 
+    public String getComment(){
+        return mComment;
+    }
 
     public abstract T getDefaultValue();
 
@@ -162,12 +165,12 @@ public abstract class Field<T> implements Translator{
         return WordUtils.capitalizeFully(mName, new char[] { '_' }).replaceAll("_", "");
     }
 
-    public  String getCdocumentation(){
+    public  String getCComment(){
         return "// " + getDocumentation();
     }
 
     public String getJavaDocumentation(){
-        return getCdocumentation();
+        return getCComment();
     }
     public  String getPythondocumentation(){
         return "# " + getDocumentation();

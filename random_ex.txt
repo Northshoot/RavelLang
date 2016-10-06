@@ -21,8 +21,8 @@ controller RandomControllerEmbedded(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
     random_source = tier.sources.random
-    random_timer = tier.platform.timer
-    boot_event = tier.platform.boot
+    random_timer = tier.sources.timer
+    boot_event = tier.sources.boot
     running = False
 
     event boot_event.booted(context ctx):
@@ -54,7 +54,7 @@ controller RandomControllerEmbedded(tier):
 
 space EmbeddedSpace:
     platform:
-        language = clang
+        language = CLang
         templates=nrf52
         system = nrf52Platform.v12
 
@@ -69,3 +69,4 @@ space EmbeddedSpace:
     sources:
         random = platform.source.random
         boot = platform.system.boot
+        timer = platform.system.timer

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 public class Model extends ParametrizedComponent {
 
     private static Logger LOGGER = Logger.getLogger(Model.class.getName());
-
+    private String mComment = "Default comments";
 
 
     public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
@@ -38,6 +38,22 @@ public class Model extends ParametrizedComponent {
         return new ArrayList<>(mFields.values());
     }
 
+
+    public String getComment() {
+        return mComment;
+    }
+
+    public String getModelName(){ return mName+"Model";}
+
+    public String getModelName_c(){ return "m_"+mName.toLowerCase()+"_model";}
+
+    public String getModelNameCDefine(){ return mName.toUpperCase()+"_MODEL";}
+
+    public List<Field> getSchema(){
+        List<Field> f = new ArrayList<>();
+        f.addAll(mFields.values());
+        return f;
+    }
     public void addField(String name, Field mFields) {
         this.mFields.put(name, mFields);
     }
@@ -59,6 +75,7 @@ public class Model extends ParametrizedComponent {
         return total;
     }
     public Model(String name, Model.Type t){
+
         super(name);
         //TODO: implement real error handling
         if (t == Type.tINVALID ) {

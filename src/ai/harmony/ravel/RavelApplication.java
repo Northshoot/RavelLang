@@ -8,23 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Internal representation of the ravel application
+ *
+ * a container abstraction for the primites and components
  * Created by lauril on 8/18/16.
  */
 public class RavelApplication  {
-    Map<String, Model> mModels = new LinkedHashMap<>();
-    Map<String, Controller> mControllers = new LinkedHashMap<>();
-    Map<String, Space> mSpace = new LinkedHashMap<>();
-    Map<String, View> mViews = new LinkedHashMap<>();
-    Map<String, Source> mSource = new LinkedHashMap<>();
-    Map<String, Sink> mSink = new LinkedHashMap<>();
-    Map<String, Flow> mFlow = new LinkedHashMap<>();
-
-
 
     public RavelApplication() {
 
     }
-
+    Map<String, Model> mModels = new LinkedHashMap<>();
     public void addModel(String name, Model m){
         mModels.put(name, m);
     }
@@ -32,24 +26,47 @@ public class RavelApplication  {
     public Model getModel(String name) { return mModels.get(name); }
     public List<Model> getModels(){ return new ArrayList<>(mModels.values());}
 
-    public void addController(String name, Controller c){
-        mControllers.put(name, c);
+    Map<String, Controller> mControllers = new LinkedHashMap<>();
+    public void addController(String name, Controller m){
+        mControllers.put(name, m);
     }
+    public Controller getController(String name) { return mControllers.get(name); }
+    public List<Controller> getControllers(){ return new ArrayList<>(mControllers.values());}
+
+    Map<String, Space> mSpace = new LinkedHashMap<>();
     public void addSpace(String name, Space s){
         mSpace.put(name, s);
     }
+    public Space getSpace(String name) { return mSpace.get(name); }
+    public List<Space> getSpaces(){ return new ArrayList<>(mSpace.values());}
+
+    Map<String, View> mViews = new LinkedHashMap<>();
     public void addView(String name, View v){
         mViews.put(name, v);
     }
+    public View getView(String name) { return mViews.get(name); }
+    public List<View> getViews(){ return new ArrayList<>(mViews.values());}
+
+    Map<String, Source> mSource = new LinkedHashMap<>();
     public void addSource(String name, Source s){
         mSource.put(name, s);
     }
+    public Source getSource(String name) { return mSource.get(name); }
+    public List<Source> getSource(){ return new ArrayList<>(mSource.values());}
+
+    Map<String, Sink> mSink = new LinkedHashMap<>();
     public void addSink(String name, Sink s){
         mSink.put(name, s);
     }
+    public Sink getSink(String name) { return mSink.get(name); }
+    public List<Sink> getSinks(){ return new ArrayList<>(mSink.values());}
+
+    Map<String, Flow> mFlow = new LinkedHashMap<>();
     public void addFlow(String name, Flow f){
         mFlow.put(name, f);
     }
+    public Flow getFlow(String name) { return mFlow.get(name); }
+    public List<Flow> getFlows(){ return new ArrayList<>(mFlow.values());}
 
     private Object getFirst(Map m){
         Object firstKey = m.keySet().toArray()[0];
