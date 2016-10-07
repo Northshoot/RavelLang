@@ -43,8 +43,8 @@ models_obj_file(space)::=<<
 <base_includes()>
 #include "models.h"
 <model_ctr_includes(space.models)>
-//Model coman implementations
-<space.models:{model|<model_cmd_imp(m)> }; separator="\n\n">
+//Model common implementations
+<space.models:{model|<model_cmd_imp(model)> }; separator="\n\n">
 >>
 ////////////END models c object file
 /**
@@ -208,6 +208,6 @@ base_includes()::=<<
 >>
 model_ctr_includes(models)::=<<
 <! For  each model add controller for call backs!>
-<models:{model:#include "<model.model_controller.modelName_c>.h"};separator="\n">
+<models:{model:#include <model.modelController_name_c>.h};separator="\n">
 >>
 

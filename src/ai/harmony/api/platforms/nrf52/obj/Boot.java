@@ -13,7 +13,7 @@ public class Boot  extends RavelAPIObject implements RavelObjectInterface {
 
 
     public Boot(String mBuildPath) {
-
+        super();
     }
 
     @Override
@@ -23,6 +23,6 @@ public class Boot  extends RavelAPIObject implements RavelObjectInterface {
 
     @Override
     public List<FileObject> getFiles() {
-        return null;
+        return mFileList;
     }
 }

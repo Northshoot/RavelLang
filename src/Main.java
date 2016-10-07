@@ -87,6 +87,7 @@ public class Main {
         RavelApplication rApp = new RavelApplication();
         PrimitiveRepPhase inter = new PrimitiveRepPhase(def.globalScope, rApp);
         walker.walk(inter, tree);
+        rApp.link();
         LOGGER.info("Internal representation is created!");
         /**
          *Generate code

@@ -14,13 +14,38 @@ public class Model extends ParametrizedComponent {
     private String mComment = "Default comments";
 
 
+
+
     public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
 
     Model.Type mModelType;
+    Controller mController = null;
+
     private Map<String, Field> mFields = new LinkedHashMap<>();
     private Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
 
+    //TODO: implement builder pattern
+    public Model(String name, Model.Type t){
+        super(name);
+        //TODO: implement real error handling
+        if (t == Type.tINVALID ) {
+            LOGGER.severe("Invalid model type! ");
+        }
+        this.mModelType = t;
+    }
 
+    /**
+     * we only support one controller now
+     * TODO: add suport for multiple controllers
+     * @param ctr
+     */
+    public void addController(Controller ctr){
+        this.mController = ctr;
+    }
+
+    public Controller getModelController(){ return this.mController; }
+
+    public String getModelController_name_c() { return this.getModelController().getName_c();}
     public Model.Type getModelType() {
         return mModelType;
     }
@@ -43,6 +68,27 @@ public class Model extends ParametrizedComponent {
         return mComment;
     }
 
+    public boolean isStreaming(){
+        return getModelType() == Type.STREAMING;
+    }
+
+    public boolean isLocal(){
+        return getModelType() == Type.LOCAL;
+    }
+
+    public boolean isReplicated(){
+        return getModelType() == Type.REPLICATED;
+    }
+
+    /***
+     *
+     * TODO: this all need to move out to translator
+     *
+     *
+     *
+     *
+     *
+     */
     public String getModelName(){ return mName+"Model";}
 
     public String getModelName_c(){ return "m_"+mName.toLowerCase()+"_model";}
@@ -74,15 +120,7 @@ public class Model extends ParametrizedComponent {
         }
         return total;
     }
-    public Model(String name, Model.Type t){
 
-        super(name);
-        //TODO: implement real error handling
-        if (t == Type.tINVALID ) {
-            System.err.println("Invalid model type! ");
-        }
-        this.mModelType = t;
-    }
 
     @Override
     public String toString(){

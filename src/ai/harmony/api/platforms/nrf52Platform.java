@@ -96,7 +96,6 @@ public class nrf52Platform extends ConcretePlatform{
             try {
                 Method addSourceMethod  = nrf52Platform.class.getMethod(name, String.class);
                 addSourceMethod.invoke(this, src.getSinkIdentifier());
-
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {

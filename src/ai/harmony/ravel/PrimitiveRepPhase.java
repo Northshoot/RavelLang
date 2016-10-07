@@ -321,7 +321,11 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             String reference = re.getValue();
             //must start with platform.system.
             if(reference.startsWith("platform.system.")){
-                space.add(new Sink(identifier, reference));
+                space.add(identifier, new Sink(identifier, reference));
+            } else {
+                LOGGER.severe("Error processing sink with name: "
+                        + identifier + " refereing to unknown location "
+                        + reference);
             }
         }
         /** build sources */
@@ -333,7 +337,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             String reference = re.getValue();
             //must start with platform.system.
             if(reference.startsWith("platform.system.")){
-                space.add(new Source(identifier, reference));
+                space.add(identifier, new Source(identifier, reference));
             }
         }
         space.add(p.build());
@@ -351,7 +355,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             for(Map.Entry<String, String> entry : ismap.entrySet()) {
                 m.setParam(entry.getKey(), entry.getValue());
             }
-            space.add(m);
+            space.add(is.getIdentifier(), m);
         }
 
         /** build controllers */
@@ -363,12 +367,13 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             InstanceSymbol is = ctrInst.get(mName);
             //get the model
             Controller m = rApp.getController(is.getInstanceName());
+            m.setSpace(space);
             //set parameters
             Map<String, String> ismap = is.getParameterMap();
             for(Map.Entry<String, String> entry : ismap.entrySet()) {
                 m.setParam(entry.getKey(), entry.getValue());
             }
-            space.add(m);
+            space.add(is.getIdentifier(),m);
         }
 
         rApp.addSpace(name, space);

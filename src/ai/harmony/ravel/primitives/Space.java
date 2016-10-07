@@ -24,11 +24,11 @@ public class Space extends Primitive{
     }
 
     /** add components to the particular space */
-    public void add(Model m) { this.mModels.put(m.getName(), m); }
-    public void add(Controller c) { this.mControllers.put(c.getName(), c); }
-    public void add(View v) { this.mViews.put(v.getName(), v); }
-    public void add(Sink s) { this.mSink.put(s.getName(), s); }
-    public void add(Source v) { this.mSource.put(v.getName(), v); }
+    public void add(String ref, Model m) { this.mModels.put(ref, m); }
+    public void add(String ref, Controller c) { this.mControllers.put(ref, c); }
+    public void add(String ref, View v) { this.mViews.put(ref,  v); }
+    public void add(String ref, Sink s) { this.mSink.put(ref,  s); }
+    public void add(String ref, Source v) { this.mSource.put(ref,  v); }
 
 
     public String getTransmitFunction(){
@@ -39,6 +39,13 @@ public class Space extends Primitive{
         return "ravel_service";
     }
 
+    public Model resolveModel(String name){
+        if(name.startsWith("tier.models.")){
+            return mModels.get(name.replace("tier.models.",""));
+        } else {
+            throw new RuntimeException("Cannot resolve model: " + name);
+        }
+    }
     public List<Model> getModels(){
         List<Model> lst = new ArrayList<>();
         lst.addAll(mModels.values());

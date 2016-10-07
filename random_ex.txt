@@ -67,6 +67,6 @@ space EmbeddedSpace:
         rndcnt = RandomControllerEmbedded(tier=self)
 
     sources:
-        random = platform.source.random
+        random = platform.system.random
         boot = platform.system.boot
         timer = platform.system.timer
