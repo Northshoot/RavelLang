@@ -46,6 +46,8 @@ public class Model extends ParametrizedComponent {
     public Controller getModelController(){ return this.mController; }
 
     public String getModelController_name_c() { return this.getModelController().getName_c();}
+
+    public String getModelNameUpperCase(){return getModelName().toUpperCase();}
     public Model.Type getModelType() {
         return mModelType;
     }
@@ -104,12 +106,21 @@ public class Model extends ParametrizedComponent {
         this.mFields.put(name, mFields);
     }
 
+    @Override
+    public String getInitMethodCall(){
+        return mName.toLowerCase()+"_model__queue" + super.getInitMethodCall();
+    }
 
     public void setProperty(Variable v) {
-        LOGGER.info("Variable: " + v);
+        LOGGER.info("Property: " + v);
         this.mPropertiesMap.put(v.getName(), v);
     }
 
+    public String getSize(){
+        String size = mParameterMap.get("size");
+        Integer.parseInt(size);
+        return size;
+    }
 
     public int getsizeCbuffer(){
         int total=0;

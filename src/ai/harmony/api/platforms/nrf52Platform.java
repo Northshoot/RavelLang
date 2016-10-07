@@ -54,24 +54,26 @@ public class nrf52Platform extends ConcretePlatform{
     public void setPath(String path) {
         mBuildPath = path;
         mBuildPathApi += "api/";
-        mMainApp = new MainApp(mBuildPath);
+
     }
-    public void addBoot(String name){
+    public void addSourceBoot(String name, Source src){
         if(mBoot == null) {
             this.mBoot = new Boot(mBuildPathApi);
         }
+        //set boot callback function
         mFiles.addAll(mBoot.getFiles());
     }
 
-    public void addTimer(String timer_name){
+    public void addSourceTimer(String timer_name, Source src){
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi);
 
         }
+        src.setInitCallName(tQueue.innit_name);
         tQueue.addTimer(timer_name, true);
     }
 
-    public void addRandom(String name) {
+    public void addSourceRandom(String name, Source src) {
 
     }
 
@@ -88,14 +90,16 @@ public class nrf52Platform extends ConcretePlatform{
 
     public List<FileObject> build(Space s){
         setPath(s.getBuildPath());
+        mMainApp = new MainApp(mBuildPath, s);
         //TODO: add a check first that api provides methods
         for(Source src: s.getSources()){
             // get the method
             String n = src.getSinkReference().replace("platform.system.", "");
-            String name = "add" + n.substring(0, 1).toUpperCase() + n.substring(1);
+            String name = "addSource" + n.substring(0, 1).toUpperCase() + n.substring(1);
+            //also we need to push puch the init methods
             try {
-                Method addSourceMethod  = nrf52Platform.class.getMethod(name, String.class);
-                addSourceMethod.invoke(this, src.getSinkIdentifier());
+                Method addSourceMethod  = nrf52Platform.class.getMethod(name, name.getClass(), src.getClass());
+                addSourceMethod.invoke(this, name, src);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {

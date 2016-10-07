@@ -1,4 +1,4 @@
-main(components, models, controllers)::=<<
+main(space, components)::=<<
 int main(void)
 {
 
@@ -9,10 +9,9 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     // Initialize.
-    <components:{c|<c.initMethodCall>};separator="\n">
-    timers_init();
-    buttons_leds_init(&erase_bonds);
 
+    buttons_leds_init(&erase_bonds);
+    <if(components.ble_enable)>
     ble_stack_init();
     gap_params_init();
     services_init();
@@ -25,21 +24,25 @@ int main(void)
     }
  // Start execution.
      advertising_start();
+     <endif>
      // from there in we count as booted
      //is there boot event call?
      //create context
      RavelContext rctx;
 
      //init all models
-     <models:{m|<m.initMethodCall>};separator="\n">
+     <space.models:{model|<init_models(model)>};separator="\n">
 
      //set model dependencies and variables
      ConfigModel cm;
      config_model__first(&cm);
      random_model_ctr__set_config_model(&cm);
 
+     //init sources
+    <space.sources:{source|<init_source(source)>};separator="\n">
+
      //then boot events
-     <controllers:{c|<c.initMethodCall>};separator="\n">
+     <space.controllers:{c|<c.initMethodCall>};separator="\n">
      random_model_ctr__system_booted(&rctx);
 
      NRF_LOG_INFO("Hello!\r\n");
@@ -51,8 +54,22 @@ int main(void)
                power_manage();
            };
      }
+}
 >>
-
+//init sources
+init_source(source)::=<<
+<if(source.init)>
+<source.initMethodCall>();
+<endif>
+>>
+//Init models
+init_models(model)::=<<
+<if(model.replicated)>
+void <model.modelName_c>__queue_innit();
+<else>
+void <model.modelName_c>__queue_innit_sized(<model.size>);
+<endif>
+>>
 power_manage()::=<<
 /**@brief Function for the Power manager.
  */

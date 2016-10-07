@@ -4,6 +4,7 @@ import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
+import ai.harmony.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -19,18 +20,20 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     private boolean debug_nrf_log = true;
     private boolean debug_segger_rtt = true;
-    private boolean ble_enable = true;
-    private boolean nrf_uart = true;
+    public boolean ble_enable = true;
+    private boolean nrf_uart = false;
 
     private String fileName = "main.c";
+    private Space mSpace;
     private STGroup mMainTmlp;
     private STGroup mCnfgTmlp;
 
 
 
 
-    public MainApp(String bp) {
+    public MainApp(String bp, Space s) {
         mBuildPath = bp;
+        mSpace = s;
         mMainTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/main.stg");
         mCnfgTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/config.stg");
         //create main app
@@ -64,8 +67,10 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         obj.appendContent(t_obj.render());
         //main
         t_obj = mMainTmlp.getInstanceOf("main");
-        obj.appendContent(t_obj.render());
+        t_obj.add("space", mSpace);
         t_obj.add("components", this);
+        obj.appendContent(t_obj.render());
+
         obj.setContent(t_obj.render());
         mFileList.add(obj);
         return mFileList;
@@ -96,7 +101,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     private void addCnfFile(String name, String content){
         FileObject fo = new FileObject();
-        fo.setPath(mBuildPath + "config/");
+        fo.setPath(mBuildPath + "/config/");
         fo.setFileName(name);
         fo.setContent(content);
         mFileList.add(fo);

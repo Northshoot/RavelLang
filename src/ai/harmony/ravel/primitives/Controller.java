@@ -40,6 +40,9 @@ public class Controller extends ParametrizedComponent{
         this.mEvents.put(name, event);
     }
 
+    public String getfileNameC(){
+        System.out.println(":::::::::::: " + mName);
+        return mName+"_ctr"; }
     public String getName_c(){ return "m_"+mName.toLowerCase()+"_ctr";}
 
     public void addModels(Map<String, Model> modelMap) {

@@ -52,7 +52,7 @@ public class CLang extends ConcreteLanguage{
         mFileObjects.add(f);
         ST model_object = model_tmpl.getInstanceOf("models_obj_file");
         model_object.add("space", mSpace);
-        System.out.println(model_object.render());
+//        System.out.println(model_object.render());
         f = new FileObject();
         f.setPath(mSpace.getBuildPath());
         f.setFileName("model.c");

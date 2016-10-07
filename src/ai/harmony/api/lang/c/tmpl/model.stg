@@ -42,7 +42,7 @@ models_obj_file(space)::=<<
  */
 <base_includes()>
 #include "models.h"
-<model_ctr_includes(space.models)>
+<model_ctr_includes(space.controllers)>
 //Model common implementations
 <space.models:{model|<model_cmd_imp(model)> }; separator="\n\n">
 >>
@@ -58,7 +58,7 @@ model_cmd_imp(model)::=<<
 #define <model.modelNameUpperCase>_QUEUE_SIZE <model.size>
 
 ghpringbuf *<model.modelName_c>__queue_buf ;
-uint32_t <model.modelName_c>__buff_size = RAMDOM_MODEL_QUEUE_SIZE;
+uint32_t <model.modelName_c>__buff_size = <model.modelNameUpperCase>_QUEUE_SIZE;
 bool <model.modelName_c>__buff_full = false;
 uint32_t <model.modelName_c>__rec_id=0;
 uint32_t <model.modelName_c>__rec_discarded=0;
@@ -206,8 +206,8 @@ base_includes()::=<<
 #include "api/ringbuf.h"
 
 >>
-model_ctr_includes(models)::=<<
+model_ctr_includes(controllers)::=<<
 <! For  each model add controller for call backs!>
-<models:{model:#include <model.modelController_name_c>.h};separator="\n">
+<controllers:{ctr|#include <ctr.modelController.fileNameC>.h //controller include};separator="\n">
 >>
 

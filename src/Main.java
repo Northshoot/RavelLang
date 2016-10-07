@@ -34,12 +34,12 @@ public class Main {
         if (inputFile != null) {
             is = new FileInputStream(inputFile);
             mBuildPath = Paths.get(args[0]).toAbsolutePath().getParent().toString();
-            mBuildPath+="rout/";
+            mBuildPath+="/rout/";
             System.out.println("Build path " + mBuildPath);
         } else {
             System.out.println("File is null");
         }
-        mBuildPath += "/src/";
+        //mBuildPath += "/src/";
 
         ANTLRInputStream input = new ANTLRInputStream(is);
 
@@ -97,6 +97,7 @@ public class Main {
         builder.setApp(rApp);
         builder.setPath(mBuildPath);
         builder.buildAll();
+        builder.render();
 
 //        }
         Date now = Calendar.getInstance().getTime();

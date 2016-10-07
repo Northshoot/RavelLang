@@ -12,7 +12,7 @@ replicated model UpdateFrequency(size):
     properties:
         durable = False
         reliable = False
-        buffer_size = size
+        records = size
 
     schema:
         frequency = IntegerField(default=1000)

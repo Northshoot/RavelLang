@@ -58,8 +58,6 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             m.addParam(t.getText());
         }
         Scope propScope = ctx.scope.getNestedScope("properties");
-        LOGGER.info("Adding models properties: [");
-        String propertyDebug = "";
         List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();
         for (VariableSymbol s: prop) {
             Variable var = makeVariable(s);
@@ -69,13 +67,13 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             }
             m.setProperty(var);
         }
-        LOGGER.info(propertyDebug + "]");
+
 
         // create fields for the schema
         Scope schemaScope = ctx.scope.getNestedScope("schema");
-        LOGGER.info("Adding model fields to the schema:");
+//        LOGGER.info("Adding model fields to the schema:");
         List<FieldSymbol> schema = (List<FieldSymbol>) schemaScope.getAllSymbols();
-        LOGGER.info("Adding model # " + schema.size() + " fields to the schema:");
+//        LOGGER.info("Adding model # " + schema.size() + " fields to the schema:");
         Iterator<FieldSymbol> s = schema.iterator();
         while (s.hasNext()) {
             boolean field_has_options = false;

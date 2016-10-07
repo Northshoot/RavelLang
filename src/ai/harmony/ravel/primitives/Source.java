@@ -9,6 +9,7 @@ public class Source extends Primitive{
 
     private String identifier;
     private String resolve;
+    private String mInitCallName = null;
 
     public Source(String name, String res) {
         super(name);
@@ -23,6 +24,21 @@ public class Source extends Primitive{
             this.resolve = resolve;
         }
 
+    public boolean getInit(){
+        if(mInitCallName == null ){
+            return false;
+        } else {
+            return true;
+        }
+    }
+     public void setInitCallName(String s){
+         mInitCallName = s;
+     }
+
+    @Override
+    public String getInitMethodCall(){
+        return mInitCallName;
+    }
         public String getSinkIdentifier() {return this.identifier; }
         public String getSinkReference() {return this.resolve; }
 }
