@@ -5,6 +5,7 @@ import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.nrf52.obj.MainApp;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 

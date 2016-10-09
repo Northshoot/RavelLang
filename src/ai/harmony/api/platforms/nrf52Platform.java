@@ -54,7 +54,7 @@ public class nrf52Platform extends ConcretePlatform{
 
     public void setPath(String path) {
         mBuildPath = path;
-        mBuildPathApi += "api/";
+        mBuildPathApi += mBuildPath + "/api/";
 
     }
     public void addSourceBoot(String name, Source src){
@@ -115,7 +115,7 @@ public class nrf52Platform extends ConcretePlatform{
 
     public List<FileObject> getFiles(){
         mFiles.addAll(mMainApp.getFiles());
-        mFiles.addAll(this.tQueue.getFiles());
+        mFiles.addAll(tQueue.getFiles());
         mFiles.add(getMakeFile());
         return mFiles;
     }

@@ -65,7 +65,7 @@ void ravel_service_init(ble_os_t * p_service);
 //Event form which calls are dispached to arrived stuff
 void ble_ravel__on_ble_evt(ble_os_t * p_service, ble_evt_t * p_ble_evt);
 
-//command for writting to the ble 
+//command for writting to the ble
 void random_model__sys_write_to_BLE(ble_os_t *p_our_service, RandomModel *model);
 
 //base BLE functions for NRF
