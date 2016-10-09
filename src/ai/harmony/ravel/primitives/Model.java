@@ -37,6 +37,7 @@ public class Model extends ParametrizedComponent {
     private String mGet="get";
     private String mFirst="first";
     private String mLast="last";
+    private String mDestroy="destroy";
 
 
     //TODO: implement builder pattern
@@ -49,6 +50,9 @@ public class Model extends ParametrizedComponent {
         this.mModelType = t;
     }
 
+    public String getModelName(){
+        return mName;
+    }
     /**
      * Model API functions bellow
      */
@@ -57,15 +61,15 @@ public class Model extends ParametrizedComponent {
 
     //get buffer initialization
     public String getInitFunction(){
-        return "";
+        return getCName()+"__innit";
     }
     //destroy buffer
     public String getDestroyFunction(){
-        return "";
+        return getCName() +"__destroy";
     }
     //create
     public String getCreateFunction(){
-        return "";
+        return getCName() + "__create";
     }
 
     //save
@@ -73,43 +77,50 @@ public class Model extends ParametrizedComponent {
         return getCName()+"__save";
     }
 
+
     //delete
     public String getDeleteFunction(){
-        return "";
+        return getCName()+"__delete";
     }
     //queries
-    //get with id
+    //get with position id
     public String getRecordPosition(){
         return getCName()+"__get";
     }
 
-
-    //get first element
-
-    //get position
-
+    //get first
+    public String getFirstRecord(){
+        return getCName()+"__get_first";
+    }
+    //get last
+    public String getLastRecord(){
+        return getCName()+"__get_last";
+    }
     /**
      * Model Events
+     * we add controller name to distinguish the subscribers
+     *
      */
     //record arrived to the tier
     public String getArrivedEvent(){
-        return "";
+        return getCName() +  "__" + mController.getCName() + "__arrived";
     }
 
     //record departed from the tier
     public String getDepartedEvent(){
-        return "";
+        return getCName() + "__" + mController.getCName() + "__departed";
     }
     //save done
     public String getSaveDoneEvent(){
-        return "";
+        return getCName() +  "__" + mController.getCName() + "__saveDone";
+    }
+
+    public String getBufferSaveDoneEvent(){
+        return getCName() +  "__" + mController.getCName() + "__bufferSaveDone";
     }
     //buffer is full event
-    //This is a call back function to the controller
     public String getFullEvent(){
-        //check if controller subscribes to the event
-        mController.subscribesToEvent("")
-        return "";
+        return getCName() + "__" + mController.getCName() +  "__full";
     }
 
     /**
@@ -120,8 +131,6 @@ public class Model extends ParametrizedComponent {
     public void addController(Controller ctr){
         this.mController = ctr;
     }
-
-    public Controller getModelController(){ return this.mController; }
 
     public Model.Type getModelType() {
         return mModelType;

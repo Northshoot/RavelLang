@@ -21,7 +21,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
     private boolean debug_nrf_log = true;
     private boolean debug_segger_rtt = true;
     public boolean ble_enable = true;
-    private boolean nrf_uart = false;
+    private boolean nrf_uart = true;
 
     private String fileName = "main.c";
     private Space mSpace;
@@ -40,6 +40,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         obj.setPath(mBuildPath);
         obj.setFileName(fileName);
         //Base stuff that is needed by nrf
+        addLogging();
         addBaseMake();
         //this app
         addMainAppMake();
@@ -86,7 +87,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         addCnfFile("ravel_gcc_nrf52_ld.ld",t_obj.render());
 
         t_obj = mCnfgTmlp.getInstanceOf("app_cnfg");
-        addCnfFile("app_cnfg.h",t_obj.render());
+        addCnfFile("app_config.h",t_obj.render());
 
         t_obj = mCnfgTmlp.getInstanceOf("device_manager_cnfg");
         addCnfFile("device_manager_cnfg.h",t_obj.render());
@@ -113,6 +114,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
          * Fix includes for this project
          */
         addToMakeIncludePath("api/");
+        addToMakeIncludePath("config/");
         //include "this" directory too
         addToMakeIncludePath("");
         addToDefines(new Declaration("#define DEAD_BEEF                        0xDEADBEEF", "/**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */"));
@@ -127,7 +129,6 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
     private void addLogging(){
         if(debug_nrf_log){
             addToMakeIncludePathSDK("/components/libraries/log");
-            addToMakeIncludePathSDK("/components/libraries/log/src");
             addToMakeObjSDK("/components/libraries/log/src/nrf_log_backend_serial.c");
             addToMakeObjSDK("/components/libraries/log/src/nrf_log_frontend.c");
             addToDefines(new Declaration("NRF_LOG_MODULE_NAME \"APP\""));

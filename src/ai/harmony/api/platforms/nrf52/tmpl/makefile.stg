@@ -15,14 +15,14 @@ SRC_FILES += \
   $(PROJ_DIR)config_model.c \
   $(PROJ_DIR)random_model_ctr.c \
   $(PROJ_DIR)api/api_ble.c \
-  $(PROJ_DIR)api/api_system.c
+  $(PROJ_DIR)api/api_system.c \
   $(PROJ_DIR)api/ravel_layer.c \
   $(PROJ_DIR)api/ringbuf.c \
 
 
 
 # Include folders common to all targets
-INC_FOLDERS +=
+INC_FOLDERS += \
   <components.makeIncludePath:{m_object|<m_object.name> \\};separator="\n">
 
 

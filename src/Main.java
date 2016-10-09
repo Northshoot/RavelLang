@@ -28,6 +28,7 @@ public class Main {
         String mBuildPath = null;
         System.out.println("Starting Build");
         Date t = Calendar.getInstance().getTime();
+        long start = t.getTime();
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
         if (args.length > 0) inputFile = args[0];
         InputStream is = System.in;
@@ -101,7 +102,7 @@ public class Main {
 
 //        }
         Date now = Calendar.getInstance().getTime();
-        long diff = now.getTime() - t.getTime();
+        long diff = now.getTime() - start;
         long diffMilliSeconds = diff % 60;
         long diffSeconds = diff / 1000 % 60;
         long diffMinutes = diff / (60 * 1000) % 60;

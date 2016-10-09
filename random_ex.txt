@@ -17,7 +17,7 @@ replicated model UpdateFrequency(size):
     schema:
         frequency = IntegerField(default=1000)
 
-controller RandomControllerEmbedded(tier):
+controller Randomizer(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
     random_source = tier.sources.random
@@ -64,7 +64,7 @@ space EmbeddedSpace:
         frequency=UpdateFrequency(size=1)
 
     controllers:
-        rndcnt = RandomControllerEmbedded(tier=self)
+        rndcnt = Randomizer(tier=self)
 
     sources:
         random = platform.system.random
