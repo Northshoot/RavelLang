@@ -129,6 +129,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
     private void addLogging(){
         if(debug_nrf_log){
             addToMakeIncludePathSDK("/components/libraries/log");
+            addToMakeIncludePathSDK("/components/libraries/log/src");
             addToMakeObjSDK("/components/libraries/log/src/nrf_log_backend_serial.c");
             addToMakeObjSDK("/components/libraries/log/src/nrf_log_frontend.c");
             addToDefines(new Declaration("NRF_LOG_MODULE_NAME \"APP\""));

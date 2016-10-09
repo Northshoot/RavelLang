@@ -136,11 +136,8 @@ init_source(source)::=<<
 
 //Init models
 init_models(model)::=<<
-<if(model.replicated)>
-void <model.modelName_c>__queue_innit();
-<else>
-void <model.modelName_c>__queue_innit_sized(<model.size>);
-<endif>
+void <model.initFunction>();
+
 >>
 
 power_manage()::=<<
