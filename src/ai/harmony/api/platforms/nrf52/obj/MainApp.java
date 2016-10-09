@@ -51,22 +51,22 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     public List<FileObject> getFiles() {
         //add assert
-        ST t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
-        obj.appendContent(t_obj.render());
-        // Function for handling File Data Storage events.
-        t_obj = mMainTmlp.getInstanceOf("fds_evt_handler");
-        obj.appendContent(t_obj.render());
-        //Function for handling Peer Manager events.
-        t_obj = mMainTmlp.getInstanceOf("pm_evt_handler");
-        obj.appendContent(t_obj.render());
-        //  Function for the Peer Manager initialization
-        t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
-        obj.appendContent(t_obj.render());
-        //vFunction for the Power manager.
-        t_obj = mMainTmlp.getInstanceOf("power_manage");
-        obj.appendContent(t_obj.render());
+//        ST t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
+//        obj.appendContent(t_obj.render());
+//        // Function for handling File Data Storage events.
+//        t_obj = mMainTmlp.getInstanceOf("fds_evt_handler");
+//        obj.appendContent(t_obj.render());
+//        //Function for handling Peer Manager events.
+//        t_obj = mMainTmlp.getInstanceOf("pm_evt_handler");
+//        obj.appendContent(t_obj.render());
+//        //  Function for the Peer Manager initialization
+//        t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");
+//        obj.appendContent(t_obj.render());
+//        //vFunction for the Power manager.
+//        t_obj = mMainTmlp.getInstanceOf("power_manage");
+//        obj.appendContent(t_obj.render());
         //main
-        t_obj = mMainTmlp.getInstanceOf("main");
+        ST t_obj = mMainTmlp.getInstanceOf("main_obj_c");
         t_obj.add("space", mSpace);
         t_obj.add("components", this);
         obj.appendContent(t_obj.render());

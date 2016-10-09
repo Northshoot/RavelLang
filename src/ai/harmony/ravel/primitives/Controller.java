@@ -16,7 +16,7 @@ public class Controller extends ParametrizedComponent{
     private Space mSpace;
 
     public Controller(String name){
-        super(name);
+        super(name, name);
     }
     //TODO: this is sparta
     public void setSpace(Space s){

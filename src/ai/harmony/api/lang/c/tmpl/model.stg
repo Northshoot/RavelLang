@@ -55,13 +55,13 @@ model_cmd_imp(model)::=<<
 <! Initialize buffers for the model !>
 <if(model.streaming || model.local)>
 <! Streaming and local have sizes !>
-#define <model.modelNameUpperCase>_QUEUE_SIZE <model.size>
+#define <model.defineName>_QUEUE_SIZE <model.size>
 
-ghpringbuf *<model.modelName_c>__queue_buf ;
-uint32_t <model.modelName_c>__buff_size = <model.modelNameUpperCase>_QUEUE_SIZE;
-bool <model.modelName_c>__buff_full = false;
-uint32_t <model.modelName_c>__rec_id=0;
-uint32_t <model.modelName_c>__rec_discarded=0;
+ghpringbuf *<model.cName>__queue_buf ;
+uint32_t <model.cName>__buff_size = <model.modelNameUpperCase>_QUEUE_SIZE;
+bool <model.cName>__buff_full = false;
+uint32_t <model.cName>__rec_id=0;
+uint32_t <model.cName>__rec_discarded=0;
 //generic buffer implementation
 ghpringbuf *buf;
 <elseif(model.replicated)>
@@ -74,40 +74,40 @@ ghpringbuf *buf;
 <! functions differ depending on local streaming or replicated !>
 
 <if(model.streaming || model.local)>
-inline static bool <model.modelName_c>__is_full(){
-	return <model.modelName_c>__queue_buf->capacity == <model.modelName_c>__queue_buf->count;
+inline static bool <model.cName>__is_full(){
+	return <model.cName>__queue_buf->capacity == <model.cName>__queue_buf->count;
 }
 
-void <model.modelName_c>__save(<model.modelName> *mr) {
+void <model.saveFunction>(<model.modelName> *mr) {
 	
-	if(!<model.modelName_c>__buff_full) {
-		ghpringbuf_put(<model.modelName_c>__queue_buf, mr);
-		<model.modelName_c>__rec_id++;
+	if(!<model.cName>__buff_full) {
+		ghpringbuf_put(<model.cName>__queue_buf, mr);
+		<model.cName>__rec_id++;
 	} else {
-		<model.modelName_c>__rec_discarded++;
+		<model.cName>__rec_discarded++;
 	}
-	<model.modelName_c>__buff_full = <model.modelName_c>__is_full();
-	if(<model.modelName_c>__buff_full){
-		<model.modelName_c>_ctr__<model.modelName_c>_full();
+	<model.cName>__buff_full = <model.cName>__is_full();
+	if(<model.cName>__buff_full){
+		<model.cName>_ctr__<model.cName>_full();
 	}
-	<model.modelName_c>__data_added();
+	<model.cName>__data_added();
 }
 
 
-int <model.modelName_c>__first(<model.modelName> *a){
+int <model.cName>__first(<model.modelName> *a){
 	<model.modelName> *a_ptr;
-	if( (a_ptr = ghpringbuf_at(<model.modelName_c>__queue_buf, 0)) ){
+	if( (a_ptr = ghpringbuf_at(<model.cName>__queue_buf, 0)) ){
 		a = a_ptr;
-		ghpringbuf_pop(<model.modelName_c>__queue_buf);
+		ghpringbuf_pop(<model.cName>__queue_buf);
 		return 0;
 	} else {
 		return 1;
 	}
 }
 
-int <model.modelName_c>__get(uint32_t position, <model.modelName> *rm){
+int <model.recordPosition>(uint32_t position, <model.modelName> *rm){
 	<model.modelName> *a_ptr;
-	if( (a_ptr = ghpringbuf_at(<model.modelName_c>__queue_buf, position)) ){
+	if( (a_ptr = ghpringbuf_at(<model.cName>__queue_buf, position)) ){
 		memcpy(&rm, a_ptr, sizeof(<model.modelName>));
 		return 0;
 	} else {
@@ -115,34 +115,34 @@ int <model.modelName_c>__get(uint32_t position, <model.modelName> *rm){
 	}
 }
 
-void <model.modelName_c>__queue_innit_sized(int size){
-	<model.modelName_c>__buff_size = size;
-	<model.modelName_c>__queue_buf = ghpringbuf_create(size, sizeof(<model.modelName>), 1, NULL);
+void <model.cName>__queue_innit_sized(int size){
+	<model.cName>__buff_size = size;
+	<model.cName>__queue_buf = ghpringbuf_create(size, sizeof(<model.modelName>), 1, NULL);
 }
 
-void <model.modelName_c>__queue_innit(){
-	<model.modelName_c>__queue_buf = ghpringbuf_create(<model.modelNameUpperCase>QUEUE_SIZE, sizeof(<model.modelName>), 1, NULL);
+void <model.cName>__queue_innit(){
+	<model.cName>__queue_buf = ghpringbuf_create(<model.modelNameUpperCase>QUEUE_SIZE, sizeof(<model.modelName>), 1, NULL);
 }
 
-void <model.modelName_c>__destroy_queue(){
-ghpringbuf_destroy(<model.modelName_c>__queue_buf);
+void <model.cName>__destroy_queue(){
+ghpringbuf_destroy(<model.cName>__queue_buf);
 }
 <elseif(model.replicated)>
 <! replicated are only one instance of the model, logging makes new model !>
-void <model.modelName_c>__save(<model.modelName> *rm) {
+void <model.cName>__save(<model.modelName> *rm) {
 	cm.frequency = rm->frequency;
 	//notify subscribers
    RavelContext rctx;
    rctx.error = NRF_SUCCESS;
    rctx.model = &cm;
-   random_model_ctr__<model.modelName_c>_arrived(&rctx);
+   random_model_ctr__<model.cName>_arrived(&rctx);
 }
 
-int <model.modelName_c>__first(<model.modelName> *rm){
+int <model.cName>__first(<model.modelName> *rm){
 	memcpy(rm, &cm, sizeof(cm));
 	return 0;
 }
-int <model.modelName_c>__get(uint32_t position, <model.modelName> *rm){
+int <model.cName>__get(uint32_t position, <model.modelName> *rm){
 	if (position >1) return 1;
 	else{
 		rm = &cm;
@@ -150,12 +150,12 @@ int <model.modelName_c>__get(uint32_t position, <model.modelName> *rm){
 	}
 }
 
-void <model.modelName_c>__queue_innit(){
+void <model.cName>__queue_innit(){
 	memset(&cm, 0, sizeof(cm));
 	<model.schema:{s|
 	model_cmd_imp.<s.modelName> = <s.defaultValue>; // default value ;separator="\n"} >
 }
-void <model.modelName_c>__destroy_queue(){
+void <model.cName>__destroy_queue(){
 	//since the model is replicated we dont have any buffer
 }
 <model.modelName> modelInstance ;
@@ -168,13 +168,13 @@ void <model.modelName_c>__destroy_queue(){
 >>
 //model command definitions
 model_cmd_def(model)::=<<
-void <model.modelName_c>__save(<model.modelName> *modelP) ;
-int <model.modelName_c>__first(<model.modelName> *modelP);
-int <model.modelName_c>__get(uint32_t position, <model.modelName> *modelP);
+void <model.cName>__save(<model.modelName> *modelP) ;
+int <model.cName>__first(<model.modelName> *modelP);
+int <model.cName>__get(uint32_t position, <model.modelName> *modelP);
 
-void <model.modelName_c>__queue_innit_sized(int size);
-void <model.modelName_c>__queue_innit();
-void <model.modelName_c>__destroy_queue();
+void <model.cName>__queue_innit_sized(int size);
+void <model.cName>__queue_innit();
+void <model.cName>__destroy_queue();
 >>
 model_meta_pkt(model)::=<<
 typedef struct _metaConfigModel {
@@ -208,6 +208,6 @@ base_includes()::=<<
 >>
 model_ctr_includes(controllers)::=<<
 <! For  each model add controller for call backs!>
-<controllers:{ctr|#include <ctr.modelController.fileNameC>.h //controller include};separator="\n">
+<controllers:{ctr|#include "<ctr.fileNameC>.h" //controller include};separator="\n">
 >>
 

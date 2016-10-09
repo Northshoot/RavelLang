@@ -39,6 +39,7 @@ public class nrf52Platform extends ConcretePlatform{
     private String mBuildPath="";
     private String mBuildPathApi="";
 
+    private Space mSpace;
 
     public nrf52Platform (String path){
         this();
@@ -89,8 +90,9 @@ public class nrf52Platform extends ConcretePlatform{
     public Random getRandom() { return mRandom; }
 
     public List<FileObject> build(Space s){
-        setPath(s.getBuildPath());
-        mMainApp = new MainApp(mBuildPath, s);
+        mSpace = s;
+        setPath(mSpace.getBuildPath());
+        mMainApp = new MainApp(mBuildPath, mSpace);
         //TODO: add a check first that api provides methods
         for(Source src: s.getSources()){
             // get the method
@@ -145,6 +147,7 @@ public class nrf52Platform extends ConcretePlatform{
         STGroup make_tmpl = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/makefile.stg");
         ST r = make_tmpl.getInstanceOf("make");
         r.add("components", obj);
+        r.add("space", mSpace);
         //create and populate file object
         FileObject fo = new FileObject();
         fo.setPath(mBuildPath);

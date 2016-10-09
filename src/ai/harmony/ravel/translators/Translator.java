@@ -15,8 +15,10 @@ public interface Translator {
      * Returns C style name of the component or primitive
      * @return String C style
      */
+    String getCName();
     String getCStructName();
     String getCVarName();
+    String getDefineName();
 
     /**
      * Returns Java style name of the component or primitive

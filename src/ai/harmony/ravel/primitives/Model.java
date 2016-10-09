@@ -1,6 +1,7 @@
 package ai.harmony.ravel.primitives;
 
 import ai.harmony.ravel.primitives.Fields.Field;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -24,14 +25,91 @@ public class Model extends ParametrizedComponent {
     private Map<String, Field> mFields = new LinkedHashMap<>();
     private Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
 
+    /**
+     * the provided api
+     */
+    private String mArrived="arrived";
+    private String mDeparted="departed";
+    private String mCreate="create";
+    private String mSave="save";
+    private String mFull="full";
+    private String mDelete="delete";
+    private String mGet="get";
+    private String mFirst="first";
+    private String mLast="last";
+
+
     //TODO: implement builder pattern
     public Model(String name, Model.Type t){
-        super(name);
+        super(name,name+"Model");
         //TODO: implement real error handling
         if (t == Type.tINVALID ) {
             LOGGER.severe("Invalid model type! ");
         }
         this.mModelType = t;
+    }
+
+    /**
+     * Model API functions bellow
+     */
+
+    //internal to system
+
+    //get buffer initialization
+    public String getInitFunction(){
+        return "";
+    }
+    //destroy buffer
+    public String getDestroyFunction(){
+        return "";
+    }
+    //create
+    public String getCreateFunction(){
+        return "";
+    }
+
+    //save
+    public String getSaveFunction(){
+        return getCName()+"__save";
+    }
+
+    //delete
+    public String getDeleteFunction(){
+        return "";
+    }
+    //queries
+    //get with id
+    public String getRecordPosition(){
+        return getCName()+"__get";
+    }
+
+
+    //get first element
+
+    //get position
+
+    /**
+     * Model Events
+     */
+    //record arrived to the tier
+    public String getArrivedEvent(){
+        return "";
+    }
+
+    //record departed from the tier
+    public String getDepartedEvent(){
+        return "";
+    }
+    //save done
+    public String getSaveDoneEvent(){
+        return "";
+    }
+    //buffer is full event
+    //This is a call back function to the controller
+    public String getFullEvent(){
+        //check if controller subscribes to the event
+        mController.subscribesToEvent("")
+        return "";
     }
 
     /**
@@ -45,30 +123,14 @@ public class Model extends ParametrizedComponent {
 
     public Controller getModelController(){ return this.mController; }
 
-    public String getModelController_name_c() { return this.getModelController().getName_c();}
-
-    public String getModelNameUpperCase(){return getModelName().toUpperCase();}
     public Model.Type getModelType() {
         return mModelType;
     }
 
-    public void setModelType(Model.Type mModelType) {
-        this.mModelType = mModelType;
-    }
-    public String getService(){
-        return "ravel_service";
-    }
-    public String getTransmitFunction(){
-        return getNameLowerCase() + "_char_update";
-    }
     public List<Field> getFields() {
         return new ArrayList<>(mFields.values());
     }
 
-
-    public String getComment() {
-        return mComment;
-    }
 
     public boolean isStreaming(){
         return getModelType() == Type.STREAMING;
@@ -87,15 +149,7 @@ public class Model extends ParametrizedComponent {
      * TODO: this all need to move out to translator
      *
      *
-     *
-     *
-     *
      */
-    public String getModelName(){ return mName+"Model";}
-
-    public String getModelName_c(){ return "m_"+mName.toLowerCase()+"_model";}
-
-    public String getModelNameCDefine(){ return mName.toUpperCase()+"_MODEL";}
 
     public List<Field> getSchema(){
         List<Field> f = new ArrayList<>();
@@ -106,20 +160,21 @@ public class Model extends ParametrizedComponent {
         this.mFields.put(name, mFields);
     }
 
-    @Override
-    public String getInitMethodCall(){
-        return mName.toLowerCase()+"_model__queue" + super.getInitMethodCall();
-    }
+
 
     public void setProperty(Variable v) {
         LOGGER.info("Property: " + v);
         this.mPropertiesMap.put(v.getName(), v);
     }
 
-    public String getSize(){
+    public int getSizeInt(){
         String size = mParameterMap.get("size");
         Integer.parseInt(size);
-        return size;
+        return Integer.parseInt(size);
+    }
+
+    public String getSize(){
+        return mParameterMap.get("size");
     }
 
     public int getsizeCbuffer(){

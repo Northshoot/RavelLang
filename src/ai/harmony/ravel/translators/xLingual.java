@@ -1,5 +1,6 @@
 package ai.harmony.ravel.translators;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Locale;
@@ -8,11 +9,23 @@ import java.util.Locale;
  * Created by lauril on 8/23/16.
  */
 public class xLingual implements Translator {
-    String mName;
-
-    public xLingual(String name){
-        this.mName = name;
+    public String mName;
+    public String mGivenName;
+    //TODO: fix naming for files
+    public String getFileNameC(){
+        return mName.toLowerCase();
     }
+
+    public xLingual(String givenName, String internalName){
+        this.mGivenName = givenName;
+        this.mName = internalName;
+    }
+
+    public xLingual(String givenName){
+        this.mGivenName = givenName;
+        this.mName = givenName;
+    }
+
     @Override
     public String getVerboseName() {
         return getNameCamelCase();
@@ -24,14 +37,26 @@ public class xLingual implements Translator {
     }
 
     @Override
-    public String getCVarName(){
-        return "m_"+getNameLowerCase();
+    public String getCName(){
+        return StringUtils.join(mName.split("(?=\\p{Upper})"),"_").toLowerCase();
     }
+
+    @Override
+    public String getCVarName() {
+        return "m_" + StringUtils.join(mName.split("(?=\\p{Upper})"), "_").toLowerCase();
+    }
+
+    @Override
+    public String getDefineName(){
+        return getCName().toUpperCase();
+    }
+
 
     @Override
     public String getJavaClassName() {
         return getName();
     }
+
     public String getJavaVarName(){
         return "m"+getNameCamelCase();
     }
@@ -48,7 +73,7 @@ public class xLingual implements Translator {
 
 
     public String getName() {
-        return mName;
+        return mGivenName;
     }
 
     public String getNameUpper() {

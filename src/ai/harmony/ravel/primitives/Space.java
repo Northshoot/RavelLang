@@ -52,6 +52,11 @@ public class Space extends Primitive{
         return lst;
     }
 
+    public List<Controller> getControllers(){
+        List<Controller> lst = new ArrayList<>();
+        lst.addAll(mControllers.values());
+        return lst;
+    }
     public void add(Platform build) {
         mPlatform = build;
     }

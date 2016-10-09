@@ -10,8 +10,8 @@ public class ParametrizedComponent extends Primitive{
     private static Logger LOGGER = Logger.getLogger(ParametrizedComponent.class.getName());
 
     protected Map<String,String> mParameterMap = new LinkedHashMap<>();
-    public ParametrizedComponent(String name) {
-        super(name);
+    public ParametrizedComponent(String name, String internalName) {
+        super(name, internalName);
     }
 
 

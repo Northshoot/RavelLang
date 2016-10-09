@@ -39,7 +39,15 @@ public abstract class Field<T> implements Translator{
     protected T mDefaultValue;
     protected String mComment ="Auto Generated";
     protected Map<String, String> mFieldOptions = new HashMap<>();
+    @Override
+    public java.lang.String getCName() {
+        return mName;
+    }
 
+    @Override
+    public java.lang.String getDefineName() {
+        return null;
+    }
 
     public enum Type {  T_INTEGER, T_NUMBER, T_DATE,
                         T_DATE_TIME, T_TIME_STAMP, T_BYTE,
