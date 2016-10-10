@@ -63,7 +63,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         ST tmpl_o = ble_tmpl.getInstanceOf("ble_obj");
         tmpl_o.add("space", mSpace);
 
-        addToMakeObjSDK("api/api_ble.c");
+        addToMakeObj("api/api_ble.c");
         FileObject ble_header = new FileObject();
         ble_header.setFileName("api_ble.h");
         ble_header.setPath(mBuildPath+"/api/");

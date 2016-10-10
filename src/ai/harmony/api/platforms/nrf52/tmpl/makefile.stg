@@ -11,13 +11,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   <components.makeObjects:{m_object|<m_object.name> \\};separator="\n">
-  $(PROJ_DIR)random_model.c \
-  $(PROJ_DIR)config_model.c \
-  $(PROJ_DIR)random_model_ctr.c \
-  $(PROJ_DIR)api/api_ble.c \
-  $(PROJ_DIR)api/api_system.c \
-  $(PROJ_DIR)api/ravel_layer.c \
-  $(PROJ_DIR)api/ringbuf.c \
+
 
 
 

@@ -213,7 +213,7 @@ void <model.saveDoneEvent>();
 void <model.bufferSaveDoneEvent>();
 >>
 model_meta_pkt(model)::=<<
-typedef struct _metaConfigModel {
+typedef struct _meta<model.modelName> {
 	uint32_t node_UUID;
 	uint8_t origin;
 	uint8_t rqACK;
@@ -226,7 +226,7 @@ typedef struct _metaConfigModel {
 //create model struct
 model_schema(model)::=<<
 typedef struct {
-    <model.schema:{field| <field.cType> <field.cVarName> <field.cComment> ;};separator="\n">
+    <model.schema:{field| <field.cType> <field.cVarName> ; <field.cComment> };separator="\n">
 } <model.modelName>;
 
 

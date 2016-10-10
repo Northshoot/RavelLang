@@ -12,8 +12,7 @@ ble_header(space)::=<<
 #ifndef API_API_BLE_H_
 #define API_API_BLE_H_
 <ble_base_include()>
-//everything is decoupled expect models
-#include "../models.h"
+
 <ble_base_config()>
 
 #define BLE_UUID_RAVEL_BASE_UUID              {{ 0x00, 0x00, 0x00, 0x00, 0x24, 0x90, 0x66, 0x76, 0x42, 0x50, 0x83, 0x72, 0x00, 0x00, 0x10, 0x78 }} // 128-bit base UUID
@@ -50,7 +49,7 @@ typedef struct
 	uint16_t                    conn_handle;
     uint16_t    				service_handle;     /**\< Handle of Our Service (as provided by the BLE stack). */
     //add a handler for each model
-    <space.models:{model|ble_gatts_char_handles_t <model.cName>_handles }; separator="\n">
+    <space.models:{model|ble_gatts_char_handles_t <model.cName>_handles; }; separator="\n">
 }ble_os_t;
 
 ble_os_t m_ravel_service;
@@ -267,7 +266,7 @@ static uint32_t <model.cName>__characteristic_add(ble_os_t * p_ravel_service) {
 	attr_char_value.p_attr_md = &attr_md;
 
 	// OUR_JOB: Step 2.H, Set characteristic length in number of bytes
-	attr_char_value.max_len = sizeof(<model.name>);
+	attr_char_value.max_len = sizeof(<model.modelName>);
 	attr_char_value.init_len = 0;
 	attr_char_value.p_value = NULL;
 
@@ -297,12 +296,12 @@ inline void <model.cName>__data_flow_event(ble_os_t * p_ravel_service, ble_evt_t
 				////SEGGER_RTT_printf(0, "size error!\r\n");
 			}
     <elseif(model.replicated)>
-	if (p_evt_write->len != sizeof(<model.name>)) {
+	if (p_evt_write->len != sizeof(<model.modelName>)) {
 			//TODO: create error model
 		} else {
 			//save the model
-			<model.name> model;
-			memcpy(&model, p_evt_write->data, sizeof(<model.name>));
+			<model.modelName> model;
+			memcpy(&model, p_evt_write->data, sizeof(<model.modelName>));
 			<model.cName>__save(&model);
 		}
     <else>
@@ -311,12 +310,11 @@ inline void <model.cName>__data_flow_event(ble_os_t * p_ravel_service, ble_evt_t
 }
 >>
 model_write_to_ble(model)::=<<
-//write and notify is essentialy the same
-void <model.cName>__sys_write_to_BLE(ble_os_t *p_ravel_service,
-		<model.name> *model) {
+//write and notify is essentially the same
+void <model.cName>__sys_write_to_BLE(ble_os_t *p_ravel_service, <model.modelName> *model) {
 
 	if (p_ravel_service->conn_handle != BLE_CONN_HANDLE_INVALID) {
-		uint16_t len = sizeof(<model.name>);
+		uint16_t len = sizeof(<model.modelName>);
 		ble_gatts_hvx_params_t hvx_params;
 		memset(&hvx_params, 0, sizeof(hvx_params));
 		hvx_params.handle = p_ravel_service-><model.cName>_handles.value_handle;
@@ -459,11 +457,11 @@ void gap_params_init(void) {
 }
 
 >>
-ble_notification_enabled(modelName)::="BLE_<modelName>_NOTIFICATION_ENABLED"
-ble_notification_disabled(modelName)::="BLE_<modelName>_NOTIFICATION_DISABLED"
-ble_read(modelName)::="BLE_<modelName>_READ"
-ble_write(modelName)::="BLE_<modelName>_WRITE"
-ble_indicate(modelName)::="BLE_<modelName>_INDICATE"
+ble_notification_enabled(name)::="BLE_<name>_NOTIFICATION_ENABLED"
+ble_notification_disabled(name)::="BLE_<name>_NOTIFICATION_DISABLED"
+ble_read(name)::="BLE_<name>_READ"
+ble_write(name)::="BLE_<name>_WRITE"
+ble_indicate(name)::="BLE_<name>_INDICATE"
 
 //TODO: add config file for all the parameters to allow flexing and from Ravel
 ble_base_config()::=<<
@@ -513,6 +511,8 @@ ble_base_include()::=<<
 #include "ble_advdata.h"
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
+#include "ble_conn_state.h"
+#include "peer_manager.h"
 #include "boards.h"
 #include "softdevice_handler.h"
 #include "app_timer.h"

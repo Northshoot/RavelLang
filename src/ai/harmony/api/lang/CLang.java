@@ -47,7 +47,7 @@ public class CLang extends ConcreteLanguage{
         model_header.add("space", mSpace);
         FileObject f = new FileObject();
         f.setPath(mSpace.getBuildPath());
-        f.setFileName("model.h");
+        f.setFileName("models.h");
         f.setContent(model_header.render());
         mFileObjects.add(f);
         ST model_object = model_tmpl.getInstanceOf("models_obj_file");
@@ -55,7 +55,7 @@ public class CLang extends ConcreteLanguage{
 //        System.out.println(model_object.render());
         f = new FileObject();
         f.setPath(mSpace.getBuildPath());
-        f.setFileName("model.c");
+        f.setFileName("models.c");
         f.setContent(model_object.render());
         mFileObjects.add(f);
         //create buffer files

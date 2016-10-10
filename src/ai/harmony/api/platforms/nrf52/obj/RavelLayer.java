@@ -1,6 +1,7 @@
 package ai.harmony.api.platforms.nrf52.obj;
 
 import ai.harmony.api.builder.FileObject;
+import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import ai.harmony.ravel.primitives.Space;
@@ -26,6 +27,7 @@ public class RavelLayer extends RavelAPIObject implements RavelObjectInterface {
         mBuildPath = bp+"/api/";
         mSpace = s;
         mRavelLayerTmpl = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/ravel_layer.stg");
+        addToMakeObj(new Declaration(fileName+".c"));
 
     }
     public String getHeaderDefName() {
