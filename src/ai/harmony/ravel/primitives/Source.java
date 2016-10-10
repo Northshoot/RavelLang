@@ -10,6 +10,8 @@ public class Source extends Primitive{
     private String identifier;
     private String resolve;
     private String mInitCallName = null;
+    private Controller mController = null;
+
 
     public Source(String name, String res) {
         super(name);
@@ -17,14 +19,12 @@ public class Source extends Primitive{
         resolve = res;
     }
 
-
-
-        public void source(String name, String resolve){
+    public void source(String name, String resolve){
             this.identifier = name;
             this.resolve = resolve;
         }
 
-    public boolean getInit(){
+    public boolean hasInit(){
         if(mInitCallName == null ){
             return false;
         } else {
@@ -41,4 +41,10 @@ public class Source extends Primitive{
     }
         public String getSinkIdentifier() {return this.identifier; }
         public String getSinkReference() {return this.resolve; }
+
+    public void addController(Controller controller) {
+        mController = controller;
+        mName = controller.getCName()+"__"+mName;
+    }
+
 }

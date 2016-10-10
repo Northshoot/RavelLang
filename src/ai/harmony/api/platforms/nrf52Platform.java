@@ -71,7 +71,7 @@ public class nrf52Platform extends ConcretePlatform{
 
         }
         src.setInitCallName(tQueue.innit_name);
-        tQueue.addTimer(timer_name, true);
+        tQueue.addTimer(src.getCName(), true);
     }
 
     public void addSourceRandom(String name, Source src) {
@@ -100,8 +100,8 @@ public class nrf52Platform extends ConcretePlatform{
             String name = "addSource" + n.substring(0, 1).toUpperCase() + n.substring(1);
             //also we need to push puch the init methods
             try {
-                Method addSourceMethod  = nrf52Platform.class.getMethod(name, name.getClass(), src.getClass());
-                addSourceMethod.invoke(this, name, src);
+                Method addSourceMethod  = nrf52Platform.class.getMethod(name, n.getClass(), src.getClass());
+                addSourceMethod.invoke(this, n, src);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {

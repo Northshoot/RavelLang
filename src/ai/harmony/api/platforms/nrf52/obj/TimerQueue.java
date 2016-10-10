@@ -106,7 +106,7 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
 
 
     public void addTimer(String timer_name, boolean periodic) {
-        mTimerMap.put(timer_name, new Timer(timer_name, this, periodic));
+        mTimerMap.put(" noname no_gane", new Timer(timer_name, this, periodic));
     }
 
     public Timer getTimer(String timer_name) {

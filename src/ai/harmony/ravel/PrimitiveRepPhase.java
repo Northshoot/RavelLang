@@ -322,7 +322,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
                 space.add(identifier, new Sink(identifier, reference));
             } else {
                 LOGGER.severe("Error processing sink with name: "
-                        + identifier + " refereing to unknown location "
+                        + identifier + " referering to unknown location "
                         + reference);
             }
         }
@@ -364,14 +364,14 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             //get the instance symbol
             InstanceSymbol is = ctrInst.get(mName);
             //get the model
-            Controller m = rApp.getController(is.getInstanceName());
-            m.setSpace(space);
+            Controller ctr = rApp.getController(is.getInstanceName());
+            ctr.setSpace(space);
             //set parameters
             Map<String, String> ismap = is.getParameterMap();
             for(Map.Entry<String, String> entry : ismap.entrySet()) {
-                m.setParam(entry.getKey(), entry.getValue());
+                ctr.setParam(entry.getKey(), entry.getValue());
             }
-            space.add(is.getIdentifier(),m);
+            space.add(is.getIdentifier(),ctr);
         }
 
         rApp.addSpace(name, space);
