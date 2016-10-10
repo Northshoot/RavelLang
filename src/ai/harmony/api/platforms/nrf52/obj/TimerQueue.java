@@ -63,8 +63,8 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         addToMakeIncludePathSDK("/components/drivers_nrf/timer");
         addToMakeIncludePathSDK("/components/libraries/timer");
         addToMakeObjSDK("/components/libraries/timer/app_timer.c");
-
-        addToMakeObj("/api/" + this.fileName +".c");
+        //TODO: all these should be aggregated sorted from builder class
+        addToMakeObj("api/" + this.fileName +".c");
     }
 
     private void make_init() {

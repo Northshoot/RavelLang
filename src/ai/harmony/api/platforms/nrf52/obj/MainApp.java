@@ -30,7 +30,6 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
 
 
-
     public MainApp(String bp, Space s) {
         mBuildPath = bp;
         mSpace = s;
@@ -39,6 +38,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         //create main app
         obj.setPath(mBuildPath);
         obj.setFileName(fileName);
+        if(ble_enable) makeBLE(mBuildPath);
         //Base stuff that is needed by nrf
         addLogging();
         addBaseMake();
@@ -50,6 +50,26 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     }
 
+    private void makeBLE(String mBuildPath){
+        STGroup ble_tmpl = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/ble.stg");
+        ST tmpl_h = ble_tmpl.getInstanceOf("ble_header");
+        tmpl_h.add("space", mSpace);
+        ST tmpl_o = ble_tmpl.getInstanceOf("ble_obj");
+        tmpl_o.add("space", mSpace);
+
+        addToMakeObjSDK("api/api_ble.c");
+        FileObject ble_header = new FileObject();
+        ble_header.setFileName("api_ble.h");
+        ble_header.setPath(mBuildPath+"/api/");
+        ble_header.setContent(tmpl_h.render());
+
+        FileObject ble_obj= new FileObject();
+        ble_obj.setFileName("api_ble.c");
+        ble_obj.setPath(mBuildPath+"/api/");
+        ble_obj.setContent(tmpl_o.render());
+        mFileList.add(ble_header);
+        mFileList.add(ble_obj);
+    }
     public List<FileObject> getFiles() {
         //add assert
 //        ST t_obj = mMainTmlp.getInstanceOf("assert_nrf_callback");

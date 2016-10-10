@@ -1,11 +1,11 @@
 /**
  * ble header for nordic
  */
-ble_header(space,rapp)::=<<
+ble_header(space)::=<<
 /*
  * api_ble.h
  *
- *  Created on: \<space.timeDate>
+ *  Created on: <space.timeDate>
  *      Author: Ravel
  */
 
@@ -21,16 +21,12 @@ ble_header(space,rapp)::=<<
 #define BLE_UUID_RAVEL                0x1000 // Just a random, but recognizable value
 //0000abcd
 
-#define BLE_UUID_RANDOM_MODEL_CHAR_UUID          0x1100
-#define BLE_UUID_CONFIG_MODEL_CHAR_UUID          0x1110
+<space.models:{model|#define BLE_UUID_<model.cName>_CHAR_UUID 0x110<i0>}; separator="\n">
 
 
 typedef enum
-{
-    BLE_RANDOM_MODEL_NOTIFICATION_ENABLED,
-	BLE_RANDOM_MODEL_NOTIFICATION_DISABLED,
-	BLE_CONFIG_MODEL_WRITE,
-	BLE_CONFIG_MODEL_READ
+{    ??TODO: fix comma separation
+    <space.models:{model|<get_model_comm_events(model)>}>
 } ble_rand_mod_evt_type_t;
 
 
@@ -515,11 +511,32 @@ void conn_params_init(void) {
 	err_code = ble_conn_params_init(&cp_init);
 	APP_ERROR_CHECK(err_code);
 }
-
 >>
+
+//create model event types and namings
+get_model_comm_events(model)::=<<
+<if(model.streaming)>
+//streaming models have notifications
+<ble_notification_enabled(model.defineName)>,
+<ble_notification_disabled(model.defineName)>,
+<elseif(model.replicated)>
+// replicated model have read/write
+<ble_read(model.defineName)>,
+<ble_write(model.defineName)>
+<else>
+<! should never end up here !>
+\<\<\<\< ERROR in model type! \>\>\>
+<endif>
+>>
+
+ble_notification_enabled(modelName)::="BLE_<modelName>_NOTIFICATION_ENABLED"
+ble_notification_disabled(modelName)::="BLE_<modelName>_NOTIFICATION_DISABLED"
+ble_read(modelName)::="BLE_<modelName>_READ"
+ble_write(modelName)::="BLE_<modelName>_WRITE"
+ble_indicate(modelName)::="BLE_<modelName>_INDICATE"
+
 //TODO: add config file for all the parameters to allow flexing and from Ravel
 ble_base_config()::=<<
-
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(100, UNIT_1_25_MS)           /**\< Minimum acceptable connection interval (0.1 seconds). */
 #define MAX_CONN_INTERVAL                MSEC_TO_UNITS(200, UNIT_1_25_MS)           /**\< Maximum acceptable connection interval (0.2 second). */
 #define SLAVE_LATENCY                    0                                          /**\< Slave latency. */
@@ -550,10 +567,11 @@ ble_base_config()::=<<
 
 
 >>
+//TODO: need clean up
 ble_base_include()::=<<
-#include \<stdint.h\>
-#include \<stdlib.h\>
-#include \<string.h\/>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include "nordic_common.h"
 #include "nrf.h"
 #include "app_error.h"
@@ -566,4 +584,8 @@ ble_base_include()::=<<
 #include "boards.h"
 #include "softdevice_handler.h"
 #include "app_timer.h"
+#include "bsp_btn_ble.h"
+
+#include "ravel_layer.h"
+#include "../models.h"
 >>
