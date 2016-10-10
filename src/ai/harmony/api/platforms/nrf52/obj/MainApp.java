@@ -31,6 +31,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
 
     public MainApp(String bp, Space s) {
+        super();
         mBuildPath = bp;
         mSpace = s;
         mMainTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/main.stg");
@@ -42,6 +43,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         //Base stuff that is needed by nrf
         addLogging();
         addBaseMake();
+        addRavelLayer();
         //this app
         addMainAppMake();
         //make config section
@@ -50,6 +52,10 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     }
 
+    private void addRavelLayer(){
+        RavelLayer rl = new RavelLayer(mBuildPath, mSpace);
+        mFileList.addAll(rl.getFiles());
+    }
     private void makeBLE(String mBuildPath){
         STGroup ble_tmpl = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/ble.stg");
         ST tmpl_h = ble_tmpl.getInstanceOf("ble_header");
