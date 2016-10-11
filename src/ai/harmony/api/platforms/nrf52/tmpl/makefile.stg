@@ -7,18 +7,15 @@ SDK_ROOT := $(NRF52SDK)
 PROJ_DIR :=
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := ravel_gcc_nrf52.ld
+  LINKER_SCRIPT  := config/ravel_gcc_nrf52.ld
 # Source files common to all targets
 SRC_FILES += \
   <components.makeObjects:{m_object|<m_object.name> \\};separator="\n">
 
 
-
-
 # Include folders common to all targets
 INC_FOLDERS += \
   <components.makeIncludePath:{m_object|<m_object.name> \\};separator="\n">
-
 
 
 # Libraries common to all targets

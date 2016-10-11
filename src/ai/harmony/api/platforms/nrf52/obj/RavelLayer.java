@@ -34,7 +34,7 @@ public class RavelLayer extends RavelAPIObject implements RavelObjectInterface {
         return null;
     }
 
-
+    public String getMakeObjName(){return "api/"+fileName+".c";}
     @Override
     public List<FileObject> getFiles() {
         ST t_obj = mRavelLayerTmpl.getInstanceOf("ravel_layer_obj_c");

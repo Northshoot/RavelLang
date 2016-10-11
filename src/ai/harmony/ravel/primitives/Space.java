@@ -76,26 +76,24 @@ public class Space extends Primitive{
 
     public List<FileObject> buildAll() {
         List<FileObject> mFiles = new ArrayList<>();
-        mFiles.addAll(mPlatform.buildPlatform(this));
         mFiles.addAll(mPlatform.buildLanguage(this));
+        mFiles.addAll(mPlatform.buildPlatform(this));
+
         return mFiles;
     }
 
-    public void buildLanguage() {
 
-    }
     public String getBuildPath(){
         return this.mBuildPath;
     }
     public String setBuildPath(String p){
         return this.mBuildPath=p+this.mName;
     }
-    public void buildPlatform() {
-    }
+
 
     /**
      * get time current
-     * TODO: shoudl be moved to a builder class that is passed to the template with all the preferences
+     * TODO: should be moved to a builder class that is passed to the template with all the preferences
      * @return
      */
     public String getTimeDate(){

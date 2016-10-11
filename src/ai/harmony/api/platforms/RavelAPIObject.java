@@ -132,9 +132,8 @@ public class RavelAPIObject {
      * kind of platform specific
      * @return
      */
-    public String getInitMethodCall(){
-        return mInitMethodName+"();";
-    }
+
+
 
     public String getHeaderFileName() {
         return null;

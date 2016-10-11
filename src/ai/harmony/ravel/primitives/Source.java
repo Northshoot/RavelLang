@@ -2,6 +2,9 @@ package ai.harmony.ravel.primitives;
 import ai.harmony.ravel.primitives.Fields.Field;
 import org.stringtemplate.v4.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by lauril on 8/16/16.
  */
@@ -11,7 +14,7 @@ public class Source extends Primitive{
     private String resolve;
     private String mInitCallName = null;
     private Controller mController = null;
-
+    private List<String> mCallBacks = new ArrayList<>();
 
     public Source(String name, String res) {
         super(name);
@@ -47,4 +50,14 @@ public class Source extends Primitive{
         mName = controller.getCName()+"__"+mName;
     }
 
+    public Controller getController() {
+        return mController;
+    }
+
+    public void addCallBack(String callbackname){
+        mCallBacks.add(callbackname);
+    }
+    public List<String>  getCallBacks(){
+        return mCallBacks;
+    }
 }

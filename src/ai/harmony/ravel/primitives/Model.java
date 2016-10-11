@@ -31,18 +31,20 @@ public class Model extends ParametrizedComponent {
     private String mArrived="arrived";
     private String mDeparted="departed";
     private String mCreate="create";
-    private String mSave="save";
+    private String mSaveDone="save";
+    private String mBufferSaveDone="bufferSave";
     private String mFull="full";
     private String mDelete="delete";
     private String mGet="get";
     private String mFirst="first";
     private String mLast="last";
     private String mDestroy="destroy";
-
+    private Map<String, String> mEvents;
 
     //TODO: implement builder pattern
     public Model(String name, Model.Type t){
         super(name,name+"Model");
+        mEvents = new LinkedHashMap<>();
         //TODO: implement real error handling
         if (t == Type.tINVALID ) {
             LOGGER.severe("Invalid model type! ");
@@ -62,6 +64,12 @@ public class Model extends ParametrizedComponent {
     //get buffer initialization
     public String getInitFunction(){
         return getCName()+"__innit";
+    }
+
+    public List<String> getEvents(){
+        List<String> lst = new ArrayList<>();
+        lst.addAll(mEvents.values());
+        return lst;
     }
     //destroy buffer
     public String getDestroyFunction(){
@@ -103,24 +111,24 @@ public class Model extends ParametrizedComponent {
      */
     //record arrived to the tier
     public String getArrivedEvent(){
-        return getCName() +  "__" + mController.getCName() + "__arrived";
+        return mEvents.get(mArrived);
     }
 
     //record departed from the tier
     public String getDepartedEvent(){
-        return getCName() + "__" + mController.getCName() + "__departed";
+        return mEvents.get(mDeparted);
     }
     //save done
     public String getSaveDoneEvent(){
-        return getCName() +  "__" + mController.getCName() + "__saveDone";
+        return mEvents.get(mSaveDone);
     }
 
     public String getBufferSaveDoneEvent(){
-        return getCName() +  "__" + mController.getCName() + "__bufferSaveDone";
+        return mEvents.get(mBufferSaveDone);
     }
     //buffer is full event
     public String getFullEvent(){
-        return getCName() + "__" + mController.getCName() +  "__full";
+        return mEvents.get(mFull);
     }
 
     /**
@@ -130,6 +138,11 @@ public class Model extends ParametrizedComponent {
      */
     public void addController(Controller ctr){
         this.mController = ctr;
+        mEvents.put(mArrived, getCName()  +  "__" + mController.getCName() + "__arrived");
+        mEvents.put(mDeparted,getCName() + "__" + mController.getCName() + "__departed");
+        mEvents.put(mSaveDone,getCName()  +  "__" + mController.getCName() +"__saveDone");
+        mEvents.put(mBufferSaveDone, getCName() + "__" + mController.getCName() + "__bufferSaveDone");
+        mEvents.put(mFull,getCName() + "__" + mController.getCName() +  "__full");
     }
 
     public Model.Type getModelType() {

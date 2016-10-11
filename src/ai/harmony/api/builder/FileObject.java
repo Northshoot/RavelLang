@@ -18,7 +18,7 @@ public class FileObject {
     private String content;
 
     public String getPath() throws IOException{
-        if (path == null) throw new IOException("File content is not set!");
+        if (path == null) throw new IOException("File Path is not set! " + fileName);
         return path;
     }
 
@@ -40,7 +40,7 @@ public class FileObject {
 
     public String getContent() throws IOException{
         if (content == null) {
-            throw new IOException("File content is not set!");
+            throw new IOException("File content is not set! " + fileName);
         } else {
             return content;
         }

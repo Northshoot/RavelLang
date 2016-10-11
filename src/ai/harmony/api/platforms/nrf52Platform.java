@@ -67,11 +67,11 @@ public class nrf52Platform extends ConcretePlatform{
 
     public void addSourceTimer(String timer_name, Source src){
         if(tQueue == null) {
-            this.tQueue = new TimerQueue(mBuildPathApi);
+            this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
 
         }
         src.setInitCallName(tQueue.innit_name);
-        tQueue.addTimer(src.getCName(), true);
+        tQueue.addTimer(src, true);
     }
 
     public void addSourceRandom(String name, Source src) {
@@ -109,6 +109,10 @@ public class nrf52Platform extends ConcretePlatform{
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+        }
+        for(Controller c: mSpace.getControllers()){
+            ControllerImpl cImp = new ControllerImpl(c, mMainApp);
+            mFiles.addAll(cImp.getFiles());
         }
         return getFiles();
     }

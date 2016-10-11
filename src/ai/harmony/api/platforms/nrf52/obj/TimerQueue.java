@@ -6,6 +6,7 @@ import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.RavelObjectInterface;
 import ai.harmony.ravel.primitives.Controller;
+import ai.harmony.ravel.primitives.Source;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -37,28 +38,18 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     public String innit_name = "timers_init";
 
 
-    public TimerQueue(String mBuildPath){
+    public TimerQueue(String mBuildPath, Controller c){
         super();
+        controller = c;
         mTimerMap = new HashMap<>();
         tmpl_group = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/timer.stg");
-        tmpl_header = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/h_file.stg");
-        tmpl_obj = new STGroupFile(BASE_C_LANG_TMPL_PATH + "/c_obj.stg");
         docs = "This is timer file documentation documentation" +
                 "All timers are collected in the single file";
-        mTimerMap = new HashMap<>();
 
-        mBuildPath = mBuildPath;
         header.setFileName(fileName + ".h");
         header.setPath(mBuildPath);
         obj.setFileName(fileName + ".c");
         obj.setPath(mBuildPath);
-
-
-        //to all timers needed includes
-        addToIncludes(new Declaration("<stdint.h>", "Used for uint type"));
-        addToIncludes(new Declaration("\"app_error.h\"", "Used to deterime error"));
-        addToIncludes(new Declaration("\"softdevice_handler.h\""));
-        addToIncludes(new Declaration("\"app_timer.h\""));
 
         addToMakeIncludePathSDK("/components/drivers_nrf/timer");
         addToMakeIncludePathSDK("/components/libraries/timer");
@@ -67,20 +58,9 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         addToMakeObj("api/" + this.fileName +".c");
     }
 
-    private void make_init() {
-        FuncDeclaration f = new FuncDeclaration();
-        f.setCallFunction(innit_name +"();");
-        f.setMethodDeclaration("void " + f.getCallFunction());
-        ST tmpl = tmpl_group.getInstanceOf(innit_name);
-        //show the map of timers and puf!
-        tmpl.add("timers", this);
-        f.setFunctionImplementation( tmpl.render() );
-        addFuncDeclaration(f);
-    }
-
-    public ST getTemplate(String name){
-        return tmpl_group.getInstanceOf(name);
-    }
+    public String getControllerInclude(){
+        System.out.println("::::: " +controller.getHeaderFileName());
+        return controller.getHeaderFileName();}
 
     public List<FuncDeclaration> getFuncDeclaration(){
 
@@ -105,8 +85,8 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     }
 
 
-    public void addTimer(String timer_name, boolean periodic) {
-        mTimerMap.put(" noname no_gane", new Timer(timer_name, this, periodic));
+    public void addTimer(Source timer_name, boolean periodic) {
+        mTimerMap.put(timer_name.getCName(), new Timer(timer_name, this, periodic));
     }
 
     public Timer getTimer(String timer_name) {
@@ -114,22 +94,18 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     }
 
     public List<FileObject> getFiles() {
-        make_init();
-        ST r = tmpl_header.getInstanceOf("header");
-        r.add("header_data", this);
+        ST r = tmpl_group.getInstanceOf("timers_header");
+        r.add("obj", this);
         header.setContent(r.render());
-        ST t_obj = tmpl_obj.getInstanceOf("obj_file");
 
-        t_obj.add("obj_data", this);
+        ST t_obj = tmpl_group.getInstanceOf("timer_object");
+        t_obj.add("timers", this);
+        t_obj.add("include", getControllerInclude());
         obj.setContent(t_obj.render());
-
         return super.getFiles();
     }
     @Override
     public String toString(){
-        //create the init method
-        make_init();
-
         ST r = tmpl_header.getInstanceOf("header");
         r.add("header_data", this);
         return r.render();

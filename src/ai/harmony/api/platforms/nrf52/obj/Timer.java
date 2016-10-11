@@ -3,6 +3,7 @@ package ai.harmony.api.platforms.nrf52.obj;
 import ai.harmony.api.lang.c.Declaration;
 import ai.harmony.api.lang.c.FuncDeclaration;
 import ai.harmony.api.platforms.RavelAPIObject;
+import ai.harmony.ravel.primitives.Source;
 import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
@@ -23,92 +24,60 @@ public class Timer extends RavelAPIObject {
     String mCallBack;
     String mVarName ;
     String mShortName;
-    String mTemplateName;
-    Map<String, FuncDeclaration> mFunctions;
+    String mStartName;
+    String mStopName;
     TimerQueue tm;
-    FuncDeclaration start;
-    FuncDeclaration stop;
+    Source mSrc;
+
     public boolean debug = true;
     private boolean periodic = true;
 
-    public Timer( String n, TimerQueue tm, boolean periodic){
+    public Timer(Source src, TimerQueue tm, boolean periodic){
         super();
+        mSrc =src;
         this.tm = tm;
         this.periodic = periodic;
-        this.mShortName = n;
-        this.mVarName = n;
+        this.mShortName = src.getCName();
+        this.mVarName = src.getCName();
+
         docs = "This is timer " + this.mVarName + " documentation";
-        mTimerMode = "APP_TIMER_MODE_REPEATED";
-        mFunctions = new HashMap<>();
+
         // implementation of timer functions
-        //timers have two functions, start and stop,
-         start = new FuncDeclaration();
-         stop = new FuncDeclaration();
-        //fixing naming depending on the periodic or not
         if(periodic ) {
+            mTimerMode="APP_TIMER_MODE_REPEATED";
+
             this.mVarName = mShortName+"__timer_periodic";
-            this.mTemplateName = "__timer_periodic";
-            tm.addToDefines(new Declaration(this.mVarName.toUpperCase() + " APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)",
-                    "Default value for the timer" ));
-            //set function name
-            start.setName(mShortName+"__startTimerPeriodic");
-            stop.setName(mShortName+"__stopTimerPeriodic");
         } else {
-            this.mVarName = mShortName+"__timer_periodic";
-            tm.addToDefines(new Declaration(this.mVarName +" APP_TIMER_TICKS(25000, APP_TIMER_PRESCALER)",
-                    "Default value for the timer" ));
-            //set function name
-            start.setName(mShortName+"__startTimerOneShoot");
-            stop.setName(mShortName+"__stopTimerOneShoot");
+            mTimerMode="APP_TIMER_MODE_SINGLE_SHOT";
+            this.mVarName = mShortName+"__timer_one_shot";
         }
         //creating functions and all other stuff
         mCallBack = this.mVarName+"__expired";
+        src.addCallBack(mCallBack);
+        mStartName = this.mVarName + "__start";
+        mStopName = this.mVarName + "__stop";
 
-        ST start_decl = getTemplate("start", "__declaration");
-        start_decl.add("timer", start);
-        start.setMethodDeclaration(start_decl.render());
-
-        ST start_impl = getTemplate("start" , "__implementation");
-        start_impl.add("timer", start);
-        start.setFunctionImplementation(start_impl.render());
-
-        ST stop_decl = getTemplateStop("__declaration");
-        stop_decl.add("timer", stop);
-        stop.setMethodDeclaration(stop_decl.render());
-
-        ST stop_impl = getTemplateStop("__implementation");
-        stop_impl.add("timer", stop);
-        stop.setFunctionImplementation(stop_impl.render());
-
-        //add functions
-        tm.addToDefines(new Declaration("APP_TIMER_DEF(" + this.mVarName +")", "Initializing timer"));
-        tm.addFuncDeclaration(start);
-        tm.addFuncDeclaration(stop);
     }
 
-    public String getStopCall(){
-        if (periodic ) {
-            return start.getCallFunction();
-        }
-        return "";
+
+    public boolean isPeriodic(){ return periodic; }
+    public String getCallback(){ return this.mCallBack;}
+
+    public String getStartName(){
+        return  mStartName;
     }
-    public String getStartPeriodicCall(String period){
-        if (periodic ) {
-            return start.getCallFunction();
-        }
-        return "";
+    public String getStopName(){
+        return  mStopName;
+    }
+    public String getCVarName(){
+        return "m_" + this.mVarName;
     }
 
+    public String getDefineName(){ return this.mVarName.toUpperCase();}
     public String getTimerMode(){
         return this.mTimerMode;
     }
 
     public  String getCallBack() { return this.mCallBack; }
 
-    private ST getTemplateStop(String post){
-        return tm.getTemplate("stop__timer"+post);
-    }
-    private ST getTemplate(String pre, String post){
-        return tm.getTemplate(pre + this.mTemplateName + post);
-    }
 }

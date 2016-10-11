@@ -17,6 +17,8 @@ header(header_data) ::= <<
 // defines below
 <header_data.defines:{define|#define <define.name> <\t><\t> <define.comment>} ;separator="\n">
 
+// declarations below
+<header_data.declarations:{decl|<decl.name> ; <\t><\t> <decl.comment>} ;separator="\n">
 //function declarations bellow
 <header_data.funcDeclaration:{func|<func.methodDeclaration>  <\t><\t> <func.comment> } ;separator="\n">
 

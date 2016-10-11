@@ -29,7 +29,7 @@ public class Controller extends ParametrizedComponent{
             m.addController(this);
         }
         for(String key: mSources.keySet()) {
-            //TODO: there is alwasys a bettter way to handle this
+            //TODO: there is always a better way to handle this
             Source src = this.mSpace.getSource(mReference.get(key).replace("tier.sources.",""));
             if(src != null) {
                 mSources.put(key, src);
@@ -40,6 +40,9 @@ public class Controller extends ParametrizedComponent{
     }
     public void addVar(String name, Variable value) { this.mDeclarations.put(name, value) ;}
 
+    public boolean isSubscribe(Model model){
+        return true;
+    }
     public void addRef(String name, String value) {
         if(value.contains("model")) {
             mModels.put(value, null);
@@ -48,19 +51,32 @@ public class Controller extends ParametrizedComponent{
         }
         this.mReference.put(name, value) ;}
 
+    public List<Source> getSources(){
+        List<Source> lst = new ArrayList<>();
+        lst.addAll(mSources.values());
+        return lst;
 
+    }
+    public List<Model> getModels(){
+        List<Model> lst = new ArrayList<>();
+        lst.addAll(mModels.values());
+        return lst;
 
+    }
+    /**
+     * To actually subscribe to source/model events we need to map
+     * the events and get the actual source/model naming and make implementation
+     *
+     */
 
     public void addEvent(String name, Event event) {
         this.mEvents.put(name, event);
     }
 
     public String getfileNameC(){
-        System.out.println(":::::::::::: getfileNameC " + mName);
-        return mName+"_ctr"; }
-    public String getName_c(){ return "m_"+mName.toLowerCase()+"_ctr";}
 
-    public void addModels(Map<String, Model> modelMap) {
-
+        return mName+"_ctr";
     }
+
+
 }

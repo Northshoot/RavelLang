@@ -39,7 +39,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         //create main app
         obj.setPath(mBuildPath);
         obj.setFileName(fileName);
-        if(ble_enable) makeBLE(mBuildPath);
+        makeCnf();
         //Base stuff that is needed by nrf
         addLogging();
         addBaseMake();
@@ -48,12 +48,17 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         addMainAppMake();
         //make config section
         //TODO: add dynamic app config based on params
-        makeCnf();
+
+        if(ble_enable) makeBLE(mBuildPath);
+        addToMakeObj("api/ringbuf.c");
 
     }
 
+    public String getBuildPath(){ return this.mBuildPath; }
+
     private void addRavelLayer(){
         RavelLayer rl = new RavelLayer(mBuildPath, mSpace);
+        addToMakeObj(rl.getMakeObjName());
         mFileList.addAll(rl.getFiles());
     }
     private void makeBLE(String mBuildPath){
@@ -73,6 +78,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         ble_obj.setFileName("api_ble.c");
         ble_obj.setPath(mBuildPath+"/api/");
         ble_obj.setContent(tmpl_o.render());
+
         mFileList.add(ble_header);
         mFileList.add(ble_obj);
     }
@@ -100,6 +106,8 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
         obj.setContent(t_obj.render());
         mFileList.add(obj);
+        //add models to the build files
+        addToMakeObj("models.c");
         return mFileList;
     }
 
@@ -110,7 +118,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     private void makeCnf(){
         ST t_obj = mCnfgTmlp.getInstanceOf("ravel_gcc_nrf52_ld");
-        addCnfFile("ravel_gcc_nrf52_ld.ld",t_obj.render());
+        addCnfFile("ravel_gcc_nrf52.ld",t_obj.render());
 
         t_obj = mCnfgTmlp.getInstanceOf("app_cnfg");
         addCnfFile("app_config.h",t_obj.render());

@@ -20,19 +20,14 @@ public class RavelApplication  {
     }
 
     /**
-     * Making intercomponents linking
+     * Making inter component linking
      * mangle mangle this can be done better
      * TODO: making it pretty
      */
     public void link() {
 
-        for(Controller c: getControllers()){
-            c.addModels(mModels);
-        }
 
     }
-
-
 
     Map<String, Model> mModels = new LinkedHashMap<>();
     public void addModel(String name, Model m){

@@ -26,6 +26,13 @@ public class xLingual implements Translator {
         this.mName = givenName;
     }
 
+    public String getHeaderFileName(){
+        return getCName() + ".h";
+    }
+    public String getObjFileName(){
+        return getCName() + ".c";
+    }
+
     @Override
     public String getVerboseName() {
         return getNameCamelCase();

@@ -13,6 +13,13 @@ models_header_file(space)::=<<
 #ifndef MODELS_H_
 #define MODELS_H_
 <base_includes()>
+
+typedef struct _rCntx {
+	uint32_t error;
+	void* model;
+} RavelContext;
+
+
 //generating structures for the models
 <space.models:{model|
 //<model.comment>
@@ -75,6 +82,11 @@ ghpringbuf *buf;
 
 <! function implementation depends on the model type!>
 <if(model.streaming || model.local)>
+//*record functions:*/
+//delete buffer
+void <model.DestroyFunction>(){
+    ghpringbuf_destroy(<model.cName>__queue_buf);
+}
 //is buffer full
 inline static bool <model.cName>__is_full(){
 	return <model.cName>__queue_buf->capacity == <model.cName>__queue_buf->count;
@@ -82,16 +94,9 @@ inline static bool <model.cName>__is_full(){
 
 //buffer size is defined via <model.defineName>__QUEUE_SIZE
 //init buffer
-void <model.getInitFunction>(){
-	<model.cName>__queue_buf = ghpringbuf_create(<model.modelNameUpperCase>QUEUE_SIZE, sizeof(<model.modelName>), 1, NULL);
+void <model.initFunction>(){
+	<model.cName>__queue_buf = ghpringbuf_create(<model.defineName>__QUEUE_SIZE, sizeof(<model.modelName>), 1, NULL);
 }
-
-//delete buffer
-void <model.DestroyFunction>(){
-    ghpringbuf_destroy(<model.cName>__queue_buf);
-}
-//*record functions:*/
-
 //create record is in place code snippet
 <model.modelName> <model.createFunction>(){
         <model.modelName> m_model;
@@ -100,7 +105,7 @@ void <model.DestroyFunction>(){
     	//loop through the field to set default values
     	<model.schema:{field|<if(field.hasDefault)> <field.cVarName>=<field.defaultValue>; //setting default<endif>};separator="\n">
         //return newly created model with set fields
-    	return m_model
+    	return m_model;
 }
 //save record
 void <model.saveFunction>(<model.modelName> *mr) {
@@ -112,38 +117,40 @@ void <model.saveFunction>(<model.modelName> *mr) {
 	}
 	<model.cName>__buff_full = <model.cName>__is_full();
 	if(<model.cName>__buff_full){
-		<model.cName>_ctr__<model.cName>_full();
+		<model.fullEvent>(mr);
 	}
 	<model.bufferSaveDoneEvent>(mr);
 }
 
 //delete
 void <model.deleteFunction>(int position) {
-    ghpringbuf_pop(position);
+    //TODO: fix buffer pop at possition
+    //ghpringbuf_pop(position);
 
 }
+
 //* record local queries */
 void <model.recordPosition>(uint32_t position, <model.modelName> *rm){
 	<model.modelName> *a_ptr;
-	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, position))
+	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, position);
 	memcpy(&rm, a_ptr, sizeof(<model.modelName>));
 
 }
-void <model.firstRecord>(<model.modelName> *a){
+void <model.firstRecord>(<model.modelName> *rm){
 	<model.modelName> *a_ptr;
-	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, 0))
+	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, 0);
 	memcpy(&rm, a_ptr, sizeof(<model.modelName>));
 
 }
-void <model.lastRecord>(<model.modelName> *a){
+void <model.lastRecord>(<model.modelName> *rm){
 	<model.modelName> *a_ptr;
-	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, <model.size>-1))
+	a_ptr = ghpringbuf_at(<model.cName>__queue_buf, <model.size>-1);
 	memcpy(&rm, a_ptr, sizeof(<model.modelName>));
 }
 <elseif(model.replicated)>
 <! replicated are only one instance of the model, logging makes new model !>
 
-void <model.initFunction>{
+void <model.initFunction>(){
 	memset(&<model.cVarName>, 0, sizeof(<model.modelName>));
 	//loop through the field to set default values
      <model.schema:{field|<if(field.hasDefault)> <field.cVarName>=<field.defaultValue>; //setting default<endif>};separator="\n">
@@ -163,7 +170,10 @@ void <model.saveFunction>(<model.modelName> *rm) {
 void <model.firstRecord>(<model.modelName> *rm){
 	memcpy(rm, &<model.cVarName>, sizeof(<model.cVarName>));
 }
-void <model.cName>recordPosition(uint32_t position, <model.modelName> *rm){
+void <model.lastRecord>(<model.modelName> *rm){
+	memcpy(rm, &<model.cVarName>, sizeof(<model.cVarName>));
+}
+void <model.recordPosition>(uint32_t position, <model.modelName> *rm){
      //TODO: raise an error from Ravel
      memcpy(rm, &<model.cVarName>, sizeof(<model.cVarName>));
 }
@@ -185,7 +195,7 @@ void <model.destroyFunction>();
 
 //*record functions:*/
 //create record
-void <model.createFunction>(<model.modelName> *modelP) ;
+<model.modelName> <model.createFunction>() ;
 //save record
 void <model.saveFunction>(<model.modelName> *modelP) ;
 //delete
@@ -193,24 +203,13 @@ void <model.deleteFunction>(int position) ;
 
 //* record local queries */
 //get record with position position
-void <model.recordPosition>(uint32_t position);
+void <model.recordPosition>(uint32_t position, <model.modelName> *rm);
 //get first record
-void <model.firstRecord>();
+void <model.firstRecord>(<model.modelName> *rm);
 //get last record
-void <model.lastRecord>();
+void <model.lastRecord>(<model.modelName> *rm);
 
-//* record events defined for each controller */
-//TODO: add many to many relation support
-//arrived event
-void <model.arrivedEvent>();
-//departed event
-void <model.departedEvent>();
-//buffer is full event
-void <model.fullEvent>();
-//save done event
-void <model.saveDoneEvent>();
-//data saved to the buffer event
-void <model.bufferSaveDoneEvent>();
+
 >>
 model_meta_pkt(model)::=<<
 typedef struct _meta<model.modelName> {
@@ -236,14 +235,15 @@ typedef struct {
 //common includes for base models
 base_includes()::=<<
 //base includes
-#include "stdlib.h"
-#include "unistd.h"
+#include \<stdint.h>
+#include \<stdlib.h>
+#include \<string.h>
 //default buffers
 #include "api/ringbuf.h"
 
 >>
 model_ctr_includes(controllers)::=<<
 <! For  each model add controller for call backs!>
-<controllers:{ctr|#include "<ctr.fileNameC>.h" //controller include};separator="\n">
+<controllers:{ctr|#include "<ctr.headerFileName>" //controller include};separator="\n">
 >>
 

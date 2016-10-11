@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 
 
 /**
+ * TODO: move linking between to the ravelApp
+ *
  * Created by lauril on 8/30/16.
  */
 public class PrimitiveRepPhase extends RavelBaseListener {
