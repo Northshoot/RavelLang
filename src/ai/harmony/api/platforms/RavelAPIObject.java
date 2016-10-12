@@ -8,6 +8,7 @@ import ai.harmony.api.platforms.nrf52.obj.MainApp;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static ai.harmony.api.platforms.nrf52Platform.MAKE_PRJ_PREFIX;
 import static ai.harmony.api.platforms.nrf52Platform.MAKE_SDK_PREFIX;
@@ -16,6 +17,7 @@ import static ai.harmony.api.platforms.nrf52Platform.MAKE_SDK_PREFIX;
  * Created by lauril on 9/21/16.
  */
 public class RavelAPIObject {
+    private static Logger LOGGER = Logger.getLogger(RavelAPIObject.class.getName());
     protected String docs = "Object documentation is not set";
     protected boolean isStandAlone = false;
     protected String mMethodName = "";
@@ -35,7 +37,7 @@ public class RavelAPIObject {
         this.depenencies.put("defines", new ArrayList<>());
         this.depenencies.put("declarations", new ArrayList<>());
         this.depenencies.put("functions", new ArrayList<>());
-
+        LOGGER.info("Initialized RavelAPIObject");
     }
 
 
@@ -161,8 +163,13 @@ public class RavelAPIObject {
     }
 
     public List<FileObject> getFiles() {
-        mFileList.add(header);
-        mFileList.add(obj);
+        if(mFileList == null || header == null || obj == null){
+            LOGGER.severe("objects are null!!" + " mFileList " + (mFileList == null)
+                    + " header " + (header == null) + " obj "  + (obj == null) );
+        } else {
+            mFileList.add(header);
+            mFileList.add(obj);
+        }
         return mFileList;
     }
 

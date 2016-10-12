@@ -258,6 +258,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlockStatement(RavelParser.BlockStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#comp_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComp_stmt(RavelParser.Comp_stmtContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code DeleteStmt}
 	 * labeled alternative in {@link RavelParser#del_stmt}.
 	 * @param ctx the parse tree
@@ -288,6 +294,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArrayInitializer(RavelParser.ArrayInitializerContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#while_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhile_stmt(RavelParser.While_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFor_stmt(RavelParser.For_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#statement}.
 	 * @param ctx the parse tree
@@ -356,17 +374,17 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForControl(RavelParser.ForControlContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#forInit}.
+	 * Visit a parse tree produced by {@link RavelParser#exprlist}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitForInit(RavelParser.ForInitContext ctx);
+	T visitExprlist(RavelParser.ExprlistContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#forUpdate}.
+	 * Visit a parse tree produced by {@link RavelParser#testlist}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitForUpdate(RavelParser.ForUpdateContext ctx);
+	T visitTestlist(RavelParser.TestlistContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#function_args}.
 	 * @param ctx the parse tree
@@ -379,6 +397,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WhileStmt}
+	 * labeled alternative in {@link RavelParser#whileControl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStmt(RavelParser.WhileStmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#functionArg}.
 	 * @param ctx the parse tree

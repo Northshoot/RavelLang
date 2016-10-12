@@ -55,9 +55,13 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         Model m = new Model(name, Model.getType(type));
         LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
-        List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
-        for(RavelParser.ParamContext t: component_parametersContext){
-            m.addParam(t.getText());
+        try{
+            List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
+            for(RavelParser.ParamContext t: component_parametersContext){
+                m.addParam(t.getText());
+            }
+        } catch (NullPointerException e){
+            //no params so no worries
         }
         Scope propScope = ctx.scope.getNestedScope("properties");
         List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();

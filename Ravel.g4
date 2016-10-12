@@ -311,11 +311,21 @@ eventdef returns [Scope scope]
 block_stmt
     : NEWLINE INDENT blockStatement+ DEDENT
     ;
+
 blockStatement
-    : controller_body
-    | statement
+    : ref_assig // reference
+    | property // simple var assignment
+    | variableDeclarator // or variable assignment
+    | funct_expr
+    | eventdef
+    | comp_stmt
+    | NEWLINE
+    ;
+comp_stmt
+    : while_stmt
     | if_stmt
     | del_stmt
+    | for_stmt
     ;
 del_stmt
     : DELETE qualified_name '(' elementValuePairs? ')' #DeleteStmt
@@ -333,10 +343,19 @@ variableInitializer
 arrayInitializer
     :   '{' (variableInitializer (',' variableInitializer)* (',')? )? '}'
     ;
+/// while_stmt: 'while' test ':' suite ['else' ':' suite]
+while_stmt
+ : WHILE comp_expr ':' block_stmt
+ ;
 
+/// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
+for_stmt
+ : FOR forControl ':' block_stmt
+ ;
 statement
     :   ASSERT expression
     |   'for'  forControl ':' block_stmt
+    |   'while'  whileControl ':' block_stmt
     |   'return' expression?
     |   'break' Identifier?
     |   'continue' Identifier?
@@ -381,15 +400,15 @@ statementExpression
 // : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
 // ;
 forControl
-    :   forInit? ';' expression? ';' forUpdate?
+    :   exprlist IN testlist
     ;
 
-forInit
+exprlist
     :   variableDeclarators
     |   expressionList
     ;
 
-forUpdate
+testlist
     :   expressionList
     ;
 function_args
@@ -398,7 +417,9 @@ function_args
 functionArgsList
     :functionArg (',' functionArg)?
     ;
-
+whileControl
+    : comp_expr  #WhileStmt
+    ;
 functionArg
     : Identifier Identifier
     ;

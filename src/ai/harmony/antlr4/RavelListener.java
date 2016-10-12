@@ -422,6 +422,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitBlockStatement(RavelParser.BlockStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#comp_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterComp_stmt(RavelParser.Comp_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#comp_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitComp_stmt(RavelParser.Comp_stmtContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code DeleteStmt}
 	 * labeled alternative in {@link RavelParser#del_stmt}.
 	 * @param ctx the parse tree
@@ -473,6 +483,26 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArrayInitializer(RavelParser.ArrayInitializerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#while_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhile_stmt(RavelParser.While_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#while_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhile_stmt(RavelParser.While_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterFor_stmt(RavelParser.For_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitFor_stmt(RavelParser.For_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#statement}.
 	 * @param ctx the parse tree
@@ -586,25 +616,25 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitForControl(RavelParser.ForControlContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#forInit}.
+	 * Enter a parse tree produced by {@link RavelParser#exprlist}.
 	 * @param ctx the parse tree
 	 */
-	void enterForInit(RavelParser.ForInitContext ctx);
+	void enterExprlist(RavelParser.ExprlistContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#forInit}.
+	 * Exit a parse tree produced by {@link RavelParser#exprlist}.
 	 * @param ctx the parse tree
 	 */
-	void exitForInit(RavelParser.ForInitContext ctx);
+	void exitExprlist(RavelParser.ExprlistContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#forUpdate}.
+	 * Enter a parse tree produced by {@link RavelParser#testlist}.
 	 * @param ctx the parse tree
 	 */
-	void enterForUpdate(RavelParser.ForUpdateContext ctx);
+	void enterTestlist(RavelParser.TestlistContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#forUpdate}.
+	 * Exit a parse tree produced by {@link RavelParser#testlist}.
 	 * @param ctx the parse tree
 	 */
-	void exitForUpdate(RavelParser.ForUpdateContext ctx);
+	void exitTestlist(RavelParser.TestlistContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#function_args}.
 	 * @param ctx the parse tree
@@ -625,6 +655,18 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code WhileStmt}
+	 * labeled alternative in {@link RavelParser#whileControl}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStmt(RavelParser.WhileStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code WhileStmt}
+	 * labeled alternative in {@link RavelParser#whileControl}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStmt(RavelParser.WhileStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#functionArg}.
 	 * @param ctx the parse tree

@@ -3,6 +3,7 @@ package ai.harmony.api.platforms;
 import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.platforms.RavelAPIObject;
 import ai.harmony.api.platforms.nrf52.obj.*;
+import ai.harmony.ravel.PrimitiveRepPhase;
 import ai.harmony.ravel.primitives.Controller;
 import ai.harmony.ravel.primitives.Source;
 import ai.harmony.ravel.primitives.Space;
@@ -14,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static ai.harmony.api.Settings.BASE_TMPL_PATH;
 
@@ -21,6 +23,7 @@ import static ai.harmony.api.Settings.BASE_TMPL_PATH;
  * Created by lauril on 9/21/16.
  */
 public class nrf52Platform extends ConcretePlatform{
+    private static Logger LOGGER = Logger.getLogger(nrf52Platform.class.getName());
     public final static String BASE_PALTFORM_TMPL_PATH = BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
     public final static String MAKE_PRJ_PREFIX = "$(PROJ_DIR)";
@@ -74,10 +77,20 @@ public class nrf52Platform extends ConcretePlatform{
         tQueue.addTimer(src, true);
     }
 
+    public void addSourceVibration(String name, Source src){
+        //TODO: implent sources
+        System.out.println("<<<<< not implemented sources >>>>>");
+    }
     public void addSourceRandom(String name, Source src) {
 
     }
-
+    public void  addSourcePeriodicTimer(String name, Source src) {
+        if(tQueue == null) {
+            this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
+        }
+        src.setInitCallName(tQueue.innit_name);
+        tQueue.addTimer(src, true);
+    }
     public static boolean providesAPI(String v){
         return VERSION.contentEquals(v);
     }
@@ -103,10 +116,13 @@ public class nrf52Platform extends ConcretePlatform{
                 Method addSourceMethod  = nrf52Platform.class.getMethod(name, n.getClass(), src.getClass());
                 addSourceMethod.invoke(this, n, src);
             } catch (NoSuchMethodException e) {
+                LOGGER.severe("NoSuchMethodException: Can not find method: " + name);
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
+                LOGGER.severe("InvocationTargetException: Wrong parameters to invoke: " + name);
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
+                LOGGER.severe("IllegalAccessException: Can not access: " + name);
                 e.printStackTrace();
             }
         }
@@ -119,7 +135,8 @@ public class nrf52Platform extends ConcretePlatform{
 
     public List<FileObject> getFiles(){
         mFiles.addAll(mMainApp.getFiles());
-        mFiles.addAll(tQueue.getFiles());
+        if(tQueue != null)
+            mFiles.addAll(tQueue.getFiles());
         mFiles.add(getMakeFile());
         return mFiles;
     }

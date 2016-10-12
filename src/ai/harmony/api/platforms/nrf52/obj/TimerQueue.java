@@ -59,7 +59,7 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     }
 
     public String getControllerInclude(){
-        System.out.println("::::: " +controller.getHeaderFileName());
+
         return controller.getHeaderFileName();}
 
     public List<FuncDeclaration> getFuncDeclaration(){
@@ -102,12 +102,11 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         t_obj.add("timers", this);
         t_obj.add("include", getControllerInclude());
         obj.setContent(t_obj.render());
+
         return super.getFiles();
     }
     @Override
     public String toString(){
-        ST r = tmpl_header.getInstanceOf("header");
-        r.add("header_data", this);
-        return r.render();
+        return "TQueus: " + mTimerMap.size();
     }
 }
