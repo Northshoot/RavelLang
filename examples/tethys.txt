@@ -43,10 +43,10 @@ replicated model AppConfig():
 
 controller EmBootstrapController(tier):
     app_device = tier.models.AppDevice
-    boot_error = tier.models.BootError
+    boot_error = tier.models.boot_error
     boot = tier.platform.system.boot
     timer = tier.platform.system.timer
-	
+
 
     event boot.booted(context cntx):
         rec = app_device.create()
@@ -72,7 +72,7 @@ replicated model GatewayAppConfig(buffer_size):
         log = ALL
         durable = True
         size = buffer_size
-	
+
 
     schema:
         id = IntegerField()
@@ -85,7 +85,7 @@ replicated model GatewayAppConfig(buffer_size):
 
 controller GtwAppConfig(tier):
     app_config = tier.models.app_config
-    boot_error = tier.models.BootError
+    boot_error = tier.models.boot_error
     system = tier.platform.system
 
     event system.booted(Context ctx):
@@ -108,7 +108,7 @@ local model ADCModel():
 
     schema:
         adc = IntegerField()
-    
+
 
 local model Measurement():
     properties:
@@ -119,7 +119,7 @@ local model Measurement():
         time = TimeStampField(auto_add_on_save=True)
         temperature = IntegerField()
         voltage = IntegerField()
-    
+
 local model EncryptedBlob(size):
     properties:
         durable = true
@@ -141,20 +141,20 @@ streaming model MeasurementPacket(size):
         acked = BooleanField(default=False)
         measurement = ByteField()
 
-controller MeasurementController(tier, source):
-    temp = source.temperature
-    voltage = source.voltage
+controller MeasurementController(tier):
+    temp = tier.source.temperature
+    voltage = tier.source.voltage
     timer = tier.platform.timer
     boot = tier.platform.system.boot
     fft = tier.platform.compute.fft
     ocb= tier.platform.encryption.ocb
-    config = tier.models.AppConfig
-    measurement_model = tier.models.Measurement
-    measurement_pkt = tier.models.MeasurementPacket
-    eBlob = tiers.models.EncryptedBlob
+    config = tier.models.embedded_config
+    measurement_model = tier.models.measurement
+    measurement_pkt = tier.models.measurement_packet
+    eBlob = tier.models.EncryptedBlob
     adc_model = tier.models.ADCMode
 
-    
+
     event boot.booted(Context ctx):
         timer.startPeriodic(config.frequency)
 
@@ -162,7 +162,7 @@ controller MeasurementController(tier, source):
         rec = adc_model.create()
         rec.adc = voltage.READ
         rec.save()
-    
+
     event adc_model.full(Context ctx):
         rec = measurement_model.create()
         rec.voltage = fft(adc_model)
@@ -188,7 +188,7 @@ controller MeasurementController(tier, source):
 
     event measurement_pkt.save_done(Context c):
         if c.error == SUCCESS:
-            rec = c.model
+            rec = measurement_pkt.getFirst()
             if rec.acked == True:
                 last = measurement_pkt.getLast()
                 if rec.blob == last.blob and rec.sequence ==last.sequence:
@@ -202,14 +202,15 @@ local model NumberOfPackets():
         number_of_packets = IntegerField(default=0)
 
 
-controller NumberOfPacketsController(tier):
+controller PacketCounter(tier):
     measurement = tier.models.measurement_packet
     number_packets = tier.models.number_packets
     measurement_per_pkt = 50
 
     event measurement.arrived(context cntx):
         n = number_packets.last()
-        number_packets.number_og_packets = n+measurement_per_pkt
+        count = n + measurement_per_pkt
+        number_packets.number_og_packets = count
         number_of_packets.save()
 
 local model DeviceLocationModel():
@@ -227,21 +228,20 @@ local model DeviceLocationModel():
         location = StringField()
         notes = StringField()
 
-controller SystemController(tier):
+controller AppSystem(tier):
     device_bootstrap = tier.models.device
     embedded_config = tier.models.embedded_config
     gtw_config = tier.models.gtw_config
-    measurement_pkt = tier.models.measurement_pkt
+    measurement_pkt = tier.models.measurement_packet
     measurement = tier.models.measurement
     location_model = tier.models.location_model
     api = tier.platform.system
     sink = tier.sink.db
 
-    event measurement_pkt.arrived(Context ctx):
 
     event device_bootstrap.arrived(Context ctx):
         if ctx.error is SUCCESS:
-            rec = ctx.model
+            rec = ctx.getModel()
             if rec.first_boot:
                 rec.uuid = api.get_unique_uuid()
                 rec.save()
@@ -253,81 +253,86 @@ controller SystemController(tier):
 
     event embedded_config.arrived(Context ctx):
         if ctx.error is SUCCESS:
-            rec = ctx.model
+            rec = ctx.getModel()
             sink.write(rec)
 
     event measurement_pkt.arrived(Context ctx):
         if ctx.error is SUCCESS:
-            rec = ctx.model
+            rec = ctx.getModel()
             measurements = api.encryption.ocb.decrypt(rec)
             for m in measurements:
                 sink.write(m)
 
     event location_model.arrived(Context ctx):
         if ctx.error is SUCCESS:
-            rec = ctx.model
+            rec = ctx.getModel()
             sink.write(rec)
 
 
 space EmbeddedSpace:
     platform:
-        language = clang
+        language = CLang
         templates=nrf52
-        system=nrf52.apiv1
+        system = nrf52Platform.v12
         compute = system.compute
 
     models:
 	    AppDevice = AppDevice()
-	    AppConfig = AppConfig()
-	    BootError = BootError(size=30)
+	    embedded_config = AppConfig()
+	    boot_error = BootError(size=30)
 	    ADCMode = ADCModel()
-	    Measurement = Measurement()
-	    MeasurementPacket = MeasurementPacket(size=500)
-	    eBlob= EncryptedBlob()
+	    location = DeviceLocationModel()
+	    measurement = Measurement()
+	    measurement_packet = MeasurementPacket(size=500)
+	    EncryptedBlob = EncryptedBlob()
 
     controllers:
-        boot_ctr=EmBootstrapController(tier=self, source=source)
+        boot_ctr=EmBootstrapController(tier=self)
         measurement_ctr = MeasurementController(tier=self)
 
-    
+
     sources:
 		temperature = platform.system.Temperature
 		voltage = platform.system.VoltageIO
-    
+
 
 
 space GatewaySpace:
     platform:
-        system = android.api23
+        language = JLang
+        system = Android.api23
         templates = android23
 
     models:
         app_gtw_config = GatewayAppConfig()
         number_packets = NumberOfPackets()
         boot_error = BootError(size=100)
+        measurement_packet =  MeasurementPacket(size=500)
 
     controllers:
-        packet_counter = NumberOfPacketsController(tier=self)
+        packet_counter = PacketCounter(tier=self)
 
 
 space CloudSpace:
     platform:
-	    language = python
+	    language = PyLang
 	    templates = django2
-	    system = django.apiv2
+	    system = Django.apiv2
 
     models:
 	    device = AppDevice()
+	    ADCMode = ADCModel()
 	    boot_error = BootError()
 	    embedded_config = AppConfig()
 	    gtw_config = GatewayAppConfig()
 	    measurement = Measurement()
-	    measurement_pkt = MeasurementPacket()
+	    measurement_packet = MeasurementPacket()
 	    location_model = DeviceLocationModel()
+	    EncryptedBlob = EncryptedBlob()
 
 
     controllers:
-	    bootstrap_ctr = SystemController(tier=self)
+	    bootstrap_ctr = AppSystem(tier=self)
 	    measurement_ctr = MeasurementController(tier=self)
     
 

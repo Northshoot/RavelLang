@@ -1,10 +1,12 @@
 package ai.harmony.api.builder;
 
+import ai.harmony.api.platforms.nrf52Platform;
 import ai.harmony.ravel.RavelApplication;
 import ai.harmony.ravel.primitives.Space;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 10/6/16.

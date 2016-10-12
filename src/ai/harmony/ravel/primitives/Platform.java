@@ -3,23 +3,20 @@ package ai.harmony.ravel.primitives;
 import ai.harmony.api.builder.FileObject;
 import ai.harmony.api.lang.ConcreteLanguage;
 import ai.harmony.api.platforms.ConcretePlatform;
-import ai.harmony.api.platforms.SystemApi;
-import ai.harmony.ravel.primitives.lang.IfStatement;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 9/7/16.
  */
 public class Platform {
 
-
+    private static Logger LOGGER = Logger.getLogger(Platform.class.getName());
     protected String mName;
     protected String mSystem;
     protected String mLang;
-    protected String mTempalte;
+    protected String mTemplate;
 
     private ConcretePlatform mPlatform;
     private ConcreteLanguage mLanguage;
@@ -34,6 +31,7 @@ public class Platform {
         //create a real platform object from the data
         try {
             String[] pAPI = mSystem.split("\\.");
+            LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
             mLanguage = (ConcreteLanguage) Class.forName("ai.harmony.api.lang." + mLang).newInstance();
             mPlatform = (ConcretePlatform) Class.forName("ai.harmony.api.platforms." + pAPI[0]).newInstance();
             mPlatform.setAPILevel(pAPI[1]);
@@ -78,7 +76,7 @@ public class Platform {
         public Builder name(String name) {varObj.mName = name; return thisObj; }
         public Builder language(String lang){varObj.mLang=lang; return thisObj; }
         public Builder system(String sys){varObj.mSystem=sys; return thisObj; }
-        public Builder template(String tempalte){varObj.mTempalte=tempalte; return thisObj; }
+        public Builder template(String tempalte){varObj.mTemplate =tempalte; return thisObj; }
 
 
 

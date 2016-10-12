@@ -1,26 +1,17 @@
-replicated model Device():
-    properties:
-        durable=false
-        reliable=false
-        records = size
-    schema:
-        id = DeviceId(unique=true)
-        booted = TimeStampField(auto_update=True)
-
 streaming model Random(size):
     properties:
-        durable=false
-        reliable=false
+        durable=False
+        reliable=False
         records = size
 
     schema:
-        time=TimestampField(auto_add=True)
+        time=TimeStampField(auto_add=True)
         value = IntegerField()
 
 replicated model Frequency(size):
     properties:
-        durable = false
-        reliable = false
+        durable = False
+        reliable = False
         buffer_size = size
 
     schema:
@@ -28,23 +19,23 @@ replicated model Frequency(size):
 
 streaming model BootError():
     properties:
-        durable = false
-        reliable = false
+        durable = False
+        reliable = False
         records = 10
 
     schema:
-        time=TimestampField(auto_add=True)
+        time=TimeStampField(auto_add=True)
         occurred = StringField()
         context = ContextField()
 
 streaming model DelayError(size):
     properties:
-        durable = false
-        reliable = false
+        durable = False
+        reliable = False
         records = size
 
     schema:
-        time=TimestampField(auto_add=True)
+        time=TimeStampField(auto_add=True)
         source = StringField()
         reason = StringField()
         context = ContextField()
@@ -52,11 +43,11 @@ streaming model DelayError(size):
 streaming model RandomError():
     properties:
         records = 1
-        durable = false
-        reliable = false
+        durable = False
+        reliable = False
 
     schema:
-        time=TimestampField(auto_add=True)
+        time=TimeStampField(auto_add=True)
         source = StringField()
         reason = StringField()
         context = ContextField()
@@ -64,19 +55,18 @@ streaming model RandomError():
 controller RandomControllerEmbedded(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
-    mError = tier.models.error
+    mError = tier.models.boor_error
     random_source = tier.sources.random
     random_timer = tier.platform.timer
     boot_event = tier.platform.boot
-    running = false
+    running = False
 
-    event boot_event(context ctx):
+    event boot_event.booted(context ctx):
         if ctx.error is SUCCESS:
             random_timer.start_periodic(mFreq.frequency)
-            running = true
+            running = True
         else:
             error = mError.create()
-            error.occurred=self
             error.context=ctx
             error.save()
 
@@ -91,12 +81,12 @@ controller RandomControllerEmbedded(tier):
 
     event mRandom.full(context ctx):
         random_timer.stop()
-        running = false
+        running = False
 
     event mRandom.departed(context ctx):
         if not running:
             random_timer.start_periodic(mFreq.frequency)
-            running = true
+            running = True
 
 controller RandomControllerGateway(tier):
     mFreq = tier.models.frequency
@@ -157,18 +147,18 @@ controller RandomControllerCloud(tier):
 
 space EmbeddedSpace:
     platform:
-        language = clang
+        language = CLang
         templates=nrf52
-        platform = nrf52.apiv1
-        boot = platform.boot
+        system = nrf52Platform.v12
+
 
     models:
-        random=Random(records=10)
-        frequency=Frequency(records=1)
-        boor_error = BootError(records=10)
+        random=Random(size=10)
+        frequency=Frequency(size=1)
+        boor_error = BootError()
 
     controllers:
-        rndcnt = RandomController(tier=self)
+        rndcnt = RandomControllerEmbedded(tier=self)
 
     sources:
         random = platform.source.random
@@ -176,32 +166,37 @@ space EmbeddedSpace:
 
 space GatewaySpace:
     platform:
-        language=java
+        language=JLang
         templates=android
-        platform = android.apiv1
+        system = Android.apiv1
 
 
     models:
         random=Random(size=100)
+        frequency=Frequency(size=1)
+        delay_error = DelayError()
 
     controllers:
         rndcnt = RandomControllerGateway(tier=self)
 
+
 space CloudSpace:
     platform:
-        language=python
+        language=PyLang
         templates=django
-        platform = django.apiv1
+        system = Django.apiv1
 
     models:
-        random=Random(records=10)
-        frequency=Frequency(records=1)
-        boor_error = BootError(records=10)
+        random=Random(size=10)
+        frequency=Frequency(size=1)
+        boor_error = BootError()
         random_error = RandomError()
 
 
     controllers:
         rndcnt = RandomControllerCloud(tier=self)
 
+    source:
+         boot = platform.system.boot
     sinks:
         db = platform.sinks.db

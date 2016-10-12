@@ -55,7 +55,7 @@ streaming model RandomError():
 controller RandomControllerEmbedded(tier):
     mFreq = tier.models.frequency
     mRandom = tier.models.random
-    mError = tier.models.error
+    mError = tier.models.boor_error
     random_source = tier.sources.random
     random_timer = tier.platform.timer
     boot_event = tier.platform.boot
@@ -147,15 +147,15 @@ controller RandomControllerCloud(tier):
 
 space EmbeddedSpace:
     platform:
-        language = clang
+        language = CLang
         templates=nrf52
-        system = android.apiv1
-        boot = system.boot
+        system = nrf52Platform.v12
+
 
     models:
-        random=Random(records=10)
-        frequency=Frequency(records=1)
-        boor_error = BootError(records=10)
+        random=Random(size=10)
+        frequency=Frequency(size=1)
+        boor_error = BootError()
 
     controllers:
         rndcnt = RandomControllerEmbedded(tier=self)
@@ -166,13 +166,15 @@ space EmbeddedSpace:
 
 space GatewaySpace:
     platform:
-        language=java
+        language=JLang
         templates=android
-        system = android.apiv1
+        system = Android.apiv1
 
 
     models:
         random=Random(size=100)
+        frequency=Frequency(size=1)
+        delay_error = DelayError()
 
     controllers:
         rndcnt = RandomControllerGateway(tier=self)
@@ -180,56 +182,21 @@ space GatewaySpace:
 
 space CloudSpace:
     platform:
-        language=python
+        language=PyLang
         templates=django
-        system = django.apiv1
+        system = Django.apiv1
 
     models:
-        random=Random(records=10)
-        frequency=Frequency(records=1)
-        boor_error = BootError(records=10)
+        random=Random(size=10)
+        frequency=Frequency(size=1)
+        boor_error = BootError()
         random_error = RandomError()
 
 
     controllers:
         rndcnt = RandomControllerCloud(tier=self)
 
+    source:
+         boot = platform.system.boot
     sinks:
         db = platform.sinks.db
-
-
-controller RandomControllerEmbedded(tier):
-    mFreq = tier.models.frequency
-    mRandom = tier.models.random
-    mError = tier.models.error
-    random_source = tier.sources.random
-    random_timer = tier.platform.timer
-    boot_event = tier.platform.boot
-    running = False
-
-    event boot_event.booted(context ctx):
-        if ctx.error is SUCCESS:
-            random_timer.start_periodic(mFreq.frequency)
-            running = True
-        else:
-            error = mError.create()
-            error.context=ctx
-            error.save()
-
-    event mFreq.arrived(context ctx):
-        random_timer.stop()
-        random_timer.start_periodic(mFreq.frequency)
-
-    event random_timer.fired(context ctx):
-        rand = mRandom.create()
-        rand.value = random_source.read()
-        rand.save()
-
-    event mRandom.full(context ctx):
-        random_timer.stop()
-        running = False
-
-    event mRandom.departed(context ctx):
-        if not running:
-            random_timer.start_periodic(mFreq.frequency)
-            running = True

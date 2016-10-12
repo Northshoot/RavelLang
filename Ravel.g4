@@ -182,7 +182,8 @@ param_assig
     : Identifier '=' param_val
     ;
 
-param_val : literal;
+param_val : literal | SELF;
+
 instance_name
     : Identifier
     ;
@@ -506,7 +507,7 @@ ref_assig
     : key '=' value  #ReferenceAssignment
     ;
 key: qualified_name;
-value: qualified_name ;
+value: qualified_name | SELF ;
 
 
 

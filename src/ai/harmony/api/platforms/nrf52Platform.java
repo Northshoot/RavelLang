@@ -79,7 +79,15 @@ public class nrf52Platform extends ConcretePlatform{
 
     public void addSourceVibration(String name, Source src){
         //TODO: implent sources
-        System.out.println("<<<<< not implemented sources >>>>>");
+        LOGGER.severe("<<<<< not implemented addSourceVibration >>>>>");
+    }
+    public void addSourceTemperature(String name, Source src){
+        //TODO: implent sources
+        LOGGER.severe("<<<<< not implemented addSourceTemperature >>>>>");
+    }
+    public void addSourceVoltageIO(String name, Source src){
+        //TODO: implent sources
+        LOGGER.severe("<<<<< not implemented addSourceVoltageIO >>>>>");
     }
     public void addSourceRandom(String name, Source src) {
 

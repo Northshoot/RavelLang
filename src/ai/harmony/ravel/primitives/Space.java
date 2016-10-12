@@ -41,9 +41,13 @@ public class Space extends Primitive{
 
     public Model resolveModel(String name){
         if(name.startsWith("tier.models.")){
-            return mModels.get(name.replace("tier.models.",""));
+            String modelName = name.replace("tier.models.","");
+            if(mModels.containsKey(modelName))
+                return mModels.get(modelName);
+            else
+                throw new RuntimeException("Cannot resolve model: " + modelName + " in " + mName + " space.");
         } else {
-            throw new RuntimeException("Cannot resolve model: " + name);
+            throw new RuntimeException("Cannot resolve path " + name);
         }
     }
     public List<Model> getModels(){

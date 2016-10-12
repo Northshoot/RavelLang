@@ -1,12 +1,13 @@
 package ai.harmony.ravel.primitives;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 7/21/16.
  */
 public class Controller extends ParametrizedComponent{
-
+    private static Logger LOGGER = Logger.getLogger(Controller.class.getName());
 
     private Map<String, Variable> mDeclarations = new LinkedHashMap<>();
     private Map<String, String> mReference = new LinkedHashMap<>();
@@ -24,9 +25,15 @@ public class Controller extends ParametrizedComponent{
     public void setSpace(Space s){
         this.mSpace = s;
         for(String key: mModels.keySet()) {
-            Model m = this.mSpace.resolveModel(key);
-            mModels.put(key, m);
-            m.addController(this);
+            try {
+                Model m = this.mSpace.resolveModel(key);
+                mModels.put(key, m);
+                m.addController(this);
+            } catch (NullPointerException e){
+                LOGGER.severe("Could not resolve model: " + key);
+                e.printStackTrace();
+            }
+
         }
         for(String key: mSources.keySet()) {
             //TODO: there is always a better way to handle this
