@@ -39,6 +39,7 @@ timer_object(timers, include)::=<<
 
 void <timers.innit_name>(void){
     // Initialize timer module.
+    NRF_LOG_INFO("<timers.innit_name> running\r\n");
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
     <timers.timers:{timer|app_timer_create(&<timer.cVarName>, <timer.timerMode>, <timer.callBack>);};separator="\n">
 }
@@ -54,6 +55,7 @@ get_timer_impl(timer)::=<<
  * <timer.comment >
  */
 void <timer.startName>(uint32_t period){
+    NRF_LOG_INFO("<timers.innit_name> started\r\n");
 	uint32_t time =  APP_TIMER_TICKS(period,  APP_TIMER_PRESCALER) ; <\t><\t> //pre-scale should a parameter
 <if(timer.debug)>
     NRF_LOG_INFO("<timer.name> started\r\n");
@@ -61,9 +63,7 @@ void <timer.startName>(uint32_t period){
 	app_timer_start(<timer.cVarName>, time,  NULL);
 }
 void <timer.stopName>(uint32_t period){
-<if(timer.debug)>
     NRF_LOG_INFO("stopping <timer.name>\r\n");
-<endif>
 	app_timer_stop(<timer.cVarName>); // <timer.comment>
 }
 <else>
@@ -71,9 +71,7 @@ void <timer.stopName>(uint32_t period){
  * <timer.comment >
  */
 void <timer.startName>(uint64_t next){
-<if(timer.debug)>
     NRF_LOG_INFO("<timer.namestartName> started\r\n");
-<endif>
     //static trix
     app_timer_start(<timer.cVarName>, next, NULL);
 }

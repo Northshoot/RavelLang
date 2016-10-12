@@ -97,6 +97,9 @@ ble_obj(space)::=<<
 
 #include "api_ble.h"
 
+//add models with they event data
+<space.controllers:{ctr|#include "../<ctr.headerFileName>"};separator="\n">
+
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**\< Handle of the current connection. */
 <space.models:{model|<model_write_to_ble(model)>}>
 //create ble service flow arrival functions
@@ -107,11 +110,12 @@ static void on_ble_write(ble_os_t * p_ravel_service, ble_evt_t * p_ble_evt) {
 
 	if (p_evt_write->handle == p_ravel_service-><first(space.models).cName>_handles.cccd_handle) {
          <first(space.models).cName>__data_flow_event(p_ravel_service, p_ble_evt);
-	}<rest(space.models):{model| else if (p_evt_write->handle == p_ravel_service-><model.cName>_handles.cccd_handle){
+	}<rest(space.models):{model| else if (p_evt_write->handle == p_ravel_service-><model.cName>_handles.value_handle){
             <model.cName>__data_flow_event(p_ravel_service, p_ble_evt);}
 	> <\n><\t> }else {
 		//we in trouble here
 		//TODO: create error model
+		NRF_LOG_INFO("did not recognized handler\r\n");
 
 	}
 }
@@ -290,6 +294,7 @@ model_flow_event(model)::=<<
 //creating lowest level model notification about data pipeline events
 inline void <model.cName>__data_flow_event(ble_os_t * p_ravel_service, ble_evt_t * p_ble_evt){
     ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
+    NRF_LOG_INFO("<model.cName>__data_flow_event \r\n");
     <if(model.streaming)>if (p_evt_write->len == 2) {
 				if (ble_srv_is_notification_enabled(p_evt_write->data)) {
 					NRF_LOG_INFO("Notification enabled \r\n");
@@ -303,13 +308,16 @@ inline void <model.cName>__data_flow_event(ble_os_t * p_ravel_service, ble_evt_t
 				////SEGGER_RTT_printf(0, "size error!\r\n");
 			}
     <elseif(model.replicated)>
+    NRF_LOG_INFO("model is replicated\r\n");
 	if (p_evt_write->len != sizeof(<model.modelName>)) {
 			//TODO: create error model
+			NRF_LOG_INFO("p_evt_write->len != sizeof(<model.modelName>)\r\n");
 		} else {
 			//save the model
+			NRF_LOG_INFO("Got Data\r\n");
 			<model.modelName> model;
 			memcpy(&model, p_evt_write->data, sizeof(<model.modelName>));
-			<model.cName>__save(&model);
+			<model.arrivedEvent>((void*) &model);
 		}
     <else>
         \<\<\<\< ERROR: trying to connect local model

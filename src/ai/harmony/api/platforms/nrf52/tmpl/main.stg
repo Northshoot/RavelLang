@@ -72,6 +72,8 @@ int main(void)
 
     bool erase_bonds;
     uint32_t err_code;
+    //timer must be one of first to be initialized, we always need it
+    timers_init();
 
     err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
