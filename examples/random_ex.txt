@@ -1,202 +1,172 @@
-streaming model Random(size):
+streaming model Requests():
     properties:
-        durable=False
-        reliable=False
-        records = size
+        reliable = false
+        durable = false
+        records = 27
 
     schema:
-        time=TimeStampField(auto_add=True)
-        value = IntegerField()
+        time = TimeStampField(auto_add=true)
 
-replicated model Frequency(size):
-    properties:
-        durable = False
-        reliable = False
-        buffer_size = size
+local model Arrival(size):
+     properties:
+         reliable = false
+         durable = false
+         records = size
 
-    schema:
-        frequency = IntegerField(default=1000)
+     schema:
+         time_diff = IntegerField()
 
-streaming model BootError():
-    properties:
-        durable = False
-        reliable = False
-        records = 10
+streaming model TimeArray(size):
+     properties:
+         reliable = false
+         durable = false
+         records = size
 
-    schema:
-        time=TimeStampField(auto_add=True)
-        occurred = StringField()
-        context = ContextField()
-
-streaming model DelayError(size):
-    properties:
-        durable = False
-        reliable = False
-        records = size
-
-    schema:
-        time=TimeStampField(auto_add=True)
-        source = StringField()
-        reason = StringField()
-        context = ContextField()
-
-streaming model RandomError():
-    properties:
-        records = 1
-        durable = False
-        reliable = False
-
-    schema:
-        time=TimeStampField(auto_add=True)
-        source = StringField()
-        reason = StringField()
-        context = ContextField()
-
-controller RandomControllerEmbedded(tier):
-    mFreq = tier.models.frequency
-    mRandom = tier.models.random
-    mError = tier.models.boor_error
-    random_source = tier.sources.random
-    random_timer = tier.platform.timer
-    boot_event = tier.platform.boot
-    running = False
-
-    event boot_event.booted(context ctx):
-        if ctx.error is SUCCESS:
-            random_timer.start_periodic(mFreq.frequency)
-            running = True
-        else:
-            error = mError.create()
-            error.context=ctx
-            error.save()
-
-    event mFreq.arrived(context ctx):
-        random_timer.stop()
-        random_timer.start_periodic(mFreq.frequency)
-
-    event random_timer.fired(context ctx):
-        rand = mRandom.create()
-        rand.value = random_source.read()
-        rand.save()
-
-    event mRandom.full(context ctx):
-        random_timer.stop()
-        running = False
-
-    event mRandom.departed(context ctx):
-        if not running:
-            random_timer.start_periodic(mFreq.frequency)
-            running = True
-
-controller RandomControllerGateway(tier):
-    mFreq = tier.models.frequency
-    mRandom = tier.models.random
-    mDelayError = tier.models.delay_error
-    timer = tier.platform.timer
-    delay_max = 10000
-    last_depart = 0
-
-    event mRandom.arrived(context ctx):
-        if ctx.error is SUCCESS:
-            current = ctx.mRandom
-            last = mRandom.query.last()
-            diff = current.time - last.time
-            if diff > delay_max:
-                error = mDelayError.create()
-                error.source = self
-                error.reason = "too long time in between data samples from device: " + diff
-                error.context = ctx
-                error.save()
-
-    event mRandom.departed(context ctx):
-        now = timer.now()
-        diff = now - last_depart
-        if diff > delay_max:
-            error = DelayError.create()
-            error.source = self
-            error.reason = "delay not cloud: " + diff
-            error.context = ctx
-            error.save()
-
-    event mDelayError.full(context ctx):
-        delete mDelayError.first()
-
-    event mRandom.full(context ctx):
-        delete mRandom.last()
-
-controller RandomControllerCloud(tier):
-    mFreq = tier.models.frequency
-    mRandom = tier.models.random
-    mRandomError = tier.models.random_error
-    random_sink = tier.sources.db
-
-    event mRandom.arrived(context ctx):
-        if ctx.error is SUCCESS:
-            current = ctx.mRandom
-            last = mRandom.query.last
-            diff = current.time - last.time
-            if last.value == current.value:
-                    rnd_error = mRandomError.create()
-                    rnd_error.source = self
-                    rnd_error.reason = "Same random value as last time: " + current.value
-                    rnd_error.context = ctx
-                    rnd_error.save()
-
-            random_sink.write(current)
+     schema:
+         estimate = IntegerField()
 
 
-space EmbeddedSpace:
+
+replicated model TagLocation(size):
+     properties:
+         reliable = false
+         durable = false
+         records = size
+
+     schema:
+        id = IntegerField()
+        x = IntegerField()
+        y = IntegerField()
+        z = IntegerField()
+
+local model DroneLocation(size):
+     properties:
+         reliable = false
+         durable = false
+         records = size
+
+     schema:
+        time = TimeStampField(auto_add=true)
+        x = IntegerField()
+        y = IntegerField()
+        z = IntegerField()
+
+streaming model ClockSynk(size):
+     properties:
+         reliable = false
+         durable = false
+         records = size
+
+     schema:
+         rq = ByteField(size=1, default=0xFF)
+
+controller MakeRequests(tier):
+    boot = tier.sources.boot
+    timer = tier.sources.timer
+    request_model = tier.models.rq
+    dst = tier.model.anch_tag
+    clock_synk = tier.models.clock_synk
+
+    event boot.booted(Context ctx):
+        rec = request_model.create()
+        rec.save(dst.get(all))
+
+    event clock_synk.departed(Context ctx):
+        request_model.clear()
+        rec = request_model.create()
+        rec.save(dst.get(all))
+
+controller ArrivalTime(tier):
+    timer = tier.source.timer
+    arrival = tier.models.arrival
+    request_model = tier.models.rq
+    clock_synk = tier.models.clsync
+    timer_array = tier.models.time_arr
+    synk_delay = 200
+
+    event request_model.arrived(Context ctx):
+        t = timer.getNow()
+        rec = arrival.create()
+        rq_rec = ctx.getModel()
+        rec.time_diff=t-rq_rec.time
+        rec.save()
+
+
+    event arrival.full(Context ctx):
+        rec = timer_array.create()
+        rec.estimate = zip(arrival)
+        timer.startSingleShoot(synk_delay)
+
+    event timer.fired(Context ctx):
+        rec = clock_synk.create()
+        rec.save()
+        timer_array.clear()
+
+controller Triangulation(tier):
+    drone_loc = tier.models.drone_location
+    tag_loc = tier.models.tag_location
+    clock_synk = tier.models.clock_synk
+    t_array = tier.models.time_array
+    db = tier.sink.db
+
+    event clock_synk.arrived(Context ctx):
+        rec = drone_loc.create()
+        rec = compute_location(t_array)
+        rec.save()
+        db.write(rec)
+
+space AnchorTag:
     platform:
         language = CLang
         templates=nrf52
         system = nrf52Platform.v12
 
-
     models:
-        random=Random(size=10)
-        frequency=Frequency(size=1)
-        boor_error = BootError()
+        rq = Requests()
+        clsync= ClockSynk()
+        time_arr = TimeArray()
+        arrival = Arrival()
 
     controllers:
-        rndcnt = RandomControllerEmbedded(tier=self)
+        arrival_time = ArrivalTime(tier=self)
 
     sources:
-        random = platform.source.random
+        timer = system.timerSingleShoot
 
-
-space GatewaySpace:
+space Drone:
     platform:
-        language=JLang
-        templates=android
-        system = Android.apiv1
-
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
 
     models:
-        random=Random(size=100)
-        frequency=Frequency(size=1)
-        delay_error = DelayError()
+        rq = Requests()
+        clock_synk = ClockSynk(size=100)
+        time_array = TimeArray(size=100)
+        anch_tag = TagLocation(27)
 
     controllers:
-        rndcnt = RandomControllerGateway(tier=self)
+        make_request = MakeRequests(tier=self)
+
+    sources:
+        boot = system.boot
+        timer = system.timerPeriodic
 
 
-space CloudSpace:
+space Cloud:
     platform:
         language=PyLang
         templates=django
         system = Django.apiv1
 
     models:
-        random=Random(size=10)
-        frequency=Frequency(size=1)
-        boor_error = BootError()
-        random_error = RandomError()
-
+        tag_location = TagLocation(size=100)
+        drone_location = DroneLocation(size=100)
+        clock_synk = ClockSynk(size=100)
+        time_array = TimeArray(size=100)
 
     controllers:
-        rndcnt = RandomControllerCloud(tier=self)
+        triangulation = Triangulation(tier=self)
 
-    source:
-         boot = platform.system.boot
     sinks:
-        db = platform.sinks.db
+        db = system.db

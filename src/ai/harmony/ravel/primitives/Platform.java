@@ -31,9 +31,10 @@ public class Platform {
         //create a real platform object from the data
         try {
             String[] pAPI = mSystem.split("\\.");
+            String platform = pAPI[0];
             LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
             mLanguage = (ConcreteLanguage) Class.forName("ai.harmony.api.lang." + mLang).newInstance();
-            mPlatform = (ConcretePlatform) Class.forName("ai.harmony.api.platforms." + pAPI[0]).newInstance();
+            mPlatform = (ConcretePlatform) Class.forName("ai.harmony.api.platforms." + platform).newInstance();
             mPlatform.setAPILevel(pAPI[1]);
 
         } catch (InstantiationException e) {

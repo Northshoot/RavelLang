@@ -41,7 +41,7 @@ controller Node(tier):
     tx_cs = tier.models.tx_cs
     p_timer = tier.sources.timer
     vib_src = tier.sources.vibration
-    pphase_alg = tier.compute.ppase
+    pphase_alg = tier.compute.pphase
     spars = tier.compute.sparsity
     cmpr = tier.computer.compresive_sampling
     back_off_time = 5000
@@ -61,7 +61,7 @@ controller Node(tier):
                 rec.save()
 
     event vibration_model.full(Context ctx):
-        rec = pPhase.create()
+        rec = phase_model.create()
         rec.prelim_pphase = pphase_alg(vibration_model)
         rec.signal_sparsity = spars(vibration_model)
         rec.save()
