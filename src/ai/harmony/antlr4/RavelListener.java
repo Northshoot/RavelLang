@@ -368,6 +368,26 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitField_type(RavelParser.Field_typeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#field_options}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_options(RavelParser.Field_optionsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#field_options}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_options(RavelParser.Field_optionsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#field_option}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_option(RavelParser.Field_optionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#field_option}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_option(RavelParser.Field_optionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ControllerScope}
 	 * labeled alternative in {@link RavelParser#controller_comp}.
 	 * @param ctx the parse tree
@@ -412,6 +432,46 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitEventScope(RavelParser.EventScopeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#functionArgsList}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#functionArgsList}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#functionArg}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionArg(RavelParser.FunctionArgContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#functionArg}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionArg(RavelParser.FunctionArgContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#arg_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterArg_type(RavelParser.Arg_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#arg_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitArg_type(RavelParser.Arg_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#arg_name}.
+	 * @param ctx the parse tree
+	 */
+	void enterArg_name(RavelParser.Arg_nameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#arg_name}.
+	 * @param ctx the parse tree
+	 */
+	void exitArg_name(RavelParser.Arg_nameContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#block_stmt}.
 	 * @param ctx the parse tree
 	 */
@@ -442,6 +502,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitComp_stmt(RavelParser.Comp_stmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#repeat_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterRepeat_stmt(RavelParser.Repeat_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#repeat_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitRepeat_stmt(RavelParser.Repeat_stmtContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code DeleteStmt}
 	 * labeled alternative in {@link RavelParser#del_stmt}.
 	 * @param ctx the parse tree
@@ -454,15 +524,15 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitDeleteStmt(RavelParser.DeleteStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#variableDeclarators}.
+	 * Enter a parse tree produced by {@link RavelParser#variable_declarations}.
 	 * @param ctx the parse tree
 	 */
-	void enterVariableDeclarators(RavelParser.VariableDeclaratorsContext ctx);
+	void enterVariable_declarations(RavelParser.Variable_declarationsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#variableDeclarators}.
+	 * Exit a parse tree produced by {@link RavelParser#variable_declarations}.
 	 * @param ctx the parse tree
 	 */
-	void exitVariableDeclarators(RavelParser.VariableDeclaratorsContext ctx);
+	void exitVariable_declarations(RavelParser.Variable_declarationsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#variable_declaration}.
 	 * @param ctx the parse tree
@@ -513,16 +583,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFor_stmt(RavelParser.For_stmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterStatement(RavelParser.StatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitStatement(RavelParser.StatementContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code IfStatement}
 	 * labeled alternative in {@link RavelParser#if_stmt}.
@@ -636,26 +696,6 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitTestlist(RavelParser.TestlistContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#function_args}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunction_args(RavelParser.Function_argsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#function_args}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunction_args(RavelParser.Function_argsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#functionArgsList}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#functionArgsList}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionArgsList(RavelParser.FunctionArgsListContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code WhileStmt}
 	 * labeled alternative in {@link RavelParser#whileControl}.
 	 * @param ctx the parse tree
@@ -667,16 +707,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhileStmt(RavelParser.WhileStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#functionArg}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionArg(RavelParser.FunctionArgContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#functionArg}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionArg(RavelParser.FunctionArgContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#component_parameters}.
 	 * @param ctx the parse tree
@@ -757,36 +787,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionList(RavelParser.ExpressionListContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#increament_expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterIncreament_expr(RavelParser.Increament_exprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#increament_expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitIncreament_expr(RavelParser.Increament_exprContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#decrement_exp}.
-	 * @param ctx the parse tree
-	 */
-	void enterDecrement_exp(RavelParser.Decrement_expContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#decrement_exp}.
-	 * @param ctx the parse tree
-	 */
-	void exitDecrement_exp(RavelParser.Decrement_expContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#primary}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrimary(RavelParser.PrimaryContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#primary}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrimary(RavelParser.PrimaryContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ReferenceAssignmentsList}
 	 * labeled alternative in {@link RavelParser#ref_assig_list}.
@@ -915,14 +915,4 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLiteral(RavelParser.LiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#boolean_r}.
-	 * @param ctx the parse tree
-	 */
-	void enterBoolean_r(RavelParser.Boolean_rContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#boolean_r}.
-	 * @param ctx the parse tree
-	 */
-	void exitBoolean_r(RavelParser.Boolean_rContext ctx);
 }

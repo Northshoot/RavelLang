@@ -135,21 +135,21 @@ public class PrimitiveRepPhase extends RavelBaseListener {
                     .name(fs.getName()) // set name
                     .model(m); //ad model to the field (for reverse name creation
             // now we add field options if any
-            RavelParser.ElementValuePairsContext fieldOpt = field_ctx.elementValuePairs();
+            RavelParser.Field_optionsContext fieldOpt = field_ctx.field_options();
 
 
             if (fieldOpt != null) {
                 field_has_options = true;
-                List<RavelParser.ElementValuePairContext> valp;
-                valp = fieldOpt.elementValuePair();
-                Iterator<RavelParser.ElementValuePairContext> optPair = valp.iterator();
+                List<RavelParser.Field_optionContext> valp;
+                valp = fieldOpt.field_option();
+                Iterator<RavelParser.Field_optionContext> optPair = valp.iterator();
                 String args = "";
                 while (optPair.hasNext()) {
-                    RavelParser.ElementValuePairContext el = optPair.next();
-                    //This is assums that field can not have expression
+                    RavelParser.Field_optionContext el = optPair.next();
+                    //This is assumes that field can not have expression
                     //TODO: needs redesign
                     String optName = el.Identifier().getText();
-                    String optValue = el.elementValue().getText();
+                    String optValue = el.literal().getText();
                     args += optName + ":" + optValue + ",";
                     f_concreate.addOption(optName, optValue);
                 }
@@ -223,13 +223,16 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         event.name(e.getName());
         RavelParser.EventScopeContext ectx = (RavelParser.EventScopeContext) e.getDefNode();
         //currently only context is passed
-        RavelParser.FunctionArgsListContext args  =  ectx.function_args().functionArgsList();
-        List<RavelParser.FunctionArgContext> functionArgContexts = args.functionArg();
-        Iterator<RavelParser.FunctionArgContext> arg = functionArgContexts.iterator();
-        while(arg.hasNext()){
-            RavelParser.FunctionArgContext argContext = arg.next();
-            //TODO: doubtfully the best way, fix when time (HA!)
-            event.addArg(argContext.Identifier(0).getText(), argContext.Identifier(1).getText());
+        RavelParser.FunctionArgsListContext args  =  ectx.functionArgsList();
+        if(args != null ) {
+            List<RavelParser.FunctionArgContext> functionArgContexts = args.functionArg();
+            Iterator<RavelParser.FunctionArgContext> arg = functionArgContexts.iterator();
+            while (arg.hasNext()) {
+                RavelParser.FunctionArgContext argContext = arg.next();
+                //TODO: doubtfully the best way, fix when time (HA!)
+                event.addArg(argContext.arg_type().getText(),
+                             argContext.arg_name().getText());
+            }
         }
         //get all variables
         List<VariableSymbol> eventVars =  ((EventSymbol)ectx.scope).getDefinedFields();
@@ -260,7 +263,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         if (propValueContext.getChild(0) instanceof RavelParser.PropContext) {
             RavelParser.PropContext node = propValueContext.prop();
             try {
-                String value = node.boolean_r().getText();
+                String value = node.BooleanLiteral().getText();
                 var.stringType("boolean");
                 return var.value(Boolean.parseBoolean(value)).build();
             } catch (NullPointerException e) { }

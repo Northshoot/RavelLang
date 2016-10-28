@@ -1,119 +1,10 @@
-streaming model Requests():
-    properties:
-        reliable = false
-        durable = false
-        records = 27
-
-    schema:
-        time = TimeStampField(auto_add=true)
-
-local model Arrival(size):
-     properties:
-         reliable = false
-         durable = false
-         records = size
-
-     schema:
-         time_diff = IntegerField()
-
-streaming model TimeArray(size):
-     properties:
-         reliable = false
-         durable = false
-         records = size
-
-     schema:
-         estimate = IntegerField()
-
-
-
-replicated model TagLocation(size):
-     properties:
-         reliable = false
-         durable = false
-         records = size
-
-     schema:
-        id = IntegerField()
-        x = IntegerField()
-        y = IntegerField()
-        z = IntegerField()
-
-local model DroneLocation(size):
-     properties:
-         reliable = false
-         durable = false
-         records = size
-
-     schema:
-        time = TimeStampField(auto_add=true)
-        x = IntegerField()
-        y = IntegerField()
-        z = IntegerField()
-
-streaming model ClockSynk(size):
-     properties:
-         reliable = false
-         durable = false
-         records = size
-
-     schema:
-         rq = ByteField(size=1, default=0xFF)
-
 controller MakeRequests(tier):
     boot = tier.sources.boot
-    timer = tier.sources.timer
-    request_model = tier.models.rq
-    dst = tier.models.anch_tag
-    clock_synk = tier.models.clock_synk
 
     event boot.booted(Context ctx):
-        rec = request_model.create()
-        rec.save()
+        if x == 10:
+            x = 1
 
-    event clock_synk.departed(Context ctx):
-        request_model.clear()
-        rec = request_model.create()
-        rec.save()
-
-controller ArrivalTime(tier):
-    timer = tier.source.timer
-    arrival = tier.models.arrival
-    request_model = tier.models.rq
-    clock_synk = tier.models.clsync
-    timer_array = tier.models.time_arr
-    synk_delay = 200
-
-    event request_model.arrived(Context ctx):
-        t = timer.getNow()
-        rec = arrival.create()
-        rq_rec = ctx.getModel()
-        rec.time_diff = t - rq_rec.time
-        rec.save()
-
-
-    event arrival.full(Context ctx):
-        rec = timer_array.create()
-        rec.estimate = zip(arrival)
-        timer.startSingleShoot(synk_delay)
-
-    event timer.fired(Context ctx):
-        rec = clock_synk.create()
-        rec.save()
-        timer_array.clear()
-
-controller Triangulation(tier):
-    drone_loc = tier.models.drone_location
-    tag_loc = tier.models.tag_location
-    clock_synk = tier.models.clock_synk
-    t_array = tier.models.time_array
-    db = tier.sink.db
-
-    event clock_synk.arrived(Context ctx):
-        rec = drone_loc.create()
-        rec = compute_location(t_array)
-        rec.save()
-        db.write(rec)
 
 space AnchorTag:
     platform:
@@ -121,52 +12,9 @@ space AnchorTag:
         templates=nrf52
         system = nrf52Platform.v12
 
-    models:
-        rq = Requests()
-        clsync= ClockSynk()
-        time_arr = TimeArray()
-        arrival = Arrival()
-
     controllers:
-        arrival_time = ArrivalTime(tier=self)
+        arrival_time = MakeRequests(tier=self)
 
     sources:
         timer = system.timerSingleShoot
-
-space Drone:
-    platform:
-        language = CLang
-        templates=nrf52
-        system = nrf52Platform.v12
-
-    models:
-        rq = Requests()
-        clock_synk = ClockSynk(size=100)
-        time_array = TimeArray(size=100)
-        anch_tag = TagLocation(27)
-
-    controllers:
-        make_request = MakeRequests(tier=self)
-
-    sources:
         boot = system.boot
-        timer = system.timerPeriodic
-
-
-space Cloud:
-    platform:
-        language=PyLang
-        templates=django
-        system = Django.apiv1
-
-    models:
-        tag_location = TagLocation(size=100)
-        drone_location = DroneLocation(size=100)
-        clock_synk = ClockSynk(size=100)
-        time_array = TimeArray(size=100)
-
-    controllers:
-        triangulation = Triangulation(tier=self)
-
-    sinks:
-        db = system.db

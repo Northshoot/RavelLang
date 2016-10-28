@@ -224,7 +224,6 @@ properties_block returns [Scope scope]
 properties
     : NEWLINE INDENT property+ DEDENT
     ;
-
 property
     : Identifier '=' propValue NEWLINE #VarAssignment
     ;
@@ -240,7 +239,7 @@ propArray
 // we are just very specific what it is allowed in the property definirion
 prop
     : StringLiteral
-    | boolean_r
+    | BooleanLiteral
     | IntegerLiteral
     | FloatingPointLiteral
     | Identifier
@@ -254,9 +253,8 @@ fields
     ;
 
 field
-    : Identifier '=' field_type '(' elementValuePairs? ')'  NEWLINE? #FieldDeclaration
+    : Identifier '=' field_type '(' field_options? ')'  NEWLINE? #FieldDeclaration
     ;
-
 /**
  *
  * Field types, currently only in parser. But maybe it should be like a Ravel library
@@ -277,6 +275,13 @@ field_type
     | T_MODEL_FIELD
     ;
 
+field_options
+    : field_option (',' field_option)?
+    ;
+//for now field options are build and checked in field symbol rather than in lexer
+field_option
+    : Identifier '=' literal
+    ;
 /**
  * Controller rules
  */
@@ -295,28 +300,32 @@ controller_scope
  */
 controller_body
     : eventdef // can only be events
-    | ref_assig // reference
+    | ref_assig // reference: wiring tier componets to local variables
     | variable_declaration //variable assignment
     | NEWLINE
     ;
-
-/**
- * All here for handling normal language statements and expressions
- *
- */
-
 eventdef returns [Scope scope]
-    : EVENT qualified_name  function_args ':' block_stmt #EventScope
+    : EVENT qualified_name  '(' functionArgsList? ')' ':' block_stmt #EventScope
     ;
+functionArgsList
+    :functionArg (',' functionArg)?
+    ;
+functionArg
+    : arg_type arg_name
+    ;
+arg_type: Identifier ;
+arg_name: Identifier ;
+
 block_stmt
     : NEWLINE INDENT blockStatement+ DEDENT
     ;
-
+/** event block can be all this */
 blockStatement
     : ref_assig // reference
     | variable_declaration // or variable assignment
-    | funct_expr
-    | comp_stmt
+    | funct_expr // model command or query
+    | comp_stmt // conditional or loops
+    | PASS
     | NEWLINE
     ;
 comp_stmt
@@ -324,11 +333,15 @@ comp_stmt
     | if_stmt
     | del_stmt
     | for_stmt
+    | repeat_stmt
+    ;
+repeat_stmt
+    : REPEAT expr TIMES ':' block_stmt
     ;
 del_stmt
     : DELETE qualified_name '(' elementValuePairs? ')' #DeleteStmt
     ;
-variableDeclarators
+variable_declarations
     :   variable_declaration (',' variable_declaration)*
     ;
 variable_declaration
@@ -350,13 +363,6 @@ while_stmt
 for_stmt
  : FOR forControl ':' block_stmt
  ;
-statement
-    :   'for'  forControl ':' block_stmt
-    |   'while'  whileControl ':' block_stmt
-    |   'break' Identifier?
-    |   'continue' Identifier?
-    |   NEWLINE
-    ;
 if_stmt
     : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
     ;
@@ -383,7 +389,7 @@ atom
     : Identifier
     | IntegerLiteral
     | FloatingPointLiteral
-    | boolean_r
+    | BooleanLiteral
     | qualified_name
     ;
 //for_stmt
@@ -394,25 +400,18 @@ forControl
     ;
 
 exprlist
-    :   variableDeclarators
+    :   variable_declarations
     |   expressionList
     ;
 
 testlist
     :   expressionList
     ;
-function_args
-    : '(' functionArgsList? ')'
-    ;
-functionArgsList
-    :functionArg (',' functionArg)?
-    ;
+
 whileControl
     : comp_expr  #WhileStmt
     ;
-functionArg
-    : Identifier Identifier
-    ;
+
 component_parameters
     : '(' params? ')'
     ;
@@ -438,19 +437,6 @@ elementValueArrayInitializer
     ;
 expressionList
     :   //expression (',' expression)*
-    ;
-increament_expr
-    : Identifier '++'
-    ;
-decrement_exp
-    : Identifier '--'
-    ;
-
-primary
-    : '('  ')'
-    | 'self'
-    | literal
-    | qualified_name
     ;
 //reference is a dottend name accesesing scopes
 ref_assig_list
@@ -539,6 +525,8 @@ PASS                : 'pass';
 CONTINUE            : 'continue';
 BREAK               : 'break' ;
 NONE                : 'none' ;
+REPEAT              : 'repeat' ;
+TIMES               : 'times' ;
 
 //comparators
 
@@ -593,54 +581,15 @@ RIGHT_SHIFT_ASSIGN : '>>=';
 POWER_ASSIGN : '**=';
 
 
-NEWLINE
- : ( {atStartOfInput()}?   SPACES
-   | ( '\r'? '\n' | '\r' ) SPACES?
-   )
-   {
-     String newLine = getText().replaceAll("[^\r\n]+", "");
-     String spaces = getText().replaceAll("[\r\n]+", "");
-     int next = _input.LA(1);
-
-     if (opened > 0 || next == '\r' || next == '\n' || next == '#') {
-       // If we're inside a list or on a blank line, ignore all indents,
-       // dedents and line breaks.
-       skip();
-     }
-     else {
-       emit(commonToken(NEWLINE, newLine));
-
-       int indent = getIndentationCount(spaces);
-       int previous = indents.isEmpty() ? 0 : indents.peek();
-
-       if (indent == previous) {
-         // skip indents of the same size as the present indent-size
-         skip();
-       }
-       else if (indent > previous) {
-         indents.push(indent);
-         emit(commonToken(RavelParser.INDENT, spaces));
-       }
-       else {
-         // Possibly emit more than 1 DEDENT token.
-         while(!indents.isEmpty() && indents.peek() > indent) {
-           this.emit(createDedent());
-           indents.pop();
-         }
-       }
-     }
-   }
- ;
 literal
     :   IntegerLiteral
     |   FloatingPointLiteral
     |   CharacterLiteral
-    | boolean_r
+    |   BooleanLiteral
     |   StringLiteral
-    |   'null'
+    |   NullLiteral
     ;
 // §3.10.1 Integer Literals
-
 IntegerLiteral
     :   DecimalIntegerLiteral
     |   HexIntegerLiteral
@@ -832,7 +781,7 @@ BinaryExponentIndicator
 
 // §3.10.3 Boolean Literals
 
-boolean_r
+BooleanLiteral
     : TRUE
     | FALSE
     ;
@@ -884,13 +833,9 @@ ZeroToThree
     ;
 
 // §3.10.7 The Null Literal
-
 NullLiteral
     :   'null'
     ;
-
-
-
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 
 Identifier
@@ -942,3 +887,41 @@ fragment LINE_JOINING
  ;
 
 
+NEWLINE
+ : ( {atStartOfInput()}?   SPACES
+   | ( '\r'? '\n' | '\r' ) SPACES?
+   )
+   {
+     String newLine = getText().replaceAll("[^\r\n]+", "");
+     String spaces = getText().replaceAll("[\r\n]+", "");
+     int next = _input.LA(1);
+
+     if (opened > 0 || next == '\r' || next == '\n' || next == '#') {
+       // If we're inside a list or on a blank line, ignore all indents,
+       // dedents and line breaks.
+       skip();
+     }
+     else {
+       emit(commonToken(NEWLINE, newLine));
+
+       int indent = getIndentationCount(spaces);
+       int previous = indents.isEmpty() ? 0 : indents.peek();
+
+       if (indent == previous) {
+         // skip indents of the same size as the present indent-size
+         skip();
+       }
+       else if (indent > previous) {
+         indents.push(indent);
+         emit(commonToken(RavelParser.INDENT, spaces));
+       }
+       else {
+         // Possibly emit more than 1 DEDENT token.
+         while(!indents.isEmpty() && indents.peek() > indent) {
+           this.emit(createDedent());
+           indents.pop();
+         }
+       }
+     }
+   }
+ ;
