@@ -64,17 +64,17 @@ controller MakeRequests(tier):
     boot = tier.sources.boot
     timer = tier.sources.timer
     request_model = tier.models.rq
-    dst = tier.model.anch_tag
+    dst = tier.models.anch_tag
     clock_synk = tier.models.clock_synk
 
     event boot.booted(Context ctx):
         rec = request_model.create()
-        rec.save(dst.get(all))
+        rec.save()
 
     event clock_synk.departed(Context ctx):
         request_model.clear()
         rec = request_model.create()
-        rec.save(dst.get(all))
+        rec.save()
 
 controller ArrivalTime(tier):
     timer = tier.source.timer
@@ -88,7 +88,7 @@ controller ArrivalTime(tier):
         t = timer.getNow()
         rec = arrival.create()
         rq_rec = ctx.getModel()
-        rec.time_diff=t-rq_rec.time
+        rec.time_diff = t - rq_rec.time
         rec.save()
 
 

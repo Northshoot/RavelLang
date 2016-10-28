@@ -80,37 +80,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) { }
+	@Override public void enterInstanciation_block(RavelParser.Instanciation_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSpace_assigment(RavelParser.Space_assigmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSpace_assigment(RavelParser.Space_assigmentContext ctx) { }
+	@Override public void exitInstanciation_block(RavelParser.Instanciation_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -123,6 +99,18 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -147,6 +135,18 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInstance(RavelParser.InstanceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstance_name(RavelParser.Instance_nameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstance_name(RavelParser.Instance_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -188,25 +188,25 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstance_name(RavelParser.Instance_nameContext ctx) { }
+	@Override public void enterReference_block(RavelParser.Reference_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstance_name(RavelParser.Instance_nameContext ctx) { }
+	@Override public void exitReference_block(RavelParser.Reference_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
+	@Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
+	@Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -231,6 +231,18 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSpace_assignments(RavelParser.Space_assignmentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -512,13 +524,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterVariableDeclarator(RavelParser.VariableDeclaratorContext ctx) { }
+	@Override public void enterVariable_declaration(RavelParser.Variable_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitVariableDeclarator(RavelParser.VariableDeclaratorContext ctx) { }
+	@Override public void exitVariable_declaration(RavelParser.Variable_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -675,18 +687,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAtom(RavelParser.AtomContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStatementExpression(RavelParser.StatementExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStatementExpression(RavelParser.StatementExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -891,18 +891,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDecrement_exp(RavelParser.Decrement_expContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterExpression(RavelParser.ExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExpression(RavelParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

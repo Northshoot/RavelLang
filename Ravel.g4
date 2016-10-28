@@ -108,8 +108,6 @@ tokens { INDENT, DEDENT }
 // most of the lexer rules are copy pasted from antrl4 pthon 3 implementation
 // thank you Ter! :)
 
-
-
 /*
  * parser rules
  */
@@ -141,54 +139,51 @@ space_comp returns [Scope scope]
 space_body
     : NEWLINE INDENT space_block+ DEDENT
     ;
+/** space currently has 5 blocks */
+//TODO: implment views and transforms
 space_block
-    : platform_scope
-    | models_scope
+    : instanciation_block
+    | reference_block
+    | NEWLINE
+    ;
+//blocks that perform instantiation
+instanciation_block
+    : models_scope
     | controllers_scope
-    | sink_scope
-    | source_scope
-    | NEWLINE
     ;
-
-platform_scope returns [Scope scope]
-    : 'platform:' space_assignments #PlatformScope
-    ;
-
-space_assignments returns [Symbol symbol]
-    : NEWLINE INDENT space_assigment+ DEDENT
-    ;
-
-space_assigment
-    : ref_assig
-    | NEWLINE
-    ;
-
 models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstanciation
+    ;
+controllers_scope returns [Scope scope]
+    : 'controllers:' instantiations #ControllerInstanciation
     ;
 instantiations
     : NEWLINE INDENT instance_def+ DEDENT
     ;
-
 instance_def returns [Symbol symbol]
     : Identifier '=' instance_name '(' param_assig_list? ')' NEWLINE? #Instance
     ;
-
-param_assig_list
-    : param_assig (',' param_assig)? #ParameterAssignments
-    ;
-
-param_assig
-    : Identifier '=' param_val
-    ;
-
-param_val : literal | SELF;
-
 instance_name
     : Identifier
     ;
-controllers_scope returns [Scope scope]
-    : 'controllers:' instantiations #ControllerInstanciation
+param_assig_list
+    : param_assig (',' param_assig)? #ParameterAssignments
+    ;
+param_assig
+    : Identifier '=' param_val
+    ;
+//We do not allow expressions to be assigned during instantiation
+//TODO: error making sense
+param_val : literal | SELF;
+
+//blocks that only wire
+reference_block
+    : platform_scope
+    | sink_scope
+    | source_scope
+    ;
+platform_scope returns [Scope scope]
+    : 'platform:' space_assignments #PlatformScope
     ;
 sink_scope returns [Scope scope]
     : 'sinks:' space_assignments #SinkLinks
@@ -197,6 +192,10 @@ sink_scope returns [Scope scope]
 source_scope returns [Scope scope]
     : 'sources:' space_assignments #SourceLinks
     ;
+space_assignments returns [Symbol symbol]
+    : NEWLINE INDENT ref_assig+ DEDENT
+    ;
+
 /**
  *
  * Model parser rules
@@ -204,8 +203,6 @@ source_scope returns [Scope scope]
 model_comp returns [Scope scope]
     :  modelType MODEL Identifier  component_parameters ':' model_body # ModelScope
     ;
-
-
 modelType
     : 'local'
     | 'streaming'
@@ -281,9 +278,8 @@ field_type
     ;
 
 /**
- * Controller stuff
+ * Controller rules
  */
-
 controller_comp returns [Scope scope]
     : CONTROLLER Identifier component_parameters ':' controller_scope # ControllerScope
     ;
@@ -291,18 +287,21 @@ controller_comp returns [Scope scope]
 controller_scope
     : NEWLINE INDENT controller_body+ DEDENT
     ;
-
+/**
+ * controller body and event body are similar, excep that
+ * no tests or function calls are allowed in the controller body
+ * all the assigments are evaluated staticaly inside the controller body
+ * while in event expresions are evaluated on call
+ */
 controller_body
     : eventdef // can only be events
     | ref_assig // reference
-    | property // simple var assignment
-    | variableDeclarator // or variable assignment
-    | funct_expr
+    | variable_declaration //variable assignment
     | NEWLINE
     ;
 
 /**
- *All here for handling normal language statements and expressions
+ * All here for handling normal language statements and expressions
  *
  */
 
@@ -315,10 +314,8 @@ block_stmt
 
 blockStatement
     : ref_assig // reference
-    | property // simple var assignment
-    | variableDeclarator // or variable assignment
+    | variable_declaration // or variable assignment
     | funct_expr
-    | eventdef
     | comp_stmt
     | NEWLINE
     ;
@@ -332,17 +329,17 @@ del_stmt
     : DELETE qualified_name '(' elementValuePairs? ')' #DeleteStmt
     ;
 variableDeclarators
-    :   variableDeclarator (',' variableDeclarator)*
+    :   variable_declaration (',' variable_declaration)*
     ;
-variableDeclarator
-    :   Identifier ('=' variableInitializer)?
+variable_declaration
+    :   Identifier '=' variableInitializer
     ;
 variableInitializer
     :   arrayInitializer
-    |   expression
+
     ;
 arrayInitializer
-    :   '{' (variableInitializer (',' variableInitializer)* (',')? )? '}'
+    :   '[' (variableInitializer (',' variableInitializer)* (',')? )? ']'
     ;
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
 while_stmt
@@ -354,13 +351,10 @@ for_stmt
  : FOR forControl ':' block_stmt
  ;
 statement
-    :   ASSERT expression
-    |   'for'  forControl ':' block_stmt
+    :   'for'  forControl ':' block_stmt
     |   'while'  whileControl ':' block_stmt
-    |   'return' expression?
     |   'break' Identifier?
     |   'continue' Identifier?
-    |   statementExpression
     |   NEWLINE
     ;
 if_stmt
@@ -392,11 +386,6 @@ atom
     | boolean_r
     | qualified_name
     ;
-
-statementExpression
-    :  expression
-    ;
-
 //for_stmt
 // : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
 // ;
@@ -441,16 +430,14 @@ elementValuePair
     ;
 
 elementValue
-    : expression
-    | elementValueArrayInitializer
+    //: //expression
+    : elementValueArrayInitializer
     ;
 elementValueArrayInitializer
     :   '{' (elementValue (',' elementValue)*)? (',')? '}'
     ;
-
-
 expressionList
-    :   expression (',' expression)*
+    :   //expression (',' expression)*
     ;
 increament_expr
     : Identifier '++'
@@ -458,42 +445,9 @@ increament_expr
 decrement_exp
     : Identifier '--'
     ;
-expression
-    :   primary
-    |   expression '[' expression ']'
-    |   expression '(' expressionList? ')'
-    |   increament_expr
-    |   decrement_exp
-    |   ('+'|'-') expression
-    |   ('~'|'!') expression
-    |   expression ('*'|'/'|'%') expression
-    |   expression ('+'|'-') expression
-    |   expression comp_op expression
-    |   expression '&' expression
-    |   expression '^' expression
-    |   expression '|' expression
-    |   expression '&&' expression
-    |   expression '||' expression
-    |   <assoc=right> expression
-        (   '='
-        |   '+='
-        |   '-='
-        |   '*='
-        |   '/='
-        |   '&='
-        |   '|='
-        |   '^='
-        |   '>>='
-        |   '>>>='
-        |   '<<='
-        |   '%='
-        )
-        expression
-    | NEWLINE
-    ;
 
 primary
-    : '(' expression ')'
+    : '('  ')'
     | 'self'
     | literal
     | qualified_name
@@ -509,13 +463,10 @@ ref_assig
 key: qualified_name;
 value: qualified_name | SELF ;
 
-
-
 funct_expr
     : func_no_return
     | func_with_return
     ;
-
 func_no_return
     : function_name component_parameters  #FunctionRet
     ;
@@ -534,18 +485,7 @@ ident
 qualified_name
     :   Identifier ('.' Identifier)*
     ;
-comp_op
-    : '<'
-    | '>'
-    | '=='
-    | '>='
-    | '<='
-    | '!='
-    | IN
-    | NOT IN
-    | IS
-    | IS NOT
-    ;
+
 
 /*
  * lexer rules
@@ -563,17 +503,9 @@ STREAMING           : 'streaming' ;
 REPLICATED          : 'replicated';
 PROPERTIES          : 'properties' ;
 SCHEMA              : 'schema' ;
-
-//space
-//MODELS              : 'models';
-//CONTROLLERS         : 'controllers';
-//PLATFORM            : 'platform' ;
-//SINKS               : 'sinks' ;
-//SOURCES             : 'sources' ;
-
 //controller
 EVENT               : 'event' ;
-COMMAND             :  'command' ;
+COMMAND             : 'command' ;
 
 //fields
 T_BYTE_FIELD        : 'ByteField' ;
@@ -607,6 +539,59 @@ PASS                : 'pass';
 CONTINUE            : 'continue';
 BREAK               : 'break' ;
 NONE                : 'none' ;
+
+//comparators
+
+comp_op
+    : LESS_THAN
+    | GREATER_THAN
+    | EQUALS
+    | GT_EQ
+    | LT_EQ
+    | NOT_EQ_1
+    | NOT_EQ_2
+    | IN
+    | NOT IN
+    | IS
+    | IS NOT
+    ;
+
+LESS_THAN       : '<';
+GREATER_THAN    : '>';
+EQUALS          : '==';
+GT_EQ           : '>=';
+LT_EQ           : '<=';
+NOT_EQ_1        : '<>';
+NOT_EQ_2        : '!=';
+
+//operands
+STAR            : '*';
+POWER           : '**';
+OR_OP           : '|';
+XOR             : '^';
+AND_OP          : '&';
+LEFT_SHIFT      : '<<';
+RIGHT_SHIFT     : '>>';
+ADD             : '+';
+MINUS           : '-';
+DIV             : '/';
+MOD             : '%';
+NOT_OP          : '~';
+
+//operand assigments
+ARROW : '->';
+ADD_ASSIGN : '+=';
+SUB_ASSIGN : '-=';
+MULT_ASSIGN : '*=';
+DIV_ASSIGN : '/=';
+MOD_ASSIGN : '%=';
+AND_ASSIGN : '&=';
+OR_ASSIGN : '|=';
+XOR_ASSIGN : '^=';
+LEFT_SHIFT_ASSIGN : '<<=';
+RIGHT_SHIFT_ASSIGN : '>>=';
+POWER_ASSIGN : '**=';
+
 
 NEWLINE
  : ( {atStartOfInput()}?   SPACES
@@ -904,55 +889,7 @@ NullLiteral
     :   'null'
     ;
 
-// §3.11 Separators
 
-LPAREN          : '(';
-RPAREN          : ')';
-LBRACE          : '{';
-RBRACE          : '}';
-LBRACK          : '[';
-RBRACK          : ']';
-SEMI            : ';';
-COMMA           : ',';
-DOT             : '.';
-
-// §3.12 Operators
-
-ASSIGN          : '=';
-GT              : '>';
-LT              : '<';
-BANG            : '!';
-TILDE           : '~';
-QUESTION        : '?';
-COLON           : ':';
-EQUAL           : '==';
-LE              : '<=';
-GE              : '>=';
-NOTEQUAL        : '!=';
-AND_S           : '&&';
-OR_S             : '||';
-INC             : '++';
-DEC             : '--';
-ADD             : '+';
-SUB             : '-';
-MUL             : '*';
-DIV             : '/';
-BITAND          : '&';
-BITOR           : '|';
-CARET           : '^';
-MOD             : '%';
-
-ADD_ASSIGN      : '+=';
-SUB_ASSIGN      : '-=';
-MUL_ASSIGN      : '*=';
-DIV_ASSIGN      : '/=';
-AND_ASSIGN      : '&=';
-OR_ASSIGN       : '|=';
-XOR_ASSIGN      : '^=';
-MOD_ASSIGN      : '%=';
-LSHIFT_ASSIGN   : '<<=';
-RSHIFT_ASSIGN   : '>>=';
-URSHIFT_ASSIGN  : '>>>=';
 
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 

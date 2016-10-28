@@ -6,7 +6,7 @@ streaming model Random(size):
 
     schema:
         time=TimeStampField(auto_add=True)
-        value = IntegerField(default=1000)
+        value = IntegerField(default=1000, min=100, max=500)
 
 replicated model UpdateFrequency(size):
     properties:

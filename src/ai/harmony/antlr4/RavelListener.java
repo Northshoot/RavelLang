@@ -64,37 +64,15 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitSpace_block(RavelParser.Space_blockContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code PlatformScope}
-	 * labeled alternative in {@link RavelParser#platform_scope}.
+	 * Enter a parse tree produced by {@link RavelParser#instanciation_block}.
 	 * @param ctx the parse tree
 	 */
-	void enterPlatformScope(RavelParser.PlatformScopeContext ctx);
+	void enterInstanciation_block(RavelParser.Instanciation_blockContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code PlatformScope}
-	 * labeled alternative in {@link RavelParser#platform_scope}.
+	 * Exit a parse tree produced by {@link RavelParser#instanciation_block}.
 	 * @param ctx the parse tree
 	 */
-	void exitPlatformScope(RavelParser.PlatformScopeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#space_assignments}.
-	 * @param ctx the parse tree
-	 */
-	void enterSpace_assignments(RavelParser.Space_assignmentsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#space_assignments}.
-	 * @param ctx the parse tree
-	 */
-	void exitSpace_assignments(RavelParser.Space_assignmentsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#space_assigment}.
-	 * @param ctx the parse tree
-	 */
-	void enterSpace_assigment(RavelParser.Space_assigmentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#space_assigment}.
-	 * @param ctx the parse tree
-	 */
-	void exitSpace_assigment(RavelParser.Space_assigmentContext ctx);
+	void exitInstanciation_block(RavelParser.Instanciation_blockContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ModelInstanciation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
@@ -107,6 +85,18 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ControllerInstanciation}
+	 * labeled alternative in {@link RavelParser#controllers_scope}.
+	 * @param ctx the parse tree
+	 */
+	void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ControllerInstanciation}
+	 * labeled alternative in {@link RavelParser#controllers_scope}.
+	 * @param ctx the parse tree
+	 */
+	void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#instantiations}.
 	 * @param ctx the parse tree
@@ -129,6 +119,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInstance(RavelParser.InstanceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#instance_name}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_name(RavelParser.Instance_nameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#instance_name}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_name(RavelParser.Instance_nameContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ParameterAssignments}
 	 * labeled alternative in {@link RavelParser#param_assig_list}.
@@ -162,27 +162,27 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitParam_val(RavelParser.Param_valContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#instance_name}.
+	 * Enter a parse tree produced by {@link RavelParser#reference_block}.
 	 * @param ctx the parse tree
 	 */
-	void enterInstance_name(RavelParser.Instance_nameContext ctx);
+	void enterReference_block(RavelParser.Reference_blockContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#instance_name}.
+	 * Exit a parse tree produced by {@link RavelParser#reference_block}.
 	 * @param ctx the parse tree
 	 */
-	void exitInstance_name(RavelParser.Instance_nameContext ctx);
+	void exitReference_block(RavelParser.Reference_blockContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ControllerInstanciation}
-	 * labeled alternative in {@link RavelParser#controllers_scope}.
+	 * Enter a parse tree produced by the {@code PlatformScope}
+	 * labeled alternative in {@link RavelParser#platform_scope}.
 	 * @param ctx the parse tree
 	 */
-	void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx);
+	void enterPlatformScope(RavelParser.PlatformScopeContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code ControllerInstanciation}
-	 * labeled alternative in {@link RavelParser#controllers_scope}.
+	 * Exit a parse tree produced by the {@code PlatformScope}
+	 * labeled alternative in {@link RavelParser#platform_scope}.
 	 * @param ctx the parse tree
 	 */
-	void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx);
+	void exitPlatformScope(RavelParser.PlatformScopeContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code SinkLinks}
 	 * labeled alternative in {@link RavelParser#sink_scope}.
@@ -207,6 +207,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSourceLinks(RavelParser.SourceLinksContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#space_assignments}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpace_assignments(RavelParser.Space_assignmentsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#space_assignments}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpace_assignments(RavelParser.Space_assignmentsContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ModelScope}
 	 * labeled alternative in {@link RavelParser#model_comp}.
@@ -454,15 +464,15 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitVariableDeclarators(RavelParser.VariableDeclaratorsContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#variableDeclarator}.
+	 * Enter a parse tree produced by {@link RavelParser#variable_declaration}.
 	 * @param ctx the parse tree
 	 */
-	void enterVariableDeclarator(RavelParser.VariableDeclaratorContext ctx);
+	void enterVariable_declaration(RavelParser.Variable_declarationContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#variableDeclarator}.
+	 * Exit a parse tree produced by {@link RavelParser#variable_declaration}.
 	 * @param ctx the parse tree
 	 */
-	void exitVariableDeclarator(RavelParser.VariableDeclaratorContext ctx);
+	void exitVariable_declaration(RavelParser.Variable_declarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#variableInitializer}.
 	 * @param ctx the parse tree
@@ -595,16 +605,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAtom(RavelParser.AtomContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#statementExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterStatementExpression(RavelParser.StatementExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#statementExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitStatementExpression(RavelParser.StatementExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#forControl}.
 	 * @param ctx the parse tree
@@ -777,16 +777,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDecrement_exp(RavelParser.Decrement_expContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpression(RavelParser.ExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpression(RavelParser.ExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#primary}.
 	 * @param ctx the parse tree

@@ -34,6 +34,19 @@ replicated model TransmitCS():
     schema:
         tx_cs = BooleanField(default=false)
 
+controller Coordinator(tier):
+    phase_model = tier.models.pPhase
+    cs_model = tier.models.cs
+    tx_cs = tier.models.tx_cs
+    select = tier.compute.select
+
+
+    event phase_model.full(Context ctx):
+        dest = select(phase_model)
+        rec = tx_cs.create()
+        rec.tx_cs = true
+        rec.save(dest)
+
 controller Node(tier):
     vibration_model = tier.models.vibration
     phase_model = tier.models.pPhase
@@ -44,6 +57,7 @@ controller Node(tier):
     pphase_alg = tier.compute.pphase
     spars = tier.compute.sparsity
     cmpr = tier.computer.compresive_sampling
+
     back_off_time = 5000
     vib_threshold = 1.2
     time_threshold = 1200
