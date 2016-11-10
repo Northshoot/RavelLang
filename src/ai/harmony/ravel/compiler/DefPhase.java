@@ -183,7 +183,7 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) {
         intend++;
-        ReferenceSymbol rs = new ReferenceSymbol(ctx.key().getText(), ctx.value().getText());
+        ReferenceSymbol rs = new ReferenceSymbol(ctx.reference_name().getText(), ctx.reference_value().getText());
         rs.setScope(currentScope);
         rs.setDefNode(ctx);
         currentScope.define(rs);
@@ -268,6 +268,10 @@ public class DefPhase extends RavelBaseListener {
         LocalScope ls = new LocalScope("controllers", currentScope);
         ctx.scope = ls;
         pushScope(ls);
+    }
+
+    @Override public void enterIfStatement(RavelParser.IfStatementContext ctx) {
+        System.out.println("IF statement");
     }
 
     @Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {

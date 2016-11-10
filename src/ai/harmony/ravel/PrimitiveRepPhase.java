@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ai.harmony.antlr4.RavelParser.*;
+
 
 /**
  * TODO: move linking between to the ravelApp
@@ -48,7 +50,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
      * @param ctx
      */
     @Override
-    public void enterModelScope(RavelParser.ModelScopeContext ctx) {
+    public void enterModelScope(ModelScopeContext ctx) {
         //Create models and fields set properties, add to
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
@@ -57,7 +59,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         //TODO: not a clean solution
         try{
             List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
-            for(RavelParser.ParamContext t: component_parametersContext){
+            for(ParamContext t: component_parametersContext){
                 m.addParam(t.getText());
             }
         } catch (NullPointerException e){
@@ -84,7 +86,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         while (s.hasNext()) {
             boolean field_has_options = false;
             FieldSymbol fs = s.next();
-            RavelParser.FieldDeclarationContext field_ctx = (RavelParser.FieldDeclarationContext) fs.getDefNode();
+            FieldDeclarationContext field_ctx = (FieldDeclarationContext) fs.getDefNode();
             //Field type name
             String field_type = field_ctx.field_type().getText();
             //get field type
@@ -135,26 +137,26 @@ public class PrimitiveRepPhase extends RavelBaseListener {
                     .name(fs.getName()) // set name
                     .model(m); //ad model to the field (for reverse name creation
             // now we add field options if any
-            RavelParser.Field_optionsContext fieldOpt = field_ctx.field_options();
-
-
-            if (fieldOpt != null) {
-                field_has_options = true;
-                List<RavelParser.Field_optionContext> valp;
-                valp = fieldOpt.field_option();
-                Iterator<RavelParser.Field_optionContext> optPair = valp.iterator();
-                String args = "";
-                while (optPair.hasNext()) {
-                    RavelParser.Field_optionContext el = optPair.next();
-                    //This is assumes that field can not have expression
-                    //TODO: needs redesign
-                    String optName = el.Identifier().getText();
-                    String optValue = el.literal().getText();
-                    args += optName + ":" + optValue + ",";
-                    f_concreate.addOption(optName, optValue);
-                }
-                LOGGER.info("field arguments: [" + args + "]");
-            }
+//            Field_optionsContext fieldOpt = null;//field_ctx.field_options();
+//
+//
+//            if (fieldOpt != null) {
+//                field_has_options = true;
+//                List<RavelParser.Field_optionContext> valp;
+//                valp = fieldOpt.field_option();
+//                Iterator<RavelParser.Field_optionContext> optPair = valp.iterator();
+//                String args = "";
+//                while (optPair.hasNext()) {
+//                    Field_optionContext el = optPair.next();
+//                    //This is assumes that field can not have expression
+//                    //TODO: needs redesign
+//                    String optName = "";//el.Identifier().getText();
+//                    String optValue = el.literal().getText();
+//                    args += optName + ":" + optValue + ",";
+//                    f_concreate.addOption(optName, optValue);
+//                }
+//                LOGGER.info("field arguments: [" + args + "]");
+//            }
             f_concreate.hasOptions(field_has_options);
             m.addField(fs.getName(), f_concreate.build());
             rApp.addModel(m.getName(), m);
@@ -171,13 +173,13 @@ public class PrimitiveRepPhase extends RavelBaseListener {
      * @param ctx
      */
     @Override
-    public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
+    public void enterControllerScope(ControllerScopeContext ctx) {
         //create controllers
-        String name = ctx.Identifier().getText(); //
+        String name = "";//ctx.Identifier().getText(); //
         Controller ctrl = new Controller(name);
         //get controller args
         List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
-        for(RavelParser.ParamContext t: component_parametersContext){
+        for(ParamContext t: component_parametersContext){
             ctrl.addParam(t.getText());
         }
         //get all variables
@@ -221,19 +223,19 @@ public class PrimitiveRepPhase extends RavelBaseListener {
 
         Event.Builder event = new Event.Builder();
         event.name(e.getName());
-        RavelParser.EventScopeContext ectx = (RavelParser.EventScopeContext) e.getDefNode();
+        EventScopeContext ectx = (EventScopeContext) e.getDefNode();
         //currently only context is passed
-        RavelParser.FunctionArgsListContext args  =  ectx.functionArgsList();
-        if(args != null ) {
-            List<RavelParser.FunctionArgContext> functionArgContexts = args.functionArg();
-            Iterator<RavelParser.FunctionArgContext> arg = functionArgContexts.iterator();
-            while (arg.hasNext()) {
-                RavelParser.FunctionArgContext argContext = arg.next();
-                //TODO: doubtfully the best way, fix when time (HA!)
-                event.addArg(argContext.arg_type().getText(),
-                             argContext.arg_name().getText());
-            }
-        }
+//        FunctionArgsListContext args  =  ectx.functionArgsList();
+//        if(args != null ) {
+//            List<RavelParser.FunctionArgContext> functionArgContexts = args.functionArg();
+//            Iterator<RavelParser.FunctionArgContext> arg = functionArgContexts.iterator();
+//            while (arg.hasNext()) {
+//                FunctionArgContext argContext = arg.next();
+//                //TODO: doubtfully the best way, fix when time (HA!)
+//                event.addArg(argContext.arg_type().getText(),
+//                             argContext.arg_name().getText());
+//            }
+//        }
         //get all variables
         List<VariableSymbol> eventVars =  ((EventSymbol)ectx.scope).getDefinedFields();
         for (VariableSymbol s: eventVars) {
@@ -251,53 +253,52 @@ public class PrimitiveRepPhase extends RavelBaseListener {
     private Variable makeVariable(VariableSymbol vs) {
         Variable.Builder var = new Variable.Builder();
         var.name(vs.getName());
-        RavelParser.PropValueContext propValueContext = ((VarAssignmentContext) vs.getDefNode()).propValue();
+        PropValueContext propValueContext = ((VarAssignmentContext) vs.getDefNode()).propValue();
 
-//        prop
-//                : Identifier
-//                | boolean_r
-//                | IntegerLiteral
-//                | FloatingPointLiteral
-//
         //get class of next child, we know it only can be one
-        if (propValueContext.getChild(0) instanceof RavelParser.PropContext) {
-            RavelParser.PropContext node = propValueContext.prop();
+        if (propValueContext.literal() != null) {
+            final LiteralContext literal = propValueContext.literal();
             try {
-                String value = node.BooleanLiteral().getText();
+                String value = literal.boolean_rule().getText();
                 var.stringType("boolean");
                 return var.value(Boolean.parseBoolean(value)).build();
             } catch (NullPointerException e) { }
             try {
-                String value = node.IntegerLiteral().getText();
+                String value = literal.number().integer().getText();
                 var.stringType("integer");
                 return var.value(Integer.parseInt(value)).build();
             } catch (NullPointerException e) { }
             try {
-                String value = node.FloatingPointLiteral().getText();
+                String value = literal.number().float_point().getText();
 
                 var.stringType("number");
                 return var.value(Float.parseFloat(value)).build();
             } catch (NullPointerException e) { }
             try {
-                String value = node.StringLiteral().getText();
+                String value = literal.string().getText();
                 var.stringType("string");
                 return var.value(value).build();
             } catch (NullPointerException e) { }
             try {
-                String value = node.Identifier().getText();
+                String value = literal.string().getText();
                 var.stringType("assignment");
+                return var.value(value).build();
+            } catch (NullPointerException e ) {}
+            try {
+                String value = literal.Identifier().getText();
+                var.stringType("variable");
                 return var.value(value).build();
             } catch (NullPointerException e ) {}
             //we could build and return here, but we need to be sure that parsing has identified
             //the right value.
             //merge prop and varAssignments
-        } else if (propValueContext.getChild(0) instanceof RavelParser.PropArrayContext){
+        } else if (propValueContext.propArray() != null){
             //either one has to be not null
-            RavelParser.PropArrayContext propArrayContext = propValueContext.propArray();
-            List<RavelParser.PropContext> prop = propArrayContext.prop();
+            PropArrayContext propArrayContext = propValueContext.propArray();
+            List<RavelParser.LiteralContext> prop = propArrayContext.literal();
             var.stringType("array");
             List<String> valList = new ArrayList<>();
-            for(RavelParser.PropContext p: prop) valList.add(p.getText());
+            for(LiteralContext p: prop) valList.add(p.getText());
             return var.value(valList).build();
         } else {
             throw new RuntimeException("Illegal child when creating variable, expecting property or property array, got: " +
@@ -307,7 +308,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
     }
 
     @Override
-    public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
+    public void enterSpaceScope(SpaceScopeContext ctx){
         String name = ctx.Identifier().getText();
         SpaceSymbol ssb = (SpaceSymbol)ctx.scope;
         Space space  = new Space(ssb.getName());
@@ -374,6 +375,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             InstanceSymbol is = ctrInst.get(mName);
             //get the model
             Controller ctr = rApp.getController(is.getInstanceName());
+            System.out.println(ctr);
             ctr.setSpace(space);
             //set parameters
             Map<String, String> ismap = is.getParameterMap();

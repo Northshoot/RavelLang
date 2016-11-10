@@ -1,4 +1,15 @@
+//model
+streaming model Frequency(size):
+    properties:
+        durable = False
+        reliable = False
+        buffer_size = size
+
+    schema:
+        frequency = IntegerField(default=1000)
+
 controller MakeRequests(tier):
+    var = 5
     boot = tier.sources.boot
 
     event boot.booted(Context ctx):
@@ -9,7 +20,7 @@ controller MakeRequests(tier):
 space AnchorTag:
     platform:
         language = CLang
-        templates=nrf52
+        templates = nrf52
         system = nrf52Platform.v12
 
     controllers:
