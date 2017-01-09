@@ -65,12 +65,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ModelInstanciation}
+	 * Visit a parse tree produced by the {@code ModelInstantiation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitModelInstanciation(RavelParser.ModelInstanciationContext ctx);
+	T visitModelInstantiation(RavelParser.ModelInstantiationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#instantiations}.
 	 * @param ctx the parse tree
@@ -110,12 +110,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstance_name(RavelParser.Instance_nameContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ControllerInstanciation}
+	 * Visit a parse tree produced by the {@code ControllerInstantiation}
 	 * labeled alternative in {@link RavelParser#controllers_scope}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx);
+	T visitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code SinkLinks}
 	 * labeled alternative in {@link RavelParser#sink_scope}.
@@ -312,29 +312,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCompExpr(RavelParser.CompExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#or_test}.
+	 * Visit a parse tree produced by the {@code CompRule}
+	 * labeled alternative in {@link RavelParser#comparison}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOr_test(RavelParser.Or_testContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#and_test}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnd_test(RavelParser.And_testContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#not_test}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNot_test(RavelParser.Not_testContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#comparison}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComparison(RavelParser.ComparisonContext ctx);
+	T visitCompRule(RavelParser.CompRuleContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#expr}.
 	 * @param ctx the parse tree

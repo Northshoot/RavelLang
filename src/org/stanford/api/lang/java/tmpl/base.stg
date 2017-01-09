@@ -1,0 +1,8 @@
+/**
+ * base template for language translation
+*/
+
+variable(var)::=<<
+<if(var.comment)>//<var.comment> <endif>
+<var.jType> <var.jName> <if(var.value)> = <var.value> <endif>
+>>

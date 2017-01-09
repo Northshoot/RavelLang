@@ -1,0 +1,17 @@
+/**
+ * base template for language translation
+*/
+
+variable(var)::=<<
+<if(var.comment)>#<var.comment> <endif>
+<var.pyName> <if(var.value)> = <var.value> <endif>
+>>
+
+if_statement(comp_expr)::=<<
+if <reduce_expr(comp_expr)>:
+    <! block !>
+>>
+
+reduce_expr(comp_expr)::=<<
+
+>>

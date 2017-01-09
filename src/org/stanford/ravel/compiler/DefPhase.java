@@ -216,7 +216,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
 
-    @Override public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+    @Override public void enterModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
         LocalScope ls = new LocalScope("models", currentScope);
         ctx.scope = ls;
         pushScope(ls);
@@ -256,14 +256,14 @@ public class DefPhase extends RavelBaseListener {
         }
 
     }
-    @Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+    @Override public void exitModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
         for(Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addModels(re.getName(),(InstanceSymbol) re);
         }
         popScope();
     }
 
-    @Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
+    @Override public void enterControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         LocalScope ls = new LocalScope("controllers", currentScope);
         ctx.scope = ls;
         pushScope(ls);
@@ -320,7 +320,7 @@ public class DefPhase extends RavelBaseListener {
     public void enterCompExpr(RavelParser.CompExprContext ctx){
         System.out.println("Enter Comparison Expression");
     }
-    @Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
+    @Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         popScope();
     }
 

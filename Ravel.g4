@@ -164,7 +164,7 @@ space_assigment
     ;
 
 models_scope returns [Scope scope]
-    : 'models:' instantiations #ModelInstanciation
+    : 'models:' instantiations #ModelInstantiation
     ;
 instantiations
     : NEWLINE INDENT instance_def+ DEDENT
@@ -188,7 +188,7 @@ instance_name
     : Identifier
     ;
 controllers_scope returns [Scope scope]
-    : 'controllers:' instantiations #ControllerInstanciation
+    : 'controllers:' instantiations #ControllerInstantiation
     ;
 sink_scope returns [Scope scope]
     : 'sinks:' space_assignments #SinkLinks
@@ -342,24 +342,17 @@ for_stmt
      : FOR forControl ':' block_stmt #ForStatement
      ;
 
+
 if_stmt
-    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
+    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )? ( ELSE ':' block_stmt )? #IfStatement
     ;
+
 comp_expr
-    : or_test ( IF or_test ELSE comp_expr )? #CompExpr
+    : comparison (AND comparison)? (OR comparison)? #CompExpr
     ;
-or_test
-    : and_test (OR and_test)*
-    ;
-and_test
-    : not_test (AND not_test)*
-    ;
-not_test
-    : NOT not_test
-    | comparison
-    ;
+
 comparison
-    : expr (comp_op expr)*
+    : expr (comp_op expr)* #CompRule
     ;
 expr
     : atom //this is prep for future to implement advance comparisons

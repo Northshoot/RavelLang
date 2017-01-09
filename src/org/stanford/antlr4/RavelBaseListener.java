@@ -116,13 +116,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) { }
+	@Override public void enterModelInstantiation(RavelParser.ModelInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitModelInstanciation(RavelParser.ModelInstanciationContext ctx) { }
+	@Override public void exitModelInstantiation(RavelParser.ModelInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -200,13 +200,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
+	@Override public void enterControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) { }
+	@Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -572,49 +572,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOr_test(RavelParser.Or_testContext ctx) { }
+	@Override public void enterCompRule(RavelParser.CompRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOr_test(RavelParser.Or_testContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAnd_test(RavelParser.And_testContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAnd_test(RavelParser.And_testContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNot_test(RavelParser.Not_testContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNot_test(RavelParser.Not_testContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterComparison(RavelParser.ComparisonContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitComparison(RavelParser.ComparisonContext ctx) { }
+	@Override public void exitCompRule(RavelParser.CompRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
