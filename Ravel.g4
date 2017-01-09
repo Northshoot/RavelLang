@@ -1,8 +1,8 @@
 grammar Ravel;
 
 @header{
-import ai.harmony.ravel.compiler.scope.*;
-import ai.harmony.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.scope.*;
+import org.stanford.ravel.compiler.symbol.*;
 }
 tokens { INDENT, DEDENT }
 
@@ -287,11 +287,7 @@ controller_scope
 
 controller_body
     : eventdef // can only be events
-    | ref_assig // reference
-    | property // simple var assignment
-    | variableDeclarator // or variable assignment
-    | funct_expr
-    | NEWLINE
+    | blockStatement
     ;
 
 /**
@@ -302,16 +298,15 @@ controller_body
 eventdef returns [Scope scope]
     : EVENT qualified_name  function_args ':' block_stmt #EventScope
     ;
+
 block_stmt
-    : NEWLINE INDENT blockStatement+ DEDENT
+    : NEWLINE INDENT blockStatement+ DEDENT #Block
     ;
 
 blockStatement
     : ref_assig // reference
-    | property // simple var assignment
-    | variableDeclarator // or variable assignment
+    | variable // or variable assignment
     | funct_expr
-    | eventdef
     | comp_stmt
     | NEWLINE
     ;
@@ -320,47 +315,38 @@ comp_stmt
     | if_stmt
     | del_stmt
     | for_stmt
+    | NEWLINE
     ;
 del_stmt
-    : DELETE qualified_name '(' elementValuePairs? ')' #DeleteStmt
+    : DELETE funct_expr #DeleteStmt
     ;
-variableDeclarators
-    :   variableDeclarator (',' variableDeclarator)*
+
+variable
+    :   Identifier '=' variableInitializer
     ;
-variableDeclarator
-    :   Identifier ('=' variableInitializer)?
-    ;
+
 variableInitializer
     :   arrayInitializer
     |   expression
     ;
 arrayInitializer
-    :   '{' (variableInitializer (',' variableInitializer)* (',')? )? '}'
+    :   '[' (variableInitializer (',' variableInitializer)* (',')? )? ']'
     ;
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
 while_stmt
- : WHILE comp_expr ':' block_stmt
+ : WHILE comp_expr ':' block_stmt #WhileStatement
  ;
 
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt
- : FOR forControl ':' block_stmt
- ;
-statement
-    :   ASSERT expression
-    |   'for'  forControl ':' block_stmt
-    |   'while'  whileControl ':' block_stmt
-    |   'return' expression?
-    |   'break' Identifier?
-    |   'continue' Identifier?
-    |   statementExpression
-    |   NEWLINE
-    ;
+     : FOR forControl ':' block_stmt #ForStatement
+     ;
+
 if_stmt
     : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
     ;
 comp_expr
-    : or_test ( IF or_test ELSE comp_expr )?
+    : or_test ( IF or_test ELSE comp_expr )? #CompExpr
     ;
 or_test
     : and_test (OR and_test)*
@@ -384,11 +370,6 @@ atom
     | boolean_rule
     | qualified_name
     ;
-
-statementExpression
-    :  expression
-    ;
-
 //for_stmt
 // : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
 // ;
@@ -397,7 +378,7 @@ forControl
     ;
 
 exprlist
-    :   variableDeclarators
+    :   variable
     |   expressionList
     ;
 
@@ -471,8 +452,6 @@ ref_assig
     ;
 reference_name: qualified_name;
 reference_value: qualified_name | SELF ;
-
-
 
 funct_expr
     : func_no_return
@@ -597,6 +576,7 @@ NEWLINE
      }
    }
  ;
+
 literal
     : number
     | boolean_rule
@@ -622,13 +602,16 @@ DECIMAL_INTEGER
 fragment NON_ZERO_DIGIT
      : [1-9]
      ;
-
 /// digit          ::=  "0"..."9"
 fragment DIGIT
      : [0-9]
      ;
-
+/// floatnumber   ::=  pointfloat | exponentfloat
 float_point
+     : FLOAT_NUMBER
+     ;
+
+FLOAT_NUMBER
     : POINT_FLOAT
     ;
 

@@ -1,31 +1,9 @@
-//model
-streaming model Frequency(size):
-    properties:
-        durable = False
-        reliable = False
-        buffer_size = size
-
-    schema:
-        frequency = IntegerField(default=1000)
 
 controller MakeRequests(tier):
     var = 5
     boot = tier.sources.boot
 
     event boot.booted(Context ctx):
-        if x == 10:
+        if x == 10 or y == 5 and:
             x = 1
 
-
-space AnchorTag:
-    platform:
-        language = CLang
-        templates = nrf52
-        system = nrf52Platform.v12
-
-    controllers:
-        arrival_time = MakeRequests(tier=self)
-
-    sources:
-        timer = system.timerSingleShoot
-        boot = system.boot

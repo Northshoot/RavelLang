@@ -3,6 +3,8 @@ streaming model Random(size):
         durable=False
         reliable=False
         records = size
+        encryption = ALL(AES)
+        access = W[ES], R[CS]
 
     schema:
         time=TimeStampField(auto_add=True)
