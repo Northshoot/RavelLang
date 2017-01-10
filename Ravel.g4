@@ -344,15 +344,29 @@ for_stmt
 
 
 if_stmt
-    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )? ( ELSE ':' block_stmt )? #IfStatement
+    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
     ;
 
 comp_expr
-    : comparison (AND comparison)? (OR comparison)? #CompExpr
+    : or_test ( IF or_test ELSE comp_expr )?
     ;
 
+or_test
+ : and_test ( OR and_test )* #OrTest
+ ;
+
+/// and_test: not_test ('and' not_test)*
+and_test
+     : not_test ( AND not_test )* #AndTest
+     ;
+
+not_test
+     : NOT not_test #NotTest
+     | comparison #CompRule
+     ;
+
 comparison
-    : expr (comp_op expr)* #CompRule
+    : expr (comp_op expr)*
     ;
 expr
     : atom //this is prep for future to implement advance comparisons

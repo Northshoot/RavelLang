@@ -37,13 +37,13 @@ public class RefPhase extends RavelBaseListener {
         currentScope = ctx.scope;
     }
     @Override
-    public void enterModelInstanciation(RavelParser.ModelInstanciationContext ctx) {
+    public void enterModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
         LOGGER.info("Instantiating: " + ctx.getText());
         isDeclared( ModelSymbol.class, (List<InstanceSymbol>) ctx.scope.getAllSymbols() );
 
     }
     @Override
-    public void enterControllerInstanciation(RavelParser.ControllerInstanciationContext ctx) {
+    public void enterControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         isDeclared( ControllerSymbol.class, (List<InstanceSymbol>) ctx.scope.getAllSymbols() );
 
     }

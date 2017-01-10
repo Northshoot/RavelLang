@@ -3,11 +3,6 @@ controller MakeRequests(tier):
     boot = tier.sources.boot
 
     event boot.booted(Context ctx):
-        if x == 10 or y == 5:
+        if x == 10 and x >10:
             x = 1
-        else if x > 10:
-            y = 0
-        else:
-            x=y
-
 

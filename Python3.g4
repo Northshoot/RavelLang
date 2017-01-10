@@ -435,7 +435,7 @@ except_clause
 
 /// suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
 suite
- :
+ : simple_stmt
  | NEWLINE INDENT stmt+ DEDENT
  ;
 
@@ -566,7 +566,7 @@ atom
  | '{' dictorsetmaker? '}'
  | NAME
  | number
- | string+
+ | str+
  | '...'
  | NONE
  | TRUE
@@ -674,7 +674,7 @@ yield_arg
  | testlist
  ;
 
-string
+str
  : STRING_LITERAL
  | BYTES_LITERAL
  ;

@@ -272,53 +272,33 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void enterIfStatement(RavelParser.IfStatementContext ctx) {
         System.out.println("IF statement");
-        List<RavelParser.Comp_exprContext> comp_expr = ctx.comp_expr();
-//        Iterator<RavelParser.Comp_exprContext> comp_iter = comp_expr.iterator();
-//        while(comp_iter.hasNext()){
-//            //TODO: test for secondary if
-//            System.out.println("ENTER: comp " + comp_expr.size());
-//            List<RavelParser.Or_testContext> or_test = comp_iter.next().or_test();
-//            Iterator<RavelParser.Or_testContext> or_iter = or_test.iterator();
-//            while(or_iter.hasNext()){
-//                System.out.println("ENTER: or " + or_test.size());
-//                List<RavelParser.And_testContext> and_test = or_iter.next().and_test();
-//                Iterator<RavelParser.And_testContext> and_iter = and_test.iterator();
-//                while(and_iter.hasNext()){
-//                    System.out.println("ENTER: and " + and_test.size());
-//                    List<RavelParser.Not_testContext> not_test = and_iter.next().not_test();
-//                    Iterator<RavelParser.Not_testContext> not_iter = not_test.iterator();
-//                    while(not_iter.hasNext()){
-//                        System.out.println("ENTER: comparison");
-//                        RavelParser.ComparisonContext comparison = not_iter.next().comparison();
-//                        List<RavelParser.ExprContext> expr = comparison.expr();
-//                        Iterator<RavelParser.ExprContext> expr_iter = expr.iterator();
-//                        List<RavelParser.Comp_opContext> comp_op = comparison.comp_op();
-//                        Iterator<RavelParser.Comp_opContext> comp_op_iter = comp_op.iterator();
-//                        System.out.println(comparison.getText());
-//                        String operator = comp_op_iter.next().getText();
-//                        System.out.println("Enter expre");
-//                        while (expr_iter.hasNext()){
-//
-//                            RavelParser.AtomContext atom = expr_iter.next().atom();
-//                            System.out.print(atom.getText() );
-//                            if(expr_iter.hasNext()) {
-//                                System.out.print( " " + operator + " ");
-//                            }
-//                        }
-//                        System.out.println("");
-//
-//                    }
-//                }
-//            }
-//        }
-
-
 
     }
 
+    @Override public void enterOrTest(RavelParser.OrTestContext ctx) {
+        if(! ctx.OR().isEmpty()){
+            System.out.println("Enter OR " + ctx.OR());
+        }
+    }
+    @Override public void exitOrTest(RavelParser.OrTestContext ctx) { }
+    @Override public void enterAndTest(RavelParser.AndTestContext ctx) {
+        if(!ctx.AND().isEmpty()){
+            System.out.println("Enter AND");
+        }
+    }
+
+    @Override public void enterNotTest(RavelParser.NotTestContext ctx) {
+        if( ctx.NOT().getText() != null){
+            System.out.println("Enter Not");
+        }
+    }
+
+    @Override public void exitAndTest(RavelParser.AndTestContext ctx) { }
+
     @Override
-    public void enterCompExpr(RavelParser.CompExprContext ctx){
-        System.out.println("Enter Comparison Expression");
+    public void enterCompRule(RavelParser.CompRuleContext ctx){
+        System.out.println("Enter Comparison Rule");
+
     }
     @Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         popScope();

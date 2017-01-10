@@ -502,29 +502,73 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitIfStatement(RavelParser.IfStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code CompExpr}
-	 * labeled alternative in {@link RavelParser#comp_expr}.
+	 * Enter a parse tree produced by {@link RavelParser#comp_expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterCompExpr(RavelParser.CompExprContext ctx);
+	void enterComp_expr(RavelParser.Comp_exprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code CompExpr}
-	 * labeled alternative in {@link RavelParser#comp_expr}.
+	 * Exit a parse tree produced by {@link RavelParser#comp_expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitCompExpr(RavelParser.CompExprContext ctx);
+	void exitComp_expr(RavelParser.Comp_exprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code OrTest}
+	 * labeled alternative in {@link RavelParser#or_test}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrTest(RavelParser.OrTestContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code OrTest}
+	 * labeled alternative in {@link RavelParser#or_test}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrTest(RavelParser.OrTestContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AndTest}
+	 * labeled alternative in {@link RavelParser#and_test}.
+	 * @param ctx the parse tree
+	 */
+	void enterAndTest(RavelParser.AndTestContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AndTest}
+	 * labeled alternative in {@link RavelParser#and_test}.
+	 * @param ctx the parse tree
+	 */
+	void exitAndTest(RavelParser.AndTestContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NotTest}
+	 * labeled alternative in {@link RavelParser#not_test}.
+	 * @param ctx the parse tree
+	 */
+	void enterNotTest(RavelParser.NotTestContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NotTest}
+	 * labeled alternative in {@link RavelParser#not_test}.
+	 * @param ctx the parse tree
+	 */
+	void exitNotTest(RavelParser.NotTestContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code CompRule}
-	 * labeled alternative in {@link RavelParser#comparison}.
+	 * labeled alternative in {@link RavelParser#not_test}.
 	 * @param ctx the parse tree
 	 */
 	void enterCompRule(RavelParser.CompRuleContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code CompRule}
-	 * labeled alternative in {@link RavelParser#comparison}.
+	 * labeled alternative in {@link RavelParser#not_test}.
 	 * @param ctx the parse tree
 	 */
 	void exitCompRule(RavelParser.CompRuleContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#comparison}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparison(RavelParser.ComparisonContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#comparison}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparison(RavelParser.ComparisonContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#expr}.
 	 * @param ctx the parse tree

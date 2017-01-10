@@ -560,13 +560,49 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompExpr(RavelParser.CompExprContext ctx) { }
+	@Override public void enterComp_expr(RavelParser.Comp_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCompExpr(RavelParser.CompExprContext ctx) { }
+	@Override public void exitComp_expr(RavelParser.Comp_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOrTest(RavelParser.OrTestContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOrTest(RavelParser.OrTestContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAndTest(RavelParser.AndTestContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAndTest(RavelParser.AndTestContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNotTest(RavelParser.NotTestContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNotTest(RavelParser.NotTestContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -579,6 +615,18 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCompRule(RavelParser.CompRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterComparison(RavelParser.ComparisonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComparison(RavelParser.ComparisonContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
