@@ -171,7 +171,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
         //create controllers
-        String name = "";//ctx.Identifier().getText(); //
+        String name = ctx.Identifier().getText(); //
         Controller ctrl = new Controller(name);
         //get controller args
         List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
@@ -370,9 +370,10 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         for(String mName: ctrInst.keySet()){
             //get the instance symbol
             InstanceSymbol is = ctrInst.get(mName);
+            System.out.println("Ctr: " + is.getName());
             //get the model
             Controller ctr = rApp.getController(is.getInstanceName());
-            System.out.println(ctr);
+            System.out.println("Controller: \n" +ctr);
             ctr.setSpace(space);
             //set parameters
             Map<String, String> ismap = is.getParameterMap();

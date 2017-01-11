@@ -267,9 +267,9 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
+    //TODO: if scoping is a mess
     @Override
     public void enterIfStatement(RavelParser.IfStatementContext ctx) {
-        prettyPrint("Entering If statement");
         LocalScope ls = new LocalScope("if_statement", currentScope);
         ctx.scope = ls;
         pushScope(ls);
@@ -283,7 +283,7 @@ public class DefPhase extends RavelBaseListener {
         }
     }
     @Override public void exitOrTest(RavelParser.OrTestContext ctx) {
-        if(! ctx.OR().isEmpty()){
+        if(currentScope.getName() == "or_comparison"){
             popScope();
         }
 
@@ -302,12 +302,12 @@ public class DefPhase extends RavelBaseListener {
         }
     }
     @Override public void exitNotTest(RavelParser.NotTestContext ctx) {
-        if(ctx.NOT().getText() != null){
+        if(currentScope.getName() == "not_comparison"){
             popScope();
         }
     }
     @Override public void exitAndTest(RavelParser.AndTestContext ctx) {
-        if(!ctx.AND().isEmpty()){
+        if(currentScope.getName() == "and_comparison"){
             popScope();
         }
     }
@@ -326,8 +326,8 @@ public class DefPhase extends RavelBaseListener {
     }
     @Override
     public void exitIfStatement(RavelParser.IfStatementContext ctx) {
+        System.out.println( "Symbols: \n" + currentScope.getAllSymbols() );
         popScope();
-
     }
     @Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         popScope();

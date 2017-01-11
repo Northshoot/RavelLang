@@ -33,8 +33,8 @@ public class Platform {
             String[] pAPI = mSystem.split("\\.");
             String platform = pAPI[0];
             LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
-            mLanguage = (ConcreteLanguage) Class.forName("ai.harmony.api.lang." + mLang).newInstance();
-            mPlatform = (ConcretePlatform) Class.forName("ai.harmony.api.platforms." + platform).newInstance();
+            mLanguage = (ConcreteLanguage) Class.forName("org.stanford.api.lang." + mLang).newInstance();
+            mPlatform = (ConcretePlatform) Class.forName("org.stanford.api.platforms." + platform).newInstance();
             mPlatform.setAPILevel(pAPI[1]);
 
         } catch (InstantiationException e) {
@@ -77,7 +77,7 @@ public class Platform {
         public Builder name(String name) {varObj.mName = name; return thisObj; }
         public Builder language(String lang){varObj.mLang=lang; return thisObj; }
         public Builder system(String sys){varObj.mSystem=sys; return thisObj; }
-        public Builder template(String tempalte){varObj.mTemplate =tempalte; return thisObj; }
+        public Builder template(String template){varObj.mTemplate =template; return thisObj; }
 
 
 

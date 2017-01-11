@@ -24,6 +24,7 @@ public class CLang extends ConcreteLanguage{
 
     public CLang() {
         super();
+        System.out.println("Language platform init");
         model_tmpl = new STGroupFile(BASE_LANG_TMPL_PATH +"/model.stg");
     }
 

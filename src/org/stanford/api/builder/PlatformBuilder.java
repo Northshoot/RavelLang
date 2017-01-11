@@ -35,6 +35,7 @@ public class PlatformBuilder {
     }
 
     public void buildSpace(Space s){
+        System.out.println("Building Space: \n" + s.getName());
         s.setBuildPath(path);
         mFiles.addAll(s.buildAll());
     }
