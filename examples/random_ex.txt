@@ -1,8 +1,38 @@
-controller MakeRequests(tier):
-    var = 5
-    boot = tier.sources.boot
+streaming model Random(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
 
-    event boot.booted(Context ctx):
-        if x == 10 and x >10:
-            x = 1
+    schema:
+        time=TimeStampField(auto_add=True)
+        value = IntegerField()
 
+controller RandomControllerEmbedded(tier):
+    mRandom = tier.models.random
+    random_source = tier.sources.random
+    boot_event = tier.platform.boot
+    running = False
+
+    event boot_event.booted(context ctx):
+        x = 10
+        if x > 5 :
+            rand = mRandom.create()
+            rand.value = random_source.read()
+            rand.save()
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+
+
+    models:
+        random=Random(size=10)
+
+    controllers:
+        rndcnt = RandomControllerEmbedded(tier=self)
+
+    sources:
+        random = platform.source.random

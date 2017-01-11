@@ -28,7 +28,7 @@ public class DefPhase extends RavelBaseListener {
 
 
     void prettyPrint(String s){
-        //System.out.println(getTab() + s);
+        System.out.println(getTab() + s);
     }
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
@@ -269,6 +269,7 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterIfStatement(RavelParser.IfStatementContext ctx) {
+        prettyPrint("Entering If statement");
         LocalScope ls = new LocalScope("if_statement", currentScope);
         ctx.scope = ls;
         pushScope(ls);
@@ -282,7 +283,10 @@ public class DefPhase extends RavelBaseListener {
         }
     }
     @Override public void exitOrTest(RavelParser.OrTestContext ctx) {
-        popScope();
+        if(! ctx.OR().isEmpty()){
+            popScope();
+        }
+
     }
     @Override public void enterAndTest(RavelParser.AndTestContext ctx) {
         if(!ctx.AND().isEmpty()){
@@ -297,8 +301,16 @@ public class DefPhase extends RavelBaseListener {
             pushScope(ls);
         }
     }
-    @Override public void exitNotTest(RavelParser.NotTestContext ctx) { popScope();}
-    @Override public void exitAndTest(RavelParser.AndTestContext ctx) { popScope(); }
+    @Override public void exitNotTest(RavelParser.NotTestContext ctx) {
+        if(ctx.NOT().getText() != null){
+            popScope();
+        }
+    }
+    @Override public void exitAndTest(RavelParser.AndTestContext ctx) {
+        if(!ctx.AND().isEmpty()){
+            popScope();
+        }
+    }
 
     @Override
     public void enterCompRule(RavelParser.CompRuleContext ctx){
