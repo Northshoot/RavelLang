@@ -1,7 +1,7 @@
 package org.stanford.ravel.primitives.Fields;
 
 /**
- * Has applicaiton related context
+ * Has application related context
  * TODO: actual implementation
  * Created by lauril on 8/30/16.
  */

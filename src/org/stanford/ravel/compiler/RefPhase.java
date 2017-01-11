@@ -28,7 +28,7 @@ public class RefPhase extends RavelBaseListener {
 
 
     /**
-     * (1) Bellow we check if the models and controllers in the sapce are are declared before
+     * (1) Bellow we check if the models and controllers in the space are are declared before
      * (2) we add innit parameters to the models
      * @param ctx
      */

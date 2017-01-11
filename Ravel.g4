@@ -333,17 +333,17 @@ arrayInitializer
     :   '[' (variableInitializer (',' variableInitializer)* (',')? )? ']'
     ;
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
-while_stmt
+while_stmt returns [Scope scope]
  : WHILE comp_expr ':' block_stmt #WhileStatement
  ;
 
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
-for_stmt
+for_stmt returns [Scope scope]
      : FOR forControl ':' block_stmt #ForStatement
      ;
 
 
-if_stmt
+if_stmt returns [Scope scope]
     : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
     ;
 
@@ -365,8 +365,9 @@ not_test
      | comparison #CompRule
      ;
 
+//we only allow one comparison
 comparison
-    : expr (comp_op expr)*
+    : expr comp_op expr
     ;
 expr
     : atom //this is prep for future to implement advance comparisons
@@ -484,12 +485,12 @@ qualified_name
     :   Identifier ('.' Identifier)*
     ;
 comp_op
-    : '<'
-    | '>'
-    | '=='
-    | '>='
-    | '<='
-    | '!='
+    : GT
+    | LT
+    | EQUAL
+    | LE
+    | GE
+    | NOTEQUAL
     | IN
     | NOT IN
     | IS

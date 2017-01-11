@@ -149,7 +149,6 @@ public class DefPhase extends RavelBaseListener {
         es.setDefNode(ctx);
         currentScope.define(es);
         pushScope(es);
-        System.out.println("EVENT");
 
     }
 
@@ -171,7 +170,6 @@ public class DefPhase extends RavelBaseListener {
         vs.setScope(currentScope);
         vs.setDefNode(ctx);
         currentScope.define(vs);
-        System.out.println("VARIABLE");
     }
 
     @Override
@@ -271,33 +269,52 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterIfStatement(RavelParser.IfStatementContext ctx) {
-        System.out.println("IF statement");
+        LocalScope ls = new LocalScope("if_statement", currentScope);
+        ctx.scope = ls;
+        pushScope(ls);
 
     }
 
     @Override public void enterOrTest(RavelParser.OrTestContext ctx) {
         if(! ctx.OR().isEmpty()){
-            System.out.println("Enter OR " + ctx.OR());
+            LocalScope ls = new LocalScope("or_comparison", currentScope);
+            pushScope(ls);
         }
     }
-    @Override public void exitOrTest(RavelParser.OrTestContext ctx) { }
+    @Override public void exitOrTest(RavelParser.OrTestContext ctx) {
+        popScope();
+    }
     @Override public void enterAndTest(RavelParser.AndTestContext ctx) {
         if(!ctx.AND().isEmpty()){
-            System.out.println("Enter AND");
+            LocalScope ls = new LocalScope("and_comparison", currentScope);
+            pushScope(ls);
         }
     }
 
     @Override public void enterNotTest(RavelParser.NotTestContext ctx) {
         if( ctx.NOT().getText() != null){
-            System.out.println("Enter Not");
+            LocalScope ls = new LocalScope("not_comparison", currentScope);
+            pushScope(ls);
         }
     }
-
-    @Override public void exitAndTest(RavelParser.AndTestContext ctx) { }
+    @Override public void exitNotTest(RavelParser.NotTestContext ctx) { popScope();}
+    @Override public void exitAndTest(RavelParser.AndTestContext ctx) { popScope(); }
 
     @Override
     public void enterCompRule(RavelParser.CompRuleContext ctx){
-        System.out.println("Enter Comparison Rule");
+        RavelParser.Comp_opContext comp_operators = ctx.comparison().comp_op();
+        RavelParser.ExprContext left_expr = ctx.comparison().expr(0);
+        RavelParser.ExprContext right_expr = ctx.comparison().expr(1);
+        String name = "comparison expr" + ctx.start.getCharPositionInLine();
+        currentScope.define(new ComparisonSymbol(
+                name,
+                left_expr.getText(), right_expr.getText(), comp_operators
+        ));
+
+    }
+    @Override
+    public void exitIfStatement(RavelParser.IfStatementContext ctx) {
+        popScope();
 
     }
     @Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
