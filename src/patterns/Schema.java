@@ -1,4 +1,4 @@
-package tests;
+package patterns;
 
 /**
  * Created by lauril on 10/5/16.

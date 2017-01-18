@@ -29,6 +29,7 @@ controller Randomizer(tier):
 
     event boot_event.booted(context ctx):
         if ctx.error is SUCCESS:
+            a = mFreq.frequency + mFreq.frequency
             random_timer.start_periodic(mFreq.frequency)
             running = True
         else:
@@ -54,6 +55,7 @@ controller Randomizer(tier):
             random_timer.start_periodic(mFreq.frequency)
             running = True
 
+
 space EmbeddedSpace:
     platform:
         language = CLang
@@ -62,8 +64,40 @@ space EmbeddedSpace:
 
 
     models:
-        random=Random(size=10)
-        frequency=UpdateFrequency(size=1)
+        random = Random(size=10)
+        frequency = UpdateFrequency(size=1)
+
+    controllers:
+        rndcnt = Randomizer(tier=self)
+
+    sources:
+        random = platform.system.random
+        boot = platform.system.boot
+        timer = platform.system.timer
+
+streaming model Random2(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
+        encryption = ALL(AES)
+        access = W[ES], R[CS]
+
+    schema:
+        time=TimeStampField(auto_add=True)
+        value = DoubleField(default=1000, min=100, max=500)
+
+
+space EmbeddedSpace2:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+
+
+    models:
+        random = Random2(size=10)
+        frequency = UpdateFrequency(size=1)
 
     controllers:
         rndcnt = Randomizer(tier=self)

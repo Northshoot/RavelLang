@@ -302,7 +302,7 @@ eventdef returns [Scope scope]
 block_stmt
     : NEWLINE INDENT blockStatement+ DEDENT #Block
     ;
-
+//TODO: prevent controll flow in the controller block
 blockStatement
     : ref_assig // reference
     | variable // or variable assignment
@@ -310,6 +310,7 @@ blockStatement
     | comp_stmt
     | NEWLINE
     ;
+
 comp_stmt
     : while_stmt
     | if_stmt
@@ -712,7 +713,7 @@ fragment SPACES
  ;
 
 fragment COMMENT
- : '//' ~[\r\n]*
+ : '#' ~[\r\n]*
  ;
 
 fragment LINE_JOINING

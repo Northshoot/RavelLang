@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.5.3
+// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class RavelParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.6", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -207,6 +207,7 @@ public class RavelParser extends Parser {
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__8) | (1L << T__9) | (1L << T__10) | (1L << SPACE) | (1L << CONTROLLER) | (1L << NEWLINE))) != 0)) {
 				{
 				setState(178);
+				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case NEWLINE:
 					{
@@ -281,6 +282,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 2, RULE_comp_def);
 		try {
 			setState(188);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__8:
 			case T__9:
@@ -493,6 +495,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 8, RULE_space_block);
 		try {
 			setState(210);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__0:
 				enterOuterAlt(_localctx, 1);
@@ -707,6 +710,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 14, RULE_space_assigment);
 		try {
 			setState(226);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Identifier:
 				enterOuterAlt(_localctx, 1);
@@ -918,6 +922,7 @@ public class RavelParser extends Parser {
 			setState(243);
 			match(T__2);
 			setState(245);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Identifier) {
 				{
@@ -929,6 +934,7 @@ public class RavelParser extends Parser {
 			setState(247);
 			match(T__3);
 			setState(249);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==NEWLINE) {
 				{
@@ -995,6 +1001,7 @@ public class RavelParser extends Parser {
 			setState(251);
 			param_assig();
 			setState(254);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__4) {
 				{
@@ -1096,6 +1103,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 26, RULE_param_val);
 		try {
 			setState(262);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__18:
 			case TRUE:
@@ -1449,7 +1457,10 @@ public class RavelParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__8) | (1L << T__9) | (1L << T__10))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -1566,6 +1577,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 42, RULE_model_block);
 		try {
 			setState(296);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__11:
 				enterOuterAlt(_localctx, 1);
@@ -1821,6 +1833,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 50, RULE_propValue);
 		try {
 			setState(317);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__12:
 				enterOuterAlt(_localctx, 1);
@@ -2104,6 +2117,7 @@ public class RavelParser extends Parser {
 			setState(345);
 			match(T__2);
 			setState(347);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Identifier) {
 				{
@@ -2115,6 +2129,7 @@ public class RavelParser extends Parser {
 			setState(349);
 			match(T__3);
 			setState(351);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==NEWLINE) {
 				{
@@ -2177,7 +2192,10 @@ public class RavelParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T_BYTE_FIELD) | (1L << T_STRING_FIELD) | (1L << T_BOOLEAN_FIELD) | (1L << T_INTEGER_FIELD) | (1L << T_NUMBER_FIELD) | (1L << T_DATE_FIELD) | (1L << T_DATE_TIME_FIELD) | (1L << T_TIME_STAMP_FIELD) | (1L << T_CONTEXT_FIELD) | (1L << T_MODEL_FIELD))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -2361,6 +2379,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 66, RULE_controller_body);
 		try {
 			setState(372);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case EVENT:
 				enterOuterAlt(_localctx, 1);
@@ -2670,6 +2689,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 74, RULE_comp_stmt);
 		try {
 			setState(401);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case WHILE:
 				enterOuterAlt(_localctx, 1);
@@ -2857,6 +2877,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 80, RULE_variableInitializer);
 		try {
 			setState(412);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__12:
 				enterOuterAlt(_localctx, 1);
@@ -2933,6 +2954,7 @@ public class RavelParser extends Parser {
 			setState(414);
 			match(T__12);
 			setState(426);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__12) | (1L << T__18) | (1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << DECIMAL_INTEGER) | (1L << FLOAT_NUMBER) | (1L << NullLiteral))) != 0) || _la==Identifier) {
 				{
@@ -2957,6 +2979,7 @@ public class RavelParser extends Parser {
 					_alt = getInterpreter().adaptivePredict(_input,26,_ctx);
 				}
 				setState(424);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__4) {
 					{
@@ -3198,6 +3221,7 @@ public class RavelParser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(457);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ELSE) {
 				{
@@ -3264,6 +3288,7 @@ public class RavelParser extends Parser {
 			setState(459);
 			or_test();
 			setState(465);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==IF) {
 				{
@@ -3501,6 +3526,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 96, RULE_not_test);
 		try {
 			setState(486);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case NOT:
 				_localctx = new NotTestContext(_localctx);
@@ -3904,6 +3930,7 @@ public class RavelParser extends Parser {
 			setState(510);
 			match(T__2);
 			setState(512);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Identifier) {
 				{
@@ -3963,6 +3990,7 @@ public class RavelParser extends Parser {
 			setState(516);
 			functionArg();
 			setState(519);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__4) {
 				{
@@ -4119,6 +4147,7 @@ public class RavelParser extends Parser {
 			setState(526);
 			match(T__2);
 			setState(528);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Identifier) {
 				{
@@ -4178,6 +4207,7 @@ public class RavelParser extends Parser {
 			setState(532);
 			param();
 			setState(535);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__4) {
 				{
@@ -4389,6 +4419,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 128, RULE_elementValue);
 		try {
 			setState(553);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__2:
 			case T__18:
@@ -4465,6 +4496,7 @@ public class RavelParser extends Parser {
 			setState(555);
 			match(T__15);
 			setState(564);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__15) | (1L << T__18) | (1L << SELF) | (1L << TRUE) | (1L << FALSE) | (1L << NEWLINE) | (1L << DECIMAL_INTEGER) | (1L << FLOAT_NUMBER) | (1L << NullLiteral))) != 0) || _la==Identifier) {
 				{
@@ -4492,6 +4524,7 @@ public class RavelParser extends Parser {
 			}
 
 			setState(567);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__4) {
 				{
@@ -4696,6 +4729,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 138, RULE_expression);
 		try {
 			setState(587);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__2:
 			case T__18:
@@ -4860,6 +4894,7 @@ public class RavelParser extends Parser {
 			setState(598);
 			ref_assig();
 			setState(601);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__4) {
 				{
@@ -5016,6 +5051,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 148, RULE_reference_value);
 		try {
 			setState(611);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Identifier:
 				enterOuterAlt(_localctx, 1);
@@ -5547,6 +5583,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 164, RULE_literal);
 		try {
 			setState(657);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case DECIMAL_INTEGER:
 			case FLOAT_NUMBER:
@@ -5631,6 +5668,7 @@ public class RavelParser extends Parser {
 			setState(659);
 			match(T__18);
 			setState(661);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Identifier) {
 				{
@@ -5685,6 +5723,7 @@ public class RavelParser extends Parser {
 		enterRule(_localctx, 168, RULE_number);
 		try {
 			setState(667);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case DECIMAL_INTEGER:
 				enterOuterAlt(_localctx, 1);
@@ -5832,7 +5871,10 @@ public class RavelParser extends Parser {
 			_la = _input.LA(1);
 			if ( !(_la==TRUE || _la==FALSE) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
