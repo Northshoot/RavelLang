@@ -9,7 +9,7 @@ TODO's for Ravel:
 * introducing struct
 * introducing array
 * option to write custom fields and define newtype
-* type is translated, plus types have allowed opperations
+* type is translated, plus types have allowed operations
 * automate testing
 * rewrite apps
 * define new IR
