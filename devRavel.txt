@@ -1,5 +1,6 @@
 TODO's for Ravel:
 
+* add imports
 * define controller life cycle
 * draw architecture
 * move to multiple models and multiple controller using same model per tier

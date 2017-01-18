@@ -1,0 +1,12 @@
+space EmbeddedSpace:
+    platform:
+        pass
+
+    sources:
+        pass
+
+    models:
+        pass
+
+    controllers:
+        pass
