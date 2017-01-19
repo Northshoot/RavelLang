@@ -11,8 +11,12 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.stanford.ravel.primitives.Controller;
+import org.stanford.ravel.primitives.Model;
+import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -22,16 +26,17 @@ import java.util.logging.Logger;
 
 
 public class RavelCompiler {
-    private static Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static Logger LOGGER = Logger.getLogger(RavelCompiler.class.getName());
 
-    private static void logBuildStart() {
+    private static long logBuildStart() {
         System.out.println("Starting Build");
         Date t = Calendar.getInstance().getTime();
         long start = t.getTime();
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
+        return start;
     }
 
-    private static void logBuildEnd() {
+    private static void logBuildEnd(long start) {
         Date now = Calendar.getInstance().getTime();
         long diff = now.getTime() - start;
         long diffMilliSeconds = diff % 60;
@@ -41,7 +46,7 @@ public class RavelCompiler {
                 " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
     }
 
-    private static ParseTree parse(InputStream is) {
+    private static ParseTree parse(InputStream is) throws IOException {
         ANTLRInputStream input = new ANTLRInputStream(is);
 
         RavelLexer lexer = new RavelLexer(input);
@@ -49,10 +54,10 @@ public class RavelCompiler {
 
         RavelParser parser = new RavelParser(tokens);
         parser.setBuildParseTree(true);
-        ParseTree tree = parser.file_input();
+        return  parser.file_input();
     }
 
-    private RavelApplication defPhase(ParseTree tree) {
+    private static RavelApplication defPhase(ParseTree tree) {
         RavelApplication rApp = new RavelApplication();
 
         // TODO
@@ -60,13 +65,13 @@ public class RavelCompiler {
         return rApp;
     }
 
-    private void compileModels(RavelApplication app) {
+    private static void compileModels(RavelApplication app) {
         for (Model m : app.getModels()) {
 
         }
     }
 
-    private void compileControllers(RavelApplication app) {
+    private static void compileControllers(RavelApplication app) {
         for (Controller c : app.getControllers()) {
             //
             // ControllerHIR hir = analyzeSyntax(c.getParseTree());
@@ -77,7 +82,7 @@ public class RavelCompiler {
         }
     }
 
-    private void compileSpaces(RavelApplication app) {
+    private static void compileSpaces(RavelApplication app) {
         // this is effectively the ref/link phase, where
         // models, controllers, and platforms are linked together
 
@@ -88,18 +93,17 @@ public class RavelCompiler {
         }
     }
 
-    private void generateCode(RavelApplication app, String buildPath) {
+    private static void generateCode(RavelApplication app, String buildPath) {
         PlatformBuilder builder = PlatformBuilder.getInstance();
-        builder.setApp(rApp);
+        builder.setApp(app);
         builder.setPath(buildPath);
         builder.buildAll();
         builder.render();
     }
 
     public static void main(String[] args) throws Exception {
-        logBuildStart();
+        long start = logBuildStart();
 
-        InputStream is;
         String inputFile = null;
         String mBuildPath = null;
         if (args.length > 0) inputFile = args[0];
@@ -128,10 +132,9 @@ public class RavelCompiler {
 
         LOGGER.info("Internal representation is created!");
 
-        generateCode();
+        generateCode(app, mBuildPath);
 
-        logBuildEnd();
-
+        logBuildEnd(start);
     }
 
 }
