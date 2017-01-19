@@ -1,3 +1,5 @@
+package org.stanford.ravel;
+
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.api.builder.PlatformBuilder;
@@ -19,7 +21,7 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 
-public class Main {
+public class RavelCompiler {
     private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     private static void logBuildStart() {
