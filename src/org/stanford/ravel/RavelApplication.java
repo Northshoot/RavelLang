@@ -19,16 +19,6 @@ public class RavelApplication  {
 
     }
 
-    /**
-     * Making inter component linking
-     * mangle mangle this can be done better
-     * TODO: making it pretty
-     */
-    public void link() {
-
-
-    }
-
     Map<String, Model> mModels = new LinkedHashMap<>();
     public void addModel(String name, Model m){
         mModels.put(name, m);

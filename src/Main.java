@@ -22,13 +22,84 @@ import java.util.logging.Logger;
 public class Main {
     private static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
-    public static void main(String[] args) throws Exception {
-        String inputFile = null;
-        String mBuildPath = null;
+    private static void logBuildStart() {
         System.out.println("Starting Build");
         Date t = Calendar.getInstance().getTime();
         long start = t.getTime();
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
+    }
+
+    private static void logBuildEnd() {
+        Date now = Calendar.getInstance().getTime();
+        long diff = now.getTime() - start;
+        long diffMilliSeconds = diff % 60;
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        System.out.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
+                " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
+    }
+
+    private static ParseTree parse(InputStream is) {
+        ANTLRInputStream input = new ANTLRInputStream(is);
+
+        RavelLexer lexer = new RavelLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+        RavelParser parser = new RavelParser(tokens);
+        parser.setBuildParseTree(true);
+        ParseTree tree = parser.file_input();
+    }
+
+    private RavelApplication defPhase(ParseTree tree) {
+        RavelApplication rApp = new RavelApplication();
+
+        // TODO
+
+        return rApp;
+    }
+
+    private void compileModels(RavelApplication app) {
+        for (Model m : app.getModels()) {
+
+        }
+    }
+
+    private void compileControllers(RavelApplication app) {
+        for (Controller c : app.getControllers()) {
+            //
+            // ControllerHIR hir = analyzeSyntax(c.getParseTree());
+            // ControllerIR ir = typeResolve(hir);
+            // ir = transform(ir);
+            // ir = lower(ir);
+            // c.setTargetIR(ir);
+        }
+    }
+
+    private void compileSpaces(RavelApplication app) {
+        // this is effectively the ref/link phase, where
+        // models, controllers, and platforms are linked together
+
+        for (Space s : app.getSpaces()) {
+            // for (Controller c : s.getControllers()) {
+            //    s.addInstantiatedController(c.instantiate(s));
+            // }
+        }
+    }
+
+    private void generateCode(RavelApplication app, String buildPath) {
+        PlatformBuilder builder = PlatformBuilder.getInstance();
+        builder.setApp(rApp);
+        builder.setPath(buildPath);
+        builder.buildAll();
+        builder.render();
+    }
+
+    public static void main(String[] args) throws Exception {
+        logBuildStart();
+
+        InputStream is;
+        String inputFile = null;
+        String mBuildPath = null;
         if (args.length > 0) inputFile = args[0];
         InputStream is = System.in;
         if (inputFile != null) {
@@ -39,74 +110,25 @@ public class Main {
         } else {
             System.out.println("File is null");
         }
-        //mBuildPath += "/src/";
 
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        ParseTree tree = parse(is);
 
-        RavelLexer lexer = new RavelLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        // define (hoist) the models and controllers
+        RavelApplication app = defPhase(tree);
+        // typecheck the models, assign types to the fields
+        compileModels(app);
 
-        RavelParser parser = new RavelParser(tokens);
-        parser.setBuildParseTree(true);
-        ParseTree tree = parser.file_input();
-        ParseTreeWalker walker = new ParseTreeWalker();
+        // compile the controllers to IR
+        compileControllers(app);
 
+        // link controllers, models and platforms
+        compileSpaces(app);
 
-        /**
-         * First create Defined symbols
-         */
-        DefPhase def = new DefPhase();
-        walker.walk(def, tree);
-
-        /**
-         * Second create reference symbols and resolve definitions
-         * What do we want to validate?
-         * Added: 18/8/2016 09:06:04 For a starter:
-         * (1) Variable references have corresponding definitions in the scope
-         * (2) Event declarations have corresponding definitions in the scope
-         * (3) Variables are not used as functions
-         * (4) Functions are not used as variables
-         * (5) Referenced functions context has definitions in it
-         * (6) Components are using appropriate component blocks
-         * (7) Models, Controller and views are instantiated on to a particular space
-         * (8) components are instantiated with allowed keywords
-         * (9) schema fields have required and allowed keywords, parameters
-         * (10) Model fields are accessed with correct privileges that are defined in model properties
-         *
-         *
-         */
-        //TODO: this is just a sample testing if models and controllers are defined and
-        //if model scopes are defined
-        RefPhase ref = new RefPhase(def.globalScope);
-        walker.walk(ref, tree);
-        /**
-         *  Morph to an complete internal representation
-         *  Create concrete instances of models
-         *
-         */
-        RavelApplication rApp = new RavelApplication();
-        PrimitiveRepPhase inter = new PrimitiveRepPhase(def.globalScope, rApp);
-        walker.walk(inter, tree);
-        rApp.link();
         LOGGER.info("Internal representation is created!");
-        /**
-         *Generate code
-         */
-        //TODO: need settings file
-        PlatformBuilder builder = PlatformBuilder.getInstance();
-        builder.setApp(rApp);
-        builder.setPath(mBuildPath);
-        builder.buildAll();
-        builder.render();
 
-//        }
-        Date now = Calendar.getInstance().getTime();
-        long diff = now.getTime() - start;
-        long diffMilliSeconds = diff % 60;
-        long diffSeconds = diff / 1000 % 60;
-        long diffMinutes = diff / (60 * 1000) % 60;
-        System.out.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
-                " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
+        generateCode();
+
+        logBuildEnd();
 
     }
 
