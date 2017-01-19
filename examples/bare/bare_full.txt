@@ -1,0 +1,54 @@
+streaming model RandomModel(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
+
+    schema:
+        value = IntegerField()
+
+
+controller Randomizer(sys: Platform, random: RandomModel, random_source: source):
+
+    event sys.booted(Context ctx):
+        if ctx.error is SUCCESS:
+            sys.random_timer.start_periodic(1000)
+        else:
+            pass
+
+    event sys.random_timer.fired(Context ctx):
+        rand = mRandom.create()
+        rand.value = random_source.read()
+        rand.save()
+
+    event mRandom.full(context ctx):
+        random_timer.stop()
+        running = False
+
+    event mRandom.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(mFreq.frequency)
+            running = True
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+
+    models:
+        random = RandomModel(size=10)
+
+
+    controllers:
+        rndcnt = Randomizer(random=RandomModel)
+
+    sources:
+        random = platform.system.random
+        boot = platform.system.boot
+        timer = platform.system.timer
+
+
+
+
