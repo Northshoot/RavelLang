@@ -10,7 +10,8 @@ public class LocalScope extends BaseScope {
 
     String mName;
     public LocalScope(String name, Scope enclosingScope) {
-        super(enclosingScope);
+        super();
+        setEnclosingScope(enclosingScope);
         this.mName = name;
     }
 

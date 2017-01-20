@@ -19,7 +19,7 @@ public class Space extends Primitive{
     private Platform mPlatform;
 
 
-    public Space(String name){
+    public Space(String name) {
         super(name);
     }
 

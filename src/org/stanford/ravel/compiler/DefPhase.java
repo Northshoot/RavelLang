@@ -19,24 +19,29 @@ import java.util.logging.Logger;
  */
 public class DefPhase extends RavelBaseListener {
     private static Logger LOGGER = Logger.getLogger(DefPhase.class.getName());
-    Scope currentScope;
+    private Scope currentScope;
     //will be imports eventually
-    public GlobalScope globalScope;
-    int intend = 0;
-    boolean walked = false;
 
+    private GlobalScope globalScope;
+    private int intend = 0;
+    private boolean walked = false;
 
+    public GlobalScope getGlobalScope() {
+        assert walked;
 
-    void prettyPrint(String s){
+        return globalScope;
+    }
+
+    private void prettyPrint(String s){
         System.out.println(getTab() + s);
     }
+
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
-        globalScope = new GlobalScope(null);
+        globalScope = new GlobalScope();
         ctx.scope = globalScope;
         pushScope(globalScope);
     }
-
 
     @Override
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
@@ -71,6 +76,21 @@ public class DefPhase extends RavelBaseListener {
             }
         }
         popScope();
+    }
+
+    @Override
+    public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) {
+        intend++;
+        String name = ctx.Identifier().getText();
+        VariableSymbol vs = new VariableSymbol(name);
+        vs.setScope(currentScope);
+        vs.setDefNode(ctx);
+        currentScope.define(vs);
+    }
+
+    @Override
+    public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) {
+        intend--;
     }
 
     @Override
@@ -135,7 +155,6 @@ public class DefPhase extends RavelBaseListener {
         ctx.scope = ctr;
         currentScope.define(ctr);
         pushScope(ctr);
-
     }
 
     @Override
@@ -161,33 +180,6 @@ public class DefPhase extends RavelBaseListener {
     public void exitControllerScope(RavelParser.ControllerScopeContext ctx) {
         popScope();
     }
-
-    @Override
-    public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend++;
-        String name = ctx.Identifier().getText();
-        VariableSymbol vs = new VariableSymbol(name);
-        vs.setScope(currentScope);
-        vs.setDefNode(ctx);
-        currentScope.define(vs);
-    }
-
-    @Override
-    public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend--;
-    }
-
-    @Override
-    public void enterReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) {
-        intend++;
-        ReferenceSymbol rs = new ReferenceSymbol(ctx.reference_name().getText(), ctx.reference_value().getText());
-        rs.setScope(currentScope);
-        rs.setDefNode(ctx);
-        currentScope.define(rs);
-    }
-
-    @Override
-    public void exitReferenceAssignment(RavelParser.ReferenceAssignmentContext ctx) { intend--;}
 
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx) {
@@ -225,10 +217,7 @@ public class DefPhase extends RavelBaseListener {
         is.setScope(currentScope);
         is.setDefNode(ctx);
         currentScope.define(is);
-
     }
-
-
 
     @Override public void enterParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
         RavelParser.InstanceContext instance = (RavelParser.InstanceContext) ctx.getParent();
@@ -239,23 +228,10 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override public void exitInstance(RavelParser.InstanceContext ctx) {
-        if(currentScope.getEnclosingScope() instanceof SpaceSymbol){
-            SpaceSymbol ss = (SpaceSymbol) currentScope.getEnclosingScope();
-            String cn = currentScope.getName();
-           if(cn == "model"){
-               ss.addModels(ctx.Identifier().getText(), (InstanceSymbol)ctx.symbol);
-           } else if (cn == "controllers") {
-               ss.addControllers(ctx.Identifier().getText(), (InstanceSymbol)ctx.symbol);
-           } else {
-               LOGGER.severe("Not applicable here exitInstance with name: " + cn);
-           }
-        } else {
-            LOGGER.severe("Should be only in space!");
-        }
-
     }
+
     @Override public void exitModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
-        for(Symbol re: ctx.scope.getSymbols()) {
+        for (Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addModels(re.getName(),(InstanceSymbol) re);
         }
         popScope();
@@ -267,69 +243,10 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
-    //TODO: if scoping is a mess
-    @Override
-    public void enterIfStatement(RavelParser.IfStatementContext ctx) {
-        LocalScope ls = new LocalScope("if_statement", currentScope);
-        ctx.scope = ls;
-        pushScope(ls);
-
-    }
-
-    @Override public void enterOrTest(RavelParser.OrTestContext ctx) {
-        if(! ctx.OR().isEmpty()){
-            LocalScope ls = new LocalScope("or_comparison", currentScope);
-            pushScope(ls);
-        }
-    }
-    @Override public void exitOrTest(RavelParser.OrTestContext ctx) {
-        if(currentScope.getName() == "or_comparison"){
-            popScope();
-        }
-
-    }
-    @Override public void enterAndTest(RavelParser.AndTestContext ctx) {
-        if(!ctx.AND().isEmpty()){
-            LocalScope ls = new LocalScope("and_comparison", currentScope);
-            pushScope(ls);
-        }
-    }
-
-    @Override public void enterNotTest(RavelParser.NotTestContext ctx) {
-        if( ctx.NOT().getText() != null){
-            LocalScope ls = new LocalScope("not_comparison", currentScope);
-            pushScope(ls);
-        }
-    }
-    @Override public void exitNotTest(RavelParser.NotTestContext ctx) {
-        if(currentScope.getName() == "not_comparison"){
-            popScope();
-        }
-    }
-    @Override public void exitAndTest(RavelParser.AndTestContext ctx) {
-        if(currentScope.getName() == "and_comparison"){
-            popScope();
-        }
-    }
-
-    @Override
-    public void enterCompRule(RavelParser.CompRuleContext ctx){
-        RavelParser.Comp_opContext comp_operators = ctx.comparison().comp_op();
-        RavelParser.ExprContext left_expr = ctx.comparison().expr(0);
-        RavelParser.ExprContext right_expr = ctx.comparison().expr(1);
-        String name = "comparison expr" + ctx.start.getCharPositionInLine();
-        currentScope.define(new ComparisonSymbol(
-                name,
-                left_expr.getText(), right_expr.getText(), comp_operators
-        ));
-
-    }
-    @Override
-    public void exitIfStatement(RavelParser.IfStatementContext ctx) {
-        System.out.println( "Symbols: \n" + currentScope.getAllSymbols() );
-        popScope();
-    }
     @Override public void exitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
+        for (Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addControllers(re.getName(),(InstanceSymbol) re);
+        }
         popScope();
     }
 
@@ -364,8 +281,6 @@ public class DefPhase extends RavelBaseListener {
         popScope();
     }
 
-
-
     /**
      * The end of the file and the end of the app
      * TODO: handle multiple files and imports
@@ -374,8 +289,8 @@ public class DefPhase extends RavelBaseListener {
     @Override
     public void exitFile_input(RavelParser.File_inputContext ctx) {
         walked = true;
-
     }
+
     private void pushScope(Scope s) {
         currentScope = s;
         prettyPrint("entering: "+currentScope.getName()+":"+s);
@@ -393,6 +308,7 @@ public class DefPhase extends RavelBaseListener {
         exception+=" found on line " +String.valueOf(rctx.start.getLine());
         throw new RuntimeException(exception);
     }
+
     private String getTab(){
         String tab="";
         for(int i=0; i<intend; i++){

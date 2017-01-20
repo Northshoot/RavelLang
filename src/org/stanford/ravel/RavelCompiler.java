@@ -1,16 +1,18 @@
 package org.stanford.ravel;
 
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.api.builder.PlatformBuilder;
-import org.stanford.ravel.PrimitiveRepPhase;
-import org.stanford.ravel.RavelApplication;
-import org.stanford.ravel.compiler.DefPhase;
-import org.stanford.ravel.compiler.RefPhase;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.stanford.ravel.compiler.DefPhase;
+import org.stanford.ravel.compiler.scope.GlobalScope;
+import org.stanford.ravel.compiler.symbol.ControllerSymbol;
+import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.Space;
@@ -57,22 +59,22 @@ public class RavelCompiler {
         return  parser.file_input();
     }
 
-    private static RavelApplication defPhase(ParseTree tree) {
-        RavelApplication rApp = new RavelApplication();
+    private static GlobalScope defPhase(ParseTree tree) {
+        DefPhase listener = new DefPhase();
+        ParseTreeWalker walker = new ParseTreeWalker()
+        walker.walk(listener, tree);
 
-        // TODO
-
-        return rApp;
+        return listener.getGlobalScope();
     }
 
-    private static void compileModels(RavelApplication app) {
-        for (Model m : app.getModels()) {
+    private static void compileModels(GlobalScope app) {
+        for (ModelSymbol m : app.getModels()) {
 
         }
     }
 
-    private static void compileControllers(RavelApplication app) {
-        for (Controller c : app.getControllers()) {
+    private static void compileControllers(GlobalScope app) {
+        for (ControllerSymbol c : app.getControllers()) {
             //
             // ControllerHIR hir = analyzeSyntax(c.getParseTree());
             // ControllerIR ir = typeResolve(hir);
@@ -82,11 +84,11 @@ public class RavelCompiler {
         }
     }
 
-    private static void compileSpaces(RavelApplication app) {
+    private static void compileSpaces(GlobalScope app) {
         // this is effectively the ref/link phase, where
         // models, controllers, and platforms are linked together
 
-        for (Space s : app.getSpaces()) {
+        for (SpaceSymbol s : app.getSpaces()) {
             // for (Controller c : s.getControllers()) {
             //    s.addInstantiatedController(c.instantiate(s));
             // }
@@ -120,18 +122,19 @@ public class RavelCompiler {
         ParseTree tree = parse(is);
 
         // define (hoist) the models and controllers
-        RavelApplication app = defPhase(tree);
+        GlobalScope globalScope = defPhase(tree);
         // typecheck the models, assign types to the fields
-        compileModels(app);
+        compileModels(globalScope);
 
         // compile the controllers to IR
-        compileControllers(app);
+        compileControllers(globalScope);
 
         // link controllers, models and platforms
-        compileSpaces(app);
+        compileSpaces(globalScope);
 
         LOGGER.info("Internal representation is created!");
 
+        RavelApplication app = new RavelApplication();
         generateCode(app, mBuildPath);
 
         logBuildEnd(start);

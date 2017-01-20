@@ -30,9 +30,7 @@ public abstract class BaseScope implements Scope {
     protected List<Scope> nestedScopesNotSymbols = new ArrayList<>();
     protected Map<String, Scope> nestedScopeMap = new HashMap<>();
 
-    public BaseScope() { }
-
-    public BaseScope(Scope enclosingScope) { setEnclosingScope(enclosingScope);	}
+    protected BaseScope() { }
 
     public Map<String, ? extends Symbol> getMembers() {
         return symbols;
