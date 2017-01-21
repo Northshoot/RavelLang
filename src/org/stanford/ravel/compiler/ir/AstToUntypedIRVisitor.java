@@ -32,6 +32,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     public AstToUntypedIRVisitor(ControllerCompiler compiler) {
         this.compiler = compiler;
+        blockStack.add(ir.getRoot());
     }
 
     public UntypedIR getIR() {
@@ -53,7 +54,154 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
     }
 
     private Block previous() {
-        return blockStack.get(blockStack.size()-1);
+        return blockStack.get(blockStack.size()-2);
+    }
+
+    @Override
+    public Integer visitBlock(RavelParser.BlockContext ctx) {
+        currentScope = ctx.scope;
+        visitChildren(ctx);
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitVar_decl(RavelParser.Var_declContext ctx) {
+        List<RavelParser.Ident_declContext> lvalues = ctx.identifier_list().ident_decl();
+        if (ctx.expressionList() == null)
+            return VOID_REG;
+
+        List<RavelParser.ExpressionContext> rvalues = ctx.expressionList().expression();
+
+        if (rvalues.size() > lvalues.size()) {
+            compiler.emitError(new SourceLocation(ctx), "number of initalizations must match the number of variables");
+        }
+
+        for (int i = 0; i < Math.max(lvalues.size(), rvalues.size()); i++) {
+            RavelParser.Ident_declContext lvalue;
+            if (i < lvalues.size())
+                lvalue = lvalues.get(i);
+            else
+                lvalue = null;
+
+            int rvalueReg;
+            int varReg;
+
+            if (lvalue != null) {
+                String varName = lvalue.Identifier().getText();
+                Symbol var = currentScope.resolve(varName);
+                if (var == null || !(var instanceof VariableSymbol)) {
+                    compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+                    varReg = ERROR_REG;
+                } else {
+                    varReg = ensureVarRegister((VariableSymbol) var);
+                }
+            } else {
+                varReg = ERROR_REG;
+            }
+
+            if (i > rvalues.size())
+                continue;
+            rvalueReg = visit(rvalues.get(i));
+
+            current().add(new Move(ctx, varReg, rvalueReg));
+        }
+
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitAssignment(RavelParser.AssignmentContext ctx) {
+        List<RavelParser.Lvalue_expressionContext> lvalues = ctx.lvalue().lvalue_expression();
+        List<RavelParser.ExpressionContext> rvalues = ctx.expressionList().expression();
+
+        if (lvalues.size() != rvalues.size()) {
+            compiler.emitError(new SourceLocation(ctx), "number of assignments must match the number of expressions");
+        }
+
+        String assignOp = ctx.assign_op().getText();
+        boolean isCompound = !assignOp.equals("=");
+        String compound = isCompound ? assignOp.substring(0, assignOp.length()-1) : null;
+
+        for (int i = 0; i < Math.max(lvalues.size(), rvalues.size()); i++) {
+            RavelParser.Lvalue_expressionContext lvalue;
+            if (i < lvalues.size())
+                    lvalue = lvalues.get(i);
+            else
+                lvalue = null;
+
+            int rvalueReg;
+            int varReg = UNSET_REG;
+            int objectReg = UNSET_REG;
+            int arrayReg = UNSET_REG;
+            int indexReg = UNSET_REG;
+
+            if (lvalue == null) {
+                varReg = ERROR_REG;
+            } else if (lvalue.primary() == null) {
+                String varName = lvalue.Identifier().getText();
+                Symbol var = currentScope.resolve(varName);
+                if (var == null || !(var instanceof VariableSymbol)) {
+                    compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+                    varReg = ERROR_REG;
+                } else {
+                    varReg = ensureVarRegister((VariableSymbol)var);
+                }
+            } else if (lvalue.expression() == null) {
+                String fieldName = lvalue.Identifier().getText();
+
+                objectReg = visit(lvalue.primary());
+            } else {
+                arrayReg = visit(lvalue.primary());
+                indexReg = visit(lvalue.expression());
+            }
+
+            if (isCompound) {
+                int lvalueReg;
+
+                if (lvalue == null) {
+                    lvalueReg = ERROR_REG;
+                } else if (lvalue.primary() == null) {
+                    lvalueReg = varReg;
+                } else if (lvalue.expression() == null) {
+                    String fieldName = lvalue.Identifier().getText();
+
+                    lvalueReg = ir.allocateRegister();
+                    current().add(new FieldLoad(ctx, lvalueReg, objectReg, fieldName));
+                } else {
+
+                    lvalueReg = ir.allocateRegister();
+                    current().add(new ArrayLoad(ctx, lvalueReg, arrayReg, indexReg));
+                }
+
+                if (i < rvalues.size())
+                    rvalueReg = visit(rvalues.get(i));
+                else
+                    rvalueReg = ERROR_REG;
+
+                int tmpReg = ir.allocateRegister();
+                current().add(new BinaryArithOp(ctx, tmpReg, lvalueReg, rvalueReg, compound));
+                rvalueReg = tmpReg;
+            } else {
+                if (i < rvalues.size())
+                    rvalueReg = visit(rvalues.get(i));
+                else
+                    rvalueReg = ERROR_REG;
+            }
+
+            if (lvalue == null) {
+                current().add(new Move(ctx, varReg, rvalueReg));
+            } else if (lvalue.primary() == null) {
+                current().add(new Move(ctx, varReg, rvalueReg));
+            } else if (lvalue.expression() == null) {
+                String fieldName = lvalue.Identifier().getText();
+
+                current().add(new FieldStore(ctx, objectReg, fieldName, rvalueReg));
+            } else {
+                current().add(new ArrayLoad(ctx, arrayReg, indexReg, rvalueReg));
+            }
+        }
+
+        return VOID_REG;
     }
 
     @Override
@@ -110,6 +258,12 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             return var;
         }
     }
+
+    private int ensureVarRegister(VariableSymbol var) {
+        if (var.getRegister() == UNSET_REG)
+            var.setRegister(ir.allocateRegister());
+        return var.getRegister();
+    }
     
     @Override public Integer visitAtom(RavelParser.AtomContext ctx) {
         if (ctx.Identifier() != null) {
@@ -119,9 +273,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
             if (sym instanceof VariableSymbol) {
                 VariableSymbol var = (VariableSymbol) sym;
-                if (var.getRegister() == UNSET_REG)
-                    var.setRegister(ir.allocateRegister());
-                return var.getRegister();
+                return ensureVarRegister(var);
             } else {
                 // probably a model or a function
                 // allocate a pseudo register to load this, and let type check
@@ -131,6 +283,8 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 return reg;
             }
 
+        } else if (ctx.expression() != null) {
+            return visit(ctx.expression());
         } else {
             // a literal or an array literal
             return visitChildren(ctx);
@@ -230,16 +384,20 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         return target;
     }
 
+    private int visitBinaryOp(ParserRuleContext definer, ParserRuleContext lhs, ParserRuleContext rhs, ParserRuleContext op) {
+        return visitBinaryOp(definer, lhs, rhs, op != null ? op.getText() : null);
+    }
+
     @Override public Integer visitMult_exp(RavelParser.Mult_expContext ctx) {
-        return visitBinaryOp(ctx, ctx.mult_exp(), ctx.unary_exp(), ctx.mult_op().getText());
+        return visitBinaryOp(ctx, ctx.mult_exp(), ctx.unary_exp(), ctx.mult_op());
     }
 
     @Override public Integer visitAdd_exp(RavelParser.Add_expContext ctx) {
-        return visitBinaryOp(ctx, ctx.add_exp(), ctx.mult_exp(), ctx.add_op().getText());
+        return visitBinaryOp(ctx, ctx.add_exp(), ctx.mult_exp(), ctx.add_op());
     }
 
     @Override public Integer visitShift_exp(RavelParser.Shift_expContext ctx) {
-        return visitBinaryOp(ctx, ctx.shift_exp(), ctx.add_exp(), ctx.shift_op().getText());
+        return visitBinaryOp(ctx, ctx.shift_exp(), ctx.add_exp(), ctx.shift_op());
     }
 
     @Override public Integer visitBin_and_exp(RavelParser.Bin_and_expContext ctx) {

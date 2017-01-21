@@ -174,10 +174,11 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         String name = ctx.Identifier().getText(); //
         Controller ctrl = new Controller(name);
         //get controller args
+        /*
         List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
         for(RavelParser.ParamContext t: component_parametersContext){
             ctrl.addParam(t.getText());
-        }
+        }*/
         //get all variables
         List<VariableSymbol> cntrVars =  ((ComponentSymbol)ctx.scope).getDefinedFields();
         //get all events

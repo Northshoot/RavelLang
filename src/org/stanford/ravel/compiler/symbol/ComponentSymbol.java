@@ -2,6 +2,7 @@ package org.stanford.ravel.compiler.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.primitives.Variable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,10 +14,8 @@ import java.util.Map;
  *  and methods with different slot sequences. A ComponentSymbol
  *  can also be a member of an aggregate itself (nested structs, ...).
  */
-public abstract class ComponentSymbol extends SymbolWithScope implements MemberSymbol, CompoundType, TypeSymbol {
+public abstract class ComponentSymbol extends SymbolWithScope implements CompoundType, TypeSymbol {
     protected ParserRuleContext defNode;
-    protected int nextFreeFieldSlot = 0;  // next slot to allocate
-    protected int typeIndex;
 
     //variables used to denote when concrete classes have been made for the symbols
     //
@@ -37,23 +36,7 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
 
     @Override
     public void define(Symbol sym) throws IllegalArgumentException {
-//        if ( !(sym instanceof MemberSymbol) ) {
-//            throw new IllegalArgumentException(
-//                    "sym is "+sym.getClass().getSimpleName()+" not MemberSymbol"
-//            );
-//        }
         super.define(sym);
-        setSlotNumber(sym);
-    }
-
-    @Override
-    public List<MemberSymbol> getSymbols() {
-        return (List<MemberSymbol>)super.getSymbols();
-    }
-
-    @Override
-    public Map<String, ? extends MemberSymbol> getMembers() {
-        return (Map<String, ? extends MemberSymbol>)super.getMembers();
     }
 
     /** Look up name within this scope only. Return any kind of MemberSymbol found
@@ -72,7 +55,7 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
      */
     public Symbol resolveField(String name) {
         Symbol s = resolveMember(name);
-        if ( s instanceof LocalVariableSymbol ) {
+        if (s instanceof VariableSymbol) {
             return s;
         }
         return null;
@@ -81,8 +64,8 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
     /** get the number of fields defined specifically in this class */
     public int getNumberOfDefinedFields() {
         int n = 0;
-        for (MemberSymbol s : getSymbols()) {
-            if ( s instanceof LocalVariableSymbol ) {
+        for (Symbol s : getSymbols()) {
+            if (s instanceof VariableSymbol) {
                 n++;
             }
         }
@@ -95,7 +78,7 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
     /** Return the list of fields in this specific aggregate */
     public List<VariableSymbol> getDefinedFields() {
         List<VariableSymbol> fields = new ArrayList<>();
-        for (MemberSymbol s : getSymbols()) {
+        for (Symbol s : getSymbols()) {
             if (s instanceof VariableSymbol) {
                 fields.add((VariableSymbol)s);
             }
@@ -105,22 +88,10 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
 
     public List<VariableSymbol> getFields() { return getDefinedFields(); }
 
-    public void setSlotNumber(Symbol sym) {
-        if ( sym instanceof LocalVariableSymbol) {
-            LocalVariableSymbol fsym = (LocalVariableSymbol)sym;
-            fsym.slot = nextFreeFieldSlot++;
-        }
-    }
-
-    @Override
-    public int getSlotNumber() {
-        return -1; // class definitions do not yield either field or method slots; they are just nested
-    }
-
     @Override
     public Collection<String> getMemberList() {
         List<String> fields = new ArrayList<>();
-        for (MemberSymbol s : getSymbols()) {
+        for (Symbol s : getSymbols()) {
             if (s instanceof VariableSymbol) {
                 fields.add(s.getName());
             }

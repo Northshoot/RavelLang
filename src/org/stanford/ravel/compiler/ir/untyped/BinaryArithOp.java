@@ -24,6 +24,6 @@ public class BinaryArithOp extends Instruction {
     }
 
     public String toString() {
-        return "binarith " + target + "= " + src1 + " " + op + " " + src2;
+        return "binarith " + target + " = " + src1 + " " + op + " " + src2;
     }
 }

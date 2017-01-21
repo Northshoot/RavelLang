@@ -278,7 +278,7 @@ field_type
  */
 
 controller_comp returns [Scope scope]
-    : CONTROLLER Identifier component_parameters ':' controller_scope # ControllerScope
+    : CONTROLLER Identifier function_args ':' controller_scope # ControllerScope
     ;
 
 controller_scope
@@ -321,7 +321,7 @@ assign_op
     : '=' | '+=' | '-=' | '*=' | '/=' ;
 
 ident_decl
-    : Identifier (':' type)? #IdentDecl
+    : Identifier (':' type)?
     ;
 
 identifier_list
@@ -522,7 +522,7 @@ qualified_name
     ;
 
 function_args
-    : '(' typed_identifier_list ')'
+    : '(' typed_identifier_list? ')'
     ;
 
 /*

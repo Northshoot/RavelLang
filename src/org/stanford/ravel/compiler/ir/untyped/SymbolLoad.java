@@ -27,6 +27,6 @@ public class SymbolLoad extends Instruction {
     }
 
     public String toString() {
-        return "symbol " + target + "= " + symbol.getName();
+        return "symbol " + target + " = " + symbol.getName();
     }
 }

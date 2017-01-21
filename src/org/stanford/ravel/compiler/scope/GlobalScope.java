@@ -43,7 +43,7 @@ public class GlobalScope extends BaseScope {
             controllers.put(sym.getName(), (ControllerSymbol)sym);
         else if (sym instanceof SpaceSymbol)
             spaces.put(sym.getName(), (SpaceSymbol)sym);
-        else
+        else if (!(sym instanceof PrimitiveTypeSymbol))
             throw new IllegalArgumentException("Invalid toplevel symbol " + sym.getName());
     }
 

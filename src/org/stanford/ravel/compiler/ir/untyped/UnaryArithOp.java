@@ -22,6 +22,6 @@ public class UnaryArithOp extends Instruction {
     }
 
     public String toString() {
-        return "unarith " + target + "= " + op + " " + source;
+        return "unarith " + target + " = " + op + " " + source;
     }
 }

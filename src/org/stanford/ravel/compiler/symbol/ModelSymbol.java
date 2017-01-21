@@ -16,8 +16,6 @@ public class ModelSymbol extends ComponentSymbol {
         // local model assigned to embedded space
         // cannot  be accessed from any other space
         this.mModelType = mt;
-        // this is the type of the component
-        super.setTypeIndex(RavelParser.MODEL);
     }
 
 

@@ -488,13 +488,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdentDecl(RavelParser.IdentDeclContext ctx) { }
+	@Override public void enterIdent_decl(RavelParser.Ident_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdentDecl(RavelParser.IdentDeclContext ctx) { }
+	@Override public void exitIdent_decl(RavelParser.Ident_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -294,7 +294,7 @@ public class RavelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitIdentDecl(RavelParser.IdentDeclContext ctx) { return visitChildren(ctx); }
+	@Override public T visitIdent_decl(RavelParser.Ident_declContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

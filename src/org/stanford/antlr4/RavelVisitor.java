@@ -266,12 +266,11 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssign_op(RavelParser.Assign_opContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code IdentDecl}
-	 * labeled alternative in {@link RavelParser#ident_decl}.
+	 * Visit a parse tree produced by {@link RavelParser#ident_decl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIdentDecl(RavelParser.IdentDeclContext ctx);
+	T visitIdent_decl(RavelParser.Ident_declContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#identifier_list}.
 	 * @param ctx the parse tree

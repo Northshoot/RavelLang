@@ -16,7 +16,7 @@ public class ControllerCompiler {
 
     public ControllerCompiler() {}
 
-    public void run(RavelParser.EventScopeContext tree) {
+    public void compileEvent(RavelParser.EventScopeContext tree) {
         // compile to untyped IR
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
         visitor.visit(tree);

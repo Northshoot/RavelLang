@@ -436,17 +436,15 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitAssign_op(RavelParser.Assign_opContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code IdentDecl}
-	 * labeled alternative in {@link RavelParser#ident_decl}.
+	 * Enter a parse tree produced by {@link RavelParser#ident_decl}.
 	 * @param ctx the parse tree
 	 */
-	void enterIdentDecl(RavelParser.IdentDeclContext ctx);
+	void enterIdent_decl(RavelParser.Ident_declContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code IdentDecl}
-	 * labeled alternative in {@link RavelParser#ident_decl}.
+	 * Exit a parse tree produced by {@link RavelParser#ident_decl}.
 	 * @param ctx the parse tree
 	 */
-	void exitIdentDecl(RavelParser.IdentDeclContext ctx);
+	void exitIdent_decl(RavelParser.Ident_declContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#identifier_list}.
 	 * @param ctx the parse tree

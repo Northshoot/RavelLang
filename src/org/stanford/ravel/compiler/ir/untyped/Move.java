@@ -20,6 +20,6 @@ public class Move extends Instruction {
     }
 
     public String toString() {
-        return "move " + target + "= " + source;
+        return "move " + target + " = " + source;
     }
 }

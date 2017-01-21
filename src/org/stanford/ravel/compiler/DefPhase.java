@@ -173,7 +173,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void enterIdentDecl(RavelParser.IdentDeclContext ctx) {
+    public void enterIdent_decl(RavelParser.Ident_declContext ctx) {
         String varName = ctx.Identifier().getText();
 
         Symbol existing = currentScope.resolve(varName);
@@ -183,6 +183,7 @@ public class DefPhase extends RavelBaseListener {
         }
 
         VariableSymbol var = new VariableSymbol(varName);
+        var.setDefNode(ctx);
 
         Type type;
         if (ctx.type() != null) {
@@ -211,6 +212,7 @@ public class DefPhase extends RavelBaseListener {
         }
         Type type = ((TypeSymbol) typeSymbol).getDefinedType();
         var.setType(type);
+        var.setDefNode(ctx);
         currentScope.define(var);
     }
 

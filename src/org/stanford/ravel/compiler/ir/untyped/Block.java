@@ -19,4 +19,14 @@ public class Block {
     public void add(Instruction instr) {
         instructions.add(instr);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (Instruction instr : instructions) {
+            builder.append(instr.toString());
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
 }

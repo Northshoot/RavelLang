@@ -21,6 +21,6 @@ public class ImmediateLoad extends Instruction {
     }
 
     public String toString() {
-        return "loadimm " + target + "= '" + value + "'";
+        return "loadimm " + target + " = '" + value.getText() + "'";
     }
 }
