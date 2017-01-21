@@ -1,9 +1,7 @@
 package org.stanford.ravel.compiler.scope;
 
-import org.stanford.ravel.compiler.symbol.ControllerSymbol;
-import org.stanford.ravel.compiler.symbol.ModelSymbol;
-import org.stanford.ravel.compiler.symbol.SpaceSymbol;
-import org.stanford.ravel.compiler.symbol.Symbol;
+import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.PrimitiveType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +16,15 @@ public class GlobalScope extends BaseScope {
     private Map<String, ControllerSymbol> controllers = new LinkedHashMap<>();
     private Map<String, SpaceSymbol> spaces = new LinkedHashMap<>();
 
-    public GlobalScope() { super(); }
+    public GlobalScope() {
+        super();
+
+        // define primitive types in scope
+        for (PrimitiveType type : PrimitiveType.values()) {
+            if (type.isValid())
+                define(new PrimitiveTypeSymbol(type));
+        }
+    }
     public String getName() { return "global"; }
 
     public String toString() { return "Global Symbol"; }

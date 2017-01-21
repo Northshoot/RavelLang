@@ -61,7 +61,7 @@ public class RavelCompiler {
 
     private static GlobalScope defPhase(ParseTree tree) {
         DefPhase listener = new DefPhase();
-        ParseTreeWalker walker = new ParseTreeWalker()
+        ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
         return listener.getGlobalScope();

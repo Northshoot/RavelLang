@@ -7,6 +7,8 @@ import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.InstanceSymbol;
+import org.stanford.ravel.compiler.types.PrimitiveType;
+import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
@@ -168,7 +170,60 @@ public class DefPhase extends RavelBaseListener {
         es.setDefNode(ctx);
         currentScope.define(es);
         pushScope(es);
+    }
 
+    @Override
+    public void enterIdentDecl(RavelParser.IdentDeclContext ctx) {
+        String varName = ctx.Identifier().getText();
+
+        Symbol existing = currentScope.resolve(varName);
+        if (existing != null && existing instanceof VariableSymbol && ctx.type() == null) {
+            // assignment, not declaration, handle it later
+            return;
+        }
+
+        VariableSymbol var = new VariableSymbol(varName);
+
+        Type type;
+        if (ctx.type() != null) {
+            Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
+            if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
+                abortParsing(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
+                return;
+            }
+            type = ((TypeSymbol) typeSymbol).getDefinedType();
+        } else {
+            type = PrimitiveType.ANY;
+        }
+        var.setType(type);
+        currentScope.define(var);
+    }
+
+    @Override
+    public void enterTypedIdentDecl(RavelParser.TypedIdentDeclContext ctx) {
+        String varName = ctx.Identifier().getText();
+        VariableSymbol var = new VariableSymbol(varName);
+
+        Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
+        if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
+            abortParsing(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
+            return;
+        }
+        Type type = ((TypeSymbol) typeSymbol).getDefinedType();
+        var.setType(type);
+        currentScope.define(var);
+    }
+
+    @Override
+    public void enterBlock(RavelParser.BlockContext ctx) {
+        LocalScope ls = new LocalScope(null, currentScope);
+        pushScope(ls);
+        ctx.scope = ls;
+    }
+
+    @Override
+    public void exitBlock(RavelParser.BlockContext ctx) {
+        popScope();
     }
 
     @Override

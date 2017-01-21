@@ -294,12 +294,13 @@ eventdef returns [Scope scope]
     : EVENT qualified_name  function_args ':' block_stmt #EventScope
     ;
 
-block_stmt
+block_stmt returns [Scope scope]
     : NEWLINE INDENT statement+ DEDENT #Block
     ;
 
 statement
-    : assignment
+    : var_decl
+    | assignment
     | expression // expression statement (eg function call)
     | del_stmt
     | while_stmt
@@ -319,8 +320,31 @@ lvalue
 assign_op
     : '=' | '+=' | '-=' | '*=' | '/=' ;
 
+ident_decl
+    : Identifier (':' type)? #IdentDecl
+    ;
+
+identifier_list
+    : ident_decl (',' ident_decl )*
+    ;
+
+typed_ident_decl
+    : Identifier ':' type #TypedIdentDecl
+    ;
+
+typed_identifier_list
+    : typed_ident_decl (',' typed_ident_decl )*
+    ;
+
+var_decl
+    : identifier_list ('=' expressionList)?
+    ;
+
+type
+    : Identifier ;
+
 assignment
-    : lvalue assign_op expression
+    : lvalue assign_op expressionList
     ;
 
 // a simplified version of an assignment, to use in constant expression contexts
@@ -409,7 +433,7 @@ bin_xor_exp
     ;
 bin_or_exp
     : bin_xor_exp
-    | bin_or_exp '|' bin_or_exp
+    | bin_or_exp '|' bin_xor_exp
     ;
 
 comp_op
@@ -449,13 +473,9 @@ expression
 
 
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
-while_stmt returns [Scope scope]
+while_stmt
  : WHILE expression ':' block_stmt #WhileStatement
  ;
-
-identifier_list
-    : Identifier (',' Identifier)*
-    ;
 
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt returns [Scope scope]
@@ -502,7 +522,7 @@ qualified_name
     ;
 
 function_args
-    : '(' identifier_list ')'
+    : '(' typed_identifier_list ')'
     ;
 
 /*

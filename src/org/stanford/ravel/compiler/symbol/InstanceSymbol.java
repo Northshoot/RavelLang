@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.symbol;
 
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.compiler.types.Type;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

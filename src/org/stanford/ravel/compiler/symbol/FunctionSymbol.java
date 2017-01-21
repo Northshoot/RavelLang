@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler.symbol;
 
 import org.stanford.ravel.compiler.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.stanford.ravel.compiler.types.Type;
 
 /** This symbol represents a function ala C, not a method ala Java.
  *  You can associate a node in the parse tree that is responsible

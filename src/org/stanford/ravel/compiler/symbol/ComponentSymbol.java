@@ -1,7 +1,10 @@
 package org.stanford.ravel.compiler.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.stanford.ravel.compiler.types.CompoundType;
+import org.stanford.ravel.compiler.types.Type;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +13,7 @@ import java.util.Map;
  *  and methods with different slot sequences. A ComponentSymbol
  *  can also be a member of an aggregate itself (nested structs, ...).
  */
-public abstract class ComponentSymbol extends SymbolWithScope implements MemberSymbol, Type {
+public abstract class ComponentSymbol extends SymbolWithScope implements MemberSymbol, CompoundType, TypeSymbol {
     protected ParserRuleContext defNode;
     protected int nextFreeFieldSlot = 0;  // next slot to allocate
     protected int typeIndex;
@@ -115,9 +118,23 @@ public abstract class ComponentSymbol extends SymbolWithScope implements MemberS
     }
 
     @Override
-    public int getTypeIndex() { return typeIndex; }
+    public Collection<String> getMemberList() {
+        List<String> fields = new ArrayList<>();
+        for (MemberSymbol s : getSymbols()) {
+            if (s instanceof VariableSymbol) {
+                fields.add(s.getName());
+            }
+        }
+        return fields;
+    }
 
-    public void setTypeIndex(int typeIndex) {
-        this.typeIndex = typeIndex;
+    @Override
+    public Type getMemberType(String member) {
+        return ((TypedSymbol)getSymbol(member)).getType();
+    }
+
+    @Override
+    public Type getDefinedType() {
+        return this;
     }
 }

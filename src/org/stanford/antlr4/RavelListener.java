@@ -436,6 +436,70 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitAssign_op(RavelParser.Assign_opContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code IdentDecl}
+	 * labeled alternative in {@link RavelParser#ident_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdentDecl(RavelParser.IdentDeclContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IdentDecl}
+	 * labeled alternative in {@link RavelParser#ident_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdentDecl(RavelParser.IdentDeclContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#identifier_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdentifier_list(RavelParser.Identifier_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#identifier_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdentifier_list(RavelParser.Identifier_listContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code TypedIdentDecl}
+	 * labeled alternative in {@link RavelParser#typed_ident_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypedIdentDecl(RavelParser.TypedIdentDeclContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TypedIdentDecl}
+	 * labeled alternative in {@link RavelParser#typed_ident_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypedIdentDecl(RavelParser.TypedIdentDeclContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#typed_identifier_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterTyped_identifier_list(RavelParser.Typed_identifier_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#typed_identifier_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitTyped_identifier_list(RavelParser.Typed_identifier_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#var_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_decl(RavelParser.Var_declContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#var_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_decl(RavelParser.Var_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterType(RavelParser.TypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitType(RavelParser.TypeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#assignment}.
 	 * @param ctx the parse tree
 	 */
@@ -737,16 +801,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitWhileStatement(RavelParser.WhileStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#identifier_list}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdentifier_list(RavelParser.Identifier_listContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#identifier_list}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdentifier_list(RavelParser.Identifier_listContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ForStatement}
 	 * labeled alternative in {@link RavelParser#for_stmt}.
