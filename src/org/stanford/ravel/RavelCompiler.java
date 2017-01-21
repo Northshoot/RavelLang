@@ -8,9 +8,11 @@ import org.stanford.api.builder.PlatformBuilder;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.stanford.ravel.compiler.ControllerCompiler;
 import org.stanford.ravel.compiler.DefPhase;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
+import org.stanford.ravel.compiler.symbol.EventSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.primitives.Controller;
@@ -74,13 +76,12 @@ public class RavelCompiler {
     }
 
     private static void compileControllers(GlobalScope app) {
+        ControllerCompiler compiler = new ControllerCompiler();
+
         for (ControllerSymbol c : app.getControllers()) {
-            //
-            // ControllerHIR hir = analyzeSyntax(c.getParseTree());
-            // ControllerIR ir = typeResolve(hir);
-            // ir = transform(ir);
-            // ir = lower(ir);
-            // c.setTargetIR(ir);
+           for (EventSymbol event : c.getEvents()) {
+               compiler.compileEvent((RavelParser.EventScopeContext)event.getDefNode());
+           }
         }
     }
 

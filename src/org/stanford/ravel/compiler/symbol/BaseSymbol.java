@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler.symbol;
 import org.stanford.ravel.compiler.Utils;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.stanford.ravel.compiler.types.Type;
 
 import java.util.Collections;
 import java.util.List;

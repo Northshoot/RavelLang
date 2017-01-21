@@ -266,6 +266,43 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssign_op(RavelParser.Assign_opContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#ident_decl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdent_decl(RavelParser.Ident_declContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#identifier_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdentifier_list(RavelParser.Identifier_listContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TypedIdentDecl}
+	 * labeled alternative in {@link RavelParser#typed_ident_decl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypedIdentDecl(RavelParser.TypedIdentDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#typed_identifier_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTyped_identifier_list(RavelParser.Typed_identifier_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#var_decl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVar_decl(RavelParser.Var_declContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitType(RavelParser.TypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#assignment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -446,12 +483,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitWhileStatement(RavelParser.WhileStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#identifier_list}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifier_list(RavelParser.Identifier_listContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ForStatement}
 	 * labeled alternative in {@link RavelParser#for_stmt}.

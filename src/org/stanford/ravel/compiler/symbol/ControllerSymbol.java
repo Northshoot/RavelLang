@@ -12,7 +12,6 @@ public class ControllerSymbol extends ComponentSymbol {
 
     public ControllerSymbol(String name) {
         super(name);
-        super.setTypeIndex(RavelParser.CONTROLLER);
     }
 
     public List<EventSymbol> getEvents(){
