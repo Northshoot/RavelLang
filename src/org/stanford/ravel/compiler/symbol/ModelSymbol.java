@@ -21,4 +21,8 @@ public class ModelSymbol extends ComponentSymbol {
     }
 
 
+
+    public Model.Type getType(){
+        return this.mModelType;
+    }
 }

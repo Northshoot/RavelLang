@@ -7,8 +7,30 @@ local model Random(size):
     schema:
         value = IntegerField()
 
+streaming model RandomStream(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
 
-controller RandomControllerEmbedded(random: Random, timer, boot : event):
+    schema:
+        value = IntegerField()
+
+
+replicated model RandomReplica(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
+
+    schema:
+        value = IntegerField()
+
+
+controller RandomControllerEmbedded(random: Random,
+                                    randomS: RandomStream,
+                                    randomR: RandomReplica,
+                                    timer, boot : event):
     number frequency = 1000
     boolean running = False
 
@@ -17,6 +39,8 @@ controller RandomControllerEmbedded(random: Random, timer, boot : event):
             timer.start_periodic(frequency)
             running = True
 
+    event mFreq.arrived(context ctx):
+        pass
 
     event timer.fired(context ctx):
         rand = mRandom.create()
@@ -27,6 +51,10 @@ controller RandomControllerEmbedded(random: Random, timer, boot : event):
         random_timer.stop()
         running = False
 
+    event random.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(frequency)
+            running = True
 
     event random.save_done(Context ctx):
         pass #need to delete stuff

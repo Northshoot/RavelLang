@@ -1,3 +1,6 @@
+ToResolve:
+making variables
+
 TODO's for Ravel:
 
 * add imports

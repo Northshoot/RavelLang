@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Internal representation of the ravel application
  *
- * a container abstraction for the primites and components
+ * a container abstraction for the primitives and components
  * Created by lauril on 8/18/16.
  */
 public class RavelApplication  {

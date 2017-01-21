@@ -1,4 +1,4 @@
-local model Random(size):
+replicated model Random(size):
     properties:
         durable=False
         reliable=False
@@ -17,6 +17,8 @@ controller RandomControllerEmbedded(random: Random, timer, boot : event):
             timer.start_periodic(frequency)
             running = True
 
+    event mFreq.arrived(Context ctx):
+        frequency = ctx.random.value
 
     event timer.fired(context ctx):
         rand = mRandom.create()
@@ -27,6 +29,10 @@ controller RandomControllerEmbedded(random: Random, timer, boot : event):
         random_timer.stop()
         running = False
 
+    event random.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(frequency)
+            running = True
 
     event random.save_done(Context ctx):
         pass #need to delete stuff

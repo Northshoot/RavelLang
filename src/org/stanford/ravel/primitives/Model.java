@@ -177,8 +177,8 @@ public class Model extends ParametrizedComponent {
         f.addAll(mFields.values());
         return f;
     }
-    public void addField(String name, Field mFields) {
-        this.mFields.put(name, mFields);
+    public void addField( Field field) {
+        this.mFields.put(field.getName(), field);
     }
 
 

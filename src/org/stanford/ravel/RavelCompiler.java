@@ -61,15 +61,15 @@ public class RavelCompiler {
 
     private static GlobalScope defPhase(ParseTree tree) {
         DefPhase listener = new DefPhase();
-        ParseTreeWalker walker = new ParseTreeWalker()
+        ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
         return listener.getGlobalScope();
     }
 
-    private static void compileModels(GlobalScope app) {
+    private static void compileModels(GlobalScope app, ModelIR mir) {
         for (ModelSymbol m : app.getModels()) {
-
+            mir.addModel(m);
         }
     }
 
@@ -123,8 +123,9 @@ public class RavelCompiler {
 
         // define (hoist) the models and controllers
         GlobalScope globalScope = defPhase(tree);
-        // typecheck the models, assign types to the fields
-        compileModels(globalScope);
+        // typecheck the models, assign types to the
+        ModelIR mir = new ModelIR();
+        compileModels(globalScope, mir);
 
         // compile the controllers to IR
         compileControllers(globalScope);

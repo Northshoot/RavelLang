@@ -45,120 +45,120 @@ public class PrimitiveRepPhase extends RavelBaseListener {
      *
      * @param ctx
      */
-    @Override
-    public void enterModelScope(RavelParser.ModelScopeContext ctx) {
-        //Create models and fields set properties, add to
-        String name = ctx.Identifier().getText();
-        String type = ctx.modelType().getText();
-        Model m = new Model(name, Model.getType(type));
-        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
-        //TODO: not a clean solution
-        try{
-            List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
-            for(RavelParser.ParamContext t: component_parametersContext){
-                m.addParam(t.getText());
-            }
-        } catch (NullPointerException e){
-            //no params so no worries
-        }
-        Scope propScope = ctx.scope.getNestedScope("properties");
-        List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();
-        for (VariableSymbol s: prop) {
-            Variable var = makeVariable(s);
-            if(var == null){
-                throw new IllegalArgumentException("Line: " + s.getDefNode().start.getLine()
-                        + " Could not create variable " +s.toString());
-            }
-            m.setProperty(var);
-        }
-
-
-        // create fields for the schema
-        Scope schemaScope = ctx.scope.getNestedScope("schema");
-//        LOGGER.info("Adding model fields to the schema:");
-        List<FieldSymbol> schema = (List<FieldSymbol>) schemaScope.getAllSymbols();
-//        LOGGER.info("Adding model # " + schema.size() + " fields to the schema:");
-        Iterator<FieldSymbol> s = schema.iterator();
-        while (s.hasNext()) {
-            boolean field_has_options = false;
-            FieldSymbol fs = s.next();
-            RavelParser.FieldDeclarationContext field_ctx = (RavelParser.FieldDeclarationContext) fs.getDefNode();
-            //Field type name
-            String field_type = field_ctx.field_type().getText();
-            //get field type
-            Field.Type ft = Field.getType(field_ctx.field_type().start.getType());
-
-            Builder f_concreate = null;
-            //first we only create a specific field builder
-            //and add leaf methods
-            switch (ft) {
-                case T_INTEGER:
-                    f_concreate = new IntegerField.Builder();
-                    break;
-                case T_NUMBER:
-                    f_concreate = new NumberField.Builder();
-                    break;
-                case T_DATE:
-                    f_concreate = new DateField.Builder();
-                    break;
-                case T_DATE_TIME:
-                    f_concreate = new DateTimeField.Builder();
-                    break;
-                case T_TIME_STAMP:
-                    f_concreate = new TimeStampField.Builder();
-                    break;
-                case T_BYTE:
-                    f_concreate = new ByteField.Builder();
-                    break;
-                case T_STRING:
-                    f_concreate = new StringField.Builder();
-                    break;
-                case T_BOOLEAN:
-                    f_concreate = new BooleanField.Builder();
-                    break;
-                case T_CONTEXT:
-                    f_concreate = new ContextField.Builder();
-                    break;
-                case T_MODEL:
-                    f_concreate = new ModelField.Builder();
-                    break;
-                case tINVALID:
-                    throw new RuntimeException("Could not instantiate field: " + field_type + " got tINVALID");
-
-            }
-            //Now we add generic field properties
-            f_concreate
-                    .fieldType(ft) //set type
-                    .fieldTypeName(field_type) // give string value of type name
-                    .name(fs.getName()) // set name
-                    .model(m); //ad model to the field (for reverse name creation
-            // now we add field options if any
-//            Field_optionsContext fieldOpt = null;//field_ctx.field_options();
-//
-//
-//            if (fieldOpt != null) {
-//                field_has_options = true;
-//                List<RavelParser.Field_optionContext> valp;
-//                valp = fieldOpt.field_option();
-//                Iterator<RavelParser.Field_optionContext> optPair = valp.iterator();
-//                String args = "";
-//                while (optPair.hasNext()) {
-//                    Field_optionContext el = optPair.next();
-//                    //This is assumes that field can not have expression
-//                    //TODO: needs redesign
-//                    String optName = "";//el.Identifier().getText();
-//                    String optValue = el.literal().getText();
-//                    args += optName + ":" + optValue + ",";
-//                    f_concreate.addOption(optName, optValue);
-//                }
-//                LOGGER.info("field arguments: [" + args + "]");
+//    @Override
+//    public void enterModelScope(RavelParser.ModelScopeContext ctx) {
+//        //Create models and fields set properties, add to
+//        String name = ctx.Identifier().getText();
+//        String type = ctx.modelType().getText();
+//        Model m = new Model(name, Model.getType(type));
+//        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
+//        //TODO: not a clean solution
+//        try{
+//            List<RavelParser.ParamContext> component_parametersContext = ctx.component_parameters().params().param();
+//            for(RavelParser.ParamContext t: component_parametersContext){
+//                m.addParam(t.getText());
 //            }
-            f_concreate.hasOptions(field_has_options);
-            m.addField(fs.getName(), f_concreate.build());
-            rApp.addModel(m.getName(), m);
-        }//end field constructions
-
-    }
+//        } catch (NullPointerException e){
+//            //no params so no worries
+//        }
+//        Scope propScope = ctx.scope.getNestedScope("properties");
+//        List<VariableSymbol> prop = (List<VariableSymbol>) propScope.getAllSymbols();
+//        for (VariableSymbol s: prop) {
+//            Variable var = makeVariable(s);
+//            if(var == null){
+//                throw new IllegalArgumentException("Line: " + s.getDefNode().start.getLine()
+//                        + " Could not create variable " +s.toString());
+//            }
+//            m.setProperty(var);
+//        }
+//
+//
+//        // create fields for the schema
+//        Scope schemaScope = ctx.scope.getNestedScope("schema");
+////        LOGGER.info("Adding model fields to the schema:");
+//        List<FieldSymbol> schema = (List<FieldSymbol>) schemaScope.getAllSymbols();
+////        LOGGER.info("Adding model # " + schema.size() + " fields to the schema:");
+//        Iterator<FieldSymbol> s = schema.iterator();
+//        while (s.hasNext()) {
+//            boolean field_has_options = false;
+//            FieldSymbol fs = s.next();
+//            RavelParser.FieldDeclarationContext field_ctx = (RavelParser.FieldDeclarationContext) fs.getDefNode();
+//            //Field type name
+//            String field_type = field_ctx.field_type().getText();
+//            //get field type
+//            Field.Type ft = Field.getType(field_ctx.field_type().start.getType());
+//
+//            Builder f_concreate = null;
+//            //first we only create a specific field builder
+//            //and add leaf methods
+//            switch (ft) {
+//                case T_INTEGER:
+//                    f_concreate = new IntegerField.Builder();
+//                    break;
+//                case T_NUMBER:
+//                    f_concreate = new NumberField.Builder();
+//                    break;
+//                case T_DATE:
+//                    f_concreate = new DateField.Builder();
+//                    break;
+//                case T_DATE_TIME:
+//                    f_concreate = new DateTimeField.Builder();
+//                    break;
+//                case T_TIME_STAMP:
+//                    f_concreate = new TimeStampField.Builder();
+//                    break;
+//                case T_BYTE:
+//                    f_concreate = new ByteField.Builder();
+//                    break;
+//                case T_STRING:
+//                    f_concreate = new StringField.Builder();
+//                    break;
+//                case T_BOOLEAN:
+//                    f_concreate = new BooleanField.Builder();
+//                    break;
+//                case T_CONTEXT:
+//                    f_concreate = new ContextField.Builder();
+//                    break;
+//                case T_MODEL:
+//                    f_concreate = new ModelField.Builder();
+//                    break;
+//                case tINVALID:
+//                    throw new RuntimeException("Could not instantiate field: " + field_type + " got tINVALID");
+//
+//            }
+//            //Now we add generic field properties
+//            f_concreate
+//                    .fieldType(ft) //set type
+//                    .fieldTypeName(field_type) // give string value of type name
+//                    .name(fs.getName()) // set name
+//                    .model(m); //ad model to the field (for reverse name creation
+//            // now we add field options if any
+////            Field_optionsContext fieldOpt = null;//field_ctx.field_options();
+////
+////
+////            if (fieldOpt != null) {
+////                field_has_options = true;
+////                List<RavelParser.Field_optionContext> valp;
+////                valp = fieldOpt.field_option();
+////                Iterator<RavelParser.Field_optionContext> optPair = valp.iterator();
+////                String args = "";
+////                while (optPair.hasNext()) {
+////                    Field_optionContext el = optPair.next();
+////                    //This is assumes that field can not have expression
+////                    //TODO: needs redesign
+////                    String optName = "";//el.Identifier().getText();
+////                    String optValue = el.literal().getText();
+////                    args += optName + ":" + optValue + ",";
+////                    f_concreate.addOption(optName, optValue);
+////                }
+////                LOGGER.info("field arguments: [" + args + "]");
+////            }
+//            f_concreate.hasOptions(field_has_options);
+//            m.addField(fs.getName(), f_concreate.build());
+//            rApp.addModel(m.getName(), m);
+//        }//end field constructions
+//
+//    }
 
     /**
      * Lets build controller representations
@@ -183,15 +183,15 @@ public class PrimitiveRepPhase extends RavelBaseListener {
         //get all events
         List<EventSymbol> events = ((ControllerSymbol)ctx.scope).getEvents();
         List<ReferenceSymbol> referenceSymbols = ((ControllerSymbol) ctx.scope).getRefenceSymbols();
-        for (VariableSymbol s: cntrVars) {
-            Variable var = makeVariable(s);
-            if(s == null){
-                throw new IllegalArgumentException("Line: " + ctx.start.getLine()
-                        + "Could not create variable" +s.toString());
-            }
-            LOGGER.info(var.toString());
-            ctrl.addVar(s.getName(), var);
-        }
+//        for (VariableSymbol s: cntrVars) {
+//           // Variable var = makeVariable(s);
+//            if(s == null){
+//                throw new IllegalArgumentException("Line: " + ctx.start.getLine()
+//                        + "Could not create variable" +s.toString());
+//            }
+//            LOGGER.info(var.toString());
+//            ctrl.addVar(s.getName(), var);
+//        }
         for(ReferenceSymbol r: referenceSymbols){
             //TODO: needs a clever way to create ref objects pointing to the right object
             String ref = r.getValue();
@@ -234,75 +234,75 @@ public class PrimitiveRepPhase extends RavelBaseListener {
 //            }
 //        }
         //get all variables
-        List<VariableSymbol> eventVars =  ((EventSymbol)ectx.scope).getDefinedFields();
-        for (VariableSymbol s: eventVars) {
-            Variable var = makeVariable(s);
-            if(s == null){
-                throw new IllegalArgumentException("Line: " + ectx.start.getLine()
-                        + "Could not create variable" +s.toString());
-            }
-            event.addVariable(var);
-        }
+//        List<VariableSymbol> eventVars =  ((EventSymbol)ectx.scope).getDefinedFields();
+//        for (VariableSymbol s: eventVars) {
+//           // Variable var = makeVariable(s);
+//            if(s == null){
+//                throw new IllegalArgumentException("Line: " + ectx.start.getLine()
+//                        + "Could not create variable" +s.toString());
+//            }
+//            event.addVariable(var);
+//        }
         LOGGER.info(event.build().toString());
         return event.build();
     }
 
-    private Variable makeVariable(VariableSymbol vs) {
-        Variable.Builder var = new Variable.Builder();
-        var.name(vs.getName());
-        RavelParser.PropValueContext propValueContext = ((VarAssignmentContext) vs.getDefNode()).propValue();
-
-        //get class of next child, we know it only can be one
-        if (propValueContext.literal() != null) {
-            final RavelParser.LiteralContext literal = propValueContext.literal();
-            try {
-                String value = literal.boolean_rule().getText();
-                var.stringType("boolean");
-                return var.value(Boolean.parseBoolean(value)).build();
-            } catch (NullPointerException e) { }
-            try {
-                String value = literal.number().integer().getText();
-                var.stringType("integer");
-                return var.value(Integer.parseInt(value)).build();
-            } catch (NullPointerException e) { }
-            try {
-                String value = literal.number().float_point().getText();
-
-                var.stringType("number");
-                return var.value(Float.parseFloat(value)).build();
-            } catch (NullPointerException e) { }
-            try {
-                String value = literal.string().getText();
-                var.stringType("string");
-                return var.value(value).build();
-            } catch (NullPointerException e) { }
-            try {
-                String value = literal.string().getText();
-                var.stringType("assignment");
-                return var.value(value).build();
-            } catch (NullPointerException e ) {}
-            try {
-                String value = literal.Identifier().getText();
-                var.stringType("variable");
-                return var.value(value).build();
-            } catch (NullPointerException e ) {}
-            //we could build and return here, but we need to be sure that parsing has identified
-            //the right value.
-            //merge prop and varAssignments
-        } else if (propValueContext.propArray() != null){
-            //either one has to be not null
-            RavelParser.PropArrayContext propArrayContext = propValueContext.propArray();
-            List<RavelParser.LiteralContext> prop = propArrayContext.literal();
-            var.stringType("array");
-            List<String> valList = new ArrayList<>();
-            for(RavelParser.LiteralContext p: prop) valList.add(p.getText());
-            return var.value(valList).build();
-        } else {
-            throw new RuntimeException("Illegal child when creating variable, expecting property or property array, got: " +
-                    ((VarAssignmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
-        }
-        return null;
-    }
+//    private Variable makeVariable(VariableSymbol vs) {
+//        Variable.Builder var = new Variable.Builder();
+//        var.name(vs.getName());
+//        RavelParser.PropValueContext propValueContext = ((VarAssignmentContext) vs.getDefNode()).propValue();
+//
+//        //get class of next child, we know it only can be one
+//        if (propValueContext.literal() != null) {
+//            final RavelParser.LiteralContext literal = propValueContext.literal();
+//            try {
+//                String value = literal.boolean_rule().getText();
+//                var.stringType("boolean");
+//                return var.value(Boolean.parseBoolean(value)).build();
+//            } catch (NullPointerException e) { }
+//            try {
+//                String value = literal.number().integer().getText();
+//                var.stringType("integer");
+//                return var.value(Integer.parseInt(value)).build();
+//            } catch (NullPointerException e) { }
+//            try {
+//                String value = literal.number().float_point().getText();
+//
+//                var.stringType("number");
+//                return var.value(Float.parseFloat(value)).build();
+//            } catch (NullPointerException e) { }
+//            try {
+//                String value = literal.string().getText();
+//                var.stringType("string");
+//                return var.value(value).build();
+//            } catch (NullPointerException e) { }
+//            try {
+//                String value = literal.string().getText();
+//                var.stringType("assignment");
+//                return var.value(value).build();
+//            } catch (NullPointerException e ) {}
+//            try {
+//                String value = literal.Identifier().getText();
+//                var.stringType("variable");
+//                return var.value(value).build();
+//            } catch (NullPointerException e ) {}
+//            //we could build and return here, but we need to be sure that parsing has identified
+//            //the right value.
+//            //merge prop and varAssignments
+//        } else if (propValueContext.propArray() != null){
+//            //either one has to be not null
+//            RavelParser.PropArrayContext propArrayContext = propValueContext.propArray();
+//            List<RavelParser.LiteralContext> prop = propArrayContext.literal();
+//            var.stringType("array");
+//            List<String> valList = new ArrayList<>();
+//            for(RavelParser.LiteralContext p: prop) valList.add(p.getText());
+//            return var.value(valList).build();
+//        } else {
+//            throw new RuntimeException("Illegal child when creating variable, expecting property or property array, got: " +
+//                    ((VarAssignmentContext) vs.getDefNode()).propValue().getChild(0).getClass().getName());
+//        }
+//        return null;
+//    }
 
     @Override
     public void enterSpaceScope(RavelParser.SpaceScopeContext ctx){
