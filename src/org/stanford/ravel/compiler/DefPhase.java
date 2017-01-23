@@ -27,6 +27,7 @@ public class DefPhase extends RavelBaseListener {
     private GlobalScope globalScope;
     private int intend = 0;
     private boolean walked = false;
+    private int nextBlockId = 1;
 
     public GlobalScope getGlobalScope() {
         assert walked;
@@ -218,9 +219,11 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterBlock(RavelParser.BlockContext ctx) {
-        LocalScope ls = new LocalScope(null, currentScope);
-        pushScope(ls);
+        LocalScope ls = new LocalScope("block_" + nextBlockId++, currentScope);
+        ls.setDefNode(ctx);
         ctx.scope = ls;
+        currentScope.nest(ls);
+        pushScope(ls);
     }
 
     @Override

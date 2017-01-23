@@ -2,18 +2,13 @@ package org.stanford.ravel.compiler.ir.untyped;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.stanford.ravel.compiler.ir.untyped.UntypedIR.VOID_REG;
-
 /**
  * Created by gcampagn on 1/20/17.
  */
 public class IfStatement extends Instruction {
-    private final int cond;
-    private final Block iftrue;
-    private final Block iffalse;
+    public final int cond;
+    public final Block iftrue;
+    public final Block iffalse;
 
     public IfStatement(ParserRuleContext definer, int cond, Block iftrue, Block iffalse) {
         super(definer);
@@ -28,8 +23,6 @@ public class IfStatement extends Instruction {
     }
 
     void accept(InstructionVisitor visitor) {
-        super.accept(visitor);
-        iftrue.accept(visitor);
-        iffalse.accept(visitor);
+        visitor.visit(this);
     }
 }

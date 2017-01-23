@@ -9,9 +9,9 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class ArrayLoad extends Instruction {
-    private final int target;
-    private final int source;
-    private final int index;
+    public final int target;
+    public final int source;
+    public final int index;
 
     public ArrayLoad(ParserRuleContext definer, int target, int source, int index) {
         super(definer);
@@ -23,5 +23,10 @@ public class ArrayLoad extends Instruction {
 
     public String toString() {
         return "array.ld " + target + " = " + source + " [ " + index + " ]";
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

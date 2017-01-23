@@ -1,14 +1,62 @@
 package org.stanford.ravel.compiler.ir.untyped;
 
+import org.stanford.antlr4.RavelParser;
+
+import java.util.function.Function;
+
 /**
  * Created by gcampagn on 1/20/17.
  */
 public interface InstructionVisitor {
-    default void beginBlock(Block block) {
+    default void visit(ArrayLoad instr) {
+
     }
 
-    default void endBlock(Block block) {
+    default void visit(ArrayStore instr) {
+
     }
 
-    void visit(Instruction instr);
+    default void visit(BinaryArithOp instr) {
+
+    }
+
+    default void visit(ComparisonOp instr) {
+
+    }
+
+    default void visit(FieldLoad instr) {
+
+    }
+
+    default void visit(FieldStore instr) {
+
+    }
+
+    default void visit(FunctionCall instr) {
+
+    }
+
+    default void visit(IfStatement instr) {
+
+    }
+
+    default void visit(ImmediateLoad instr) {
+
+    }
+
+    default void visit(Move instr) {
+
+    }
+
+    default void visit(SymbolLoad instr) {
+
+    }
+
+    default void visit(UnaryArithOp instr) {
+
+    }
+
+    default void visit(WhileLoop instr) {
+
+    }
 }

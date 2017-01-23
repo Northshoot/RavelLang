@@ -1,10 +1,10 @@
 package org.stanford.ravel.compiler.ir;
 
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.antlr4.RavelBaseVisitor;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.ControllerCompiler;
+import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.untyped.*;
 import org.stanford.ravel.compiler.scope.Scope;
@@ -15,9 +15,9 @@ import org.stanford.ravel.compiler.types.PrimitiveType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.stanford.ravel.compiler.ir.untyped.UntypedIR.ERROR_REG;
-import static org.stanford.ravel.compiler.ir.untyped.UntypedIR.UNSET_REG;
-import static org.stanford.ravel.compiler.ir.untyped.UntypedIR.VOID_REG;
+import static org.stanford.ravel.compiler.ir.Registers.ERROR_REG;
+import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
+import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
 
 /**
  * Created by gcampagn on 1/20/17.
@@ -179,7 +179,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                     rvalueReg = ERROR_REG;
 
                 int tmpReg = ir.allocateRegister();
-                current().add(new BinaryArithOp(ctx, tmpReg, lvalueReg, rvalueReg, compound));
+                current().add(new BinaryArithOp(ctx, tmpReg, lvalueReg, rvalueReg, BinaryOperation.forSymbol(compound)));
                 rvalueReg = tmpReg;
             } else {
                 if (i < rvalues.size())
@@ -264,25 +264,28 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             var.setRegister(ir.allocateRegister());
         return var.getRegister();
     }
+
+    private int visitVarRef(ParserRuleContext ctx, String name) {
+        Symbol sym = lookupName(ctx, name);
+
+        if (sym instanceof VariableSymbol) {
+            VariableSymbol var = (VariableSymbol) sym;
+            return ensureVarRegister(var);
+        } else {
+            // probably a model or a function
+            // allocate a pseudo register to load this, and let type check
+            // eliminate it
+            int reg = ir.allocateRegister();
+            current().add(new SymbolLoad(ctx, reg, sym));
+            return reg;
+        }
+    }
     
     @Override public Integer visitAtom(RavelParser.AtomContext ctx) {
         if (ctx.Identifier() != null) {
             String name = ctx.Identifier().getText();
 
-            Symbol sym = lookupName(ctx, name);
-
-            if (sym instanceof VariableSymbol) {
-                VariableSymbol var = (VariableSymbol) sym;
-                return ensureVarRegister(var);
-            } else {
-                // probably a model or a function
-                // allocate a pseudo register to load this, and let type check
-                // eliminate it
-                int reg = ir.allocateRegister();
-                current().add(new SymbolLoad(ctx, reg, sym));
-                return reg;
-            }
-
+            return visitVarRef(ctx, name);
         } else if (ctx.expression() != null) {
             return visit(ctx.expression());
         } else {
@@ -293,13 +296,34 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override
     public Integer visitLiteral(RavelParser.LiteralContext ctx) {
+        // for dumb reasons the grammar allows literal -> Identifier
+        // (which should be a variable reference, not a literal)
+        // special case it
+        if (ctx.Identifier() != null) {
+            return visitVarRef(ctx, ctx.Identifier().getText());
+        }
+
+
         int reg = ir.allocateRegister();
-        current().add(new ImmediateLoad(ctx, reg, ctx));
+        Object value;
+
+        if (ctx.number() != null) {
+            if (ctx.number().integer() != null)
+                value = Integer.parseInt(ctx.number().integer().getText());
+            else
+                value = Double.parseDouble(ctx.number().float_point().getText());
+        } else if (ctx.boolean_rule() != null) {
+            value = (ctx.boolean_rule().TRUE() != null);
+        } else {
+            value = ParserUtils.extractStringLiteral(ctx.STRING_LITERAL().getText());
+        }
+
+        current().add(new ImmediateLoad(ctx, reg, value));
         return reg;
     }
     
     @Override public Integer visitArray_literal(RavelParser.Array_literalContext ctx) {
-        // FINISHME
+        // TODO
         return ERROR_REG;
     }
 
@@ -355,7 +379,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             int base = visit(ctx.primary());
             int exponent = visit(ctx.unary_exp());
             int reg = ir.allocateRegister();
-            current().add(new BinaryArithOp(ctx, reg, base, exponent, "**"));
+            current().add(new BinaryArithOp(ctx, reg, base, exponent, BinaryOperation.POW));
             return reg;
         } else {
             return visit(ctx.primary());
@@ -366,7 +390,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (ctx.unary_op() != null) {
             int value = visit(ctx.unary_exp());
             int reg = ir.allocateRegister();
-            current().add(new UnaryArithOp(ctx, reg, value, ctx.unary_op().getText()));
+            current().add(new UnaryArithOp(ctx, reg, value, UnaryOperation.forSymbol(ctx.unary_op().getText())));
             return reg;
         } else {
             return visit(ctx.power_exp());
@@ -380,7 +404,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         int src1 = visit(lhs);
         int src2 = visit(rhs);
         int target = ir.allocateRegister();
-        current().add(new BinaryArithOp(definer, target, src1, src2, op));
+        current().add(new BinaryArithOp(definer, target, src1, src2, BinaryOperation.forSymbol(op)));
         return target;
     }
 
@@ -422,12 +446,12 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (children.size() == 2) {
             // fast path common case of one comparison
             int target = ir.allocateRegister();
-            current().add(new BinaryArithOp(ctx, target, src1, src2, ctx.comp_op(0).getText()));
+            current().add(new ComparisonOp(ctx, target, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
             return target;
         }
 
         int comp = ir.allocateRegister();
-        current().add(new BinaryArithOp(ctx, comp, src1, src2, ctx.comp_op(0).getText()));
+        current().add(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
         src1 = src2;
 
         int n = blockStack.size();
@@ -435,7 +459,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             Block iftrue = pushBlock();
             previous().add(new IfStatement(ctx, comp, iftrue, new Block()));
             src2 = visit(ctx.bin_or_exp(i));
-            current().add(new BinaryArithOp(ctx, comp, src1, src2, ctx.comp_op(i-1).getText()));
+            current().add(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(i-1).getText())));
             src1 = src2;
         }
         for (int i = 2; i < children.size(); i++)
@@ -449,7 +473,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (ctx.not_exp() != null) {
             int value = visit(ctx.not_exp());
             int reg = ir.allocateRegister();
-            current().add(new UnaryArithOp(ctx, reg, value, "!"));
+            current().add(new UnaryArithOp(ctx, reg, value, UnaryOperation.NOT));
             return reg;
         } else {
             return visit(ctx.comp_exp());

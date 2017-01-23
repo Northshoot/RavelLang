@@ -16,8 +16,8 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class SymbolLoad extends Instruction {
-    private final int target;
-    private final Symbol symbol;
+    public final int target;
+    public final Symbol symbol;
 
     public SymbolLoad(ParserRuleContext definer, int target, Symbol symbol) {
         super(definer);
@@ -28,5 +28,10 @@ public class SymbolLoad extends Instruction {
 
     public String toString() {
         return "symbol " + target + " = " + symbol.getName();
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -2,20 +2,18 @@ package org.stanford.ravel.compiler.ir.untyped;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.ir.BinaryOperation;
-
-import java.util.Arrays;
-import java.util.List;
+import org.stanford.ravel.compiler.ir.ComparisonOperation;
 
 /**
- * Created by gcampagn on 1/20/17.
+ * Created by gcampagn on 1/23/17.
  */
-public class BinaryArithOp extends Instruction {
+public class ComparisonOp extends Instruction {
     public final int target;
     public final int src1;
     public final int src2;
-    public final BinaryOperation op;
+    public final ComparisonOperation op;
 
-    public BinaryArithOp(ParserRuleContext definer, int target, int src1, int src2, BinaryOperation op) {
+    public ComparisonOp(ParserRuleContext definer, int target, int src1, int src2, ComparisonOperation op) {
         super(definer);
 
         this.target = target;
@@ -25,7 +23,7 @@ public class BinaryArithOp extends Instruction {
     }
 
     public String toString() {
-        return "binarith " + target + " = " + src1 + " " + op + " " + src2;
+        return "comp " + target + " = " + src1 + " " + op + " " + src2;
     }
 
     @Override

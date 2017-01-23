@@ -7,13 +7,11 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class Block {
-    private List<Instruction> instructions = new ArrayList<>();
+    private final List<Instruction> instructions = new ArrayList<>();
 
-    void accept(InstructionVisitor visitor) {
-        visitor.beginBlock(this);
+    public void accept(InstructionVisitor visitor) {
         for (Instruction instr : instructions)
             instr.accept(visitor);
-        visitor.endBlock(this);
     }
 
     public void add(Instruction instr) {

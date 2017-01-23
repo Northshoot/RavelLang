@@ -564,12 +564,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLiteral(RavelParser.LiteralContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#string}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitString(RavelParser.StringContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link RavelParser#number}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

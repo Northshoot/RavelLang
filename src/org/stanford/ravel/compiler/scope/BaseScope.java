@@ -196,6 +196,8 @@ public abstract class BaseScope implements Scope {
                 syms.addAll(scope.getAllSymbols());
             }
         }
+        for (Scope scope : nestedScopesNotSymbols)
+            syms.addAll(scope.getAllSymbols());
         return syms;
     }
 

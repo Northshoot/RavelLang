@@ -9,9 +9,9 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class FunctionCall extends Instruction {
-    private final int callee;
-    private final int[] arguments;
-    private final int target;
+    public final int callee;
+    public final int[] arguments;
+    public final int target;
 
     public FunctionCall(RavelParser.Function_callContext definer, int target, int callee, int[] arguments) {
         super(definer);
@@ -27,5 +27,10 @@ public class FunctionCall extends Instruction {
             str += " " + arg + ", ";
         }
         return str + ")";
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

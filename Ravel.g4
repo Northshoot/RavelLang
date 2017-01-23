@@ -443,10 +443,10 @@ comp_op
     | LE
     | GE
     | NOTEQUAL
-    | IN
-    | NOT IN
-    | IS
-    | IS NOT
+    //| IN
+    //| NOT IN
+    //| IS
+    //| IS NOT
     ;
 comp_exp
     : bin_or_exp (comp_op bin_or_exp)*
@@ -616,13 +616,21 @@ NEWLINE
 literal
     : number
     | boolean_rule
-    | string
+    | STRING_LITERAL
     | Identifier
-    | NullLiteral
     ;
-string
-    : '"' Identifier? '"'
+
+/// string     ::=  "'" stringitem* "'" | '"' stringitem* '"'
+STRING_LITERAL
+    : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
+    | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
     ;
+
+/// stringescapeseq ::=  "\" <any source character>
+fragment STRING_ESCAPE_SEQ
+ : '\\' .
+ ;
+
 number
      : integer
      | float_point
