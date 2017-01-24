@@ -17,10 +17,10 @@ controller RandomControllerEmbedded(random: Random):
         z = (x + 5 >= 0) or True
         q : int32
         if z:
-            q = random.value
+            q = self.record.value
         else:
-            q = random.value - 1
-        random.value /= q + random.value
+            q = self.record.value - 1
+        self.record.value /= q + self.record.value
 
 
 space EmbeddedSpace:

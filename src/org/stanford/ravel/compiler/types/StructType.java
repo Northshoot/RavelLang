@@ -3,6 +3,8 @@ package org.stanford.ravel.compiler.types;
 import java.util.*;
 
 /**
+ * A user-defined compound type.
+ *
  * Created by gcampagn on 1/20/17.
  */
 public class StructType implements CompoundType {

@@ -1,12 +1,15 @@
 package org.stanford.ravel.compiler;
 
 
+import jdk.nashorn.internal.ir.Terminal;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.InstanceSymbol;
+import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Model;
@@ -54,7 +57,7 @@ public class DefPhase extends RavelBaseListener {
         currentScope.define(model);
         ctx.scope=model;
         pushScope(model);
-        LOGGER.info("ADDING " + type +" Model: " + name);
+        //LOGGER.info("ADDING " + type +" Model: " + name);
     }
 
     @Override
@@ -134,10 +137,10 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitModelScope(RavelParser.ModelScopeContext ctx) {
-        List<Scope> modelCeck = currentScope.getNestedScopes();
+        List<Scope> modelCheck = currentScope.getNestedScopes();
         //we know there is only two scopes
-        if ( modelCeck.size() != 2 ){
-            throw new RuntimeException("Expecting two scopes in the model, found: " + modelCeck.size());
+        if ( modelCheck.size() != 2 ){
+            throw new RuntimeException("Expecting two scopes in the model, found: " + modelCheck.size());
         }
         if (! currentScope.hasNestedScope("properties")  ) {
             throw new RuntimeException("Missing declaration of properties in the model!") ;
@@ -145,6 +148,8 @@ public class DefPhase extends RavelBaseListener {
         if(! currentScope.hasNestedScope("schema") ) {
             throw new RuntimeException("Missing declaration of schema in the model!") ;
         }
+
+        ((ModelSymbol)currentScope).createModelType();
 
         popScope();
     }
@@ -164,13 +169,36 @@ public class DefPhase extends RavelBaseListener {
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope
-        String name = ctx.qualified_name().getText();
+        String modelVarName = ctx.Identifier(0).getText();
+        String eventName = ctx.Identifier(1).getText();
         //we create a local scope for each event
-        EventSymbol es = new EventSymbol(name);
+        EventSymbol es = new EventSymbol(modelVarName + "." + eventName);
         ctx.scope = es;
         es.setDefNode(ctx);
         currentScope.define(es);
+
+        Symbol modelVarSym = currentScope.resolve(modelVarName);
+
         pushScope(es);
+
+        VariableSymbol selfVar = new VariableSymbol("self");
+
+        if (modelVarSym == null) {
+            abortParsing(ctx, "invalid event declaration " + es.getName() + " (undeclared model)");
+            return;
+        }
+        if (!(modelVarSym instanceof VariableSymbol)) {
+            abortParsing(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            return;
+        }
+        Type modelType =  ((VariableSymbol) modelVarSym).getType();
+        if (!(modelType instanceof ModelType)) {
+            abortParsing(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            return;
+        }
+
+        selfVar.setType(((ModelType) modelType).getInstanceType());
+        currentScope.define(selfVar);
     }
 
     @Override

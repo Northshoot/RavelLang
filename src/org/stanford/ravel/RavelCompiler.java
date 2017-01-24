@@ -15,6 +15,7 @@ import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.EventSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
+import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.Space;
@@ -75,13 +76,13 @@ public class RavelCompiler {
         }
     }
 
-    private static boolean compileControllers(GlobalScope app) {
+    private static boolean compileControllers(GlobalScope app) throws FatalCompilerErrorException {
         ControllerCompiler compiler = new ControllerCompiler();
 
         boolean success = true;
         for (ControllerSymbol c : app.getControllers()) {
            for (EventSymbol event : c.getEvents()) {
-               success = compiler.compileEvent((RavelParser.EventScopeContext)event.getDefNode()) && success;
+               success = compiler.compileEvent((RavelParser.EventScopeContext) event.getDefNode()) && success;
            }
         }
 

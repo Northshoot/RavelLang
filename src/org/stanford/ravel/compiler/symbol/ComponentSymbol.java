@@ -14,7 +14,7 @@ import java.util.Map;
  *  and methods with different slot sequences. A ComponentSymbol
  *  can also be a member of an aggregate itself (nested structs, ...).
  */
-public abstract class ComponentSymbol extends SymbolWithScope implements CompoundType, TypeSymbol {
+public abstract class ComponentSymbol extends SymbolWithScope {
     protected ParserRuleContext defNode;
 
     //variables used to denote when concrete classes have been made for the symbols
@@ -87,25 +87,4 @@ public abstract class ComponentSymbol extends SymbolWithScope implements Compoun
     }
 
     public List<VariableSymbol> getFields() { return getDefinedFields(); }
-
-    @Override
-    public Collection<String> getMemberList() {
-        List<String> fields = new ArrayList<>();
-        for (Symbol s : getSymbols()) {
-            if (s instanceof VariableSymbol) {
-                fields.add(s.getName());
-            }
-        }
-        return fields;
-    }
-
-    @Override
-    public Type getMemberType(String member) {
-        return ((TypedSymbol)getSymbol(member)).getType();
-    }
-
-    @Override
-    public Type getDefinedType() {
-        return this;
-    }
 }

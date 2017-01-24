@@ -182,7 +182,7 @@ param_assig
     : Identifier '=' param_val
     ;
 
-param_val : literal | SELF;
+param_val : literal;
 
 instance_name
     : Identifier
@@ -291,7 +291,7 @@ controller_scope
  */
 
 eventdef returns [Scope scope]
-    : EVENT qualified_name  function_args ':' block_stmt #EventScope
+    : EVENT Identifier '.' Identifier  function_args ':' block_stmt #EventScope
     ;
 
 block_stmt returns [Scope scope]
@@ -529,7 +529,6 @@ function_args
  * lexer rules
  */
  // Keywords
-SELF                : 'self' ;
 MODEL               : 'model' ;
 SPACE               : 'space' ;
 CONTROLLER          : 'controller' ;

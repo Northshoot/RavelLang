@@ -50,7 +50,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
 //        //Create models and fields set properties, add to
 //        String name = ctx.Identifier().getText();
 //        String type = ctx.modelType().getText();
-//        Model m = new Model(name, Model.getType(type));
+//        Model m = new Model(name, Model.getModelType(type));
 //        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
 //        //TODO: not a clean solution
 //        try{
@@ -86,7 +86,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
 //            //Field type name
 //            String field_type = field_ctx.field_type().getText();
 //            //get field type
-//            Field.Type ft = Field.getType(field_ctx.field_type().start.getType());
+//            Field.Type ft = Field.getModelType(field_ctx.field_type().start.getModelType());
 //
 //            Builder f_concreate = null;
 //            //first we only create a specific field builder

@@ -10,7 +10,6 @@ import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.Variable;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -28,7 +27,7 @@ public class ModelIR {
         LOGGER.info("Making model object from scope");
         //make concrete model
         String name = ms.getName();
-        Model m = new Model(name, ms.getType());
+        Model m = new Model(name, ms.getModelType());
 //        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
 //        try{
@@ -163,12 +162,12 @@ public class ModelIR {
                 return var.value(Float.parseFloat(value)).build();
             } catch (NullPointerException e) { }
             try {
-                String value = literal.string().getText();
+                String value = literal.STRING_LITERAL().getText();
                 var.stringType("string");
                 return var.value(value).build();
             } catch (NullPointerException e) { }
             try {
-                String value = literal.string().getText();
+                String value = literal.STRING_LITERAL().getText();
                 var.stringType("assignment");
                 return var.value(value).build();
             } catch (NullPointerException e ) {}

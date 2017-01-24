@@ -8,7 +8,6 @@ import org.stanford.ravel.compiler.types.Type;
 public class FieldSymbol extends BaseSymbol implements TypedSymbol {
     public FieldSymbol(String name) {
         super(name);
-
     }
 
     @Override
