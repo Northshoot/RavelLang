@@ -1,4 +1,5 @@
 // Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+package org.stanford;
 
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;

@@ -23,6 +23,7 @@ TODO's for Ravel:
 * define decoration API
 * define expert systems and decorators
 * lower down
+* pull out definition of primitive to
 
 
 Compiler phases
