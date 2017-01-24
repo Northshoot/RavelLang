@@ -10,10 +10,10 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class ImmediateLoad extends Instruction {
-    private final int target;
-    private final RavelParser.LiteralContext value;
+    public final int target;
+    public final Object value;
 
-    public ImmediateLoad(ParserRuleContext definer, int target, RavelParser.LiteralContext value) {
+    public ImmediateLoad(ParserRuleContext definer, int target, Object value) {
         super(definer);
 
         this.target = target;
@@ -21,6 +21,11 @@ public class ImmediateLoad extends Instruction {
     }
 
     public String toString() {
-        return "loadimm " + target + " = '" + value.getText() + "'";
+        return "loadimm " + target + " = '" + value + "'";
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

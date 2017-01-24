@@ -1,10 +1,10 @@
 package org.stanford.ravel.compiler.symbol;
 
-import org.stanford.ravel.compiler.ir.untyped.UntypedIR;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.types.Type;
 
 public class VariableSymbol extends BaseSymbol implements TypedSymbol {
-    private int register = UntypedIR.UNSET_REG;
+    private int register = Registers.UNSET_REG;
 
     public VariableSymbol(String name) {
         super(name);

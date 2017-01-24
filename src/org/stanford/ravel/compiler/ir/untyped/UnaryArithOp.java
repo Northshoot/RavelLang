@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.ir.untyped;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.stanford.ravel.compiler.ir.UnaryOperation;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,11 +10,11 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class UnaryArithOp extends Instruction {
-    private final int target;
-    private final int source;
-    private final String op;
+    public final int target;
+    public final int source;
+    public final UnaryOperation op;
 
-    public UnaryArithOp(ParserRuleContext definer, int target, int source, String op) {
+    public UnaryArithOp(ParserRuleContext definer, int target, int source, UnaryOperation op) {
         super(definer);
 
         this.target = target;
@@ -23,5 +24,10 @@ public class UnaryArithOp extends Instruction {
 
     public String toString() {
         return "unarith " + target + " = " + op + " " + source;
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -9,9 +9,9 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class FieldLoad extends Instruction {
-    private final int target;
-    private final int source;
-    private final String field;
+    public final int target;
+    public final int source;
+    public final String field;
 
     public FieldLoad(ParserRuleContext definer, int target, int source, String field) {
         super(definer);
@@ -23,5 +23,10 @@ public class FieldLoad extends Instruction {
 
     public String toString() {
         return "field.ld " + target + " = " + source + " ." + field;
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -934,16 +934,6 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitLiteral(RavelParser.LiteralContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#string}.
-	 * @param ctx the parse tree
-	 */
-	void enterString(RavelParser.StringContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#string}.
-	 * @param ctx the parse tree
-	 */
-	void exitString(RavelParser.StringContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link RavelParser#number}.
 	 * @param ctx the parse tree
 	 */

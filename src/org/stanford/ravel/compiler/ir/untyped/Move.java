@@ -9,8 +9,8 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class Move extends Instruction {
-    private final int target;
-    private final int source;
+    public final int target;
+    public final int source;
 
     public Move(ParserRuleContext definer, int target, int source) {
         super(definer);
@@ -21,5 +21,10 @@ public class Move extends Instruction {
 
     public String toString() {
         return "move " + target + " = " + source;
+    }
+
+    @Override
+    void accept(InstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

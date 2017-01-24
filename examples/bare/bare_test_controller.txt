@@ -10,9 +10,11 @@ streaming model Random(size):
 
 controller RandomControllerEmbedded(random: Random):
     event random.arrived():
+        s1 : str = "\"foo\""
+        s2 = s1 + "lol"
         x : int32 = 7
         y = x + 5
-        z = (x + 5) or -1
+        z = (x + 5 >= 0) or True
         q : int32
         if z:
             q = random.value

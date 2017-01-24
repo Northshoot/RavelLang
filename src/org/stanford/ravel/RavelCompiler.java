@@ -75,14 +75,18 @@ public class RavelCompiler {
         }
     }
 
-    private static void compileControllers(GlobalScope app) {
+    private static boolean compileControllers(GlobalScope app) {
         ControllerCompiler compiler = new ControllerCompiler();
 
+        boolean success = true;
         for (ControllerSymbol c : app.getControllers()) {
            for (EventSymbol event : c.getEvents()) {
-               compiler.compileEvent((RavelParser.EventScopeContext)event.getDefNode());
+               success = compiler.compileEvent((RavelParser.EventScopeContext)event.getDefNode()) && success;
            }
         }
+
+        compiler.printAllErrors();
+        return success;
     }
 
     private static void compileSpaces(GlobalScope app) {
@@ -129,7 +133,10 @@ public class RavelCompiler {
         compileModels(globalScope, mir);
 
         // compile the controllers to IR
-        compileControllers(globalScope);
+        if (!compileControllers(globalScope)) {
+            logBuildEnd(start);
+            return;
+        }
 
         // link controllers, models and platforms
         compileSpaces(globalScope);

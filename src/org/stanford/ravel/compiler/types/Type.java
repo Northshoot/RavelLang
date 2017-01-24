@@ -10,4 +10,15 @@ package org.stanford.ravel.compiler.types;
  */
 public interface Type {
     String getName();
+
+    /**
+     * Checks if @param other can be assigned to a variable of this type.
+     * The default implementation just checks that the type is equal or is an error type
+     *
+     * @param other the type on the right hand side of the assignment
+     * @return true if assignable, false otherwise.
+     */
+    default boolean isAssignable(Type other) {
+        return this.equals(other) || other == PrimitiveType.ERROR;
+    }
 }
