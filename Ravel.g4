@@ -377,14 +377,17 @@ array_literal
     : '[' (expressionList (',')?)? ']'
     ;
 
+method_call
+    : '.' Identifier '(' expressionList? ')' ;
+
 primary
     : atom access_op*
     ;
 
 access_op
-    : member_access
-    | array_access
-    | function_call
+    : array_access
+    | method_call
+    | member_access
     ;
 
 member_access
@@ -392,9 +395,6 @@ member_access
 
 array_access
     : '[' expression ']' ;
-
-function_call
-    : '(' expressionList? ')' ;
 
 power_exp
     : primary ('**' unary_exp)? ;

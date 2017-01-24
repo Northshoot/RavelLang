@@ -9,12 +9,14 @@ import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.InstanceSymbol;
+import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.primitives.Primitive;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -108,6 +110,29 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
+    private static Type typeFromField(String fieldType) {
+        switch (fieldType) {
+            case "ByteField":
+                return new ArrayType(PrimitiveType.BYTE);
+            case "BooleanField":
+                return PrimitiveType.BOOL;
+            case "StringField":
+                return PrimitiveType.STR;
+            case "IntegerField":
+                return PrimitiveType.INT32;
+            case "NumberField":
+                return PrimitiveType.DOUBLE;
+            case "DateField":
+                return PrimitiveType.DATE;
+            case "DateTimeField":
+                return PrimitiveType.DATE_TIME;
+            case "TimeStampField":
+                return PrimitiveType.TIMESTAMP;
+            default:
+                return PrimitiveType.ANY;
+        }
+    }
+
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
         // can only be inside the schema scope!
@@ -115,7 +140,10 @@ public class DefPhase extends RavelBaseListener {
         FieldSymbol fs = new FieldSymbol(name);
         fs.setDefNode(ctx);
         fs.setScope(currentScope);
-        //TODO: do we need type here?
+
+        String fieldType = ctx.field_type().getText();
+        fs.setType(typeFromField(fieldType));
+
         currentScope.define(fs);
         //LOGGER.info("ADDING FIELD: " +fs.toString());
 

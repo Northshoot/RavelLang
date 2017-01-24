@@ -11,9 +11,29 @@ public class StructType implements CompoundType {
     private final String name;
     private final List<String> memberNames = new ArrayList<>();
     private final HashMap<String, Type> memberTypes = new HashMap<>();
+    private final boolean mutable;
+
+    private StructType immutableVersion;
 
     public StructType(String name) {
+        this(name, true);
+    }
+    private StructType(String name, boolean mutable) {
         this.name = name;
+        this.mutable = mutable;
+    }
+
+    public StructType makeImmutable() {
+        if (!mutable)
+            return this;
+
+        if (immutableVersion != null)
+            return immutableVersion;
+
+        immutableVersion = new StructType(name, false);
+        immutableVersion.memberNames.addAll(memberNames);
+        immutableVersion.memberTypes.putAll(memberTypes);
+        return immutableVersion;
     }
 
     public void addField(String name, Type type) {
@@ -31,6 +51,11 @@ public class StructType implements CompoundType {
     @Override
     public Type getMemberType(String member) {
         return memberTypes.get(member);
+    }
+
+    @Override
+    public boolean isWritable(String member) {
+        return mutable;
     }
 
     @Override

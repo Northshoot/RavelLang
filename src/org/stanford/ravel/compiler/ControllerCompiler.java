@@ -36,6 +36,11 @@ public class ControllerCompiler {
             if (s instanceof VariableSymbol)
                 variables.add((VariableSymbol)s);
         }
+        // add controller level variables
+        for (Symbol s : tree.scope.getEnclosingScope().getSymbols()) {
+            if (s instanceof VariableSymbol)
+                variables.add((VariableSymbol)s);
+        }
 
         // compile to untyped IR
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);

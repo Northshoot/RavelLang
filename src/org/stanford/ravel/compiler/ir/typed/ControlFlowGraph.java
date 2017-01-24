@@ -30,7 +30,7 @@ public class ControlFlowGraph {
         return entry;
     }
     public TBlock getExit() {
-        return entry;
+        return exit;
     }
 
     private void topologicalSort(Set<TBlock> visited, TBlock block) {

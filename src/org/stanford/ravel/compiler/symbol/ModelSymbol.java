@@ -30,7 +30,7 @@ public class ModelSymbol extends ComponentSymbol implements TypeSymbol {
         // this is the "type" of the model in the compiler sense
         // ie, a class type that has static methods create(), save()
         // and fields "record" and "error"
-        mDefinedType = new ModelType(name);
+        mDefinedType = new ModelType(this);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ModelSymbol extends ComponentSymbol implements TypeSymbol {
     public void createModelType() {
         for (Symbol sym : mSchemaScope.getSymbols()) {
             assert sym instanceof FieldSymbol;
-            mDefinedType.addField(sym.getName(), ((FieldSymbol) sym).getType());
+            mDefinedType.getRecordType().addField(sym.getName(), ((FieldSymbol) sym).getType());
         }
     }
 

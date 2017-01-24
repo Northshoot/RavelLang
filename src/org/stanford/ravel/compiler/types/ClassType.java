@@ -24,8 +24,17 @@ public class ClassType implements CompoundType {
         }
 
         @Override
+        public boolean isWritable(String member) {
+            return fieldNames.contains(member);
+        }
+
+        @Override
         public String getName() {
             return "instance-of-" + name;
+        }
+
+        public ClassType getClassType() {
+            return ClassType.this;
         }
     }
 
@@ -45,7 +54,7 @@ public class ClassType implements CompoundType {
         if (instanceType.memberTypes.containsKey(name))
             throw new IllegalArgumentException("Duplicate instance method " + name + " in class " + this.name);
         instanceType.allMemberNames.add(methodName);
-        instanceType.memberTypes.put(methodName, new FunctionType(name, this, false, arguments, returnValue));
+        instanceType.memberTypes.put(methodName, new FunctionType(methodName, this, false, arguments, returnValue));
     }
 
     public void addField(String fieldName, Type type) {
@@ -62,9 +71,10 @@ public class ClassType implements CompoundType {
         if (instanceType.memberTypes.containsKey(name))
             throw new IllegalArgumentException("Static method " + name + " collides with non static method in class " + this.name);
 
-        staticMembers.put(methodName, new FunctionType(name, this, true, arguments, returnValue));
+        FunctionType functionType = new FunctionType(methodName, this, true, arguments, returnValue);
+        staticMembers.put(methodName, functionType);
         instanceType.allMemberNames.add(methodName);
-        instanceType.memberTypes.put(methodName, new FunctionType(name, this, false, arguments, returnValue));
+        instanceType.memberTypes.put(methodName, functionType);
     }
 
     //
@@ -76,6 +86,11 @@ public class ClassType implements CompoundType {
     @Override
     public Type getMemberType(String member) {
         return staticMembers.get(member);
+    }
+
+    @Override
+    public boolean isWritable(String member) {
+        return false;
     }
 
     @Override

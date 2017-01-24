@@ -339,6 +339,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitArray_literal(RavelParser.Array_literalContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#method_call}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMethod_call(RavelParser.Method_callContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#primary}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -362,12 +368,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArray_access(RavelParser.Array_accessContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#function_call}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunction_call(RavelParser.Function_callContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#power_exp}.
 	 * @param ctx the parse tree

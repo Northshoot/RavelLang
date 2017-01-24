@@ -632,6 +632,18 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterMethod_call(RavelParser.Method_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMethod_call(RavelParser.Method_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPrimary(RavelParser.PrimaryContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -675,18 +687,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArray_access(RavelParser.Array_accessContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFunction_call(RavelParser.Function_callContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFunction_call(RavelParser.Function_callContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

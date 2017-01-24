@@ -1,27 +1,27 @@
 package org.stanford.ravel.compiler.ir;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.ControllerCompiler;
+import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.*;
 import org.stanford.ravel.compiler.ir.untyped.BinaryArithOp;
-import org.stanford.ravel.compiler.ir.untyped.Block;
 import org.stanford.ravel.compiler.ir.untyped.IfStatement;
 import org.stanford.ravel.compiler.ir.untyped.ImmediateLoad;
 import org.stanford.ravel.compiler.ir.untyped.Instruction;
 import org.stanford.ravel.compiler.ir.untyped.Move;
 import org.stanford.ravel.compiler.ir.untyped.UnaryArithOp;
+import org.stanford.ravel.compiler.symbol.Symbol;
+import org.stanford.ravel.compiler.symbol.TypeSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Primitive;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
-import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
 
 /**
  * Converts tree-like UntypedIR to TypedIR, checking the type of
@@ -81,12 +81,85 @@ public class TypeResolvePass implements InstructionVisitor {
 
     @Override
     public void visit(ArrayLoad instr) {
-        // TODO
+        Type ownerType = getRegisterType(instr.source);
+        if (!(ownerType instanceof ArrayType)) {
+            typeError(instr, ownerType.getName() + " is not an array");
+            return;
+        }
+
+        Type indexType = getRegisterType(instr.index);
+        int index;
+        if (indexType == PrimitiveType.INT32) {
+            index = instr.index;
+        } else if (PrimitiveType.INT32.isAssignable(indexType)) {
+            index = allocateRegister(PrimitiveType.INT32);
+            cfgBuilder.addInstruction(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
+        } else {
+            typeError(instr, "array index must be an integer, not " + indexType.getName());
+            index = Registers.ERROR_REG;
+        }
+
+        Type resultType = ((ArrayType) ownerType).getElementType();
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of array index to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        cfgBuilder.addInstruction(new TArrayLoad(resultType, (ArrayType)ownerType, target, instr.source, index));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
     public void visit(ArrayStore instr) {
-        // TODO
+        Type ownerType = getRegisterType(instr.object);
+        if (!(ownerType instanceof ArrayType)) {
+            typeError(instr, ownerType.getName() + " is not an array");
+            return;
+        }
+
+        Type indexType = getRegisterType(instr.index);
+        int index;
+        if (indexType == PrimitiveType.INT32) {
+            index = instr.index;
+        } else if (PrimitiveType.INT32.isAssignable(indexType)) {
+            index = allocateRegister(PrimitiveType.INT32);
+            cfgBuilder.addInstruction(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
+        } else {
+            typeError(instr, "array index must be an integer, not " + indexType.getName());
+            index = Registers.ERROR_REG;
+        }
+
+        ArrayType arrayType = (ArrayType) ownerType;
+
+        if (!arrayType.isMutable()) {
+            typeError(instr, "array type " + arrayType.getName() + " is not writable");
+            return;
+        }
+
+        Type targetType = arrayType.getElementType();
+        Type sourceType = getRegisterType(instr.value);
+        int value;
+        if (targetType.equals(sourceType)) {
+            value = instr.value;
+        } else if (targetType.isAssignable(sourceType)) {
+            value = allocateRegister(targetType);
+            cfgBuilder.addInstruction(new TConvert(targetType, sourceType, value, instr.value));
+        } else {
+            typeError(instr, "cannot assign expression of type " + sourceType.getName() + " to an element of array of type " + arrayType.getName());
+            value = Registers.ERROR_REG;
+        }
+        cfgBuilder.addInstruction(new TArrayStore(targetType, arrayType, instr.object, index, value));
     }
 
     private Type promote(Type t1, Type t2) {
@@ -148,7 +221,7 @@ public class TypeResolvePass implements InstructionVisitor {
         int src2;
         if (!resultType.equals(srcType2)) {
             src2 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(resultType, srcType1, src2, instr.src2));
+            cfgBuilder.addInstruction(new TConvert(resultType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
         }
@@ -219,32 +292,153 @@ public class TypeResolvePass implements InstructionVisitor {
 
     @Override
     public void visit(FieldLoad instr) {
-        // TODO
+        Type ownerType = getRegisterType(instr.source);
+        if (!(ownerType instanceof CompoundType)) {
+            typeError(instr, "cannot read field " + instr.field + " on non compound type " + ownerType.getName());
+            return;
+        }
+
+        CompoundType compoundType = (CompoundType) ownerType;
+        Type resultType = compoundType.getMemberType(instr.field);
+        if (resultType == null) {
+            typeError(instr, ownerType.getName() + " has no field " + instr.field);
+            resultType = PrimitiveType.ERROR;
+        }
+        if (resultType instanceof FunctionType) {
+            typeError(instr, "cannot read method " + ownerType.getName() + "." + instr.field + " as a field");
+            resultType = PrimitiveType.ERROR;
+        }
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of field load " + ownerType.getName() + "." + instr.field + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        cfgBuilder.addInstruction(new TFieldLoad(resultType, compoundType, target, instr.source, instr.field));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
     public void visit(FieldStore instr) {
-        // TODO
+        Type ownerType = getRegisterType(instr.object);
+        if (!(ownerType instanceof CompoundType)) {
+            typeError(instr, "cannot write field " + instr.field + " on non compound type " + ownerType.getName());
+            return;
+        }
+
+        CompoundType compoundType = (CompoundType) ownerType;
+        Type targetType = compoundType.getMemberType(instr.field);
+        if (targetType == null) {
+            typeError(instr, ownerType.getName() + " has no field " + instr.field);
+            return;
+        }
+        if (targetType instanceof FunctionType) {
+            typeError(instr, "cannot write method " + ownerType.getName() + "." + instr.field + " as a field");
+            return;
+        }
+
+        if (!compoundType.isWritable(instr.field)) {
+            typeError(instr, "field " + ownerType.getName() + "." + instr.field + " is not writable");
+            return;
+        }
+
+        Type sourceType = getRegisterType(instr.value);
+        int value;
+        if (targetType.equals(sourceType)) {
+            value = instr.value;
+        } else if (targetType.isAssignable(sourceType)) {
+            value = allocateRegister(targetType);
+            cfgBuilder.addInstruction(new TConvert(targetType, sourceType, value, instr.value));
+        } else {
+            typeError(instr, "cannot assign expression of type " + sourceType.getName() + " to a field " + ownerType.getName() + "." + instr.field + " of type " + targetType.getName());
+            value = Registers.ERROR_REG;
+        }
+        cfgBuilder.addInstruction(new TFieldStore(targetType, compoundType, instr.object, instr.field, value));
     }
 
     @Override
-    public void visit(FunctionCall instr) {
-        // TODO
+    public void visit(MethodCall instr) {
+        Type ownerType = getRegisterType(instr.owner);
+        if (!(ownerType instanceof CompoundType)) {
+            typeError(instr, "cannot call method " + instr.method + " on non compound type " + ownerType.getName());
+            return;
+        }
+
+        CompoundType compoundType = (CompoundType) ownerType;
+        Type methodType = compoundType.getMemberType(instr.method);
+        if (!(methodType instanceof FunctionType)) {
+            typeError(instr, ownerType.getName() + "." + instr.method + " is not a method");
+            return;
+        }
+
+        FunctionType functionType = (FunctionType)methodType;
+        Type[] argumentTypes = functionType.getArgumentTypes();
+        if (instr.arguments.length != argumentTypes.length) {
+            typeError(instr, ownerType.getName() + "." + instr.method + " takes " + argumentTypes.length + " arguments, " + instr.arguments.length + " passed");
+        }
+        int[] arguments = new int[argumentTypes.length];
+        for (int i = 0; i < argumentTypes.length; i++) {
+            int arg = i < instr.arguments.length ? instr.arguments[i] : Registers.ERROR_REG;
+            Type formalType = argumentTypes[i];
+
+            arguments[i] = arg;
+
+            if (arg != Registers.ERROR_REG) {
+                Type argType = getRegisterType(arg);
+                if (!formalType.isAssignable(argType)) {
+                    typeError(instr, "cannot convert " + argType.getName() + " to " + formalType.getName() + " in argument " + (i+1) + " of " + ownerType.getName() + "." + instr.method);
+                    arguments[i] = Registers.ERROR_REG;
+                } else if (!formalType.equals(argType)) {
+                    arguments[i] = allocateRegister(formalType);
+                    cfgBuilder.addInstruction(new TConvert(formalType, argType, arguments[i], arg));
+                }
+            }
+        }
+
+        Type resultType = functionType.getReturnType();
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of method call " + ownerType.getName() + "." + instr.method + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        cfgBuilder.addInstruction(new TMethodCall(functionType, target, instr.owner, instr.method, arguments));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
     public void visit(IfStatement instr) {
         Type condType = getRegisterType(instr.cond);
 
-        if (!PrimitiveType.BOOL.isAssignable(condType)) {
-            typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
-        }
         int cond;
-        if (condType != PrimitiveType.BOOL) {
+        if (condType == PrimitiveType.BOOL) {
+            cond = instr.cond;
+        } else if (PrimitiveType.BOOL.isAssignable(condType)) {
             cond = allocateRegister(PrimitiveType.BOOL);
             cfgBuilder.addInstruction(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
         } else {
-            cond = instr.cond;
+            typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
+            cond = Registers.ERROR_REG;
         }
 
         // build the iftrue part
@@ -330,11 +524,6 @@ public class TypeResolvePass implements InstructionVisitor {
             cfgBuilder.addInstruction(new TMove(targetType, instr.target, instr.source));
     }
 
-    @Override
-    public void visit(SymbolLoad instr) {
-        // TODO
-    }
-
     private Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
         if (resultType == PrimitiveType.ERROR)
             return resultType;
@@ -397,6 +586,38 @@ public class TypeResolvePass implements InstructionVisitor {
 
     @Override
     public void visit(WhileLoop instr) {
-        // TODO
+        Type condType = getRegisterType(instr.cond);
+
+        int cond;
+        if (condType == PrimitiveType.BOOL) {
+            cond = instr.cond;
+        } else if (PrimitiveType.BOOL.isAssignable(condType)) {
+            cond = allocateRegister(PrimitiveType.BOOL);
+            cfgBuilder.addInstruction(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
+        } else {
+            typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
+            cond = Registers.ERROR_REG;
+        }
+
+        TBlock loopHead = cfgBuilder.newBlock();
+        TBlock loopBody = cfgBuilder.newBlock();
+
+        // continue in a new block
+        TBlock continuation = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(loopHead);
+
+        cfgBuilder.pushBlock(loopHead);
+        cfgBuilder.addInstruction(new TIfStatement(cond, loopBody, continuation));
+        cfgBuilder.addSuccessor(loopBody);
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+
+        cfgBuilder.pushBlock(loopBody);
+        instr.body.accept(this);
+        cfgBuilder.addSuccessor(loopHead);
+        cfgBuilder.popBlock();
+
+        cfgBuilder.replaceBlock(continuation);
     }
 }

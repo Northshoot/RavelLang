@@ -34,6 +34,13 @@ public class FunctionType implements Type {
         return isStatic;
     }
 
+    public Type getReturnType() {
+        return returnValue;
+    }
+    public Type[] getArgumentTypes() {
+        return arguments;
+    }
+
     @Override
     public String getName() {
         return (owner != null ? owner.getName() + "." : "") + name;

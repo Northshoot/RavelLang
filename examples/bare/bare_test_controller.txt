@@ -21,6 +21,11 @@ controller RandomControllerEmbedded(random: Random):
         else:
             q = self.record.value - 1
         self.record.value /= q + self.record.value
+        rec2 = self.create()
+        rec2.value = 42
+
+        rec3 = random.create()
+        rec3.value = 1000
 
 
 space EmbeddedSpace:

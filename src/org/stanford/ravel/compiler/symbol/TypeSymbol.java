@@ -8,6 +8,6 @@ import org.stanford.ravel.compiler.types.Type;
  *
  * Created by gcampagn on 1/20/17.
  */
-public interface TypeSymbol {
+public interface TypeSymbol extends Symbol {
     Type getDefinedType();
 }

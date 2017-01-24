@@ -23,20 +23,29 @@ public enum PrimitiveType implements Type {
 
     // regular types
     BOOL,
+    BYTE {
+        @Override
+        public boolean isAssignable(Type type) {
+            return type == BYTE || type == BOOL || type == ERROR;
+        }
+    },
     INT32 {
         @Override
         public boolean isAssignable(Type type) {
-            return type == INT32 || type == BOOL || type == ERROR;
+            return type == INT32 || type == BYTE || type == BOOL || type == ERROR;
         }
     },
     DOUBLE {
         @Override
         public boolean isAssignable(Type type) {
-            return type == DOUBLE || type == INT32 || type == BOOL || type == ERROR;
+            return type == DOUBLE || type == BYTE || type == INT32 || type == BOOL || type == ERROR;
         }
     },
     STR,
-    ERROR_MSG;
+    ERROR_MSG,
+    DATE,
+    DATE_TIME,
+    TIMESTAMP;
 
     public String getName() {
         return name().toLowerCase();

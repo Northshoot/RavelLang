@@ -12,6 +12,8 @@ public class TConvert extends TInstruction {
     private final int source;
 
     public TConvert(Type tgtType, Type srcType, int target, int source) {
+        if (tgtType.equals(srcType))
+            throw new IllegalArgumentException("Invalid conversion");
         this.tgtType = tgtType;
         this.srcType = srcType;
         this.target = target;

@@ -10,4 +10,5 @@ import java.util.Collection;
 public interface CompoundType extends Type {
     Collection<String> getMemberList();
     Type getMemberType(String member);
+    boolean isWritable(String member);
 }

@@ -13,6 +13,7 @@ import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.stanford.ravel.compiler.ir.Registers.ERROR_REG;
@@ -272,12 +273,8 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             VariableSymbol var = (VariableSymbol) sym;
             return ensureVarRegister(var);
         } else {
-            // probably a model or a function
-            // allocate a pseudo register to load this, and let type check
-            // eliminate it
-            int reg = ir.allocateRegister();
-            current().add(new SymbolLoad(ctx, reg, sym));
-            return reg;
+            compiler.emitError(new SourceLocation(ctx), name + " is not a variable in scope");
+            return ERROR_REG;
         }
     }
     
@@ -357,11 +354,11 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         return reg;
     }
 
-    @Override public Integer visitFunction_call(RavelParser.Function_callContext ctx) {
+    @Override public Integer visitMethod_call(RavelParser.Method_callContext ctx) {
         int saveCurrent = currentReg;
         currentReg = VOID_REG;
 
-        List<RavelParser.ExpressionContext> args = ctx.expressionList().expression();
+        List<RavelParser.ExpressionContext> args = ctx.expressionList() != null ? ctx.expressionList().expression() : Collections.emptyList();
         int[] arguments = new int[args.size()];
 
         for (int i = 0; i < arguments.length; i++) {
@@ -370,7 +367,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
         currentReg = saveCurrent;
         int reg = ir.allocateRegister();
-        current().add(new FunctionCall(ctx, reg, currentReg, arguments));
+        current().add(new MethodCall(ctx, reg, currentReg, ctx.Identifier().getText(), arguments));
         return reg;
     }
 

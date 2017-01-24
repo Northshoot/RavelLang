@@ -558,6 +558,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitArray_literal(RavelParser.Array_literalContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#method_call}.
+	 * @param ctx the parse tree
+	 */
+	void enterMethod_call(RavelParser.Method_callContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#method_call}.
+	 * @param ctx the parse tree
+	 */
+	void exitMethod_call(RavelParser.Method_callContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#primary}.
 	 * @param ctx the parse tree
 	 */
@@ -597,16 +607,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArray_access(RavelParser.Array_accessContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#function_call}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunction_call(RavelParser.Function_callContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#function_call}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunction_call(RavelParser.Function_callContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#power_exp}.
 	 * @param ctx the parse tree

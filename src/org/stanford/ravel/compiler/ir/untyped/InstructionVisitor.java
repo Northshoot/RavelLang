@@ -1,9 +1,5 @@
 package org.stanford.ravel.compiler.ir.untyped;
 
-import org.stanford.antlr4.RavelParser;
-
-import java.util.function.Function;
-
 /**
  * Created by gcampagn on 1/20/17.
  */
@@ -32,7 +28,7 @@ public interface InstructionVisitor {
 
     }
 
-    default void visit(FunctionCall instr) {
+    default void visit(MethodCall instr) {
 
     }
 
@@ -45,10 +41,6 @@ public interface InstructionVisitor {
     }
 
     default void visit(Move instr) {
-
-    }
-
-    default void visit(SymbolLoad instr) {
 
     }
 
