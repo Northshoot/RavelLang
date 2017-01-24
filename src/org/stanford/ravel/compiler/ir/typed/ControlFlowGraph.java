@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Created by gcampagn on 1/23/17.
  */
-public class ControlFlowGraph {
+public class ControlFlowGraph implements Iterable<TBlock> {
     public static final int BLOCK_ENTRY = 0;
     public static final int BLOCK_EXIT = -1;
 
@@ -52,5 +52,10 @@ public class ControlFlowGraph {
     public void visitBackward(ControlFlowGraphVisitor visitor) {
         for (int i = blocks.size()-1; i >= 0; i--)
             visitor.visitBlock(blocks.get(i));
+    }
+
+    @Override
+    public Iterator<TBlock> iterator() {
+        return blocks.iterator();
     }
 }

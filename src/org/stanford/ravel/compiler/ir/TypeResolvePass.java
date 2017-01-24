@@ -33,7 +33,7 @@ public class TypeResolvePass implements InstructionVisitor {
     private final ControllerCompiler compiler;
     private final ControlFlowGraphBuilder cfgBuilder = new ControlFlowGraphBuilder();
 
-    private Map<Integer, Type> registerTypes = new HashMap<>();
+    private TypedIR ir = new TypedIR();
     private int nextRegister = UNSET_REG;
 
     public TypeResolvePass(ControllerCompiler compiler) {
@@ -47,27 +47,18 @@ public class TypeResolvePass implements InstructionVisitor {
         setRegisterType(sym.getRegister(), type);
     }
 
-    public ControlFlowGraph run(UntypedIR ir) {
+    public TypedIR run(UntypedIR ir) {
         this.nextRegister = ir.numUsedRegisters();
         ir.getRoot().accept(this);
-        return cfgBuilder.build();
+        this.ir.finish(cfgBuilder);
+        return this.ir;
     }
 
     private void setRegisterType(int reg, Type type) {
-        assert Registers.isNormal(reg);
-        assert !registerTypes.containsKey(reg);
-        registerTypes.put(reg, type);
+        ir.setRegisterType(reg, type);
     }
     private Type getRegisterType(int reg) {
-        if (reg == Registers.VOID_REG)
-            return PrimitiveType.VOID;
-        if (reg == Registers.ERROR_REG)
-            return PrimitiveType.ERROR;
-        Type type = registerTypes.get(reg);
-        if (type == null)
-            return PrimitiveType.ANY;
-        else
-            return type;
+        return ir.getRegisterType(reg);
     }
     private int allocateRegister(Type type) {
         int reg = nextRegister++;
@@ -586,6 +577,17 @@ public class TypeResolvePass implements InstructionVisitor {
 
     @Override
     public void visit(WhileLoop instr) {
+        TBlock loopHead = cfgBuilder.newBlock();
+        TBlock loopBody = cfgBuilder.newBlock();
+
+        // continue in a new block
+        TBlock continuation = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(loopHead);
+
+        cfgBuilder.pushBlock(loopHead);
+        instr.head.accept(this);
+
         Type condType = getRegisterType(instr.cond);
 
         int cond;
@@ -598,16 +600,6 @@ public class TypeResolvePass implements InstructionVisitor {
             typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
             cond = Registers.ERROR_REG;
         }
-
-        TBlock loopHead = cfgBuilder.newBlock();
-        TBlock loopBody = cfgBuilder.newBlock();
-
-        // continue in a new block
-        TBlock continuation = cfgBuilder.newBlock();
-
-        cfgBuilder.addSuccessor(loopHead);
-
-        cfgBuilder.pushBlock(loopHead);
         cfgBuilder.addInstruction(new TIfStatement(cond, loopBody, continuation));
         cfgBuilder.addSuccessor(loopBody);
         cfgBuilder.addSuccessor(continuation);

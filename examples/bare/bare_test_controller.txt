@@ -26,6 +26,10 @@ controller RandomControllerEmbedded(random: Random):
 
         rec3 = random.create()
         rec3.value = 1000
+        while rec3.value > 5:
+            while x + y > q:
+                x -= 1
+            rec3.value -= 5
 
 
 space EmbeddedSpace:

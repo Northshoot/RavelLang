@@ -238,11 +238,13 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override
     public Integer visitWhileStatement(RavelParser.WhileStatementContext ctx) {
+        Block head = pushBlock();
         int cond = this.visit(ctx.expression());
+        popBlock();
         Block body = pushBlock();
         this.visit(ctx.block_stmt());
         popBlock();
-        current().add(new WhileLoop(ctx, cond, body));
+        current().add(new WhileLoop(ctx, cond, head, body));
         return VOID_REG;
     }
 

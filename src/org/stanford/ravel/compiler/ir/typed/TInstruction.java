@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.ir.typed;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
 import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
@@ -21,7 +22,7 @@ public abstract class TInstruction {
     }
 
     Type getSinkType() {
-        return null;
+        return PrimitiveType.VOID;
     }
 
     boolean writesMemory() {

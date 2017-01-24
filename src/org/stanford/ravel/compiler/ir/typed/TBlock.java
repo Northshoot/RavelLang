@@ -1,14 +1,11 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by gcampagn on 1/23/17.
  */
-public class TBlock {
+public class TBlock implements Iterable<TInstruction> {
     private final int id;
     private final Set<TBlock> predecessors = new HashSet<>();
     private final Set<TBlock> successors = new HashSet<>();
@@ -68,5 +65,16 @@ public class TBlock {
             builder.append("\n");
         }
         return builder.toString();
+    }
+
+    @Override
+    public Iterator<TInstruction> iterator() {
+        return instructions.iterator();
+    }
+
+    TInstruction getLastInstruction() {
+        if (instructions.isEmpty())
+            return null;
+        return instructions.get(instructions.size()-1);
     }
 }

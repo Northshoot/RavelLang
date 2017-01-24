@@ -5,9 +5,7 @@ import org.stanford.antlr4.RavelParser;
 import org.stanford.api.platforms.SystemApi;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
-import org.stanford.ravel.compiler.ir.typed.ControlFlowGraph;
-import org.stanford.ravel.compiler.ir.typed.ControlFlowGraphVisitor;
-import org.stanford.ravel.compiler.ir.typed.TBlock;
+import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.FieldStore;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.EventSymbol;
@@ -56,13 +54,16 @@ public class ControllerCompiler {
         TypeResolvePass typeResolvePass = new TypeResolvePass(this);
         for (VariableSymbol var : variables)
             typeResolvePass.declare(var);
-        ControlFlowGraph cfg = typeResolvePass.run(visitor.getIR());
+        TypedIR ir2 = typeResolvePass.run(visitor.getIR());
+        ControlFlowGraph cfg = ir2.getControlFlowGraph();
 
         System.out.println("CFG");
         cfg.visitForward(System.out::println);
 
         if (!success())
             return false;
+
+        ValidateIR.validate(ir2);
 
         // run analysis and optimization passes
         // lower IR
