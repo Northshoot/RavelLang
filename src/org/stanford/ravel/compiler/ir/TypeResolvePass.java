@@ -17,9 +17,7 @@ import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Primitive;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
@@ -32,9 +30,12 @@ import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 public class TypeResolvePass implements InstructionVisitor {
     private final ControllerCompiler compiler;
     private final ControlFlowGraphBuilder cfgBuilder = new ControlFlowGraphBuilder();
+    private final LoopTreeBuilder loopTreeBuilder = new LoopTreeBuilder();
 
     private TypedIR ir = new TypedIR();
     private int nextRegister = UNSET_REG;
+    private TBlock currentLoopHead = null;
+    private TBlock currentLoopContinuation = null;
 
     public TypeResolvePass(ControllerCompiler compiler) {
         this.compiler = compiler;
@@ -44,13 +45,15 @@ public class TypeResolvePass implements InstructionVisitor {
         Type type = sym.getType();
         if (type == PrimitiveType.ANY)
             return;
+        if (sym.getRegister() == Registers.UNSET_REG)
+            return;
         setRegisterType(sym.getRegister(), type);
     }
 
     public TypedIR run(UntypedIR ir) {
         this.nextRegister = ir.numUsedRegisters();
         ir.getRoot().accept(this);
-        this.ir.finish(cfgBuilder);
+        this.ir.finish(cfgBuilder, loopTreeBuilder);
         return this.ir;
     }
 
@@ -438,6 +441,8 @@ public class TypeResolvePass implements InstructionVisitor {
 
         cfgBuilder.addInstruction(new TIfStatement(cond, iftrue, iffalse));
 
+        loopTreeBuilder.ifStatement(cond, iftrue, iffalse);
+
         // continue in a new block
         TBlock continuation = cfgBuilder.newBlock();
 
@@ -447,11 +452,16 @@ public class TypeResolvePass implements InstructionVisitor {
         instr.iftrue.accept(this);
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
+
+
+        loopTreeBuilder.elseStatement(cond);
         cfgBuilder.pushBlock(iffalse);
         instr.iffalse.accept(this);
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
 
+        loopTreeBuilder.endIfStatement(cond);
+        loopTreeBuilder.addBasicBlock(continuation);
         cfgBuilder.replaceBlock(continuation);
     }
 
@@ -577,12 +587,17 @@ public class TypeResolvePass implements InstructionVisitor {
 
     @Override
     public void visit(WhileLoop instr) {
+        TBlock saveLoopHead = currentLoopHead;
+        TBlock saveLoopContinuation = currentLoopContinuation;
+
         TBlock loopHead = cfgBuilder.newBlock();
-        TBlock loopBody = cfgBuilder.newBlock();
+        currentLoopHead = loopHead;
 
         // continue in a new block
         TBlock continuation = cfgBuilder.newBlock();
+        currentLoopContinuation = continuation;
 
+        loopTreeBuilder.beginLoop(loopHead);
         cfgBuilder.addSuccessor(loopHead);
 
         cfgBuilder.pushBlock(loopHead);
@@ -600,16 +615,80 @@ public class TypeResolvePass implements InstructionVisitor {
             typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
             cond = Registers.ERROR_REG;
         }
-        cfgBuilder.addInstruction(new TIfStatement(cond, loopBody, continuation));
+
+        // to facilitate the LoopTree construction, we lower every loop
+        // to the form
+        //
+        // while(true) {
+        //    <loopHead>
+        //    if (cond) {}
+        //    else { break }
+        //    <loopBody>
+        // }
+
+        TBlock empty = cfgBuilder.newBlock();
+        TBlock breakBlock = cfgBuilder.newBlock();
+        TBlock loopBody = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(empty);
+        cfgBuilder.addSuccessor(breakBlock);
+        cfgBuilder.addInstruction(new TIfStatement(cond, empty, breakBlock));
+
+        loopTreeBuilder.ifStatement(cond, empty, breakBlock);
+        cfgBuilder.pushBlock(empty);
         cfgBuilder.addSuccessor(loopBody);
+        cfgBuilder.popBlock();
+        loopTreeBuilder.elseStatement(cond);
+        cfgBuilder.pushBlock(breakBlock);
+        cfgBuilder.addInstruction(new TBreak());
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
+        loopTreeBuilder.endIfStatement(cond);
 
-        cfgBuilder.pushBlock(loopBody);
+        cfgBuilder.replaceBlock(loopBody);
+        loopTreeBuilder.addBasicBlock(loopBody);
         instr.body.accept(this);
         cfgBuilder.addSuccessor(loopHead);
         cfgBuilder.popBlock();
 
+        loopTreeBuilder.endLoop();
+        loopTreeBuilder.addBasicBlock(continuation);
         cfgBuilder.replaceBlock(continuation);
+
+        currentLoopHead = saveLoopHead;
+        currentLoopContinuation = saveLoopContinuation;
+    }
+
+    @Override
+    public void visit(Break instr) {
+        if (currentLoopContinuation == null) {
+            typeError(instr, "break statement not inside a loop");
+            return;
+        }
+
+        cfgBuilder.addInstruction(new TBreak());
+
+        // code after break will be dead, but we need a block to appease CfgBuilder
+        TBlock afterBreak = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(currentLoopContinuation);
+        loopTreeBuilder.addBasicBlock(afterBreak);
+        cfgBuilder.replaceBlock(afterBreak);
+    }
+
+    @Override
+    public void visit(Continue instr) {
+        if (currentLoopHead == null) {
+            typeError(instr, "continue statement not inside a loop");
+            return;
+        }
+
+        cfgBuilder.addInstruction(new TContinue());
+
+        // see comment in visit(Break)
+        TBlock afterContinue = cfgBuilder.newBlock();
+        cfgBuilder.addSuccessor(currentLoopHead);
+        loopTreeBuilder.addBasicBlock(afterContinue);
+        cfgBuilder.replaceBlock(afterContinue);
     }
 }

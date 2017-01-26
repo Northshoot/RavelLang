@@ -48,6 +48,9 @@ public class ValidateIR {
             for (TBlock successor : block.getSuccessors()) {
                 assert successor.getPredecessors().contains(block);
             }
+            for (TBlock successor : block.getPredecessors()) {
+                assert successor.getSuccessors().contains(block);
+            }
 
             // enforce structured control flow
             TInstruction instr = block.getLastInstruction();

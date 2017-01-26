@@ -7,11 +7,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TBinaryArithOp extends TInstruction {
-    private final Type type;
-    private final int target;
-    private final int src1;
-    private final int src2;
-    private final BinaryOperation op;
+    public final Type type;
+    public final int target;
+    public final int src1;
+    public final int src2;
+    public final BinaryOperation op;
 
     public TBinaryArithOp(Type type, int target, int src1, int src2, BinaryOperation op) {
         this.type = type;
@@ -43,5 +43,10 @@ public class TBinaryArithOp extends TInstruction {
     @Override
     Type getSinkType() {
         return type;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

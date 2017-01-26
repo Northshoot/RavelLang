@@ -7,9 +7,9 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TIfStatement extends TInstruction {
-    private final int cond;
-    private final TBlock iftrue;
-    private final TBlock iffalse;
+    public final int cond;
+    public final TBlock iftrue;
+    public final TBlock iffalse;
 
     public TIfStatement(int cond, TBlock iftrue, TBlock iffalse) {
         this.cond = cond;
@@ -29,5 +29,10 @@ public class TIfStatement extends TInstruction {
     @Override
     Type[] getSourceTypes() {
         return new Type[]{PrimitiveType.BOOL};
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

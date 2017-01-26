@@ -42,6 +42,7 @@ public class ControlFlowGraph implements Iterable<TBlock> {
             topologicalSort(visited, next);
         }
 
+        block.setSequenceId(blocks.size());
         blocks.add(block);
     }
 

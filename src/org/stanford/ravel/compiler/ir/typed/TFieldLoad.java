@@ -9,11 +9,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/23/17.
  */
 public class TFieldLoad extends TInstruction {
-    private final Type type;
-    private final CompoundType compoundType;
-    private final int target;
-    private final int source;
-    private final String field;
+    public final Type type;
+    public final CompoundType compoundType;
+    public final int target;
+    public final int source;
+    public final String field;
 
     public TFieldLoad(Type type, CompoundType compoundType, int target, int source, String field) {
         this.type = type;
@@ -50,5 +50,10 @@ public class TFieldLoad extends TInstruction {
     @Override
     public boolean readsMemory() {
         return true;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

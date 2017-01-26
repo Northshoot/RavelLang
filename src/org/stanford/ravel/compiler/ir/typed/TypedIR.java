@@ -4,8 +4,11 @@ import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
@@ -15,12 +18,17 @@ import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 public class TypedIR {
     private final Map<Integer, Type> registerTypes = new HashMap<>();
     private ControlFlowGraph cfg;
+    private LoopTreeNode loopTree;
 
     public ControlFlowGraph getControlFlowGraph() {
         return cfg;
     }
-    public void finish(ControlFlowGraphBuilder cfg) {
+    public LoopTreeNode getLoopTree() {
+        return loopTree;
+    }
+    public void finish(ControlFlowGraphBuilder cfg, LoopTreeBuilder loopTreeBuilder) {
         this.cfg = cfg.build();
+        this.loopTree = loopTreeBuilder.getRoot();
     }
 
     public void setRegisterType(int reg, Type type) {
@@ -38,5 +46,9 @@ public class TypedIR {
             return PrimitiveType.ANY;
         else
             return type;
+    }
+
+    public Collection<Map.Entry<Integer, Type>> getRegisterTypes() {
+        return registerTypes.entrySet();
     }
 }

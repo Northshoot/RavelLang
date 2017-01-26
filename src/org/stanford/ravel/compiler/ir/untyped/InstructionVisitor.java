@@ -51,4 +51,12 @@ public interface InstructionVisitor {
     default void visit(WhileLoop instr) {
 
     }
+
+    default void visit(Break instr) {
+
+    }
+
+    default void visit(Continue instr) {
+
+    }
 }

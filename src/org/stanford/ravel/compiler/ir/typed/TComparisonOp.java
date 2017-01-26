@@ -9,11 +9,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/23/17.
  */
 public class TComparisonOp extends TInstruction {
-    private final Type type;
-    private final int target;
-    private final int src1;
-    private final int src2;
-    private final ComparisonOperation op;
+    public final Type type;
+    public final int target;
+    public final int src1;
+    public final int src2;
+    public final ComparisonOperation op;
 
     public TComparisonOp(Type type, int target, int src1, int src2, ComparisonOperation op) {
         this.type = type;
@@ -45,5 +45,10 @@ public class TComparisonOp extends TInstruction {
     @Override
     Type getSinkType() {
         return PrimitiveType.BOOL;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

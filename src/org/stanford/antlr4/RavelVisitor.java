@@ -254,6 +254,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeleteStmt(RavelParser.DeleteStmtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#break_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBreak_stmt(RavelParser.Break_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#continue_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitContinue_stmt(RavelParser.Continue_stmtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#lvalue}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

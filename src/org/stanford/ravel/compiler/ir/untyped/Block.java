@@ -8,14 +8,20 @@ import java.util.List;
  */
 public class Block {
     private final List<Instruction> instructions = new ArrayList<>();
+    private boolean terminated = false;
 
     public void accept(InstructionVisitor visitor) {
         for (Instruction instr : instructions)
             instr.accept(visitor);
     }
 
-    public void add(Instruction instr) {
+    public boolean add(Instruction instr) {
+        if (terminated)
+            return false;
+        if (instr instanceof Break || instr instanceof Continue)
+            terminated = true;
         instructions.add(instr);
+        return true;
     }
 
     @Override

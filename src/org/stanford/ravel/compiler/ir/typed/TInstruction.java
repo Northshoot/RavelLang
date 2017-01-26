@@ -32,4 +32,6 @@ public abstract class TInstruction {
     boolean readsMemory() {
         return false;
     }
+
+    public abstract void accept(TInstructionVisitor visitor);
 }

@@ -10,12 +10,25 @@ public class TBlock implements Iterable<TInstruction> {
     private final Set<TBlock> predecessors = new HashSet<>();
     private final Set<TBlock> successors = new HashSet<>();
     private final List<TInstruction> instructions = new ArrayList<>();
+    private int sequenceId;
 
     TBlock(int id) {
         this.id = id;
     }
     int getId() {
         return id;
+    }
+
+    void setSequenceId(int id) {
+        this.sequenceId = id;
+    }
+    int getSequenceId() {
+        return sequenceId;
+    }
+
+    public boolean isTopologicallyAfter(TBlock other) {
+        assert other == this || this.sequenceId != other.sequenceId;
+        return this.sequenceId > other.sequenceId;
     }
 
     void addPredecessor(TBlock other) {
