@@ -69,17 +69,24 @@ public class TestTemplates {
     public static void main(String [] args)
     {
         //AppDispather
-        AppDispatcher appD = new AppDispatcher();
+        AppDispatcher embedded = new AppDispatcher();
+        AppDispatcher gateway = new AppDispatcher();
+        AppDispatcher cloud = new AppDispatcher();
         //create model
 
         //create endpoint
-        Endpoint ep0 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
-        Endpoint ep1 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
+        Endpoint ep_embedded = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
+        Endpoint ep_gateway = new Endpoint("Gateway", Endpoint.TYPE.SOCKET);
+        Endpoint ep2_cloud = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
         //create driver
-        AndroidDriver androidDriver = new AndroidDriver(appD);
+        AndroidDriver embeddedDriver = new AndroidDriver(embedded);
+        embeddedDriver.register_endpoint(ep_gateway);
+        AndroidDriver androidDriver = new AndroidDriver(gateway);
+        androidDriver.register_endpoint(ep_embedded);
+        androidDriver.register_endpoint(ep2_cloud);
+        AndroidDriver cloudDriver = new AndroidDriver(cloud);
+        cloudDriver.register_endpoint(ep_gateway);
 
-        androidDriver.register_endpoint(ep0);
-        androidDriver.register_endpoint(ep1);
         //test diver
         androidDriver.rx_data_from_socket(getTestPacket());
         //test model API

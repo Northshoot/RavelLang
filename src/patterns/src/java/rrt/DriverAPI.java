@@ -10,13 +10,6 @@ import java.util.Timer;
  */
 public interface DriverAPI {
 
-    /**
-     * Send data to the particular endpoint
-     * @param record
-     * @param endpoint
-     * @return
-     */
-    Context send_data(Model.Record record, Endpoint endpoint);
 
     /**
      * Get system timer
@@ -27,5 +20,4 @@ public interface DriverAPI {
      * Register endpoint
      */
 
-    void register_endpoint(Endpoint endpoint);
 }

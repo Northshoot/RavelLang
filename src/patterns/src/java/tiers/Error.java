@@ -10,5 +10,5 @@ public enum Error {
     WRITE_ERROR,
     READ_ERROR,
     OUT_OF_STORAGE,
-    IN_TRANSIT
+    SYSTEM_ERROR, IN_TRANSIT
 }

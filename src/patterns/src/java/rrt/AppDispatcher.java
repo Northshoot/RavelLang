@@ -25,8 +25,7 @@ public class AppDispatcher implements DispatherAPI{
     }
 
     public void setDriver(Driver d){ this.mDriver = d;}
-    public Context send_data(Model.Record record, Endpoint endpoint){
-
+    public Context send_data(byte[] record, Endpoint endpoint){
         //send data to the driver
         return null;
     }

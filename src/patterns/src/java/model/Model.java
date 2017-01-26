@@ -12,6 +12,7 @@ import patterns.src.java.rrt.Context;
 import patterns.src.java.utils.ByteWork;
 
 //Standard utilities
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,7 +136,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     /*************** Model internal functionality  ***************/
 
 
-    private void addRecord(Record r){
+    private void addRecord(Model.Record r){
         //if durable save to disk
         mRecords[current_pos++]=r;
     }
@@ -161,8 +162,17 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
 
     }
 
+    /**
+     * CAll from the driver layers with a record
+     * @param record
+     * @param endpoint
+     */
     @Override
     public void record_departed(Model.Record record, Endpoint endpoint) {
+        //TODO: is this an ACK?
+
+        //TODO: is this system packet?
+        //normal data
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -172,6 +182,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
 
     @Override
     public void record_saved_durably(Model.Record record) {
+        //TODO: only true do remote and durable
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -209,22 +220,37 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     public Context save(Context ctx){
         //AUTOGEN code will depend on the type
         //local can not be reliable!
-        if(current_pos >= mSize){
+        if(current_pos >= mSize){ // no more space
             ctx.mError = Error.OUT_OF_STORAGE;
             return ctx;
-        } else {
-            addRecord(ctx.mRecord);
-            if (mType != ModelType.LOCAL) { //TODO: remove in autogen
-                if (mEndpoint.isConnected()) {
-                    mAppDispacher.send_data(ctx.mRecord, mEndpoint);
-                    ctx.mError = Error.IN_TRANSIT;
-                } else {
-                    ctx.mError = Error.WAITING_FOR_NETWORK;
-                }
-                return ctx;
-            } //end check for local
         }
-        return null;
+        if( this.mType == ModelType.LOCAL) {// all set, add record locally
+            ctx.mError = Error.SUCCESS;
+            //TODO: handle durable models
+            addRecord(ctx.mRecord);
+            return ctx;
+        } else {
+            if (! mEndpoint.isConnected() ){
+                //TODO: queue packets
+            }
+        }//endpoint is connected
+
+        //TODO: are the any queued packets?
+        switch (this.mType){
+            case REPLICATED:
+                //TODO: Packetize the record and send it
+                //TODO: determine and send to endpoints
+                ctx.mError = Error.WRITE_ERROR;
+                return ctx;
+            case STREAMING:
+                //Packetize the record and send it
+                // determine and send to endpoints
+                return ctx;
+            default:
+                //Should never end up here
+                ctx.mError = Error.SYSTEM_ERROR;
+                return ctx;
+        }
     }
 
     public Context delete(int deleteField){
@@ -306,6 +332,18 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
 
         public Record() {
 
+        }
+
+        public byte[] getData(){
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+            //ATOGEN
+            outputStream.write(position);
+            outputStream.write(field1);
+            outputStream.write(field2);
+            outputStream.write(field3);
+            outputStream.write(field4);
+            //AUTOGEN END
+            return outputStream.toByteArray();
         }
     }
 
