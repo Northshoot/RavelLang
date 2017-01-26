@@ -1,10 +1,9 @@
 package org.stanford.ravel;
 
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.api.builder.PlatformBuilder;
+import org.stanford.ravel.api.builder.PlatformBuilder;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -16,9 +15,6 @@ import org.stanford.ravel.compiler.symbol.EventSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
-import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.Model;
-import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -102,9 +98,7 @@ public class RavelCompiler {
     }
 
     private static void generateCode(RavelApplication app, String buildPath) {
-        PlatformBuilder builder = PlatformBuilder.getInstance();
-        builder.setApp(app);
-        builder.setPath(buildPath);
+        PlatformBuilder builder = new PlatformBuilder(app, buildPath);
         builder.buildAll();
         builder.render();
     }

@@ -1,18 +1,12 @@
 package org.stanford.ravel.compiler;
 
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.api.platforms.SystemApi;
 import org.stanford.ravel.compiler.backend.CCodeTranslator;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
 import org.stanford.ravel.compiler.ir.typed.*;
-import org.stanford.ravel.compiler.ir.untyped.FieldStore;
-import org.stanford.ravel.compiler.symbol.ControllerSymbol;
-import org.stanford.ravel.compiler.symbol.EventSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 
