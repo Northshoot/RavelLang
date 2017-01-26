@@ -7,13 +7,13 @@ import patterns.src.java.tiers.Endpoint;
  */
 public interface ModelBottomAPI {
 
-    void record_arrived(Record record, Endpoint endpoint);
+    void record_arrived(Model.Record record, Endpoint endpoint);
 
-    void record_departed(Record record, Endpoint endpoint);
+    void record_departed(Model.Record record, Endpoint endpoint);
 
-    void record_saved_durably(Record record);
+    void record_saved_durably(Model.Record record);
 
-    void record_saved_endpoint(Record record, Endpoint endpoint);
+    void record_saved_endpoint(Model.Record record, Endpoint endpoint);
 
     void endpoint_connected(Endpoint endpoint);
 

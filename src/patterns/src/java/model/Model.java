@@ -10,6 +10,7 @@ import patterns.src.java.controller.ModelCtrl;
 import patterns.src.java.rrt.Context;
 
 //Standard utilities
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -144,7 +145,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     /***************************************************************/
 
     @Override
-    public void record_arrived(Record record, Endpoint endpoint) {
+    public void record_arrived(Model.Record record, Endpoint endpoint) {
         Context ctx = new Context(this);
         addRecord(record);
         ctx.mError = Error.SUCCESS;
@@ -155,7 +156,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     }
 
     @Override
-    public void record_departed(Record record, Endpoint endpoint) {
+    public void record_departed(Model.Record record, Endpoint endpoint) {
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -164,7 +165,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     }
 
     @Override
-    public void record_saved_durably(Record record) {
+    public void record_saved_durably(Model.Record record) {
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -174,7 +175,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     }
 
     @Override
-    public void record_saved_endpoint(Record record, Endpoint endpoint) {
+    public void record_saved_endpoint(Model.Record record, Endpoint endpoint) {
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -190,7 +191,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     /*************** Model Command API implementation ***************/
     /***************************************************************/
 
-    public Record create(){
+    public Model.Record create(){
         //contract: if current not last
         //return empty record
         if(current_pos < mSize){
@@ -226,7 +227,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         //delete from local array
         for(int i=deleteField ; i< mSize ;i++) {
             mRecords[i] = mRecords[i + 1];
-            mRecords[i].possition=i+1;
+            mRecords[i].position=i+1;
         }
         current_pos--;
         return new Context(this, mDeletedRecord, Error.SUCCESS);
@@ -255,9 +256,32 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     }
 
     @Override
-    public Record[] all() {
+    public Model.Record[] all() {
         return mRecords;
     }
 
+    public class Record implements Serializable {
+        int position;
+        int state;
+        int field1;
+        int field2;
+        int field3;
+        int field4;
+
+        public Record(int position,
+                      int field1_val,
+                      int field2_val,
+                      int field3_val,
+                      int field4_val){
+
+            this.position = position;
+            this.field1 = field1_val;
+            this.field2 = field2_val;
+            this.field3 = field3_val;
+            this.field4 = field4_val;
+        }
+
+        public Record(){}
+    }
 
 }

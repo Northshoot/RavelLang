@@ -1,8 +1,7 @@
 package org.stanford.ravel.compiler;
 
 
-import jdk.nashorn.internal.ir.Terminal;
-import org.antlr.v4.runtime.tree.TerminalNode;
+
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.scope.GlobalScope;
@@ -398,7 +397,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
     /**
-     * The end of the file and the end of the app
+     * The end of the file and the end of the App
      * TODO: handle multiple files and imports
      * @param ctx
      */

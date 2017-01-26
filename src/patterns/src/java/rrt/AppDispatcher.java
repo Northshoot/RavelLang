@@ -2,8 +2,6 @@ package patterns.src.java.rrt;
 
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
-import patterns.src.java.model.Record;
-import patterns.src.java.tiers.AndroidDriver;
 import patterns.src.java.tiers.Endpoint;
 
 
@@ -25,7 +23,7 @@ public class AppDispatcher implements DispatherAPI{
     }
 
     public void setDriver(Driver d){ this.mDriver = d;}
-    public Context send_data(Record record, Endpoint endpoint){
+    public Context send_data(Model.Record record, Endpoint endpoint){
 
         //send data to the driver
         return null;

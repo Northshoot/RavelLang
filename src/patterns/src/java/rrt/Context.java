@@ -1,6 +1,5 @@
 package patterns.src.java.rrt;
 
-import patterns.src.java.model.Record;
 import patterns.src.java.tiers.Error;
 import patterns.src.java.model.Model;
 
@@ -11,12 +10,12 @@ import java.time.LocalDateTime;
  */
 public class Context {
 
-    public Record mRecord;
+    public Model.Record mRecord;
     public Error mError;
     public LocalDateTime createTime;
     public Model mModel;
 
-    public Context(Model model, Record record, Error error){
+    public Context(Model model, Model.Record record, Error error){
         this(model);
         this.mRecord = record;
         this.mError = error;

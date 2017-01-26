@@ -36,7 +36,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         mSpace = s;
         mMainTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/main.stg");
         mCnfgTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/config.stg");
-        //create main app
+        //create main App
         obj.setPath(mBuildPath);
         obj.setFileName(fileName);
         makeCnf();
@@ -44,10 +44,10 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         addLogging();
         addBaseMake();
         addRavelLayer();
-        //this app
+        //this App
         addMainAppMake();
         //make config section
-        //TODO: add dynamic app config based on params
+        //TODO: add dynamic App config based on params
 
         if(ble_enable) makeBLE(mBuildPath);
         addToMakeObj("api/ringbuf.c");

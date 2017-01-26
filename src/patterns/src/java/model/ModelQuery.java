@@ -10,14 +10,14 @@ public interface ModelQuery {
      *
      * @return copy of the first record
      */
-    Record getFirst();
+    Model.Record getFirst();
 
     /**
      * Queries local model storage
      *
      * @return copy of the first record
      */
-    Record getLast();
+    Model.Record getLast();
 
     /**
      * Queries local model storage
@@ -26,13 +26,13 @@ public interface ModelQuery {
      * else
      * @return getFirst()
      */
-    Record get(int x);
+    Model.Record get(int x);
 
     /**
      * Queries local model storage
      *
      * @return copies of all records
      */
-    Record[] all();
+    Model.Record[] all();
 
 }

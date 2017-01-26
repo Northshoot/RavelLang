@@ -18,7 +18,7 @@ public interface ModelCommandAPI {
      * Creates an empty Record
      * @return empty record
      */
-    Record create();
+    Model.Record create();
 
     /**
      * Returns deleted record

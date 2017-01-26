@@ -38,10 +38,10 @@ public class PrimitiveRepPhase extends RavelBaseListener {
     /**
      * Lets build the model representation
      * Models consist of properties and schema
-     * (1) set app properties to the model
+     * (1) set App properties to the model
      * (2) set schema fields to the model
-     * (3) add model to the app
-     * (4) NOTE: we add models to the spaces in the next step, which is done for the ravel app
+     * (3) add model to the App
+     * (4) NOTE: we add models to the spaces in the next step, which is done for the ravel App
      *
      * @param ctx
      */
@@ -164,7 +164,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
      * Lets build controller representations
      * (1) set all declarations
      * (2) create and add all event to controller
-     * (3) add controller to ravel app
+     * (3) add controller to ravel App
      * (4) all references to the spaces is done in next build step
      * @param ctx
      */
