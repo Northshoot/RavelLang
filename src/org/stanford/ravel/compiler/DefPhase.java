@@ -4,6 +4,7 @@ package org.stanford.ravel.compiler;
 
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.RavelCompiler;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
@@ -24,7 +25,14 @@ import java.util.logging.Logger;
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
-    private static Logger LOGGER = Logger.getLogger(DefPhase.class.getName());
+    private final static boolean DEBUG = true;
+
+    private final RavelCompiler driver;
+
+    public DefPhase(RavelCompiler driver) {
+        this.driver = driver;
+    }
+
     private Scope currentScope;
     //will be imports eventually
 
@@ -144,8 +152,6 @@ public class DefPhase extends RavelBaseListener {
         fs.setType(typeFromField(fieldType));
 
         currentScope.define(fs);
-        //LOGGER.info("ADDING FIELD: " +fs.toString());
-
      }
 
     @Override
@@ -211,16 +217,16 @@ public class DefPhase extends RavelBaseListener {
         VariableSymbol selfVar = new VariableSymbol("self");
 
         if (modelVarSym == null) {
-            abortParsing(ctx, "invalid event declaration " + es.getName() + " (undeclared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + " (undeclared model)");
             return;
         }
         if (!(modelVarSym instanceof VariableSymbol)) {
-            abortParsing(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
             return;
         }
         Type modelType =  ((VariableSymbol) modelVarSym).getType();
         if (!(modelType instanceof ModelType)) {
-            abortParsing(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
             return;
         }
 
@@ -245,7 +251,7 @@ public class DefPhase extends RavelBaseListener {
         if (ctx.type() != null) {
             Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
             if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-                abortParsing(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
+                emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
                 return;
             }
             type = ((TypeSymbol) typeSymbol).getDefinedType();
@@ -263,7 +269,7 @@ public class DefPhase extends RavelBaseListener {
 
         Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
         if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-            abortParsing(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
+            emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
             return;
         }
         Type type = ((TypeSymbol) typeSymbol).getDefinedType();
@@ -408,20 +414,20 @@ public class DefPhase extends RavelBaseListener {
 
     private void pushScope(Scope s) {
         currentScope = s;
-        prettyPrint("entering: "+currentScope.getName()+":"+s);
+        if (DEBUG)
+            prettyPrint("entering: "+currentScope.getName()+":"+s);
         intend++;
     }
 
     private void popScope() {
-        prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
+        if (DEBUG)
+            prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
         currentScope = currentScope.getEnclosingScope();
         intend--;
     }
 
-    void abortParsing(ParserRuleContext rctx, String reason){
-        String exception = reason;
-        exception+=" found on line " +String.valueOf(rctx.start.getLine());
-        throw new RuntimeException(exception);
+    private void emitError(ParserRuleContext rctx, String reason){
+        driver.emitError(new SourceLocation(rctx), reason);
     }
 
     private String getTab(){
