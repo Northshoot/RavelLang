@@ -9,11 +9,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/24/17.
  */
 public class TArrayLoad extends TInstruction {
-    private final Type type;
-    private final ArrayType arrayType;
-    private final int target;
-    private final int source;
-    private final int index;
+    public final Type type;
+    public final ArrayType arrayType;
+    public final int target;
+    public final int source;
+    public final int index;
 
     public TArrayLoad(Type type, ArrayType arrayType, int target, int source, int index) {
         this.type = type;
@@ -50,5 +50,10 @@ public class TArrayLoad extends TInstruction {
     @Override
     public boolean readsMemory() {
         return true;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

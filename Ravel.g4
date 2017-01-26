@@ -306,11 +306,21 @@ statement
     | while_stmt
     | if_stmt
     | for_stmt
+    | break_stmt
+    | continue_stmt
     | NEWLINE
     ;
 
 del_stmt
     : DELETE lvalue_expression #DeleteStmt
+    ;
+
+break_stmt
+    : BREAK
+    ;
+
+continue_stmt
+    : CONTINUE
     ;
 
 lvalue

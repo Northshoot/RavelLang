@@ -6,9 +6,9 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TMove extends TInstruction {
-    private final Type type;
-    private final int target;
-    private final int source;
+    public final Type type;
+    public final int target;
+    public final int source;
 
     public TMove(Type type, int target, int source) {
         this.type = type;
@@ -38,5 +38,10 @@ public class TMove extends TInstruction {
     @Override
     Type getSinkType() {
         return type;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

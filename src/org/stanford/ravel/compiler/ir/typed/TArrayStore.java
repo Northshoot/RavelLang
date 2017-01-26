@@ -9,11 +9,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/24/17.
  */
 public class TArrayStore extends TInstruction {
-    private final Type type;
-    private final ArrayType arrayType;
-    private final int object;
-    private final int index;
-    private final int value;
+    public final Type type;
+    public final ArrayType arrayType;
+    public final int object;
+    public final int index;
+    public final int value;
 
     public TArrayStore(Type type, ArrayType arrayType, int object, int index, int value) {
         this.type = type;
@@ -40,5 +40,10 @@ public class TArrayStore extends TInstruction {
     @Override
     public boolean writesMemory() {
         return true;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

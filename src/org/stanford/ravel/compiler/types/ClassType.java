@@ -8,7 +8,7 @@ import java.util.*;
  * Created by gcampagn on 1/23/17.
  */
 public class ClassType implements CompoundType {
-    private class InstanceType implements CompoundType {
+    public class InstanceType implements CompoundType {
         private final List<String> fieldNames = new ArrayList<>();
         private final List<String> allMemberNames = new ArrayList<>();
         private final HashMap<String, Type> memberTypes = new HashMap<>();

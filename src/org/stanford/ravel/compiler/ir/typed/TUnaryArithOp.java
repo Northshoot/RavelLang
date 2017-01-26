@@ -8,10 +8,10 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TUnaryArithOp extends TInstruction {
-    private final Type type;
-    private final int target;
-    private final int source;
-    private final UnaryOperation op;
+    public final Type type;
+    public final int target;
+    public final int source;
+    public final UnaryOperation op;
 
     public TUnaryArithOp(Type type, int target, int source, UnaryOperation op) {
         this.type = type;
@@ -42,5 +42,10 @@ public class TUnaryArithOp extends TInstruction {
     @Override
     Type getSinkType() {
         return type;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

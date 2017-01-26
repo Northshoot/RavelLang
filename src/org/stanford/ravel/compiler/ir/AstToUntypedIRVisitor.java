@@ -50,12 +50,21 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         blockStack.remove(blockStack.size()-1);
     }
 
-    private Block current() {
-        return blockStack.get(blockStack.size()-1);
+    private void unreachable(Instruction instr) {
+        compiler.emitWarning(new SourceLocation(instr.definer), "unreachable code");
     }
 
-    private Block previous() {
-        return blockStack.get(blockStack.size()-2);
+    private void addCurrent(Instruction instr) {
+        Block current = blockStack.get(blockStack.size()-1);
+
+        if (!current.add(instr))
+            unreachable(instr);
+    }
+    private void addPrevious(Instruction instr) {
+        Block previous = blockStack.get(blockStack.size()-2);
+
+        if (!previous.add(instr))
+            unreachable(instr);
     }
 
     @Override
@@ -104,7 +113,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 continue;
             rvalueReg = visit(rvalues.get(i));
 
-            current().add(new Move(ctx, varReg, rvalueReg));
+            addCurrent(new Move(ctx, varReg, rvalueReg));
         }
 
         return VOID_REG;
@@ -167,11 +176,11 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                     String fieldName = lvalue.Identifier().getText();
 
                     lvalueReg = ir.allocateRegister();
-                    current().add(new FieldLoad(ctx, lvalueReg, objectReg, fieldName));
+                    addCurrent(new FieldLoad(ctx, lvalueReg, objectReg, fieldName));
                 } else {
 
                     lvalueReg = ir.allocateRegister();
-                    current().add(new ArrayLoad(ctx, lvalueReg, arrayReg, indexReg));
+                    addCurrent(new ArrayLoad(ctx, lvalueReg, arrayReg, indexReg));
                 }
 
                 if (i < rvalues.size())
@@ -180,7 +189,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                     rvalueReg = ERROR_REG;
 
                 int tmpReg = ir.allocateRegister();
-                current().add(new BinaryArithOp(ctx, tmpReg, lvalueReg, rvalueReg, BinaryOperation.forSymbol(compound)));
+                addCurrent(new BinaryArithOp(ctx, tmpReg, lvalueReg, rvalueReg, BinaryOperation.forSymbol(compound)));
                 rvalueReg = tmpReg;
             } else {
                 if (i < rvalues.size())
@@ -190,15 +199,15 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             }
 
             if (lvalue == null) {
-                current().add(new Move(ctx, varReg, rvalueReg));
+                addCurrent(new Move(ctx, varReg, rvalueReg));
             } else if (lvalue.primary() == null) {
-                current().add(new Move(ctx, varReg, rvalueReg));
+                addCurrent(new Move(ctx, varReg, rvalueReg));
             } else if (lvalue.expression() == null) {
                 String fieldName = lvalue.Identifier().getText();
 
-                current().add(new FieldStore(ctx, objectReg, fieldName, rvalueReg));
+                addCurrent(new FieldStore(ctx, objectReg, fieldName, rvalueReg));
             } else {
-                current().add(new ArrayLoad(ctx, arrayReg, indexReg, rvalueReg));
+                addCurrent(new ArrayLoad(ctx, arrayReg, indexReg, rvalueReg));
             }
         }
 
@@ -224,7 +233,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             popBlock();
             Block iffalse = pushBlock();
 
-            previous().add(new IfStatement(ctx, cond, iftrue, iffalse));
+            addPrevious(new IfStatement(ctx, cond, iftrue, iffalse));
         }
         if (bodies.size() == conditions.size()+1)
             this.visit(bodies.get(bodies.size()-1));
@@ -244,7 +253,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         Block body = pushBlock();
         this.visit(ctx.block_stmt());
         popBlock();
-        current().add(new WhileLoop(ctx, cond, head, body));
+        addCurrent(new WhileLoop(ctx, cond, head, body));
         return VOID_REG;
     }
 
@@ -317,7 +326,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             value = ParserUtils.extractStringLiteral(ctx.STRING_LITERAL().getText());
         }
 
-        current().add(new ImmediateLoad(ctx, reg, value));
+        addCurrent(new ImmediateLoad(ctx, reg, value));
         return reg;
     }
     
@@ -341,7 +350,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override public Integer visitMember_access(RavelParser.Member_accessContext ctx) {
         int reg = ir.allocateRegister();
-        current().add(new FieldLoad(ctx, reg, currentReg, ctx.Identifier().getText()));
+        addCurrent(new FieldLoad(ctx, reg, currentReg, ctx.Identifier().getText()));
         return reg;
     }
 
@@ -352,7 +361,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         currentReg = saveCurrent;
 
         int reg = ir.allocateRegister();
-        current().add(new ArrayLoad(ctx, reg, currentReg, index));
+        addCurrent(new ArrayLoad(ctx, reg, currentReg, index));
         return reg;
     }
 
@@ -369,7 +378,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
         currentReg = saveCurrent;
         int reg = ir.allocateRegister();
-        current().add(new MethodCall(ctx, reg, currentReg, ctx.Identifier().getText(), arguments));
+        addCurrent(new MethodCall(ctx, reg, currentReg, ctx.Identifier().getText(), arguments));
         return reg;
     }
 
@@ -378,7 +387,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             int base = visit(ctx.primary());
             int exponent = visit(ctx.unary_exp());
             int reg = ir.allocateRegister();
-            current().add(new BinaryArithOp(ctx, reg, base, exponent, BinaryOperation.POW));
+            addCurrent(new BinaryArithOp(ctx, reg, base, exponent, BinaryOperation.POW));
             return reg;
         } else {
             return visit(ctx.primary());
@@ -389,7 +398,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (ctx.unary_op() != null) {
             int value = visit(ctx.unary_exp());
             int reg = ir.allocateRegister();
-            current().add(new UnaryArithOp(ctx, reg, value, UnaryOperation.forSymbol(ctx.unary_op().getText())));
+            addCurrent(new UnaryArithOp(ctx, reg, value, UnaryOperation.forSymbol(ctx.unary_op().getText())));
             return reg;
         } else {
             return visit(ctx.power_exp());
@@ -403,7 +412,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         int src1 = visit(lhs);
         int src2 = visit(rhs);
         int target = ir.allocateRegister();
-        current().add(new BinaryArithOp(definer, target, src1, src2, BinaryOperation.forSymbol(op)));
+        addCurrent(new BinaryArithOp(definer, target, src1, src2, BinaryOperation.forSymbol(op)));
         return target;
     }
 
@@ -445,20 +454,20 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (children.size() == 2) {
             // fast path common case of one comparison
             int target = ir.allocateRegister();
-            current().add(new ComparisonOp(ctx, target, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
+            addCurrent(new ComparisonOp(ctx, target, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
             return target;
         }
 
         int comp = ir.allocateRegister();
-        current().add(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
+        addCurrent(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(0).getText())));
         src1 = src2;
 
         int n = blockStack.size();
         for (int i = 2; i < children.size(); i++) {
             Block iftrue = pushBlock();
-            previous().add(new IfStatement(ctx, comp, iftrue, new Block()));
+            addPrevious(new IfStatement(ctx, comp, iftrue, new Block()));
             src2 = visit(ctx.bin_or_exp(i));
-            current().add(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(i-1).getText())));
+            addCurrent(new ComparisonOp(ctx, comp, src1, src2, ComparisonOperation.forSymbol(ctx.comp_op(i-1).getText())));
             src1 = src2;
         }
         for (int i = 2; i < children.size(); i++)
@@ -472,7 +481,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         if (ctx.not_exp() != null) {
             int value = visit(ctx.not_exp());
             int reg = ir.allocateRegister();
-            current().add(new UnaryArithOp(ctx, reg, value, UnaryOperation.NOT));
+            addCurrent(new UnaryArithOp(ctx, reg, value, UnaryOperation.NOT));
             return reg;
         } else {
             return visit(ctx.comp_exp());
@@ -484,9 +493,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             int reg = visit(ctx.and_exp());
             Block iftrue = pushBlock();
             int reg2 = visit(ctx.not_exp());
-            current().add(new Move(ctx, reg, reg2));
+            addCurrent(new Move(ctx, reg, reg2));
             popBlock();
-            current().add(new IfStatement(ctx, reg, iftrue, new Block()));
+            addCurrent(new IfStatement(ctx, reg, iftrue, new Block()));
             return reg;
         } else {
             return visit(ctx.not_exp());
@@ -498,12 +507,22 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
             int reg = visit(ctx.or_exp());
             Block iffalse = pushBlock();
             int reg2 = visit(ctx.and_exp());
-            current().add(new Move(ctx, reg, reg2));
+            addCurrent(new Move(ctx, reg, reg2));
             popBlock();
-            current().add(new IfStatement(ctx, reg, new Block(), iffalse));
+            addCurrent(new IfStatement(ctx, reg, new Block(), iffalse));
             return reg;
         } else {
             return visit(ctx.and_exp());
         }
+    }
+
+    @Override public Integer visitBreak_stmt(RavelParser.Break_stmtContext ctx) {
+        addCurrent(new Break(ctx));
+        return VOID_REG;
+    }
+
+    @Override public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
+        addCurrent(new Continue(ctx));
+        return VOID_REG;
     }
 }

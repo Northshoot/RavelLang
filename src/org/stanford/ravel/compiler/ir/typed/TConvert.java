@@ -6,10 +6,10 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/23/17.
  */
 public class TConvert extends TInstruction {
-    private final Type srcType;
-    private final Type tgtType;
-    private final int target;
-    private final int source;
+    public final Type srcType;
+    public final Type tgtType;
+    public final int target;
+    public final int source;
 
     public TConvert(Type tgtType, Type srcType, int target, int source) {
         if (tgtType.equals(srcType))
@@ -52,5 +52,10 @@ public class TConvert extends TInstruction {
     @Override
     boolean readsMemory() {
         return false;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

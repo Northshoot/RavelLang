@@ -8,11 +8,11 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/23/17.
  */
 public class TFieldStore extends TInstruction {
-    private final Type type;
-    private final CompoundType compoundType;
-    private final int object;
-    private final int value;
-    private final String field;
+    public final Type type;
+    public final CompoundType compoundType;
+    public final int object;
+    public final int value;
+    public final String field;
 
     public TFieldStore(Type type, CompoundType compoundType, int object, String field, int value) {
         this.type = type;
@@ -39,5 +39,10 @@ public class TFieldStore extends TInstruction {
     @Override
     public boolean writesMemory() {
         return true;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }

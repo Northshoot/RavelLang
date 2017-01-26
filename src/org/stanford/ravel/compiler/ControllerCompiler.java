@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.api.platforms.SystemApi;
+import org.stanford.ravel.compiler.backend.CCodeTranslator;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
 import org.stanford.ravel.compiler.ir.typed.*;
@@ -17,6 +18,7 @@ import org.stanford.ravel.error.FatalCompilerErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by gcampagn on 1/20/17.
@@ -60,6 +62,9 @@ public class ControllerCompiler {
         System.out.println("CFG");
         cfg.visitForward(System.out::println);
 
+        System.out.println("Loop Tree");
+        System.out.println(ir2.getLoopTree());
+
         if (!success())
             return false;
 
@@ -67,6 +72,18 @@ public class ControllerCompiler {
 
         // run analysis and optimization passes
         // lower IR
+
+        // for debugging only, attempt translation to C
+        CCodeTranslator ccode = new CCodeTranslator();
+
+        // only one parameter, self
+        VariableSymbol self = (VariableSymbol) tree.scope.resolve("self");
+        ccode.declareParameter("self", self.getRegister(), self.getType());
+        for (Map.Entry<Integer, Type> entry : ir2.getRegisterTypes())
+            ccode.declareRegister(entry.getKey(), entry.getValue());
+        ccode.translate(ir2);
+        System.out.println("C code");
+        System.out.println(ccode.getCode());
 
         return true;
     }

@@ -6,9 +6,9 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TImmediateLoad extends TInstruction {
-    private final int target;
-    private final Object value;
-    private final Type type;
+    public final int target;
+    public final Object value;
+    public final Type type;
 
     public TImmediateLoad(Type type, int target, Object value) {
         this.type = type;
@@ -28,5 +28,10 @@ public class TImmediateLoad extends TInstruction {
     @Override
     Type getSinkType() {
         return type;
+    }
+
+    @Override
+    public void accept(TInstructionVisitor visitor) {
+        visitor.visit(this);
     }
 }
