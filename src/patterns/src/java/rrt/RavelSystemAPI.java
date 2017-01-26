@@ -1,7 +1,5 @@
 package patterns.src.java.rrt;
 
-import patterns.src.java.model.Record;
-import patterns.src.java.rrt.Context;
 import patterns.src.java.tiers.Endpoint;
 
 /**

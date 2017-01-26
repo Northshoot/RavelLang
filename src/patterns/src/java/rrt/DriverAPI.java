@@ -1,7 +1,6 @@
 package patterns.src.java.rrt;
 
-import org.stanford.ravel.primitives.Controller;
-import patterns.src.java.model.Record;
+import patterns.src.java.model.Model;
 import patterns.src.java.tiers.Endpoint;
 
 import java.util.Timer;
@@ -17,7 +16,7 @@ public interface DriverAPI {
      * @param endpoint
      * @return
      */
-    Context send_data(Record record, Endpoint endpoint);
+    Context send_data(Model.Record record, Endpoint endpoint);
 
     /**
      * Get system timer

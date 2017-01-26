@@ -12,8 +12,10 @@ import java.util.Map;
  */
 public class AppDispatcher implements DispatherAPI{
 
-    Map<String, Model> mModels;
-    Map<String, ModelController> mController;
+    //AUTOGEN
+    Model model_id_1 = new Model(this);
+    ModelController mcntr_id_1 = new ModelController(model_id_1);
+
     Map<String, Endpoint> mEndpoints;
 
     Driver mDriver;
@@ -33,5 +35,12 @@ public class AppDispatcher implements DispatherAPI{
         //is it an ACK?
         System.out.println("Received data from: " + endpoint.getName());
         //Dispatch to appropriate model
+        RavelPacket rp = new RavelPacket(data);
+        switch (rp.model_id){
+            case 1:
+                model_id_1.record_arrived(rp, endpoint);
+
+        }
+
     }
 }

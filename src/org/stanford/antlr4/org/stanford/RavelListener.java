@@ -416,6 +416,26 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitDeleteStmt(RavelParser.DeleteStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#break_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterBreak_stmt(RavelParser.Break_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#break_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitBreak_stmt(RavelParser.Break_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#continue_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinue_stmt(RavelParser.Continue_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#continue_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinue_stmt(RavelParser.Continue_stmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#lvalue}.
 	 * @param ctx the parse tree
 	 */

@@ -1,6 +1,6 @@
 package patterns.src.java.tiers;
 
-import patterns.src.java.model.Record;
+import patterns.src.java.model.Model;
 import patterns.src.java.rrt.AppDispatcher;
 import patterns.src.java.rrt.Context;
 import patterns.src.java.rrt.Driver;
@@ -23,7 +23,7 @@ public class AndroidDriver extends Driver{
         this.appDispatcher = appDispatcher;
         appDispatcher.setDriver(this);
     }
-    public Context send_data(Record record, Endpoint endpoint) {
+    public Context send_data(Model.Record record, Endpoint endpoint) {
         //send data to the right channel
         return null;
     }
@@ -38,6 +38,8 @@ public class AndroidDriver extends Driver{
     }
 
     public void rx_data_from_ble(byte[] data){
+        //need a function that maps rx to endpoint
+        //in a more clean way
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.BLE){
                 appDispatcher.data_received(data, e);
@@ -46,12 +48,24 @@ public class AndroidDriver extends Driver{
     }
 
     public void rx_data_from_cloud(byte[] data){
-
+        for (Endpoint e: endpointsMap.values()) {
+            if(e.getType() == Endpoint.TYPE.HTTP){
+                appDispatcher.data_received(data, e);
+            }
+        }
     }
 
     public void rx_data_from_socket(byte[] data){
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.SOCKET){
+                appDispatcher.data_received(data, e);
+            }
+        }
+    }
+
+    public void rx_data_from_gcm(byte[] data){
+        for (Endpoint e: endpointsMap.values()) {
+            if(e.getType() == Endpoint.TYPE.GCM){
                 appDispatcher.data_received(data, e);
             }
         }

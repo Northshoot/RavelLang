@@ -3,11 +3,13 @@ package patterns.src.java.model;
 
 //AUTOGEN imports
 import patterns.src.java.rrt.AppDispatcher;
+import patterns.src.java.rrt.RavelPacket;
 import patterns.src.java.tiers.Endpoint;
 import patterns.src.java.tiers.Error;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.controller.ModelCtrl;
 import patterns.src.java.rrt.Context;
+import patterns.src.java.utils.ByteWork;
 
 //Standard utilities
 import java.io.Serializable;
@@ -45,6 +47,8 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     //AUTOGEN endpoints
     private Endpoint mEndpoint;
 
+    //AUTOGEN ravel enumerates all models
+    public final static int MODEL_ID = 5;
    
  
     public final static int IN_REST = 1;
@@ -145,8 +149,10 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     /***************************************************************/
 
     @Override
-    public void record_arrived(Model.Record record, Endpoint endpoint) {
+    public void record_arrived(RavelPacket pkt, Endpoint endpoint) {
         Context ctx = new Context(this);
+        Record record = new Record(pkt.record_data);
+        System.out.println("RX record");
         addRecord(record);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
@@ -281,7 +287,26 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
             this.field4 = field4_val;
         }
 
-        public Record(){}
+        public Record(byte[] data){
+            //make record out of byte[]
+            //AUTOGEN
+            this.field1 = ByteWork.convertFourUnsignedBytesToInt(
+                    ByteWork.getBytes(data,0,4)
+            );
+            this.field2 = ByteWork.convertFourUnsignedBytesToInt(
+                    ByteWork.getBytes(data,4,8)
+            );
+            this.field3 = ByteWork.convertFourUnsignedBytesToInt(
+                    ByteWork.getBytes(data,8,12)
+            );
+            this.field4 = ByteWork.convertFourUnsignedBytesToInt(
+                    ByteWork.getBytes(data,12,16)
+            );
+        }
+
+        public Record() {
+
+        }
     }
 
 }

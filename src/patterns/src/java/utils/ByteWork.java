@@ -14,8 +14,8 @@ public class ByteWork {
          * @return byte[stop-end]
          */
         public static byte[] getBytes(byte[] bytes, int start, int end){
-            byte[] b = new byte[end-start+1];
-            for(int i=0; start <= end;i++){
+            byte[] b = new byte[end-start];
+            for(int i=0; start < end;i++){
                 b[i]=bytes[start++];
             }
             return b;
@@ -58,7 +58,7 @@ public class ByteWork {
          * @param bytes
          * @return converted long
          */
-        public static int convertFourUnsignedBytesToLong (byte[] bytes)
+        public static int convertFourUnsignedBytesToInt (byte[] bytes)
         {
             if (bytes.length !=4) throw new AssertionError("Expected 4 bytes");
             return  (bytes[0] & 0xFF) << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);

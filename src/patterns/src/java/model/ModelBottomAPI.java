@@ -1,5 +1,6 @@
 package patterns.src.java.model;
 
+import patterns.src.java.rrt.RavelPacket;
 import patterns.src.java.tiers.Endpoint;
 
 /**
@@ -7,7 +8,7 @@ import patterns.src.java.tiers.Endpoint;
  */
 public interface ModelBottomAPI {
 
-    void record_arrived(Model.Record record, Endpoint endpoint);
+    void record_arrived(RavelPacket record, Endpoint endpoint);
 
     void record_departed(Model.Record record, Endpoint endpoint);
 

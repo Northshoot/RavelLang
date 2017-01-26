@@ -19,7 +19,7 @@ public class Endpoint {
         this.mName = name;
     }
 
-    public String setAddress(String address){ this.mAddress = address; }
+    public void setAddress(String address){ this.mAddress = address; }
     public TYPE getType() { return mType; }
     public String getName(){ return  mName; }
     public void setConnected(){

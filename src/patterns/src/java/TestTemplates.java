@@ -7,6 +7,7 @@ import patterns.src.java.rrt.AppDispatcher;
 import patterns.src.java.rrt.RavelPacket;
 import patterns.src.java.tiers.AndroidDriver;
 import patterns.src.java.tiers.Endpoint;
+import patterns.src.java.utils.ByteWork;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,18 +21,17 @@ public class TestTemplates {
 
     public static void testRavelPacket(){
 
-        byte[] src= ByteBuffer.allocate(4).putInt(11111).array();
+        byte[] src= ByteBuffer.allocate(4).putInt(30).array();
         byte[] dst= ByteBuffer.allocate(4).putInt(22222).array();
-        byte[] partial= ByteBuffer.allocate(1).putInt(1).array();
-        byte[] last= ByteBuffer.allocate(1).putInt(0).array();
-        byte[] model_id = ByteBuffer.allocate(1).putInt(5).array();
+        byte[] partial= ByteBuffer.allocate(1).put((byte)0).array();
+        byte[] model_id = ByteBuffer.allocate(1).put((byte)5).array();
         byte[] record = ByteBuffer.allocate(20).putInt(1234567890).array();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
         try {
             outputStream.write(src);
             outputStream.write(dst);
             outputStream.write(partial);
-            outputStream.write(last);
+            //outputStream.write(last);
             outputStream.write(model_id);
             outputStream.write(record);
         } catch (IOException e) {
@@ -42,14 +42,36 @@ public class TestTemplates {
         RavelPacket rp = new RavelPacket(outputStream.toByteArray());
         System.out.println(rp);
     }
+
+    public static byte[] getTestPacket(){
+
+        byte[] src= ByteBuffer.allocate(4).putInt(30).array();
+        byte[] dst= ByteBuffer.allocate(4).putInt(22222).array();
+        byte[] partial= ByteBuffer.allocate(1).put((byte)0).array();
+        byte[] model_id = ByteBuffer.allocate(1).put((byte)1).array();
+        byte[] record = ByteBuffer.allocate(20).putInt(1234567890).array();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        try {
+            outputStream.write(src);
+            outputStream.write(dst);
+            outputStream.write(partial);
+            outputStream.write(model_id);
+            outputStream.write(record);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return outputStream.toByteArray();
+    }
+
+
     public static void main(String [] args)
     {
         //AppDispather
         AppDispatcher appD = new AppDispatcher();
         //create model
-        Model m = new Model(appD);
-        //create controller
-        ModelController mcntr = new ModelController(m);
+
         //create endpoint
         Endpoint ep0 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
         Endpoint ep1 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
@@ -59,9 +81,11 @@ public class TestTemplates {
         androidDriver.register_endpoint(ep0);
         androidDriver.register_endpoint(ep1);
         //test diver
-        androidDriver.rx_data_from_socket(new byte[]{1,1,1,1,1,1});
+        androidDriver.rx_data_from_socket(getTestPacket());
         //test model API
 
         //test controller API
+
+        //testRavelPacket();
     }
 }
