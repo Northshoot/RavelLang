@@ -1,7 +1,6 @@
 package org.stanford.ravel.compiler.ir;
 
-import org.stanford.ravel.compiler.ControllerCompiler;
-import org.stanford.ravel.compiler.ParserUtils;
+import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.*;
@@ -11,13 +10,8 @@ import org.stanford.ravel.compiler.ir.untyped.ImmediateLoad;
 import org.stanford.ravel.compiler.ir.untyped.Instruction;
 import org.stanford.ravel.compiler.ir.untyped.Move;
 import org.stanford.ravel.compiler.ir.untyped.UnaryArithOp;
-import org.stanford.ravel.compiler.symbol.Symbol;
-import org.stanford.ravel.compiler.symbol.TypeSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
-import org.stanford.ravel.primitives.Primitive;
-
-import java.util.*;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
@@ -28,7 +22,7 @@ import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
  * Created by gcampagn on 1/23/17.
  */
 public class TypeResolvePass implements InstructionVisitor {
-    private final ControllerCompiler compiler;
+    private final ControllerEventCompiler compiler;
     private final ControlFlowGraphBuilder cfgBuilder = new ControlFlowGraphBuilder();
     private final LoopTreeBuilder loopTreeBuilder = new LoopTreeBuilder();
 
@@ -37,7 +31,7 @@ public class TypeResolvePass implements InstructionVisitor {
     private TBlock currentLoopHead = null;
     private TBlock currentLoopContinuation = null;
 
-    public TypeResolvePass(ControllerCompiler compiler) {
+    public TypeResolvePass(ControllerEventCompiler compiler) {
         this.compiler = compiler;
     }
 

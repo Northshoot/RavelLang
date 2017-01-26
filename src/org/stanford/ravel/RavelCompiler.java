@@ -1,14 +1,15 @@
 package org.stanford.ravel;
 
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.api.builder.PlatformBuilder;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.stanford.ravel.compiler.ControllerCompiler;
+import org.stanford.ravel.compiler.CompileError;
+import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.DefPhase;
+import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.EventSymbol;
@@ -21,33 +22,67 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 
 public class RavelCompiler {
     private static Logger LOGGER = Logger.getLogger(RavelCompiler.class.getName());
 
-    private static long logBuildStart() {
-        System.out.println("Starting Build");
-        Date t = Calendar.getInstance().getTime();
-        long start = t.getTime();
-        System.out.println(new SimpleDateFormat("HH:mm:ss").format(t));
-        return start;
+    private long start;
+    private boolean hadErrors = false;
+    private final List<CompileError> errors = new ArrayList<>();
+
+    public boolean success() {
+        return !hadErrors;
     }
 
-    private static void logBuildEnd(long start) {
+    public void emitError(SourceLocation loc, String message) {
+        errors.add(new CompileError(loc, CompileError.Severity.ERROR, message));
+        hadErrors = true;
+    }
+    public void emitWarning(SourceLocation loc, String message) {
+        errors.add(new CompileError(loc, CompileError.Severity.WARNING, message));
+    }
+    public void emitFatal(SourceLocation loc, String message) throws FatalCompilerErrorException {
+        errors.add(new CompileError(loc, CompileError.Severity.FATAL, message));
+        hadErrors = true;
+        throw new FatalCompilerErrorException();
+    }
+
+    private void printAllErrors() {
+        for (CompileError e : errors)
+            System.err.println(e);
+    }
+
+    private void logBuildStart() {
+        System.err.println("Starting Build");
+        Date t = Calendar.getInstance().getTime();
+        start = t.getTime();
+        System.err.println(new SimpleDateFormat("HH:mm:ss").format(t));
+    }
+
+    private void logBuildEnd() {
+        printAllErrors();
+
         Date now = Calendar.getInstance().getTime();
         long diff = now.getTime() - start;
         long diffMilliSeconds = diff % 60;
         long diffSeconds = diff / 1000 % 60;
         long diffMinutes = diff / (60 * 1000) % 60;
-        System.out.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
-                " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
+        if (success()) {
+            System.err.println("Build finished at " + new SimpleDateFormat("HH:mm:ss").format(now) +
+                    " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
+        } else {
+            System.err.println("Build failed at " + new SimpleDateFormat("HH:mm:ss").format(now) +
+                    " in " + diffMinutes + ":" + diffSeconds + ":" + diffMilliSeconds);
+        }
     }
 
-    private static ParseTree parse(InputStream is) throws IOException {
+    private ParseTree parse(InputStream is) throws IOException {
         ANTLRInputStream input = new ANTLRInputStream(is);
 
         RavelLexer lexer = new RavelLexer(input);
@@ -55,38 +90,41 @@ public class RavelCompiler {
 
         RavelParser parser = new RavelParser(tokens);
         parser.setBuildParseTree(true);
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                emitError(new SourceLocation(line, charPositionInLine), msg);
+            }
+        });
+
         return  parser.file_input();
     }
 
-    private static GlobalScope defPhase(ParseTree tree) {
-        DefPhase listener = new DefPhase();
+    private GlobalScope defPhase(ParseTree tree) {
+        DefPhase listener = new DefPhase(this);
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
         return listener.getGlobalScope();
     }
 
-    private static void compileModels(GlobalScope app, ModelIR mir) {
+    private void compileModels(GlobalScope app, ModelIR mir) throws FatalCompilerErrorException {
         for (ModelSymbol m : app.getModels()) {
             mir.addModel(m);
         }
     }
 
-    private static boolean compileControllers(GlobalScope app) throws FatalCompilerErrorException {
-        ControllerCompiler compiler = new ControllerCompiler();
+    private void compileControllers(GlobalScope app) throws FatalCompilerErrorException {
+        ControllerEventCompiler compiler = new ControllerEventCompiler(this);
 
-        boolean success = true;
         for (ControllerSymbol c : app.getControllers()) {
            for (EventSymbol event : c.getEvents()) {
-               success = compiler.compileEvent((RavelParser.EventScopeContext) event.getDefNode()) && success;
+               compiler.compileEvent((RavelParser.EventScopeContext) event.getDefNode());
            }
         }
-
-        compiler.printAllErrors();
-        return success;
     }
 
-    private static void compileSpaces(GlobalScope app) {
+    private void compileSpaces(GlobalScope app) throws FatalCompilerErrorException {
         // this is effectively the ref/link phase, where
         // models, controllers, and platforms are linked together
 
@@ -97,51 +135,74 @@ public class RavelCompiler {
         }
     }
 
-    private static void generateCode(RavelApplication app, String buildPath) {
+    private void generateCode(RavelApplication app, String buildPath) {
         PlatformBuilder builder = new PlatformBuilder(app, buildPath);
         builder.buildAll();
         builder.render();
     }
 
-    public static void main(String[] args) throws Exception {
-        long start = logBuildStart();
+    private void run(String inputFile) {
+        logBuildStart();
 
-        String inputFile = null;
-        String mBuildPath = null;
-        if (args.length > 0) inputFile = args[0];
-        InputStream is = System.in;
-        if (inputFile != null) {
-            is = new FileInputStream(inputFile);
-            mBuildPath = Paths.get(args[0]).toAbsolutePath().getParent().toString();
-            mBuildPath+="/rout/";
-            System.out.println("Build path " + mBuildPath);
-        } else {
-            System.out.println("File is null");
+        try {
+            String mBuildPath = null;
+            InputStream is = System.in;
+
+            ParseTree tree;
+
+            try {
+                if (inputFile != null) {
+                    is = new FileInputStream(inputFile);
+                    mBuildPath = Paths.get(inputFile).toAbsolutePath().getParent().toString();
+                    mBuildPath += "/rout/";
+                } else {
+                    mBuildPath = "./rout/";
+                }
+                System.err.println("Build path " + mBuildPath);
+
+                tree = parse(is);
+            } catch(IOException e) {
+                System.err.println("Failed to read input file: " + e.getLocalizedMessage());
+                return;
+            }
+
+            // define (hoist) the models and controllers
+            GlobalScope globalScope = defPhase(tree);
+            if (!success())
+                return;
+
+            // typecheck the models, assign types to the
+            ModelIR mir = new ModelIR();
+            compileModels(globalScope, mir);
+            if (!success())
+                return;
+
+            // compile the controllers to IR
+            compileControllers(globalScope);
+            if (!success())
+                return;
+
+            // link controllers, models and platforms
+            compileSpaces(globalScope);
+            if (!success())
+                return;
+
+            LOGGER.info("Internal representation is created!");
+
+            RavelApplication app = new RavelApplication();
+            generateCode(app, mBuildPath);
+        } catch (FatalCompilerErrorException e) {
+            // do nothing, this exception is just a quick way to interrupt compilation
+            // if something really bad happens
+        } finally {
+            logBuildEnd();
         }
+    }
 
-        ParseTree tree = parse(is);
+    public static void main(String[] args) {
+        RavelCompiler driver = new RavelCompiler();
 
-        // define (hoist) the models and controllers
-        GlobalScope globalScope = defPhase(tree);
-        // typecheck the models, assign types to the
-        ModelIR mir = new ModelIR();
-        compileModels(globalScope, mir);
-
-        // compile the controllers to IR
-        if (!compileControllers(globalScope)) {
-            logBuildEnd(start);
-            return;
-        }
-
-        // link controllers, models and platforms
-        compileSpaces(globalScope);
-
-        LOGGER.info("Internal representation is created!");
-
-        RavelApplication app = new RavelApplication();
-        generateCode(app, mBuildPath);
-
-        logBuildEnd(start);
+        driver.run(args.length > 0 ? args[0] : null);
     }
 
 }

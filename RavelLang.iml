@@ -28,5 +28,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="android_contentprovider_generator-1.11.0-bundle" level="project" />
   </component>
 </module>

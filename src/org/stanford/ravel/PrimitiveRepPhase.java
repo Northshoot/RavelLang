@@ -117,7 +117,7 @@ public class PrimitiveRepPhase extends RavelBaseListener {
             //set parameters
             Map<String, String> ismap = is.getParameterMap();
             for(Map.Entry<String, String> entry : ismap.entrySet()) {
-                ctr.setParam(entry.getKey(), entry.getValue());
+                ictr.setParam(entry.getKey(), entry.getValue());
             }
             space.add(is.getIdentifier(), ictr);
         }

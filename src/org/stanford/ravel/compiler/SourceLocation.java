@@ -22,6 +22,11 @@ public class SourceLocation {
         columnEnd = end.getCharPositionInLine();
     }
 
+    public SourceLocation(int line, int column) {
+        lineStart = lineEnd = line;
+        columnStart = columnEnd = column;
+    }
+
     public String toString() {
         return lineStart + ":" + columnStart;
     }

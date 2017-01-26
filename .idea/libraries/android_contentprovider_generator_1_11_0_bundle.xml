@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="android_contentprovider_generator-1.11.0-bundle">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/android_contentprovider_generator-1.11.0-bundle.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

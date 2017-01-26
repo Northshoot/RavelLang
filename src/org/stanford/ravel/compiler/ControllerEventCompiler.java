@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler;
 
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.RavelCompiler;
 import org.stanford.ravel.compiler.backend.CCodeTranslator;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
@@ -17,11 +18,12 @@ import java.util.Map;
 /**
  * Created by gcampagn on 1/20/17.
  */
-public class ControllerCompiler {
-    private boolean hadErrors = false;
-    private List<CompileError> errors = new ArrayList<>();
+public class ControllerEventCompiler {
+    private final RavelCompiler driver;
 
-    public ControllerCompiler() {}
+    public ControllerEventCompiler(RavelCompiler driver) {
+        this.driver = driver;
+    }
 
     public boolean compileEvent(RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
         // hoist all variables up the register scope (the whole compilation unit)
@@ -44,7 +46,7 @@ public class ControllerCompiler {
         for (VariableSymbol var : variables)
             System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
         System.out.println(visitor.getIR().getRoot());
-        if (!success())
+        if (!driver.success())
             return false;
 
         TypeResolvePass typeResolvePass = new TypeResolvePass(this);
@@ -59,7 +61,7 @@ public class ControllerCompiler {
         System.out.println("Loop Tree");
         System.out.println(ir2.getLoopTree());
 
-        if (!success())
+        if (!driver.success())
             return false;
 
         ValidateIR.validate(ir2);
@@ -82,26 +84,13 @@ public class ControllerCompiler {
         return true;
     }
 
-    public void printAllErrors() {
-        for (CompileError error : errors) {
-            System.out.println(error);
-        }
-    }
-
-    public boolean success() {
-        return !hadErrors;
-    }
-
     public void emitError(SourceLocation loc, String message) {
-        errors.add(new CompileError(loc, CompileError.Severity.ERROR, message));
-        hadErrors = true;
+        driver.emitError(loc, message);
     }
     public void emitWarning(SourceLocation loc, String message) {
-        errors.add(new CompileError(loc, CompileError.Severity.WARNING, message));
+        driver.emitWarning(loc, message);
     }
     public void emitFatal(SourceLocation loc, String message) throws FatalCompilerErrorException {
-        errors.add(new CompileError(loc, CompileError.Severity.FATAL, message));
-        hadErrors = true;
-        throw new FatalCompilerErrorException();
+        driver.emitFatal(loc, message);
     }
 }
