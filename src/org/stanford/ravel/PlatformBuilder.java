@@ -1,6 +1,7 @@
-package org.stanford.ravel.api.builder;
+package org.stanford.ravel;
 
 import org.stanford.ravel.RavelApplication;
+import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.platforms.ConcretePlatform;
 import org.stanford.ravel.primitives.Platform;
@@ -17,7 +18,7 @@ public class PlatformBuilder {
     private final String path;
     private final List<FileObject> mFiles; //collect all the files to generate
 
-    public PlatformBuilder(RavelApplication rApp, String buildPath) {
+    PlatformBuilder(RavelApplication rApp, String buildPath) {
         this.rApp = rApp;
         this.path = buildPath;
         mFiles = new ArrayList<>();

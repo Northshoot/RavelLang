@@ -2,18 +2,15 @@ package org.stanford.ravel.compiler;
 
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
-import org.stanford.ravel.compiler.backend.CCodeTranslator;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by gcampagn on 1/20/17.

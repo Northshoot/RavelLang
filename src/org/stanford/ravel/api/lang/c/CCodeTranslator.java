@@ -1,5 +1,6 @@
-package org.stanford.ravel.compiler.backend;
+package org.stanford.ravel.api.lang.c;
 
+import org.stanford.ravel.api.lang.BaseTranslator;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.types.*;
 
@@ -7,8 +8,6 @@ import org.stanford.ravel.compiler.types.*;
  * Created by gcampagn on 1/25/17.
  */
 public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
-    StringBuilder ccode;
-
     private String typeToCType(Type type) {
         if (type instanceof ArrayType) {
             return "(" + typeToCType(((ArrayType) type).getElementType()) + ")[]";
