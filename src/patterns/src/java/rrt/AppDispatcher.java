@@ -10,7 +10,8 @@ import java.util.Map;
 /**
  * Created by lauril on 1/23/17.
  */
-public class AppDispatcher implements DispatherAPI{
+public class AppDispatcher implements DispatherAPI, SystemEventAPI{
+
 
     //AUTOGEN
     Model model_id_1 = new Model(this);
@@ -40,6 +41,27 @@ public class AppDispatcher implements DispatherAPI{
                 model_id_1.record_arrived(rp, endpoint);
 
         }
+
+    }
+
+    @Override
+    public void started() {
+        //AUTOGEN: controllers that subscribe to the event
+        mcntr_id_1.system_started();
+    }
+
+    @Override
+    public void stopped() {
+
+    }
+
+    @Override
+    public void restarted() {
+
+    }
+
+    @Override
+    public void battery(BatteryLevel bl) {
 
     }
 }

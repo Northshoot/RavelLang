@@ -14,7 +14,7 @@ public interface DriverAPI {
     /**
      * Get system timer
      */
-    Timer get_timer();
+
 
     /**
      * Register endpoint
