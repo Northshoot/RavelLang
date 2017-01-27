@@ -96,6 +96,26 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 */
+	void enterRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 */
+	void exitRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ModelInstantiation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
 	 * @param ctx the parse tree
@@ -527,16 +547,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssignment(RavelParser.AssignmentContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 */
-	void enterRef_assign(RavelParser.Ref_assignContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 */
-	void exitRef_assign(RavelParser.Ref_assignContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#lvalue_expression}.
 	 * @param ctx the parse tree

@@ -99,6 +99,22 @@ public abstract class BaseScope implements Scope {
 
     @Override
     public Symbol resolve(String name) {
+        int dot = name.indexOf('.');
+        if (dot >= 0) {
+            String qualifier = name.substring(0, dot);
+            String qualifiedname = name.substring(dot+1);
+            Symbol scopeSym = resolve(qualifier);
+            if (scopeSym != null) {
+                if (!(scopeSym instanceof Scope))
+                    return null;
+                return ((Scope) scopeSym).resolve(qualifiedname);
+            } else {
+                // try resolving as a nested scope
+                Scope pureScope = getEnclosingScope().getNestedScope(qualifier);
+                return pureScope.resolve(qualifiedname);
+            }
+        }
+
         Symbol s = symbols.get(name);
         if ( s!=null ) {
             return s;

@@ -1,34 +1,43 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.scope.Scope;
+import org.stanford.ravel.compiler.types.Type;
+
 import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * Created by lauril on 7/21/16.
  */
-public class Controller extends Primitive {
-    private static Logger LOGGER = Logger.getLogger(Controller.class.getName());
-
+public class Controller extends Primitive implements Iterable<Event> {
     private final List<Event> mEvents = new ArrayList<>();
-    private final Map<String, Model> mModels = new LinkedHashMap<>();
-    private final Map<String, Source> mSources = new LinkedHashMap<>();
+    private final Map<String, Type> mInterface =  new HashMap<>();
 
-
-    private Space mSpace;
-
-    public Controller(String name){
+    public Controller(String name) {
         super(name, name+"Ctr");
     }
 
-    public List<Source> getSources(){
-        List<Source> lst = new ArrayList<>();
-        lst.addAll(mSources.values());
-        return lst;
-
+    public void addEvent(Event event) {
+        mEvents.add(event);
     }
-    public List<Model> getModels() {
-        List<Model> lst = new ArrayList<>();
-        lst.addAll(mModels.values());
-        return lst;
+
+    public void addParameter(String name, Type type) {
+        mInterface.put(name, type);
+    }
+
+    public Type getParameterType(String name) {
+        return mInterface.get(name);
+    }
+
+    public Collection<String> getParameterNames() {
+        return mInterface.keySet();
+    }
+
+    public Iterator<Event> iterator() {
+        return mEvents.iterator();
+    }
+
+    public InstantiatedController instantiate(Space space) {
+        return new InstantiatedController(space, this);
     }
 }

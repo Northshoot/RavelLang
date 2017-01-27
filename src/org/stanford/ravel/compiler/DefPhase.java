@@ -16,7 +16,9 @@ import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.primitives.ModelEvent;
 import org.stanford.ravel.primitives.Primitive;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -204,8 +206,17 @@ public class DefPhase extends RavelBaseListener {
         //define parameters in the scope
         String modelVarName = ctx.Identifier(0).getText();
         String eventName = ctx.Identifier(1).getText();
+
+        EventSymbol es;
+        try {
+            ModelEvent event = ModelEvent.valueOf(eventName);
+            es = new EventSymbol(modelVarName, event);
+        } catch(IllegalArgumentException e) {
+            emitError(ctx, "invalid event declaration " + modelVarName + "." + eventName + ": not a valid event name");
+            return;
+        }
+
         //we create a local scope for each event
-        EventSymbol es = new EventSymbol(modelVarName + "." + eventName);
         ctx.scope = es;
         es.setDefNode(ctx);
         currentScope.define(es);
@@ -217,16 +228,16 @@ public class DefPhase extends RavelBaseListener {
         VariableSymbol selfVar = new VariableSymbol("self");
 
         if (modelVarSym == null) {
-            emitError(ctx, "invalid event declaration " + es.getName() + " (undeclared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + ": undeclared model");
             return;
         }
         if (!(modelVarSym instanceof VariableSymbol)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
             return;
         }
         Type modelType =  ((VariableSymbol) modelVarSym).getType();
         if (!(modelType instanceof ModelType)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + " (does not refer to a declared model)");
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
             return;
         }
 
@@ -314,26 +325,50 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) {
         LocalScope ls = new LocalScope("platform", currentScope);
         ctx.scope = ls;
+        currentScope.nest(ls);
         pushScope(ls);
     }
 
     @Override public void exitPlatformScope(RavelParser.PlatformScopeContext ctx) {
 
-        for(Symbol re: ctx.scope.getSymbols()) {
+        for (Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addPlatform(re.getName(),(ReferenceSymbol) re);
         }
 
         popScope();
     }
 
+    @Override
+    public void enterRef_assign(RavelParser.Ref_assignContext ctx) {
+        assert currentScope.getEnclosingScope() instanceof SpaceSymbol;
+
+        String currentScopeName = currentScope.getName();
+
+        // FIXME this can actually never be true, because models and controllers
+        // use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
+        boolean allowLiteral = currentScopeName.equals("models") || currentScopeName.equals("controllers");
+
+        String name = ctx.qualified_name().getText();
+        RavelParser.Simple_expressionContext value = ctx.simple_expression();
+        if (value.literal() != null) {
+            if (allowLiteral) {
+                currentScope.define(new ConstantSymbol(name, ParserUtils.literalToValue(value.literal())));
+            } else {
+                emitError(value.literal(), "literal value not allowed in this context");
+            }
+        } else {
+            currentScope.define(new ReferenceSymbol(name, value.qualified_name().getText()));
+        }
+    }
 
     @Override public void enterModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
         LocalScope ls = new LocalScope("models", currentScope);
         ctx.scope = ls;
+        currentScope.nest(ls);
         pushScope(ls);
     }
     @Override public void enterInstance(RavelParser.InstanceContext ctx) {
-        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText(), ctx);
+        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText(), ctx.instance_name().getText());
         ctx.symbol = is;
         is.setScope(currentScope);
         is.setDefNode(ctx);
@@ -342,9 +377,21 @@ public class DefPhase extends RavelBaseListener {
 
     @Override public void enterParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
         RavelParser.InstanceContext instance = (RavelParser.InstanceContext) ctx.getParent();
-        List<RavelParser.Param_assigContext> paramAssigContexts = ctx.param_assig();
-        for(RavelParser.Param_assigContext p: ctx.param_assig()) {
-            ((InstanceSymbol) instance.symbol).addParameter(p.Identifier().getText(), p.param_val().getText());
+        for (RavelParser.Param_assigContext p: ctx.param_assig()) {
+            RavelParser.Simple_expressionContext pval = p.param_val().simple_expression();
+
+            String pname = p.Identifier().getText();
+            if (pval.qualified_name() != null) {
+                Symbol referencedSymbol = currentScope.resolve(pval.qualified_name().getText());
+                if (referencedSymbol instanceof ConstantSymbol)
+                    instance.symbol.addParameter(pname, ((ConstantSymbol) referencedSymbol).getValue());
+                else if (referencedSymbol instanceof InstanceSymbol)
+                    instance.symbol.addParameter(pname, referencedSymbol);
+                else // null, or some weird symbol (eg another SpaceSymbol or a ModelSymbol)
+                    emitError(ctx, "invalid parameter value (not a variable in scope)");
+            } else {
+                instance.symbol.addParameter(pname, ParserUtils.literalToValue(pval.literal()));
+            }
         }
     }
 
@@ -361,6 +408,7 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         LocalScope ls = new LocalScope("controllers", currentScope);
         ctx.scope = ls;
+        currentScope.nest(ls);
         pushScope(ls);
     }
 
@@ -374,11 +422,11 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) {
         LocalScope ls = new LocalScope("sinks", currentScope);
         ctx.scope = ls;
+        currentScope.nest(ls);
         pushScope(ls);
     }
     @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) {
-
-        for(Symbol re: ctx.scope.getSymbols()) {
+        for (Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addSink(re.getName(),(ReferenceSymbol) re);
         }
         popScope();
@@ -388,12 +436,12 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) {
         LocalScope ls = new LocalScope("sources", currentScope);
         ctx.scope = ls;
+        currentScope.nest(ls);
         pushScope(ls);
     }
 
     @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) {
-
-        for(Symbol re: ctx.scope.getSymbols()) {
+        for (Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addSource(re.getName(),(ReferenceSymbol) re);
         }
         popScope();

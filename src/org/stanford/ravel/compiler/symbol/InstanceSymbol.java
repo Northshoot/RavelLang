@@ -13,38 +13,27 @@ public class InstanceSymbol extends BaseSymbol implements TypedSymbol {
 
     private String identifier;
     private String instance_name;
-    private Map<String,String>  parameterMap;
-    RavelParser.InstanceContext context;
+    private Map<String, Object>  parameterMap;
 
-    public InstanceSymbol(String name, RavelParser.InstanceContext ictx) {
+    public InstanceSymbol(String name, String instanceName) {
         super(name);
         parameterMap = new LinkedHashMap<>();
-        identifier = ictx.Identifier().getText();
-        instance_name = ictx.instance_name().getText();
-        context = ictx;
-
-       // parameterMap = refList;
-
+        identifier = name;
+        instance_name = instanceName;
     }
 
-    public String getIdentifier(){
+    public String getIdentifier() {
         return identifier;
     }
 
-    public String getInstanceName(){
+    public String getInstanceName() {
         return instance_name;
     }
 
-    public void addParameter(String key, String val){
+    public void addParameter(String key, Object val) {
         parameterMap.put(key, val);
     }
-    public Map<String,String> getParameterMap(){
+    public Map<String, Object> getParameterMap() {
         return parameterMap;
     }
-    @Override
-    public void setType(Type type) {
-        super.setType(type);
-    }
-
-
 }

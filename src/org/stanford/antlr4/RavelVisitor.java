@@ -65,6 +65,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ModelInstantiation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
 	 * @param ctx the parse tree
@@ -320,12 +332,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAssignment(RavelParser.AssignmentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitRef_assign(RavelParser.Ref_assignContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#lvalue_expression}.
 	 * @param ctx the parse tree

@@ -304,27 +304,8 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override
     public Integer visitLiteral(RavelParser.LiteralContext ctx) {
-        // for dumb reasons the grammar allows literal -> Identifier
-        // (which should be a variable reference, not a literal)
-        // special case it
-        if (ctx.Identifier() != null) {
-            return visitVarRef(ctx, ctx.Identifier().getText());
-        }
-
-
         int reg = ir.allocateRegister();
-        Object value;
-
-        if (ctx.number() != null) {
-            if (ctx.number().integer() != null)
-                value = Integer.parseInt(ctx.number().integer().getText());
-            else
-                value = Double.parseDouble(ctx.number().float_point().getText());
-        } else if (ctx.boolean_rule() != null) {
-            value = (ctx.boolean_rule().TRUE() != null);
-        } else {
-            value = ParserUtils.extractStringLiteral(ctx.STRING_LITERAL().getText());
-        }
+        Object value = ParserUtils.literalToValue(ctx);
 
         addCurrent(new ImmediateLoad(ctx, reg, value));
         return reg;

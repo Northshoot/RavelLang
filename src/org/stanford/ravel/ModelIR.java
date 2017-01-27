@@ -27,7 +27,7 @@ public class ModelIR {
         LOGGER.info("Making model object from scope");
         //make concrete model
         String name = ms.getName();
-        Model m = new Model(name, ms.getModelType());
+        Model m = new Model(name, ms);
 //        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
 //        try{
@@ -171,11 +171,11 @@ public class ModelIR {
                 var.stringType("assignment");
                 return var.value(value).build();
             } catch (NullPointerException e ) {}
-            try {
-                String value = literal.Identifier().getText();
-                var.stringType("variable");
-                return var.value(value).build();
-            } catch (NullPointerException e ) {}
+            //try {
+            //    String value = literal.Identifier().getText();
+            //    var.stringType("variable");
+            //    return var.value(value).build();
+            //} catch (NullPointerException e ) {}
             //we could build and return here, but we need to be sure that parsing has identified
             //the right value.
             //merge prop and varAssignments

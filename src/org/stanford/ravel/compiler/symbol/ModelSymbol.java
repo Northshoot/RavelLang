@@ -1,15 +1,8 @@
 package org.stanford.ravel.compiler.symbol;
 
-import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.scope.Scope;
-import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.ModelType;
-import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Model;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by lauril on 8/25/16.
@@ -52,7 +45,7 @@ public class ModelSymbol extends ComponentSymbol implements TypeSymbol {
     }
 
     @Override
-    public Type getDefinedType() {
+    public org.stanford.ravel.compiler.types.Type getDefinedType() {
         return mDefinedType;
     }
 }
