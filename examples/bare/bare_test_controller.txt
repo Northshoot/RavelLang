@@ -53,9 +53,9 @@ controller RandomControllerEmbedded(random: Random):
 
 space EmbeddedSpace:
     platform:
-        language = CLang
+        language = JLang
         templates = nrf52
-        system = nrf52Platform.v12
+        system = Android.v22
 
     models:
         random = Random(size=10)
@@ -66,4 +66,4 @@ space EmbeddedSpace:
         rndcnt = RandomControllerEmbedded(random = models.random)
 
     sources:
-        random = platform.source.random
+        random = platform.system.random

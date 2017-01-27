@@ -16,18 +16,25 @@ import java.util.logging.Logger;
  * Created by lauril on 1/20/17.
  */
 public class ModelIR {
-    private static Logger LOGGER = Logger.getLogger(ModelIR.class.getName());
+    private final RavelCompiler driver;
+    private final RavelApplication app;
+
     private Map<String, Model> mModels = new LinkedHashMap<>();
 
-    public ModelIR(){
-
+    public ModelIR(RavelCompiler driver, RavelApplication app) {
+        this.driver = driver;
+        this.app = app;
     }
 
     public void addModel(ModelSymbol ms){
-        LOGGER.info("Making model object from scope");
+        //LOGGER.info("Making model object from scope");
         //make concrete model
         String name = ms.getName();
         Model m = new Model(name, ms);
+        app.addModel(name, m);
+
+        // TODO finish the rest of the code here
+
 //        LOGGER.log(Level.INFO, "Creating >>{0}<< model {1}", new Object[]{type, name});
         //TODO: not a clean solution
 //        try{
@@ -193,6 +200,7 @@ public class ModelIR {
         }
         return null;
     }
+
     public Map<String, Model> getModels(){
         return this.mModels;
     }

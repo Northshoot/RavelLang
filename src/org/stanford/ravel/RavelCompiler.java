@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.ravel.api.builder.PlatformBuilder;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.ravel.compiler.*;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
@@ -106,8 +105,9 @@ public class RavelCompiler {
         return listener.getGlobalScope();
     }
 
-    private void compileModels(GlobalScope app, ModelIR mir) throws FatalCompilerErrorException {
-        for (ModelSymbol m : app.getModels()) {
+    private void compileModels(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        ModelIR mir = new ModelIR(this, app);
+        for (ModelSymbol m : scope.getModels()) {
             mir.addModel(m);
         }
     }
@@ -190,8 +190,7 @@ public class RavelCompiler {
             RavelApplication app = new RavelApplication();
 
             // typecheck the models, assign types to the
-            ModelIR mir = new ModelIR();
-            compileModels(globalScope, mir);
+            compileModels(globalScope, app);
             if (!success())
                 return;
 

@@ -2,23 +2,21 @@ package org.stanford.ravel.compiler;
 
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
-import org.stanford.ravel.compiler.backend.CCodeTranslator;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by gcampagn on 1/20/17.
  */
 public class ControllerEventCompiler {
+    private static final boolean DEBUG = false;
     private final RavelCompiler driver;
 
     public ControllerEventCompiler(RavelCompiler driver) {
@@ -42,10 +40,12 @@ public class ControllerEventCompiler {
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
         visitor.visit(tree);
 
-        System.out.println("event " + tree.scope.getName());
-        for (VariableSymbol var : variables)
-            System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
-        System.out.println(visitor.getIR().getRoot());
+        if (DEBUG) {
+            System.out.println("event " + tree.scope.getName());
+            for (VariableSymbol var : variables)
+                System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
+            System.out.println(visitor.getIR().getRoot());
+        }
         if (!driver.success())
             return null;
 
@@ -55,11 +55,13 @@ public class ControllerEventCompiler {
         TypedIR ir2 = typeResolvePass.run(visitor.getIR());
         ControlFlowGraph cfg = ir2.getControlFlowGraph();
 
-        System.out.println("CFG");
-        cfg.visitForward(System.out::println);
+        if (DEBUG) {
+            System.out.println("CFG");
+            cfg.visitForward(System.out::println);
 
-        System.out.println("Loop Tree");
-        System.out.println(ir2.getLoopTree());
+            System.out.println("Loop Tree");
+            System.out.println(ir2.getLoopTree());
+        }
 
         if (!driver.success())
             return null;

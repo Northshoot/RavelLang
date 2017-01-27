@@ -61,7 +61,7 @@ public class ModelControllerLinker {
             if (reference.startsWith("platform.system.")) {
                 space.add(identifier, new Sink(identifier, reference));
             } else {
-                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " referring to unknown location "
+                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " refers to an unknown location "
                         + reference);
             }
         }
@@ -76,7 +76,7 @@ public class ModelControllerLinker {
             if (reference.startsWith("platform.system.")) {
                 space.add(identifier, new Source(identifier, reference));
             } else {
-                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " referring to unknown location "
+                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " refers to an unknown location "
                         + reference);
             }
         }

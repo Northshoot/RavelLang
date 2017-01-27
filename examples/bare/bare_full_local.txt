@@ -40,13 +40,13 @@ space EmbeddedSpace:
 
 
     models:
-        random=Random(size=10)
-        frequency=Frequency(size=1)
+        random = Random(size=10)
+        frequency = Frequency(size=1)
         boor_error = BootError()
 
     controllers:
         rndcnt = RandomControllerEmbedded(random = random)
 
     sources:
-        random = platform.source.random
+        random = platform.system.random
 

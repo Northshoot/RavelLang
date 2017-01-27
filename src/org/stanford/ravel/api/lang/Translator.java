@@ -1,4 +1,4 @@
-package org.stanford.ravel.compiler.backend;
+package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.types.Type;

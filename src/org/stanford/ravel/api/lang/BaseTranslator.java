@@ -1,8 +1,6 @@
-package org.stanford.ravel.compiler.backend;
+package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.compiler.ir.typed.*;
-import org.stanford.ravel.compiler.ir.untyped.InstructionVisitor;
-import org.stanford.ravel.compiler.types.Type;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +12,7 @@ public abstract class BaseTranslator implements Translator, LoopTreeVisitor, TIn
     private StringBuilder builder;
     private Map<Integer, String> registerNames = new HashMap<>();
 
-    BaseTranslator() {
+    protected BaseTranslator() {
         builder = new StringBuilder();
     }
 
