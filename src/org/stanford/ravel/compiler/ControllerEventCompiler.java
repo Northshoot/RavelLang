@@ -25,7 +25,7 @@ public class ControllerEventCompiler {
         this.driver = driver;
     }
 
-    public boolean compileEvent(RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
+    public TypedIR compileEvent(RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
         // hoist all variables up the register scope (the whole compilation unit)
         List<VariableSymbol> variables = new ArrayList<>();
         for (Symbol s : tree.scope.getAllSymbols()) {
@@ -47,7 +47,7 @@ public class ControllerEventCompiler {
             System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
         System.out.println(visitor.getIR().getRoot());
         if (!driver.success())
-            return false;
+            return null;
 
         TypeResolvePass typeResolvePass = new TypeResolvePass(this);
         for (VariableSymbol var : variables)
@@ -62,26 +62,14 @@ public class ControllerEventCompiler {
         System.out.println(ir2.getLoopTree());
 
         if (!driver.success())
-            return false;
+            return null;
 
         ValidateIR.validate(ir2);
 
         // run analysis and optimization passes
         // lower IR
 
-        // for debugging only, attempt translation to C
-        CCodeTranslator ccode = new CCodeTranslator();
-
-        // only one parameter, self
-        VariableSymbol self = (VariableSymbol) tree.scope.resolve("self");
-        ccode.declareParameter("self", self.getRegister(), self.getType());
-        for (Map.Entry<Integer, Type> entry : ir2.getRegisterTypes())
-            ccode.declareRegister(entry.getKey(), entry.getValue());
-        ccode.translate(ir2);
-        System.out.println("C code");
-        System.out.println(ccode.getCode());
-
-        return true;
+        return ir2;
     }
 
     public void emitError(SourceLocation loc, String message) {

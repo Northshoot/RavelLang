@@ -10,41 +10,22 @@ import java.util.Map;
  * Created by lauril on 8/26/16.
  */
 public class InstanceSymbol extends BaseSymbol implements TypedSymbol {
+    private final ComponentSymbol referredSymbol;
+    private final Map<String, Object>  parameterMap = new LinkedHashMap<>();
 
-    private String identifier;
-    private String instance_name;
-    private Map<String,String>  parameterMap;
-    RavelParser.InstanceContext context;
-
-    public InstanceSymbol(String name, RavelParser.InstanceContext ictx) {
+    public InstanceSymbol(String name, ComponentSymbol referredSymbol) {
         super(name);
-        parameterMap = new LinkedHashMap<>();
-        identifier = ictx.Identifier().getText();
-        instance_name = ictx.instance_name().getText();
-        context = ictx;
-
-       // parameterMap = refList;
-
+        this.referredSymbol = referredSymbol;
     }
 
-    public String getIdentifier(){
-        return identifier;
+    public String getInstanceName() {
+        return referredSymbol.getName();
     }
 
-    public String getInstanceName(){
-        return instance_name;
-    }
-
-    public void addParameter(String key, String val){
+    public void addParameter(String key, Object val) {
         parameterMap.put(key, val);
     }
-    public Map<String,String> getParameterMap(){
+    public Map<String, Object> getParameterMap() {
         return parameterMap;
     }
-    @Override
-    public void setType(Type type) {
-        super.setType(type);
-    }
-
-
 }

@@ -1,5 +1,7 @@
 package org.stanford.ravel.compiler;
 
+import org.stanford.ravel.compiler.SourceLocation;
+
 /**
  * Created by gcampagn on 1/20/17.
  */

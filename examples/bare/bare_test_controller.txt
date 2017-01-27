@@ -1,10 +1,12 @@
 streaming model Random(size):
     properties:
-        durable=False
-        reliable=False
-        records = size
+        durable = False
+        reliable = False
+        #records = size
+        records = 10
 
     schema:
+        # comment here
         value = IntegerField()
 
 
@@ -52,17 +54,16 @@ controller RandomControllerEmbedded(random: Random):
 space EmbeddedSpace:
     platform:
         language = CLang
-        templates=nrf52
+        templates = nrf52
         system = nrf52Platform.v12
 
-
     models:
-        random=Random(size=10)
-        frequency=Frequency(size=1)
-        boor_error = BootError()
+        random = Random(size=10)
+        #frequency = Frequency(size=1)
+        #boor_error = BootError()
 
     controllers:
-        rndcnt = RandomControllerEmbedded(random = random)
+        rndcnt = RandomControllerEmbedded(random = models.random)
 
     sources:
         random = platform.source.random

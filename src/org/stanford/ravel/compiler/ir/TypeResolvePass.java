@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.ir;
 
 import org.stanford.ravel.compiler.ControllerEventCompiler;
+import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.*;
@@ -459,21 +460,9 @@ public class TypeResolvePass implements InstructionVisitor {
         cfgBuilder.replaceBlock(continuation);
     }
 
-    private Type typeFromLiteral(Object literal) {
-        if (literal instanceof Boolean)
-            return PrimitiveType.BOOL;
-        if (literal instanceof String)
-            return PrimitiveType.STR;
-        if (literal instanceof Double)
-            return PrimitiveType.DOUBLE;
-        if (literal instanceof Integer)
-            return PrimitiveType.INT32;
-        throw new AssertionError("Unexpected literal " + literal);
-    }
-
     @Override
     public void visit(ImmediateLoad instr) {
-        Type literalType = typeFromLiteral(instr.value);
+        Type literalType = ParserUtils.typeFromLiteral(instr.value);
 
         int target;
         Type targetType = getRegisterType(instr.target);

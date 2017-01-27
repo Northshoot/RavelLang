@@ -48,16 +48,6 @@ public abstract class SymbolWithScope extends BaseScope implements Symbol, Scope
     }
 
     @Override
-    public int getInsertionOrderNumber() {
-        return index;
-    }
-
-    @Override
-    public void setInsertionOrderNumber(int i) {
-        this.index = i;
-    }
-
-    @Override
     public int getNumberOfSymbols() {
         return symbols.size();
     }

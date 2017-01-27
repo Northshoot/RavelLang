@@ -96,6 +96,26 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 */
+	void enterRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 */
+	void exitRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ModelInstantiation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
 	 * @param ctx the parse tree
@@ -117,6 +137,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInstantiations(RavelParser.InstantiationsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#instance_line}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_line(RavelParser.Instance_lineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#instance_line}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_line(RavelParser.Instance_lineContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Instance}
 	 * labeled alternative in {@link RavelParser#instance_def}.
@@ -272,6 +302,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitProperties(RavelParser.PropertiesContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#property_line}.
+	 * @param ctx the parse tree
+	 */
+	void enterProperty_line(RavelParser.Property_lineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#property_line}.
+	 * @param ctx the parse tree
+	 */
+	void exitProperty_line(RavelParser.Property_lineContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code VarAssignment}
 	 * labeled alternative in {@link RavelParser#property}.
 	 * @param ctx the parse tree
@@ -325,6 +365,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFields(RavelParser.FieldsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#field_line}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_line(RavelParser.Field_lineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#field_line}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_line(RavelParser.Field_lineContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FieldDeclaration}
 	 * labeled alternative in {@link RavelParser#field}.
@@ -527,16 +577,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssignment(RavelParser.AssignmentContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 */
-	void enterRef_assign(RavelParser.Ref_assignContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 */
-	void exitRef_assign(RavelParser.Ref_assignContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#lvalue_expression}.
 	 * @param ctx the parse tree

@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.scope;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.Symbol;
 
 import java.util.List;
@@ -27,6 +28,11 @@ public interface Scope {
      *  unnamed scopes like code blocks, you can just return "local" or something.
      */
     String getName();
+
+    /**
+     * The AST node that defines this scope (for error messages)
+     */
+    ParserRuleContext getDefNode();
 
     /** Scope in which this scope defined. null if no enclosing scope */
     Scope getEnclosingScope();

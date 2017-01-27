@@ -163,14 +163,30 @@ space_assigment
     | NEWLINE
     ;
 
+// a simplified version of an assignment, to use in constant expression contexts
+// (eg. in model and space declarations)
+ref_assign
+    : qualified_name '=' simple_expression
+    ;
+
+simple_expression
+    : literal
+    | qualified_name
+    ;
+
 models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstantiation
     ;
 instantiations
-    : NEWLINE INDENT instance_def+ DEDENT
+    : NEWLINE INDENT instance_line+ DEDENT
     ;
 
-instance_def returns [Symbol symbol]
+instance_line
+    : instance_def
+    | NEWLINE
+    ;
+
+instance_def returns [InstanceSymbol symbol]
     : Identifier '=' instance_name '(' param_assig_list? ')' NEWLINE? #Instance
     ;
 
@@ -182,7 +198,7 @@ param_assig
     : Identifier '=' param_val
     ;
 
-param_val : literal;
+param_val : simple_expression;
 
 instance_name
     : Identifier
@@ -225,7 +241,12 @@ properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
     ;
 properties
-    : NEWLINE INDENT property+ DEDENT
+    : NEWLINE INDENT property_line+ DEDENT
+    ;
+
+property_line
+    : property
+    | NEWLINE
     ;
 
 property
@@ -246,7 +267,12 @@ schema_block returns [Scope scope]
     ;
 
 fields
-    : NEWLINE INDENT field+ DEDENT
+    : NEWLINE INDENT field_line+ DEDENT
+    ;
+
+field_line
+    : field
+    | NEWLINE
     ;
 
 field
@@ -355,12 +381,6 @@ type
 
 assignment
     : lvalue assign_op expressionList
-    ;
-
-// a simplified version of an assignment, to use in constant expression contexts
-// (eg. in model and space declarations)
-ref_assign
-    : qualified_name '=' expression
     ;
 
 // an expression that evaluates to an lvalue:
@@ -626,7 +646,6 @@ literal
     : number
     | boolean_rule
     | STRING_LITERAL
-    | Identifier
     ;
 
 /// string     ::=  "'" stringitem* "'" | '"' stringitem* '"'

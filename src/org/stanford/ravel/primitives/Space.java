@@ -8,11 +8,11 @@ import java.util.*;
  */
 public class Space extends Primitive {
     private String mTransmitFunction;
-    private Map<String, Model> mModels = new LinkedHashMap<>();
-    private Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
-    private Map<String, View> mViews = new LinkedHashMap<>();
-    private Map<String, Sink> mSink = new LinkedHashMap<>();
-    private Map<String, Source> mSource = new LinkedHashMap<>();
+    private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
+    private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
+    private final Map<String, View> mViews = new LinkedHashMap<>();
+    private final Map<String, Sink> mSink = new LinkedHashMap<>();
+    private final Map<String, Source> mSource = new LinkedHashMap<>();
     private Platform mPlatform;
 
     public Space(String name) {
@@ -20,7 +20,7 @@ public class Space extends Primitive {
     }
 
     /** add components to the particular space */
-    public void add(String ref, Model m) { this.mModels.put(ref, m); }
+    public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
     public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
     public void add(String ref, Sink s) { this.mSink.put(ref,  s); }
@@ -35,7 +35,7 @@ public class Space extends Primitive {
         return "ravel_service";
     }
 
-    public Model resolveModel(String name){
+    public InstantiatedModel resolveModel(String name){
         if(name.startsWith("tier.models.")){
             String modelName = name.replace("tier.models.","");
             if(mModels.containsKey(modelName))
@@ -46,8 +46,8 @@ public class Space extends Primitive {
             throw new RuntimeException("Cannot resolve path " + name);
         }
     }
-    public List<Model> getModels(){
-        List<Model> lst = new ArrayList<>();
+    public List<InstantiatedModel> getModels() {
+        List<InstantiatedModel> lst = new ArrayList<>();
         lst.addAll(mModels.values());
         return lst;
     }
@@ -57,7 +57,7 @@ public class Space extends Primitive {
         lst.addAll(mControllers.values());
         return lst;
     }
-    public void add(Platform build) {
+    public void setPlatform(Platform build) {
         mPlatform = build;
     }
 
