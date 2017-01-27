@@ -57,6 +57,7 @@ public class DefPhase extends RavelBaseListener {
     public void enterFile_input(RavelParser.File_inputContext ctx) {
         globalScope = new GlobalScope();
         ctx.scope = globalScope;
+        globalScope.setDefNode(ctx);
         pushScope(globalScope);
     }
 
@@ -67,6 +68,7 @@ public class DefPhase extends RavelBaseListener {
         ModelSymbol model = new ModelSymbol(name, Model.getType(type));
         currentScope.define(model);
         ctx.scope=model;
+        model.setDefNode(ctx);
         pushScope(model);
         //LOGGER.info("ADDING " + type +" Model: " + name);
     }
@@ -76,6 +78,7 @@ public class DefPhase extends RavelBaseListener {
         LocalScope ls = new LocalScope("properties", currentScope);
         ctx.scope = ls;
         currentScope.nest(ls);
+        ls.setDefNode(ctx);
         pushScope(ls);
         //can only be defined ONCE per model, through error otherwise
     }
@@ -102,6 +105,8 @@ public class DefPhase extends RavelBaseListener {
         VariableSymbol vs = new VariableSymbol(name);
         vs.setScope(currentScope);
         vs.setDefNode(ctx);
+        // FIXME figure out the right type
+        vs.setType(PrimitiveType.ANY);
         currentScope.define(vs);
     }
 
@@ -116,6 +121,7 @@ public class DefPhase extends RavelBaseListener {
         LocalScope ls = new LocalScope("schema", currentScope);
         ctx.scope = ls;
         currentScope.nest(ls);
+        ls.setDefNode(ctx);
         pushScope(ls);
     }
 
@@ -196,6 +202,7 @@ public class DefPhase extends RavelBaseListener {
         String name = ctx.Identifier().getText();
         ControllerSymbol ctr = new ControllerSymbol(name);
         ctx.scope = ctr;
+        ctr.setDefNode(ctx);
         currentScope.define(ctr);
         pushScope(ctr);
     }
@@ -226,6 +233,10 @@ public class DefPhase extends RavelBaseListener {
         pushScope(es);
 
         VariableSymbol selfVar = new VariableSymbol("self");
+        // it's a stretch to say that the whole event defines self, but if
+        // we ever need to emit type errors related to it, that's probably the
+        // best AST node to attach to it
+        selfVar.setDefNode(ctx);
 
         if (modelVarSym == null) {
             emitError(ctx, "invalid event declaration " + es.getName() + ": undeclared model");
@@ -318,6 +329,7 @@ public class DefPhase extends RavelBaseListener {
         String name = ctx.Identifier().getText();
         SpaceSymbol ssb = new SpaceSymbol(name);
         ctx.scope = ssb;
+        ssb.setDefNode(ctx);
         currentScope.define(ssb);
         pushScope(ssb);
     }
@@ -325,6 +337,7 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterPlatformScope(RavelParser.PlatformScopeContext ctx) {
         LocalScope ls = new LocalScope("platform", currentScope);
         ctx.scope = ls;
+        ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
@@ -352,31 +365,62 @@ public class DefPhase extends RavelBaseListener {
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
         if (value.literal() != null) {
             if (allowLiteral) {
-                currentScope.define(new ConstantSymbol(name, ParserUtils.literalToValue(value.literal())));
+                Object literal = ParserUtils.literalToValue(value.literal());
+                ConstantSymbol sym = new ConstantSymbol(name, literal);
+                sym.setDefNode(ctx);
+                sym.setType(ParserUtils.typeFromLiteral(literal));
+                currentScope.define(sym);
             } else {
                 emitError(value.literal(), "literal value not allowed in this context");
             }
         } else {
-            currentScope.define(new ReferenceSymbol(name, value.qualified_name().getText()));
+            ReferenceSymbol ref = new ReferenceSymbol(name, value.qualified_name().getText());
+            ref.setDefNode(ctx);
+            currentScope.define(ref);
         }
     }
 
     @Override public void enterModelInstantiation(RavelParser.ModelInstantiationContext ctx) {
         LocalScope ls = new LocalScope("models", currentScope);
         ctx.scope = ls;
+        ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
     @Override public void enterInstance(RavelParser.InstanceContext ctx) {
-        InstanceSymbol is = new InstanceSymbol(ctx.Identifier().getText(), ctx.instance_name().getText());
+        String instanceName = ctx.instance_name().getText();
+        String varName = ctx.Identifier().getText();
+        Symbol referred = currentScope.resolve(instanceName);
+        if (referred == null || !(referred instanceof ComponentSymbol)) {
+            emitError(ctx, "instantiation of " + varName + " refers to non-existing component " + instanceName);
+            return;
+        }
+        if (currentScope.getName().equals("models")) {
+            if (!(referred instanceof ModelSymbol)) {
+                emitError(ctx, "instantiation of model " + varName + " must refer to a model, not a " + referred.getClass().getName());
+                return;
+            }
+        } else if (currentScope.getName().equals("controllers")) {
+            if (!(referred instanceof ControllerSymbol)) {
+                emitError(ctx, "instantiation of controller " + varName + " must refer to a model, not a " + referred.getClass().getName());
+                return;
+            }
+        }
+
+        InstanceSymbol is = new InstanceSymbol(varName, (ComponentSymbol)referred);
         ctx.symbol = is;
-        is.setScope(currentScope);
         is.setDefNode(ctx);
+        is.setType(((ComponentSymbol) referred).getDefinedType());
         currentScope.define(is);
     }
 
     @Override public void enterParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
         RavelParser.InstanceContext instance = (RavelParser.InstanceContext) ctx.getParent();
+
+        // if instance.symbol == null, enterInstance returned early before creating the symbol,
+        // which indicates a parse/type error
+        if (instance.symbol == null)
+            return;
         for (RavelParser.Param_assigContext p: ctx.param_assig()) {
             RavelParser.Simple_expressionContext pval = p.param_val().simple_expression();
 
@@ -408,6 +452,7 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterControllerInstantiation(RavelParser.ControllerInstantiationContext ctx) {
         LocalScope ls = new LocalScope("controllers", currentScope);
         ctx.scope = ls;
+        ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
@@ -422,6 +467,7 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) {
         LocalScope ls = new LocalScope("sinks", currentScope);
         ctx.scope = ls;
+        ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
@@ -436,6 +482,7 @@ public class DefPhase extends RavelBaseListener {
     @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) {
         LocalScope ls = new LocalScope("sources", currentScope);
         ctx.scope = ls;
+        ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }

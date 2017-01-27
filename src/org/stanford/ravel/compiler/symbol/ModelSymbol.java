@@ -45,7 +45,7 @@ public class ModelSymbol extends ComponentSymbol implements TypeSymbol {
     }
 
     @Override
-    public org.stanford.ravel.compiler.types.Type getDefinedType() {
+    public ModelType getDefinedType() {
         return mDefinedType;
     }
 }

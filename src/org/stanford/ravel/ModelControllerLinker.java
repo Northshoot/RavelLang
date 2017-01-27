@@ -96,7 +96,7 @@ public class ModelControllerLinker {
 
             // instantiate the model on this space
             InstantiatedModel im = m.instantiate(space, is.getParameterMap());
-            space.add(is.getIdentifier(), im);
+            space.add(is.getName(), im);
         });
 
         /** build controllers */
@@ -165,7 +165,7 @@ public class ModelControllerLinker {
                 ictr.linkEvent(e, m);
             }
 
-            space.add(is.getIdentifier(), ictr);
+            space.add(is.getName(), ictr);
         });
 
         return space;

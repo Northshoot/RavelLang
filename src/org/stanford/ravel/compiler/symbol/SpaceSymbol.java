@@ -1,6 +1,8 @@
 package org.stanford.ravel.compiler.symbol;
 
 
+import org.stanford.ravel.compiler.types.SpaceType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,24 +10,29 @@ import java.util.Map;
  * Created by lauril on 8/25/16.
  */
 public class SpaceSymbol extends ComponentSymbol {
-
-    private Map<String, InstanceSymbol> modelInitMap;
-    private Map<String, InstanceSymbol> ctrInitMap;
-    private Map<String, ReferenceSymbol> propInitMap;
-    private Map<String, ReferenceSymbol> platInitMap;
-    private Map<String, ReferenceSymbol> srcInitMap;
-    private Map<String, ReferenceSymbol> sinkInitMap;
+    private final SpaceType definedType;
+    private final Map<String, InstanceSymbol> modelInitMap;
+    private final Map<String, InstanceSymbol> ctrInitMap;
+    private final Map<String, ReferenceSymbol> propInitMap;
+    private final Map<String, ReferenceSymbol> platInitMap;
+    private final Map<String, ReferenceSymbol> srcInitMap;
+    private final Map<String, ReferenceSymbol> sinkInitMap;
 
     public SpaceSymbol(String name) {
         super(name);
-        //super.addTypeIndex(RavelParser.SPACE);
+
+        definedType = new SpaceType(name);
         modelInitMap = new LinkedHashMap<>();
         ctrInitMap = new LinkedHashMap<>();
         propInitMap = new LinkedHashMap<>();
         platInitMap = new LinkedHashMap<>();
         srcInitMap = new LinkedHashMap<>();
         sinkInitMap = new LinkedHashMap<>();
+    }
 
+    @Override
+    public SpaceType getDefinedType() {
+        return definedType;
     }
 
     public Map<String, InstanceSymbol> getModels() {

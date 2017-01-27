@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /** An abstract base class that houses common functionality for scopes. */
 public abstract class BaseScope implements Scope {
     protected Scope enclosingScope = null; // null if this scope is the root of the scope tree
-    protected ParserRuleContext defNode; // points at definition node in tree
+    private ParserRuleContext defNode; // points at definition node in tree
     /** All symbols defined in this scope; can include classes, functions,
      *  variables, or anything else that is a Symbol impl. It does NOT
      *  include non-Symbol-based things like LocalScope. See nestedScopes.
@@ -27,8 +27,8 @@ public abstract class BaseScope implements Scope {
      *  LocalScope or a LocalScope within a FunctionSymbol. This does not
      *  include SymbolWithScope objects.
      */
-    protected List<Scope> nestedScopesNotSymbols = new ArrayList<>();
-    protected Map<String, Scope> nestedScopeMap = new HashMap<>();
+    private List<Scope> nestedScopesNotSymbols = new ArrayList<>();
+    private Map<String, Scope> nestedScopeMap = new HashMap<>();
 
     protected BaseScope() { }
 
@@ -68,9 +68,12 @@ public abstract class BaseScope implements Scope {
     public void setDefNode(ParserRuleContext defNode) {
         this.defNode = defNode;
     }
+
+    @Override
     public ParserRuleContext getDefNode() {
         return defNode;
     }
+
     /** Add a nested scope to this scope; could also be a FunctionSymbol
      *  if your language allows nested functions.
      */
@@ -130,7 +133,6 @@ public abstract class BaseScope implements Scope {
             throw new IllegalArgumentException("duplicate symbol >>>"+sym.getName() + "<<<");
         }
         sym.setScope(this);
-        sym.setInsertionOrderNumber(symbols.size()); // set to insertion position from 0
         symbols.put(sym.getName(), sym);
     }
 

@@ -14,7 +14,7 @@ import java.util.Map;
  *  and methods with different slot sequences. A ComponentSymbol
  *  can also be a member of an aggregate itself (nested structs, ...).
  */
-public abstract class ComponentSymbol extends SymbolWithScope {
+public abstract class ComponentSymbol extends SymbolWithScope implements TypeSymbol {
     protected ParserRuleContext defNode;
 
     //variables used to denote when concrete classes have been made for the symbols

@@ -6,10 +6,7 @@ import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.api.builder.PlatformBuilder;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.stanford.ravel.compiler.CompileError;
-import org.stanford.ravel.compiler.ControllerEventCompiler;
-import org.stanford.ravel.compiler.DefPhase;
-import org.stanford.ravel.compiler.SourceLocation;
+import org.stanford.ravel.compiler.*;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.*;
@@ -188,6 +185,7 @@ public class RavelCompiler {
             GlobalScope globalScope = defPhase(tree);
             if (!success())
                 return;
+            ValidateScope.validate(globalScope);
 
             RavelApplication app = new RavelApplication();
 

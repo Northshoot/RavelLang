@@ -10,24 +10,16 @@ import java.util.Map;
  * Created by lauril on 8/26/16.
  */
 public class InstanceSymbol extends BaseSymbol implements TypedSymbol {
+    private final ComponentSymbol referredSymbol;
+    private final Map<String, Object>  parameterMap = new LinkedHashMap<>();
 
-    private String identifier;
-    private String instance_name;
-    private Map<String, Object>  parameterMap;
-
-    public InstanceSymbol(String name, String instanceName) {
+    public InstanceSymbol(String name, ComponentSymbol referredSymbol) {
         super(name);
-        parameterMap = new LinkedHashMap<>();
-        identifier = name;
-        instance_name = instanceName;
-    }
-
-    public String getIdentifier() {
-        return identifier;
+        this.referredSymbol = referredSymbol;
     }
 
     public String getInstanceName() {
-        return instance_name;
+        return referredSymbol.getName();
     }
 
     public void addParameter(String key, Object val) {

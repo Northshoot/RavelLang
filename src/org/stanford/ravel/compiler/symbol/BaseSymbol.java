@@ -17,7 +17,6 @@ public abstract class BaseSymbol implements Symbol {
     protected Type type;				 // If language statically typed, record type
     protected Scope scope;      		 // All symbols know what scope contains them.
     protected ParserRuleContext defNode; // points at definition node in tree
-    protected int lexicalOrder; 		 // order seen or insertion order from 0; compilers often need this
 
     public BaseSymbol(String name) { this.name = name; }
 
@@ -32,6 +31,7 @@ public abstract class BaseSymbol implements Symbol {
         this.defNode = defNode;
     }
 
+    @Override
     public ParserRuleContext getDefNode() {
         return defNode;
     }
@@ -50,16 +50,6 @@ public abstract class BaseSymbol implements Symbol {
     @Override
     public int hashCode() {
         return name.hashCode();
-    }
-
-    @Override
-    public int getInsertionOrderNumber() {
-        return lexicalOrder;
-    }
-
-    @Override
-    public void setInsertionOrderNumber(int i) {
-        this.lexicalOrder = i;
     }
 
     public String getFullyQualifiedName(String scopePathSeparator) {
