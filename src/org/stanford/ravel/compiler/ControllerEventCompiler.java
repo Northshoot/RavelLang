@@ -19,6 +19,7 @@ import java.util.Map;
  * Created by gcampagn on 1/20/17.
  */
 public class ControllerEventCompiler {
+    private static final boolean DEBUG = false;
     private final RavelCompiler driver;
 
     public ControllerEventCompiler(RavelCompiler driver) {
@@ -42,10 +43,12 @@ public class ControllerEventCompiler {
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
         visitor.visit(tree);
 
-        System.out.println("event " + tree.scope.getName());
-        for (VariableSymbol var : variables)
-            System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
-        System.out.println(visitor.getIR().getRoot());
+        if (DEBUG) {
+            System.out.println("event " + tree.scope.getName());
+            for (VariableSymbol var : variables)
+                System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
+            System.out.println(visitor.getIR().getRoot());
+        }
         if (!driver.success())
             return null;
 
@@ -55,11 +58,13 @@ public class ControllerEventCompiler {
         TypedIR ir2 = typeResolvePass.run(visitor.getIR());
         ControlFlowGraph cfg = ir2.getControlFlowGraph();
 
-        System.out.println("CFG");
-        cfg.visitForward(System.out::println);
+        if (DEBUG) {
+            System.out.println("CFG");
+            cfg.visitForward(System.out::println);
 
-        System.out.println("Loop Tree");
-        System.out.println(ir2.getLoopTree());
+            System.out.println("Loop Tree");
+            System.out.println(ir2.getLoopTree());
+        }
 
         if (!driver.success())
             return null;

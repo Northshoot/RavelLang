@@ -66,4 +66,4 @@ space EmbeddedSpace:
         rndcnt = RandomControllerEmbedded(random = models.random)
 
     sources:
-        random = platform.source.random
+        random = platform.system.random
