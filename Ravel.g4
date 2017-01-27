@@ -178,7 +178,12 @@ models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstantiation
     ;
 instantiations
-    : NEWLINE INDENT instance_def+ DEDENT
+    : NEWLINE INDENT instance_line+ DEDENT
+    ;
+
+instance_line
+    : instance_def
+    | NEWLINE
     ;
 
 instance_def returns [InstanceSymbol symbol]
@@ -236,7 +241,12 @@ properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
     ;
 properties
-    : NEWLINE INDENT property+ DEDENT
+    : NEWLINE INDENT property_line+ DEDENT
+    ;
+
+property_line
+    : property
+    | NEWLINE
     ;
 
 property
@@ -257,7 +267,12 @@ schema_block returns [Scope scope]
     ;
 
 fields
-    : NEWLINE INDENT field+ DEDENT
+    : NEWLINE INDENT field_line+ DEDENT
+    ;
+
+field_line
+    : field
+    | NEWLINE
     ;
 
 field

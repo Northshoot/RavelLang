@@ -2,9 +2,11 @@ streaming model Random(size):
     properties:
         durable = False
         reliable = False
+        #records = size
         records = 10
 
     schema:
+        # comment here
         value = IntegerField()
 
 
@@ -57,8 +59,8 @@ space EmbeddedSpace:
 
     models:
         random = Random(size=10)
-        frequency = Frequency(size=1)
-        boor_error = BootError()
+        #frequency = Frequency(size=1)
+        #boor_error = BootError()
 
     controllers:
         rndcnt = RandomControllerEmbedded(random = models.random)
