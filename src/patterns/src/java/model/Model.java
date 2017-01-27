@@ -2,12 +2,11 @@
 package patterns.src.java.model;
 
 //AUTOGEN imports
-import patterns.src.java.rrt.AppDispatcher;
+import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.rrt.RavelPacket;
 import patterns.src.java.tiers.Endpoint;
 import patterns.src.java.tiers.Error;
 import patterns.src.java.controller.ModelController;
-import patterns.src.java.controller.ModelCtrl;
 import patterns.src.java.rrt.Context;
 import patterns.src.java.utils.ByteWork;
 
@@ -31,7 +30,8 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     /**
      * Controller Listeners
      */
-    private Map<String, ModelCtrl> mModelListeners;
+    //AUTOGEN: controller naming
+    private Map<String, ModelController> mModelListeners;
     private AppDispatcher mAppDispacher;
 
     private int current_pos = 0;
@@ -131,18 +131,24 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         this.mAppDispacher = appDispatcher;
         this.mModelListeners = new HashMap<>();
         this.mRecords = new Record[mSize];
+
     }
 
     /*************** Model internal functionality  ***************/
 
+    public void setEndpoint(Endpoint ep){
+        this.mEndpoint = ep;
+        System.out.println("Setting ep" + this.mEndpoint);
+    }
 
     private void addRecord(Model.Record r){
         //if durable save to disk
         mRecords[current_pos++]=r;
+        System.out.println("Added record to the buffer");
     }
 
     public void setController(ModelController controller) {
-        mModelListeners.put(controller.name, controller);
+        mModelListeners.put(controller.getName(), controller);
     }
 
     /***************************************************************/
@@ -217,21 +223,25 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         return null;
     }
 
-    public Context save(Context ctx){
+    public Context save(Record rec){
         //AUTOGEN code will depend on the type
         //local can not be reliable!
+        Context ctx = new Context(this);
         if(current_pos >= mSize){ // no more space
             ctx.mError = Error.OUT_OF_STORAGE;
             return ctx;
         }
+
         if( this.mType == ModelType.LOCAL) {// all set, add record locally
             ctx.mError = Error.SUCCESS;
             //TODO: handle durable models
             addRecord(ctx.mRecord);
             return ctx;
         } else {
+            System.out.println("ENDPOINT:     "  + mEndpoint);
             if (! mEndpoint.isConnected() ){
                 //TODO: queue packets
+                addRecord(ctx.mRecord);
             }
         }//endpoint is connected
 
@@ -245,6 +255,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
             case STREAMING:
                 //Packetize the record and send it
                 // determine and send to endpoints
+                mAppDispacher.send_data(rec, mEndpoint);
                 return ctx;
             default:
                 //Should never end up here
@@ -293,12 +304,13 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     }
 
     public class Record implements Serializable {
+        int model_id = Model.MODEL_ID;
         int position;
         int state;
-        int field1;
-        int field2;
-        int field3;
-        int field4;
+        public int field1;
+        public int field2;
+        public int field3;
+        public int field4;
 
         public Record(int position,
                       int field1_val,
@@ -336,7 +348,8 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
 
         public byte[] getData(){
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-            //ATOGEN
+            //AUTOGEN: write to
+            outputStream.write(model_id);
             outputStream.write(position);
             outputStream.write(field1);
             outputStream.write(field2);

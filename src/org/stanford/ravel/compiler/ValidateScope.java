@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler;
 
-import org.apache.commons.lang.Validate;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.PrimitiveTypeSymbol;

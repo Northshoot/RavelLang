@@ -9,10 +9,10 @@ public interface ModelCommandAPI {
 
     /**
      * Saves the record and initiates transmission
-     * @param ctx
+     * @param rec
      * @return
      */
-    Context save(Context ctx);
+    Context save(Model.Record rec);
 
     /**
      * Creates an empty Record

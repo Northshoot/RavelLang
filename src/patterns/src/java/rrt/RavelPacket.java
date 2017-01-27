@@ -39,6 +39,13 @@ public class RavelPacket {
         this.record_data = ByteWork.getBytes(data, MODEL_ID, data.length);
     }
 
+    public RavelPacket(byte[] bytes, int count) {
+        //Creates new packet from stream
+        //TODO: very the length
+        this(bytes);
+
+    }
+
     public boolean isLast(){
         return this.last == 1;
     }

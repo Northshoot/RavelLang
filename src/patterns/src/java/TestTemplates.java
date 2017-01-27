@@ -1,13 +1,7 @@
 package patterns.src.java;
 
-import org.apache.commons.lang3.ArrayUtils;
-import patterns.src.java.controller.ModelController;
-import patterns.src.java.model.Model;
-import patterns.src.java.rrt.AppDispatcher;
+import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.rrt.RavelPacket;
-import patterns.src.java.tiers.AndroidDriver;
-import patterns.src.java.tiers.Endpoint;
-import patterns.src.java.utils.ByteWork;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,36 +63,41 @@ public class TestTemplates {
     public static void main(String [] args)
     {
         //AppDispather
-        AppDispatcher embedded = new AppDispatcher();
-        AppDispatcher gateway = new AppDispatcher();
-        AppDispatcher cloud = new AppDispatcher();
-        //create model
+        Thread embedded_thread = new Thread(){
+            public void run(){
+                AppDispatcher embedded = new AppDispatcher("EMD");
+            }
+        };
 
-        //create endpoint
-        Endpoint ep_embedded = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
-        Endpoint ep_gateway = new Endpoint("Gateway", Endpoint.TYPE.SOCKET);
-        Endpoint ep2_cloud = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
-        //create driver
-        AndroidDriver embeddedDriver = new AndroidDriver(embedded);
-        embeddedDriver.register_endpoint(ep_gateway);
-        AndroidDriver androidDriver = new AndroidDriver(gateway);
-        androidDriver.register_endpoint(ep_embedded);
-        androidDriver.register_endpoint(ep2_cloud);
-        AndroidDriver cloudDriver = new AndroidDriver(cloud);
-        cloudDriver.register_endpoint(ep_gateway);
+        embedded_thread.start();
+
+        Thread gateway_thread = new Thread(){
+            public void run(){
+                AppDispatcher gateway = new AppDispatcher("GTW");
+            }
+        };
+
+        gateway_thread.start();
+
+        Thread cloud_thread = new Thread(){
+            public void run(){
+                AppDispatcher cloud = new AppDispatcher("CLD");
+            }
+        };
+
+        cloud_thread.start();
+
+
+
+
 
         //test diver
-        androidDriver.rx_data_from_socket(getTestPacket());
+       // androidDriver.rx_data_from_socket(getTestPacket());
         //test model API
 
         //test controller API
 
         //testRavelPacket();
 
-        try{
-            Thread.sleep(10000);
-        }  catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

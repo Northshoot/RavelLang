@@ -65,6 +65,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSpace_assigment(RavelParser.Space_assigmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#ref_assign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRef_assign(RavelParser.Ref_assignContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#simple_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSimple_expression(RavelParser.Simple_expressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ModelInstantiation}
 	 * labeled alternative in {@link RavelParser#models_scope}.
 	 * @param ctx the parse tree
@@ -77,6 +89,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitInstantiations(RavelParser.InstantiationsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#instance_line}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_line(RavelParser.Instance_lineContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Instance}
 	 * labeled alternative in {@link RavelParser#instance_def}.
@@ -169,6 +187,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProperties(RavelParser.PropertiesContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#property_line}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProperty_line(RavelParser.Property_lineContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code VarAssignment}
 	 * labeled alternative in {@link RavelParser#property}.
 	 * @param ctx the parse tree
@@ -200,6 +224,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFields(RavelParser.FieldsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#field_line}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitField_line(RavelParser.Field_lineContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FieldDeclaration}
 	 * labeled alternative in {@link RavelParser#field}.
@@ -320,12 +350,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAssignment(RavelParser.AssignmentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#ref_assign}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitRef_assign(RavelParser.Ref_assignContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#lvalue_expression}.
 	 * @param ctx the parse tree

@@ -9,8 +9,9 @@ import java.util.TimerTask;
 /**
  * Created by lauril on 1/23/17.
  */
-public class ModelController extends ModelCtrl {
+public class ModelController {
 
+    protected String mName ;
     //AUTOGEN: models that controller is using
     private Model mModel;
 
@@ -25,27 +26,40 @@ public class ModelController extends ModelCtrl {
     ControllerNameTimerNameTask timerTask;
 
 
-
+    public boolean start = false;
     public ModelController(Model model){
+
         //AUTOGEN: bind models
         this.mModel = model;
-        //AUTOGEN: set controller name
-        name = "ModelController";
         //AUTOGEN: set controller to the model for callbacks
         mModel.setController(this);
 
         //AUTOGEN:create timers
         //We set DThread to true.
         //A daemon thread will execute only as long as the rest of the program continues to execute.
-        controller_timer_1 = new Timer("timer_name", false);
-        timerTask = new ControllerNameTimerNameTask(this);
-        controller_timer_1.scheduleAtFixedRate(timerTask,0,1000);
+    }
 
+    public void setName(String name){
+        this.mName = name;
+    }
+
+    //TEMP: start the timer
+    public void start_timer(){
+        controller_timer_1.scheduleAtFixedRate(timerTask,0,1000);
     }
 
     public void ControllerNameTimerNameTask_call_back(){
-        System.out.println("Callback: tick" );
+        //create a record and save it.
+        Model.Record rec = mModel.create();
+        rec.field1 = 1;
+        rec.field2 = rec.field1 + 2;
+        rec.field3 = rec.field2 * 3;
+        rec.field4 = rec.field3 / 2;
+        Context ctx = mModel.save(rec);
+
+        System.out.println(ctx.mError);
     }
+
     public void arrived(Context ctx){
         System.out.println(ctx);
     }
@@ -68,7 +82,17 @@ public class ModelController extends ModelCtrl {
      * AUTOGEN methods that controller subscribes in Ravel
      */
     public void system_started() {
-        System.out.println("System Started");
+        controller_timer_1 = new Timer("timer_name_"+this.mName, false);
+        timerTask = new ControllerNameTimerNameTask(this);
+        //TODO: test only in simulation
+        System.out.println("Controller {" + this.mName +"} started: " + start);
+        if(start) {
+            start_timer();
+        }
+    }
+
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -86,7 +110,6 @@ public class ModelController extends ModelCtrl {
             this.mcrt = mcrt;
         }
         public void run(){
-            System.out.println("Running timer task with counter: "+ counter++);
             mcrt.ControllerNameTimerNameTask_call_back();
         }
 
