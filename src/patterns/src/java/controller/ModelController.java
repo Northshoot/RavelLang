@@ -24,7 +24,7 @@ public class ModelController {
 
     //AUTOGEN: timer tasks
     ControllerNameTimerNameTask timerTask;
-
+    boolean controller_timer_1_running=false;
 
     public boolean start = false;
     public ModelController(Model model){
@@ -45,6 +45,7 @@ public class ModelController {
 
     //TEMP: start the timer
     public void start_timer(){
+        controller_timer_1_running = true;
         controller_timer_1.scheduleAtFixedRate(timerTask,0,1000);
     }
 
@@ -65,11 +66,14 @@ public class ModelController {
     }
 
     public void departed(Context ctx){
+        if(!controller_timer_1_running) start_timer();
         System.out.println(ctx);
 
     }
 
     public void full(Context ctx){
+        controller_timer_1.cancel();
+        controller_timer_1_running = false;
         System.out.println(ctx);
 
     }

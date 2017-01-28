@@ -144,7 +144,11 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     private void addRecord(Model.Record r){
         //if durable save to disk
         mRecords[current_pos++]=r;
-        System.out.println("Added record to the buffer");
+        Context ctx = new Context();
+        ctx.mError = Error.OUT_OF_STORAGE;
+        if(current_pos == mSize) {
+            mModelListeners.forEach((k,v) -> v.full(ctx));
+        }
     }
 
     public void setController(ModelController controller) {
@@ -217,10 +221,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
     public Model.Record create(){
         //contract: if current not last
         //return empty record
-        if(current_pos < mSize){
-            return new Record();
-        }
-        return null;
+        return new Record();
     }
 
     public Context save(Record rec){

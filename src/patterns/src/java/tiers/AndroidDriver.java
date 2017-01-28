@@ -29,17 +29,20 @@ public class AndroidDriver extends Driver{
     }
     public Context send_data(byte[] data, Endpoint endpoint) {
         //send data to the right channel
+        Context ctx = new Context();
         if(endpoint.getType() == Endpoint.TYPE.SOCKET){
             try {
                 //TODO: mmmrm not the best way to keep reconnecting
                 clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
                 clientSocket.getOutputStream().write(data);
                 clientSocket.close();
+                ctx.mError = Error.SUCCESS;
             } catch (IOException e) {
-                e.printStackTrace();
+                endpoint.setDisconnected();
+                ctx.mError = Error.WAITING_FOR_NETWORK;
             }
         }
-        return null;
+        return ctx;
     }
 
     public void register_endpoint(Endpoint endpoint){
