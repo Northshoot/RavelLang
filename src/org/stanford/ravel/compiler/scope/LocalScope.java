@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public class LocalScope extends BaseScope {
+    private String mName;
 
-    String mName;
     public LocalScope(String name, Scope enclosingScope) {
-        super(enclosingScope);
+        super();
+        setEnclosingScope(enclosingScope);
         this.mName = name;
     }
 

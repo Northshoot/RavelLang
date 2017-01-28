@@ -1,5 +1,6 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.primitives.Fields.Field;
 
 import java.util.*;
@@ -8,47 +9,59 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Model extends ParametrizedComponent {
+public class Model extends Primitive {
+    public enum Type {
+        LOCAL, STREAMING, REPLICATED, INVALID;
+    }
 
     private static Logger LOGGER = Logger.getLogger(Model.class.getName());
     private String mComment = "Default comments";
 
+    private final ModelSymbol symbol;
+    private final Type mModelType;
 
-
-
-    public enum Type { LOCAL, STREAMING, REPLICATED, tINVALID }
-
-    Model.Type mModelType;
-    Controller mController = null;
-
-    private Map<String, Field> mFields = new LinkedHashMap<>();
-    private Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
+    private final Map<String, Field> mFields = new LinkedHashMap<>();
+    private final Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
 
     /**
      * the provided api
      */
-    private String mArrived="arrived";
-    private String mDeparted="departed";
-    private String mCreate="create";
-    private String mSaveDone="save";
-    private String mBufferSaveDone="bufferSave";
-    private String mFull="full";
-    private String mDelete="delete";
-    private String mGet="get";
-    private String mFirst="first";
-    private String mLast="last";
-    private String mDestroy="destroy";
-    private Map<String, String> mEvents;
+    private final String mArrived="arrived";
+    private final String mDeparted="departed";
+    private final String mCreate="create";
+    private final String mSaveDone="save";
+    private final String mBufferSaveDone="bufferSave";
+    private final String mFull="full";
+    private final String mDelete="delete";
+    private final String mGet="get";
+    private final String mFirst="first";
+    private final String mLast="last";
+    private final String mDestroy="destroy";
+    private final Map<String, String> mEvents = new LinkedHashMap<>();
 
     //TODO: implement builder pattern
-    public Model(String name, Model.Type t){
+    public Model(String name, ModelSymbol symbol) {
         super(name,name+"Model");
-        mEvents = new LinkedHashMap<>();
+
+        this.symbol = symbol;
+        this.mModelType = symbol.getModelType();
+
         //TODO: implement real error handling
-        if (t == Type.tINVALID ) {
-            LOGGER.severe("Invalid model type! ");
+        if (mModelType == Type.INVALID) {
+            LOGGER.severe("Invalid model type!");
         }
-        this.mModelType = t;
+    }
+
+    public InstantiatedModel instantiate(Space space, Map<String, Object> parameters) {
+        InstantiatedModel instantiated = new InstantiatedModel(space, this);
+        instantiated.setManyParam(parameters);
+        // TODO: check types of parameters
+        // TODO: check that all parameters are set
+        return instantiated;
+    }
+
+    public org.stanford.ravel.compiler.types.Type getType() {
+        return symbol.getDefinedType();
     }
 
     public String getModelName(){
@@ -130,28 +143,13 @@ public class Model extends ParametrizedComponent {
         return mEvents.get(mFull);
     }
 
-    /**
-     * we only support one controller now
-     * TODO: add suport for multiple controllers
-     * @param ctr
-     */
-    public void addController(Controller ctr){
-        this.mController = ctr;
-        mEvents.put(mArrived, getCName()  +  "__" + mController.getCName() + "__arrived");
-        mEvents.put(mDeparted,getCName() + "__" + mController.getCName() + "__departed");
-        mEvents.put(mSaveDone,getCName()  +  "__" + mController.getCName() +"__saveDone");
-        mEvents.put(mBufferSaveDone, getCName() + "__" + mController.getCName() + "__bufferSaveDone");
-        mEvents.put(mFull,getCName() + "__" + mController.getCName() +  "__full");
-    }
-
-    public Model.Type getModelType() {
+    public Type getModelType() {
         return mModelType;
     }
 
     public List<Field> getFields() {
         return new ArrayList<>(mFields.values());
     }
-
 
     public boolean isStreaming(){
         return getModelType() == Type.STREAMING;
@@ -177,8 +175,8 @@ public class Model extends ParametrizedComponent {
         f.addAll(mFields.values());
         return f;
     }
-    public void addField(String name, Field mFields) {
-        this.mFields.put(name, mFields);
+    public void addField( Field field) {
+        this.mFields.put(field.getName(), field);
     }
 
 
@@ -186,16 +184,6 @@ public class Model extends ParametrizedComponent {
     public void setProperty(Variable v) {
         LOGGER.info("Property: " + v);
         this.mPropertiesMap.put(v.getName(), v);
-    }
-
-    public int getSizeInt(){
-        String size = mParameterMap.get("size");
-        Integer.parseInt(size);
-        return Integer.parseInt(size);
-    }
-
-    public String getSize(){
-        return mParameterMap.get("size");
     }
 
     public int getsizeCbuffer(){
@@ -207,7 +195,6 @@ public class Model extends ParametrizedComponent {
         }
         return total;
     }
-
 
     @Override
     public String toString(){
@@ -234,7 +221,7 @@ public class Model extends ParametrizedComponent {
                 return "Invalid";
         }
     }
-    public static Model.Type getType(String name){
+    public static Type getType(String name){
         switch ( name ){
             case "local":
                 return Type.LOCAL;
@@ -243,7 +230,7 @@ public class Model extends ParametrizedComponent {
             case "replicated":
                 return Type.REPLICATED;
             default:
-                return Type.tINVALID;
+                return Type.INVALID;
         }
     }
 }

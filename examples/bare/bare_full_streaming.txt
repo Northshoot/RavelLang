@@ -1,0 +1,58 @@
+streaming model Random(size):
+    properties:
+        durable=False
+        reliable=False
+        records = size
+
+    schema:
+        value = IntegerField()
+
+
+controller RandomControllerEmbedded(random: Random, timer, boot : event):
+    number frequency = 1000
+    boolean running = False
+
+    event boot.booted(Context ctx):
+        if ctx.error is SUCCESS:
+            timer.start_periodic(frequency)
+            running = True
+
+    event mFreq.arrived(context ctx):
+        pass
+
+    event timer.fired(context ctx):
+        rand = mRandom.create()
+        rand.value = random_source.read()
+        rand.save()
+
+    event random.full(context ctx):
+        random_timer.stop()
+        running = False
+
+    event random.departed(context ctx):
+        if not running:
+            random_timer.start_periodic(frequency)
+            running = True
+
+    event random.save_done(Context ctx):
+        pass #need to delete stuff
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+
+
+    models:
+        random=Random(size=10)
+        frequency=Frequency(size=1)
+        boor_error = BootError()
+
+    controllers:
+        rndcnt = RandomControllerEmbedded(random = random)
+
+    sources:
+        random = platform.source.random
+

@@ -1,0 +1,4 @@
+import "class.stg"
+file(package,className) ::=<<
+<class(package,className,"Model")>
+>>

@@ -251,7 +251,25 @@ controller AppSystem(tier):
             sink.write(rec)
 
 
-    event embedded_config.arrived(Context ctx):
+    class Model {
+        public Record record;
+        public Error error;
+
+        public static Record create() {
+
+        }
+    };
+
+    event embedded_config.arrived():
+        if self.error is SUCCESS:
+            rec = self.record
+
+            rec.x
+            rec.y
+
+        rec2 = self.create()
+        rec3 = embedded_config.create()
+
         if ctx.error is SUCCESS:
             rec = ctx.getModel()
             sink.write(rec)

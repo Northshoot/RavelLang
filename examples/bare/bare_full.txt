@@ -49,6 +49,3 @@ space EmbeddedSpace:
         boot = platform.system.boot
         timer = platform.system.timer
 
-
-
-

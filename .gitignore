@@ -4,3 +4,6 @@ out/*
 */rout/*
 out/
 rout/
+
+.idea/workspace.xml
+lib/*

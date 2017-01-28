@@ -22,6 +22,7 @@
 package com.wolfssl;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import static org.junit.Assert.*;
@@ -33,7 +34,7 @@ public class WolfCryptECCTest {
     ECC ecc;
 
     @Test
-    public void testECC() throws WolfSSLException {
+    public void testECC() throws com.wolfssl.WolfSSLException {
 
         System.out.println("ECC Class");
 

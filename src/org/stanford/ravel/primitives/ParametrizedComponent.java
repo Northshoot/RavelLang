@@ -6,35 +6,26 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 10/6/16.
  */
-public class ParametrizedComponent extends Primitive{
+class ParametrizedComponent extends Primitive {
     private static Logger LOGGER = Logger.getLogger(ParametrizedComponent.class.getName());
 
-    protected Map<String,String> mParameterMap = new LinkedHashMap<>();
-    public ParametrizedComponent(String name, String internalName) {
+    private Map<String, Object> mParameterMap = new LinkedHashMap<>();
+    ParametrizedComponent(String name, String internalName) {
         super(name, internalName);
     }
 
-
-    public void addParam(String text) {
-        mParameterMap.put(text, null);
+    public void setParam(String key, Object value){
+        mParameterMap.put(key, value);
     }
 
-    public void setParam(String key, String value){
-        if(mParameterMap.containsKey(key)){
-            mParameterMap.put(key, value);
-        } else {
-            LOGGER.severe("No such paramer in the mParameterMap");
-            throw new NoSuchElementException("Parameter with the name: " + key +
-                    " does not exist. Available options: " + mParameterMap.keySet());
-
-        }
+    void setManyParam(Map<? extends String, ?> map) {
+        mParameterMap.putAll(map);
+    }
+    Object getParam(String key) {
+        return mParameterMap.get(key);
     }
 
-    public boolean hasParam(String key){
+    public boolean isParamSet(String key) {
         return mParameterMap.containsKey(key);
-    }
-
-    public Set getParamsNames(){
-        return mParameterMap.keySet();
     }
 }

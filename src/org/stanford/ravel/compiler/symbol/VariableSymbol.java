@@ -1,9 +1,10 @@
 package org.stanford.ravel.compiler.symbol;
 
-public class VariableSymbol<T> extends BaseSymbol implements MemberSymbol{
+import org.stanford.ravel.compiler.ir.Registers;
+import org.stanford.ravel.compiler.types.Type;
 
-    private T value;
-    private boolean mArray = false;
+public class VariableSymbol extends BaseSymbol implements TypedSymbol {
+    private int register = Registers.UNSET_REG;
 
     public VariableSymbol(String name) {
         super(name);
@@ -14,16 +15,10 @@ public class VariableSymbol<T> extends BaseSymbol implements MemberSymbol{
         super.setType(type);
     }
 
-    public void setValue(T value){
-        this.value = value;
+    public void setRegister(int reg) {
+        register = reg;
     }
-
-    public T getValue() {return this.value ;}
-
-    public boolean isArray(){return mArray; }
-    public void setArray(){mArray = true ; }
-    @Override
-    public int getSlotNumber() {
-        return 0;
+    public int getRegister() {
+        return register;
     }
 }

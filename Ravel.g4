@@ -159,18 +159,34 @@ space_assignments returns [Symbol symbol]
     ;
 
 space_assigment
-    : ref_assig
+    : ref_assign
     | NEWLINE
+    ;
+
+// a simplified version of an assignment, to use in constant expression contexts
+// (eg. in model and space declarations)
+ref_assign
+    : qualified_name '=' simple_expression
+    ;
+
+simple_expression
+    : literal
+    | qualified_name
     ;
 
 models_scope returns [Scope scope]
     : 'models:' instantiations #ModelInstantiation
     ;
 instantiations
-    : NEWLINE INDENT instance_def+ DEDENT
+    : NEWLINE INDENT instance_line+ DEDENT
     ;
 
-instance_def returns [Symbol symbol]
+instance_line
+    : instance_def
+    | NEWLINE
+    ;
+
+instance_def returns [InstanceSymbol symbol]
     : Identifier '=' instance_name '(' param_assig_list? ')' NEWLINE? #Instance
     ;
 
@@ -182,7 +198,7 @@ param_assig
     : Identifier '=' param_val
     ;
 
-param_val : literal | SELF;
+param_val : simple_expression;
 
 instance_name
     : Identifier
@@ -225,7 +241,12 @@ properties_block returns [Scope scope]
     : 'properties:' properties #PropertiesScope
     ;
 properties
-    : NEWLINE INDENT property+ DEDENT
+    : NEWLINE INDENT property_line+ DEDENT
+    ;
+
+property_line
+    : property
+    | NEWLINE
     ;
 
 property
@@ -246,7 +267,12 @@ schema_block returns [Scope scope]
     ;
 
 fields
-    : NEWLINE INDENT field+ DEDENT
+    : NEWLINE INDENT field_line+ DEDENT
+    ;
+
+field_line
+    : field
+    | NEWLINE
     ;
 
 field
@@ -278,16 +304,11 @@ field_type
  */
 
 controller_comp returns [Scope scope]
-    : CONTROLLER Identifier component_parameters ':' controller_scope # ControllerScope
+    : CONTROLLER Identifier function_args ':' controller_scope # ControllerScope
     ;
 
 controller_scope
-    : NEWLINE INDENT controller_body+ DEDENT
-    ;
-
-controller_body
-    : eventdef // can only be events
-    | blockStatement
+    : NEWLINE INDENT eventdef+ DEDENT
     ;
 
 /**
@@ -296,46 +317,194 @@ controller_body
  */
 
 eventdef returns [Scope scope]
-    : EVENT qualified_name  function_args ':' block_stmt #EventScope
+    : EVENT Identifier '.' Identifier  function_args ':' block_stmt #EventScope
     ;
 
-block_stmt
-    : NEWLINE INDENT blockStatement+ DEDENT #Block
-    ;
-//TODO: prevent controll flow in the controller block
-blockStatement
-    : ref_assig // reference
-    | variable // or variable assignment
-    | funct_expr
-    | comp_stmt
-    | NEWLINE
+block_stmt returns [Scope scope]
+    : NEWLINE INDENT statement+ DEDENT #Block
     ;
 
-comp_stmt
-    : while_stmt
-    | if_stmt
+statement
+    : var_decl
+    | assignment
+    | expression // expression statement (eg function call)
     | del_stmt
+    | while_stmt
+    | if_stmt
     | for_stmt
+    | break_stmt
+    | continue_stmt
     | NEWLINE
     ;
+
 del_stmt
-    : DELETE funct_expr #DeleteStmt
+    : DELETE lvalue_expression #DeleteStmt
     ;
 
-variable
-    :   Identifier '=' variableInitializer
+break_stmt
+    : BREAK
     ;
 
-variableInitializer
-    :   arrayInitializer
-    |   expression
+continue_stmt
+    : CONTINUE
     ;
-arrayInitializer
-    :   '[' (variableInitializer (',' variableInitializer)* (',')? )? ']'
+
+lvalue
+    : lvalue_expression (',' lvalue_expression)*
     ;
+
+assign_op
+    : '=' | '+=' | '-=' | '*=' | '/=' ;
+
+ident_decl
+    : Identifier (':' type)?
+    ;
+
+identifier_list
+    : ident_decl (',' ident_decl )*
+    ;
+
+typed_ident_decl
+    : Identifier ':' type #TypedIdentDecl
+    ;
+
+typed_identifier_list
+    : typed_ident_decl (',' typed_ident_decl )*
+    ;
+
+var_decl
+    : identifier_list ('=' expressionList)?
+    ;
+
+type
+    : Identifier ;
+
+assignment
+    : lvalue assign_op expressionList
+    ;
+
+// an expression that evaluates to an lvalue:
+// could be an identifier, an expression followed by member access,
+// or an expression followed by array access
+lvalue_expression
+    : Identifier
+    | primary '.' Identifier
+    | primary '[' expression ']'
+    ;
+
+expressionList
+    :   expression (',' expression)*
+    ;
+
+atom
+    : '(' expression ')'
+    | Identifier
+    | literal
+    | array_literal
+    ;
+
+array_literal
+    : '[' (expressionList (',')?)? ']'
+    ;
+
+method_call
+    : '.' Identifier '(' expressionList? ')' ;
+
+primary
+    : atom access_op*
+    ;
+
+access_op
+    : array_access
+    | method_call
+    | member_access
+    ;
+
+member_access
+    : '.' Identifier ;
+
+array_access
+    : '[' expression ']' ;
+
+power_exp
+    : primary ('**' unary_exp)? ;
+
+unary_op : '-' | '+' | '~' ;
+unary_exp
+    : power_exp
+    | unary_op unary_exp
+    ;
+
+mult_op : '*' | '/' | '//' | '%' ;
+mult_exp
+    : unary_exp
+    | mult_exp mult_op unary_exp
+    ;
+
+add_op : '+' | '-' ;
+add_exp
+    : mult_exp
+    | add_exp add_op mult_exp
+    ;
+
+shift_op : '<<' | '>>' ;
+shift_exp
+    : add_exp
+    | shift_exp shift_op add_exp
+    ;
+
+bin_and_exp
+    : shift_exp
+    | bin_and_exp '&' shift_exp
+    ;
+bin_xor_exp
+    : bin_and_exp
+    | bin_xor_exp '^' bin_and_exp
+    ;
+bin_or_exp
+    : bin_xor_exp
+    | bin_or_exp '|' bin_xor_exp
+    ;
+
+comp_op
+    : GT
+    | LT
+    | EQUAL
+    | LE
+    | GE
+    | NOTEQUAL
+    //| IN
+    //| NOT IN
+    //| IS
+    //| IS NOT
+    ;
+comp_exp
+    : bin_or_exp (comp_op bin_or_exp)*
+    ;
+
+not_exp
+    : comp_exp
+    | NOT not_exp
+    ;
+
+and_exp
+    : not_exp
+    | and_exp AND not_exp
+    ;
+
+or_exp
+    : and_exp
+    | or_exp OR and_exp
+    ;
+
+expression
+    : or_exp
+    ;
+
+
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
-while_stmt returns [Scope scope]
- : WHILE comp_expr ':' block_stmt #WhileStatement
+while_stmt
+ : WHILE expression ':' block_stmt #WhileStatement
  ;
 
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
@@ -343,69 +512,17 @@ for_stmt returns [Scope scope]
      : FOR forControl ':' block_stmt #ForStatement
      ;
 
-
 if_stmt returns [Scope scope]
-    : IF comp_expr ':' block_stmt ( ELIF comp_expr ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
+    : IF expression ':' block_stmt ( ELIF expression ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
     ;
 
-comp_expr
-    : or_test ( IF or_test ELSE comp_expr )?
-    ;
-
-or_test
- : and_test ( OR and_test )* #OrTest
- ;
-
-/// and_test: not_test ('and' not_test)*
-and_test
-     : not_test ( AND not_test )* #AndTest
-     ;
-
-not_test
-     : NOT not_test #NotTest
-     | comparison #CompRule
-     ;
-
-//we only allow one comparison
-comparison
-    : expr comp_op expr
-    ;
-expr
-    : atom //this is prep for future to implement advance comparisons
-    ;
-atom
-    : Identifier
-    | number
-    | boolean_rule
-    | qualified_name
-    ;
 //for_stmt
 // : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
 // ;
 forControl
-    :   exprlist IN testlist
+    :   identifier_list IN expressionList
     ;
 
-exprlist
-    :   variable
-    |   expressionList
-    ;
-
-testlist
-    :   expressionList
-    ;
-function_args
-    : '(' functionArgsList? ')'
-    ;
-functionArgsList
-    :functionArg (',' functionArg)?
-    ;
-whileControl
-    : comp_expr  #WhileStmt
-    ;
-functionArg
-    : Identifier Identifier
-    ;
 component_parameters
     : '(' params? ')'
     ;
@@ -413,7 +530,7 @@ params
     : param (',' param)?
     ;
 param
-    : qualified_name
+    : Identifier
     ;
 elementValuePairs
     :   elementValuePair (',' elementValuePair)*
@@ -430,79 +547,18 @@ elementValueArrayInitializer
     :   '{' (elementValue (',' elementValue)*)? (',')? '}'
     ;
 
-
-expressionList
-    :   expression (',' expression)*
-    ;
-increament_expr
-    : Identifier '++'
-    ;
-decrement_exp
-    : Identifier '--'
-    ;
-expression
-    :   primary
-    | NEWLINE
-    ;
-
-primary
-    : '(' expression ')'
-    | 'self'
-    | literal
-    | qualified_name
-    ;
-//reference is a dottend name accesesing scopes
-ref_assig_list
-    :ref_assig (',' ref_assig)? #ReferenceAssignmentsList
-    ;
-
-ref_assig
-    : reference_name '=' reference_value  #ReferenceAssignment
-    ;
-reference_name: qualified_name;
-reference_value: qualified_name | SELF ;
-
-funct_expr
-    : func_no_return
-    | func_with_return
-    ;
-
-func_no_return
-    : function_name component_parameters  #FunctionRet
-    ;
-
-function_name
-    : qualified_name
-    ;
-func_with_return
-    : ident '=' func_no_return  #FunctionWithReturn
-    ;
-
-ident
-    : Identifier
-    | qualified_name
-    ;
 qualified_name
-    :   Identifier ('.' Identifier)*
+    : Identifier ('.' Identifier)*
     ;
-comp_op
-    : GT
-    | LT
-    | EQUAL
-    | LE
-    | GE
-    | NOTEQUAL
-    | IN
-    | NOT IN
-    | IS
-    | IS NOT
+
+function_args
+    : '(' typed_identifier_list? ')'
     ;
 
 /*
  * lexer rules
  */
  // Keywords
-SELF                : 'self' ;
 MODEL               : 'model' ;
 SPACE               : 'space' ;
 CONTROLLER          : 'controller' ;
@@ -589,13 +645,20 @@ NEWLINE
 literal
     : number
     | boolean_rule
-    | string
-    | Identifier
-    | NullLiteral
+    | STRING_LITERAL
     ;
-string
-    : '"' Identifier? '"'
+
+/// string     ::=  "'" stringitem* "'" | '"' stringitem* '"'
+STRING_LITERAL
+    : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
+    | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
     ;
+
+/// stringescapeseq ::=  "\" <any source character>
+fragment STRING_ESCAPE_SEQ
+ : '\\' .
+ ;
+
 number
      : integer
      | float_point
