@@ -127,7 +127,7 @@ public class RavelCompiler {
 
                 TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
                 if (ir != null) {
-                    EventHandler event = new EventHandler(modelVar, eventSym.getEvent(), ir);
+                    EventHandler event = new EventHandler(modelVar, eventSym.getType(), ir);
                     controller.addEvent(event);
                 }
             }

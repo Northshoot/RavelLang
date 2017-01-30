@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.types;
 
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.primitives.ModelEvent;
 
 /**
  * The type of a model object.
@@ -30,11 +31,15 @@ public class ModelType extends ClassType {
         super(symbol.getName());
 
         recordType = new RecordType(symbol.getName() + "::Record");
-
-        this.addStaticMethod("create", new Type[0], recordType);
-        this.addMethod("save", new Type[]{recordType}, PrimitiveType.VOID);
-
         ctxType = new ContextType(this);
+
+        this.addMethod("save", new Type[]{recordType}, PrimitiveType.VOID);
+        this.addStaticMethod("create", new Type[0], recordType);
+
+        for (ModelEvent e : ModelEvent.values()) {
+            this.addEvent(e.name(), new Type[]{}, PrimitiveType.VOID, ctxType, e);
+        }
+
     }
 
     public ModelSymbol getSymbol() {
@@ -44,6 +49,4 @@ public class ModelType extends ClassType {
     public StructType getRecordType() {
         return recordType;
     }
-
-    public CompoundType getContextType() { return ctxType; }
 }

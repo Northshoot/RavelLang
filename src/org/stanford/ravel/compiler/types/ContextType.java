@@ -2,33 +2,37 @@ package org.stanford.ravel.compiler.types;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The type of "self" in an event handler
  *
  * Created by gcampagn on 1/29/17.
  */
-public class ContextType implements CompoundType {
-    private final ModelType model;
+class ContextType implements CompoundType {
+    private final ClassType component;
 
-    public ContextType(ModelType model) {
-        this.model = model;
+    ContextType(ClassType model) {
+        this.component = model;
     }
 
     @Override
     public Collection<String> getMemberList() {
-        return Arrays.asList("record", "error", "model");
+        if (component instanceof ModelType)
+            return Arrays.asList("record", "error");
+            return Collections.singletonList("error");
     }
 
     @Override
     public Type getMemberType(String member) {
         switch (member) {
-            case "record":
-                return model.getRecordType();
             case "error":
                 return PrimitiveType.ERROR_MSG;
-            case "model":
-                return model.getInstanceType();
+            case "record":
+                if (component instanceof ModelType)
+                    return ((ModelType) component).getRecordType();
+                else
+                    return null;
             default:
                 return null;
         }
@@ -41,6 +45,6 @@ public class ContextType implements CompoundType {
 
     @Override
     public String getName() {
-        return this.model.getName() + "::Context";
+        return this.component.getName() + "::Context";
     }
 }

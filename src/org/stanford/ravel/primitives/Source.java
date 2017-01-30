@@ -2,16 +2,16 @@ package org.stanford.ravel.primitives;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lauril on 8/16/16.
  */
-public class Source extends Primitive{
+public class Source extends Primitive {
 
     private String identifier;
     private String resolve;
     private String mInitCallName = null;
-    private Controller mController = null;
     private List<String> mCallBacks = new ArrayList<>();
 
     public Source(String name, String res) {
@@ -20,13 +20,16 @@ public class Source extends Primitive{
         resolve = res;
     }
 
-    public void source(String name, String resolve){
-            this.identifier = name;
-            this.resolve = resolve;
-        }
+    public InstantiatedSource instantiate(Space space, Map<String, Object> parameters, String varName) {
+        InstantiatedSource instantiated = new InstantiatedSource(space, this, varName);
+        instantiated.setManyParam(parameters);
+        // TODO: check types of parameters
+        // TODO: check that all parameters are set
+        return instantiated;
+    }
 
     public boolean hasInit(){
-        if(mInitCallName == null ){
+        if (mInitCallName == null ){
             return false;
         } else {
             return true;
@@ -42,15 +45,6 @@ public class Source extends Primitive{
     }
         public String getSinkIdentifier() {return this.identifier; }
         public String getSinkReference() {return this.resolve; }
-
-    public void addController(Controller controller) {
-        mController = controller;
-        mName = controller.getCName()+"__"+mName;
-    }
-
-    public Controller getController() {
-        return mController;
-    }
 
     public void addCallBack(String callbackname){
         mCallBacks.add(callbackname);

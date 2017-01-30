@@ -65,6 +65,7 @@ public class nrf52Platform extends ConcretePlatform{
         mFiles.addAll(mBoot.getFiles());
     }
 
+    /*
     public void addSourceTimer(String timer_name, Source src){
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
@@ -73,6 +74,7 @@ public class nrf52Platform extends ConcretePlatform{
         src.setInitCallName(tQueue.innit_name);
         tQueue.addTimer(src, true);
     }
+    */
 
     public void addSourceVibration(String name, Source src){
         //TODO: implement sources
@@ -89,6 +91,7 @@ public class nrf52Platform extends ConcretePlatform{
     public void addSourceRandom(String name, Source src) {
 
     }
+    /*
     public void  addSourcePeriodicTimer(String name, Source src) {
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
@@ -96,6 +99,7 @@ public class nrf52Platform extends ConcretePlatform{
         src.setInitCallName(tQueue.innit_name);
         tQueue.addTimer(src, true);
     }
+    */
     public static boolean providesAPI(String v){
         return VERSION.contentEquals(v);
     }
@@ -113,7 +117,8 @@ public class nrf52Platform extends ConcretePlatform{
         setPath(buildPath);
         mMainApp = new MainApp(mBuildPath, mSpace);
         //TODO: add a check first that api provides methods
-        for(Source src: s.getSources()){
+        /*
+        for (Source src: s.getSources()){
             // get the method
             String n = src.getSinkReference().replace("platform.system.", "");
             String name = "addSource" + n.substring(0, 1).toUpperCase() + n.substring(1);
@@ -132,6 +137,7 @@ public class nrf52Platform extends ConcretePlatform{
                 e.printStackTrace();
             }
         }
+        */
         for(InstantiatedController c: mSpace.getControllers()){
             ControllerImpl cImp = new ControllerImpl(c, mMainApp);
             mFiles.addAll(cImp.getFiles());

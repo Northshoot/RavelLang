@@ -1,7 +1,5 @@
 package org.stanford.ravel.primitives;
 
-import org.stanford.ravel.compiler.symbol.VariableSymbol;
-
 import java.util.*;
 
 /**
@@ -31,16 +29,29 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
     }
 
     public Collection<InstantiatedModel> getLinkedModels() {
-        Set<InstantiatedModel> models = new HashSet<>();
-        for (LinkedEvent event : mLinkedEvents)
-            models.add(event.getModel());
-        return models;
+        return getLinkedComponents(InstantiatedModel.class);
+    }
+    public Collection<InstantiatedSource> getLinkedSources() {
+        return getLinkedComponents(InstantiatedSource.class);
+    }
+    public Collection<InstantiatedSink> getLinkedSink() {
+        return getLinkedComponents(InstantiatedSink.class);
     }
 
-    public void linkEvent(EventHandler event, InstantiatedModel model) {
-        LinkedEvent linkedEvent = new LinkedEvent(this, model, event);
+    private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
+        Set<E> components = new HashSet<E>();
+        for (LinkedEvent event : mLinkedEvents) {
+            if (ofClass.isInstance(event.getComponent())) {
+                components.add(ofClass.cast(event.getComponent()));
+            }
+        }
+        return components;
+    }
+
+    public void linkEvent(EventHandler event, EventComponent component) {
+        LinkedEvent linkedEvent = new LinkedEvent(this, component, event);
         mLinkedEvents.add(linkedEvent);
-        model.addLinkedEvent(linkedEvent);
+        component.addLinkedEvent(linkedEvent);
     }
 
     public Iterator<LinkedEvent> iterator() {

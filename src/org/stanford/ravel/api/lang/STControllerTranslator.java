@@ -44,7 +44,7 @@ public class STControllerTranslator implements ControllerTranslator {
         List<ConcreteEventHandler> eventHandlers = new ArrayList<>();
 
         for (EventHandler event : ctr) {
-            String name = event.getEvent().toString();
+            String name = event.getEventType().getKey().toString();
             Type model = event.getModelVar().getType();
             String modelName = model.getName();
 

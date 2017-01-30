@@ -3,18 +3,15 @@ package org.stanford.ravel.api.lang;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
-import org.stanford.ravel.compiler.symbol.InstanceSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
-import org.stanford.ravel.primitives.Fields.Field;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 

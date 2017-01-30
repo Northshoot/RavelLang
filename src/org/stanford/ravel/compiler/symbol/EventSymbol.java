@@ -1,25 +1,32 @@
 package org.stanford.ravel.compiler.symbol;
 
+import org.stanford.ravel.compiler.types.EventType;
+import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.ModelEvent;
 
 /**
  * Created by lauril on 8/25/16.
  */
-public class EventSymbol extends SymbolWithScope {
+public class EventSymbol extends SymbolWithScope implements TypedSymbol {
     private final String modelVarName;
-    private final ModelEvent event;
+    private EventType type;
 
-    public EventSymbol(String modelVarName, ModelEvent event) {
-        super(modelVarName + "." + event);
+    public EventSymbol(String modelVarName, String eventName) {
+        super(modelVarName + "." + eventName);
         this.modelVarName = modelVarName;
-        this.event = event;
     }
 
     public String getModelVarName() {
         return modelVarName;
     }
 
-    public ModelEvent getEvent() {
-        return event;
+    @Override
+    public EventType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(Type type) {
+        this.type = (EventType) type;
     }
 }

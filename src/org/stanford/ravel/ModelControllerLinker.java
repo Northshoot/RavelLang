@@ -50,7 +50,8 @@ public class ModelControllerLinker {
         }
         space.setPlatform(platform);
 
-        /** build sinks */
+        /*
+        // build sinks
         Map<String, ReferenceSymbol> sinks = ssb.getSink();
         for (ReferenceSymbol re: sinks.values()) {
             //TODO: is reference starting good?
@@ -64,7 +65,7 @@ public class ModelControllerLinker {
                         + reference);
             }
         }
-        /** build sources */
+        // build sources
         Map<String, ReferenceSymbol> source = ssb.getSource();
 
         for (ReferenceSymbol re: source.values()) {
@@ -78,10 +79,41 @@ public class ModelControllerLinker {
                 driver.emitError(new SourceLocation(re.getDefNode()), identifier + " refers to an unknown location "
                         + reference);
             }
-        }
+        }*/
 
-        /** build models */
+        // instantiate sinks
+        ssb.getSink().forEach((sName, rs) -> {
+            // get the sink
+            String sinkName = rs.getValue();
+            Sink s = app.getSink(sinkName);
+            if (s == null) {
+                driver.emitError(new SourceLocation(rs.getDefNode()), sinkName + " does not refer to a valid sink");
+                return;
+            }
 
+            // instantiate the sink on this space
+            // sinks don't have parameters (but they are ParametrizedComponent for consistency)
+            InstantiatedSink isink = s.instantiate(space, new HashMap<>(), rs.getName());
+            space.add(rs.getName(), isink);
+        });
+
+        // instantiate sources
+        ssb.getSource().forEach((sName, rs) -> {
+            // get the source
+            String sourceName = rs.getValue();
+            Source s = app.getSource(sourceName);
+            if (s == null) {
+                driver.emitError(new SourceLocation(rs.getDefNode()), sourceName + " does not refer to a valid source");
+                return;
+            }
+
+            // instantiate the source on this space
+            // sinks don't have parameters (but they are ParametrizedComponent for consistency)
+            InstantiatedSource isource = s.instantiate(space, new HashMap<>(), rs.getName());
+            space.add(rs.getName(), isource);
+        });
+
+        // instantiate models
         ssb.getModels().forEach((mName, is) -> {
             // add model and set all the parameters to the parameter map
 
@@ -98,7 +130,7 @@ public class ModelControllerLinker {
             space.add(is.getName(), im);
         });
 
-        /** build controllers */
+        // instantiate controllers
         ssb.getControllers().forEach((cName, is) -> {
             // get the controller
             String controllerName = is.getInstanceName();
@@ -170,10 +202,8 @@ public class ModelControllerLinker {
             space.add(is.getName(), ictr);
         });
 
-        // freeze all the models to build the derived state
-        for (InstantiatedModel im : space.getModels())
-            im.freeze();
-
+        // freeze the space to build the derived state
+        space.freezeAll();
         return space;
     }
 }

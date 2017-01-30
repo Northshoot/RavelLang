@@ -48,7 +48,7 @@ public abstract class BaseLanguage implements ConcreteLanguage {
 
     public List<FileObject> build(Space s) {
         this.buildPath = buildPath;
-        LOGGER.info("Building Space: " +s.mName);
+        LOGGER.info("Building Space: " +s.getName());
         createModels(s);
         createControllers(s);
         createDispatcher(s);
