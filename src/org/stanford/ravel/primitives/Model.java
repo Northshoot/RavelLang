@@ -52,8 +52,8 @@ public class Model extends Primitive {
         }
     }
 
-    public InstantiatedModel instantiate(Space space, Map<String, Object> parameters) {
-        InstantiatedModel instantiated = new InstantiatedModel(space, this);
+    public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
+        InstantiatedModel instantiated = new InstantiatedModel(space, this, varName);
         instantiated.setManyParam(parameters);
         // TODO: check types of parameters
         // TODO: check that all parameters are set

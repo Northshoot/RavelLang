@@ -145,22 +145,20 @@ public class STIRTranslator extends BaseIRTranslator {
     @Override
     public void visit(TMethodCall methodCall) {
         ST tmpl;
-        if (methodCall.target == Registers.VOID_REG)
-            tmpl = this.irGroup.getInstanceOf("void_method_call");
-        else
-            tmpl = this.irGroup.getInstanceOf("method_call");
+        if (methodCall.type.isStatic()) {
+            if (methodCall.target == Registers.VOID_REG)
+                tmpl = this.irGroup.getInstanceOf("void_function_call");
+            else
+                tmpl = this.irGroup.getInstanceOf("function_call");
+        } else {
+            if (methodCall.target == Registers.VOID_REG)
+                tmpl = this.irGroup.getInstanceOf("void_method_call");
+            else
+                tmpl = this.irGroup.getInstanceOf("method_call");
+        }
         tmpl.add("call", methodCall);
+        tmpl.add("ownerType", typeFormatter.toNativeType(methodCall.type.getOwner()));
         addCode(tmpl.render());
-    }
-
-    @Override
-    public void visit(TModelCreateCall modelCreateCall) {
-        // TODO
-    }
-
-    @Override
-    public void visit(TModelRecordLoad modelRecordLoad) {
-        // TODO
     }
 
     @Override

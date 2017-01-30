@@ -3,19 +3,18 @@ package org.stanford.ravel.api.lang;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
-import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.ClassType;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.symbol.InstanceSymbol;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.*;
+import org.stanford.ravel.primitives.*;
 import org.stanford.ravel.primitives.Fields.Field;
-import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.InstantiatedModel;
-import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -63,6 +62,8 @@ public class JLang extends BaseLanguage {
                 return toNativeType(((ArrayType) type).getElementType()) + "[]";
             } else if (type instanceof ClassType.InstanceType) {
                 return ((ClassType.InstanceType) type).getClassType().getName();
+            } else if (type instanceof ModelType.RecordType) {
+                return ((ModelType.RecordType) type).getModel().getName() + ".Record";
             } else {
                 return type.getName();
             }
@@ -73,11 +74,13 @@ public class JLang extends BaseLanguage {
     private final STGroup controllerGroup;
     private final STGroup modelGroup;
     private final STGroup irGroup;
+    private final STGroup dispatcherGroup;
 
     public JLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
         modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
         irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
+        dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
     }
 
     @Override
@@ -85,9 +88,71 @@ public class JLang extends BaseLanguage {
         return JavaLanguageOptions.getInstance();
     }
 
+    private void setPackage(FileObject file, String packageName) {
+
+    }
+
+    private CodeModule simpleModule(ST tmpl, String name, String packageName) {
+        tmpl.add("package", packageName);
+        FileObject file = new FileObject();
+        file.setFileName(name + ".java");
+        file.setSubPath("src/" + packageName.replace(".", "/"));
+        file.setContent(tmpl.render());
+        CodeModule module = new CodeModule();
+        module.addFile(file);
+        return module;
+    }
+
     @Override
     protected void createDispatcher(Space s) {
-        // TODO
+        // A helper class to pass down to StringTemplates
+        class ConcreteController {
+            public String name;
+            public String varName;
+            public final List<String> parameterValues = new ArrayList<>();
+        }
+
+        JavaLanguageOptions options = JavaLanguageOptions.getInstance();
+        ST tmpl = dispatcherGroup.getInstanceOf("file");
+        String packageName = options.getPackageName();
+
+        for (InstantiatedModel im : s.getModels())
+            tmpl.add("imports", packageName + ".models." + im.getName());
+        for (InstantiatedController ictr : s.getControllers())
+            tmpl.add("imports", packageName + ".controller." + ictr.getName());
+        tmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
+        tmpl.add("imports", RUNTIME_PKG + ".model.ModelBottomAPI");
+        tmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
+        tmpl.add("imports", RUNTIME_PKG + ".DispatcherAPI");
+        tmpl.add("imports", RUNTIME_PKG + ".SystemEventAPI");
+        tmpl.add("imports", RUNTIME_PKG + ".DriverAPI");
+        tmpl.add("imports", RUNTIME_PKG + ".SourceAPI");
+        tmpl.add("imports", RUNTIME_PKG + ".SinkAPI");
+
+        for (InstantiatedModel im : s.getModels())
+            tmpl.add("models", im);
+        for (InstantiatedController ictr : s.getControllers()) {
+            ConcreteController concrete = new ConcreteController();
+            concrete.name = ictr.getName();
+            concrete.varName = ictr.getVarName();
+
+            for (VariableSymbol sym : ictr.getController().getParameterSymbols()) {
+                Object pvalue = ictr.getParam(sym.getName());
+
+                if (pvalue instanceof InstantiatedModel) {
+                    concrete.parameterValues.add("model_" + ((InstantiatedModel) pvalue).getVarName());
+                } else if (pvalue instanceof Source) {
+                    concrete.parameterValues.add("src_" + ((Source) pvalue).getName());
+                } else if (pvalue instanceof Sink) {
+                    concrete.parameterValues.add("sink_" + ((Sink) pvalue).getName());
+                } else {
+                    concrete.parameterValues.add(JLITERAL.toLiteral(pvalue));
+                }
+            }
+            tmpl.add("controllers", concrete);
+        }
+
+        addModule(simpleModule(tmpl, "AppDispatcher", packageName));
     }
 
     @Override
@@ -96,18 +161,15 @@ public class JLang extends BaseLanguage {
         ST modelTmpl = modelGroup.getInstanceOf("file");
 
         String packageName = options.getPackageName() + ".models";
-        modelTmpl.add("package", packageName);
         modelTmpl.add("name", im.getName());
-        modelTmpl.add("imports", RUNTIME_PKG + ".Model");
+        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelCommandAPI");
+        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelBottomAPI");
+        modelTmpl.add("imports", RUNTIME_PKG + ".Context");
+        modelTmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
+        modelTmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
         modelTmpl.add("modelFields", im.getBaseModel().getFields());
 
-        CodeModule module = new CodeModule();
-        FileObject file = new FileObject();
-        file.setFileName(im.getName() + ".java");
-        file.setSubPath("src/" + packageName.replace(".", "/"));
-        file.setContent(modelTmpl.render());
-        module.addFile(file);
-        return module;
+        return simpleModule(modelTmpl, im.getName(), packageName);
     }
 
     @Override

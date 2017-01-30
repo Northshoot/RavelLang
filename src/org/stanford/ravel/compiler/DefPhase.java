@@ -252,7 +252,7 @@ public class DefPhase extends RavelBaseListener {
             return;
         }
 
-        selfVar.setType(((ModelType) modelType).getInstanceType());
+        selfVar.setType(((ModelType) modelType).getContextType());
         currentScope.define(selfVar);
     }
 

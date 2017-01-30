@@ -1,6 +1,7 @@
 package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.EventHandler;
@@ -48,16 +49,25 @@ public class STControllerTranslator implements ControllerTranslator {
             String modelName = model.getName();
 
             STIRTranslator translator = new STIRTranslator(irGroup, typeFormatter, literalFormatter);
-            translator.translate(event.getBody());
+            translator.translate(ctr.getParameterSymbols(), event.getBody());
 
             ConcreteEventHandler handler = new ConcreteEventHandler(name, modelName, translator.getCode());
             eventHandlers.add(handler);
+        }
+
+        List<String> paramNames = new ArrayList<>();
+        List<String> paramTypes = new ArrayList<>();
+        for (VariableSymbol sym : ctr.getParameterSymbols()) {
+            paramNames.add(sym.getName());
+            paramTypes.add(typeFormatter.toNativeType(sym.getType()));
         }
 
         CodeModule module = new CodeModule();
         for (FileConfig fc : controllerFiles) {
             ST tmpl = fc.tmpl;
             tmpl.add("eventHandlers", eventHandlers);
+            tmpl.add("paramNames", paramNames);
+            tmpl.add("paramTypes", paramTypes);
             FileObject fo = new FileObject();
             fo.setFileName(fc.fileName);
             fo.setContent(tmpl.render());

@@ -21,7 +21,7 @@ class ParametrizedComponent extends Primitive {
     void setManyParam(Map<? extends String, ?> map) {
         mParameterMap.putAll(map);
     }
-    Object getParam(String key) {
+    public Object getParam(String key) {
         return mParameterMap.get(key);
     }
 

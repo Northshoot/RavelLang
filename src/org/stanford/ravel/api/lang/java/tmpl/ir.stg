@@ -73,11 +73,19 @@ field_store(store) ::=<<
 
 >>
 
-void_method_call(call) ::=<<
-<call.object.name>(<call.arguments:{a|<a.name>}; separator=", ">);
+void_function_call(call, ownerType) ::=<<
+<ownerType>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>
-method_call(call) ::=<<
-<call.target.name> = <call.object.name>(<call.arguments:{a|<a.name>}; separator=", ">);
+function_call(call, ownerType) ::=<<
+<call.target.name> = <ownerType>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+void_method_call(call, ownerType) ::=<<
+<call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+method_call(call, ownerType) ::=<<
+<call.target.name> = <call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>

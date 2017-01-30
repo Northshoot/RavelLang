@@ -36,6 +36,14 @@ public class ValidateIR {
                 if (sink != Registers.VOID_REG) {
                     assert Registers.isNormal(sink);
                     assert ir.getRegisterType(sink).equals(sinkType);
+
+                    // this is not true always:
+                    // AstToUntypedIRVisitor will assign registers to the result of function calls,
+                    // even if those calls return void, in which case TypeResolvePass will set those
+                    // registers to VOID
+                    // if the user attempts to do anything with the result it will result in a type error
+                    // though
+                    //assert sinkType != PrimitiveType.VOID;
                 } else {
                     assert sinkType == PrimitiveType.VOID;
                 }

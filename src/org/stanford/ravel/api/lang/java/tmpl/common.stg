@@ -1,0 +1,9 @@
+do_import(imp) ::=<<
+import <imp>;
+
+>>
+
+// default constructor is public and empty
+constructor(className) ::= <<
+public <className>() {}
+>>

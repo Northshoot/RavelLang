@@ -51,6 +51,7 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         LOGGER.info("Building Space: " +s.mName);
         createModels(s);
         createControllers(s);
+        createDispatcher(s);
         return mFileObjects;
     }
 }

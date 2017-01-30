@@ -1,0 +1,67 @@
+import "common.stg"
+
+model_field(model) ::=<<
+private final <model.name> model_<model.varName> = new <model.name>();
+>>
+
+controller_field(ctr) ::=<<
+private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
+>>
+
+endpoint_field(ep) ::=<<
+private final Endpoint ep_<ep.name> = null;
+>>
+source_field(src) ::=<<
+private final SourceAPI src_<src.varName> = null;
+>>
+sink_field(sink) ::=<<
+private final SinkAPI sink_<sink.varName> = null;
+>>
+
+file(package,imports,models,controllers,sources,sinks,endpoints) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
+    <models:model_field(); separator="\n">
+    <sources:source_field(); separator="\n">
+    <sinks:sink_field(); separator="\n">
+    <controllers:controller_field(); separator="\n">
+    <endpoints:endpoint_field(); separator="\n">
+
+    private final ModelBottomAPI[] modelDispatchTable;
+
+    private DriverAPI driver;
+
+    public AppDispatcher(DriverAPI driver) {
+        this.driver = driver;
+        this.modelDispatchTable = new ModelBottomAPI[<length(models)>];
+
+        driver.appDispatcherReady();
+    }
+
+    // Implementation of DispatcherAPI
+    @Override
+    public void data_received(byte[] data, Endpoint endpoint) {
+        //is it an ACK?
+        System.out.println("Received data from: " + endpoint.getName());
+
+        RavelPacket rp = new RavelPacket(data);
+        modelDispatchTable[rp.model_id].record_arrived(rp, endpoint);
+    }
+
+    // Implementation of SystemEventAPI
+    @Override
+    public void started() {}
+
+    @Override
+    public void stopped() {}
+
+    @Override
+    public void restarted() {}
+
+    @Override
+    public void battery(SystemEventAPI.BatteryLevel bl) {}
+};
+>>

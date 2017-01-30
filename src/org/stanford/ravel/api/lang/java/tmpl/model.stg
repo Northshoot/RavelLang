@@ -1,21 +1,55 @@
-import "class.stg"
+import "common.stg"
 
 record_class(fields) ::=<<
 public static class Record {
     <fields:{f|public <f.javaType> <f.name>;}>
+
+    public Record() {
+    }
+
+    public Record(byte[] data) {
+        // TODO
+    }
 };
->>
-model_api() ::=<<
-public static Record create() {
-    return null;
-}
-public Record getRecord() {
-    return null;
-}
-public void save(Record r) {
-}
 >>
 
 file(package,imports,name,modelFields) ::=<<
-<class(package,imports,name,"Model",[record_class(modelFields),model_api()])>
+package <package>;
+
+<imports:do_import()>
+
+public class <name> implements ModelCommandAPI\<<name>.Record>, ModelBottomAPI\<<name>.Record> {
+    <record_class(modelFields)>
+
+    public <name>() {
+    }
+
+    public static Record create() {
+        return new Record();
+    }
+    public Record getRecord() {
+        return null;
+    }
+    public Context\<Record> save(Record r) {
+        return null;
+    }
+    public Context\<Record> delete(int recordPos) {
+        return null;
+    }
+    public void record_arrived(RavelPacket record, Endpoint endpoint) {
+        // TODO
+    }
+    public void record_departed(Record record, Endpoint endpoint) {
+        // TODO
+    }
+    public void record_saved_durably(Record record) {
+        // TODO
+    }
+    public void record_saved_endpoint(Record record, Endpoint endpoint) {
+        // TODO
+    }
+    public void endpoint_connected(Endpoint endpoint) {
+        // TODO
+    }
+};
 >>

@@ -152,16 +152,6 @@ public class CCodeTranslator extends BaseIRTranslator implements LoopTreeVisitor
     }
 
     @Override
-    public void visit(TModelCreateCall modelCreateCall) {
-        // TODO
-    }
-
-    @Override
-    public void visit(TModelRecordLoad modelRecordLoad) {
-        // TODO
-    }
-
-    @Override
     public void visit(TMove move) {
         addLine(move.target, " = ", move.source);
     }

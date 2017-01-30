@@ -120,9 +120,7 @@ public class RavelCompiler {
         for (ControllerSymbol c : scope.getControllers()) {
             Controller controller = new Controller(c.getName());
 
-            for (VariableSymbol varSym : c.getParameters()) {
-                controller.addParameter(varSym.getName(), varSym.getType());
-            }
+            controller.addAllParameters(c.getParameters());
 
             for (EventSymbol eventSym : c.getEvents()) {
                 VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());

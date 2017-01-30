@@ -94,7 +94,7 @@ public class ModelControllerLinker {
             }
 
             // instantiate the model on this space
-            InstantiatedModel im = m.instantiate(space, is.getParameterMap());
+            InstantiatedModel im = m.instantiate(space, is.getParameterMap(), is.getName());
             space.add(is.getName(), im);
         });
 
@@ -108,7 +108,7 @@ public class ModelControllerLinker {
                 return;
             }
 
-            InstantiatedController ictr = ctr.instantiate(space);
+            InstantiatedController ictr = ctr.instantiate(space, is.getName());
 
             // set parameters
             Map<String, InstantiatedModel> modelMap = new HashMap<>();
@@ -131,7 +131,7 @@ public class ModelControllerLinker {
                     assert m == im.getBaseModel();
                     modelMap.put(pname, im);
                     type = m.getType();
-                    value = m;
+                    value = im;
                 } else {
                     type = ParserUtils.typeFromLiteral(pvalue);
                     value = pvalue;
@@ -142,7 +142,7 @@ public class ModelControllerLinker {
                         ctr.getParameterType(pname).getName());
                     ok = false;
                 } else {
-                    ictr.setParam(pname, pvalue);
+                    ictr.setParam(pname, value);
                 }
             }
 

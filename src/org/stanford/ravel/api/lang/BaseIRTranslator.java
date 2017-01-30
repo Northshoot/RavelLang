@@ -2,9 +2,12 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,13 +37,21 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
     }
 
     @Override
-    public void translate(TypedIR ir) {
+    public void translate(List<VariableSymbol> controllerParams, TypedIR ir) {
+        // declare all the controller parameters
+        for (VariableSymbol sym : controllerParams) {
+            setRegisterName(sym.getRegister(), sym.getName());
+        }
         // give self a name
         setRegisterName(Registers.SELF_REG, "self");
 
-        // declare all registers
+        // declare all unnamed (temporary, gp) registers
+        // (this includes also named variables in the original code,
+        // because we don't bother tracking them)
         for (Map.Entry<Integer, Type> entry : ir.getRegisterTypes()) {
-            if (entry.getKey() == Registers.SELF_REG)
+            if (entry.getValue() == PrimitiveType.VOID)
+                continue;
+            if (registerNames.containsKey(entry.getKey()))
                 continue;
             declareRegister(entry.getKey(), entry.getValue());
         }

@@ -1,5 +1,6 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.*;
 public class Controller extends Primitive implements Iterable<EventHandler> {
     private final List<EventHandler> mEvents = new ArrayList<>();
     private final Map<String, Type> mInterface =  new HashMap<>();
+    private final List<VariableSymbol> mParamSymbols = new ArrayList<>();
 
     public Controller(String name) {
         super(name, name+"Ctr");
@@ -19,8 +21,13 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
         mEvents.add(event);
     }
 
-    public void addParameter(String name, Type type) {
-        mInterface.put(name, type);
+    public void addParameter(VariableSymbol sym) {
+        mParamSymbols.add(sym);
+        mInterface.put(sym.getName(), sym.getType());
+    }
+    public void addAllParameters(Collection<VariableSymbol> syms) {
+        for (VariableSymbol sym : syms)
+            addParameter(sym);
     }
 
     public Type getParameterType(String name) {
@@ -31,11 +38,15 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
         return mInterface.keySet();
     }
 
+    public List<VariableSymbol> getParameterSymbols() {
+        return Collections.unmodifiableList(mParamSymbols);
+    }
+
     public Iterator<EventHandler> iterator() {
         return mEvents.iterator();
     }
 
-    public InstantiatedController instantiate(Space space) {
-        return new InstantiatedController(space, this);
+    public InstantiatedController instantiate(Space space, String varName) {
+        return new InstantiatedController(space, this, varName);
     }
 }
