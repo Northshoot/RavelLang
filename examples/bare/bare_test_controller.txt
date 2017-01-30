@@ -9,7 +9,7 @@ streaming model Random(size):
         # comment here
         value = IntegerField()
 
-source TimerSource():
+interface TimerSource():
     implementation:
         java = "java/timer.stg"
         c = "c/timer_c.stg", "c/timer_h.stg"
