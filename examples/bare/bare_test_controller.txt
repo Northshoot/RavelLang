@@ -12,10 +12,10 @@ streaming model Random(size):
 controller RandomControllerEmbedded(random: Random):
     event random.arrived():
         s1 = "foo"
-        s2 = s1 + "bar"
+        s2 = s1 + 1
 
         rec = random.create()
-        rec.value = 7
+        rec.value = 7 + "Str"
         random.save(rec)
     event random.departed():
         x = 7
@@ -33,7 +33,7 @@ space EmbeddedSpace:
         #boor_error = BootError()
 
     sources:
-        random = platform.system.random
+        #random = platform.system.random
 
     controllers:
         rndcnt = RandomControllerEmbedded(random = models.random)

@@ -1,7 +1,7 @@
 package patterns.src.java.controller;
 
+import org.stanford.ravel.rrt.Context;
 import patterns.src.java.model.Model;
-import patterns.src.java.rrt.Context;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,8 +31,6 @@ public class ModelController {
 
         //AUTOGEN: bind models
         this.mModel = model;
-        //AUTOGEN: set controller to the model for callbacks
-        mModel.setController(this);
 
         //AUTOGEN:create timers
         //We set DThread to true.
@@ -58,27 +56,27 @@ public class ModelController {
         rec.field4 = rec.field3 / 2;
         Context ctx = mModel.save(rec);
 
-        System.out.println(ctx.mError);
+        System.out.println(ctx.error);
     }
 
-    public void arrived(Context ctx){
+    public void Model_arrived(Context<Model.Record> ctx){
         System.out.println(ctx);
     }
 
-    public void departed(Context ctx){
+    public void Model_departed(Context<Model.Record> ctx){
         if(!controller_timer_1_running) start_timer();
         System.out.println(ctx);
 
     }
 
-    public void full(Context ctx){
+    public void Model_full(Context<Model.Record> ctx){
         controller_timer_1.cancel();
         controller_timer_1_running = false;
         System.out.println(ctx);
 
     }
 
-    public void save_done(Context ctx){
+    public void Model_save_done(Context<Model.Record> ctx){
         System.out.println(ctx);
     }
 

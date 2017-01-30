@@ -1,6 +1,8 @@
 package patterns.src.java.tiers;
 
-import patterns.src.java.model.Model;
+import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
 import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.rrt.*;
 
@@ -14,7 +16,7 @@ import java.util.Timer;
 /**
  * Created by lauril on 1/23/17.
  */
-public class AndroidDriver extends Driver{
+public class AndroidDriver implements DriverAPI {
 
     Map<String, Endpoint> endpointsMap = new HashMap<>();
     private AppDispatcher appDispatcher;
@@ -24,25 +26,23 @@ public class AndroidDriver extends Driver{
 
     public AndroidDriver(AppDispatcher appDispatcher){
         this.appDispatcher = appDispatcher;
-
-
     }
-    public Context send_data(byte[] data, Endpoint endpoint) {
+
+    public Error sendData(byte[] data, Endpoint endpoint) {
         //send data to the right channel
-        Context ctx = new Context();
         if(endpoint.getType() == Endpoint.TYPE.SOCKET){
             try {
                 //TODO: mmmrm not the best way to keep reconnecting
                 clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
                 clientSocket.getOutputStream().write(data);
                 clientSocket.close();
-                ctx.mError = Error.SUCCESS;
+                return Error.SUCCESS;
             } catch (IOException e) {
                 endpoint.setDisconnected();
-                ctx.mError = Error.WAITING_FOR_NETWORK;
+                return Error.WAITING_FOR_NETWORK;
             }
         }
-        return ctx;
+        return Error.WRITE_ERROR;
     }
 
     public void register_endpoint(Endpoint endpoint){

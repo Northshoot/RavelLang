@@ -1,13 +1,14 @@
 package patterns.src.java.app;
 
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.SystemEventAPI;
+import org.stanford.ravel.rrt.tiers.Endpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
-import patterns.src.java.rrt.Context;
-import patterns.src.java.rrt.DispatherAPI;
-import patterns.src.java.rrt.RavelPacket;
-import patterns.src.java.rrt.SystemEventAPI;
 import patterns.src.java.tiers.AndroidDriver;
-import patterns.src.java.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
 
 
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
 /**
  * Created by lauril on 1/23/17.
  */
-public class AppDispatcher implements DispatherAPI, SystemEventAPI {
+public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
 
 
     //AUTOGEN
@@ -66,10 +67,11 @@ public class AppDispatcher implements DispatherAPI, SystemEventAPI {
     }
 
 
-    public Context send_data( Model.Record record, Endpoint endpoint){
+    @Override
+    public Error send_data(byte[] bytes, Endpoint endpoint){
         //send data to the driver
-        mDriver.send_data(record.getData(), endpoint);
-        return null;
+        mDriver.sendData(bytes, endpoint);
+        return Error.SUCCESS;
     }
     @Override
     public void data_received(byte[] data, Endpoint endpoint) {

@@ -1,7 +1,7 @@
 package patterns.src.java;
 
+import org.stanford.ravel.rrt.RavelPacket;
 import patterns.src.java.app.AppDispatcher;
-import patterns.src.java.rrt.RavelPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
