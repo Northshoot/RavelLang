@@ -18,22 +18,20 @@ import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.primitives.ModelEvent;
-import org.stanford.ravel.primitives.Primitive;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
-    private final static boolean DEBUG = true;
+    private final boolean debug;
 
     private final RavelCompiler driver;
 
-    public DefPhase(RavelCompiler driver) {
+    public DefPhase(RavelCompiler driver, boolean debug) {
         this.driver = driver;
+        this.debug = debug;
     }
 
     private Scope currentScope;
@@ -511,13 +509,13 @@ public class DefPhase extends RavelBaseListener {
 
     private void pushScope(Scope s) {
         currentScope = s;
-        if (DEBUG)
+        if (debug)
             prettyPrint("entering: "+currentScope.getName()+":"+s);
         intend++;
     }
 
     private void popScope() {
-        if (DEBUG)
+        if (debug)
             prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
         currentScope = currentScope.getEnclosingScope();
         intend--;

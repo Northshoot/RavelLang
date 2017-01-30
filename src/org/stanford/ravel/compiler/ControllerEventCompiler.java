@@ -16,11 +16,12 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class ControllerEventCompiler {
-    private static final boolean DEBUG = true;
+    private final boolean debug;
     private final RavelCompiler driver;
 
-    public ControllerEventCompiler(RavelCompiler driver) {
+    public ControllerEventCompiler(RavelCompiler driver, boolean debug) {
         this.driver = driver;
+        this.debug = debug;
     }
 
     public TypedIR compileEvent(RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
@@ -40,7 +41,7 @@ public class ControllerEventCompiler {
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
         visitor.visit(tree);
 
-        if (DEBUG) {
+        if (debug) {
             System.out.println("event " + tree.scope.getName());
             for (VariableSymbol var : variables)
                 System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
@@ -55,7 +56,7 @@ public class ControllerEventCompiler {
         TypedIR ir2 = typeResolvePass.run(visitor.getIR());
         ControlFlowGraph cfg = ir2.getControlFlowGraph();
 
-        if (DEBUG) {
+        if (debug) {
             System.out.println("CFG");
             cfg.visitForward(System.out::println);
 
