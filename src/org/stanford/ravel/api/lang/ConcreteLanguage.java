@@ -1,22 +1,18 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by lauril on 10/6/16.
  */
-public abstract class ConcreteLanguage {
-    protected final List<FileObject> mFileObjects;
+public interface ConcreteLanguage {
+    OptionParser getOptions();
 
-    protected ConcreteLanguage() {
-        mFileObjects = new ArrayList<>();
-    }
-
-    public abstract List<FileObject> build(Space s, String buildPath);
-
-
+    List<FileObject> build(Space s);
 }

@@ -45,9 +45,9 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
                 "All timers are collected in the single file";
 
         header.setFileName(fileName + ".h");
-        header.setPath(mBuildPath);
+        header.setBasePath(mBuildPath);
         obj.setFileName(fileName + ".c");
-        obj.setPath(mBuildPath);
+        obj.setBasePath(mBuildPath);
 
         addToMakeIncludePathSDK("/components/drivers_nrf/timer");
         addToMakeIncludePathSDK("/components/libraries/timer");

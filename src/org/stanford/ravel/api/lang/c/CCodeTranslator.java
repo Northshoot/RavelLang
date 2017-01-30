@@ -1,13 +1,13 @@
 package org.stanford.ravel.api.lang.c;
 
-import org.stanford.ravel.api.lang.BaseTranslator;
+import org.stanford.ravel.api.lang.BaseIRTranslator;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.types.*;
 
 /**
  * Created by gcampagn on 1/25/17.
  */
-public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
+public class CCodeTranslator extends BaseIRTranslator implements LoopTreeVisitor {
     private String typeToCType(Type type) {
         if (type instanceof ArrayType) {
             return "(" + typeToCType(((ArrayType) type).getElementType()) + ")[]";
@@ -39,12 +39,6 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
         } else {
             return type.getName() + "*";
         }
-    }
-
-    @Override
-    public void declareParameter(String name, int reg, Type type) {
-        setRegisterName(reg, name);
-        declareRegister(reg, type);
     }
 
     @Override
@@ -155,16 +149,6 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
             addCode(getRegisterName(arg));
         }
         addCode(");\n");
-    }
-
-    @Override
-    public void visit(TModelCreateCall modelCreateCall) {
-        // TODO
-    }
-
-    @Override
-    public void visit(TModelRecordLoad modelRecordLoad) {
-        // TODO
     }
 
     @Override

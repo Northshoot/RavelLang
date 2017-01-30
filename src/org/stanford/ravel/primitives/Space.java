@@ -11,8 +11,8 @@ public class Space extends Primitive {
     private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
     private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
     private final Map<String, View> mViews = new LinkedHashMap<>();
-    private final Map<String, Sink> mSink = new LinkedHashMap<>();
-    private final Map<String, Source> mSource = new LinkedHashMap<>();
+    private final Map<String, InstantiatedSink> mSink = new LinkedHashMap<>();
+    private final Map<String, InstantiatedSource> mSource = new LinkedHashMap<>();
     private Platform mPlatform;
 
     public Space(String name) {
@@ -23,57 +23,43 @@ public class Space extends Primitive {
     public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
     public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
-    public void add(String ref, Sink s) { this.mSink.put(ref,  s); }
-    public void add(String ref, Source v) { this.mSource.put(ref,  v); }
+    public void add(String ref, InstantiatedSink s) { this.mSink.put(ref,  s); }
+    public void add(String ref, InstantiatedSource v) { this.mSource.put(ref,  v); }
 
-
-    public String getTransmitFunction(){
-        return "random_char_update";
+    public Collection<InstantiatedModel> getModels() {
+        return Collections.unmodifiableCollection(mModels.values());
+    }
+    public InstantiatedModel getModel(String modelName) {
+        return mModels.get(modelName);
+    }
+    public Collection<InstantiatedSource> getSources() {
+        return Collections.unmodifiableCollection(mSource.values());
+    }
+    public InstantiatedSource getSource(String sourceName) {
+        return mSource.get(sourceName);
+    }
+    public Collection<InstantiatedSink> getSinks() {
+        return Collections.unmodifiableCollection(mSink.values());
+    }
+    public InstantiatedSink getSink(String sourceName) {
+        return mSink.get(sourceName);
+    }
+    public Collection<InstantiatedController> getControllers() {
+        return Collections.unmodifiableCollection(mControllers.values());
     }
 
-    public String getService(){
-        return "ravel_service";
+    public void freezeAll() {
+        for (InstantiatedModel im : mModels.values())
+            im.freeze();
+        for (InstantiatedSource is : mSource.values())
+            is.freeze();
+        for (InstantiatedSink is : mSink.values())
+            is.freeze();
     }
 
-    public InstantiatedModel resolveModel(String name){
-        if(name.startsWith("tier.models.")){
-            String modelName = name.replace("tier.models.","");
-            if(mModels.containsKey(modelName))
-                return mModels.get(modelName);
-            else
-                throw new RuntimeException("Cannot resolve model: " + modelName + " in " + mName + " space.");
-        } else {
-            throw new RuntimeException("Cannot resolve path " + name);
-        }
-    }
-    public List<InstantiatedModel> getModels() {
-        List<InstantiatedModel> lst = new ArrayList<>();
-        lst.addAll(mModels.values());
-        return lst;
-    }
-
-    public List<InstantiatedController> getControllers() {
-        List<InstantiatedController> lst = new ArrayList<>();
-        lst.addAll(mControllers.values());
-        return lst;
-    }
     public void setPlatform(Platform build) {
         mPlatform = build;
     }
-
-    public void addSource(Source s){
-        this.mSource.put(s.getSinkIdentifier(), s);
-    }
-
-    public Source getSource(String name){
-        return mSource.get(name);
-    }
-    public List<Source> getSources(){
-        List<Source> lst = new ArrayList<>();
-        lst.addAll(mSource.values());
-        return lst;
-    }
-
     public Platform getPlatform() {
         return mPlatform;
     }

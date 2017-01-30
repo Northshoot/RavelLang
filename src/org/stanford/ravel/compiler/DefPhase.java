@@ -5,34 +5,30 @@ package org.stanford.ravel.compiler;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.InstanceSymbol;
-import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.ModelType;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.primitives.ModelEvent;
-import org.stanford.ravel.primitives.Primitive;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
-    private final static boolean DEBUG = true;
+    private final boolean debug;
 
     private final RavelCompiler driver;
 
-    public DefPhase(RavelCompiler driver) {
+    public DefPhase(RavelCompiler driver, boolean debug) {
         this.driver = driver;
+        this.debug = debug;
     }
 
     private Scope currentScope;
@@ -65,7 +61,16 @@ public class DefPhase extends RavelBaseListener {
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
-        ModelSymbol model = new ModelSymbol(name, Model.getType(type));
+
+        Model.Type modelType;
+        try {
+            modelType = Model.Type.valueOf(type.toUpperCase());
+        } catch(IllegalArgumentException e) {
+            emitError(ctx.modelType(), "invalid model type");
+            modelType = Model.Type.INVALID;
+        }
+
+        ModelSymbol model = new ModelSymbol(name, modelType);
         currentScope.define(model);
         ctx.scope=model;
         model.setDefNode(ctx);
@@ -214,46 +219,47 @@ public class DefPhase extends RavelBaseListener {
         String modelVarName = ctx.Identifier(0).getText();
         String eventName = ctx.Identifier(1).getText();
 
-        EventSymbol es;
-        try {
-            ModelEvent event = ModelEvent.valueOf(eventName);
-            es = new EventSymbol(modelVarName, event);
-        } catch(IllegalArgumentException e) {
-            emitError(ctx, "invalid event declaration " + modelVarName + "." + eventName + ": not a valid event name");
-            return;
-        }
+        EventSymbol es = new EventSymbol(modelVarName, eventName);
 
-        //we create a local scope for each event
+        // we create a local scope for each event
+        // we must push the scope regardless of the errors we emit later because
+        // we'll pop in exitEventScope()
         ctx.scope = es;
         es.setDefNode(ctx);
         currentScope.define(es);
+        pushScope(es);
 
         Symbol modelVarSym = currentScope.resolve(modelVarName);
 
-        pushScope(es);
-
-        VariableSymbol selfVar = new VariableSymbol("self");
-        // it's a stretch to say that the whole event defines self, but if
-        // we ever need to emit type errors related to it, that's probably the
-        // best AST node to attach to it
-        selfVar.setDefNode(ctx);
-
-        if (modelVarSym == null) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": undeclared model");
-            return;
-        }
         if (!(modelVarSym instanceof VariableSymbol)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model, source or sink");
             return;
         }
-        Type modelType =  ((VariableSymbol) modelVarSym).getType();
-        if (!(modelType instanceof ModelType)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
+        Type classType =  ((VariableSymbol) modelVarSym).getType();
+        if (!(classType instanceof ClassType)) {
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model, source or sink");
             return;
         }
+        Type eventType = ((ClassType) classType).getMemberType(eventName);
+        if (!(eventType instanceof EventType)) {
+            emitError(ctx, "invalid event declaration " + modelVarName + "." + eventName + ": not a valid event name");
+            return;
+        }
+        es.setType(eventType);
 
-        selfVar.setType(((ModelType) modelType).getInstanceType());
-        currentScope.define(selfVar);
+        Type contextType = ((EventType) eventType).getContextType();
+
+        // if we have a context, then define self to point to it
+        if (contextType != null) {
+            VariableSymbol selfVar = new VariableSymbol("self");
+            // it's a stretch to say that the whole event defines self, but if
+            // we ever need to emit type errors related to it, that's probably the
+            // best AST node to attach to it
+            selfVar.setDefNode(ctx);
+            selfVar.setRegister(Registers.SELF_REG);
+            selfVar.setType(contextType);
+            currentScope.define(selfVar);
+        }
     }
 
     @Override
@@ -509,13 +515,13 @@ public class DefPhase extends RavelBaseListener {
 
     private void pushScope(Scope s) {
         currentScope = s;
-        if (DEBUG)
+        if (debug)
             prettyPrint("entering: "+currentScope.getName()+":"+s);
         intend++;
     }
 
     private void popScope() {
-        if (DEBUG)
+        if (debug)
             prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
         currentScope = currentScope.getEnclosingScope();
         intend--;

@@ -1,4 +1,76 @@
-import "class.stg"
-file(package,className) ::=<<
-<class(package,className,"Model")>
+import "common.stg"
+
+record_class(fields) ::=<<
+public static class Record implements ModelRecord {
+    <fields:{f|public <f.javaType> <f.name>;}>
+
+    public Record() {
+    }
+
+    public Record(byte[] data) {
+        // TODO
+    }
+
+    @Override
+    public byte[] toBytes() {
+        // TODO
+        return null;
+    }
+};
+>>
+
+set_controller_method(c) ::=<<
+public void setController_<c.varName>(<c.name> ctr) {
+    this.ctr_<c.varName> = ctr;
+}
+>>
+
+file(package,imports,name,base,modelObj,modelFields,controllerList,controllerMap) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class <name> extends <base>\<<name>.Record> {
+    <record_class(modelFields)>
+
+    public static final int MODEL_ID = <modelObj.baseModel.id>;
+
+    private static final int MODEL_SIZE = <modelObj.size>;
+
+    <controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+
+    public <name>(AppDispatcher dispatcher) {
+        super(dispatcher, MODEL_SIZE);
+    }
+
+    // Setter methods for AppDispatcher
+    <controllerList:set_controller_method(); separator="\n">
+
+    // Event listener dispatch
+    @Override
+    protected void notifyFull(Context\<Record> ctx) {
+        <controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyArrived(Context\<Record> ctx) {
+        <controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyDeparted(Context\<Record> ctx) {
+        <controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifySaveDone(Context\<Record> ctx) {
+        <controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
+    }
+
+    // Record creation functions
+    @Override
+    protected Record unmarshall(byte[] data) {
+        return new Record(data);
+    }
+    public static Record create() {
+        return new Record();
+    }
+};
 >>

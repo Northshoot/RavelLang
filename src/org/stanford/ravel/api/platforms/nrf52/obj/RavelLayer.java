@@ -41,11 +41,11 @@ public class RavelLayer extends RavelAPIObject implements RavelObjectInterface {
         ST t_h = mRavelLayerTmpl.getInstanceOf("ravel_layer_header");
         t_obj.add("space", mSpace);
         t_h.add("space", mSpace);
-        obj.setPath(mBuildPath);
+        obj.setBasePath(mBuildPath);
         obj.setFileName(fileName+".c");
         obj.setContent(t_obj.render());
 
-        header.setPath(mBuildPath);
+        header.setBasePath(mBuildPath);
         header.setFileName(fileName+".h");
         header.setContent(t_h.render());
         return super.getFiles();

@@ -1,0 +1,83 @@
+import "common.stg"
+
+model_field(model) ::=<<
+private final <model.name> model_<model.varName> = new <model.name>(this);
+>>
+
+controller_field(ctr) ::=<<
+private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
+>>
+
+endpoint_field(ep) ::=<<
+private final Endpoint ep_<ep.name> = null;
+>>
+source_field(src) ::=<<
+private final SourceAPI src_<src.varName> = null;
+>>
+sink_field(sink) ::=<<
+private final SinkAPI sink_<sink.varName> = null;
+>>
+
+model_case_record_arrived(model) ::=<<
+case <model.baseModel.id>:
+    model_<model.varName>.record_arrived(rp, endpoint);
+    break;
+>>
+
+model_set_model_controllers(model) ::=<<
+<model.controllerList:{c|model_<model.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
+>>
+
+file(package,imports,models,controllers,sources,sinks,endpoints) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
+    <models:model_field(); separator="\n">
+    <sources:source_field(); separator="\n">
+    <sinks:sink_field(); separator="\n">
+    <controllers:controller_field(); separator="\n">
+    <endpoints:endpoint_field(); separator="\n">
+
+    private DriverAPI driver;
+
+    public AppDispatcher(DriverAPI driver) {
+        this.driver = driver;
+
+        <models:model_set_model_controllers(); separator="\n">
+
+        driver.appDispatcherReady();
+    }
+
+    // Implementation of DispatcherAPI
+    @Override
+    public void data_received(byte[] data, Endpoint endpoint) {
+        //is it an ACK?
+        System.out.println("Received data from: " + endpoint.getName());
+
+        RavelPacket rp = new RavelPacket(data);
+        switch(rp.model_id) {
+            <models:model_case_record_arrived()>
+        }
+    }
+
+    @Override
+    public Error send_data(byte[] data, Endpoint endpoint) {
+        return driver.sendData(data, endpoint);
+    }
+
+    // Implementation of SystemEventAPI
+    @Override
+    public void started() {}
+
+    @Override
+    public void stopped() {}
+
+    @Override
+    public void restarted() {}
+
+    @Override
+    public void battery(SystemEventAPI.BatteryLevel bl) {}
+};
+>>

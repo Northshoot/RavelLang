@@ -9,8 +9,9 @@ import java.util.Locale;
  * Created by lauril on 8/23/16.
  */
 public class xLingual implements Translator {
-    public String mName;
-    public String mGivenName;
+    private String mName;
+    private String mGivenName;
+
     //TODO: fix naming for files
     public String getFileNameC(){
         return mName.toLowerCase();
@@ -25,6 +26,15 @@ public class xLingual implements Translator {
         this.mGivenName = givenName;
         this.mName = givenName;
     }
+
+    public String getInternalName() {
+        return mName;
+    }
+    public String getName() {
+        return mGivenName;
+    }
+
+    // FIXME: All of the rest here should be dropped
 
     public String getHeaderFileName(){
         return getCName() + ".h";
@@ -78,10 +88,6 @@ public class xLingual implements Translator {
         return getNameCamelCaseLowerCase();
     }
 
-
-    public String getName() {
-        return mGivenName;
-    }
 
     public String getNameUpper() {
         return mName.toUpperCase(Locale.US);

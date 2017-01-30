@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.ir.untyped;
 
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.untyped.Block;
 import org.stanford.ravel.compiler.ir.untyped.InstructionVisitor;
 
@@ -12,7 +13,7 @@ import java.util.Map;
 public class UntypedIR {
 
     private Block rootBlock = new Block();
-    private int nextRegister = 1;
+    private int nextRegister = Registers.FIRST_GP_REG;
 
     public UntypedIR() {}
 

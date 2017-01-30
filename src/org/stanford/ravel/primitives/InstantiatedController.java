@@ -1,9 +1,6 @@
 package org.stanford.ravel.primitives;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A primitive representing the use of a Controller in a Space
@@ -14,15 +11,47 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
     private final Space mSpace;
     private final Controller mController;
     private final List<LinkedEvent> mLinkedEvents = new ArrayList<>();
+    private final String mVarName;
 
-    InstantiatedController(Space space, Controller controller) {
+    InstantiatedController(Space space, Controller controller, String varName) {
         super(controller.getName(), controller.getName() + "Ctr");
         mSpace = space;
         mController = controller;
+        mVarName = varName;
     }
 
-    public void linkEvent(Event event, Model model) {
-        mLinkedEvents.add(new LinkedEvent(model, event));
+    public Controller getController() {
+        return mController;
+    }
+
+    public String getVarName() {
+        return mVarName;
+    }
+
+    public Collection<InstantiatedModel> getLinkedModels() {
+        return getLinkedComponents(InstantiatedModel.class);
+    }
+    public Collection<InstantiatedSource> getLinkedSources() {
+        return getLinkedComponents(InstantiatedSource.class);
+    }
+    public Collection<InstantiatedSink> getLinkedSink() {
+        return getLinkedComponents(InstantiatedSink.class);
+    }
+
+    private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
+        Set<E> components = new HashSet<E>();
+        for (LinkedEvent event : mLinkedEvents) {
+            if (ofClass.isInstance(event.getComponent())) {
+                components.add(ofClass.cast(event.getComponent()));
+            }
+        }
+        return components;
+    }
+
+    public void linkEvent(EventHandler event, EventComponent component) {
+        LinkedEvent linkedEvent = new LinkedEvent(this, component, event);
+        mLinkedEvents.add(linkedEvent);
+        component.addLinkedEvent(linkedEvent);
     }
 
     public Iterator<LinkedEvent> iterator() {

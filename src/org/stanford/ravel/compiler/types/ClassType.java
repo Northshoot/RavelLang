@@ -50,14 +50,14 @@ public class ClassType implements CompoundType {
         return instanceType;
     }
 
-    public void addMethod(String methodName, Type[] arguments, Type returnValue) {
+    void addMethod(String methodName, Type[] arguments, Type returnValue) {
         if (instanceType.memberTypes.containsKey(name))
             throw new IllegalArgumentException("Duplicate instance method " + name + " in class " + this.name);
         instanceType.allMemberNames.add(methodName);
         instanceType.memberTypes.put(methodName, new FunctionType(methodName, this, false, arguments, returnValue));
     }
 
-    public void addField(String fieldName, Type type) {
+    void addField(String fieldName, Type type) {
         if (instanceType.memberTypes.containsKey(name))
             throw new IllegalArgumentException("Duplicate field " + name + " in class " + this.name);
         instanceType.allMemberNames.add(fieldName);
@@ -65,16 +65,25 @@ public class ClassType implements CompoundType {
         instanceType.memberTypes.put(fieldName, type);
     }
 
-    public void addStaticMethod(String methodName, Type[] arguments, Type returnValue) {
+    private void addStaticMember(String memberName, Type type, String what) {
         if (staticMembers.containsKey(name))
-            throw new IllegalArgumentException("Duplicate static method " + name + " in class " + this.name);
+            throw new IllegalArgumentException(what + " " + name + " collides with static method in class " + this.name);
         if (instanceType.memberTypes.containsKey(name))
-            throw new IllegalArgumentException("Static method " + name + " collides with non static method in class " + this.name);
+            throw new IllegalArgumentException(what + " " + name + " collides with non static method in class " + this.name);
 
+        staticMembers.put(memberName, type);
+        instanceType.allMemberNames.add(memberName);
+        instanceType.memberTypes.put(memberName, type);
+    }
+
+    void addStaticMethod(String methodName, Type[] arguments, Type returnValue) {
         FunctionType functionType = new FunctionType(methodName, this, true, arguments, returnValue);
-        staticMembers.put(methodName, functionType);
-        instanceType.allMemberNames.add(methodName);
-        instanceType.memberTypes.put(methodName, functionType);
+        addStaticMember(methodName, functionType, "Static method");
+    }
+
+    void addEvent(String eventName, Type[] arguments, Type returnValue, ContextType ctx, Object key) {
+        EventType event = new EventType(new FunctionType(eventName, this, true, arguments, returnValue), ctx, key);
+        addStaticMember(eventName, event, "Event");
     }
 
     //

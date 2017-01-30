@@ -1,5 +1,6 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
@@ -16,63 +17,50 @@ import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
  * <p>
  * Created by lauril on 10/6/16.
  */
-public class CLang extends ConcreteLanguage{
-    private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
+public class CLang extends BaseLanguage {
     public final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/lang/c/tmpl";
-    Space mSpace;
-    STGroup model_tmpl;
+    private STGroup model_tmpl;
 
     public CLang() {
-        super();
-        System.out.println("Language platform init");
         model_tmpl = new STGroupFile(BASE_LANG_TMPL_PATH +"/model.stg");
     }
 
-
-
     @Override
-    public List<FileObject> build(Space s, String buildPath){
-        LOGGER.info("Building Space: " +s.mName);
-        mSpace = s;
-        createModels(buildPath);
-        createControllers();
-        return mFileObjects;
+    public OptionParser getOptions() {
+        return new LanguageOptions();
     }
 
-    private void createModels(String buildPath) {
+    @Override
+    protected void createDispatcher(Space space) {
+        // TODO
+    }
 
+    @Override
+    protected void createModels(Space space) {
         ST model_header = model_tmpl.getInstanceOf("models_header_file");
-        model_header.add("space", mSpace);
+        model_header.add("space", space);
         FileObject f = new FileObject();
-        f.setPath(buildPath);
         f.setFileName("models.h");
         f.setContent(model_header.render());
         mFileObjects.add(f);
         ST model_object = model_tmpl.getInstanceOf("models_obj_file");
-        model_object.add("space", mSpace);
+        model_object.add("space", space);
 //        System.out.println(model_object.render());
         f = new FileObject();
-        f.setPath(buildPath);
         f.setFileName("models.c");
         f.setContent(model_object.render());
         mFileObjects.add(f);
         //create buffer files
         f = new FileObject();
-        f.setPath(buildPath +"/api/");
+        f.setSubPath("api/");
         f.setFileName("ringbuf.c");
         f.setContent(getBufferObj());
         mFileObjects.add(f);
         f = new FileObject();
-        f.setPath(buildPath +"/api/");
+        f.setSubPath("api/");
         f.setFileName("ringbuf.h");
         f.setContent(getBufferHeader());
         mFileObjects.add(f);
-
-    }
-
-
-
-    private void createControllers() {
     }
 
     private String getBufferObj() {
