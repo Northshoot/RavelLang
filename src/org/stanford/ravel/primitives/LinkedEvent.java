@@ -6,10 +6,12 @@ package org.stanford.ravel.primitives;
  * Created by gcampagn on 1/26/17.
  */
 public class LinkedEvent {
+    private final InstantiatedController controller;
     private final InstantiatedModel model;
     private final EventHandler event;
 
-    LinkedEvent(InstantiatedModel model, EventHandler event) {
+    LinkedEvent(InstantiatedController controller, InstantiatedModel model, EventHandler event) {
+        this.controller = controller;
         this.model = model;
         this.event = event;
     }
@@ -19,5 +21,8 @@ public class LinkedEvent {
     }
     public InstantiatedModel getModel() {
         return model;
+    }
+    public InstantiatedController getController() {
+        return controller;
     }
 }

@@ -14,6 +14,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -37,7 +38,7 @@ public class JLang extends BaseLanguage {
                     case STR:
                         return "String";
                     case ERROR_MSG:
-                        return "Exception";
+                        return RUNTIME_PKG + ".tiers.Error";
                     case DATE:
                     case DATE_TIME:
                     case TIMESTAMP:
@@ -162,12 +163,18 @@ public class JLang extends BaseLanguage {
 
         String packageName = options.getPackageName() + ".models";
         modelTmpl.add("name", im.getName());
-        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelCommandAPI");
-        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelBottomAPI");
+        modelTmpl.add("imports", RUNTIME_PKG + ".model.BaseModel");
         modelTmpl.add("imports", RUNTIME_PKG + ".Context");
         modelTmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
         modelTmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
+        modelTmpl.add("imports", RUNTIME_PKG + ".tiers.Error");
+        modelTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
+        for (InstantiatedController ictr : im.getControllerList())
+            modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
+        modelTmpl.add("modelObj", im);
         modelTmpl.add("modelFields", im.getBaseModel().getFields());
+        modelTmpl.add("controllerList", im.getControllerList());
+        modelTmpl.add("controllerMap", im.getControllerMap());
 
         return simpleModule(modelTmpl, im.getName(), packageName);
     }

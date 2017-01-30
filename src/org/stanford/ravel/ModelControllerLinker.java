@@ -170,6 +170,10 @@ public class ModelControllerLinker {
             space.add(is.getName(), ictr);
         });
 
+        // freeze all the models to build the derived state
+        for (InstantiatedModel im : space.getModels())
+            im.freeze();
+
         return space;
     }
 }

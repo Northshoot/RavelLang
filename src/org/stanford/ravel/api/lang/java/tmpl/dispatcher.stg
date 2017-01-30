@@ -1,7 +1,7 @@
 import "common.stg"
 
 model_field(model) ::=<<
-private final <model.name> model_<model.varName> = new <model.name>();
+private final <model.name> model_<model.varName> = new <model.name>(this);
 >>
 
 controller_field(ctr) ::=<<
@@ -18,6 +18,16 @@ sink_field(sink) ::=<<
 private final SinkAPI sink_<sink.varName> = null;
 >>
 
+model_case_record_arrived(model) ::=<<
+case <model.baseModel.id>:
+    model_<model.varName>.record_arrived(rp, endpoint);
+    break;
+>>
+
+model_set_model_controllers(model) ::=<<
+<model.controllerList:{c|model_<model.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
+>>
+
 file(package,imports,models,controllers,sources,sinks,endpoints) ::=<<
 package <package>;
 
@@ -30,13 +40,12 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
     <controllers:controller_field(); separator="\n">
     <endpoints:endpoint_field(); separator="\n">
 
-    private final ModelBottomAPI[] modelDispatchTable;
-
     private DriverAPI driver;
 
     public AppDispatcher(DriverAPI driver) {
         this.driver = driver;
-        this.modelDispatchTable = new ModelBottomAPI[<length(models)>];
+
+        <models:model_set_model_controllers(); separator="\n">
 
         driver.appDispatcherReady();
     }
@@ -48,7 +57,9 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
         System.out.println("Received data from: " + endpoint.getName());
 
         RavelPacket rp = new RavelPacket(data);
-        modelDispatchTable[rp.model_id].record_arrived(rp, endpoint);
+        switch(rp.model_id) {
+            <models:model_case_record_arrived()>
+        }
     }
 
     // Implementation of SystemEventAPI

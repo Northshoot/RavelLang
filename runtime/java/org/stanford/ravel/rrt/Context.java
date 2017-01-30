@@ -15,13 +15,13 @@ public class Context<RecordType> {
     public LocalDateTime createTime;
     public ModelCommandAPI mModel;
 
-    public Context(ModelCommandAPI model, RecordType record, Error error){
+    public Context(ModelCommandAPI<RecordType> model, RecordType record, Error error){
         this(model);
         this.mRecord = record;
         this.mError = error;
     }
 
-    public Context(ModelCommandAPI model) {
+    public Context(ModelCommandAPI<RecordType> model) {
         createTime = LocalDateTime.now();
         this.mModel = model;
     }

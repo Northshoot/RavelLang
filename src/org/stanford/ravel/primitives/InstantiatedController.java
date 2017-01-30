@@ -38,7 +38,9 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
     }
 
     public void linkEvent(EventHandler event, InstantiatedModel model) {
-        mLinkedEvents.add(new LinkedEvent(model, event));
+        LinkedEvent linkedEvent = new LinkedEvent(this, model, event);
+        mLinkedEvents.add(linkedEvent);
+        model.addLinkedEvent(linkedEvent);
     }
 
     public Iterator<LinkedEvent> iterator() {

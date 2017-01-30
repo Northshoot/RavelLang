@@ -13,43 +13,101 @@ public static class Record {
 };
 >>
 
-file(package,imports,name,modelFields) ::=<<
+set_controller_method(c) ::=<<
+public void setController_<c.varName>(<c.name> ctr) {
+    this.ctr_<c.varName> = ctr;
+}
+>>
+
+file(package,imports,name,modelObj,modelFields,controllerList,controllerMap) ::=<<
 package <package>;
 
 <imports:do_import()>
 
-public class <name> implements ModelCommandAPI\<<name>.Record>, ModelBottomAPI\<<name>.Record> {
+public class <name> extends BaseModel\<<name>.Record> {
     <record_class(modelFields)>
 
-    public <name>() {
+    public static final int MODEL_ID = <modelObj.baseModel.id>;
+
+    private static final int MODEL_SIZE = <modelObj.size>;
+
+    private final AppDispatcher mDispatcher;
+    <controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+
+    public <name>(AppDispatcher dispatcher) {
+        super(MODEL_SIZE);
+
+        mDispatcher = dispatcher;
     }
 
+    // Setter methods for AppDispatcher
+    <controllerList:set_controller_method(); separator="\n">
+
+    // Event listener dispatch
+    @Override
+    protected void notifyFull(Context\<Record> ctx) {
+        <controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyArrived(Context\<Record> ctx) {
+        <controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyDeparted(Context\<Record> ctx) {
+        <controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifySaveDone(Context\<Record> ctx) {
+        <controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
+    }
+
+    // Record creation functions
+    @Override
+    protected Record unmarshall(byte[] data) {
+        return new Record(data);
+    }
     public static Record create() {
         return new Record();
     }
-    public Record getRecord() {
-        return null;
-    }
+
     public Context\<Record> save(Record r) {
-        return null;
-    }
-    public Context\<Record> delete(int recordPos) {
-        return null;
-    }
-    public void record_arrived(RavelPacket record, Endpoint endpoint) {
-        // TODO
-    }
-    public void record_departed(Record record, Endpoint endpoint) {
-        // TODO
-    }
-    public void record_saved_durably(Record record) {
-        // TODO
-    }
-    public void record_saved_endpoint(Record record, Endpoint endpoint) {
-        // TODO
-    }
-    public void endpoint_connected(Endpoint endpoint) {
-        // TODO
+        /*Context\<Record> ctx = new Context\<>(this);
+                if(current_pos >= mSize){ // no more space
+                    ctx.mError = Error.OUT_OF_STORAGE;
+                    return ctx;
+                }
+
+                if( this.mType == ModelType.LOCAL) {// all set, add record locally
+                    ctx.mError = Error.SUCCESS;
+                    //TODO: handle durable models
+                    addRecord(ctx.mRecord);
+                    return ctx;
+                } else {
+                    System.out.println("ENDPOINT:     "  + mEndpoint);
+                    if (! mEndpoint.isConnected() ){
+                        //TODO: queue packets
+                        addRecord(ctx.mRecord);
+                    }
+                }//endpoint is connected
+
+                //TODO: are the any queued packets?
+                switch (this.mType){
+                    case REPLICATED:
+                        //TODO: Packetize the record and send it
+                        //TODO: determine and send to endpoints
+                        ctx.mError = Error.WRITE_ERROR;
+                        return ctx;
+                    case STREAMING:
+                        //Packetize the record and send it
+                        // determine and send to endpoints
+                        mAppDispacher.send_data(rec, mEndpoint);
+                        return ctx;
+                    default:
+                        //Should never end up here
+                        ctx.mError = Error.SYSTEM_ERROR;
+                        return ctx;
+                }*/
+                return null;
     }
 };
 >>

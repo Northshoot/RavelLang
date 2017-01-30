@@ -64,7 +64,16 @@ public class DefPhase extends RavelBaseListener {
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
-        ModelSymbol model = new ModelSymbol(name, Model.getType(type));
+
+        Model.Type modelType;
+        try {
+            modelType = Model.Type.valueOf(type.toUpperCase());
+        } catch(IllegalArgumentException e) {
+            emitError(ctx.modelType(), "invalid model type");
+            modelType = Model.Type.INVALID;
+        }
+
+        ModelSymbol model = new ModelSymbol(name, modelType);
         currentScope.define(model);
         ctx.scope=model;
         model.setDefNode(ctx);
