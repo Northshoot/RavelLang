@@ -12,7 +12,6 @@ import org.stanford.ravel.primitives.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by gcampagn on 1/26/17.
@@ -112,7 +111,7 @@ public class ModelControllerLinker {
             InstantiatedController ictr = ctr.instantiate(space);
 
             // set parameters
-            Map<String, Model> modelMap = new HashMap<>();
+            Map<String, InstantiatedModel> modelMap = new HashMap<>();
 
             boolean ok = true;
             for (Map.Entry<String, Object> param : is.getParameterMap().entrySet()) {
@@ -127,7 +126,10 @@ public class ModelControllerLinker {
                     Model m = app.getModel(modelName);
                     // if m is null, we already complained loudly above
                     assert m != null;
-                    modelMap.put(pname, m);
+                    InstantiatedModel im = space.getModel(((InstanceSymbol) pvalue).getName());
+                    assert im != null;
+                    assert m == im.getBaseModel();
+                    modelMap.put(pname, im);
                     type = m.getType();
                     value = m;
                 } else {
@@ -155,9 +157,9 @@ public class ModelControllerLinker {
                 return;
 
             // link events
-            for (Event e : ctr) {
+            for (EventHandler e : ctr) {
                 VariableSymbol modelVar = e.getModelVar();
-                Model m = modelMap.get(modelVar.getName());
+                InstantiatedModel m = modelMap.get(modelVar.getName());
                 // we know modelVar is a parameter of ctr (from DefPhase), we know it is of model type (because we checked types in
                 // DefPhase), we know the value we're passing is actually a model (because we just checked) and we know
                 // that we're passing a value (because we just checked)

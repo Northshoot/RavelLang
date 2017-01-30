@@ -6,11 +6,18 @@ package org.stanford.ravel.primitives;
  * Created by gcampagn on 1/26/17.
  */
 public class LinkedEvent {
-    private final Model model;
-    private final Event event;
+    private final InstantiatedModel model;
+    private final EventHandler event;
 
-    LinkedEvent(Model model, Event event) {
+    LinkedEvent(InstantiatedModel model, EventHandler event) {
         this.model = model;
         this.event = event;
+    }
+
+    public EventHandler getHandler() {
+        return event;
+    }
+    public InstantiatedModel getModel() {
+        return model;
     }
 }

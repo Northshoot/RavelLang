@@ -38,8 +38,10 @@ public class PlatformBuilder {
         ConcretePlatform concretePlatform = platform.getConcretePlatform();
 
         String path = this.path + s.mName;
-        mFiles.addAll(lang.build(s, path));
+        mFiles.addAll(lang.build(s));
         mFiles.addAll(concretePlatform.build(s, path));
+        for (FileObject fo : mFiles)
+            fo.setBasePath(path);
     }
 
     public void render() {

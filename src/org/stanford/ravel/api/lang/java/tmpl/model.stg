@@ -1,4 +1,21 @@
 import "class.stg"
-file(package,className) ::=<<
-<class(package,className,"Model")>
+
+record_class(fields) ::=<<
+public static class Record {
+    <fields:{f|public <f.javaType> <f.name>;}>
+};
+>>
+model_api() ::=<<
+public static Record create() {
+    return null;
+}
+public Record getRecord() {
+    return null;
+}
+public void save(Record r) {
+}
+>>
+
+file(package,imports,name,modelFields) ::=<<
+<class(package,imports,name,"Model",[record_class(modelFields),model_api()])>
 >>

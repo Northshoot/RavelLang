@@ -16,7 +16,7 @@ import java.util.List;
  * Created by gcampagn on 1/20/17.
  */
 public class ControllerEventCompiler {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private final RavelCompiler driver;
 
     public ControllerEventCompiler(RavelCompiler driver) {

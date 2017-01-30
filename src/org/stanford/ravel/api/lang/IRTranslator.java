@@ -8,8 +8,7 @@ import org.stanford.ravel.compiler.types.Type;
  *
  * Created by gcampagn on 1/24/17.
  */
-public interface Translator {
-    void declareParameter(String name, int reg, Type type);
+public interface IRTranslator {
     void declareRegister(int reg, Type type);
 
     void translate(TypedIR ir);

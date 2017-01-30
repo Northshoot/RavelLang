@@ -16,4 +16,8 @@ public class InstantiatedModel extends ParametrizedComponent {
     public int getSize() {
         return (Integer) getParam("size");
     }
+
+    public Model getBaseModel() {
+        return mModel;
+    }
 }

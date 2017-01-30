@@ -26,6 +26,9 @@ public class ControlFlowGraphBuilder {
         return cfg;
     }
 
+    public TBlock getEntry() {
+        return cfg.getEntry();
+    }
     public TBlock getExit() {
         return cfg.getExit();
     }

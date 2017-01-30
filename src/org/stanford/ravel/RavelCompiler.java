@@ -11,7 +11,7 @@ import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.Event;
+import org.stanford.ravel.primitives.EventHandler;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
@@ -127,7 +127,7 @@ public class RavelCompiler {
 
                 TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
                 if (ir != null) {
-                    Event event = new Event(modelVar, eventSym.getEvent(), ir);
+                    EventHandler event = new EventHandler(modelVar, eventSym.getEvent(), ir);
                     controller.addEvent(event);
                 }
             }

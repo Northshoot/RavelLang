@@ -1,23 +1,21 @@
 package org.stanford.ravel.primitives;
 
-import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by lauril on 7/21/16.
  */
-public class Controller extends Primitive implements Iterable<Event> {
-    private final List<Event> mEvents = new ArrayList<>();
+public class Controller extends Primitive implements Iterable<EventHandler> {
+    private final List<EventHandler> mEvents = new ArrayList<>();
     private final Map<String, Type> mInterface =  new HashMap<>();
 
     public Controller(String name) {
         super(name, name+"Ctr");
     }
 
-    public void addEvent(Event event) {
+    public void addEvent(EventHandler event) {
         mEvents.add(event);
     }
 
@@ -33,7 +31,7 @@ public class Controller extends Primitive implements Iterable<Event> {
         return mInterface.keySet();
     }
 
-    public Iterator<Event> iterator() {
+    public Iterator<EventHandler> iterator() {
         return mEvents.iterator();
     }
 

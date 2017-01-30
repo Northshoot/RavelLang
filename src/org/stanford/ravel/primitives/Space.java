@@ -35,21 +35,13 @@ public class Space extends Primitive {
         return "ravel_service";
     }
 
-    public InstantiatedModel resolveModel(String name){
-        if(name.startsWith("tier.models.")){
-            String modelName = name.replace("tier.models.","");
-            if(mModels.containsKey(modelName))
-                return mModels.get(modelName);
-            else
-                throw new RuntimeException("Cannot resolve model: " + modelName + " in " + mName + " space.");
-        } else {
-            throw new RuntimeException("Cannot resolve path " + name);
-        }
-    }
     public List<InstantiatedModel> getModels() {
         List<InstantiatedModel> lst = new ArrayList<>();
         lst.addAll(mModels.values());
         return lst;
+    }
+    public InstantiatedModel getModel(String modelName) {
+        return mModels.get(modelName);
     }
 
     public List<InstantiatedController> getControllers() {

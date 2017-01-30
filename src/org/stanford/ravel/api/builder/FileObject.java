@@ -10,40 +10,46 @@ import java.io.IOException;
  */
 public class FileObject {
 
-    //path to which data is written
-    private String path;
+    // base path to which all files belong
+    private String basePath;
+    // sub folder containing this file (eg java package folder, or api/ in C)
+    private String subPath = "";
     //name of the file
     private String fileName;
     //data to be writen
     private String content;
 
-    public String getPath() throws IOException{
-        if (path == null) throw new IOException("File Path is not set! " + fileName);
-        return path;
+    public String getPath() {
+        if (basePath == null) throw new IllegalStateException("File Path is not set! " + fileName);
+        return basePath + subPath;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public String getBasePath() {
+        return basePath;
+    }
+    public String getSubPath() {
+        return subPath;
+    }
+    public void setBasePath(String path) {
+        this.basePath = path;
+        if (!this.basePath.endsWith("/"))
+            this.basePath = this.basePath + "/";
+    }
+    public void setSubPath(String path) {
+        this.subPath = path;
     }
 
-    public String getFileName() throws IOException{
-        if (fileName == null) {
-            throw new IOException("File name is not set!");
-        } else {
-            return fileName;
-        }
+    private String getFileName() {
+        assert fileName != null;
+        return fileName;
     }
 
     public void setFileName(String name) {
         this.fileName = name;
     }
 
-    public String getContent() throws IOException{
-        if (content == null) {
-            throw new IOException("File content is not set! " + fileName);
-        } else {
-            return content;
-        }
+    private String getContent() {
+        return content;
     }
 
     public void setContent(String data) {
@@ -63,7 +69,11 @@ public class FileObject {
     public void toFile() {
         try {
             File f = new File(getPath(), getFileName());
-            if ( !f.getParentFile().exists() ) f.getParentFile().mkdirs();
+            File dir = f.getParentFile();
+            if (!dir.exists()) {
+                if (!dir.mkdirs())
+                    throw new IOException("Failed to create output directory");
+            }
             FileWriter w = new FileWriter(f);
             BufferedWriter bw = new BufferedWriter(w);
             bw.write(getContent());
@@ -78,7 +88,7 @@ public class FileObject {
 
     public String toString(){
         String ret = "File object " + fileName +"\n";
-        ret+="Destination " + path + "\n";
+        ret+="Destination " + getPath() + "\n";
         ret+=content;
         return ret;
     }

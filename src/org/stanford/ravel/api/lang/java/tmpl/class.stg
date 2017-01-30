@@ -1,13 +1,16 @@
-class(package,className,inherits="Object",fields=[],methods=[]) ::= <<
+do_import(imp) ::=<<
+import <imp>;
+>>
+
+class(package,imports,className,inherits="Object",members=[]) ::= <<
 package <package>;
 
-public class <className> extends <inherits> {
-    <fields:{f |<f>;
-    }>
+<imports:do_import()>
 
+public class <className> extends <inherits> {
     <constructor(className)>
 
-    <methods:{m |<m>;
+    <members:{m |<m>
     }>
 };
 >>

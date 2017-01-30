@@ -40,14 +40,14 @@ public class ControllerImpl extends RavelAPIObject implements RavelObjectInterfa
 
     public void build(){
         obj.setFileName(getObjFileName());
-        obj.setPath(mApp.getBuildPath());
+        obj.setBasePath(mApp.getBuildPath());
         ST ctrObjTmpl = mControllerTmlp.getInstanceOf("controller_obj_c");
         ctrObjTmpl.add("controller", mCtr);
         obj.setContent(ctrObjTmpl.render());
 
         ST hrdTmpl = mControllerTmlp.getInstanceOf("controller_header");
         hrdTmpl.add("controller", mCtr);
-        header.setPath(mApp.getBuildPath());
+        header.setBasePath(mApp.getBuildPath());
         header.setFileName(getHeaderFileName());
         header.setContent(hrdTmpl.render());
         mApp.addToMakeObj(this.getObjFileName());

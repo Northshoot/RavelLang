@@ -12,12 +12,12 @@ import java.util.Map;
  * translates loops and access to the variables
  * Created by lauril on 8/16/16.
  */
-public class Event {
+public class EventHandler {
     private final VariableSymbol modelVar;
     private final ModelEvent event;
     private final TypedIR body;
 
-    public Event(VariableSymbol modelVar, ModelEvent event, TypedIR body) {
+    public EventHandler(VariableSymbol modelVar, ModelEvent event, TypedIR body) {
         this.modelVar = modelVar;
         this.event = event;
         this.body = body;
@@ -25,6 +25,14 @@ public class Event {
 
     public VariableSymbol getModelVar() {
         return modelVar;
+    }
+
+    public ModelEvent getEvent() {
+        return event;
+    }
+
+    public TypedIR getBody() {
+        return body;
     }
 
     @Override

@@ -177,7 +177,7 @@ public class nrf52Platform extends ConcretePlatform{
         r.add("space", mSpace);
         //create and populate file object
         FileObject fo = new FileObject();
-        fo.setPath(mBuildPath);
+        fo.setBasePath(mBuildPath);
         fo.setFileName("Makefile");
         fo.setContent(r.render());
         return fo;

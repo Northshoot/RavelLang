@@ -5,6 +5,7 @@ package org.stanford.ravel.compiler;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
@@ -237,6 +238,7 @@ public class DefPhase extends RavelBaseListener {
         // we ever need to emit type errors related to it, that's probably the
         // best AST node to attach to it
         selfVar.setDefNode(ctx);
+        selfVar.setRegister(Registers.SELF_REG);
 
         if (modelVarSym == null) {
             emitError(ctx, "invalid event declaration " + es.getName() + ": undeclared model");

@@ -1,0 +1,10 @@
+import "class.stg"
+
+event_handler(handler) ::=<<
+public void <handler.model>_<handler.name>(Context ctx, <handler.model> self) {
+    <handler.code>}
+>>
+
+file(package,imports,name,eventHandlers) ::=<<
+<class(package,imports,name,"Object",eventHandlers:event_handler())>
+>>

@@ -34,6 +34,7 @@ public class TypeResolvePass implements InstructionVisitor {
 
     public TypeResolvePass(ControllerEventCompiler compiler) {
         this.compiler = compiler;
+        loopTreeBuilder.addBasicBlock(cfgBuilder.getEntry());
     }
 
     public void declare(VariableSymbol sym) {

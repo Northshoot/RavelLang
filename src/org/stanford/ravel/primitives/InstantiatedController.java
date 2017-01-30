@@ -1,9 +1,6 @@
 package org.stanford.ravel.primitives;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A primitive representing the use of a Controller in a Space
@@ -21,7 +18,18 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
         mController = controller;
     }
 
-    public void linkEvent(Event event, Model model) {
+    public Controller getController() {
+        return mController;
+    }
+
+    public Collection<InstantiatedModel> getLinkedModels() {
+        Set<InstantiatedModel> models = new HashSet<>();
+        for (LinkedEvent event : mLinkedEvents)
+            models.add(event.getModel());
+        return models;
+    }
+
+    public void linkEvent(EventHandler event, InstantiatedModel model) {
         mLinkedEvents.add(new LinkedEvent(model, event));
     }
 
