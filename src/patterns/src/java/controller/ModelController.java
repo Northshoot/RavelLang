@@ -2,6 +2,7 @@ package patterns.src.java.controller;
 
 import org.stanford.ravel.rrt.Context;
 import patterns.src.java.model.Model;
+import patterns.src.java.sources.TimerSource1;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,15 +17,12 @@ public class ModelController {
     private Model mModel;
 
     //AUTOGEN: sources
+    private TimerSource1 timer;
 
     //AUTOGEN: sinks
 
-    //AUTOGEN: systems components
-    Timer controller_timer_1;
-
-    //AUTOGEN: timer tasks
-    ControllerNameTimerNameTask timerTask;
-    boolean controller_timer_1_running=false;
+    //AUTOGEN: global vars
+    private boolean running;
 
     public boolean start = false;
     public ModelController(Model model){
@@ -33,6 +31,8 @@ public class ModelController {
         this.mModel = model;
 
         //AUTOGEN:create timers
+        // initialize timer from AppDispatcher
+
         //We set DThread to true.
         //A daemon thread will execute only as long as the rest of the program continues to execute.
     }
@@ -41,13 +41,7 @@ public class ModelController {
         this.mName = name;
     }
 
-    //TEMP: start the timer
-    public void start_timer(){
-        controller_timer_1_running = true;
-        controller_timer_1.scheduleAtFixedRate(timerTask,0,1000);
-    }
-
-    public void ControllerNameTimerNameTask_call_back(){
+    public void timer_1_fired() {
         //create a record and save it.
         Model.Record rec = mModel.create();
         rec.field1 = 1;
@@ -64,14 +58,14 @@ public class ModelController {
     }
 
     public void Model_departed(Context<Model.Record> ctx){
-        if(!controller_timer_1_running) start_timer();
+        if(!running) timer.start_periodic(1000);
         System.out.println(ctx);
 
     }
 
     public void Model_full(Context<Model.Record> ctx){
-        controller_timer_1.cancel();
-        controller_timer_1_running = false;
+        timer.cancel();
+        running = false;
         System.out.println(ctx);
 
     }
@@ -84,36 +78,13 @@ public class ModelController {
      * AUTOGEN methods that controller subscribes in Ravel
      */
     public void system_started() {
-        controller_timer_1 = new Timer("timer_name_"+this.mName, false);
-        timerTask = new ControllerNameTimerNameTask(this);
+        timer.start_periodic(1000);
+        running = true;
         //TODO: test only in simulation
         System.out.println("Controller {" + this.mName +"} started: " + start);
-        if(start) {
-            start_timer();
-        }
     }
 
     public String getName() {
         return mName;
-    }
-
-    /**
-     * all timer tasks are generated as inner controller classes extending TimerTask
-     * TODO: evaluate performance
-     */
-
-    class ControllerNameTimerNameTask extends TimerTask{
-
-        private int counter = 0;
-        ModelController mcrt;
-
-        public ControllerNameTimerNameTask(ModelController mcrt){
-            //We set up controller for callbacks
-            this.mcrt = mcrt;
-        }
-        public void run(){
-            mcrt.ControllerNameTimerNameTask_call_back();
-        }
-
     }
 }
