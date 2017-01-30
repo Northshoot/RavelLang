@@ -1,7 +1,7 @@
 import "common.stg"
 
 record_class(fields) ::=<<
-public static class Record {
+public static class Record implements ModelRecord {
     <fields:{f|public <f.javaType> <f.name>;}>
 
     public Record() {
@@ -9,6 +9,12 @@ public static class Record {
 
     public Record(byte[] data) {
         // TODO
+    }
+
+    @Override
+    public byte[] toBytes() {
+        // TODO
+        return null;
     }
 };
 >>
@@ -19,25 +25,22 @@ public void setController_<c.varName>(<c.name> ctr) {
 }
 >>
 
-file(package,imports,name,modelObj,modelFields,controllerList,controllerMap) ::=<<
+file(package,imports,name,base,modelObj,modelFields,controllerList,controllerMap) ::=<<
 package <package>;
 
 <imports:do_import()>
 
-public class <name> extends BaseModel\<<name>.Record> {
+public class <name> extends <base>\<<name>.Record> {
     <record_class(modelFields)>
 
     public static final int MODEL_ID = <modelObj.baseModel.id>;
 
     private static final int MODEL_SIZE = <modelObj.size>;
 
-    private final AppDispatcher mDispatcher;
     <controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
 
     public <name>(AppDispatcher dispatcher) {
-        super(MODEL_SIZE);
-
-        mDispatcher = dispatcher;
+        super(dispatcher, MODEL_SIZE);
     }
 
     // Setter methods for AppDispatcher
@@ -68,46 +71,6 @@ public class <name> extends BaseModel\<<name>.Record> {
     }
     public static Record create() {
         return new Record();
-    }
-
-    public Context\<Record> save(Record r) {
-        /*Context\<Record> ctx = new Context\<>(this);
-                if(current_pos >= mSize){ // no more space
-                    ctx.mError = Error.OUT_OF_STORAGE;
-                    return ctx;
-                }
-
-                if( this.mType == ModelType.LOCAL) {// all set, add record locally
-                    ctx.mError = Error.SUCCESS;
-                    //TODO: handle durable models
-                    addRecord(ctx.mRecord);
-                    return ctx;
-                } else {
-                    System.out.println("ENDPOINT:     "  + mEndpoint);
-                    if (! mEndpoint.isConnected() ){
-                        //TODO: queue packets
-                        addRecord(ctx.mRecord);
-                    }
-                }//endpoint is connected
-
-                //TODO: are the any queued packets?
-                switch (this.mType){
-                    case REPLICATED:
-                        //TODO: Packetize the record and send it
-                        //TODO: determine and send to endpoints
-                        ctx.mError = Error.WRITE_ERROR;
-                        return ctx;
-                    case STREAMING:
-                        //Packetize the record and send it
-                        // determine and send to endpoints
-                        mAppDispacher.send_data(rec, mEndpoint);
-                        return ctx;
-                    default:
-                        //Should never end up here
-                        ctx.mError = Error.SYSTEM_ERROR;
-                        return ctx;
-                }*/
-                return null;
     }
 };
 >>

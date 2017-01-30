@@ -122,6 +122,7 @@ public class JLang extends BaseLanguage {
         for (InstantiatedController ictr : s.getControllers())
             tmpl.add("imports", packageName + ".controller." + ictr.getName());
         tmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
+        tmpl.add("imports", RUNTIME_PKG + ".tiers.Error");
         tmpl.add("imports", RUNTIME_PKG + ".model.ModelBottomAPI");
         tmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
         tmpl.add("imports", RUNTIME_PKG + ".DispatcherAPI");
@@ -163,14 +164,28 @@ public class JLang extends BaseLanguage {
 
         String packageName = options.getPackageName() + ".models";
         modelTmpl.add("name", im.getName());
-        modelTmpl.add("imports", RUNTIME_PKG + ".model.BaseModel");
+
+        String baseClass;
+        switch (im.getBaseModel().getModelType()) {
+            case LOCAL:
+                baseClass = "LocalModel";
+                break;
+            case REPLICATED:
+                baseClass = "ReplicatedModel";
+                break;
+            case STREAMING:
+                baseClass = "StreamingModel";
+                break;
+            default:
+                throw new AssertionError();
+        }
+        modelTmpl.add("imports", RUNTIME_PKG + ".model." + baseClass);
+        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelRecord");
         modelTmpl.add("imports", RUNTIME_PKG + ".Context");
-        modelTmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
-        modelTmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
-        modelTmpl.add("imports", RUNTIME_PKG + ".tiers.Error");
         modelTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
         for (InstantiatedController ictr : im.getControllerList())
             modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
+        modelTmpl.add("base", baseClass);
         modelTmpl.add("modelObj", im);
         modelTmpl.add("modelFields", im.getBaseModel().getFields());
         modelTmpl.add("controllerList", im.getControllerList());

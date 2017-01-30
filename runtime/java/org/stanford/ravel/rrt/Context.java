@@ -10,20 +10,33 @@ import java.time.LocalDateTime;
  * Created by gcampagn on 1/29/17.
  */
 public class Context<RecordType> {
-    public RecordType mRecord;
-    public Error mError;
-    public LocalDateTime createTime;
-    public ModelCommandAPI mModel;
+    // These fields are accessed directly by Ravel-generated controller code
+    // so they must not be renamed
+    public RecordType record;
+    public Error error;
 
-    public Context(ModelCommandAPI<RecordType> model, RecordType record, Error error){
+    // These fields are private and for future use
+    private LocalDateTime createTime;
+    private ModelCommandAPI mModel;
+
+    public Context(ModelCommandAPI<RecordType> model, RecordType record){
         this(model);
-        this.mRecord = record;
-        this.mError = error;
+        this.record = record;
+    }
+
+    public Context(ModelCommandAPI<RecordType> model, Error error) {
+        this(model);
+        this.error = error;
     }
 
     public Context(ModelCommandAPI<RecordType> model) {
         createTime = LocalDateTime.now();
         this.mModel = model;
+        this.error = Error.SUCCESS;
+    }
+
+    public boolean hasError() {
+        return this.error != Error.SUCCESS;
     }
 
     @Override
@@ -32,7 +45,7 @@ public class Context<RecordType> {
     }
 
     private String getError(){
-        switch (this.mError){
+        switch (this.error) {
             case SUCCESS:
                 return "SUCCESS";
             case NETWORK_ERROR:

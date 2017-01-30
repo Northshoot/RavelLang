@@ -1,9 +1,11 @@
 package org.stanford.ravel.rrt.model;
 
+import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.Context;
+import patterns.src.java.app.AppDispatcher;
 
 import java.util.ArrayList;
 
@@ -21,12 +23,14 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         boolean ack = false;
     }
 
+    protected final DispatcherAPI mDispatcher;
     private final RecordState[] stateArray;
     private final ArrayList<RecordType> mRecords = new ArrayList<RecordType>();
     private int currentPos = 0;
 
-    protected BaseModel(int size) {
+    protected BaseModel(DispatcherAPI dispatcher, int size) {
         mRecords.ensureCapacity(size);
+        mDispatcher = dispatcher;
         stateArray = new RecordState[size];
     }
 
@@ -62,14 +66,23 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         return !rec.inTransit && !rec.inUse && rec.ack;
     }
 
-    private void addRecord(RecordType record) {
-        //if durable save to disk
+    private boolean tryAddRecord(RecordType record) {
+        if (currentPos >= mRecords.size())
+            return false;
+        // TODO: if durable save to disk
         mRecords.set(currentPos++, record);
+        return true;
+    }
+
+    protected Context<RecordType> addRecord(RecordType record) {
+        if (!tryAddRecord(record))
+            return new Context<>(this, Error.OUT_OF_STORAGE);
+
         if (currentPos == mRecords.size()) {
-            Context<RecordType> ctx = new Context<RecordType>(this);
-            ctx.mError = Error.OUT_OF_STORAGE;
+            Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
             notifyFull(ctx);
         }
+        return new Context<>(this, record);
     }
 
     @Override
@@ -78,8 +91,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         RecordType record = unmarshall(pkt.record_data);
         System.out.println("RX record");
         addRecord(record);
-        ctx.mError = Error.SUCCESS;
-        ctx.mRecord = record;
+        ctx.record = record;
 
         //notify all subscribers
         notifyArrived(ctx);
@@ -97,8 +109,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         //TODO: is this system packet?
         //normal data
         Context<RecordType> ctx = new Context<>(this);
-        ctx.mError = Error.SUCCESS;
-        ctx.mRecord = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.record_data);
 
         //notify all subscribers
         notifyDeparted(ctx);
@@ -108,8 +119,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     public void record_saved_durably(RavelPacket pkt) {
         //TODO: only true do remote and durable
         Context<RecordType> ctx = new Context<>(this);
-        ctx.mError = Error.SUCCESS;
-        ctx.mRecord = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.record_data);
 
         //mark saved durably
         //notify all subscribers
@@ -119,8 +129,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     @Override
     public void record_saved_endpoint(RavelPacket pkt, Endpoint endpoint) {
         Context<RecordType> ctx = new Context<>(this);
-        ctx.mError = Error.SUCCESS;
-        ctx.mRecord = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.record_data);
 
         //notify all subscribers
         notifySaveDone(ctx);
@@ -144,7 +153,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
             mRecords.set(i, mRecords.get(i + 1));
         }
         currentPos--;
-        return new Context<>(this, mDeletedRecord, Error.SUCCESS);
+        return new Context<>(this, mDeletedRecord);
     }
 
     /***************************************************************/

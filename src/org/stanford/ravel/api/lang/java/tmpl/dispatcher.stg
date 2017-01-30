@@ -62,6 +62,11 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
         }
     }
 
+    @Override
+    public Error send_data(byte[] data, Endpoint endpoint) {
+        return driver.sendData(data, endpoint);
+    }
+
     // Implementation of SystemEventAPI
     @Override
     public void started() {}
