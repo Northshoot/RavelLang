@@ -14,7 +14,6 @@ import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
-import org.stanford.ravel.primitives.ModelEvent;
 
 import java.util.List;
 
@@ -200,7 +199,81 @@ public class DefPhase extends RavelBaseListener {
         popScope();
     }
 
+    @Override
+    public void enterInterfaceScope(RavelParser.InterfaceScopeContext ctx) {
+        String name = ctx.Identifier().getText();
+        InterfaceSymbol sym = new InterfaceSymbol(name);
+        ctx.scope = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
 
+    @Override
+    public void enterImplementationScope(RavelParser.ImplementationScopeContext ctx) {
+        LocalScope ls = new LocalScope("implementation", currentScope);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        ls.setDefNode(ctx);
+        pushScope(ls);
+    }
+
+    @Override
+    public void enterInterfaceDef(RavelParser.InterfaceDefContext ctx) {
+        String name = ctx.Identifier().getText();
+        Type returnType;
+
+        if (ctx.type() != null) {
+            String returnTypeName = ctx.type().Identifier().getText();
+            Symbol typeSymbol = currentScope.resolve(returnTypeName);
+            if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
+                emitError(ctx.type(), returnTypeName + " does not name a type");
+                returnType = PrimitiveType.ERROR;
+            } else {
+                returnType = ((TypeSymbol) typeSymbol).getDefinedType();
+            }
+        } else {
+            returnType = PrimitiveType.VOID;
+        }
+
+        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, returnType, false);
+        ctx.symbol = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
+
+    @Override
+    public void exitInterfaceDef(RavelParser.InterfaceDefContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
+        String name = ctx.Identifier().getText();
+
+        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, PrimitiveType.VOID, true);
+        ctx.symbol = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
+
+    @Override
+    public void exitInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void exitImplementationScope(RavelParser.ImplementationScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void exitInterfaceScope(RavelParser.InterfaceScopeContext ctx) {
+        ((InterfaceSymbol)currentScope).createInterfaceType();
+        popScope();
+    }
 
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
@@ -219,7 +292,7 @@ public class DefPhase extends RavelBaseListener {
         String modelVarName = ctx.Identifier(0).getText();
         String eventName = ctx.Identifier(1).getText();
 
-        EventSymbol es = new EventSymbol(modelVarName, eventName);
+        EventHandlerSymbol es = new EventHandlerSymbol(modelVarName, eventName);
 
         // we create a local scope for each event
         // we must push the scope regardless of the errors we emit later because
@@ -359,13 +432,10 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterRef_assign(RavelParser.Ref_assignContext ctx) {
-        assert currentScope.getEnclosingScope() instanceof SpaceSymbol;
-
         String currentScopeName = currentScope.getName();
 
-        // FIXME this can actually never be true, because models and controllers
-        // use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
-        boolean allowLiteral = currentScopeName.equals("models") || currentScopeName.equals("controllers");
+        // FIXME models and controllers use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
+        boolean allowLiteral = currentScopeName.equals("implementation") || currentScopeName.equals("models") || currentScopeName.equals("controllers");
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
@@ -470,35 +540,20 @@ public class DefPhase extends RavelBaseListener {
         popScope();
     }
 
-    @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) {
-        LocalScope ls = new LocalScope("sinks", currentScope);
+    @Override public void enterInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) {
+        LocalScope ls = new LocalScope("interfaces", currentScope);
         ctx.scope = ls;
         ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
-    @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) {
+    @Override public void exitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) {
         for (Symbol re: ctx.scope.getSymbols()) {
-            ((SpaceSymbol) currentScope.getEnclosingScope()).addSink(re.getName(),(ReferenceSymbol) re);
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addInterface(re.getName(),(InstanceSymbol) re);
         }
         popScope();
     }
 
-
-    @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) {
-        LocalScope ls = new LocalScope("sources", currentScope);
-        ctx.scope = ls;
-        ls.setDefNode(ctx);
-        currentScope.nest(ls);
-        pushScope(ls);
-    }
-
-    @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) {
-        for (Symbol re: ctx.scope.getSymbols()) {
-            ((SpaceSymbol) currentScope.getEnclosingScope()).addSource(re.getName(),(ReferenceSymbol) re);
-        }
-        popScope();
-    }
     @Override public void exitSpaceScope(RavelParser.SpaceScopeContext ctx) {
         popScope();
     }

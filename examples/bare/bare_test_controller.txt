@@ -12,7 +12,8 @@ streaming model Random(size):
 interface TimerSource():
     implementation:
         java = "java/timer.stg"
-        c = "c/timer_c.stg", "c/timer_h.stg"
+        #c = "c/timer_c.stg", "c/timer_h.stg"
+        c = "c/timer_c.stg"
 
     def start_one_shot( time : int32 )
     def cancel()
@@ -23,12 +24,12 @@ interface TimerSource():
 controller RandomControllerEmbedded(random: Random, timer: TimerSource):
     event random.arrived():
         s1 = "foo"
-        s2 = s1 + 1
+        s2 = s1 + "bar"
 
         arrivedRec = self.record
 
         rec = random.create()
-        rec.value = 7 + "Str"
+        rec.value = 7
         random.save(rec)
     event random.departed():
         x = 7
@@ -55,23 +56,3 @@ space EmbeddedSpace:
 
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1)
-        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2)
-
-space Gateway:
-    platform:
-        language = JLang
-        templates = nrf52
-        system = Android.v22
-
-    models:
-        random = Random(size=10)
-        #frequency = Frequency(size=1)
-        #boor_error = BootError()
-
-    sources:
-        #random = platform.system.random
-        timer_1 = platform.system.timer()
-        timer_2 = platform.system.timer()
-
-    controllers:
-        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = sources.timer_2)

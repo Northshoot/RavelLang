@@ -23,7 +23,6 @@ public class ModelType extends ClassType {
         }
     }
 
-    private ModelSymbol symbol;
     private final StructType recordType;
     private final ContextType ctxType;
 
@@ -39,11 +38,6 @@ public class ModelType extends ClassType {
         for (ModelEvent e : ModelEvent.values()) {
             this.addEvent(e.name(), new Type[]{}, PrimitiveType.VOID, ctxType, e);
         }
-
-    }
-
-    public ModelSymbol getSymbol() {
-        return symbol;
     }
 
     public StructType getRecordType() {

@@ -1,8 +1,6 @@
 package org.stanford.ravel.compiler.symbol;
 
-import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.types.ControllerType;
-import org.stanford.ravel.compiler.types.Type;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,10 +22,10 @@ public class ControllerSymbol extends ComponentSymbol {
         return definedType;
     }
 
-    public List<EventSymbol> getEvents(){
+    public List<EventHandlerSymbol> getEvents(){
         return getSymbols().stream()
-                .filter(s -> s instanceof EventSymbol)
-                .map(s -> (EventSymbol) s)
+                .filter(s -> s instanceof EventHandlerSymbol)
+                .map(s -> (EventHandlerSymbol) s)
                 .collect(Collectors.toList());
     }
 

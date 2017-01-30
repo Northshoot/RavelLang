@@ -5,7 +5,6 @@ package org.stanford.ravel.compiler.scope;
  */
 import org.stanford.ravel.compiler.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.stanford.ravel.compiler.symbol.MethodSymbol;
 import org.stanford.ravel.compiler.symbol.ReferenceSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.SymbolWithScope;

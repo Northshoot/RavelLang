@@ -7,11 +7,11 @@ import org.stanford.ravel.primitives.ModelEvent;
 /**
  * Created by lauril on 8/25/16.
  */
-public class EventSymbol extends SymbolWithScope implements TypedSymbol {
+public class EventHandlerSymbol extends SymbolWithScope implements TypedSymbol {
     private final String modelVarName;
     private EventType type;
 
-    public EventSymbol(String modelVarName, String eventName) {
+    public EventHandlerSymbol(String modelVarName, String eventName) {
         super(modelVarName + "." + eventName);
         this.modelVarName = modelVarName;
     }

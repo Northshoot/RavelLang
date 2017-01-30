@@ -140,10 +140,8 @@ public class JLang extends BaseLanguage {
 
                 if (pvalue instanceof InstantiatedModel) {
                     concrete.parameterValues.add("model_" + ((InstantiatedModel) pvalue).getVarName());
-                } else if (pvalue instanceof Source) {
-                    concrete.parameterValues.add("src_" + ((Source) pvalue).getName());
-                } else if (pvalue instanceof Sink) {
-                    concrete.parameterValues.add("sink_" + ((Sink) pvalue).getName());
+                } else if (pvalue instanceof Interface) {
+                    concrete.parameterValues.add("iface_" + ((Interface) pvalue).getName());
                 } else {
                     concrete.parameterValues.add(JLITERAL.toLiteral(pvalue));
                 }

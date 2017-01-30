@@ -18,7 +18,6 @@ import org.stanford.ravel.primitives.Space;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -122,7 +121,7 @@ public class RavelCompiler {
 
             controller.addAllParameters(c.getParameters());
 
-            for (EventSymbol eventSym : c.getEvents()) {
+            for (EventHandlerSymbol eventSym : c.getEvents()) {
                 VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());
 
                 TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());

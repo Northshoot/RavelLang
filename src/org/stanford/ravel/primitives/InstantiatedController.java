@@ -31,11 +31,8 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
     public Collection<InstantiatedModel> getLinkedModels() {
         return getLinkedComponents(InstantiatedModel.class);
     }
-    public Collection<InstantiatedSource> getLinkedSources() {
-        return getLinkedComponents(InstantiatedSource.class);
-    }
-    public Collection<InstantiatedSink> getLinkedSink() {
-        return getLinkedComponents(InstantiatedSink.class);
+    public Collection<InstantiatedInterface> getLinkedInterfaces() {
+        return getLinkedComponents(InstantiatedInterface.class);
     }
 
     private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
