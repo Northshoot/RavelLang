@@ -71,13 +71,13 @@ public class TestTemplates {
 
         embedded_thread.start();
 
-//        Thread gateway_thread = new Thread(){
-//            public void run(){
-//                AppDispatcher gateway = new AppDispatcher("GTW");
-//            }
-//        };
-//
-//        gateway_thread.start();
+        Thread gateway_thread = new Thread(){
+            public void run(){
+                AppDispatcher gateway = new AppDispatcher("GTW");
+            }
+        };
+
+        gateway_thread.start();
 //
 //        Thread cloud_thread = new Thread(){
 //            public void run(){

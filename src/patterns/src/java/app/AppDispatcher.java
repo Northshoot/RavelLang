@@ -47,10 +47,10 @@ public class AppDispatcher implements DispatherAPI, SystemEventAPI {
                 mcntr_id_1.setName("GTW");
                 ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
                 mDriver.register_endpoint(ep_1);
-                ep_2 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
+               // ep_2 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
                 mDriver.register_endpoint(ep_2);
                 model_id_1.setEndpoint(ep_1);
-                model_id_1.setEndpoint(ep_2);
+                //model_id_1.setEndpoint(ep_2);
                 break;
             case "CLD":
                 mcntr_id_1.setName("CLD");
