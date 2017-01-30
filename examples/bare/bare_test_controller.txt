@@ -49,13 +49,13 @@ space EmbeddedSpace:
         #frequency = Frequency(size=1)
         #boor_error = BootError()
 
-    sources:
+    interfaces:
         #random = platform.system.random
         timer_1 = TimerSource()
 
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = sources.timer_1)
-        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = sources.timer_2)
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1)
+        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2)
 
 space Gateway:
     platform:
