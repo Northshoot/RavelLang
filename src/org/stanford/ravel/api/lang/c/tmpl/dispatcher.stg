@@ -1,1 +1,68 @@
 import "common.stg"
+
+init_component(comp, prefix) ::=<<
+<comp.name; format="function">_init(&self-><prefix>_<comp.varName>);
+>>
+finalize_component(comp, prefix) ::=<<
+<comp.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
+>>
+
+init_controller(c) ::=<<
+<c.name; format="function">_init(&self->ctr_<c.varName><if(c.parameterValues)>, <c.parameterValues; separator=", "><endif>);
+>>
+finalize_controller(c) ::=<<
+<c.name; format="function">_finalize(&self->ctr_<c.varName>);
+>>
+
+set_component_controller(comp, prefix) ::=<<
+<comp.controllerList:{c|<comp.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
+>>
+
+c_file(includes,name,models,interfaces,controllers,endpoints) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+
+void
+<name; format="function">_init(<name> *self)
+{
+    <models:init_component("model"); separator="\n">
+    <interfaces:init_component("iface"); separator="\n">
+    <controllers:init_controller(); separator="\n">
+    <! FIXME endpoints !>
+
+    <models:set_component_controller("model"); separator="\n">
+    <interfaces:set_component_controller("iface"); separator="\n">
+}
+void
+<name; format="function">_finalize(<name> *self)
+{
+    <models:finalize_component("model"); separator="\n">
+    <interfaces:finalize_component("iface"); separator="\n">
+    <controllers:finalize_controller(); separator="\n">
+    <! FIXME endpoints !>
+}
+
+>>
+
+h_file(includes,name,models,interfaces,controllers,endpoints) ::=<<
+<begin_header("", name)>
+
+#include \<api/endpoint.h>
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    <models:{c|<c.name> model_<c.varName>;}; separator="\n">
+    <interfaces:{c|<c.name> iface_<c.varName>;}; separator="\n">
+    <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
+    <endpoints:{ep|RavelEndpoint ep_<ep.name>;}; separator="\n">
+} <name>;
+
+void <name; format="function">_init(<name> *self);
+void <name; format="function">_finalize(<name> *self);
+
+<end_extern_c()>
+<end_header("", name)>
+>>

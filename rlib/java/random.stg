@@ -1,6 +1,6 @@
 import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
 
-file(package,imports,name,controllerList,controllerMap) ::=<<
+file(package,imports,name,interface) ::=<<
 package <package>;
 
 <imports:do_import()>

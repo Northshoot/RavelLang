@@ -1,5 +1,12 @@
 import "common.stg"
 
+define_dispatch_func(model, event, controllers) ::=<<
+static void dispatch_<event>(<model.name> *self, Context *ctx)
+{
+    <controllers:{c|<c.name; format="function">_<model.name; format="function">_<event>(self->ctr_<c.varName>, ctx);}; separator="\n">
+}
+>>
+
 c_file(includes,name,base,model) ::=<<
 <begin_source(name)>
 
@@ -12,6 +19,8 @@ c_file(includes,name,base,model) ::=<<
 #define MODEL_ID   <model.baseModel.id>
 #define MODEL_SIZE <model.size>
 
+#define ravel_base_model(m) (&(m)->__base.base)
+
 void
 <model.name; format="function">_record_init(<model.name>_Record *record)
 {
@@ -23,10 +32,23 @@ void
     /* Free any record resources (eg strings) */
 }
 
+<define_dispatch_func(model, "full", model.controllerMap.full)>
+<define_dispatch_func(model, "arrived", model.controllerMap.arrived)>
+<define_dispatch_func(model, "departed", model.controllerMap.departed)>
+<define_dispatch_func(model, "save_done", model.controllerMap.save_done)>
+
+static const RavelModelVTable vtable = {
+    .dispatch_full = (void(*)(void*, Context*)) dispatch_full,
+    .dispatch_arrived = (void(*)(void*, Context*)) dispatch_arrived,
+    .dispatch_departed = (void(*)(void*, Context*)) dispatch_departed,
+    .dispatch_save_done = (void(*)(void*, Context*)) dispatch_save_done
+};
+
 void
 <model.name; format="function">_init(<model.name> *self)
 {
     <base; format="function">_init(&self->__base, MODEL_SIZE, sizeof(<model.name>_Record));
+    ravel_base_model(self)->vtable = &vtable;
 }
 
 void
@@ -36,6 +58,17 @@ void
 }
 
 <model.controllerList:define_set_controller_method(model.name); separator="\n">
+
+<model.name>_Record *
+<model.name; format="function">_create(<model.name> *self)
+{
+    return ravel_base_model_create(ravel_base_model(self));
+}
+Context *
+<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record)
+{
+    return ravel_base_model_save(ravel_base_model(self), record);
+}
 
 >>
 
@@ -68,7 +101,7 @@ typedef struct s_<name> <name>;
 struct s_<name> {
     <base> __base;
 
-    <model.controllerList:{c|<c.name> *<c.varName>;}; separator="\n">
+    <model.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
 };
 
 void <model.name; format="function">_init(<model.name> *self);
