@@ -32,7 +32,7 @@ public class InterfaceMemberSymbol extends SymbolWithScope {
         return arguments.toArray(new Type[0]);
     }
 
-    boolean isEvent() {
+    public boolean isEvent() {
         return event;
     }
 

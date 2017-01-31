@@ -113,6 +113,13 @@ public class RavelCompiler {
         }
     }
 
+    private void compileInterfaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        InterfaceCompiler compiler = new InterfaceCompiler(this);
+        for (InterfaceSymbol isym : scope.getInterfaces()) {
+            app.addInterface(isym.getName(), compiler.compileInterface(isym));
+        }
+    }
+
     private void compileControllers(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
         ControllerEventCompiler compiler = new ControllerEventCompiler(this, options.hasFOption("dump-ir"));
 
@@ -126,7 +133,7 @@ public class RavelCompiler {
 
                 TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
                 if (ir != null) {
-                    EventHandler event = new EventHandler(modelVar, eventSym.getType(), ir);
+                    EventHandler event = new EventHandler(modelVar, eventSym.getArgumentNames(), eventSym.getType(), ir);
                     controller.addEvent(event);
                 }
             }
@@ -190,8 +197,13 @@ public class RavelCompiler {
 
                 RavelApplication app = new RavelApplication();
 
-                // typecheck the models, assign types to the
+                // typecheck the models, assign types to the fields
                 compileModels(globalScope, app);
+                if (!success())
+                    return;
+
+                // typecheck the interfaces, find implementations
+                compileInterfaces(globalScope, app);
                 if (!success())
                     return;
 

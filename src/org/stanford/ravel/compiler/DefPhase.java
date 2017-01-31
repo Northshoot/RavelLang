@@ -271,6 +271,9 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitInterfaceScope(RavelParser.InterfaceScopeContext ctx) {
+        if (((InterfaceSymbol)currentScope).getImplementationScope() == null)
+            emitError(ctx, "must define an 'implementation:' block for an interface pointing to the template files");
+
         ((InterfaceSymbol)currentScope).createInterfaceType();
         popScope();
     }
@@ -320,17 +323,14 @@ public class DefPhase extends RavelBaseListener {
         }
         es.setType(eventType);
 
-        Type contextType = ((EventType) eventType).getContextType();
-
-        // if we have a context, then define self to point to it
-        if (contextType != null) {
+        if (((EventType) eventType).hasSelf()) {
             VariableSymbol selfVar = new VariableSymbol("self");
             // it's a stretch to say that the whole event defines self, but if
             // we ever need to emit type errors related to it, that's probably the
             // best AST node to attach to it
             selfVar.setDefNode(ctx);
             selfVar.setRegister(Registers.SELF_REG);
-            selfVar.setType(contextType);
+            selfVar.setType(((EventType) eventType).getArgumentTypes()[0]);
             currentScope.define(selfVar);
         }
     }

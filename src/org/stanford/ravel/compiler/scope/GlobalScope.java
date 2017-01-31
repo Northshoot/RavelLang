@@ -61,4 +61,8 @@ public class GlobalScope extends BaseScope {
     public Collection<SpaceSymbol> getSpaces() {
         return spaces.values();
     }
+
+    public Collection<InterfaceSymbol> getInterfaces() {
+        return interfaces.values();
+    }
 }

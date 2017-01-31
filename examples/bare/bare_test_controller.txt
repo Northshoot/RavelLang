@@ -11,9 +11,9 @@ streaming model Random(size):
 
 interface TimerSource():
     implementation:
-        java = "java/timer.stg"
+        java = "rlib/java/timer.stg"
         #c = "c/timer_c.stg", "c/timer_h.stg"
-        c = "c/timer_c.stg"
+        c = "rlib/c/timer_c.stg"
 
     def start_one_shot( time : int32 )
     def cancel()

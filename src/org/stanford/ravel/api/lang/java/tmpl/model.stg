@@ -19,12 +19,6 @@ public static class Record implements ModelRecord {
 };
 >>
 
-set_controller_method(c) ::=<<
-public void setController_<c.varName>(<c.name> ctr) {
-    this.ctr_<c.varName> = ctr;
-}
->>
-
 file(package,imports,name,base,modelObj,modelFields,controllerList,controllerMap) ::=<<
 package <package>;
 

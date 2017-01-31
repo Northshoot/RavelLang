@@ -5,15 +5,15 @@ package org.stanford.ravel.primitives;
  *
  * Created by gcampagn on 1/30/17.
  */
-public class InstantiatedInterface extends BaseEventComponent<InstantiatedInterface.NoEvents> {
-    // FIXME
-    enum NoEvents {};
-
+public class InstantiatedInterface extends BaseEventComponent {
     private final Interface mIface;
 
     InstantiatedInterface(Space space, Interface iface, String varName) {
-        super(space, iface, varName, NoEvents.values());
+        super(space, iface, varName);
         mIface = iface;
+
+        for (String event : iface.getEvents())
+            createEvent(event);
     }
 
     public Interface getBaseInterface() {

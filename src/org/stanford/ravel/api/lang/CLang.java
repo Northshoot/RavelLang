@@ -31,8 +31,9 @@ public class CLang extends BaseLanguage {
     }
 
     @Override
-    protected void createDispatcher(Space space) {
+    protected CodeModule createDispatcher(Space space) {
         // TODO
+        return null;
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.EventType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,11 +16,13 @@ import java.util.Map;
  */
 public class EventHandler {
     private final VariableSymbol modelVar;
+    private final List<String> argumentNames;
     private final EventType event;
     private final TypedIR body;
 
-    public EventHandler(VariableSymbol modelVar, EventType event, TypedIR body) {
+    public EventHandler(VariableSymbol modelVar, List<String> argumentNames, EventType event, TypedIR body) {
         this.modelVar = modelVar;
+        this.argumentNames = argumentNames;
         this.event = event;
         this.body = body;
     }
@@ -39,5 +42,9 @@ public class EventHandler {
     @Override
     public String toString() {
         return "Event " + modelVar.getName() + "." + event;
+    }
+
+    public List<String> getArgumentNames() {
+        return argumentNames;
     }
 }

@@ -62,6 +62,8 @@ public class JLang extends BaseLanguage {
                 return ((ClassType.InstanceType) type).getClassType().getName();
             } else if (type instanceof ModelType.RecordType) {
                 return ((ModelType.RecordType) type).getModel().getName() + ".Record";
+            } else if (type instanceof ModelType.ContextType) {
+                return "Context<" + toNativeType(((ModelType.ContextType) type).getOwner()) + ".Record>";
             } else {
                 return type.getName();
             }
@@ -91,6 +93,7 @@ public class JLang extends BaseLanguage {
     }
 
     private CodeModule simpleModule(ST tmpl, String name, String packageName) {
+        tmpl.add("name", name);
         tmpl.add("package", packageName);
         FileObject file = new FileObject();
         file.setFileName(name + ".java");
@@ -101,21 +104,23 @@ public class JLang extends BaseLanguage {
         return module;
     }
 
-    @Override
-    protected void createDispatcher(Space s) {
-        // A helper class to pass down to StringTemplates
-        class ConcreteController {
-            public String name;
-            public String varName;
-            public final List<String> parameterValues = new ArrayList<>();
-        }
+    // A helper class to pass down to StringTemplates
+    private class ConcreteController {
+        public String name;
+        public String varName;
+        public final List<String> parameterValues = new ArrayList<>();
+    }
 
+    @Override
+    protected CodeModule createDispatcher(Space s) {
         JavaLanguageOptions options = JavaLanguageOptions.getInstance();
         ST tmpl = dispatcherGroup.getInstanceOf("file");
         String packageName = options.getPackageName();
 
         for (InstantiatedModel im : s.getModels())
             tmpl.add("imports", packageName + ".models." + im.getName());
+        for (InstantiatedInterface iiface : s.getInterfaces())
+            tmpl.add("imports", packageName + ".interfaces." + iiface.getName());
         for (InstantiatedController ictr : s.getControllers())
             tmpl.add("imports", packageName + ".controller." + ictr.getName());
         tmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
@@ -130,6 +135,8 @@ public class JLang extends BaseLanguage {
 
         for (InstantiatedModel im : s.getModels())
             tmpl.add("models", im);
+        for (InstantiatedInterface iiface : s.getInterfaces())
+            tmpl.add("interfaces", iiface);
         for (InstantiatedController ictr : s.getControllers()) {
             ConcreteController concrete = new ConcreteController();
             concrete.name = ictr.getName();
@@ -140,8 +147,8 @@ public class JLang extends BaseLanguage {
 
                 if (pvalue instanceof InstantiatedModel) {
                     concrete.parameterValues.add("model_" + ((InstantiatedModel) pvalue).getVarName());
-                } else if (pvalue instanceof Interface) {
-                    concrete.parameterValues.add("iface_" + ((Interface) pvalue).getName());
+                } else if (pvalue instanceof InstantiatedInterface) {
+                    concrete.parameterValues.add("iface_" + ((InstantiatedInterface) pvalue).getVarName());
                 } else {
                     concrete.parameterValues.add(JLITERAL.toLiteral(pvalue));
                 }
@@ -149,7 +156,30 @@ public class JLang extends BaseLanguage {
             tmpl.add("controllers", concrete);
         }
 
-        addModule(simpleModule(tmpl, "AppDispatcher", packageName));
+        return simpleModule(tmpl, "AppDispatcher", packageName);
+    }
+
+    @Override
+    public CodeModule createInterface(InstantiatedInterface iiface) {
+        JavaLanguageOptions options = JavaLanguageOptions.getInstance();
+
+        String ifaceGroupName = iiface.getBaseInterface().getImplementation("java");
+        if (ifaceGroupName == null) {
+            LOGGER.severe("Missing Java implementation of " + iiface.getName());
+            return null;
+        }
+
+        STGroupFile ifaceGroup = new STGroupFile(ifaceGroupName);
+        ST ifaceTmpl = ifaceGroup.getInstanceOf("file");
+
+        String packageName = options.getPackageName() + ".interfaces";
+        ifaceTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
+        for (InstantiatedController ictr : iiface.getControllerList())
+            ifaceTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
+        ifaceTmpl.add("controllerList", iiface.getControllerList());
+        ifaceTmpl.add("controllerMap", iiface.getControllerMap());
+
+        return simpleModule(ifaceTmpl, iiface.getName(), packageName);
     }
 
     @Override
@@ -158,7 +188,6 @@ public class JLang extends BaseLanguage {
         ST modelTmpl = modelGroup.getInstanceOf("file");
 
         String packageName = options.getPackageName() + ".models";
-        modelTmpl.add("name", im.getName());
 
         String baseClass;
         switch (im.getBaseModel().getModelType()) {
@@ -201,6 +230,9 @@ public class JLang extends BaseLanguage {
 
         for (InstantiatedModel im : ictr.getLinkedModels()) {
             controllerTmpl.add("imports", options.getPackageName() + ".models." + im.getName());
+        }
+        for (InstantiatedInterface iiface : ictr.getLinkedInterfaces()) {
+            controllerTmpl.add("imports", options.getPackageName() + ".interfaces." + iiface.getName());
         }
 
         STControllerTranslator.FileConfig fileConfig = new STControllerTranslator.FileConfig(ictr.getName() + ".java", controllerTmpl);
