@@ -5,12 +5,17 @@ import org.stanford.ravel.RavelCompiler;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
 import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.symbol.EventHandlerSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
+import org.stanford.ravel.primitives.EventHandler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by gcampagn on 1/20/17.
@@ -24,9 +29,24 @@ public class ControllerEventCompiler {
         this.debug = debug;
     }
 
-    public TypedIR compileEvent(RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
+    public TypedIR compileEvent(EventHandlerSymbol eventSym, RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
+        // Check arguments
+        List<VariableSymbol> declaredArguments = eventSym.getArguments();
+        Type[] expected = eventSym.getType().getArgumentTypes();
+
+        if (expected.length != declaredArguments.size()) {
+            emitError(new SourceLocation(tree), "wrong number of arguments for event, expected " + expected.length + ", found " + declaredArguments.size());
+        }
+        for (int i = 0; i < Math.min(expected.length, declaredArguments.size()); i++) {
+            Type exp = expected[i];
+            Type decl = declaredArguments.get(i).getType();
+            if (!exp.equals(decl)) {
+                emitError(new SourceLocation(tree), "wrong type for argument " + (i+1) + ", must be " + exp.getName());
+            }
+        }
+
         // hoist all variables up the register scope (the whole compilation unit)
-        List<VariableSymbol> variables = new ArrayList<>();
+        Set<VariableSymbol> variables = new HashSet<>();
         for (Symbol s : tree.scope.getAllSymbols()) {
             if (s instanceof VariableSymbol)
                 variables.add((VariableSymbol)s);
@@ -36,9 +56,15 @@ public class ControllerEventCompiler {
             if (s instanceof VariableSymbol)
                 variables.add((VariableSymbol)s);
         }
+        // add event arguments
+        for (VariableSymbol s : declaredArguments) {
+            variables.add(s);
+        }
 
         // compile to untyped IR
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
+        for (VariableSymbol var : declaredArguments)
+            visitor.declare(var);
         visitor.visit(tree);
 
         if (debug) {

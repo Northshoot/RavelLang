@@ -2,6 +2,7 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.primitives.InstantiatedController;
+import org.stanford.ravel.primitives.InstantiatedInterface;
 import org.stanford.ravel.primitives.InstantiatedModel;
 import org.stanford.ravel.primitives.Space;
 
@@ -15,14 +16,16 @@ import java.util.logging.Logger;
 public abstract class BaseLanguage implements ConcreteLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
 
+    // FIXME: make private when CLang is fixed
     protected final List<FileObject> mFileObjects;
-    private String buildPath;
 
     protected BaseLanguage() {
         mFileObjects = new ArrayList<>();
     }
 
     protected void addModule(CodeModule module) {
+        if (module == null)
+            return;
         mFileObjects.addAll(module.getFiles());
     }
     protected void addFile(FileObject fo) {
@@ -36,6 +39,9 @@ public abstract class BaseLanguage implements ConcreteLanguage {
     protected CodeModule createController(InstantiatedController ictr) {
         return null;
     }
+    protected CodeModule createInterface(InstantiatedInterface iiface) {
+        return null;
+    }
     protected void createModels(Space s) {
         for (InstantiatedModel im : s.getModels())
             addModule(createModel(im));
@@ -44,14 +50,18 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         for (InstantiatedController ictr : s.getControllers())
             addModule(createController(ictr));
     }
-    protected abstract void createDispatcher(Space s);
+    private void createInterfaces(Space s) {
+        for (InstantiatedInterface iiface : s.getInterfaces())
+            addModule(createInterface(iiface));
+    }
+    protected abstract CodeModule createDispatcher(Space s);
 
     public List<FileObject> build(Space s) {
-        this.buildPath = buildPath;
         LOGGER.info("Building Space: " +s.getName());
         createModels(s);
         createControllers(s);
-        createDispatcher(s);
+        createInterfaces(s);
+        addModule(createDispatcher(s));
         return mFileObjects;
     }
 }

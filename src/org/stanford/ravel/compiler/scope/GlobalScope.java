@@ -15,6 +15,7 @@ public class GlobalScope extends BaseScope {
     private Map<String, ModelSymbol> models = new LinkedHashMap<>();
     private Map<String, ControllerSymbol> controllers = new LinkedHashMap<>();
     private Map<String, SpaceSymbol> spaces = new LinkedHashMap<>();
+    private Map<String, InterfaceSymbol> interfaces = new LinkedHashMap<>();
 
     public GlobalScope() {
         super();
@@ -43,6 +44,8 @@ public class GlobalScope extends BaseScope {
             controllers.put(sym.getName(), (ControllerSymbol)sym);
         else if (sym instanceof SpaceSymbol)
             spaces.put(sym.getName(), (SpaceSymbol)sym);
+        else if (sym instanceof InterfaceSymbol)
+            interfaces.put(sym.getName(), (InterfaceSymbol) sym);
         else if (!(sym instanceof PrimitiveTypeSymbol))
             throw new IllegalArgumentException("Invalid toplevel symbol " + sym.getName());
     }
@@ -57,5 +60,9 @@ public class GlobalScope extends BaseScope {
 
     public Collection<SpaceSymbol> getSpaces() {
         return spaces.values();
+    }
+
+    public Collection<InterfaceSymbol> getInterfaces() {
+        return interfaces.values();
     }
 }

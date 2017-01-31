@@ -56,7 +56,7 @@ convert(op,type) ::=<<
 >>
 
 array_load(load) ::=<<
-<load.target.name> = <load.object.name>[<load.index.name>];
+<load.target.name> = <load.source.name>[<load.index.name>];
 
 >>
 array_store(store) ::=<<
@@ -65,7 +65,7 @@ array_store(store) ::=<<
 >>
 
 field_load(load) ::=<<
-<load.target.name> = <load.object.name>.<load.field>;
+<load.target.name> = <load.source.name>.<load.field>;
 
 >>
 field_store(store) ::=<<

@@ -24,6 +24,9 @@ class ParametrizedComponent extends Primitive {
     public Object getParam(String key) {
         return mParameterMap.get(key);
     }
+    Collection<Object> getAllParameters() {
+        return mParameterMap.values();
+    }
 
     public boolean isParamSet(String key) {
         return mParameterMap.containsKey(key);

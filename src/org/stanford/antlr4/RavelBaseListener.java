@@ -248,25 +248,85 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) { }
+	@Override public void enterInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) { }
+	@Override public void exitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) { }
+	@Override public void enterInterfaceScope(RavelParser.InterfaceScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) { }
+	@Override public void exitInterfaceScope(RavelParser.InterfaceScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIface_body(RavelParser.Iface_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIface_body(RavelParser.Iface_bodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterImplementationScope(RavelParser.ImplementationScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImplementationScope(RavelParser.ImplementationScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIface_members(RavelParser.Iface_membersContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIface_members(RavelParser.Iface_membersContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceDef(RavelParser.InterfaceDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceDef(RavelParser.InterfaceDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceEvent(RavelParser.InterfaceEventContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceEvent(RavelParser.InterfaceEventContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -351,42 +411,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitProperty_line(RavelParser.Property_lineContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterPropValue(RavelParser.PropValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPropValue(RavelParser.PropValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterPropArray(RavelParser.PropArrayContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPropArray(RavelParser.PropArrayContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1059,54 +1083,6 @@ public class RavelBaseListener implements RavelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParam(RavelParser.ParamContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterElementValuePairs(RavelParser.ElementValuePairsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElementValuePairs(RavelParser.ElementValuePairsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterElementValuePair(RavelParser.ElementValuePairContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElementValuePair(RavelParser.ElementValuePairContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterElementValue(RavelParser.ElementValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElementValue(RavelParser.ElementValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterElementValueArrayInitializer(RavelParser.ElementValueArrayInitializerContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElementValueArrayInitializer(RavelParser.ElementValueArrayInitializerContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

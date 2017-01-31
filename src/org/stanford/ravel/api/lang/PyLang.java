@@ -25,8 +25,9 @@ public class PyLang extends BaseLanguage {
     }
 
     @Override
-    protected void createDispatcher(Space s) {
+    protected CodeModule createDispatcher(Space s) {
         // TODO
+        return null;
     }
 
     @Override

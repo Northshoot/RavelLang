@@ -81,36 +81,19 @@ public class ModelControllerLinker {
             }
         }*/
 
-        // instantiate sinks
-        ssb.getSink().forEach((sName, rs) -> {
-            // get the sink
-            String sinkName = rs.getValue();
-            Sink s = app.getSink(sinkName);
-            if (s == null) {
-                driver.emitError(new SourceLocation(rs.getDefNode()), sinkName + " does not refer to a valid sink");
+        // instantiate interfaces
+        ssb.getInterfaces().forEach((iName, is) -> {
+            // get the interface
+            String interfaceName = is.getInstanceName();
+            Interface i = app.getInterface(interfaceName);
+            if (i == null) {
+                driver.emitError(new SourceLocation(is.getDefNode()), interfaceName + " does not refer to a valid interface");
                 return;
             }
 
-            // instantiate the sink on this space
-            // sinks don't have parameters (but they are ParametrizedComponent for consistency)
-            InstantiatedSink isink = s.instantiate(space, new HashMap<>(), rs.getName());
-            space.add(rs.getName(), isink);
-        });
-
-        // instantiate sources
-        ssb.getSource().forEach((sName, rs) -> {
-            // get the source
-            String sourceName = rs.getValue();
-            Source s = app.getSource(sourceName);
-            if (s == null) {
-                driver.emitError(new SourceLocation(rs.getDefNode()), sourceName + " does not refer to a valid source");
-                return;
-            }
-
-            // instantiate the source on this space
-            // sinks don't have parameters (but they are ParametrizedComponent for consistency)
-            InstantiatedSource isource = s.instantiate(space, new HashMap<>(), rs.getName());
-            space.add(rs.getName(), isource);
+            // instantiate the interface on this space
+            InstantiatedInterface iiface = i.instantiate(space, is.getParameterMap(), is.getName());
+            space.add(is.getName(), iiface);
         });
 
         // instantiate models
@@ -143,7 +126,7 @@ public class ModelControllerLinker {
             InstantiatedController ictr = ctr.instantiate(space, is.getName());
 
             // set parameters
-            Map<String, InstantiatedModel> modelMap = new HashMap<>();
+            Map<String, EventComponent> eventMap = new HashMap<>();
 
             boolean ok = true;
             for (Map.Entry<String, Object> param : is.getParameterMap().entrySet()) {
@@ -154,22 +137,38 @@ public class ModelControllerLinker {
                 Type type;
                 if (pvalue instanceof InstanceSymbol) {
                     // must refer to a model
-                    String modelName = ((InstanceSymbol) pvalue).getInstanceName();
-                    Model m = app.getModel(modelName);
-                    // if m is null, we already complained loudly above
-                    assert m != null;
-                    InstantiatedModel im = space.getModel(((InstanceSymbol) pvalue).getName());
-                    assert im != null;
-                    assert m == im.getBaseModel();
-                    modelMap.put(pname, im);
-                    type = m.getType();
-                    value = im;
+                    String instanceName = ((InstanceSymbol) pvalue).getInstanceName();
+                    Model m = app.getModel(instanceName);
+                    if (m == null) {
+                        Interface i = app.getInterface(instanceName);
+                        if (i == null) {
+                            // this can only happen if we complained above
+                            // (either it's an invalid model or an invalid interface)
+                            value = null;
+                            type = null;
+                            ok = false;
+                        } else {
+                            InstantiatedInterface iiface = space.getInterface(((InstanceSymbol) pvalue).getName());
+                            assert iiface != null;
+                            assert i == iiface.getBaseInterface();
+                            eventMap.put(pname, iiface);
+                            value = iiface;
+                            type = i.getType();
+                        }
+                    } else {
+                        InstantiatedModel im = space.getModel(((InstanceSymbol) pvalue).getName());
+                        assert im != null;
+                        assert m == im.getBaseModel();
+                        eventMap.put(pname, im);
+                        type = m.getType();
+                        value = im;
+                    }
                 } else {
                     type = ParserUtils.typeFromLiteral(pvalue);
                     value = pvalue;
                 }
 
-                if (!ctr.getParameterType(pname).isAssignable(type)) {
+                if (type != null && !ctr.getParameterType(pname).isAssignable(type)) {
                     driver.emitError(new SourceLocation(is.getDefNode()), "cannot assign value of type " + type.getName() + " to a parameter of type " +
                         ctr.getParameterType(pname).getName());
                     ok = false;
@@ -191,12 +190,12 @@ public class ModelControllerLinker {
             // link events
             for (EventHandler e : ctr) {
                 VariableSymbol modelVar = e.getModelVar();
-                InstantiatedModel m = modelMap.get(modelVar.getName());
+                EventComponent ec = eventMap.get(modelVar.getName());
                 // we know modelVar is a parameter of ctr (from DefPhase), we know it is of model type (because we checked types in
                 // DefPhase), we know the value we're passing is actually a model (because we just checked) and we know
                 // that we're passing a value (because we just checked)
-                assert m != null;
-                ictr.linkEvent(e, m);
+                assert ec != null;
+                ictr.linkEvent(e, ec);
             }
 
             space.add(is.getName(), ictr);

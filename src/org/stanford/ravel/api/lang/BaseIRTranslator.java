@@ -37,13 +37,14 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
     }
 
     @Override
-    public void translate(List<VariableSymbol> controllerParams, TypedIR ir) {
+    public void translate(List<VariableSymbol> controllerParams, List<VariableSymbol> eventParams, TypedIR ir) {
         // declare all the controller parameters
         for (VariableSymbol sym : controllerParams) {
             setRegisterName(sym.getRegister(), sym.getName());
         }
-        // give self a name
-        setRegisterName(Registers.SELF_REG, "self");
+        // declare all event parameters
+        for (VariableSymbol sym : eventParams)
+            setRegisterName(sym.getRegister(), sym.getName());
 
         // declare all unnamed (temporary, gp) registers
         // (this includes also named variables in the original code,

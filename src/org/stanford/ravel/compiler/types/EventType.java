@@ -7,32 +7,27 @@ package org.stanford.ravel.compiler.types;
  */
 public class EventType implements Type {
     private final FunctionType fn;
-    private final ContextType ctx;
-    private final Object key;
+    private final boolean hasSelf;
 
-    EventType(FunctionType fn, ContextType ctx, Object key) {
+    EventType(FunctionType fn, boolean hasSelf) {
         this.fn = fn;
-        this.ctx = ctx;
-        this.key = key;
+        this.hasSelf = hasSelf;
     }
 
     @Override
     public String getName() {
-        return "event:" + this.fn.getName();
+        return this.fn.getName();
     }
 
-    public CompoundType getContextType() {
-        return ctx;
+    public String getEventName() {
+        return this.fn.getFunctionName();
     }
 
-    /**
-     * The event key is a tag that can be applied to an event type by
-     * the owner type to more quickly distinguish between different events.
-     * For ModelTypes, the event key is a primitives.ModelEvent
-     *
-     * @return the event key
-     */
-    public Object getKey() {
-        return key;
+    public boolean hasSelf() {
+        return hasSelf;
+    }
+
+    public Type[] getArgumentTypes() {
+        return this.fn.getArgumentTypes();
     }
 }

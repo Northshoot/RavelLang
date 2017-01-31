@@ -1,7 +1,7 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
 import org.stanford.ravel.api.platforms.RavelAPIObject;
-import org.stanford.ravel.primitives.Source;
+import org.stanford.ravel.primitives.Interface;
 
 /**
  * Created by lauril on 9/21/16.
@@ -19,12 +19,12 @@ public class Timer extends RavelAPIObject {
     String mStartName;
     String mStopName;
     TimerQueue tm;
-    Source mSrc;
+    Interface mSrc;
 
     public boolean debug = true;
     private boolean periodic = true;
 
-    public Timer(Source src, TimerQueue tm, boolean periodic){
+    public Timer(Interface src, TimerQueue tm, boolean periodic){
         super();
         mSrc =src;
         this.tm = tm;
@@ -45,7 +45,7 @@ public class Timer extends RavelAPIObject {
         }
         //creating functions and all other stuff
         mCallBack = this.mVarName+"__expired";
-        src.addCallBack(mCallBack);
+        //src.addCallBack(mCallBack);
         mStartName = this.mVarName + "__start";
         mStopName = this.mVarName + "__stop";
 

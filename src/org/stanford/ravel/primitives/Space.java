@@ -11,8 +11,7 @@ public class Space extends Primitive {
     private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
     private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
     private final Map<String, View> mViews = new LinkedHashMap<>();
-    private final Map<String, InstantiatedSink> mSink = new LinkedHashMap<>();
-    private final Map<String, InstantiatedSource> mSource = new LinkedHashMap<>();
+    private final Map<String, InstantiatedInterface> mInterfaces = new LinkedHashMap<>();
     private Platform mPlatform;
 
     public Space(String name) {
@@ -23,8 +22,7 @@ public class Space extends Primitive {
     public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
     public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
-    public void add(String ref, InstantiatedSink s) { this.mSink.put(ref,  s); }
-    public void add(String ref, InstantiatedSource v) { this.mSource.put(ref,  v); }
+    public void add(String ref, InstantiatedInterface s) { this.mInterfaces.put(ref,  s); }
 
     public Collection<InstantiatedModel> getModels() {
         return Collections.unmodifiableCollection(mModels.values());
@@ -32,17 +30,11 @@ public class Space extends Primitive {
     public InstantiatedModel getModel(String modelName) {
         return mModels.get(modelName);
     }
-    public Collection<InstantiatedSource> getSources() {
-        return Collections.unmodifiableCollection(mSource.values());
+    public Collection<InstantiatedInterface> getInterfaces() {
+        return Collections.unmodifiableCollection(mInterfaces.values());
     }
-    public InstantiatedSource getSource(String sourceName) {
-        return mSource.get(sourceName);
-    }
-    public Collection<InstantiatedSink> getSinks() {
-        return Collections.unmodifiableCollection(mSink.values());
-    }
-    public InstantiatedSink getSink(String sourceName) {
-        return mSink.get(sourceName);
+    public InstantiatedInterface getInterface(String sourceName) {
+        return mInterfaces.get(sourceName);
     }
     public Collection<InstantiatedController> getControllers() {
         return Collections.unmodifiableCollection(mControllers.values());
@@ -51,9 +43,7 @@ public class Space extends Primitive {
     public void freezeAll() {
         for (InstantiatedModel im : mModels.values())
             im.freeze();
-        for (InstantiatedSource is : mSource.values())
-            is.freeze();
-        for (InstantiatedSink is : mSink.values())
+        for (InstantiatedInterface is : mInterfaces.values())
             is.freeze();
     }
 

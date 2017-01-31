@@ -7,18 +7,14 @@ import org.stanford.antlr4.RavelParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.*;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
-import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.EventHandler;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -108,31 +104,23 @@ public class RavelCompiler {
     }
 
     private void compileModels(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ModelIR mir = new ModelIR(this, app);
+        ModelCompiler compiler = new ModelCompiler(this, options.hasFOption("dump-models"));
         for (ModelSymbol m : scope.getModels()) {
-            mir.addModel(m);
+            app.addModel(m.getName(), compiler.compile(m));
+        }
+    }
+
+    private void compileInterfaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        InterfaceCompiler compiler = new InterfaceCompiler(this);
+        for (InterfaceSymbol isym : scope.getInterfaces()) {
+            app.addInterface(isym.getName(), compiler.compileInterface(isym));
         }
     }
 
     private void compileControllers(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ControllerEventCompiler compiler = new ControllerEventCompiler(this, options.hasFOption("dump-ir"));
-
+        ControllerCompiler compiler = new ControllerCompiler(this, options.hasFOption("dump-ir"));
         for (ControllerSymbol c : scope.getControllers()) {
-            Controller controller = new Controller(c.getName());
-
-            controller.addAllParameters(c.getParameters());
-
-            for (EventSymbol eventSym : c.getEvents()) {
-                VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());
-
-                TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
-                if (ir != null) {
-                    EventHandler event = new EventHandler(modelVar, eventSym.getType(), ir);
-                    controller.addEvent(event);
-                }
-            }
-
-            app.addController(c.getName(), controller);
+            app.addController(c.getName(), compiler.compile(c));
         }
     }
 
@@ -191,8 +179,13 @@ public class RavelCompiler {
 
                 RavelApplication app = new RavelApplication();
 
-                // typecheck the models, assign types to the
+                // typecheck the models, assign types to the fields
                 compileModels(globalScope, app);
+                if (!success())
+                    return;
+
+                // typecheck the interfaces, find implementations
+                compileInterfaces(globalScope, app);
                 if (!success())
                     return;
 

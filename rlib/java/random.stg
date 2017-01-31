@@ -1,0 +1,18 @@
+import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+file(package,imports,name,controllerList,controllerMap) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class <name> {
+    private final java.util.Random rng = new java.util.Random();
+
+    public <name>(AppDispatcher dispatcher) {
+    }
+
+    public int next() {
+        return rng.nextInt();
+    }
+}
+>>

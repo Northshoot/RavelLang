@@ -506,4 +506,8 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         addCurrent(new Continue(ctx));
         return VOID_REG;
     }
+
+    public void declare(VariableSymbol var) {
+        ensureVarRegister(var);
+    }
 }

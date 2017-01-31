@@ -5,7 +5,7 @@ import org.stanford.ravel.api.lang.c.FuncDeclaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.Source;
+import org.stanford.ravel.primitives.Interface;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -83,7 +83,7 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     }
 
 
-    public void addTimer(Source timer_name, boolean periodic) {
+    public void addTimer(Interface timer_name, boolean periodic) {
         mTimerMap.put(timer_name.getCName(), new Timer(timer_name, this, periodic));
     }
 

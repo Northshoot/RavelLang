@@ -1,5 +1,7 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.types.EventType;
+
 import java.util.*;
 
 /**
@@ -7,7 +9,7 @@ import java.util.*;
  *
  * Created by gcampagn on 1/30/17.
  */
-abstract class BaseEventComponent<EventType extends Enum<EventType>> extends ParametrizedComponent implements EventComponent {
+abstract class BaseEventComponent extends ParametrizedComponent implements EventComponent {
     private final Space mSpace;
     private final String mVarName;
 
@@ -17,13 +19,14 @@ abstract class BaseEventComponent<EventType extends Enum<EventType>> extends Par
     private final Map<String, Collection<InstantiatedController>> mControllerMap = new HashMap<>();
     private final List<InstantiatedController> mControllerList = new ArrayList<>();
 
-    BaseEventComponent(Space space, Primitive primitive, String varName, EventType[] eventKeys) {
+    BaseEventComponent(Space space, Primitive primitive, String varName) {
         super(primitive.getName(), primitive.getInternalName());
         mSpace = space;
         mVarName = varName;
+    }
 
-        for (EventType e : eventKeys)
-            mControllerMap.put(e.name(), new HashSet<>());
+    void createEvent(String eventName) {
+        mControllerMap.put(eventName, new HashSet<>());
     }
 
     @Override
@@ -43,8 +46,8 @@ abstract class BaseEventComponent<EventType extends Enum<EventType>> extends Par
         for (LinkedEvent e : mEvents) {
             allControllers.add(e.getController());
 
-            ModelEvent eventKey = (ModelEvent) e.getHandler().getEventType().getKey();
-            mControllerMap.get(eventKey.name()).add(e.getController());
+            EventType eventType = e.getHandler().getEventType();
+            mControllerMap.get(eventType.getEventName()).add(e.getController());
         }
 
         // convert the set to a list for stable ordering

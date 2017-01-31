@@ -128,6 +128,7 @@ file_input returns [Scope scope]
 comp_def
     : model_comp
     | controller_comp
+    | iface_comp
     | space_comp
     ;
 
@@ -145,8 +146,7 @@ space_block
     : platform_scope
     | models_scope
     | controllers_scope
-    | sink_scope
-    | source_scope
+    | interface_scope
     | NEWLINE
     ;
 
@@ -191,7 +191,7 @@ instance_def returns [InstanceSymbol symbol]
     ;
 
 param_assig_list
-    : param_assig (',' param_assig)? #ParameterAssignments
+    : param_assig (',' param_assig)* #ParameterAssignments
     ;
 
 param_assig
@@ -206,13 +206,40 @@ instance_name
 controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstantiation
     ;
-sink_scope returns [Scope scope]
-    : 'sinks:' space_assignments #SinkLinks
+interface_scope returns [Scope scope]
+    : 'interfaces:' instantiations #InterfaceInstantiation
     ;
 
-source_scope returns [Scope scope]
-    : 'sources:' space_assignments #SourceLinks
+/**
+ *
+ * Interface parser rules
+ */
+iface_comp returns [Scope scope]
+    : INTERFACE Identifier component_parameters ':' iface_body #InterfaceScope
     ;
+
+iface_body
+    : NEWLINE INDENT impl_scope iface_members* DEDENT
+    ;
+
+impl_scope returns [Scope scope]
+    : 'implementation:' space_assignments* #ImplementationScope
+    ;
+
+iface_members
+    : iface_def
+    | iface_event
+    | NEWLINE
+    ;
+
+iface_def returns [InterfaceMemberSymbol symbol]
+    : DEF Identifier '(' typed_identifier_list? ')' (':' type)? #InterfaceDef
+    ;
+
+iface_event returns [InterfaceMemberSymbol symbol]
+    : EVENT Identifier '(' typed_identifier_list? ')' #InterfaceEvent
+    ;
+
 /**
  *
  * Model parser rules
@@ -245,21 +272,8 @@ properties
     ;
 
 property_line
-    : property
+    : ref_assign
     | NEWLINE
-    ;
-
-property
-    : Identifier '=' propValue NEWLINE #VarAssignment
-    ;
-
-propValue
-    : propArray
-    | literal
-    ;
-
-propArray
-    : '[' literal (',' literal)* ']'
     ;
 
 schema_block returns [Scope scope]
@@ -276,7 +290,7 @@ field_line
     ;
 
 field
-    : Identifier '=' field_type '(' elementValuePairs? ')'  NEWLINE? #FieldDeclaration
+    : Identifier ':' type  NEWLINE? #FieldDeclaration
     ;
 
 /**
@@ -532,20 +546,6 @@ params
 param
     : Identifier
     ;
-elementValuePairs
-    :   elementValuePair (',' elementValuePair)*
-    ;
-elementValuePair
-    :   Identifier '=' elementValue
-    ;
-
-elementValue
-    : expression
-    | elementValueArrayInitializer
-    ;
-elementValueArrayInitializer
-    :   '{' (elementValue (',' elementValue)*)? (',')? '}'
-    ;
 
 qualified_name
     : Identifier ('.' Identifier)*
@@ -565,6 +565,9 @@ CONTROLLER          : 'controller' ;
 VIEW                : 'view';
 FLOW                : 'flow' ;
 
+// interface
+INTERFACE           : 'interface' ;
+DEF                 : 'def' ;
 
 //controller
 EVENT               : 'event' ;

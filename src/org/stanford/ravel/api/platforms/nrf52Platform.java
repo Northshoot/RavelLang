@@ -2,7 +2,7 @@ package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.Source;
+import org.stanford.ravel.primitives.Interface;
 import org.stanford.ravel.primitives.Space;
 import org.stanford.ravel.api.Settings;
 import org.stanford.ravel.api.platforms.nrf52.obj.*;
@@ -57,7 +57,7 @@ public class nrf52Platform extends ConcretePlatform{
         mBuildPathApi += mBuildPath + "/api/";
 
     }
-    public void addSourceBoot(String name, Source src){
+    public void addSourceBoot(String name, Interface src){
         if(mBoot == null) {
             this.mBoot = new Boot(mBuildPathApi);
         }
@@ -76,19 +76,19 @@ public class nrf52Platform extends ConcretePlatform{
     }
     */
 
-    public void addSourceVibration(String name, Source src){
+    public void addSourceVibration(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceVibration >>>>>");
     }
-    public void addSourceTemperature(String name, Source src){
+    public void addSourceTemperature(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceTemperature >>>>>");
     }
-    public void addSourceVoltageIO(String name, Source src){
+    public void addSourceVoltageIO(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceVoltageIO >>>>>");
     }
-    public void addSourceRandom(String name, Source src) {
+    public void addSourceRandom(String name, Interface src) {
 
     }
     /*

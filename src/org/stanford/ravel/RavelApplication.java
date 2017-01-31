@@ -47,19 +47,12 @@ public class RavelApplication  {
     public View getView(String name) { return mViews.get(name); }
     public List<View> getViews(){ return new ArrayList<>(mViews.values());}
 
-    private final Map<String, Source> mSource = new LinkedHashMap<>();
-    public void addSource(String name, Source s){
-        mSource.put(name, s);
+    private final Map<String, Interface> mInterfaces = new LinkedHashMap<>();
+    public void addInterface(String name, Interface s){
+        mInterfaces.put(name, s);
     }
-    public Source getSource(String name) { return mSource.get(name); }
-    public List<Source> getSource(){ return new ArrayList<>(mSource.values());}
-
-    private final Map<String, Sink> mSink = new LinkedHashMap<>();
-    public void addSink(String name, Sink s){
-        mSink.put(name, s);
-    }
-    public Sink getSink(String name) { return mSink.get(name); }
-    public List<Sink> getSinks(){ return new ArrayList<>(mSink.values());}
+    public Interface getInterface(String name) { return mInterfaces.get(name); }
+    public List<Interface> getInterfaces(){ return new ArrayList<>(mInterfaces.values());}
 
     private final Map<String, Flow> mFlow = new LinkedHashMap<>();
     public void addFlow(String name, Flow f){
@@ -110,26 +103,16 @@ public class RavelApplication  {
             ret+="\t No Views";
         }
         ret+="\n/**********************************************************/\n";
-        if(mSource.size() >0) {
-            ret += "\tSource: \n\t";
-            for (Map.Entry<String, Source> entry : mSource.entrySet()) {
-                ret += "Source : " + entry.getKey() + "\n\t" + entry.getValue();
+        if(mInterfaces.size() >0) {
+            ret += "\tInterfaces: \n\t";
+            for (Map.Entry<String, Interface> entry : mInterfaces.entrySet()) {
+                ret += "Interface : " + entry.getKey() + "\n\t" + entry.getValue();
             }
         } else {
-            ret+="\t No models";
+            ret+="\t No Interfaces";
         }
-        ret+="\n/**********************************************************/\n";
-        if(mSink.size() >0) {
-            ret += "\tSinks: \n\t";
-            for (Map.Entry<String, Sink> entry : mSink.entrySet()) {
-                ret += "Sink : " + entry.getKey() + "\n\t" + entry.getValue();
-            }
-        } else {
-            ret+="\t No Sinks";
-        }
-        ret+="\n/**********************************************************/\n";
         if(mFlow.size() >0) {
-            ret += "\tModels: \n\t";
+            ret += "\tFlows: \n\t";
             for (Map.Entry<String, Flow> entry : mFlow.entrySet()) {
                 ret += "Flow : " + entry.getKey() + "\n\t" + entry.getValue();
             }
