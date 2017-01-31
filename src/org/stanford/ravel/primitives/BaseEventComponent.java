@@ -20,7 +20,7 @@ abstract class BaseEventComponent extends ParametrizedComponent implements Event
     private final List<InstantiatedController> mControllerList = new ArrayList<>();
 
     BaseEventComponent(Space space, Primitive primitive, String varName) {
-        super(primitive.getName(), primitive.getInternalName());
+        super(primitive.getName());
         mSpace = space;
         mVarName = varName;
     }

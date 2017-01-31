@@ -27,7 +27,7 @@ public class Model extends Primitive {
     private final Map<String, String> mRefProperties = new HashMap<>();
 
     public Model(String name, ModelSymbol symbol) {
-        super(name,name+"Model");
+        super(name);
 
         this.symbol = symbol;
         this.mModelType = symbol.getModelType();
@@ -80,7 +80,7 @@ public class Model extends Primitive {
 
     @Override
     public String toString(){
-        String ret = "Concrete Model:" + " type : " + mModelType + " name: " + getVerboseName() +
+        String ret = "Concrete Model:" + " type : " + mModelType + " name: " + getName() +
                 " # of Fields " + mFields.size() + "\n\t values: \n" ;
         for (Map.Entry<String, FieldSymbol> pair : mFields.entrySet()) {
             ret += "\t\t" + pair.getValue().toString();

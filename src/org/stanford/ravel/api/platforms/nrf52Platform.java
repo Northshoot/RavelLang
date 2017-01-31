@@ -138,10 +138,6 @@ public class nrf52Platform extends ConcretePlatform{
             }
         }
         */
-        for(InstantiatedController c: mSpace.getControllers()){
-            ControllerImpl cImp = new ControllerImpl(c, mMainApp);
-            mFiles.addAll(cImp.getFiles());
-        }
         return getFiles();
     }
 

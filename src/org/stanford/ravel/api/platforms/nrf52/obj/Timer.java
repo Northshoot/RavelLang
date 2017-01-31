@@ -29,8 +29,8 @@ public class Timer extends RavelAPIObject {
         mSrc =src;
         this.tm = tm;
         this.periodic = periodic;
-        this.mShortName = src.getCName();
-        this.mVarName = src.getCName();
+        this.mShortName = src.getName();
+        this.mVarName = src.getName();
 
         docs = "This is timer " + this.mVarName + " documentation";
 

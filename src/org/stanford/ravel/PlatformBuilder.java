@@ -56,7 +56,7 @@ public class PlatformBuilder {
         ConcreteLanguage lang = platform.getConcreteLanguage();
         ConcretePlatform concretePlatform = platform.getConcretePlatform();
 
-        String path = this.path + s.getInternalName();
+        String path = this.path + s.getName();
         mFiles.addAll(lang.build(s));
         mFiles.addAll(concretePlatform.build(s, path));
         for (FileObject fo : mFiles)

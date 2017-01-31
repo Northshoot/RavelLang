@@ -1,7 +1,7 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.c.FuncDeclaration;
+import org.stanford.ravel.api.platforms.nrf52.FuncDeclaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 import org.stanford.ravel.primitives.Controller;
@@ -56,9 +56,9 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         addToMakeObj("api/" + this.fileName +".c");
     }
 
-    public String getControllerInclude(){
-
-        return controller.getHeaderFileName();}
+    public String getControllerInclude() {
+        return "controller/" + controller.getName() + ".h";
+    }
 
     public List<FuncDeclaration> getFuncDeclaration(){
 
@@ -84,7 +84,7 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
 
 
     public void addTimer(Interface timer_name, boolean periodic) {
-        mTimerMap.put(timer_name.getCName(), new Timer(timer_name, this, periodic));
+        mTimerMap.put(timer_name.getName(), new Timer(timer_name, this, periodic));
     }
 
     public Timer getTimer(String timer_name) {

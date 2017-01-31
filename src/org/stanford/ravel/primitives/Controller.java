@@ -14,7 +14,7 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     private final List<VariableSymbol> mParamSymbols = new ArrayList<>();
 
     public Controller(String name) {
-        super(name, name+"Ctr");
+        super(name);
     }
 
     public void addEvent(EventHandler event) {

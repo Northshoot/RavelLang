@@ -14,7 +14,7 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
     private final String mVarName;
 
     InstantiatedController(Space space, Controller controller, String varName) {
-        super(controller.getName(), controller.getName() + "Ctr");
+        super(controller.getName());
         mSpace = space;
         mController = controller;
         mVarName = varName;

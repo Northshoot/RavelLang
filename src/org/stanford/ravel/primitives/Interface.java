@@ -14,7 +14,7 @@ public class Interface extends Primitive {
     private final List<String> events = new ArrayList<>();
 
     public Interface(String name, InterfaceSymbol symbol) {
-        super(name, name + "Interface");
+        super(name);
         this.symbol = symbol;
     }
 

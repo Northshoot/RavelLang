@@ -1,4 +1,4 @@
-package org.stanford.ravel.api.lang.c;
+package org.stanford.ravel.api.platforms.nrf52;
 
 // FIXME: eliminate this code when NRF52 has been ported away
 
