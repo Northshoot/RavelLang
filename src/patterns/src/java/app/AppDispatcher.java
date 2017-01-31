@@ -15,9 +15,10 @@ import java.util.Map;
  * Created by lauril on 1/23/17.
  */
 public class AppDispatcher  extends AbstractDispatcher{
+    public String getName() {
+        return mName;
+    }
 
-    //TODO: not cool
-    public static final int PACKET_SIZE = Model.RECORD_SIZE;
     //AUTOGEN
     Model model_id_1 ;
     ModelController mcntr_id_1 ;
@@ -34,14 +35,9 @@ public class AppDispatcher  extends AbstractDispatcher{
     TimerSource1 timerSource;
 
     String mName ;
-    QueueArray<EVENTS> eventQueue = new QueueArray<>();
 
-    //AUTOGEN: internal schedule events
-    enum EVENTS {
-        MODEL_ARRIVED,
-        MODEL_DEPARTED,
-        MODEL_FULL
-    }
+
+
 
     public AppDispatcher(String name){
 
@@ -88,11 +84,35 @@ public class AppDispatcher  extends AbstractDispatcher{
     }
 
 
+
     void pprint(String s){
         System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
     }
+
+
+    /******************* ******* event queue ***************************/
+    QueueArray<Event> eventQueue = new QueueArray<>();
+
+    public void runNextEvent(){
+        Event e  = eventQueue.dequeue();
+        switch(e.getType()){
+            case DRIVER__DATA_RECEIVED:
+                models__notifyArrived(e);
+                break;
+            case MODELS__NOTIFY_RECORD_DEPARTED:
+                break;
+            case MODELS__NOTIFY_RECORD_ARRIVED:
+                break;
+        }
+    }
+    /***********************************************************************/
+    /*************** AD Commands from model to AD **************************/
+    /***********************************************************************/
+
+
+
     @Override
-    public Error send_data(RavelPacket pkt, Endpoint endpoint){
+    public Error model__sendData(RavelPacket pkt, Endpoint endpoint){
         //send data to the driver
         //TODO: fix form sim
         int src =0;
@@ -114,11 +134,17 @@ public class AppDispatcher  extends AbstractDispatcher{
         mDriver.sendData(pkt.toBytes(), endpoint);
         return Error.SUCCESS;
     }
-    @Override
-    public void data_received(byte[] data, Endpoint endpoint) {
-        //is it an ACK?
+    /***********************************************************************/
+    /************** AD callbacks to the models ****************************/
+    /***********************************************************************/
 
-        //Dispatch to appropriate model
+    public void models__notifyDeparted(){
+
+    }
+
+    public void models__notifyArrived(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint);
         RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
         rp.fromNetwork(data);
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
@@ -127,11 +153,19 @@ public class AppDispatcher  extends AbstractDispatcher{
                 model_id_1.record_arrived(rp, endpoint);
 
         }
+    }
+    /***********************************************************************/
+    /************** Network callbacks from Driver to AD ********************/
+    /***********************************************************************/
+    @Override
+    public void driver__dataReceived(byte[] data, Endpoint endpoint) {
+        NetworkEvent ne = new NetworkEvent(data, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
+
 
     }
 
     @Override
-    public void driver_send_done(Error networkError, byte[] data, Endpoint endpoint) {
+    public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
         pprint("driver_send_done, ERROR: " + networkError);
         RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
         rp.fromNetwork(data);
@@ -142,6 +176,13 @@ public class AppDispatcher  extends AbstractDispatcher{
         }
     }
 
+
+    /***********************************************************************/
+    /************** System callbacks from Driver to AD *********************/
+    /***********************************************************************/
+    /**
+     * System has started
+     */
     @Override
     public void started() {
         //AUTOGEN: controllers that subscribe to the event
@@ -149,23 +190,27 @@ public class AppDispatcher  extends AbstractDispatcher{
         if(this.mName == "EMD") mcntr_id_1.start = true;
         mcntr_id_1.system_started();
     }
-
+    /**
+     * System has stopped
+     */
     @Override
     public void stopped() {
 
     }
-
+    /**
+     * System has restarted
+     */
     @Override
     public void restarted() {
 
     }
-
+    /**
+     * Low battery indicator
+     */
     @Override
     public void battery(BatteryLevel bl) {
 
     }
 
-    public String getName() {
-        return mName;
-    }
+
 }
