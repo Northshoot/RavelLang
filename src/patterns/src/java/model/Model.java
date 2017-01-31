@@ -160,6 +160,11 @@ public class Model extends StreamingModel<Model.Record>{
             //AUTOGEN END
             return outputStream.toByteArray();
         }
+
+        @Override
+        public void index(int i) {
+            this.idx = i;
+        }
     }
 
 }

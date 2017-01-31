@@ -62,7 +62,7 @@ public class ModelController {
     }
 
     public void Model_departed(Context<Model.Record> ctx){
-        if(!running) timer.start_periodic(3000);
+        if(!running) timer.start_periodic(100);
         pprint("Model departed: " + ctx);
 
     }
@@ -87,7 +87,7 @@ public class ModelController {
     public void system_started() {
         //TODO: test only in simulation
         if(mName == "EMD" ) {
-            timer.start_periodic(3000);
+            timer.start_periodic(100);
             running = true;
         }
 

@@ -95,6 +95,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         if (currentPos >= mModelSize )
             return false;
         // TODO: if durable save to disk
+
         mRecords.add(currentPos++, record);
         return true;
     }

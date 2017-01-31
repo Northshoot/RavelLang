@@ -5,4 +5,6 @@ package org.stanford.ravel.rrt.model;
  */
 public interface ModelRecord {
     byte[] toBytes();
+
+    void index(int i);
 }

@@ -12,6 +12,7 @@ import org.stanford.ravel.rrt.tiers.Error;
 public abstract class StreamingModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
     private Endpoint mEndpoint;
 
+    private int index = 0;
     protected StreamingModel(DispatcherAPI dispatcher, int size) {
         super(dispatcher, size);
     }
@@ -33,7 +34,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             if (ctx.hasError())
                 return ctx;
         }
-
+        record.index(++index);
         // Packetize the record and send it
         byte[] rec = record.toBytes();
         RavelPacket ravelPacket = new RavelPacket(rec.length);

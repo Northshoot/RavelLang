@@ -72,7 +72,13 @@ public class RavelPacket {
                 ByteWork.getBytes(data, 0, 4));
         return buffer.getInt();
     }
+    private int getRecordIdx(){
+        //TODO: no hardcoded vals
 
+        ByteBuffer buffer = ByteBuffer.wrap(
+                ByteWork.getBytes(this.record_data, 4, 8));
+        return buffer.getInt();
+    }
 
 
     public byte[] toBytes(){
@@ -102,7 +108,7 @@ public class RavelPacket {
     public String toString() {
         return "[SRC: " + this.src + ", DST: " + this.dst
                 + ", PARTIAL: "+ isPartial() + ", LAST: "+ isLast()
-                +", MODEL_ID: " + this.model_id + "]";
+                +", MODEL_ID: " + this.model_id + " rec_idx: " + getRecordIdx() + "]";
     }
 
     private int getPartial() {
