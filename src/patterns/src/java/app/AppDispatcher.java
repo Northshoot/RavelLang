@@ -35,6 +35,15 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
     TimerSource1 timerSource;
 
     String mName ;
+    QueueArray<EVENTS> eventQueue = new QueueArray<>();
+
+    //AUTOGEN: internal schedule events
+    enum EVENTS {
+        MODEL_ARRIVED,
+        MODEL_DEPARTED,
+        MODEL_FULL
+    }
+
     public AppDispatcher(String name){
 
 
@@ -111,7 +120,7 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
         //is it an ACK?
 
         //Dispatch to appropriate model
-        RavelPacket rp = new RavelPacket();
+        RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
         rp.fromNetwork(data);
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
         switch (rp.model_id){
@@ -125,7 +134,7 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
     @Override
     public void driver_send_done(Error networkError, byte[] data, Endpoint endpoint) {
         pprint("driver_send_done, ERROR: " + networkError);
-        RavelPacket rp = new RavelPacket();
+        RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
         rp.fromNetwork(data);
         switch (rp.model_id){
             case 1:

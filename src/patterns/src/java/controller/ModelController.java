@@ -67,14 +67,16 @@ public class ModelController {
     }
 
     public void Model_full(Context<Model.Record> ctx){
-        timer.cancel();
-        running = false;
+        if(mName == "EMD" ) {
+            timer.cancel();
+            running = false;
+        }
+
         pprint("Model_full: " + ctx);
 
     }
 
     public void Model_save_done(Context<Model.Record> ctx){
-
         pprint("Model_save_done:" + ctx);
     }
 

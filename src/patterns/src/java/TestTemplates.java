@@ -33,7 +33,7 @@ public class TestTemplates {
         }
 
 
-        RavelPacket rp = new RavelPacket();
+        RavelPacket rp = new RavelPacket(30);
         System.out.println(rp);
     }
 

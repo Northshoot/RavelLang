@@ -95,7 +95,6 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     public void record_arrived(RavelPacket pkt, Endpoint endpoint) {
         Context<RecordType> ctx = new Context<>(this);
         RecordType record = unmarshall(pkt.record_data);
-        System.out.println("RX record");
         addRecord(record);
         ctx.record = record;
         //notify all subscribers

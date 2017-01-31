@@ -1,7 +1,6 @@
 package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.utils.ByteWork;
-import patterns.src.java.model.Model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,7 +14,6 @@ public class RavelPacket {
     public final static int SRC = 4; //32 bits for source
     public final static int DST = 8; //32 bits for destination
     public final static int RESERVED = 12; // reserved for byte mapping
-    public final static int RECORD_DATA = RESERVED+Model.RECORD_SIZE; // record data
 
 
 
@@ -27,20 +25,21 @@ public class RavelPacket {
     public int reserved=-1;
     public int partial=-1;
     public int last=-1;
-
+    private int record_end = 0;
 
 
     private byte[] mData;
 
 
 
-    public RavelPacket(){
-        this.record_data = new byte[Model.RECORD_SIZE];
+    public RavelPacket(int recordSize){
+        this.record_end = recordSize + RESERVED;
+        this.record_data = new byte[recordSize];
 
     }
 
     public int getSize(){
-        return RECORD_DATA;
+        return record_end;
     }
     void pprint(String s){
         //TODO
@@ -61,7 +60,7 @@ public class RavelPacket {
         this.reserved =  ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
         this.partial = (this.reserved >> 0) & 1;
         this.last = (this.reserved >> 1) & 1;
-        this.record_data = ByteWork.getBytes(data, RESERVED, RECORD_DATA);
+        this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
         this.model_id = getModelIdFromRecord(this.record_data);
         this.mData = data;
     }
