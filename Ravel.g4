@@ -191,7 +191,7 @@ instance_def returns [InstanceSymbol symbol]
     ;
 
 param_assig_list
-    : param_assig (',' param_assig)? #ParameterAssignments
+    : param_assig (',' param_assig)* #ParameterAssignments
     ;
 
 param_assig

@@ -9,7 +9,6 @@ public class <name> extends org.stanford.ravel.rrt.TimerSource {
     <controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
 
     public <name>(AppDispatcher dispatcher) {
-        super();
     }
 
     // Setter methods for AppDispatcher

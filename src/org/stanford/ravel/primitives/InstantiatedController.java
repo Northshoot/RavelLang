@@ -37,9 +37,9 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
 
     private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
         Set<E> components = new HashSet<E>();
-        for (LinkedEvent event : mLinkedEvents) {
-            if (ofClass.isInstance(event.getComponent())) {
-                components.add(ofClass.cast(event.getComponent()));
+        for (Object object : getAllParameters()) {
+            if (ofClass.isInstance(object)) {
+                components.add(ofClass.cast(object));
             }
         }
         return components;
