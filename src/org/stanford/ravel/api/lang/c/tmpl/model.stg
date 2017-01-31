@@ -1,1 +1,93 @@
 import "common.stg"
+
+c_file(includes,name,base,model) ::=<<
+<begin_source(name)>
+
+#include \<api/context.h>
+#include \<api/packet.h>
+#include \<api/endpoint.h>
+#include \<api/base_model.h>
+<includes:do_include(); separator="\n">
+
+#define MODEL_ID   <model.baseModel.id>
+#define MODEL_SIZE <model.size>
+
+void
+<model.name; format="function">_record_init(<model.name>_Record *record)
+{
+    /* TODO */
+}
+void
+<model.name; format="function">_record_finalize(<model.name>_Record *record)
+{
+    /* Free any record resources (eg strings) */
+}
+
+void
+<model.name; format="function">_init(<model.name> *self)
+{
+    <base; format="function">_init(&self->__base, MODEL_SIZE, sizeof(<model.name>_Record));
+}
+
+void
+<model.name; format="function">_finalize(<model.name> *self)
+{
+    <base; format="function">_finalize(&self->__base);
+}
+
+<model.controllerList:define_set_controller_method(model.name); separator="\n">
+
+>>
+
+declare_record_class(model_name, model_fields) ::=<<
+typedef struct {
+    <model_fields:{f|<f.type> <f.name>;}; separator="\n">
+} <model_name>_Record;
+
+void <model_name; format="function">_record_init(<model_name>_Record *record);
+void <model_name; format="function">_record_finalize(<model_name>_Record *record);
+>>
+
+h_file(includes,name,base,model) ::=<<
+<begin_header("MODEL", name)>
+
+#include \<api/context.h>
+#include \<api/packet.h>
+#include \<api/endpoint.h>
+#include \<api/base_model.h>
+
+/* Forward declare our model class before we include the controller headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+<declare_record_class(model.name, model.baseModel.fields)>
+
+struct s_<name> {
+    <base> __base;
+
+    <model.controllerList:{c|<c.name> *<c.varName>;}; separator="\n">
+};
+
+void <model.name; format="function">_init(<model.name> *self);
+void <model.name; format="function">_finalize(<model.name> *self);
+
+/* The Top API, used by the Controller */
+<model.name>_Record *<model.name; format="function">_create(<model.name> *self);
+Context *<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record);
+
+/* The Init API, used by the Dispatcher */
+<model.controllerList:declare_set_controller_method(model.name); separator="\n">
+
+/* The Bottom API, also used by the Dispatcher */
+void <model.name; format="function">_record_arrived(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
+void <model.name; format="function">_record_departed(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
+void <model.name; format="function">_record_saved_durably(<model.name> *self, RavelPacket *record);
+void <model.name; format="function">_record_saved_endpoint(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
+void <model.name; format="function">_endpoint_connected(<model.name> *self, RavelEndpoint *endpoint);
+
+<end_extern_c()>
+<end_header("MODEL", name)>
+>>

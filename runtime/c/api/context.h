@@ -24,3 +24,5 @@ static inline void Context_clear(Context **pctx) {
         *pctx = NULL;
     }
 }
+
+#endif /* API_CONTEXT_H */

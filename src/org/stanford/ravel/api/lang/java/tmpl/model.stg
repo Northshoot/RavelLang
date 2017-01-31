@@ -63,7 +63,7 @@ public class <name> extends <base>\<<name>.Record> {
     protected Record unmarshall(byte[] data) {
         return new Record(data);
     }
-    public static Record create() {
+    public Record create() {
         return new Record();
     }
 };

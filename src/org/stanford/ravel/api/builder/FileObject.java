@@ -23,6 +23,12 @@ public class FileObject {
         if (basePath == null) throw new IllegalStateException("File Path is not set! " + fileName);
         return basePath + subPath;
     }
+    public String getRelativeName() {
+        if (subPath == null || subPath.isEmpty())
+            return fileName;
+        else
+            return subPath + "/" + fileName;
+    }
 
     public String getBasePath() {
         return basePath;
@@ -38,7 +44,6 @@ public class FileObject {
     public void setSubPath(String path) {
         this.subPath = path;
     }
-
     private String getFileName() {
         assert fileName != null;
         return fileName;

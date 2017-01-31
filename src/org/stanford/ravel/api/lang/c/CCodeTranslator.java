@@ -2,6 +2,7 @@ package org.stanford.ravel.api.lang.c;
 
 import org.stanford.ravel.api.lang.BaseIRTranslator;
 import org.stanford.ravel.api.lang.LiteralFormatter;
+import org.stanford.ravel.compiler.ir.BinaryOperation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
@@ -90,7 +91,13 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TBinaryArithOp arithOp) {
-        addLine(arithOp.target, " = ", arithOp.src1, arithOp.op, arithOp.src2);
+        if (arithOp.op == BinaryOperation.ADD && arithOp.type == PrimitiveType.STR) {
+            addLine(arithOp.target, " = malloc(strlen(", arithOp.src1, ") + strlen(", arithOp.src2, ") + 1)");
+            addLine("if (", arithOp.target, " == NULL) abort() /* FIXME */");
+            addLine("stpcpy(stpcpy(", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
+        } else {
+            addLine(arithOp.target, " = ", arithOp.src1, arithOp.op, arithOp.src2);
+        }
     }
 
     @Override

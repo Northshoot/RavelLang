@@ -12,8 +12,6 @@ import java.util.List;
  * Created by gcampagn on 1/24/17.
  */
 public interface IRTranslator {
-    void declareRegister(int reg, Type type);
-
     void translate(List<VariableSymbol> controllerParams, List<VariableSymbol> eventParams, TypedIR ir);
 
     String getCode();

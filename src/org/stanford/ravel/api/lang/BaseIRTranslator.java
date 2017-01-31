@@ -44,8 +44,13 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
         setRegisterName(sym.getRegister(), sym.getName());
     }
 
+    protected abstract void declareRegister(int reg, Type type);
+
     @Override
     public void translate(List<VariableSymbol> controllerParams, List<VariableSymbol> eventParams, TypedIR ir) {
+        registerNames.clear();
+        builder.setLength(0);
+
         // declare all the controller parameters
         for (VariableSymbol sym : controllerParams)
             declareControllerScope(sym);

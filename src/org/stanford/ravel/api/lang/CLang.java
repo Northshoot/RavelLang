@@ -105,6 +105,7 @@ public class CLang extends BaseLanguage {
     //private final STGroup irGroup;
     private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
+    private final STGroup makefileGroup;
     private final STGroup model_tmpl; // the old template file
 
     public CLang() {
@@ -119,6 +120,8 @@ public class CLang extends BaseLanguage {
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, CTYPES);
         dispatcherGroup.registerRenderer(String.class, CIDENT);
+
+        makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
 
         //irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
         //irGroup.registerRenderer(Type.class, CTYPES);
@@ -137,6 +140,28 @@ public class CLang extends BaseLanguage {
     protected CodeModule createDispatcher(Space space) {
         // TODO
         return null;
+    }
+
+    @Override
+    protected CodeModule createBuildSystem(List<FileObject> files) {
+        List<String> cfiles = new ArrayList<>();
+
+        for (FileObject file : files) {
+            String fileName = file.getRelativeName();
+            if (fileName.endsWith(".c"))
+                cfiles.add(fileName.substring(0, fileName.length()-2));
+        }
+
+        ST tmpl = makefileGroup.getInstanceOf("link");
+        tmpl.add("target", "libravelapp.a");
+        tmpl.add("sources", cfiles);
+
+        CodeModule module = new CodeModule();
+        FileObject makefile = new FileObject();
+        makefile.setFileName("Makefile");
+        makefile.setContent(tmpl.render());
+        module.addFile(makefile);
+        return module;
     }
 
     @Override
@@ -160,24 +185,61 @@ public class CLang extends BaseLanguage {
 
         STControllerTranslator controllerTranslator = new STControllerTranslator(Arrays.asList(h_file, c_file), irTranslator);
         CodeModule generated = controllerTranslator.translate(ictr.getController());
-        generated.setSubPath("controller/");
+        generated.setSubPath("controller");
         return generated;
     }
 
+    private CodeModule simpleModule(ST h_tmpl, ST c_tmpl, String name, String subpath) {
+        h_tmpl.add("name", name);
+        FileObject hFile = new FileObject();
+        hFile.setFileName(name + ".h");
+        hFile.setSubPath(subpath);
+        hFile.setContent(h_tmpl.render());
+
+        c_tmpl.add("name", name);
+        FileObject cFile = new FileObject();
+        cFile.setFileName(name + ".c");
+        cFile.setSubPath(subpath);
+        cFile.setContent(c_tmpl.render());
+
+        CodeModule module = new CodeModule();
+        module.addFile(hFile);
+        module.addFile(cFile);
+        return module;
+    }
+
     @Override
-    protected void createModels(Space space) {
-        ST model_header = model_tmpl.getInstanceOf("models_header_file");
-        model_header.add("space", space);
-        FileObject f = new FileObject();
-        f.setFileName("models.h");
-        f.setContent(model_header.render());
-        mFileObjects.add(f);
-        ST model_object = model_tmpl.getInstanceOf("models_obj_file");
-        model_object.add("space", space);
-//        System.out.println(model_object.render());
-        f = new FileObject();
-        f.setFileName("models.c");
-        f.setContent(model_object.render());
-        mFileObjects.add(f);
+    protected CodeModule createModel(InstantiatedModel im) {
+        ST model_h = modelGroup.getInstanceOf("h_file");
+        ST model_c = modelGroup.getInstanceOf("c_file");
+
+        String baseClass;
+        switch (im.getBaseModel().getModelType()) {
+            case LOCAL:
+                baseClass = "RavelLocalModel";
+                break;
+            case REPLICATED:
+                baseClass = "RavelReplicatedModel";
+                break;
+            case STREAMING:
+                baseClass = "RavelStreamingModel";
+                break;
+            default:
+                throw new AssertionError();
+        }
+        // FIXME
+        baseClass = "RavelBaseModel";
+
+        // FIXME
+        //model_h.add("includes", "AppDispatcher.h");
+        for (InstantiatedController ictr : im.getControllerList())
+            model_h.add("includes", "controller/" + ictr.getName() + ".h");
+        model_c.add("includes", "models/" + im.getName() + ".h");
+        model_h.add("base", baseClass);
+        model_c.add("base", baseClass);
+        model_h.add("model", im);
+        model_c.add("model", im);
+
+        return simpleModule(model_h, model_c, im.getName(), "models");
     }
 }

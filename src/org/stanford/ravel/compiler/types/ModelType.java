@@ -37,7 +37,7 @@ public class ModelType extends ClassType {
         ctxType = new ContextType(this);
 
         this.addMethod("save", new Type[]{recordType}, PrimitiveType.VOID);
-        this.addStaticMethod("create", new Type[0], recordType);
+        this.addMethod("create", new Type[0], recordType);
 
         for (ModelEvent e : ModelEvent.values()) {
             this.addEvent(e.name(), new Type[]{ctxType}, PrimitiveType.VOID, true);

@@ -33,20 +33,17 @@ public abstract class BaseLanguage implements ConcreteLanguage {
     }
 
     // should be abstract, but CLang...
-    protected CodeModule createModel(InstantiatedModel im) {
-        return null;
-    }
-    protected CodeModule createController(InstantiatedController ictr) {
-        return null;
-    }
+    protected abstract CodeModule createModel(InstantiatedModel im);
+    protected abstract CodeModule createController(InstantiatedController ictr);
     protected CodeModule createInterface(InstantiatedInterface iiface) {
         return null;
     }
-    protected void createModels(Space s) {
+
+    private void createModels(Space s) {
         for (InstantiatedModel im : s.getModels())
             addModule(createModel(im));
     }
-    protected void createControllers(Space s) {
+    private void createControllers(Space s) {
         for (InstantiatedController ictr : s.getControllers())
             addModule(createController(ictr));
     }
@@ -55,6 +52,9 @@ public abstract class BaseLanguage implements ConcreteLanguage {
             addModule(createInterface(iiface));
     }
     protected abstract CodeModule createDispatcher(Space s);
+    protected CodeModule createBuildSystem(List<FileObject> files) {
+        return null;
+    }
 
     public List<FileObject> build(Space s) {
         LOGGER.info("Building Space: " +s.getName());
@@ -62,6 +62,7 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         createControllers(s);
         createInterfaces(s);
         addModule(createDispatcher(s));
+        addModule(createBuildSystem(mFileObjects));
         return mFileObjects;
     }
 }

@@ -33,16 +33,20 @@ void <controller_name; format="function">_<handler.model; format="function">_<ha
 >>
 
 h_file(includes,name,parameters,eventHandlers) ::=<<
-<begin_header(name)>
+<begin_header("CONTROLLER", name)>
 
 #include \<api/context.h>
+
+/* Forward declare our controller class before we include the controller headers */
+typedef struct s_<name> <name>;
+
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
 
-typedef struct {
+struct s_<name> {
     <parameters:{p|<p.type> <p.name>;}; separator="\n">
-} <name>;
+};
 
 void <name; format="function">_init(<name>* self<append_parameter_list(parameters)>);
 void <name; format="function">_finalize(<name>* self);
@@ -50,5 +54,5 @@ void <name; format="function">_finalize(<name>* self);
 <eventHandlers:declare_event_handler(name); separator="\n">
 
 <end_extern_c()>
-<end_header(name)>
+<end_header("CONTROLLER", name)>
 >>
