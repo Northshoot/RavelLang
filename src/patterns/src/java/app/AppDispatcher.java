@@ -87,13 +87,6 @@ public class AppDispatcher  extends AbstractDispatcher{
         System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
     }
 
-    public void run(){
-        pprint("Thread started");
-        while(true){
-            runNextEvent();
-
-        }
-    }
     /******************* ******* event queue ***************************/
     QueueArray<Event> eventQueue = new QueueArray<>();
 

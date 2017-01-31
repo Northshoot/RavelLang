@@ -1,10 +1,9 @@
 package org.stanford.ravel.rrt.model;
 
-import org.stanford.ravel.rrt.DispatcherAPI;
-import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.compiler.types.ModelType;
+import org.stanford.ravel.rrt.*;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
-import org.stanford.ravel.rrt.Context;
 import patterns.src.java.app.AppDispatcher;
 
 import java.util.ArrayList;
@@ -34,6 +33,30 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         mRecords.ensureCapacity(size);
         mDispatcher = dispatcher;
         stateArray = new RecordState[size];
+    }
+
+
+    /******************* ******* event queue ***************************/
+    QueueArray<Event> eventQueue = new QueueArray<>();
+
+    protected synchronized void runNextEvent(){
+        try {
+            Event e = eventQueue.dequeue();
+
+            switch (e.getType()) {
+                case MODEL__NOTIFY_FULL:
+                    notifyFull((Context<RecordType>) ((ModelEvent)e).ctx);
+                    break;
+
+            }
+        } catch (java.util.NoSuchElementException e){
+            pprint("No events to process");
+        }
+    }
+
+
+    private void post_task(){
+        new Thread(() -> runNextEvent()).start();
     }
 
     // the generated methods for dispatching events
@@ -85,7 +108,8 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         //TODO: race conditions
         if (currentPos == mModelSize) {
             Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
-            notifyFull(ctx);
+            eventQueue.enqueue(new ModelEvent((Context<ModelType.RecordType>) ctx, Event.Type.MODEL__NOTIFY_FULL));
+
         }
 
         return new Context<>(this, record);
