@@ -38,7 +38,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         RavelPacket ravelPacket = new RavelPacket();
         ravelPacket.fromRecord(record.toBytes());
 
-        pprint("pkt to send: " + ravelPacket);
+
         // determine and send to endpoints
         Error error = mDispatcher.send_data(ravelPacket, mEndpoint);
         if (error != Error.SUCCESS)

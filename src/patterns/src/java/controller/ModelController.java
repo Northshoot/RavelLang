@@ -47,7 +47,7 @@ public class ModelController {
     public void timer_1_fired() {
         //create a record and save it.
         Model.Record rec = mModel.create();
-        rec.field1 = 1444444444;
+        rec.field1 = 1444444;
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;
         rec.field4 = rec.field3 / 2;
@@ -57,12 +57,12 @@ public class ModelController {
     }
 
     public void Model_arrived(Context<Model.Record> ctx){
-        System.out.println(ctx);
+        pprint("RX " + ctx);
     }
 
     public void Model_departed(Context<Model.Record> ctx){
         if(!running) timer.start_periodic(1000);
-        System.out.println("Model departed: " + ctx);
+        pprint("Model departed: " + ctx);
 
     }
 
@@ -84,7 +84,7 @@ public class ModelController {
     public void system_started() {
         //TODO: test only in simulation
         if(mName == "EMD" ) {
-            timer.start_periodic(1000);
+            timer.start_periodic(100);
             running = true;
         }
 

@@ -10,7 +10,9 @@ import patterns.src.java.controller.ModelController;
 
 //Standard utilities
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,10 +82,6 @@ public class Model extends StreamingModel<Model.Record>{
 
     }
 
-    @Override
-    protected int getModelID() {
-        return MODEL_ID;
-    }
 
     @Override
     protected Record unmarshall(byte[] data) {
@@ -95,8 +93,8 @@ public class Model extends StreamingModel<Model.Record>{
     }
 
     public static class Record implements Serializable, ModelRecord {
-        int model_id = Model.MODEL_ID;
-        int idx;
+        protected int model_id = Model.MODEL_ID;
+        protected int idx;
         public int field1;
         public int field2;
         public int field3;
@@ -118,17 +116,25 @@ public class Model extends StreamingModel<Model.Record>{
         public Record(byte[] data){
             //make record out of byte[]
             //AUTOGEN
-            this.field1 = ByteWork.convertFourUnsignedBytesToInt(
+
+            this.model_id = ByteWork.convertFourBytesToInt(
                     ByteWork.getBytes(data,0,4)
             );
-            this.field2 = ByteWork.convertFourUnsignedBytesToInt(
+
+            this.idx = ByteWork.convertFourBytesToInt(
                     ByteWork.getBytes(data,4,8)
             );
-            this.field3 = ByteWork.convertFourUnsignedBytesToInt(
+            this.field1 = ByteWork.convertFourBytesToInt(
                     ByteWork.getBytes(data,8,12)
             );
-            this.field4 = ByteWork.convertFourUnsignedBytesToInt(
+            this.field2 = ByteWork.convertFourBytesToInt(
                     ByteWork.getBytes(data,12,16)
+            );
+            this.field3 = ByteWork.convertFourBytesToInt(
+                    ByteWork.getBytes(data,16,20)
+            );
+            this.field4 = ByteWork.convertFourBytesToInt(
+                    ByteWork.getBytes(data,20,24)
             );
         }
 
@@ -137,15 +143,20 @@ public class Model extends StreamingModel<Model.Record>{
         }
 
         public byte[] toBytes(){
+            //TODO: handle this mess better
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             //AUTOGEN: write to
-            outputStream.write(model_id);
-            outputStream.write(idx);
-            outputStream.write(field1);
-            outputStream.write(field2);
-            outputStream.write(field3);
-            outputStream.write(field4);
-            System.err.println("toBytes: " + outputStream.toByteArray().length);
+            try {
+                outputStream.write(ByteWork.getByteArrayFromInt(model_id));
+                outputStream.write(ByteWork.getByteArrayFromInt(idx));
+                outputStream.write(ByteWork.getByteArrayFromInt(field1));
+                outputStream.write(ByteWork.getByteArrayFromInt(field2));
+                outputStream.write(ByteWork.getByteArrayFromInt(field3));
+                outputStream.write(ByteWork.getByteArrayFromInt(field4));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             //AUTOGEN END
             return outputStream.toByteArray();
         }

@@ -27,7 +27,7 @@ public class RavelSocketProtocol {
     public String processInput(DataInputStream in, InetAddress inetAddress) {
         //TODO: fix the hack
         //TODO:  needs more dynamic
-        byte[] bytes = new byte[AppDispatcher.PACKET_SIZE];
+        byte[] bytes = new byte[4*1024];
         try {
             int count = in.read(bytes);
             this.androidDriver.rx_data_from_socket(bytes, count);

@@ -4,6 +4,8 @@ import org.stanford.ravel.rrt.utils.ByteWork;
 import patterns.src.java.model.Model;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Created by lauril on 1/25/17.
@@ -12,8 +14,8 @@ public class RavelPacket {
 
     public final static int SRC = 4; //32 bits for source
     public final static int DST = 8; //32 bits for destination
-    public final static int RESERVED = 9; // reserved for byte mapping
-    public final static int RECORD_DATA = 9+Model.RECORD_SIZE; // record data
+    public final static int RESERVED = 12; // reserved for byte mapping
+    public final static int RECORD_DATA = RESERVED+Model.RECORD_SIZE; // record data
 
 
 
@@ -22,19 +24,19 @@ public class RavelPacket {
     public int dst=-1;
     public int src=-1;
     //TODO: add packetization
-    public byte reserved=-1;
+    public int reserved=-1;
     public int partial=-1;
     public int last=-1;
 
 
 
-    private byte[] __in_mData;
     private byte[] mData;
 
 
 
     public RavelPacket(){
         this.record_data = new byte[Model.RECORD_SIZE];
+
     }
 
     public int getSize(){
@@ -47,46 +49,48 @@ public class RavelPacket {
     public void fromRecord(byte [] data){
         //unmangle data
         pprint("fromRecord: " + data.length);
-        this.__in_mData = data;
-        this.mData = this.__in_mData;
-        this.model_id =getModelIdFromRecord(data);
-        this.record_data = new byte[data.length];
+        this.mData = data;
         this.record_data = data;
+        this.model_id =getModelIdFromRecord(record_data);
     }
 
     public void fromNetwork(byte[] data){
         //unmangle data
-        System.out.println("DATA: " + data.length);
-        this.__in_mData = data;
         this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
         this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
-        this.reserved =  ByteWork.getBytes(data, DST, RESERVED)[0];
+        this.reserved =  ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
         this.partial = (this.reserved >> 0) & 1;
         this.last = (this.reserved >> 1) & 1;
         this.record_data = ByteWork.getBytes(data, RESERVED, RECORD_DATA);
         this.model_id = getModelIdFromRecord(this.record_data);
-        this.mData = this.__in_mData;
+        this.mData = data;
     }
 
     private int getModelIdFromRecord(byte[] data){
         //TODO: no hardcoded vals
-        return ByteWork.convertFourBytesToInt(
-                ByteWork.getBytes(data, 0, 4)
-        );
+
+        ByteBuffer buffer = ByteBuffer.wrap(
+                ByteWork.getBytes(data, 0, 4));
+        return buffer.getInt();
     }
 
 
 
     public byte[] toBytes(){
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-        outputStream.write(src);
-        outputStream.write(dst);
-        outputStream.write(getPartial());
-        outputStream.write(record_data, 0, record_data.length);
-
-        //AUTOGEN END
-        return outputStream.toByteArray();
+        try {
+            outputStream.write(ByteWork.getByteArrayFromInt(src));
+            outputStream.write(ByteWork.getByteArrayFromInt(dst));
+            outputStream.write(ByteWork.getByteArrayFromInt(getPartial()));
+            outputStream.write(record_data, 0, record_data.length);
+            //AUTOGEN END
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
+
 
     public boolean isLast(){
         return this.last == 1;
@@ -102,15 +106,15 @@ public class RavelPacket {
                 +", MODEL_ID: " + this.model_id + "]";
     }
 
-    private byte getPartial() {
+    private int getPartial() {
         if (isLast() && isPartial() ) {
-            this.partial = 3;
+            this.reserved = 3;
         } else if (isLast() && !isPartial()){
-            this.partial = 1;
+            this.reserved = 1;
         } else if (!isLast() && isPartial()){
-            this.partial = 1;
+            this.reserved = 1;
         } else {
-            this.partial =0;
+            this.reserved =0;
         }
         return reserved;
     }

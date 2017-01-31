@@ -34,7 +34,6 @@ public class AndroidDriver implements DriverAPI {
     }
     public Error sendData(byte[] data, Endpoint endpoint) {
         //send data to the right channel
-        pprint("sendData lenght: " + data.length);
         if(endpoint.getType() == Endpoint.TYPE.SOCKET){
                 //TODO: mmmrm not the best way to keep reconnecting
                 new Thread(new Runnable() {
@@ -84,7 +83,6 @@ public class AndroidDriver implements DriverAPI {
     }
 
     public void rx_data_from_socket(byte[] bytes, int count){
-        pprint("rx_data_from_socket size: " + count);
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.SOCKET){
                 appDispatcher.data_received(bytes, e);

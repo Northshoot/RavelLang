@@ -1,5 +1,7 @@
 package org.stanford.ravel.rrt.utils;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by lauril on 1/25/17.
  */
@@ -38,8 +40,11 @@ public class ByteWork {
 
         public static int convertFourBytesToInt (byte[] bytes)
         {
-            if (bytes.length !=4 ) throw new AssertionError("Expected 4 bytes");
-            return (bytes[3] << 24) | (bytes[2] & 0xFF) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF);
+//            if (bytes.length !=4 ) throw new AssertionError("Expected 4 bytes");
+//            return (bytes[3] << 24) | (bytes[2] & 0xFF) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF);
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            //buffer.order(ByteOrder.LITTLE_ENDIAN);  // if you want little-endian
+            return buffer.getInt();
         }
 
         /***
@@ -77,6 +82,10 @@ public class ByteWork {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public static byte[] getByteArrayFromInt(int val){
+            return ByteBuffer.allocate(4).putInt(val).array();
     }
 
 }

@@ -18,7 +18,7 @@ import java.util.Map;
 public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
 
     //TODO: not cool
-    public static final int PACKET_SIZE = 9;
+    public static final int PACKET_SIZE = Model.RECORD_SIZE;
     //AUTOGEN
     Model model_id_1 ;
     ModelController mcntr_id_1 ;
@@ -90,7 +90,7 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
         int src =0;
         int dst = 0;
         switch (mName){
-            case "EMB":
+            case "EMD":
                 src = 11111111;
                 dst = 22222222;
                 break;
@@ -102,6 +102,7 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
 
         pkt.src = src;
         pkt.dst = dst;
+        pprint("pkt to send: " + pkt);
         mDriver.sendData(pkt.toBytes(), endpoint);
         return Error.SUCCESS;
     }
@@ -114,7 +115,7 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
         rp.fromNetwork(data);
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
         switch (rp.model_id){
-            case 1:
+            case Model.MODEL_ID:
                 model_id_1.record_arrived(rp, endpoint);
 
         }

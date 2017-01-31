@@ -41,7 +41,6 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     protected abstract void notifyArrived(Context<RecordType> ctx);
     protected abstract void notifyDeparted(Context<RecordType> ctx);
     protected abstract void notifySaveDone(Context<RecordType> ctx);
-    protected abstract int getModelID();
 
     // the generated methods for marshalling/unmarshalling
     protected abstract RecordType unmarshall(byte[] data);
@@ -83,7 +82,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     protected Context<RecordType> addRecord(RecordType record) {
         if (!tryAddRecord(record))
             return new Context<>(this, Error.OUT_OF_STORAGE);
-
+        //TODO: race conditions
         if (currentPos == mModelSize) {
             Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
             notifyFull(ctx);
