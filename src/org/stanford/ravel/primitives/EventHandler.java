@@ -16,13 +16,13 @@ import java.util.Map;
  */
 public class EventHandler {
     private final VariableSymbol modelVar;
-    private final List<String> argumentNames;
+    private final List<VariableSymbol> arguments;
     private final EventType event;
     private final TypedIR body;
 
-    public EventHandler(VariableSymbol modelVar, List<String> argumentNames, EventType event, TypedIR body) {
+    public EventHandler(VariableSymbol modelVar, List<VariableSymbol> arguments, EventType event, TypedIR body) {
         this.modelVar = modelVar;
-        this.argumentNames = argumentNames;
+        this.arguments = arguments;
         this.event = event;
         this.body = body;
     }
@@ -44,7 +44,7 @@ public class EventHandler {
         return "Event " + modelVar.getName() + "." + event;
     }
 
-    public List<String> getArgumentNames() {
-        return argumentNames;
+    public List<VariableSymbol> getArguments() {
+        return arguments;
     }
 }

@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler.symbol;
 import org.stanford.ravel.compiler.types.EventType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.ModelEvent;
+import org.stanford.ravel.primitives.Variable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public class EventHandlerSymbol extends SymbolWithScope implements TypedSymbol {
     private final String modelVarName;
-    private final List<String> argumentNames = new ArrayList<>();
+    private final List<VariableSymbol> arguments = new ArrayList<>();
     private EventType type;
 
     public EventHandlerSymbol(String modelVarName, String eventName) {
@@ -32,8 +33,10 @@ public class EventHandlerSymbol extends SymbolWithScope implements TypedSymbol {
         // NOTE: we nest a block immediately inside the event handler,
         // hides all variable symbols from this call, so they don't in
         // fact appear as function argument names
-        if (sym instanceof VariableSymbol)
-            argumentNames.add(sym.getName());
+        if (sym instanceof VariableSymbol) {
+            assert ((VariableSymbol) sym).getType() != null;
+            arguments.add((VariableSymbol)sym);
+        }
     }
 
     @Override
@@ -46,7 +49,7 @@ public class EventHandlerSymbol extends SymbolWithScope implements TypedSymbol {
         this.type = (EventType) type;
     }
 
-    public List<String> getArgumentNames() {
-        return Collections.unmodifiableList(argumentNames);
+    public List<VariableSymbol> getArguments() {
+        return Collections.unmodifiableList(arguments);
     }
 }

@@ -121,24 +121,9 @@ public class RavelCompiler {
     }
 
     private void compileControllers(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ControllerEventCompiler compiler = new ControllerEventCompiler(this, options.hasFOption("dump-ir"));
-
+        ControllerCompiler compiler = new ControllerCompiler(this, options.hasFOption("dump-ir"));
         for (ControllerSymbol c : scope.getControllers()) {
-            Controller controller = new Controller(c.getName());
-
-            controller.addAllParameters(c.getParameters());
-
-            for (EventHandlerSymbol eventSym : c.getEvents()) {
-                VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());
-
-                TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
-                if (ir != null) {
-                    EventHandler event = new EventHandler(modelVar, eventSym.getArgumentNames(), eventSym.getType(), ir);
-                    controller.addEvent(event);
-                }
-            }
-
-            app.addController(c.getName(), controller);
+            app.addController(c.getName(), compiler.compile(c));
         }
     }
 

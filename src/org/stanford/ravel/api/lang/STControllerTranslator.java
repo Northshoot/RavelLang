@@ -49,12 +49,16 @@ public class STControllerTranslator implements ControllerTranslator {
             String modelName = model.getName();
 
             STIRTranslator translator = new STIRTranslator(irGroup, typeFormatter, literalFormatter);
-            translator.translate(ctr.getParameterSymbols(), event.getBody());
 
-            List<String> argumentNames = event.getArgumentNames();
+            List<VariableSymbol> arguments = event.getArguments();
+            translator.translate(ctr.getParameterSymbols(), arguments, event.getBody());
+
+            List<String> argumentNames = new ArrayList<>();
             List<String> argumentTypes = new ArrayList<>();
-            for (Type argType : event.getEventType().getArgumentTypes())
-                argumentTypes.add(typeFormatter.toNativeType(argType));
+            for (VariableSymbol arg : arguments) {
+                argumentNames.add(arg.getName());
+                argumentTypes.add(typeFormatter.toNativeType(arg.getType()));
+            }
 
             ConcreteEventHandler handler = new ConcreteEventHandler(name, modelName, argumentNames, argumentTypes, translator.getCode());
             eventHandlers.add(handler);

@@ -14,7 +14,7 @@ import java.util.List;
 public interface IRTranslator {
     void declareRegister(int reg, Type type);
 
-    void translate(List<VariableSymbol> controllerParams, TypedIR ir);
+    void translate(List<VariableSymbol> controllerParams, List<VariableSymbol> eventParams, TypedIR ir);
 
     String getCode();
 }

@@ -15,7 +15,7 @@ import org.stanford.ravel.primitives.Interface;
  *
  * Created by gcampagn on 1/30/17.
  */
-public class InterfaceCompiler {
+class InterfaceCompiler {
     private final RavelCompiler driver;
 
     public InterfaceCompiler(RavelCompiler driver) {
