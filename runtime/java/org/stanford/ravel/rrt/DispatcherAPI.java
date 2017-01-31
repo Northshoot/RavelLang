@@ -8,25 +8,21 @@ import org.stanford.ravel.rrt.tiers.Error;
  */
 public interface DispatcherAPI {
 
-    void runNextEvent();
+    String getAppName();
 
     void driver__dataReceived(byte[] data, Endpoint endpoint);
 
     void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint);
 
+    void driver__sendData(Event event);
 
     /***********************************************************************/
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
     Error model__sendData(RavelPacket data, Endpoint endpoint);
 
-    /***********************************************************************/
-    /*************** Callbakcs to the model to AD **************************/
-    /***********************************************************************/
-    void models__notifyDeparted();
 
-    void models__notifyArrived();
-    void models__notifySendDone();
+
 
 
 }

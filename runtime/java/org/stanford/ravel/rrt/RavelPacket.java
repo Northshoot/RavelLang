@@ -43,7 +43,7 @@ public class RavelPacket {
     }
     void pprint(String s){
         //TODO
-        System.out.println("[RavelPacket::]>" + s);
+        //System.out.println("[RavelPacket::]>" + s);
     }
     public void fromRecord(byte [] data){
         //unmangle data

@@ -30,7 +30,7 @@ public class AndroidDriver implements DriverAPI {
     }
     void pprint(String s){
         //TODO
-        System.out.println("[" + appDispatcher.getName() + "::AndroidDriver]>" + s);
+        System.out.println("[" + appDispatcher.getAppName() + "::AndroidDriver]>" + s);
     }
     public Error sendData(byte[] data, Endpoint endpoint) {
         //send data to the right channel
@@ -42,10 +42,10 @@ public class AndroidDriver implements DriverAPI {
                         clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
                         clientSocket.getOutputStream().write(data);
                         clientSocket.close();
-                        appDispatcher.driver_send_done(Error.SUCCESS, data, endpoint);
+                        appDispatcher.driver__sendDone(Error.SUCCESS, data, endpoint);
                         } catch (IOException e) {
                             endpoint.setDisconnected();
-                            appDispatcher.driver_send_done(Error.NETWORK_ERROR, data, endpoint);
+                            appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);
                         }
                     }
                 }).start();
@@ -69,7 +69,7 @@ public class AndroidDriver implements DriverAPI {
         //in a more clean way
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.BLE){
-                appDispatcher.data_received(data, e);
+                appDispatcher.driver__dataReceived(data, e);
             }
         }
     }
@@ -77,7 +77,7 @@ public class AndroidDriver implements DriverAPI {
     public void rx_data_from_cloud(byte[] data){
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.HTTP){
-                appDispatcher.data_received(data, e);
+                appDispatcher.driver__dataReceived(data, e);
             }
         }
     }
@@ -85,7 +85,7 @@ public class AndroidDriver implements DriverAPI {
     public void rx_data_from_socket(byte[] bytes, int count){
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.SOCKET){
-                appDispatcher.data_received(bytes, e);
+                appDispatcher.driver__dataReceived(bytes, e);
             }
         }
     }
@@ -93,7 +93,7 @@ public class AndroidDriver implements DriverAPI {
     public void rx_data_from_gcm(byte[] data){
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.GCM){
-                appDispatcher.data_received(data, e);
+                appDispatcher.driver__dataReceived(data, e);
             }
         }
     }
@@ -101,7 +101,7 @@ public class AndroidDriver implements DriverAPI {
     @Override
     public void appDispatcherReady() {
         //TODO: clean out for generations
-        if(appDispatcher.getName() == "GTW"){
+        if(appDispatcher.getAppName() == "GTW"){
             rsp = new RavelSocketProtocol(this);
             ss = new SocketServer(4444, rsp);
             ss.run();

@@ -5,5 +5,12 @@ package org.stanford.ravel.rrt;
  */
 public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAPI  {
 
-    public abstract String getName();
+
+    protected abstract void runNextEvent();
+    /***********************************************************************/
+    /*************** Callbakcs to the model to AD **************************/
+    /***********************************************************************/
+    protected abstract void models__notifyDeparted(Event event);
+
+    protected abstract void models__notifyArrived(Event event);
 }

@@ -8,4 +8,9 @@ public class SystemEvent extends Event {
     public SystemEvent(){
         super();
     }
+
+    @Override
+    public Type getType() {
+        return null;
+    }
 }

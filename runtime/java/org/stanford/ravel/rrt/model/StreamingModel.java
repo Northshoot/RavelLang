@@ -41,7 +41,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
 
 
         // determine and send to endpoints
-        Error error = mDispatcher.send_data(ravelPacket, mEndpoint);
+        Error error = mDispatcher.model__sendData(ravelPacket, mEndpoint);
         if (error != Error.SUCCESS)
             return new Context<>(this, error);
         else

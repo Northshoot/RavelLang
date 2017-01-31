@@ -7,7 +7,7 @@ public abstract class Event {
     public enum Type {
         DRIVER__DATA_RECEIVED,
         MODELS__NOTIFY_RECORD_DEPARTED,
-        MODELS__NOTIFY_RECORD_ARRIVED
+        DRIVER__SEND_DATA, MODELS__NOTIFY_RECORD_ARRIVED
     }
 
     public abstract Type getType();

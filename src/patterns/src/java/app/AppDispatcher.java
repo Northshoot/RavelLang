@@ -9,15 +9,14 @@ import org.stanford.ravel.rrt.tiers.AndroidDriver;
 import org.stanford.ravel.rrt.tiers.Error;
 
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.Map;
 
 /**
  * Created by lauril on 1/23/17.
  */
 public class AppDispatcher  extends AbstractDispatcher{
-    public String getName() {
-        return mName;
-    }
 
     //AUTOGEN
     Model model_id_1 ;
@@ -36,11 +35,10 @@ public class AppDispatcher  extends AbstractDispatcher{
 
     String mName ;
 
-
+    public String getAppName(){ return this.mName ;}
 
 
     public AppDispatcher(String name){
-
 
         this.mName = name;
         //AUTOGEN: create models
@@ -89,27 +87,43 @@ public class AppDispatcher  extends AbstractDispatcher{
         System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
     }
 
+    public void run(){
+        pprint("Thread started");
+        while(true){
+            runNextEvent();
 
+        }
+    }
     /******************* ******* event queue ***************************/
     QueueArray<Event> eventQueue = new QueueArray<>();
 
-    public void runNextEvent(){
-        Event e  = eventQueue.dequeue();
-        switch(e.getType()){
-            case DRIVER__DATA_RECEIVED:
-                models__notifyArrived(e);
-                break;
-            case MODELS__NOTIFY_RECORD_DEPARTED:
-                break;
-            case MODELS__NOTIFY_RECORD_ARRIVED:
-                break;
+    protected synchronized void runNextEvent(){
+        try {
+            Event e = eventQueue.dequeue();
+            switch (e.getType()) {
+                case DRIVER__DATA_RECEIVED:
+                    models__notifyArrived(e);
+                    break;
+                case MODELS__NOTIFY_RECORD_DEPARTED:
+                    models__notifyDeparted(e);
+                    break;
+                case DRIVER__SEND_DATA:
+                    driver__sendData(e);
+                    break;
+                case MODELS__NOTIFY_RECORD_ARRIVED:
+                    break;
+            }
+        } catch (java.util.NoSuchElementException e){
+            pprint("No events to process");
         }
     }
     /***********************************************************************/
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
 
-
+    private void post_task(){
+        new Thread(() -> runNextEvent()).start();
+    }
 
     @Override
     public Error model__sendData(RavelPacket pkt, Endpoint endpoint){
@@ -127,24 +141,34 @@ public class AppDispatcher  extends AbstractDispatcher{
                 dst = 11111111;
                 break;
         }
-
         pkt.src = src;
         pkt.dst = dst;
         pprint("pkt to send: " + pkt);
-        mDriver.sendData(pkt.toBytes(), endpoint);
+        NetworkEvent ne = new NetworkEvent(pkt.toBytes(), endpoint, Event.Type.DRIVER__SEND_DATA);
+        eventQueue.enqueue(ne);
+        post_task();
         return Error.SUCCESS;
     }
+
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/
 
-    public void models__notifyDeparted(){
+    protected void models__notifyDeparted(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
+        RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
+        rp.fromNetwork(data);
+        switch (rp.model_id){
+            case 1:
+                model_id_1.record_departed(rp, endpoint);
 
+        }
     }
 
-    public void models__notifyArrived(Event event){
+    protected void models__notifyArrived(Event event){
         byte[] data = ((NetworkEvent) event).data;
-        Endpoint endpoint = ((NetworkEvent) event).endpoint);
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
         RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
         rp.fromNetwork(data);
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
@@ -155,11 +179,23 @@ public class AppDispatcher  extends AbstractDispatcher{
         }
     }
     /***********************************************************************/
+    /************** Network callbacks from AD to Driver ********************/
+    /***********************************************************************/
+    public void driver__sendData(Event event){
+        mDriver.sendData(((NetworkEvent) event).data,
+                        ((NetworkEvent) event).endpoint
+                                                        );
+    }
+
+
+    /***********************************************************************/
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override
     public void driver__dataReceived(byte[] data, Endpoint endpoint) {
         NetworkEvent ne = new NetworkEvent(data, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
+        eventQueue.enqueue(ne);
+        post_task();
 
 
     }
@@ -167,13 +203,10 @@ public class AppDispatcher  extends AbstractDispatcher{
     @Override
     public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
         pprint("driver_send_done, ERROR: " + networkError);
-        RavelPacket rp = new RavelPacket(Model.RECORD_SIZE);
-        rp.fromNetwork(data);
-        switch (rp.model_id){
-            case 1:
-                model_id_1.record_departed(rp, endpoint);
+        NetworkEvent ne = new NetworkEvent(data, endpoint, networkError, Event.Type.MODELS__NOTIFY_RECORD_DEPARTED);
+        eventQueue.enqueue(ne);
+        post_task();
 
-        }
     }
 
 
