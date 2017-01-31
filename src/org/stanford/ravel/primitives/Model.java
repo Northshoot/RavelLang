@@ -1,7 +1,7 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
-import org.stanford.ravel.primitives.Fields.Field;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -22,8 +22,9 @@ public class Model extends Primitive {
     private final Type mModelType;
     private final int id;
 
-    private final Map<String, Field> mFields = new LinkedHashMap<>();
-    private final Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
+    private final Map<String, FieldSymbol> mFields = new HashMap<>();
+    private final Map<String, Object> mConstantProperties = new HashMap<>();
+    private final Map<String, String> mRefProperties = new HashMap<>();
 
     public Model(String name, ModelSymbol symbol) {
         super(name,name+"Model");
@@ -39,9 +40,14 @@ public class Model extends Primitive {
 
     public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
         InstantiatedModel instantiated = new InstantiatedModel(space, this, varName);
-        instantiated.setManyParam(parameters);
         // TODO: check types of parameters
+        instantiated.setManyParam(parameters);
+
+        for (Map.Entry<String, Object> entry : mConstantProperties.entrySet())
+            instantiated.setProperty(entry.getKey(), entry.getValue());
         // TODO: check that all parameters are set
+        for (Map.Entry<String, String> entry : mRefProperties.entrySet())
+            instantiated.setProperty(entry.getKey(), instantiated.getParam(entry.getValue()));
         return instantiated;
     }
 
@@ -57,31 +63,26 @@ public class Model extends Primitive {
         return mModelType;
     }
 
-    public List<Field> getFields() {
-        return new ArrayList<>(mFields.values());
+    // This is called by the STG templates to generate the Record class
+    public Collection<FieldSymbol> getFields() {
+        return Collections.unmodifiableCollection(mFields.values());
     }
-
-    /***
-     *
-     * TODO: this all need to move out to translator
-     *
-     *
-     */
-
-    public void addField(Field field) {
+    public void addField(FieldSymbol field) {
         this.mFields.put(field.getName(), field);
     }
 
-    public void setProperty(Variable v) {
-        LOGGER.info("Property: " + v);
-        this.mPropertiesMap.put(v.getName(), v);
+    public void addConstantProperty(String name, Object value) {
+        mConstantProperties.put(name, value);
+    }
+    public void addReferenceProperty(String name, String ref) {
+        mRefProperties.put(name, ref);
     }
 
     @Override
     public String toString(){
         String ret = "Concrete Model:" + " type : " + mModelType + " name: " + getVerboseName() +
                 " # of Fields " + mFields.size() + "\n\t values: \n" ;
-        for (Map.Entry<String, Field> pair : mFields.entrySet()) {
+        for (Map.Entry<String, FieldSymbol> pair : mFields.entrySet()) {
             ret += "\t\t" + pair.getValue().toString();
             ret += "\n";
         }

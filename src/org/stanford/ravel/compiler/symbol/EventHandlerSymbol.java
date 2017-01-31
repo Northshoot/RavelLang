@@ -3,7 +3,6 @@ package org.stanford.ravel.compiler.symbol;
 import org.stanford.ravel.compiler.types.EventType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.ModelEvent;
-import org.stanford.ravel.primitives.Variable;
 
 import java.util.ArrayList;
 import java.util.Collections;

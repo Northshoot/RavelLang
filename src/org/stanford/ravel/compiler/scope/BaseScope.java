@@ -52,9 +52,14 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
-    public List<Scope> getNestedScopedSymbols() {
-        List<? extends Symbol> scopes = Utils.filter(getSymbols(), s -> s instanceof Scope);
-        return (List)scopes; // force it to cast
+    public Collection<Scope> getNestedScopedSymbols() {
+        Set<Scope> output = new HashSet<>();
+        for (Symbol x : getSymbols()) {
+            if (x instanceof Scope) {
+                output.add((Scope)x);
+            }
+        }
+        return output;
     }
 
     @Override
@@ -174,12 +179,8 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
-    public List<? extends Symbol> getSymbols() {
-        Collection<Symbol> values = symbols.values();
-        if ( values instanceof List ) {
-            return (List<Symbol>)values;
-        }
-        return new ArrayList<>(values);
+    public Collection<Symbol> getSymbols() {
+        return Collections.unmodifiableCollection(symbols.values());
     }
 
     public List<ReferenceSymbol> getRefenceSymbols(){
@@ -188,7 +189,7 @@ public abstract class BaseScope implements Scope {
                 .map(s -> (ReferenceSymbol) s)
                 .collect(Collectors.toList());
     }
-    public List<? extends Symbol> getAllSymbols() {
+    public Collection<Symbol> getAllSymbols() {
         List<Symbol> syms = new ArrayList<>();
         syms.addAll(getSymbols());
         for (Symbol s : symbols.values()) {
@@ -227,7 +228,7 @@ public abstract class BaseScope implements Scope {
     }
 
     public String toTestString(String separator, String scopePathSeparator) {
-        List<? extends Symbol> allSymbols = this.getAllSymbols();
+        Collection<Symbol> allSymbols = this.getAllSymbols();
         List<String> syms = Utils.map(allSymbols, s -> s.getScope().getName() + scopePathSeparator + s.getName());
         return Utils.join(syms, separator);
     }

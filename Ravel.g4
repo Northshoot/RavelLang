@@ -272,21 +272,8 @@ properties
     ;
 
 property_line
-    : property
+    : ref_assign
     | NEWLINE
-    ;
-
-property
-    : Identifier '=' propValue NEWLINE #VarAssignment
-    ;
-
-propValue
-    : propArray
-    | literal
-    ;
-
-propArray
-    : '[' literal (',' literal)* ']'
     ;
 
 schema_block returns [Scope scope]
@@ -303,7 +290,7 @@ field_line
     ;
 
 field
-    : Identifier '=' field_type '(' elementValuePairs? ')'  NEWLINE? #FieldDeclaration
+    : Identifier ':' type  NEWLINE? #FieldDeclaration
     ;
 
 /**
@@ -558,20 +545,6 @@ params
     ;
 param
     : Identifier
-    ;
-elementValuePairs
-    :   elementValuePair (',' elementValuePair)*
-    ;
-elementValuePair
-    :   Identifier '=' elementValue
-    ;
-
-elementValue
-    : expression
-    | elementValueArrayInitializer
-    ;
-elementValueArrayInitializer
-    :   '{' (elementValue (',' elementValue)*)? (',')? '}'
     ;
 
 qualified_name

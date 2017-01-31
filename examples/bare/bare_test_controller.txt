@@ -2,12 +2,11 @@ streaming model Random(size):
     properties:
         durable = False
         reliable = False
-        #records = size
-        records = 10
+        records = size
 
     schema:
         # comment here
-        value = IntegerField()
+        value : int32
 
 interface TimerSource():
     implementation:
@@ -53,7 +52,7 @@ space EmbeddedSpace:
         system = Android.v22
 
     models:
-        random = Random(size=10)
+        random = Random(size=100)
         #frequency = Frequency(size=1)
         #boor_error = BootError()
 

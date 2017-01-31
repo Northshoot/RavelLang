@@ -7,12 +7,9 @@ import org.stanford.antlr4.RavelParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.*;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
-import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.EventHandler;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
@@ -107,9 +104,9 @@ public class RavelCompiler {
     }
 
     private void compileModels(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ModelIR mir = new ModelIR(this, app);
+        ModelCompiler compiler = new ModelCompiler(this, options.hasFOption("dump-models"));
         for (ModelSymbol m : scope.getModels()) {
-            mir.addModel(m);
+            app.addModel(m.getName(), compiler.compile(m));
         }
     }
 

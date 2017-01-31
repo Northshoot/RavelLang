@@ -15,6 +15,7 @@ import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -88,11 +89,6 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void exitParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
-
-    }
-
-    @Override
     public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
         if(currentScope instanceof SpaceSymbol) {
             for(Symbol re: ctx.scope.getSymbols()) {
@@ -100,23 +96,6 @@ public class DefPhase extends RavelBaseListener {
             }
         }
         popScope();
-    }
-
-    @Override
-    public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend++;
-        String name = ctx.Identifier().getText();
-        VariableSymbol vs = new VariableSymbol(name);
-        vs.setScope(currentScope);
-        vs.setDefNode(ctx);
-        // FIXME figure out the right type
-        vs.setType(PrimitiveType.ANY);
-        currentScope.define(vs);
-    }
-
-    @Override
-    public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend--;
     }
 
     @Override
@@ -129,29 +108,6 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
-    private static Type typeFromField(String fieldType) {
-        switch (fieldType) {
-            case "ByteField":
-                return new ArrayType(PrimitiveType.BYTE);
-            case "BooleanField":
-                return PrimitiveType.BOOL;
-            case "StringField":
-                return PrimitiveType.STR;
-            case "IntegerField":
-                return PrimitiveType.INT32;
-            case "NumberField":
-                return PrimitiveType.DOUBLE;
-            case "DateField":
-                return PrimitiveType.DATE;
-            case "DateTimeField":
-                return PrimitiveType.DATE_TIME;
-            case "TimeStampField":
-                return PrimitiveType.TIMESTAMP;
-            default:
-                return PrimitiveType.ANY;
-        }
-    }
-
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
         // can only be inside the schema scope!
@@ -160,9 +116,16 @@ public class DefPhase extends RavelBaseListener {
         fs.setDefNode(ctx);
         fs.setScope(currentScope);
 
-        String fieldType = ctx.field_type().getText();
-        fs.setType(typeFromField(fieldType));
-
+        String fieldTypeName = ctx.type().Identifier().getText();
+        Symbol typeSymbol = currentScope.resolve(fieldTypeName);
+        Type fieldType;
+        if (!(typeSymbol instanceof TypeSymbol)) {
+            emitError(ctx.type(), fieldTypeName + " does not name a type");
+            fieldType = PrimitiveType.ERROR;
+        } else {
+            fieldType = ((TypeSymbol) typeSymbol).getDefinedType();
+        }
+        fs.setType(fieldType);
         currentScope.define(fs);
      }
 
@@ -226,7 +189,7 @@ public class DefPhase extends RavelBaseListener {
         if (ctx.type() != null) {
             String returnTypeName = ctx.type().Identifier().getText();
             Symbol typeSymbol = currentScope.resolve(returnTypeName);
-            if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
+            if (!(typeSymbol instanceof TypeSymbol)) {
                 emitError(ctx.type(), returnTypeName + " does not name a type");
                 returnType = PrimitiveType.ERROR;
             } else {
@@ -435,7 +398,10 @@ public class DefPhase extends RavelBaseListener {
         String currentScopeName = currentScope.getName();
 
         // FIXME models and controllers use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
-        boolean allowLiteral = currentScopeName.equals("implementation") || currentScopeName.equals("models") || currentScopeName.equals("controllers");
+        boolean allowLiteral = currentScopeName.equals("implementation") ||
+                currentScopeName.equals("models") ||
+                currentScopeName.equals("controllers") ||
+                currentScopeName.equals("properties");
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();

@@ -69,6 +69,7 @@ public class JLang extends BaseLanguage {
             }
         }
     };
+    private static final TypeAttributeRenderer STJTYPES = new TypeAttributeRenderer(JTYPES);
     private static final LiteralFormatter JLITERAL = new CStyleLiteralFormatter();
 
     private final STGroup controllerGroup;
@@ -78,9 +79,14 @@ public class JLang extends BaseLanguage {
 
     public JLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
+        controllerGroup.registerRenderer(Type.class, STJTYPES);
         modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
-        irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
+        modelGroup.registerRenderer(Type.class, STJTYPES);
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
+        dispatcherGroup.registerRenderer(Type.class, STJTYPES);
+
+        irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
+        irGroup.registerRenderer(Type.class, STJTYPES);
     }
 
     @Override
@@ -210,10 +216,7 @@ public class JLang extends BaseLanguage {
         for (InstantiatedController ictr : im.getControllerList())
             modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
         modelTmpl.add("base", baseClass);
-        modelTmpl.add("modelObj", im);
-        modelTmpl.add("modelFields", im.getBaseModel().getFields());
-        modelTmpl.add("controllerList", im.getControllerList());
-        modelTmpl.add("controllerMap", im.getControllerMap());
+        modelTmpl.add("model", im);
 
         return simpleModule(modelTmpl, im.getName(), packageName);
     }

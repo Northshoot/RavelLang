@@ -2,7 +2,7 @@ import "common.stg"
 
 record_class(fields) ::=<<
 public static class Record implements ModelRecord {
-    <fields:{f|public <f.javaType> <f.name>;}>
+    <fields:{f|public <f.type> <f.name>;}>
 
     public Record() {
     }
@@ -19,43 +19,43 @@ public static class Record implements ModelRecord {
 };
 >>
 
-file(package,imports,name,base,modelObj,modelFields,controllerList,controllerMap) ::=<<
+file(package,imports,name,base,model) ::=<<
 package <package>;
 
 <imports:do_import()>
 
 public class <name> extends <base>\<<name>.Record> {
-    <record_class(modelFields)>
+    <record_class(model.baseModel.fields)>
 
-    public static final int MODEL_ID = <modelObj.baseModel.id>;
+    public static final int MODEL_ID = <model.baseModel.id>;
 
-    private static final int MODEL_SIZE = <modelObj.size>;
+    private static final int MODEL_SIZE = <model.size>;
 
-    <controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+    <model.controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
 
     public <name>(AppDispatcher dispatcher) {
         super(dispatcher, MODEL_SIZE);
     }
 
     // Setter methods for AppDispatcher
-    <controllerList:set_controller_method(); separator="\n">
+    <model.controllerList:set_controller_method(); separator="\n">
 
     // Event listener dispatch
     @Override
     protected void notifyFull(Context\<Record> ctx) {
-        <controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
+        <model.controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
     }
     @Override
     protected void notifyArrived(Context\<Record> ctx) {
-        <controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
+        <model.controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
     }
     @Override
     protected void notifyDeparted(Context\<Record> ctx) {
-        <controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
+        <model.controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
     }
     @Override
     protected void notifySaveDone(Context\<Record> ctx) {
-        <controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
+        <model.controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
     }
 
     // Record creation functions
