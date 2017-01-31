@@ -16,13 +16,11 @@ import org.stringtemplate.v4.misc.STNoSuchPropertyException;
  * Created by gcampagn on 1/27/17.
  */
 public class STIRTranslator extends BaseIRTranslator {
-    private final TypeFormatter typeFormatter;
     private final LiteralFormatter literalFormatter;
     private final STGroup irGroup;
 
-    public STIRTranslator(STGroup irGroup, TypeFormatter typeFormatter, LiteralFormatter literalFormatter) {
+    public STIRTranslator(STGroup irGroup, LiteralFormatter literalFormatter) {
         this.irGroup = irGroup;
-        this.typeFormatter = typeFormatter;
         this.literalFormatter = literalFormatter;
 
         // add .name to convert registers to names
@@ -41,7 +39,7 @@ public class STIRTranslator extends BaseIRTranslator {
     public void declareRegister(int reg, Type type) {
         ST tmpl = this.irGroup.getInstanceOf("declaration");
         tmpl.add("reg", reg);
-        tmpl.add("type", typeFormatter.toNativeType(type));
+        tmpl.add("type", type);
         addCode(tmpl.render());
     }
 
@@ -116,7 +114,6 @@ public class STIRTranslator extends BaseIRTranslator {
     public void visit(TConvert convert) {
         ST tmpl = this.irGroup.getInstanceOf("convert");
         tmpl.add("op", convert);
-        tmpl.add("type", typeFormatter.toNativeType(convert.tgtType));
         addCode(tmpl.render());
     }
 
@@ -157,7 +154,6 @@ public class STIRTranslator extends BaseIRTranslator {
                 tmpl = this.irGroup.getInstanceOf("method_call");
         }
         tmpl.add("call", methodCall);
-        tmpl.add("ownerType", typeFormatter.toNativeType(methodCall.type.getOwner()));
         addCode(tmpl.render());
     }
 

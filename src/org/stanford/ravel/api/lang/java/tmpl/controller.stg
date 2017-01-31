@@ -1,20 +1,20 @@
 import "common.stg"
 
 event_handler(handler) ::=<<
-public void <handler.model>_<handler.name>(<handler.argumentNames,handler.argumentTypes:{n,t|<t> <n>}; separator=", ">) {
+public void <handler.model>_<handler.name>(<handler.arguments:{a|<a.type> <a.name>}; separator=", ">) {
     <handler.code>}
 >>
 
-file(package,imports,name,paramNames,paramTypes,eventHandlers) ::=<<
+file(package,imports,name,parameters,eventHandlers) ::=<<
 package <package>;
 
 <imports:do_import()>
 
 public class <name> {
-    <paramNames,paramTypes:{n,t|private final <t> <n>;}; separator="\n">
+    <parameters:{p|private final <p.type> <p.name>;}; separator="\n">
 
-    public <name>(<paramNames,paramTypes:{n,t|<t> <n>}; separator=", ">) {
-        <paramNames:{n|this.<n> = <n>;}; separator="\n">
+    public <name>(<parameters:{p|<p.type> <p.name>}; separator=", ">) {
+        <parameters:{p|this.<p.name> = <p.name>;}; separator="\n">
     }
 
     <eventHandlers:event_handler(); separator="\n">

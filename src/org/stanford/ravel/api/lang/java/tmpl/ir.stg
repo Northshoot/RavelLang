@@ -50,8 +50,8 @@ bin_op(op) ::=<<
 <op.target.name> = <op.src1.name> <op.op> <op.src2.name>;
 
 >>
-convert(op,type) ::=<<
-<op.target.name> = (<type>) <op.source.name>;
+convert(op) ::=<<
+<op.target.name> = (<op.tgtType>) <op.source.name>;
 
 >>
 
@@ -73,19 +73,19 @@ field_store(store) ::=<<
 
 >>
 
-void_function_call(call, ownerType) ::=<<
-<ownerType>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+void_function_call(call) ::=<<
+<call.type.owner>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>
-function_call(call, ownerType) ::=<<
-<call.target.name> = <ownerType>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+function_call(call) ::=<<
+<call.target.name> = <call.type.owner>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>
-void_method_call(call, ownerType) ::=<<
+void_method_call(call) ::=<<
 <call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>
-method_call(call, ownerType) ::=<<
+method_call(call) ::=<<
 <call.target.name> = <call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>

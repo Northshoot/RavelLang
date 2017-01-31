@@ -6,6 +6,7 @@ import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
+import org.stringtemplate.v4.AttributeRenderer;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -13,6 +14,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -27,13 +29,12 @@ public class JLang extends BaseLanguage {
     private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/lang/java/tmpl";
     private final static String RUNTIME_PKG = "org.stanford.ravel.rrt";
 
-    private static final TypeFormatter JTYPES = new TypeFormatter() {
-        @Override
-        public String toNativeType(Type type) {
+    private static final AttributeRenderer JTYPES = new AttributeRenderer() {
+        private String toNativeType(Type type) {
             if (type instanceof PrimitiveType) {
                 switch ((PrimitiveType) type) {
                     case STR:
-                        return "String";
+                        return "java.lang.String";
                     case ERROR_MSG:
                         return RUNTIME_PKG + ".tiers.Error";
                     case DATE:
@@ -68,8 +69,12 @@ public class JLang extends BaseLanguage {
                 return type.getName();
             }
         }
+
+        @Override
+        public String toString(Object o, String s, Locale locale) {
+            return toNativeType((Type)o);
+        }
     };
-    private static final TypeAttributeRenderer STJTYPES = new TypeAttributeRenderer(JTYPES);
     private static final LiteralFormatter JLITERAL = new CStyleLiteralFormatter();
 
     private final STGroup controllerGroup;
@@ -79,23 +84,18 @@ public class JLang extends BaseLanguage {
 
     public JLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
-        controllerGroup.registerRenderer(Type.class, STJTYPES);
+        controllerGroup.registerRenderer(Type.class, JTYPES);
         modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
-        modelGroup.registerRenderer(Type.class, STJTYPES);
+        modelGroup.registerRenderer(Type.class, JTYPES);
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
-        dispatcherGroup.registerRenderer(Type.class, STJTYPES);
-
+        dispatcherGroup.registerRenderer(Type.class, JTYPES);
         irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
-        irGroup.registerRenderer(Type.class, STJTYPES);
+        irGroup.registerRenderer(Type.class, JTYPES);
     }
 
     @Override
     public OptionParser getOptions() {
         return JavaLanguageOptions.getInstance();
-    }
-
-    private void setPackage(FileObject file, String packageName) {
-
     }
 
     private CodeModule simpleModule(ST tmpl, String name, String packageName) {
@@ -240,7 +240,7 @@ public class JLang extends BaseLanguage {
 
         STControllerTranslator.FileConfig fileConfig = new STControllerTranslator.FileConfig(ictr.getName() + ".java", controllerTmpl);
 
-        STControllerTranslator controllerTranslator = new STControllerTranslator(Collections.singletonList(fileConfig), irGroup, JTYPES, JLITERAL);
+        STControllerTranslator controllerTranslator = new STControllerTranslator(Collections.singletonList(fileConfig), new STIRTranslator(irGroup, JLITERAL));
         CodeModule generated = controllerTranslator.translate(ictr.getController());
         generated.setSubPath("src/" + packageName.replace(".", "/"));
         return generated;

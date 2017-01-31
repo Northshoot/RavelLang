@@ -54,7 +54,7 @@ public class xLingual implements Translator {
     }
 
     @Override
-    public String getCName(){
+    public String getCName() {
         return StringUtils.join(mName.split("(?=\\p{Upper})"),"_").toLowerCase();
     }
 

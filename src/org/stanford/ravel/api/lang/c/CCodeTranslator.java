@@ -1,44 +1,45 @@
 package org.stanford.ravel.api.lang.c;
 
 import org.stanford.ravel.api.lang.BaseIRTranslator;
+import org.stanford.ravel.api.lang.LiteralFormatter;
 import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
+import org.stringtemplate.v4.AttributeRenderer;
+
+import java.util.Locale;
 
 /**
+ * Convert IR to C code.
+ *
+ * FIXME: should be replaced with string templates
+ *
  * Created by gcampagn on 1/25/17.
  */
-public class CCodeTranslator extends BaseIRTranslator implements LoopTreeVisitor {
-    private String typeToCType(Type type) {
-        if (type instanceof ArrayType) {
-            return "(" + typeToCType(((ArrayType) type).getElementType()) + ")[]";
-        }
-        if (type instanceof ClassType.InstanceType) {
-            return typeToCType(((ClassType.InstanceType) type).getClassType());
-        }
-        if (type instanceof PrimitiveType) {
-            switch ((PrimitiveType)type) {
-                case VOID:
-                    return "void";
-                case INT32:
-                    return "int32_t";
-                case BOOL:
-                    return "bool";
-                case DOUBLE:
-                    return "double";
-                case STR:
-                case ERROR_MSG:
-                    return "char*";
-                case BYTE:
-                    return "uint8_t";
+public class CCodeTranslator extends BaseIRTranslator {
+    private final AttributeRenderer typeRenderer;
+    private final AttributeRenderer identRenderer;
+    private final LiteralFormatter literalFormatter;
 
-                case ANY:
-                case ERROR:
-                default:
-                    throw new AssertionError();
-            }
-        } else {
-            return type.getName() + "*";
-        }
+    public CCodeTranslator(AttributeRenderer typeRenderer, AttributeRenderer identRenderer, LiteralFormatter literalFormatter) {
+        this.typeRenderer = typeRenderer;
+        this.identRenderer = identRenderer;
+        this.literalFormatter = literalFormatter;
+    }
+
+    private String typeToCType(Type type) {
+        return typeRenderer.toString(type, null, Locale.getDefault());
+    }
+
+    private String nameToUnderscore(String name) {
+        return identRenderer.toString(name, "function", Locale.getDefault());
+    }
+
+    // override declare controller scope to add "this->", so that references in the code
+    // are correct always
+    @Override
+    protected void declareControllerScope(VariableSymbol sym) {
+        setRegisterName(sym.getRegister(), "this->" + sym.getName());
     }
 
     @Override
@@ -124,7 +125,7 @@ public class CCodeTranslator extends BaseIRTranslator implements LoopTreeVisitor
 
     @Override
     public void visit(TImmediateLoad immediateLoad) {
-        addLine(immediateLoad.target, " = ", immediateLoad.value.toString());
+        addLine(immediateLoad.target, " = ", literalFormatter.toLiteral(immediateLoad.value));
     }
 
     @Override
@@ -134,9 +135,9 @@ public class CCodeTranslator extends BaseIRTranslator implements LoopTreeVisitor
             addCode(getRegisterName(methodCall.target));
             addCode(" = ");
         }
-        addCode(functionType.getOwner().getName());
+        addCode(nameToUnderscore(functionType.getOwner().getName()));
         addCode("_");
-        addCode(functionType.getName());
+        addCode(functionType.getFunctionName());
         addCode("(");
         boolean first = true;
         if (!functionType.isStatic()) {

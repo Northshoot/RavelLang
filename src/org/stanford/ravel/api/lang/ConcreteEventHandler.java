@@ -1,5 +1,7 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
+
 import java.util.List;
 
 /**
@@ -12,14 +14,12 @@ public class ConcreteEventHandler {
     public final String name;
     public final String model;
     public final String code;
-    public final List<String> argumentNames;
-    public final List<String> argumentTypes;
+    public final List<VariableSymbol> arguments;
 
-    public ConcreteEventHandler(String name, String model, List<String> argumentNames, List<String> argumentTypes, String code) {
+    public ConcreteEventHandler(String name, String model, List<VariableSymbol> arguments, String code) {
         this.name = name;
         this.model = model;
         this.code = code;
-        this.argumentNames = argumentNames;
-        this.argumentTypes = argumentTypes;
+        this.arguments = arguments;
     }
 }

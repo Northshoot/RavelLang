@@ -28,15 +28,11 @@ public class STControllerTranslator implements ControllerTranslator {
     }
 
     private final List<FileConfig> controllerFiles;
-    private final STGroup irGroup;
-    private final TypeFormatter typeFormatter;
-    private final LiteralFormatter literalFormatter;
+    private final IRTranslator irTranslator;
 
-    protected STControllerTranslator(List<FileConfig> controllerFiles, STGroup irGroup, TypeFormatter typeFormatter, LiteralFormatter literalFormatter) {
+    protected STControllerTranslator(List<FileConfig> controllerFiles, IRTranslator irTranslator) {
         this.controllerFiles = controllerFiles;
-        this.irGroup = irGroup;
-        this.typeFormatter = typeFormatter;
-        this.literalFormatter = literalFormatter;
+        this.irTranslator = irTranslator;
     }
 
     @Override
@@ -48,35 +44,18 @@ public class STControllerTranslator implements ControllerTranslator {
             Type model = event.getModelVar().getType();
             String modelName = model.getName();
 
-            STIRTranslator translator = new STIRTranslator(irGroup, typeFormatter, literalFormatter);
-
             List<VariableSymbol> arguments = event.getArguments();
-            translator.translate(ctr.getParameterSymbols(), arguments, event.getBody());
+            irTranslator.translate(ctr.getParameterSymbols(), arguments, event.getBody());
 
-            List<String> argumentNames = new ArrayList<>();
-            List<String> argumentTypes = new ArrayList<>();
-            for (VariableSymbol arg : arguments) {
-                argumentNames.add(arg.getName());
-                argumentTypes.add(typeFormatter.toNativeType(arg.getType()));
-            }
-
-            ConcreteEventHandler handler = new ConcreteEventHandler(name, modelName, argumentNames, argumentTypes, translator.getCode());
+            ConcreteEventHandler handler = new ConcreteEventHandler(name, modelName, arguments, irTranslator.getCode());
             eventHandlers.add(handler);
-        }
-
-        List<String> paramNames = new ArrayList<>();
-        List<String> paramTypes = new ArrayList<>();
-        for (VariableSymbol sym : ctr.getParameterSymbols()) {
-            paramNames.add(sym.getName());
-            paramTypes.add(typeFormatter.toNativeType(sym.getType()));
         }
 
         CodeModule module = new CodeModule();
         for (FileConfig fc : controllerFiles) {
             ST tmpl = fc.tmpl;
             tmpl.add("eventHandlers", eventHandlers);
-            tmpl.add("paramNames", paramNames);
-            tmpl.add("paramTypes", paramTypes);
+            tmpl.add("parameters", ctr.getParameterSymbols());
             FileObject fo = new FileObject();
             fo.setFileName(fc.fileName);
             fo.setContent(tmpl.render());

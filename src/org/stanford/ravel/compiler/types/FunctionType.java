@@ -46,7 +46,7 @@ public class FunctionType implements Type {
         return (owner != null ? owner.getName() + "." : "") + name;
     }
 
-    String getFunctionName() {
+    public String getFunctionName() {
         return name;
     }
 }

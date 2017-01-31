@@ -1,8 +1,0 @@
-/**
- * base template for language translation
-*/
-
-variable(var)::=<<
-<if(var.comment)>//<var.comment> <endif>
-<var.cType> <var.cName>  <if(var.value)> = <var.value> <endif>;
->>

@@ -63,3 +63,22 @@ space EmbeddedSpace:
 
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+
+space CSpace:
+    platform:
+        language = CLang
+        templates = nrf52
+        system = Android.v22
+
+    models:
+        random = Random(size=100)
+        #frequency = Frequency(size=1)
+        #boor_error = BootError()
+
+    interfaces:
+        #random = platform.system.random
+        timer_1 = TimerSource()
+        rng_1 = RandomSource()
+
+    controllers:
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)

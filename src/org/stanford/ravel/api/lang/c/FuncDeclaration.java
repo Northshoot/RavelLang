@@ -1,5 +1,7 @@
 package org.stanford.ravel.api.lang.c;
 
+// FIXME: eliminate this code when NRF52 has been ported away
+
 /**
  * Created by lauril on 9/22/16.
  */
