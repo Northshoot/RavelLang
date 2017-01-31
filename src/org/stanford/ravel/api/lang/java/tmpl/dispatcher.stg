@@ -53,15 +53,21 @@ public class <name> implements DispatcherAPI, SystemEventAPI {
         //is it an ACK?
         System.out.println("Received data from: " + endpoint.getName());
 
-        RavelPacket rp = new RavelPacket(data);
+        RavelPacket rp = new RavelPacket();
+        rp.fromNetwork(data);
         switch(rp.model_id) {
             <models:model_case_record_arrived()>
         }
     }
 
     @Override
-    public Error send_data(byte[] data, Endpoint endpoint) {
-        return driver.sendData(data, endpoint);
+    public Error send_data(RavelPacket data, Endpoint endpoint) {
+        return driver.sendData(data.toBytes(), endpoint);
+    }
+
+    @Override
+    public void driver_send_done(Error networkError, byte[] data, Endpoint endpoint) {
+        // TODO
     }
 
     // Implementation of SystemEventAPI
