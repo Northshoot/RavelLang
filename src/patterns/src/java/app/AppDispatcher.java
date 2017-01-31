@@ -5,17 +5,16 @@ import org.stanford.ravel.rrt.tiers.Endpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
-import patterns.src.java.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.AndroidDriver;
 import org.stanford.ravel.rrt.tiers.Error;
 
 
-import java.net.Inet4Address;
 import java.util.Map;
 
 /**
  * Created by lauril on 1/23/17.
  */
-public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
+public class AppDispatcher  extends AbstractDispatcher{
 
     //TODO: not cool
     public static final int PACKET_SIZE = Model.RECORD_SIZE;

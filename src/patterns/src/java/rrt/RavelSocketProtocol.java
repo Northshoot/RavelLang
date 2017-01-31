@@ -1,11 +1,9 @@
 package patterns.src.java.rrt;
 
-import patterns.src.java.app.AppDispatcher;
-import patterns.src.java.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.AndroidDriver;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 
 /**

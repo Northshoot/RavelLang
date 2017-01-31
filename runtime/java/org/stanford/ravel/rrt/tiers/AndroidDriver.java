@@ -1,11 +1,11 @@
-package patterns.src.java.tiers;
+package org.stanford.ravel.rrt.tiers;
 
+import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.SocketServer;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
-import patterns.src.java.app.AppDispatcher;
-import patterns.src.java.rrt.*;
+import patterns.src.java.rrt.RavelSocketProtocol;
 
 
 import java.io.IOException;
@@ -20,12 +20,12 @@ import java.util.Timer;
 public class AndroidDriver implements DriverAPI {
 
     Map<String, Endpoint> endpointsMap = new HashMap<>();
-    private AppDispatcher appDispatcher;
+    private AbstractDispatcher appDispatcher;
     private SocketServer ss;
     private RavelSocketProtocol rsp;
     private Socket clientSocket;
 
-    public AndroidDriver(AppDispatcher appDispatcher){
+    public AndroidDriver(AbstractDispatcher appDispatcher){
         this.appDispatcher = appDispatcher;
     }
     void pprint(String s){
