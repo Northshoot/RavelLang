@@ -23,6 +23,7 @@ public class Model extends StreamingModel<Model.Record>{
      */
     //AUTOGEN: controller naming
     private ModelController mcntr;
+
     public void setModelController(ModelController mc){
         this.mcntr = mc;
     }
@@ -34,31 +35,54 @@ public class Model extends StreamingModel<Model.Record>{
 
     //AUTOGEN ravel enumerates all models
     public final static int MODEL_ID = 5;
+    //AUTOGEN: schema size
+    public final static int RECORD_SIZE = 6*4;
 
     public Model(AppDispatcher appDispatcher) {
         super(appDispatcher, MODEL_SIZE);
+    }
+
+    void pprint(String s){
+        System.out.println("[StreamingModel::Model]>" + s);
     }
 
     /*************** Model internal functionality  ***************/
 
     @Override
     protected void notifyFull(org.stanford.ravel.rrt.Context<Record> ctx) {
-        mcntr.Model_arrived(ctx);
+        pprint("notifyFull");
+        //AUTOGEN: list of subscribing controllers
+        mcntr.Model_full(ctx);
     }
 
     @Override
     protected void notifyArrived(org.stanford.ravel.rrt.Context<Record> ctx) {
+        pprint("notifyArrived");
+        //AUTOGEN: list of subscribing controllers
+
+        mcntr.Model_arrived(ctx);
 
     }
 
     @Override
     protected void notifyDeparted(org.stanford.ravel.rrt.Context<Record> ctx) {
+        pprint("notifyDeparted");
+        //AUTOGEN: list of subscribing controllers
+        mcntr.Model_departed(ctx);
 
     }
 
     @Override
     protected void notifySaveDone(org.stanford.ravel.rrt.Context<Record> ctx) {
+        pprint("notifySaveDone");
+        //AUTOGEN: list of subscribing controllers
+        mcntr.Model_save_done(ctx);
 
+    }
+
+    @Override
+    protected int getModelID() {
+        return MODEL_ID;
     }
 
     @Override
@@ -72,8 +96,7 @@ public class Model extends StreamingModel<Model.Record>{
 
     public static class Record implements Serializable, ModelRecord {
         int model_id = Model.MODEL_ID;
-        int position;
-        int state;
+        int idx;
         public int field1;
         public int field2;
         public int field3;
@@ -85,7 +108,7 @@ public class Model extends StreamingModel<Model.Record>{
                       int field3_val,
                       int field4_val){
 
-            this.position = position;
+            this.idx = position;
             this.field1 = field1_val;
             this.field2 = field2_val;
             this.field3 = field3_val;
@@ -117,11 +140,12 @@ public class Model extends StreamingModel<Model.Record>{
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             //AUTOGEN: write to
             outputStream.write(model_id);
-            outputStream.write(position);
+            outputStream.write(idx);
             outputStream.write(field1);
             outputStream.write(field2);
             outputStream.write(field3);
             outputStream.write(field4);
+            System.err.println("toBytes: " + outputStream.toByteArray().length);
             //AUTOGEN END
             return outputStream.toByteArray();
         }

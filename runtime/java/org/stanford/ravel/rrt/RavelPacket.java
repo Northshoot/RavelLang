@@ -1,6 +1,9 @@
 package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.utils.ByteWork;
+import patterns.src.java.model.Model;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by lauril on 1/25/17.
@@ -9,41 +12,80 @@ public class RavelPacket {
 
     public final static int SRC = 4; //32 bits for source
     public final static int DST = 8; //32 bits for destination
-    public final static int PARTIAL = 9; //1 bit to note partial
-    public final static int LAST = 65; //1 bit to note end partial
     public final static int RESERVED = 9; // reserved for byte mapping
-    public final static int MODEL_ID = 10; //8 bits for model id
+    public final static int RECORD_DATA = 9+Model.RECORD_SIZE; // record data
 
 
 
+    public int model_id =-1;
+    public byte[] record_data=null;
+    public int dst=-1;
+    public int src=-1;
+    //TODO: add packetization
+    public byte reserved=-1;
+    public int partial=-1;
+    public int last=-1;
 
-    public int model_id;
-    public byte[] record_data;
-    public int dst;
-    public int src;
-    public int partial;
-    public int last;
 
 
+    private byte[] __in_mData;
     private byte[] mData;
 
-    public RavelPacket(byte[] data){
-        this.mData = data;
-        //unmangle data
-        this.src = ByteWork.convertFourUnsignedBytesToInt(ByteWork.getBytes(data, 0, SRC));
-        this.dst = ByteWork.convertFourUnsignedBytesToInt(ByteWork.getBytes(data, SRC, DST));
-        byte[] pkt =  ByteWork.getBytes(data, DST, RESERVED);
-        this.partial = (pkt[0] >> 0) & 1;
-        this.last = (pkt[0] >> 1) & 1;
-        this.model_id = ByteWork.getBytes(data, RESERVED,MODEL_ID)[0];
-        this.record_data = ByteWork.getBytes(data, MODEL_ID, data.length);
+
+
+    public RavelPacket(){
+        this.record_data = new byte[Model.RECORD_SIZE];
     }
 
-    public RavelPacket(byte[] bytes, int count) {
-        //Creates new packet from stream
-        //TODO: very the length
-        this(bytes);
+    public int getSize(){
+        return RECORD_DATA;
+    }
+    void pprint(String s){
+        //TODO
+        System.out.println("[RavelPacket::]>" + s);
+    }
+    public void fromRecord(byte [] data){
+        //unmangle data
+        pprint("fromRecord: " + data.length);
+        this.__in_mData = data;
+        this.mData = this.__in_mData;
+        this.model_id =getModelIdFromRecord(data);
+        this.record_data = new byte[data.length];
+        this.record_data = data;
+    }
 
+    public void fromNetwork(byte[] data){
+        //unmangle data
+        System.out.println("DATA: " + data.length);
+        this.__in_mData = data;
+        this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
+        this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
+        this.reserved =  ByteWork.getBytes(data, DST, RESERVED)[0];
+        this.partial = (this.reserved >> 0) & 1;
+        this.last = (this.reserved >> 1) & 1;
+        this.record_data = ByteWork.getBytes(data, RESERVED, RECORD_DATA);
+        this.model_id = getModelIdFromRecord(this.record_data);
+        this.mData = this.__in_mData;
+    }
+
+    private int getModelIdFromRecord(byte[] data){
+        //TODO: no hardcoded vals
+        return ByteWork.convertFourBytesToInt(
+                ByteWork.getBytes(data, 0, 4)
+        );
+    }
+
+
+
+    public byte[] toBytes(){
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        outputStream.write(src);
+        outputStream.write(dst);
+        outputStream.write(getPartial());
+        outputStream.write(record_data, 0, record_data.length);
+
+        //AUTOGEN END
+        return outputStream.toByteArray();
     }
 
     public boolean isLast(){
@@ -57,6 +99,19 @@ public class RavelPacket {
     public String toString() {
         return "[SRC: " + this.src + ", DST: " + this.dst
                 + ", PARTIAL: "+ isPartial() + ", LAST: "+ isLast()
-                +", MODEL_ID: " + this.model_id + ", DATA: " + ByteWork.bytesToHex(this.mData) + "]";
+                +", MODEL_ID: " + this.model_id + "]";
+    }
+
+    private byte getPartial() {
+        if (isLast() && isPartial() ) {
+            this.partial = 3;
+        } else if (isLast() && !isPartial()){
+            this.partial = 1;
+        } else if (!isLast() && isPartial()){
+            this.partial = 1;
+        } else {
+            this.partial =0;
+        }
+        return reserved;
     }
 }

@@ -28,7 +28,9 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     private final ArrayList<RecordType> mRecords = new ArrayList<RecordType>();
     private int currentPos = 0;
 
+    private int mModelSize;
     protected BaseModel(DispatcherAPI dispatcher, int size) {
+        mModelSize = size;
         mRecords.ensureCapacity(size);
         mDispatcher = dispatcher;
         stateArray = new RecordState[size];
@@ -39,6 +41,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     protected abstract void notifyArrived(Context<RecordType> ctx);
     protected abstract void notifyDeparted(Context<RecordType> ctx);
     protected abstract void notifySaveDone(Context<RecordType> ctx);
+    protected abstract int getModelID();
 
     // the generated methods for marshalling/unmarshalling
     protected abstract RecordType unmarshall(byte[] data);
@@ -67,21 +70,25 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
     }
 
     private boolean tryAddRecord(RecordType record) {
-        if (currentPos >= mRecords.size())
+        if (currentPos >= mModelSize )
             return false;
         // TODO: if durable save to disk
-        mRecords.set(currentPos++, record);
+        mRecords.add(currentPos++, record);
         return true;
+    }
+    void pprint(String s){
+        System.out.println("[BaseModel::]>" + s);
     }
 
     protected Context<RecordType> addRecord(RecordType record) {
         if (!tryAddRecord(record))
             return new Context<>(this, Error.OUT_OF_STORAGE);
 
-        if (currentPos == mRecords.size()) {
+        if (currentPos == mModelSize) {
             Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
             notifyFull(ctx);
         }
+
         return new Context<>(this, record);
     }
 
@@ -92,7 +99,6 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         System.out.println("RX record");
         addRecord(record);
         ctx.record = record;
-
         //notify all subscribers
         notifyArrived(ctx);
     }
@@ -108,9 +114,9 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
 
         //TODO: is this system packet?
         //normal data
+        pprint("record_departed");
         Context<RecordType> ctx = new Context<>(this);
         ctx.record = unmarshall(pkt.record_data);
-
         //notify all subscribers
         notifyDeparted(ctx);
     }
@@ -149,7 +155,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         RecordType mDeletedRecord = mRecords.get(deleteField);
         // delete from local array
 
-        for(int i = deleteField ; i < mRecords.size() ;i++) {
+        for(int i = deleteField ; i < mModelSize ;i++) {
             mRecords.set(i, mRecords.get(i + 1));
         }
         currentPos--;

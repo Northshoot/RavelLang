@@ -1,11 +1,10 @@
 package patterns.src.java.controller;
 
 import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.TimerSource;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by lauril on 1/23/17.
@@ -17,7 +16,7 @@ public class ModelController {
     private Model mModel;
 
     //AUTOGEN: sources
-    private TimerSource1 timer;
+    private TimerSource timer;
 
     //AUTOGEN: sinks
 
@@ -25,18 +24,22 @@ public class ModelController {
     private boolean running;
 
     public boolean start = false;
-    public ModelController(Model model){
+    public ModelController(Model model, TimerSource timersource){
 
         //AUTOGEN: bind models
         this.mModel = model;
 
         //AUTOGEN:create timers
         // initialize timer from AppDispatcher
+        this.timer = timersource;
 
         //We set DThread to true.
         //A daemon thread will execute only as long as the rest of the program continues to execute.
     }
 
+    void pprint(String s){
+        System.out.println("[" + this.mName +"]>" + s);
+    }
     public void setName(String name){
         this.mName = name;
     }
@@ -44,13 +47,13 @@ public class ModelController {
     public void timer_1_fired() {
         //create a record and save it.
         Model.Record rec = mModel.create();
-        rec.field1 = 1;
+        rec.field1 = 1444444444;
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;
         rec.field4 = rec.field3 / 2;
         Context ctx = mModel.save(rec);
 
-        System.out.println(ctx.error);
+        pprint("model_save(): " + ctx.error);
     }
 
     public void Model_arrived(Context<Model.Record> ctx){
@@ -59,29 +62,33 @@ public class ModelController {
 
     public void Model_departed(Context<Model.Record> ctx){
         if(!running) timer.start_periodic(1000);
-        System.out.println(ctx);
+        System.out.println("Model departed: " + ctx);
 
     }
 
     public void Model_full(Context<Model.Record> ctx){
         timer.cancel();
         running = false;
-        System.out.println(ctx);
+        pprint("Model_full: " + ctx);
 
     }
 
     public void Model_save_done(Context<Model.Record> ctx){
-        System.out.println(ctx);
+
+        pprint("Model_save_done:" + ctx);
     }
 
     /**
      * AUTOGEN methods that controller subscribes in Ravel
      */
     public void system_started() {
-        timer.start_periodic(1000);
-        running = true;
         //TODO: test only in simulation
-        System.out.println("Controller {" + this.mName +"} started: " + start);
+        if(mName == "EMD" ) {
+            timer.start_periodic(1000);
+            running = true;
+        }
+
+        pprint("system started: " + start);
     }
 
     public String getName() {

@@ -1,5 +1,7 @@
 package org.stanford.ravel.rrt;
 
+import patterns.src.java.controller.ModelController;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,4 +28,6 @@ public abstract class TimerSource {
     }
 
     protected abstract void dispatch();
+
+
 }

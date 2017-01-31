@@ -10,5 +10,10 @@ public enum Error {
     WRITE_ERROR,
     READ_ERROR,
     OUT_OF_STORAGE,
-    SYSTEM_ERROR, IN_TRANSIT
+    SYSTEM_ERROR, IN_TRANSIT;
+
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase();
+    }
 }

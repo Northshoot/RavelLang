@@ -1,16 +1,15 @@
 package patterns.src.java.app;
 
-import org.stanford.ravel.rrt.Context;
-import org.stanford.ravel.rrt.DispatcherAPI;
-import org.stanford.ravel.rrt.RavelPacket;
-import org.stanford.ravel.rrt.SystemEventAPI;
+import org.stanford.ravel.rrt.*;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
+import patterns.src.java.sources.TimerSource1;
 import patterns.src.java.tiers.AndroidDriver;
 import org.stanford.ravel.rrt.tiers.Error;
 
 
+import java.net.Inet4Address;
 import java.util.Map;
 
 /**
@@ -18,7 +17,8 @@ import java.util.Map;
  */
 public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
 
-
+    //TODO: not cool
+    public static final int PACKET_SIZE = 9;
     //AUTOGEN
     Model model_id_1 ;
     ModelController mcntr_id_1 ;
@@ -30,55 +30,89 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
     Endpoint ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
     Endpoint ep_2 = new Endpoint("Gateway", Endpoint.TYPE.SOCKET);
     //USED for test
+
+    //AUTOGEN: system components
+    TimerSource1 timerSource;
+
     String mName ;
     public AppDispatcher(String name){
+
+
         this.mName = name;
+        //AUTOGEN: create models
         model_id_1 = new Model(this);
-        mcntr_id_1 = new ModelController(model_id_1);
+        //AUTOGEN: interfaces
+        timerSource = new TimerSource1();
+        //AUTOGEN: create controllers
+        mcntr_id_1 = new ModelController(model_id_1, timerSource);
+        //AUTOGEN: push controller to all the interfaces and models
+        model_id_1.setModelController(mcntr_id_1);
+        timerSource.setModelController(mcntr_id_1);
+
+        //AUTOGEN: create system driver
         mDriver = new AndroidDriver(this);
+        mcntr_id_1.setName(mName);
         switch (mName){
             case "EMD":
-                mcntr_id_1.setName("EMD");
                 ep_1 = new Endpoint("Gateway", Endpoint.TYPE.SOCKET, "127.0.0.1", 4444);
-                mDriver = new AndroidDriver(this);
                 mDriver.register_endpoint(ep_1);
                 model_id_1.setEndpoint(ep_1);
                 break;
             case "GTW":
-                mcntr_id_1.setName("GTW");
                 ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
                 mDriver.register_endpoint(ep_1);
                // ep_2 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
-                mDriver.register_endpoint(ep_2);
+                //mDriver.register_endpoint(ep_2);
                 model_id_1.setEndpoint(ep_1);
                 //model_id_1.setEndpoint(ep_2);
                 break;
             case "CLD":
-                mcntr_id_1.setName("CLD");
                 ep_1 =new Endpoint("Gateway", Endpoint.TYPE.SOCKET , "127.0.0.1", 4444);
-                mDriver.register_endpoint(ep_1);
-                model_id_1.setEndpoint(ep_1);
+                mDriver.register_endpoint(ep_2);
+                model_id_1.setEndpoint(ep_2);
                 break;
             default:
                 System.out.println("OPS");
                 break;
         }
         mDriver.appDispatcherReady();
+
     }
 
 
+    void pprint(String s){
+        System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
+    }
     @Override
-    public Error send_data(byte[] bytes, Endpoint endpoint){
+    public Error send_data(RavelPacket pkt, Endpoint endpoint){
         //send data to the driver
-        mDriver.sendData(bytes, endpoint);
+        //TODO: fix form sim
+        int src =0;
+        int dst = 0;
+        switch (mName){
+            case "EMB":
+                src = 11111111;
+                dst = 22222222;
+                break;
+            case "GTW":
+                src = 22222222;
+                dst = 11111111;
+                break;
+        }
+
+        pkt.src = src;
+        pkt.dst = dst;
+        mDriver.sendData(pkt.toBytes(), endpoint);
         return Error.SUCCESS;
     }
     @Override
     public void data_received(byte[] data, Endpoint endpoint) {
         //is it an ACK?
-        System.out.println("Received data from: " + endpoint.getName());
+
         //Dispatch to appropriate model
-        RavelPacket rp = new RavelPacket(data);
+        RavelPacket rp = new RavelPacket();
+        rp.fromNetwork(data);
+        pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
         switch (rp.model_id){
             case 1:
                 model_id_1.record_arrived(rp, endpoint);
@@ -88,9 +122,21 @@ public class AppDispatcher implements DispatcherAPI, SystemEventAPI {
     }
 
     @Override
+    public void driver_send_done(Error networkError, byte[] data, Endpoint endpoint) {
+        pprint("driver_send_done, ERROR: " + networkError);
+        RavelPacket rp = new RavelPacket();
+        rp.fromNetwork(data);
+        switch (rp.model_id){
+            case 1:
+                model_id_1.record_departed(rp, endpoint);
+
+        }
+    }
+
+    @Override
     public void started() {
         //AUTOGEN: controllers that subscribe to the event
-        System.out.println("SYS Started: " + mName);
+        pprint("SYS Started: " + mName);
         if(this.mName == "EMD") mcntr_id_1.start = true;
         mcntr_id_1.system_started();
     }

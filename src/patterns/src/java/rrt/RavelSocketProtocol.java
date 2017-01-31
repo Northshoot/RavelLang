@@ -1,7 +1,9 @@
 package patterns.src.java.rrt;
 
+import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.tiers.AndroidDriver;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -22,18 +24,16 @@ public class RavelSocketProtocol {
     }
 
 
-    public String processInput(InputStream in, InetAddress inetAddress) {
+    public String processInput(DataInputStream in, InetAddress inetAddress) {
         //TODO: fix the hack
-        byte[] bytes = new byte[16*1024];
+        //TODO:  needs more dynamic
+        byte[] bytes = new byte[AppDispatcher.PACKET_SIZE];
         try {
-            int count;
-            while ((count = in.read(bytes)) > 0) {
-            }
+            int count = in.read(bytes);
             this.androidDriver.rx_data_from_socket(bytes, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return "OK";
     }
 }

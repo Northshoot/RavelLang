@@ -1,6 +1,7 @@
 package patterns.src.java.tiers;
 
 import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.SocketServer;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import patterns.src.java.app.AppDispatcher;
@@ -27,20 +28,30 @@ public class AndroidDriver implements DriverAPI {
     public AndroidDriver(AppDispatcher appDispatcher){
         this.appDispatcher = appDispatcher;
     }
-
+    void pprint(String s){
+        //TODO
+        System.out.println("[" + appDispatcher.getName() + "::AndroidDriver]>" + s);
+    }
     public Error sendData(byte[] data, Endpoint endpoint) {
         //send data to the right channel
+        pprint("sendData lenght: " + data.length);
         if(endpoint.getType() == Endpoint.TYPE.SOCKET){
-            try {
                 //TODO: mmmrm not the best way to keep reconnecting
-                clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
-                clientSocket.getOutputStream().write(data);
-                clientSocket.close();
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                        clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
+                        clientSocket.getOutputStream().write(data);
+                        clientSocket.close();
+                        appDispatcher.driver_send_done(Error.SUCCESS, data, endpoint);
+                        } catch (IOException e) {
+                            endpoint.setDisconnected();
+                            appDispatcher.driver_send_done(Error.NETWORK_ERROR, data, endpoint);
+                        }
+                    }
+                }).start();
                 return Error.SUCCESS;
-            } catch (IOException e) {
-                endpoint.setDisconnected();
-                return Error.WAITING_FOR_NETWORK;
-            }
+
         }
         return Error.WRITE_ERROR;
     }
@@ -73,6 +84,7 @@ public class AndroidDriver implements DriverAPI {
     }
 
     public void rx_data_from_socket(byte[] bytes, int count){
+        pprint("rx_data_from_socket size: " + count);
         for (Endpoint e: endpointsMap.values()) {
             if(e.getType() == Endpoint.TYPE.SOCKET){
                 appDispatcher.data_received(bytes, e);
@@ -90,11 +102,12 @@ public class AndroidDriver implements DriverAPI {
 
     @Override
     public void appDispatcherReady() {
-        appDispatcher.started();
+        //TODO: clean out for generations
         if(appDispatcher.getName() == "GTW"){
             rsp = new RavelSocketProtocol(this);
             ss = new SocketServer(4444, rsp);
             ss.run();
         }
+        appDispatcher.started();
     }
 }

@@ -12,12 +12,17 @@ public class TimerSource1 extends TimerSource {
      */
     //AUTOGEN: controller naming
     private ModelController mcntr;
+
     public void setModelController(ModelController mc){
         this.mcntr = mc;
     }
 
     @Override
     protected void dispatch() {
+        if ( this.mcntr == null ) {
+            throw new RuntimeException("Controller is not set in: " + TimerSource.class.getSimpleName());
+
+        }
         mcntr.timer_1_fired();
     }
 }
