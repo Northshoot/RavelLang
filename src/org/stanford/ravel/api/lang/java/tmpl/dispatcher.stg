@@ -109,13 +109,19 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     /************** System callbacks from Driver to AD *********************/
     /***********************************************************************/
     @Override
-    public void started() {}
+    public void started() {
+        <space.systemAPI.controllerMap.started:{c|ctr_<c.varName>.SystemAPI_started();}; separator="\n">
+    }
 
     @Override
-    public void stopped() {}
+    public void stopped() {
+        <space.systemAPI.controllerMap.stopped:{c|ctr_<c.varName>.SystemAPI_stopped();}; separator="\n">
+    }
 
     @Override
-    public void restarted() {}
+    public void restarted() {
+        <space.systemAPI.controllerMap.restarted:{c|ctr_<c.varName>.SystemAPI_restarted();}; separator="\n">
+    }
 
     @Override
     public void battery(SystemEventAPI.BatteryLevel bl) {}

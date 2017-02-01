@@ -249,6 +249,11 @@ public class DefPhase extends RavelBaseListener {
         ctr.setDefNode(ctx);
         currentScope.define(ctr);
         pushScope(ctr);
+
+        VariableSymbol system = new VariableSymbol("system");
+        system.setDefNode(ctx);
+        system.setType(new SystemType());
+        currentScope.define(system);
     }
 
     @Override

@@ -67,6 +67,8 @@ public class JLang extends BaseLanguage {
                 return ((ModelType.RecordType) type).getModel().getName() + ".Record";
             } else if (type instanceof ModelType.ContextType) {
                 return "Context<" + toNativeType(((ModelType.ContextType) type).getOwner()) + ".Record>";
+            } else if (type instanceof SystemType) {
+                return "DispatcherAPI";
             } else {
                 return type.getName();
             }
@@ -148,6 +150,8 @@ public class JLang extends BaseLanguage {
                     concrete.parameterValues.add("model_" + ((InstantiatedModel) pvalue).getVarName());
                 } else if (pvalue instanceof InstantiatedInterface) {
                     concrete.parameterValues.add("iface_" + ((InstantiatedInterface) pvalue).getVarName());
+                } else if (pvalue instanceof SystemAPI) {
+                    concrete.parameterValues.add("this");
                 } else {
                     concrete.parameterValues.add(JLITERAL.toLiteral(pvalue));
                 }

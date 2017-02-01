@@ -16,7 +16,7 @@ public class InterfaceType extends ClassType {
         super.addMethod(methodName, arguments, returnValue);
     }
 
-    public void addEvent(String eventName, Type[] arguments, Type returnValue) {
-        super.addEvent(eventName, arguments, returnValue, false);
+    public void addEvent(String eventName, Type[] arguments) {
+        super.addEvent(eventName, arguments, false);
     }
 }

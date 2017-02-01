@@ -36,7 +36,7 @@ public class InterfaceSymbol extends ComponentSymbol {
             InterfaceMemberSymbol imsym = (InterfaceMemberSymbol)sym;
 
             if (imsym.isEvent())
-                definedType.addEvent(imsym.getName(), imsym.getArguments(), imsym.getReturnValue());
+                definedType.addEvent(imsym.getName(), imsym.getArguments());
             else
                 definedType.addMethod(imsym.getName(), imsym.getArguments(), imsym.getReturnValue());
         }

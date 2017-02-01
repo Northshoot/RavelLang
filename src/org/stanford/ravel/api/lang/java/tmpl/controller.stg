@@ -9,6 +9,7 @@ file(package,imports,name,parameters,eventHandlers) ::=<<
 package <package>;
 
 import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.DispatcherAPI;
 
 <imports:do_import()>
 

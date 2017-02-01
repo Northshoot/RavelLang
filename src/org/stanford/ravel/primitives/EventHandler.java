@@ -44,7 +44,7 @@ public class EventHandler {
 
     @Override
     public String toString() {
-        return "Event " + modelVar.getName() + "." + event;
+        return "Event " + modelVar.getName() + "." + getEventName();
     }
 
     public List<VariableSymbol> getArguments() {

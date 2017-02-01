@@ -81,8 +81,8 @@ public class ClassType implements CompoundType {
         addStaticMember(methodName, functionType, "Static method");
     }
 
-    void addEvent(String eventName, Type[] arguments, Type returnValue, boolean hasSelf) {
-        EventType event = new EventType(new FunctionType(eventName, this, true, arguments, returnValue), hasSelf);
+    void addEvent(String eventName, Type[] arguments, boolean hasSelf) {
+        EventType event = new EventType(new FunctionType(eventName, this, true, arguments, PrimitiveType.VOID), hasSelf);
         addStaticMember(eventName, event, "Event");
     }
 

@@ -40,7 +40,7 @@ public class ModelType extends ClassType {
         this.addMethod("create", new Type[0], recordType);
 
         for (ModelEvent e : ModelEvent.values()) {
-            this.addEvent(e.name(), new Type[]{ctxType}, PrimitiveType.VOID, true);
+            this.addEvent(e.name(), new Type[]{ctxType}, true);
         }
     }
 

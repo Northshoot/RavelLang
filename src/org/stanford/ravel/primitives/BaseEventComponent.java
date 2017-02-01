@@ -64,9 +64,11 @@ abstract class BaseEventComponent extends ParametrizedComponent implements Event
     }
 
     public Map<String, Collection<InstantiatedController>> getControllerMap() {
+        assert frozen;
         return Collections.unmodifiableMap(mControllerMap);
     }
     public List<InstantiatedController> getControllerList() {
+        assert frozen;
         return Collections.unmodifiableList(mControllerList);
     }
 

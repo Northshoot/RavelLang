@@ -126,6 +126,8 @@ public class ModelControllerLinker {
 
             // set parameters
             Map<String, EventComponent> eventMap = new HashMap<>();
+            eventMap.put("system", space.getSystemAPI());
+            ictr.setParam("system", space.getSystemAPI());
 
             boolean ok = true;
             for (Map.Entry<String, Object> param : is.getParameterMap().entrySet()) {
@@ -172,7 +174,11 @@ public class ModelControllerLinker {
                         ctr.getParameterType(pname).getName());
                     ok = false;
                 } else {
-                    ictr.setParam(pname, value);
+                    if (ictr.isParamSet(pname)) {
+                        driver.emitError(new SourceLocation(is.getDefNode()), "duplicate assignment to parameter " + pname);
+                    } else {
+                        ictr.setParam(pname, value);
+                    }
                 }
             }
 

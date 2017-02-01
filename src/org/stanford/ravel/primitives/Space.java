@@ -13,6 +13,7 @@ public class Space extends Primitive {
     private final Map<String, InstantiatedInterface> mInterfaces = new LinkedHashMap<>();
     private final List<Flow> mInFlows = new ArrayList<>();
     private final List<Flow> mOutFlows = new ArrayList<>();
+    private final SystemAPI mSystemAPI = new SystemAPI(this, this, "system");
 
     private Platform mPlatform;
 
@@ -80,7 +81,12 @@ public class Space extends Primitive {
         return Collections.unmodifiableCollection(mControllers.values());
     }
 
+    public SystemAPI getSystemAPI() {
+        return mSystemAPI;
+    }
+
     public void freezeAll() {
+        mSystemAPI.freeze();
         for (InstantiatedModel im : mModels.values())
             im.freeze();
         for (InstantiatedInterface is : mInterfaces.values())
