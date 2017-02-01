@@ -48,6 +48,34 @@ controller CController(random: Random):
         # do something with rec.value
 
 
+interface Database<T>(model: T):
+    implementation:
+        python = "rlib/py/django.stg"
+
+    def save(r : T.Record): Random.Context
+
+controller CloudController(random: Random, db1: Database<Random>, db2: Database<Random2>):
+    event random.arrived():
+        rec = self.record
+        if rec.value >= 0:
+            db.save(rec)
+        if rec.origin == GatewaySpace:
+            #
+
+space CloudSpace:
+    platform:
+        language = python.v36
+        system = Django.v10
+
+    models:
+        random = Random(size=1)
+
+    interfaces:
+        database =
+
+    controllers:
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+
 space GatewaySpace:
     platform:
         language = JLang
@@ -62,6 +90,7 @@ space GatewaySpace:
 
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+
 
 
 space EmbeddedSpace:

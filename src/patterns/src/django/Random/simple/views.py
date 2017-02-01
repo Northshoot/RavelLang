@@ -47,6 +47,7 @@ def pushModel(request):
             field3 = field3,
             field4 = field4,
         )
+
         simpleModel.save()
 
     return HttpResponse("OK")

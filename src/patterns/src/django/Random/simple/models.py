@@ -12,6 +12,8 @@ class SimpleModelMeta(models.Model):
 
     def __str__(self):
         return 'SimpleModelMeta from %s' %(self.originator.device_id)
+
+
 # Create your models here.
 class SimpleModel(models.Model):
     meta = models.ForeignKey("SimpleModelMeta")
