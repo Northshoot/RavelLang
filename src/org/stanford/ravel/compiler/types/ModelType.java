@@ -36,7 +36,7 @@ public class ModelType extends ClassType {
         recordType = new RecordType(symbol.getName() + "::Record");
         ctxType = new ContextType(this);
 
-        this.addMethod("save", new Type[]{recordType}, PrimitiveType.VOID);
+        this.addMethod("save", new Type[]{recordType}, ctxType);
         this.addMethod("create", new Type[0], recordType);
 
         for (ModelEvent e : ModelEvent.values()) {

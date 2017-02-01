@@ -32,7 +32,10 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
 
     @Override
     public Context<RecordType> save(RecordType record) {
-        record.index(++index);
+        // save locally first
+        Context<RecordType> local = addRecord(record);
+        if (local.error != Error.SUCCESS)
+            return local;
 
         // Packetize the record and send it
         byte[] rec = record.toBytes();

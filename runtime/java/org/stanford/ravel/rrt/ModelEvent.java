@@ -1,6 +1,6 @@
 package org.stanford.ravel.rrt;
 
-import org.stanford.ravel.compiler.types.ModelType;
+import org.stanford.ravel.rrt.model.ModelRecord;
 
 /**
  * Created by lauril on 1/31/17.
@@ -8,9 +8,9 @@ import org.stanford.ravel.compiler.types.ModelType;
 public class ModelEvent extends Event {
 
     public Event.Type type;
-    public Context<ModelType.RecordType> ctx;
+    public Context<? extends ModelRecord> ctx;
 
-    public ModelEvent(Context<ModelType.RecordType> ctx, Event.Type type){
+    public ModelEvent(Context<? extends ModelRecord> ctx, Event.Type type){
         this.ctx = ctx;
         this.type = type;
     }

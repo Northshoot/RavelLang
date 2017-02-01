@@ -7,7 +7,7 @@ import org.stanford.ravel.rrt.tiers.Error;
 /**
  * Created by gcampagn on 1/30/17.
  */
-public abstract class LocalModel<RecordType> extends BaseModel<RecordType> {
+public abstract class LocalModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
     protected LocalModel(DispatcherAPI dispatcher, int size) {
         super(dispatcher, size);
     }

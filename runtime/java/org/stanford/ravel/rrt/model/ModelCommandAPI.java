@@ -8,7 +8,7 @@ import org.stanford.ravel.rrt.Context;
  *
  * Created by gcampagn on 1/29/17.
  */
-public interface ModelCommandAPI<RecordType> {
+public interface ModelCommandAPI<RecordType extends ModelRecord> {
     /**
      * Saves the record and initiates transmission
      * @param record

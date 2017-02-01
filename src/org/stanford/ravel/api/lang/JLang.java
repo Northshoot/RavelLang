@@ -4,6 +4,7 @@ import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.compiler.ir.typed.TConvert;
 import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
@@ -84,6 +85,7 @@ public class JLang extends BaseLanguage {
     private final STGroup controllerGroup;
     private final STGroup modelGroup;
     private final STGroup irGroup;
+    private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
 
     public JLang() {
@@ -95,6 +97,26 @@ public class JLang extends BaseLanguage {
         dispatcherGroup.registerRenderer(Type.class, JTYPES);
         irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
         irGroup.registerRenderer(Type.class, JTYPES);
+
+        // quirks for Java implemented as a nested class
+        irTranslator = new STIRTranslator(irGroup, JLITERAL) {
+            /**
+             * Quirk the conversion of ERROR_MSG to bool
+             *
+             * (True iff error != SUCCESS)
+             *
+             * @param convert the conversion operation
+             */
+            @Override
+            public void visit(TConvert convert) {
+                if (convert.srcType == PrimitiveType.ERROR_MSG &&
+                        convert.tgtType == PrimitiveType.BOOL) {
+                    addCode(getRegisterName(convert.target) + " = " + getRegisterName(convert.source) + " != Error.SUCCESS;\n");
+                } else {
+                    super.visit(convert);
+                }
+            }
+        };
     }
 
     @Override
@@ -235,7 +257,7 @@ public class JLang extends BaseLanguage {
 
         STControllerTranslator.FileConfig fileConfig = new STControllerTranslator.FileConfig(ictr.getName() + ".java", controllerTmpl);
 
-        STControllerTranslator controllerTranslator = new STControllerTranslator(Collections.singletonList(fileConfig), new STIRTranslator(irGroup, JLITERAL));
+        STControllerTranslator controllerTranslator = new STControllerTranslator(Collections.singletonList(fileConfig), irTranslator);
         CodeModule generated = controllerTranslator.translate(ictr.getController());
         generated.setSubPath("src/" + packageName.replace(".", "/"));
         return generated;

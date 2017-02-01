@@ -14,7 +14,7 @@ import java.util.ArrayList;
  *
  * Created by gcampagn on 1/29/17.
  */
-public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, ModelBottomAPI, ModelCommandAPI<RecordType> {
+public abstract class BaseModel<RecordType extends ModelRecord> implements ModelQuery<RecordType>, ModelBottomAPI, ModelCommandAPI<RecordType> {
     private static class RecordState {
         boolean inRest = false;
         boolean inTransit = false;
@@ -96,7 +96,9 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
             return false;
         // TODO: if durable save to disk
 
-        mRecords.add(currentPos++, record);
+        int idx = currentPos++;
+        record.index(idx);
+        mRecords.add(idx, record);
         return true;
     }
     void pprint(String s){
@@ -109,7 +111,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         //TODO: race conditions
         if (currentPos == mModelSize) {
             Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
-            eventQueue.add(new ModelEvent((Context<ModelType.RecordType>) ctx, Event.Type.MODEL__NOTIFY_FULL));
+            eventQueue.add(new ModelEvent(ctx, Event.Type.MODEL__NOTIFY_FULL));
 
         }
 

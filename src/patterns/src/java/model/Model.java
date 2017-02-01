@@ -2,7 +2,6 @@
 package patterns.src.java.model;
 
 //AUTOGEN imports
-import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.model.StreamingModel;
@@ -15,9 +14,6 @@ import patterns.src.java.controller.ModelController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by lauril on 1/23/14.
@@ -111,19 +107,6 @@ public class Model extends StreamingModel<Model.Record>{
         public int field3;
         public int field4;
 
-        public Record(int position,
-                      int field1_val,
-                      int field2_val,
-                      int field3_val,
-                      int field4_val){
-
-            this.idx = position;
-            this.field1 = field1_val;
-            this.field2 = field2_val;
-            this.field3 = field3_val;
-            this.field4 = field4_val;
-        }
-
         public Record(byte[] data){
             //make record out of byte[]
             //AUTOGEN
@@ -158,12 +141,12 @@ public class Model extends StreamingModel<Model.Record>{
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             //AUTOGEN: write to
             try {
-                outputStream.write(ByteWork.getByteArrayFromInt(model_id));
-                outputStream.write(ByteWork.getByteArrayFromInt(idx));
-                outputStream.write(ByteWork.getByteArrayFromInt(field1));
-                outputStream.write(ByteWork.getByteArrayFromInt(field2));
-                outputStream.write(ByteWork.getByteArrayFromInt(field3));
-                outputStream.write(ByteWork.getByteArrayFromInt(field4));
+                outputStream.write(ByteWork.getByteArray(model_id));
+                outputStream.write(ByteWork.getByteArray(idx));
+                outputStream.write(ByteWork.getByteArray(field1));
+                outputStream.write(ByteWork.getByteArray(field2));
+                outputStream.write(ByteWork.getByteArray(field3));
+                outputStream.write(ByteWork.getByteArray(field4));
             } catch (IOException e) {
                 e.printStackTrace();
             }

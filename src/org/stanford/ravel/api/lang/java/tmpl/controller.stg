@@ -10,6 +10,7 @@ package <package>;
 
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.tiers.Error;
 
 <imports:do_import()>
 

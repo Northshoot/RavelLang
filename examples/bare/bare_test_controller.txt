@@ -35,7 +35,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : Ra
         #self
         rec = random.create()
         rec.value = rnd.next()
-        random.save(rec)
+        ctx = random.save(rec)
+        if ctx.error:
+            timer.cancel()
 
     event system.started():
         timer.start_periodic(5000)
@@ -52,7 +54,7 @@ space GatewaySpace:
         system = J2SE.v18
 
     models:
-        random = Random(size=100)
+        random = Random(size=5)
 
     interfaces:
         timer_1 = TimerSource()
@@ -70,7 +72,7 @@ space EmbeddedSpace:
         system = J2SE.v18
 
     models:
-        random = Random(size=100)
+        random = Random(size=5)
 
     controllers:
         rndcnt_1 = CController(random = models.random)

@@ -1,25 +1,57 @@
 import "common.stg"
 
+record_deserialize ::= [
+    "int": "FourBytesToInt",
+    "double": "EightBytesToDouble",
+    "bool": "OneByteToBool",
+    default: "Unsupported<! this will blow up !>"
+]
+record_field_size ::= [
+    "int": "4",
+    "double": "8",
+    "bool": "1",
+    "default": "0"
+]
+
+deserialize_field(f) ::=<<
+this.<f.name> = ByteWork.convert<record_deserialize.(f.type)>(ByteWork.getBytes(data, pos, pos + <record_field_size.(f.type)>));
+pos += <record_field_size.(f.type)>;
+>>
+
 record_class(fields) ::=<<
 public static class Record implements ModelRecord {
+    private int __idx;
+
     <fields:{f|public <f.type> <f.name>;}>
 
     public Record() {
     }
 
     public Record(byte[] data) {
-        // TODO
+        // Skip model ID
+
+        this.__idx = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 4, 8));
+        int pos = 8;
+        <fields:deserialize_field(); separator="\n">
     }
 
     @Override
     public byte[] toBytes() {
-        // TODO
-        return null;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(ByteWork.getByteArray(MODEL_ID));
+            outputStream.write(ByteWork.getByteArray(__idx));
+            <fields:{f|outputStream.write(ByteWork.getByteArray(<f.name>));}; separator="\n">
+        } catch (IOException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        }
+        return outputStream.toByteArray();
     }
 
     @Override
     public void index(int i) {
-        // TODO
+        __idx = i;
     }
 };
 >>
@@ -27,8 +59,12 @@ public static class Record implements ModelRecord {
 file(package,imports,name,base,model,set_endpoints) ::=<<
 package <package>;
 
+import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+
 import org.stanford.ravel.rrt.model.<base>;
 import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.Context;
 
 <imports:do_import()>

@@ -22,7 +22,14 @@ public enum PrimitiveType implements Type {
     },
 
     // regular types
-    BOOL,
+    BOOL {
+        @Override
+        public boolean isAssignable(Type type) {
+            // error messages can be converted to bool to check if
+            // error is set
+            return type == BOOL || type == ERROR_MSG;
+        }
+    },
     BYTE {
         @Override
         public boolean isAssignable(Type type) {

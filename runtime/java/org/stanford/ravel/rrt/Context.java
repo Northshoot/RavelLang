@@ -1,6 +1,7 @@
 package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.model.ModelCommandAPI;
+import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.tiers.Error;
 import java.time.LocalDateTime;
 
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
  *
  * Created by gcampagn on 1/29/17.
  */
-public class Context<RecordType> {
+public class Context<RecordType extends ModelRecord> {
     // These fields are accessed directly by Ravel-generated controller code
     // so they must not be renamed
     public RecordType record;

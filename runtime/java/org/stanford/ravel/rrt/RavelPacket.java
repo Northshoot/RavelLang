@@ -86,9 +86,9 @@ public class RavelPacket {
     public byte[] toBytes(){
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
         try {
-            outputStream.write(ByteWork.getByteArrayFromInt(src));
-            outputStream.write(ByteWork.getByteArrayFromInt(dst));
-            outputStream.write(ByteWork.getByteArrayFromInt(getPartial()));
+            outputStream.write(ByteWork.getByteArray(src));
+            outputStream.write(ByteWork.getByteArray(dst));
+            outputStream.write(ByteWork.getByteArray(getPartial()));
             outputStream.write(record_data, 0, record_data.length);
             //AUTOGEN END
             return outputStream.toByteArray();
