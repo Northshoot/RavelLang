@@ -28,9 +28,21 @@ set_component_controller(comp, prefix) ::=<<
 file(package,imports,name,models,interfaces,controllers,endpoints) ::=<<
 package <package>;
 
+import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.model.ModelBottomAPI;
+import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.SystemEventAPI;
+import org.stanford.ravel.rrt.AbstractDispatcher;
+import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.SourceAPI;
+import org.stanford.ravel.rrt.SinkAPI;
+import org.stanford.ravel.rrt.Event;
+
 <imports:do_import()>
 
-public class <name> implements DispatcherAPI, SystemEventAPI {
+public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemEventAPI {
     <models:component_field("model"); separator="\n">
     <interfaces:component_field("iface"); separator="\n">
     <controllers:controller_field(); separator="\n">
@@ -38,22 +50,28 @@ public class <name> implements DispatcherAPI, SystemEventAPI {
 
     private DriverAPI driver;
 
-    public AppDispatcher(DriverAPI driver) {
-        this.driver = driver;
-
+    public AppDispatcher() {
         <models:set_component_controller("model"); separator="\n">
         <interfaces:set_component_controller("iface"); separator="\n">
+    }
 
-        driver.appDispatcherReady();
+    void setDriver(DriverAPI driver) {
+        this.driver = driver;
+    }
+
+    @Override
+    public String getAppName() {
+        // FIXME
+        return "App";
     }
 
     // Implementation of DispatcherAPI
     @Override
-    public void data_received(byte[] data, Endpoint endpoint) {
+    public void driver__dataReceived(byte[] data, Endpoint endpoint) {
         //is it an ACK?
         System.out.println("Received data from: " + endpoint.getName());
 
-        RavelPacket rp = new RavelPacket();
+        RavelPacket rp = new RavelPacket(data.length);
         rp.fromNetwork(data);
         switch(rp.model_id) {
             <models:model_case_record_arrived()>
@@ -61,13 +79,29 @@ public class <name> implements DispatcherAPI, SystemEventAPI {
     }
 
     @Override
-    public Error send_data(RavelPacket data, Endpoint endpoint) {
+    public Error model__sendData(RavelPacket data, Endpoint endpoint) {
         return driver.sendData(data.toBytes(), endpoint);
     }
 
     @Override
-    public void driver_send_done(Error networkError, byte[] data, Endpoint endpoint) {
+    public void driver__sendData(Event event) {
+    }
+
+    @Override
+    public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
         // TODO
+    }
+
+    @Override
+    public void runNextEvent() {
+    }
+
+    @Override
+    protected void models__notifyDeparted(Event event) {
+    }
+
+    @Override
+    protected void models__notifyArrived(Event event) {
     }
 
     // Implementation of SystemEventAPI

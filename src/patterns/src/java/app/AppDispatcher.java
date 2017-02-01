@@ -39,7 +39,7 @@ public class AppDispatcher  extends AbstractDispatcher{
     public String getAppName(){ return this.mName ;}
 
 
-    public AppDispatcher(String name){
+    public AppDispatcher(String name) {
 
         this.mName = name;
         //AUTOGEN: create models

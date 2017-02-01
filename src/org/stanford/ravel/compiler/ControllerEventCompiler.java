@@ -29,7 +29,7 @@ public class ControllerEventCompiler {
         this.debug = debug;
     }
 
-    public TypedIR compileEvent(EventHandlerSymbol eventSym, RavelParser.EventScopeContext tree) throws FatalCompilerErrorException {
+    public TypedIR compileEvent(EventHandlerSymbol eventSym, RavelParser.EventScopeContext tree, int firstGpRegister) throws FatalCompilerErrorException {
         // Check arguments
         List<VariableSymbol> declaredArguments = eventSym.getArguments();
         Type[] expected = eventSym.getType().getArgumentTypes();
@@ -62,7 +62,7 @@ public class ControllerEventCompiler {
         }
 
         // compile to untyped IR
-        AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this);
+        AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this, firstGpRegister);
         for (VariableSymbol var : declaredArguments)
             visitor.declare(var);
         visitor.visit(tree);

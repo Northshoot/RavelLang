@@ -56,10 +56,12 @@ class PlatformBuilder {
         BasePlatform concretePlatform = platform.getConcretePlatform();
 
         String path = this.path + s.getName();
-        mFiles.addAll(lang.build(s));
-        mFiles.addAll(concretePlatform.build(s));
-        for (FileObject fo : mFiles)
+        List<FileObject> spaceFiles = new ArrayList<>();
+        spaceFiles.addAll(lang.build(s));
+        spaceFiles.addAll(concretePlatform.build(s));
+        for (FileObject fo : spaceFiles)
             fo.setBasePath(path);
+        mFiles.addAll(spaceFiles);
     }
 
     void render() {

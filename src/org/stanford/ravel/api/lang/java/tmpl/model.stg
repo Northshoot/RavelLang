@@ -16,11 +16,20 @@ public static class Record implements ModelRecord {
         // TODO
         return null;
     }
+
+    @Override
+    public void index(int i) {
+        // TODO
+    }
 };
 >>
 
 file(package,imports,name,base,model) ::=<<
 package <package>;
+
+import org.stanford.ravel.rrt.model.<base>;
+import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.Context;
 
 <imports:do_import()>
 

@@ -13,9 +13,11 @@ import java.util.Map;
 public class UntypedIR {
 
     private Block rootBlock = new Block();
-    private int nextRegister = Registers.FIRST_GP_REG;
+    private int nextRegister;
 
-    public UntypedIR() {}
+    public UntypedIR(int firstGpRegister) {
+        nextRegister = firstGpRegister;
+    }
 
     public Block getRoot() {
         return rootBlock;

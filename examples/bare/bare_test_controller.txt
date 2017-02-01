@@ -13,9 +13,9 @@ interface TimerSource():
         java = "rlib/java/timer.stg"
         c = "rlib/c/timer.stg"
 
-    def start_one_shot( time : int32 )
+    def start_one_shot(time : int32)
     def cancel()
-    def start_periodic( time: int32)
+    def start_periodic(time: int32)
 
     event fired()
 
@@ -52,7 +52,7 @@ controller CController(random: Random, rnd : RandomSource):
         x = 7
 
 
-space EmbeddedSpace:
+space GatewaySpace:
     platform:
         language = JLang
         system = J2SE.v18
@@ -67,16 +67,16 @@ space EmbeddedSpace:
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
 
-#space CSpace:
-#    platform:
-#        language = CLang
-#        system = Posix.v2008
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Posix.v2008
 
-#    models:
-#        random = Random(size=100)
+    models:
+        random = Random(size=100)
 
-#    interfaces:
-#        rng_1 = RandomSource()
+    interfaces:
+        rng_1 = RandomSource()
 
-#    controllers:
-#        rndcnt_1 = CController(random = models.random, rnd = interfaces.rng_1)
+    controllers:
+        rndcnt_1 = CController(random = models.random, rnd = interfaces.rng_1)

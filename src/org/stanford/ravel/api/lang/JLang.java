@@ -4,6 +4,7 @@ import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
@@ -130,15 +131,6 @@ public class JLang extends BaseLanguage {
             tmpl.add("imports", packageName + ".interfaces." + iiface.getName());
         for (InstantiatedController ictr : s.getControllers())
             tmpl.add("imports", packageName + ".controller." + ictr.getName());
-        tmpl.add("imports", RUNTIME_PKG + ".tiers.Endpoint");
-        tmpl.add("imports", RUNTIME_PKG + ".tiers.Error");
-        tmpl.add("imports", RUNTIME_PKG + ".model.ModelBottomAPI");
-        tmpl.add("imports", RUNTIME_PKG + ".RavelPacket");
-        tmpl.add("imports", RUNTIME_PKG + ".DispatcherAPI");
-        tmpl.add("imports", RUNTIME_PKG + ".SystemEventAPI");
-        tmpl.add("imports", RUNTIME_PKG + ".DriverAPI");
-        tmpl.add("imports", RUNTIME_PKG + ".SourceAPI");
-        tmpl.add("imports", RUNTIME_PKG + ".SinkAPI");
 
         for (InstantiatedModel im : s.getModels())
             tmpl.add("models", im);
@@ -210,9 +202,6 @@ public class JLang extends BaseLanguage {
             default:
                 throw new AssertionError();
         }
-        modelTmpl.add("imports", RUNTIME_PKG + ".model." + baseClass);
-        modelTmpl.add("imports", RUNTIME_PKG + ".model.ModelRecord");
-        modelTmpl.add("imports", RUNTIME_PKG + ".Context");
         modelTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
         for (InstantiatedController ictr : im.getControllerList())
             modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
@@ -230,7 +219,6 @@ public class JLang extends BaseLanguage {
         String packageName = options.getPackageName() + ".controller";
         controllerTmpl.add("package", packageName);
         controllerTmpl.add("name", ictr.getName());
-        controllerTmpl.add("imports", RUNTIME_PKG + ".Context");
 
         for (InstantiatedModel im : ictr.getLinkedModels()) {
             controllerTmpl.add("imports", options.getPackageName() + ".models." + im.getName());

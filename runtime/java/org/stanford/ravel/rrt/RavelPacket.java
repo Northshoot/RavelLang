@@ -15,8 +15,6 @@ public class RavelPacket {
     public final static int DST = 8; //32 bits for destination
     public final static int RESERVED = 12; // reserved for byte mapping
 
-
-
     public int model_id =-1;
     public byte[] record_data=null;
     public int dst=-1;
@@ -27,12 +25,9 @@ public class RavelPacket {
     public int last=-1;
     private int record_end = 0;
 
-
     private byte[] mData;
 
-
-
-    public RavelPacket(int recordSize){
+    public RavelPacket(int recordSize) {
         this.record_end = recordSize + RESERVED;
         this.record_data = new byte[recordSize];
 

@@ -8,6 +8,8 @@ public void <handler.model>_<handler.name>(<handler.arguments:{a|<a.type> <a.nam
 file(package,imports,name,parameters,eventHandlers) ::=<<
 package <package>;
 
+import org.stanford.ravel.rrt.Context;
+
 <imports:do_import()>
 
 public class <name> {

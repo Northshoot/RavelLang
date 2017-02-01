@@ -3,6 +3,7 @@ package org.stanford.ravel;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.SourceLocation;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.EventHandlerSymbol;
@@ -32,11 +33,19 @@ class ControllerCompiler {
         Controller controller = new Controller(c.getName());
 
         controller.addAllParameters(c.getParameters());
+        int firstGpRegister = Registers.FIRST_GP_REG;
+        for (VariableSymbol var :  c.getParameters()) {
+            int reg = var.getRegister();
+            if (reg == Registers.UNSET_REG) {
+                reg = firstGpRegister++;
+                var.setRegister(reg);
+            }
+        }
 
         for (EventHandlerSymbol eventSym : c.getEvents()) {
             VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());
 
-            TypedIR ir = compiler.compileEvent(eventSym, (RavelParser.EventScopeContext) eventSym.getDefNode());
+            TypedIR ir = compiler.compileEvent(eventSym, (RavelParser.EventScopeContext) eventSym.getDefNode(), firstGpRegister);
             if (ir != null) {
                 EventHandler event = new EventHandler(modelVar, eventSym.getArguments(), eventSym.getType(), ir);
                 controller.addEvent(event);
