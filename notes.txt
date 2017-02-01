@@ -29,3 +29,26 @@ sources and sink describe the endpoint for data flow.
 model section gives name to local model instances, same for controllers.
 The controllers can access these resources to perform operations, subscribe to events etc.
 
+
+
+
+App Structure
+
+ravel startproject name
+generates
+name/
+    rout/ (ravel files)
+    bin/ (compiled files)
+    lib/ (for custom interfaces and templates)
+    app/ (ravel code)
+        models.rv
+        controller.rv
+        views.rv
+        spaces.rv (alt: EmbeddedSpace etc)
+        endpoints.rv
+        connectivity.rv
+
+config.json
+
+
+

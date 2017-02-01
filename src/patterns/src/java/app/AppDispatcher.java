@@ -64,7 +64,7 @@ public class AppDispatcher  extends AbstractDispatcher {
             case "GTW":
                 ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
                 mDriver.register_endpoint(ep_1);
-               ep_2 = new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
+                ep_2 = new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
                 mDriver.register_endpoint(ep_2);
                 model_id_1.setEndpointDown(ep_1);
                 model_id_1.setEndpointUpp(ep_2);
