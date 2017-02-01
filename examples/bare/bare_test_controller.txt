@@ -11,8 +11,7 @@ streaming model Random(size):
 interface TimerSource():
     implementation:
         java = "rlib/java/timer.stg"
-        #c = "c/timer_c.stg", "c/timer_h.stg"
-        c = "rlib/c/timer_c.stg"
+        c = "rlib/c/timer.stg"
 
     def start_one_shot( time : int32 )
     def cancel()
@@ -23,11 +22,22 @@ interface TimerSource():
 interface RandomSource():
     implementation:
         java = "rlib/java/random.stg"
-        c = "rlib/c/random_c.stg"
+        c = "rlib/c/random.stg"
 
     def next(): int32
 
+
 controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : RandomSource):
+    event random.departed():
+        x = 7
+
+    event timer.fired():
+        #self
+        rec = random.create()
+        random.save(rec)
+
+
+controller CController(random: Random, rnd : RandomSource):
     event random.arrived():
         s1 = "foo"
         s2 = s1 + "bar"
@@ -41,10 +51,6 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : Ra
     event random.departed():
         x = 7
 
-    event timer.fired():
-        #self
-        rec = random.create()
-        random.save(rec)
 
 space EmbeddedSpace:
     platform:
@@ -54,11 +60,8 @@ space EmbeddedSpace:
 
     models:
         random = Random(size=100)
-        #frequency = Frequency(size=1)
-        #boor_error = BootError()
 
     interfaces:
-        #random = platform.system.random
         timer_1 = TimerSource()
         rng_1 = RandomSource()
 
@@ -73,13 +76,9 @@ space CSpace:
 
     models:
         random = Random(size=100)
-        #frequency = Frequency(size=1)
-        #boor_error = BootError()
 
     interfaces:
-        #random = platform.system.random
-        timer_1 = TimerSource()
         rng_1 = RandomSource()
 
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+        rndcnt_1 = CController(random = models.random, rnd = interfaces.rng_1)

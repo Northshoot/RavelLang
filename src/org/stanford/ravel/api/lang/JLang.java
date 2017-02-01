@@ -176,14 +176,14 @@ public class JLang extends BaseLanguage {
         }
 
         STGroupFile ifaceGroup = new STGroupFile(ifaceGroupName);
+        ifaceGroup.registerRenderer(Type.class, JTYPES);
         ST ifaceTmpl = ifaceGroup.getInstanceOf("file");
 
         String packageName = options.getPackageName() + ".interfaces";
         ifaceTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
         for (InstantiatedController ictr : iiface.getControllerList())
             ifaceTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
-        ifaceTmpl.add("controllerList", iiface.getControllerList());
-        ifaceTmpl.add("controllerMap", iiface.getControllerMap());
+        ifaceTmpl.add("interface", iiface);
 
         return simpleModule(ifaceTmpl, iiface.getName(), packageName);
     }

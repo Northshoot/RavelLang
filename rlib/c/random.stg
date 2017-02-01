@@ -1,0 +1,41 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+
+void
+<name; format="function">_init(<name> *self)
+{}
+void
+<name; format="function">_finalize(<name> *self)
+{}
+
+int
+<name; format="function">_next(<name> *self)
+{
+    return rand();
+}
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    int dummy;
+} <name>;
+
+void <name; format="function">_init(<name> *self);
+void <name; format="function">_finalize(<name> *self);
+
+int <name; format="function">_next(<name> *self);
+
+<end_extern_c()>
+<end_header("", name)>
+>>

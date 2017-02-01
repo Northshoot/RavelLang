@@ -4,7 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.c.CCodeTranslator;
+import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.InstantiatedController;
 import org.stanford.ravel.primitives.InstantiatedInterface;
@@ -15,6 +17,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -26,6 +29,7 @@ import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
  * Created by lauril on 10/6/16.
  */
 public class CLang extends BaseLanguage {
+    private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
     public final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/lang/c/tmpl";
 
     private static final AttributeRenderer CTYPES = new AttributeRenderer() {
@@ -106,7 +110,6 @@ public class CLang extends BaseLanguage {
     private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
     private final STGroup makefileGroup;
-    private final STGroup model_tmpl; // the old template file
 
     public CLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
@@ -127,19 +130,86 @@ public class CLang extends BaseLanguage {
         //irGroup.registerRenderer(Type.class, CTYPES);
         //irGroup.registerRenderer(String.class, CIDENT);
         irTranslator = new CCodeTranslator(CTYPES, CIDENT, CLITERAL);
-
-        model_tmpl = new STGroupFile(BASE_LANG_TMPL_PATH +"/model_old.stg");
     }
 
     @Override
     public OptionParser getOptions() {
-        return new LanguageOptions();
+        return CLanguageOptions.getInstance();
     }
 
     @Override
-    protected CodeModule createDispatcher(Space space) {
-        // TODO
-        return null;
+    public CodeModule createInterface(InstantiatedInterface iiface) {
+        String ifaceGroupName = iiface.getBaseInterface().getImplementation("c");
+        if (ifaceGroupName == null) {
+            LOGGER.severe("Missing C implementation of " + iiface.getName());
+            return null;
+        }
+
+        STGroup interfaceGroup = new STGroupFile(ifaceGroupName);
+        interfaceGroup.registerRenderer(Type.class, CTYPES);
+        interfaceGroup.registerRenderer(String.class, CIDENT);
+        ST iface_h = interfaceGroup.getInstanceOf("h_file");
+        ST iface_c = interfaceGroup.getInstanceOf("c_file");
+
+        for (InstantiatedController ictr : iiface.getControllerList())
+            iface_h.add("includes", "controller/" + ictr.getName() + ".h");
+        iface_c.add("includes", "interfaces/" + iiface.getName() + ".h");
+        iface_c.add("includes", "AppDispatcher.h");
+        iface_h.add("interface", iiface);
+        iface_c.add("interface", iiface);
+
+        return simpleModule(iface_h, iface_c, iiface.getName(), "interfaces");
+    }
+
+    // A helper class to pass down to StringTemplates
+    private class ConcreteController {
+        public String name;
+        public String varName;
+        public final List<String> parameterValues = new ArrayList<>();
+    }
+
+    @Override
+    protected CodeModule createDispatcher(Space s) {
+        ST dispatcher_h = dispatcherGroup.getInstanceOf("h_file");
+        ST dispatcher_c = dispatcherGroup.getInstanceOf("c_file");
+
+        for (InstantiatedModel im : s.getModels())
+            dispatcher_h.add("includes", "models/" + im.getName() + ".h");
+        for (InstantiatedInterface iiface : s.getInterfaces())
+            dispatcher_h.add("includes", "interfaces/" + iiface.getName() + ".h");
+        for (InstantiatedController ictr : s.getControllers())
+            dispatcher_h.add("includes", "controller/" + ictr.getName() + ".h");
+        dispatcher_c.add("includes", "AppDispatcher.h");
+
+        for (InstantiatedModel im : s.getModels()) {
+            dispatcher_h.add("models", im);
+            dispatcher_c.add("models", im);
+        }
+        for (InstantiatedInterface iiface : s.getInterfaces()) {
+            dispatcher_h.add("interfaces", iiface);
+            dispatcher_c.add("interfaces", iiface);
+        }
+        for (InstantiatedController ictr : s.getControllers()) {
+            ConcreteController concrete = new ConcreteController();
+            concrete.name = ictr.getName();
+            concrete.varName = ictr.getVarName();
+
+            for (VariableSymbol sym : ictr.getController().getParameterSymbols()) {
+                Object pvalue = ictr.getParam(sym.getName());
+
+                if (pvalue instanceof InstantiatedModel) {
+                    concrete.parameterValues.add("&self->model_" + ((InstantiatedModel) pvalue).getVarName());
+                } else if (pvalue instanceof InstantiatedInterface) {
+                    concrete.parameterValues.add("&self->iface_" + ((InstantiatedInterface) pvalue).getVarName());
+                } else {
+                    concrete.parameterValues.add(CLITERAL.toLiteral(pvalue));
+                }
+            }
+            dispatcher_h.add("controllers", concrete);
+            dispatcher_c.add("controllers", concrete);
+        }
+
+        return simpleModule(dispatcher_h, dispatcher_c, "AppDispatcher", "");
     }
 
     @Override
@@ -152,9 +222,13 @@ public class CLang extends BaseLanguage {
                 cfiles.add(fileName.substring(0, fileName.length()-2));
         }
 
-        ST tmpl = makefileGroup.getInstanceOf("link");
+        CLanguageOptions options = CLanguageOptions.getInstance();
+        String runtimePath = new File(options.getRuntimePath()).getAbsolutePath();
+
+        ST tmpl = makefileGroup.getInstanceOf("static_lib");
         tmpl.add("target", "libravelapp.a");
         tmpl.add("sources", cfiles);
+        tmpl.add("runtime", runtimePath);
 
         CodeModule module = new CodeModule();
         FileObject makefile = new FileObject();
@@ -180,6 +254,7 @@ public class CLang extends BaseLanguage {
         ST c_tmpl = controllerGroup.getInstanceOf("c_file");
         c_tmpl.add("name", ictr.getName());
         c_tmpl.add("includes", "controller/" + ictr.getName() + ".h");
+        c_tmpl.add("includes", "AppDispatcher.h");
 
         STControllerTranslator.FileConfig c_file = new STControllerTranslator.FileConfig(ictr.getName() + ".c", c_tmpl);
 
@@ -227,14 +302,11 @@ public class CLang extends BaseLanguage {
             default:
                 throw new AssertionError();
         }
-        // FIXME
-        baseClass = "RavelBaseModel";
 
-        // FIXME
-        //model_h.add("includes", "AppDispatcher.h");
         for (InstantiatedController ictr : im.getControllerList())
             model_h.add("includes", "controller/" + ictr.getName() + ".h");
         model_c.add("includes", "models/" + im.getName() + ".h");
+        model_c.add("includes", "AppDispatcher.h");
         model_h.add("base", baseClass);
         model_c.add("base", baseClass);
         model_h.add("model", im);
