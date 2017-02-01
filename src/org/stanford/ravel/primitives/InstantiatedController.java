@@ -20,6 +20,15 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
         mVarName = varName;
     }
 
+    @Override
+    public String toString() {
+        return "Instantiated Controller " + mSpace.getName() + "." + mVarName;
+    }
+
+    public Space getSpace() {
+        return mSpace;
+    }
+
     public Controller getController() {
         return mController;
     }

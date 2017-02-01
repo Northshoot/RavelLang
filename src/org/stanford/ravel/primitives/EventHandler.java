@@ -34,6 +34,9 @@ public class EventHandler {
     public EventType getEventType() {
         return event;
     }
+    public String getEventName() {
+        return event.getEventName();
+    }
 
     public TypedIR getBody() {
         return body;

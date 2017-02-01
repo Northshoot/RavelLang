@@ -25,6 +25,11 @@ abstract class BaseEventComponent extends ParametrizedComponent implements Event
         mVarName = varName;
     }
 
+    @Override
+    public String toString() {
+        return "Event Component " + mSpace.getName() + "." + mVarName;
+    }
+
     void createEvent(String eventName) {
         mControllerMap.put(eventName, new HashSet<>());
     }

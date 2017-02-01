@@ -35,6 +35,9 @@ public class RavelCompiler {
         return !hadErrors;
     }
 
+    public void emitInfo(SourceLocation loc, String message) {
+        errors.add(new CompileError(loc, CompileError.Severity.INFO, message));
+    }
     public void emitError(SourceLocation loc, String message) {
         errors.add(new CompileError(loc, CompileError.Severity.ERROR, message));
         hadErrors = true;
@@ -196,6 +199,12 @@ public class RavelCompiler {
 
                 // link controllers, models and platforms
                 compileSpaces(globalScope, app);
+                if (!success())
+                    return;
+
+                // analyze flows
+                FlowAnalysis flowAnalysis = new FlowAnalysis(this, app);
+                flowAnalysis.run();
                 if (!success())
                     return;
 

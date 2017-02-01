@@ -19,6 +19,7 @@ public class LinkedEvent {
     public EventHandler getHandler() {
         return event;
     }
+
     public EventComponent getComponent() {
         return component;
     }

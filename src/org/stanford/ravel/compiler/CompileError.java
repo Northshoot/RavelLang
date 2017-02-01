@@ -7,9 +7,10 @@ import org.stanford.ravel.compiler.SourceLocation;
  */
 public class CompileError {
     public enum Severity {
+        INFO,
         ERROR,
         WARNING,
-        FATAL
+        FATAL,
     }
 
     private final SourceLocation location;
@@ -28,6 +29,6 @@ public class CompileError {
 
     @Override
     public String toString() {
-        return location.toString() + ": " + severity.toString().toLowerCase() + ": " + message;
+        return (location != null ? location.toString() + ": " : "") + severity.toString().toLowerCase() + ": " + message;
     }
 }

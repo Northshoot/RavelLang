@@ -12,6 +12,9 @@ public class Space extends Primitive {
     private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
     private final Map<String, View> mViews = new LinkedHashMap<>();
     private final Map<String, InstantiatedInterface> mInterfaces = new LinkedHashMap<>();
+    private final List<Flow> mInFlows = new ArrayList<>();
+    private final List<Flow> mOutFlows = new ArrayList<>();
+
     private Platform mPlatform;
 
     public Space(String name) {
@@ -23,6 +26,34 @@ public class Space extends Primitive {
     public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
     public void add(String ref, InstantiatedInterface s) { this.mInterfaces.put(ref,  s); }
+
+    private boolean hasModel(Model m) {
+        for (InstantiatedModel im : mModels.values()) {
+            if (im.getBaseModel() == m)
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add a flow directed to a controller in this space
+     * @param f the flow
+     */
+    public void addInboundFlow(Flow f) {
+        assert f.getSink().getSpace() == this;
+        assert hasModel(f.getModel());
+        mInFlows.add(f);
+    }
+
+    /**
+     * Add a flow departing from a controller from this space
+     * @param f the flow
+     */
+    public void addOutboundFlow(Flow f) {
+        assert f.getSource().getSpace() == this;
+        assert hasModel(f.getModel());
+        mOutFlows.add(f);
+    }
 
     public Collection<InstantiatedModel> getModels() {
         return Collections.unmodifiableCollection(mModels.values());
