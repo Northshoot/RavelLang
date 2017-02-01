@@ -1,11 +1,11 @@
 package org.stanford.ravel.api.lang;
 
 import org.apache.commons.lang3.StringUtils;
+import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.c.CCodeTranslator;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
-import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.InstantiatedController;
@@ -232,7 +232,7 @@ public class CLang extends BaseLanguage {
 
         CodeModule module = new CodeModule();
         FileObject makefile = new FileObject();
-        makefile.setFileName("Makefile");
+        makefile.setFileName("app.mk");
         makefile.setContent(tmpl.render());
         module.addFile(makefile);
         return module;

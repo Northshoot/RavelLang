@@ -7,9 +7,7 @@ compile_c(target) ::=<<
 static_lib(runtime,target,sources) ::=<<
 RAVEL_RUNTIME_DIR = <runtime>
 
-all: <target>
-
-clean:
+clean-app:
 <\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
 
 <sources:compile_c(); separator="\n">

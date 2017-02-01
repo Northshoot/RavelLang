@@ -38,7 +38,6 @@ public class ModelControllerLinker {
         Platform.Builder p = new Platform.Builder();
         p.name(prop.get("language").getName());
         p.language(prop.get("language").getValue());
-        p.template(prop.get("templates").getValue());
         p.system(prop.get("system").getValue());
 
         Platform platform = p.build();

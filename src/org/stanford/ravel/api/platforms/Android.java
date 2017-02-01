@@ -9,16 +9,8 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 9/7/16.
  */
-public class Android  extends ConcretePlatform{
+public class Android  extends BasePlatform {
     private static Logger LOGGER = Logger.getLogger(Android.class.getName());
 
-    @Override
-    public List<FileObject> build(Space s, String buildPath) {
-        return mFileObjects;
-    }
-
-    @Override
-    public void setAPILevel(String name) {
-
-    }
+    // TODO
 }

@@ -1,7 +1,6 @@
 package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.primitives.InstantiatedController;
 import org.stanford.ravel.primitives.Interface;
 import org.stanford.ravel.primitives.Space;
 import org.stanford.ravel.api.Settings;
@@ -10,8 +9,6 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 9/21/16.
  */
-public class nrf52Platform extends ConcretePlatform{
+public class nrf52Platform extends BasePlatform {
     private static Logger LOGGER = Logger.getLogger(nrf52Platform.class.getName());
     public final static String BASE_PALTFORM_TMPL_PATH = Settings.BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
@@ -112,9 +109,8 @@ public class nrf52Platform extends ConcretePlatform{
     public Random getRandom() { return mRandom; }
 
     @Override
-    public List<FileObject> build(Space s, String buildPath) {
+    public List<FileObject> build(Space s) {
         mSpace = s;
-        setPath(buildPath);
         mMainApp = new MainApp(mBuildPath, mSpace);
         //TODO: add a check first that api provides methods
         /*

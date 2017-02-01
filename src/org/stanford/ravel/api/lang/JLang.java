@@ -1,5 +1,6 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;

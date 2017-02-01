@@ -1,0 +1,19 @@
+compile_c(target) ::=<<
+<target>.o: <target>.c
+<\t>$(CC) $(CPPFLAGS) $(CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -I$(RAVEL_RUNTIME_DIR) -I. -c -o $@ $\<
+>>
+
+application(target) ::=<<
+all: <target>
+
+clean:
+<\t>rm -f <target> main.o
+<\t>make clean-app
+
+include app.mk
+
+<["main"]:compile_c(); separator="\n">
+
+<target>: main.o libravelapp.a
+<\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_RUNTIME_DIR) -lravel
+>>

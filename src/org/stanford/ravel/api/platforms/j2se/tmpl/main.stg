@@ -1,0 +1,19 @@
+file(package) ::=<<
+package <package>;
+
+import <package>.AppDispatcher;
+import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.tiers.AndroidDriver;
+
+class Application {
+    public static void main(String[] args) {
+        Thread t = new Thread() {
+            // FIXME FIXME FIXME
+            public void run() {
+                DriverAPI driver = new AndroidDriver();
+                new AppDispatcher(driver);
+            }
+        };
+    }
+}
+>>
