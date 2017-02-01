@@ -10,6 +10,8 @@ public class InstantiatedModel extends BaseEventComponent {
 
     private final Model mModel;
     private final Map<String, Object> mPropertyMap = new HashMap<>();
+    private final Set<Space> mStreamingSinks = new HashSet<>();
+    private final Set<Space> mStreamingSources = new HashSet<>();
 
     InstantiatedModel(Space space, Model model, String varName) {
         super(space, model, varName);
@@ -43,5 +45,23 @@ public class InstantiatedModel extends BaseEventComponent {
 
     public Model getBaseModel() {
         return mModel;
+    }
+
+    void addStreamingSink(Space target) {
+        assert mModel.getModelType() != Model.Type.LOCAL;
+        assert target != getSpace();
+        mStreamingSinks.add(target);
+    }
+    public Collection<Space> getStreamingSinks() {
+        return Collections.unmodifiableCollection(mStreamingSinks);
+    }
+
+    void addStreamingSource(Space target) {
+        assert mModel.getModelType() != Model.Type.LOCAL;
+        assert target != getSpace();
+        mStreamingSources.add(target);
+    }
+    public Collection<Space> getStreamingSources() {
+        return Collections.unmodifiableCollection(mStreamingSources);
     }
 }

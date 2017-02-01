@@ -40,7 +40,9 @@
           <root url="file://$MODULE_DIR$/rout/GatewaySpace/bin" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/rout/GatewaySpace/src" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

@@ -7,7 +7,6 @@ import java.util.*;
  * Created by lauril on 7/29/16.
  */
 public class Space extends Primitive {
-    private String mTransmitFunction;
     private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
     private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
     private final Map<String, View> mViews = new LinkedHashMap<>();
@@ -27,12 +26,16 @@ public class Space extends Primitive {
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
     public void add(String ref, InstantiatedInterface s) { this.mInterfaces.put(ref,  s); }
 
-    private boolean hasModel(Model m) {
+    private InstantiatedModel findModel(Model m) {
         for (InstantiatedModel im : mModels.values()) {
             if (im.getBaseModel() == m)
-                return true;
+                return im;
         }
-        return false;
+        return null;
+    }
+
+    public boolean hasModel(Model m) {
+        return findModel(m) != null;
     }
 
     /**
@@ -41,8 +44,11 @@ public class Space extends Primitive {
      */
     public void addInboundFlow(Flow f) {
         assert f.getSink().getSpace() == this;
-        assert hasModel(f.getModel());
         mInFlows.add(f);
+        InstantiatedModel im = findModel(f.getModel());
+        assert im != null;
+        if (f.getSource().getSpace() != this)
+            im.addStreamingSource(f.getSource().getSpace());
     }
 
     /**
@@ -51,8 +57,11 @@ public class Space extends Primitive {
      */
     public void addOutboundFlow(Flow f) {
         assert f.getSource().getSpace() == this;
-        assert hasModel(f.getModel());
         mOutFlows.add(f);
+        InstantiatedModel im = findModel(f.getModel());
+        assert im != null;
+        if (f.getSink().getSpace() != this)
+            im.addStreamingSink(f.getSink().getSpace());
     }
 
     public Collection<InstantiatedModel> getModels() {

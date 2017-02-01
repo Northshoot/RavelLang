@@ -48,10 +48,10 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         // determine and send to endpoints
         Error error = null;
         //TODO: this is fast hack
-        if(mEndpointDown != null) {
+        if (mEndpointDown != null) {
             error = mDispatcher.model__sendData(ravelPacket, mEndpointDown);
         }
-        if(mEndpointUpp != null){
+        if (mEndpointUpp != null) {
             error = mDispatcher.model__sendData(ravelPacket, mEndpointUpp);
         }
         if (error != Error.SUCCESS)

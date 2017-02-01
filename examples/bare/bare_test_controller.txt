@@ -1,4 +1,4 @@
-streaming model Random(size):
+replicated model Random(size):
     properties:
         durable = False
         reliable = False

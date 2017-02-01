@@ -79,7 +79,21 @@ public class AppDispatcher  extends AbstractDispatcher {
                 break;
         }
         mDriver.appDispatcherReady();
+    }
 
+    @Override
+    public Endpoint getEndpointByName(String name) {
+        // FIXME should not create new objects
+        switch (name) {
+            case "Gateway":
+                return new Endpoint("Gateway", Endpoint.TYPE.SOCKET, "127.0.0.1", 4444);
+            case "Cloud":
+                return new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
+            case "Embedded":
+                return new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
+            default:
+                throw new IllegalArgumentException("Invalid endpoint name " + name);
+        }
     }
 
     private void pprint(String s){

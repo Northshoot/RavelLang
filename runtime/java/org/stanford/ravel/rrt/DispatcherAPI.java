@@ -19,10 +19,7 @@ public interface DispatcherAPI {
     /***********************************************************************/
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
+    Endpoint getEndpointByName(String name);
+
     Error model__sendData(RavelPacket data, Endpoint endpoint);
-
-
-
-
-
 }

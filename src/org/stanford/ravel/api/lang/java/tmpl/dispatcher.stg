@@ -8,9 +8,6 @@ controller_field(ctr) ::=<<
 private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
 >>
 
-endpoint_field(ep) ::=<<
-private final Endpoint ep_<ep.name> = null;
->>
 sink_field(sink) ::=<<
 private final SinkAPI sink_<sink.varName> = null;
 >>
@@ -25,9 +22,10 @@ set_component_controller(comp, prefix) ::=<<
 <comp.controllerList:{c|<prefix>_<comp.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
 >>
 
-file(package,imports,name,models,interfaces,controllers,endpoints) ::=<<
+file(package,imports,name,models,interfaces,controllers,space) ::=<<
 package <package>;
 
+import java.util.Map;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.model.ModelBottomAPI;
@@ -47,13 +45,17 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     <models:component_field("model"); separator="\n">
     <interfaces:component_field("iface"); separator="\n">
     <controllers:controller_field(); separator="\n">
-    <endpoints:endpoint_field(); separator="\n">
 
+    private final Map\<String, Endpoint> endpointMap;
     private DriverAPI driver;
 
-    public AppDispatcher() {
+    public AppDispatcher(Map\<String, Endpoint> endpointMap) {
+        this.endpointMap = endpointMap;
+
         <models:set_component_controller("model"); separator="\n">
         <interfaces:set_component_controller("iface"); separator="\n">
+
+        <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
     }
 
     void setDriver(DriverAPI driver) {
@@ -62,8 +64,15 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
 
     @Override
     public String getAppName() {
-        // FIXME
-        return "App";
+        return "<space.name>";
+    }
+
+    @Override
+    public Endpoint getEndpointByName(String name) {
+        Endpoint ep = endpointMap.get(name);
+        if (ep == null)
+            throw new IllegalArgumentException("Invalid endpoint " + name);
+        return ep;
     }
 
     /***********************************************************************/

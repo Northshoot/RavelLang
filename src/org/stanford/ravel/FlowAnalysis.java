@@ -237,17 +237,62 @@ public class FlowAnalysis {
         }
     }
 
-    private void assignFlows(Model m) {
-        if (m.getModelType() == Model.Type.LOCAL) {
-            // local models have no flows
-            return;
-        }
-
+    private void assignStreaming(Model m) {
         for (Flow f : allFlows.get(m)) {
             f.getSource().getSpace().addOutboundFlow(f);
             f.getSink().getSpace().addInboundFlow(f);
             app.addFlow(f);
         }
+    }
+
+    private void assignReplicated(Model m) {
+        for (Space s1 : app.getSpaces()) {
+            if (!s1.hasModel(m))
+                continue;
+            for (InstantiatedController ic1 : s1.getControllers()) {
+                for (Space s2 : app.getSpaces()) {
+                    if (s1 == s2)
+                        continue;
+                    if (!s2.hasModel(m))
+                        continue;
+                    for (InstantiatedController ic2 : s2.getControllers()) {
+                        Flow f = new Flow(ic1, ic2, m);
+                        f.getSource().getSpace().addOutboundFlow(f);
+                        f.getSink().getSpace().addInboundFlow(f);
+                        app.addFlow(f);
+                    }
+                }
+            }
+        }
+    }
+
+    private void assignFlows(Model m) {
+        switch (m.getModelType()) {
+            case LOCAL:
+                // local models have no flows
+                return;
+
+            case STREAMING:
+                // streaming models have the minimum set of flows to respect the semantics
+                // of the controllers
+                assignStreaming(m);
+                return;
+
+            case REPLICATED:
+                // replicated models have all possible flows between all possible pairs
+                // of InstantiatedControllers in spaces that have this models, regardless
+                // of what the analysis said
+                //
+                // they also have intra flows within spaces according to the analysis,
+                // which we record mostly for completeness
+                assignStreaming(m);
+                assignReplicated(m);
+                return;
+
+            default:
+        }
+
+
     }
 
     public void run() {

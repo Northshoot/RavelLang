@@ -154,6 +154,7 @@ public class JLang extends BaseLanguage {
             }
             tmpl.add("controllers", concrete);
         }
+        tmpl.add("space", s);
 
         return simpleModule(tmpl, "AppDispatcher", packageName);
     }
@@ -207,6 +208,7 @@ public class JLang extends BaseLanguage {
             modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
         modelTmpl.add("base", baseClass);
         modelTmpl.add("model", im);
+        modelTmpl.add("set_endpoints", im.getBaseModel().getModelType() == Model.Type.REPLICATED);
 
         return simpleModule(modelTmpl, im.getName(), packageName);
     }

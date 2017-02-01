@@ -24,7 +24,7 @@ public static class Record implements ModelRecord {
 };
 >>
 
-file(package,imports,name,base,model) ::=<<
+file(package,imports,name,base,model,set_endpoints) ::=<<
 package <package>;
 
 import org.stanford.ravel.rrt.model.<base>;
@@ -47,6 +47,9 @@ public class <name> extends <base>\<<name>.Record> {
     }
 
     // Setter methods for AppDispatcher
+    public void addAllEndpoints() {
+        <if(set_endpoints)><model.streamingSinks:{s|addEndpoint(mDispatcher.getEndpointByName("<s.name>"));}; separator="\n"><endif>
+    }
     <model.controllerList:set_controller_method(); separator="\n">
 
     // Event listener dispatch
