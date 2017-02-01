@@ -87,7 +87,7 @@ public class ModelController {
     public void system_started() {
         //TODO: test only in simulation
         if(mName == "EMD" ) {
-            timer.start_periodic(100);
+            timer.start_periodic(2000);
             running = true;
         }
 

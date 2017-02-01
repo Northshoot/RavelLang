@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Python" name="Python">
+      <configuration sdkName="" />
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/out" />
     <output-test url="file:///test/RavelLang" />
@@ -15,7 +20,7 @@
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="com.fasterxml.uuid:java-uuid-generator:3.1.4" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.7" level="project" />
-    <orderEntry type="library" name="com.squareup.retrofit2:retrofit:2.1.0" level="project" />
+    <orderEntry type="library" name="com.squareup.retrofit2:retrofit:Release" level="project" />
     <orderEntry type="library" name="com.squareup.retrofit2:converter-gson:2.1.0" level="project" />
     <orderEntry type="library" name="org.antlr:antlr4:4.5.3" level="project" />
     <orderEntry type="library" name="com.yuvalshavit:antlr-denter:1.1" level="project" />
@@ -29,6 +34,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="android_contentprovider_generator-1.11.0-bundle" level="project" />
   </component>
 </module>

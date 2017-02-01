@@ -2,6 +2,7 @@ package org.stanford.ravel.rrt.tiers;
 
 import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.HttpClient;
 import org.stanford.ravel.rrt.SocketServer;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
@@ -24,6 +25,7 @@ public class AndroidDriver implements DriverAPI {
     private SocketServer ss;
     private RavelSocketProtocol rsp;
     private Socket clientSocket;
+    private HttpClient httpClient;
 
     public AndroidDriver(AbstractDispatcher appDispatcher){
         this.appDispatcher = appDispatcher;
@@ -51,6 +53,14 @@ public class AndroidDriver implements DriverAPI {
                 }).start();
                 return Error.SUCCESS;
 
+        } else if (endpoint.getType() == Endpoint.TYPE.HTTP){
+            httpClient = new HttpClient(endpoint);
+            try {
+                httpClient.post(data, "simple/pushModel/");
+            } catch (Exception e) {
+                e.printStackTrace();
+                appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);
+            }
         }
         return Error.WRITE_ERROR;
     }

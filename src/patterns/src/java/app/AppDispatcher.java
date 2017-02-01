@@ -2,6 +2,7 @@ package patterns.src.java.app;
 
 import org.stanford.ravel.rrt.*;
 import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
@@ -26,8 +27,8 @@ public class AppDispatcher  extends AbstractDispatcher{
 
     AndroidDriver mDriver;
     //AUTOGEN endpoints
-    Endpoint ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
-    Endpoint ep_2 = new Endpoint("Gateway", Endpoint.TYPE.SOCKET);
+    Endpoint ep_1 ;
+    Endpoint ep_2;
     //USED for test
 
     //AUTOGEN: system components
@@ -58,20 +59,20 @@ public class AppDispatcher  extends AbstractDispatcher{
             case "EMD":
                 ep_1 = new Endpoint("Gateway", Endpoint.TYPE.SOCKET, "127.0.0.1", 4444);
                 mDriver.register_endpoint(ep_1);
-                model_id_1.setEndpoint(ep_1);
+                model_id_1.setEndpointUpp(ep_1);
                 break;
             case "GTW":
                 ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
                 mDriver.register_endpoint(ep_1);
-               // ep_2 = new Endpoint("Cloud", Endpoint.TYPE.SOCKET);
-                //mDriver.register_endpoint(ep_2);
-                model_id_1.setEndpoint(ep_1);
-                //model_id_1.setEndpoint(ep_2);
+               ep_2 = new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
+                mDriver.register_endpoint(ep_2);
+                model_id_1.setEndpointDown(ep_1);
+                model_id_1.setEndpointUpp(ep_2);
                 break;
             case "CLD":
                 ep_1 =new Endpoint("Gateway", Endpoint.TYPE.SOCKET , "127.0.0.1", 4444);
-                mDriver.register_endpoint(ep_2);
-                model_id_1.setEndpoint(ep_2);
+                mDriver.register_endpoint(ep_1);
+                model_id_1.setEndpointDown(ep_1);
                 break;
             default:
                 System.out.println("OPS");

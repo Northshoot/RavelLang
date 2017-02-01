@@ -2,8 +2,11 @@
 package patterns.src.java.model;
 
 //AUTOGEN imports
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.model.StreamingModel;
+import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.controller.ModelController;
@@ -60,6 +63,15 @@ public class Model extends StreamingModel<Model.Record>{
     @Override
     protected void notifyArrived(org.stanford.ravel.rrt.Context<Record> ctx) {
         pprint("notifyArrived");
+        //TODO: this is fast hack
+        if(super.mEndpointUpp != null){
+            pprint("resending");
+            Error error = null;
+            RavelPacket ravelPacket = new RavelPacket(ctx.record.toBytes().length);
+            ravelPacket.fromRecord(ctx.record.toBytes());
+            mDispatcher.model__sendData(ravelPacket, mEndpointUpp);
+          //TODO: deal with forward error
+        }
         //AUTOGEN: list of subscribing controllers
 
         mcntr.Model_arrived(ctx);

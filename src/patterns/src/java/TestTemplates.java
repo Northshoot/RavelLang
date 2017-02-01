@@ -77,14 +77,14 @@ public class TestTemplates {
 
         gateway_thread.start();
         embedded_thread.start();
-//
-//        Thread cloud_thread = new Thread(){
-//            public void run(){
-//                AppDispatcher cloud = new AppDispatcher("CLD");
-//            }
-//        };
-//
-//        cloud_thread.start();
+
+        Thread cloud_thread = new Thread(){
+            public void run(){
+                AppDispatcher cloud = new AppDispatcher("CLD");
+            }
+        };
+
+        cloud_thread.start();
 
 
 
