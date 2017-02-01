@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
  */
 public class RavelPacket {
 
-    public final static int SRC = 4; //32 bits for source
-    public final static int DST = 8; //32 bits for destination
+    public final static int SRC = 4; // 32 bits for source
+    public final static int DST = 8; // 32 bits for destination
     public final static int RESERVED = 12; // reserved for byte mapping
 
     public int model_id =-1;
@@ -27,40 +27,47 @@ public class RavelPacket {
 
     private byte[] mData;
 
-    public RavelPacket(int recordSize) {
-        this.record_end = recordSize + RESERVED;
-        this.record_data = new byte[recordSize];
-
-    }
-
-    public int getSize(){
+    public int getSize() {
         return record_end;
     }
-    void pprint(String s){
-        //TODO
-        //System.out.println("[RavelPacket::]>" + s);
-    }
-    public void fromRecord(byte [] data){
-        //unmangle data
-        pprint("fromRecord: " + data.length);
-        this.mData = data;
-        this.record_data = data;
-        this.model_id =getModelIdFromRecord(record_data);
+
+    public static RavelPacket fromRecord(byte[] data) {
+        // unmangle data
+        RavelPacket blank = new RavelPacket(data.length);
+        blank.mData = data;
+        blank.record_data = data;
+        blank.model_id = getModelIdFromRecord(blank.record_data);
+        return blank;
     }
 
-    public void fromNetwork(byte[] data){
+    private RavelPacket(int recordSize) {
+        this.record_end = recordSize + RESERVED;
+        this.record_data = new byte[recordSize];
+    }
+
+    // For testing only
+    public static RavelPacket empty(int recordSize) {
+        return new RavelPacket(recordSize);
+    }
+
+    public static RavelPacket fromNetwork(byte[] data) {
+        return new RavelPacket(data);
+    }
+
+    private RavelPacket(byte[] data) {
         //unmangle data
         this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
         this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
         this.reserved =  ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
         this.partial = (this.reserved >> 0) & 1;
         this.last = (this.reserved >> 1) & 1;
+        this.record_end = data.length;
         this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
         this.model_id = getModelIdFromRecord(this.record_data);
         this.mData = data;
     }
 
-    private int getModelIdFromRecord(byte[] data){
+    private static int getModelIdFromRecord(byte[] data){
         //TODO: no hardcoded vals
 
         ByteBuffer buffer = ByteBuffer.wrap(

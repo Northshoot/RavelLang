@@ -15,9 +15,9 @@ sink_field(sink) ::=<<
 private final SinkAPI sink_<sink.varName> = null;
 >>
 
-model_case_record_arrived(model) ::=<<
+model_case_event(model, event) ::=<<
 case <model.baseModel.id>:
-    model_<model.varName>.record_arrived(rp, endpoint);
+    model_<model.varName>.<event>(rp, endpoint);
     break;
 >>
 
@@ -39,6 +39,7 @@ import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.SourceAPI;
 import org.stanford.ravel.rrt.SinkAPI;
 import org.stanford.ravel.rrt.Event;
+import org.stanford.ravel.rrt.NetworkEvent;
 
 <imports:do_import()>
 
@@ -65,46 +66,39 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         return "App";
     }
 
-    // Implementation of DispatcherAPI
-    @Override
-    public void driver__dataReceived(byte[] data, Endpoint endpoint) {
-        //is it an ACK?
-        System.out.println("Received data from: " + endpoint.getName());
+    /***********************************************************************/
+    /************** AD callbacks to the models ****************************/
+    /***********************************************************************/
 
-        RavelPacket rp = new RavelPacket(data.length);
-        rp.fromNetwork(data);
-        switch(rp.model_id) {
-            <models:model_case_record_arrived()>
+    protected void models__notifyDeparted(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
+        RavelPacket rp = RavelPacket.fromNetwork(data);
+        switch (rp.model_id) {
+            <models:model_case_event("record_departed"); separator="\n">
         }
     }
 
-    @Override
-    public Error model__sendData(RavelPacket data, Endpoint endpoint) {
-        return driver.sendData(data.toBytes(), endpoint);
+    protected void models__notifyArrived(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
+        RavelPacket rp = RavelPacket.fromNetwork(data);
+        switch (rp.model_id){
+            <models:model_case_event("record_arrived"); separator="\n">
+        }
     }
 
-    @Override
+    /***********************************************************************/
+    /************** Network callbacks from AD to Driver ********************/
+    /***********************************************************************/
     public void driver__sendData(Event event) {
+        driver.sendData(((NetworkEvent) event).data,
+                        ((NetworkEvent) event).endpoint);
     }
 
-    @Override
-    public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
-        // TODO
-    }
-
-    @Override
-    public void runNextEvent() {
-    }
-
-    @Override
-    protected void models__notifyDeparted(Event event) {
-    }
-
-    @Override
-    protected void models__notifyArrived(Event event) {
-    }
-
-    // Implementation of SystemEventAPI
+    /***********************************************************************/
+    /************** System callbacks from Driver to AD *********************/
+    /***********************************************************************/
     @Override
     public void started() {}
 

@@ -1,23 +1,50 @@
 package org.stanford.ravel.rrt;
 
+import java.util.AbstractQueue;
+import java.util.Iterator;
+import java.util.Queue;
+
 /**
  * Created by lauril on 1/30/17.
  */
-public class QueueArray<T> implements Queue<T> {
+public class QueueArray<T> extends AbstractQueue<T> {
 
-    private T[] arr;
+    private Object[] arr;
 
     private int total, first, next;
 
     public QueueArray()
     {
-        arr = (T[]) new Object[2];
+        arr = new Object[2];
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private int i = first;
+
+            @Override
+            public boolean hasNext() {
+                return i != next;
+            }
+
+            @Override
+            public T next() {
+                T el = get(i);
+                i = (i+1) % arr.length;
+                return el;
+            }
+        };
+    }
+
+    @Override
+    public int size() {
+        return total;
     }
 
     private void resize(int capacity)
     {
-        T[] tmp = (T[]) new Object[capacity];
-
+        Object[] tmp = new Object[capacity];
         for (int i = 0; i < total; i++)
             tmp[i] = arr[(first + i) % arr.length];
 
@@ -26,19 +53,17 @@ public class QueueArray<T> implements Queue<T> {
         next = total;
     }
 
-    public QueueArray<T> enqueue(T ele)
-    {
-        if (arr.length == total) resize(arr.length * 2);
-        arr[next++] = ele;
-        if (next == arr.length) next = 0;
-        total++;
-        return this;
+    @SuppressWarnings("unchecked")
+    private T get(int idx) {
+        return (T)arr[idx];
     }
 
-    public T dequeue()
+    @Override
+    public T poll()
     {
-        if (total == 0) throw new java.util.NoSuchElementException();
-        T ele = arr[first];
+        if (total == 0)
+            return null;
+        T ele = get(first);
         arr[first] = null;
         if (++first == arr.length) first = 0;
         if (--total > 0 && total == arr.length / 4) resize(arr.length / 2);
@@ -51,4 +76,19 @@ public class QueueArray<T> implements Queue<T> {
         return java.util.Arrays.toString(arr);
     }
 
+    @Override
+    public boolean offer(T t) {
+        if (arr.length == total) resize(arr.length * 2);
+        arr[next++] = t;
+        if (next == arr.length) next = 0;
+        total++;
+        return true;
+    }
+
+    @Override
+    public T peek() {
+        if (total == 0)
+            return null;
+        return get(first);
+    }
 }

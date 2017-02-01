@@ -67,8 +67,7 @@ public class Model extends StreamingModel<Model.Record>{
         if(super.mEndpointUpp != null){
             pprint("resending");
             Error error = null;
-            RavelPacket ravelPacket = new RavelPacket(ctx.record.toBytes().length);
-            ravelPacket.fromRecord(ctx.record.toBytes());
+            RavelPacket ravelPacket = RavelPacket.fromRecord(ctx.record.toBytes());
             mDispatcher.model__sendData(ravelPacket, mEndpointUpp);
           //TODO: deal with forward error
         }

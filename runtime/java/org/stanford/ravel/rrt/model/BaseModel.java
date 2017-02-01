@@ -41,7 +41,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
 
     protected synchronized void runNextEvent(){
         try {
-            Event e = eventQueue.dequeue();
+            Event e = eventQueue.remove();
 
             switch (e.getType()) {
                 case MODEL__NOTIFY_FULL:
@@ -109,7 +109,7 @@ public abstract class BaseModel<RecordType> implements ModelQuery<RecordType>, M
         //TODO: race conditions
         if (currentPos == mModelSize) {
             Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
-            eventQueue.enqueue(new ModelEvent((Context<ModelType.RecordType>) ctx, Event.Type.MODEL__NOTIFY_FULL));
+            eventQueue.add(new ModelEvent((Context<ModelType.RecordType>) ctx, Event.Type.MODEL__NOTIFY_FULL));
 
         }
 

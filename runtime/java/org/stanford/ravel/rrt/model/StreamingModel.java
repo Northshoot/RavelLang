@@ -42,8 +42,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         record.index(++index);
         // Packetize the record and send it
         byte[] rec = record.toBytes();
-        RavelPacket ravelPacket = new RavelPacket(rec.length);
-        ravelPacket.fromRecord(rec);
+        RavelPacket ravelPacket = RavelPacket.fromRecord(rec);
 
 
         // determine and send to endpoints
