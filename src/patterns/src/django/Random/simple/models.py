@@ -10,6 +10,8 @@ class SimpleModelMeta(models.Model):
     arrived = models.DateTimeField(auto_now_add=True)
     originator = models.ForeignKey("Originator")
 
+    def __str__(self):
+        return 'SimpleModelMeta from %s' %(self.originator.device_id)
 # Create your models here.
 class SimpleModel(models.Model):
     meta = models.ForeignKey("SimpleModelMeta")
@@ -19,3 +21,6 @@ class SimpleModel(models.Model):
     field2 = models.IntegerField()
     field3 = models.IntegerField()
     field4 = models.IntegerField()
+
+    def __str__(self):
+        return 'SimpleModel: %s received %s' % (self.idx, self.meta.arrived.strftime("%B %d, %Y, %I:%M:%S %p") )
