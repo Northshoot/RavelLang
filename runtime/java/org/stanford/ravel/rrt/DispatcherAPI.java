@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt;
 
+import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
@@ -12,7 +13,7 @@ public interface DispatcherAPI {
 
     void driver__dataReceived(byte[] data, Endpoint endpoint);
 
-    void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint);
+    void driver__sendDone(int status,Error networkError, byte[] data, Endpoint endpoint);
 
     void driver__sendData(Event event);
 

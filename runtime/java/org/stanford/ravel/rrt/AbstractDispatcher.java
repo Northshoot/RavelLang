@@ -1,7 +1,11 @@
 package org.stanford.ravel.rrt;
 
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.events.SystemEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.utils.HttpStatus;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Logger;
@@ -33,6 +37,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     /*************** Callbacks to form the AD to the model *****************/
     /***********************************************************************/
     protected abstract void models__notifyDeparted(Event event);
+
 
     protected abstract void models__notifyArrived(Event event);
 
@@ -107,8 +112,12 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     }
 
     @Override
-    public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
-        NetworkEvent ne = new NetworkEvent(data, endpoint, networkError, Event.Type.MODELS__NOTIFY_RECORD_DEPARTED);
-        pushEvent(ne);
+    public void driver__sendDone(int status, Error networkError, byte[] data, Endpoint endpoint) {
+        if(status == 200) {
+            NetworkEvent ne = new NetworkEvent(data, endpoint, networkError, Event.Type.MODELS__NOTIFY_RECORD_DEPARTED);
+            pushEvent(ne);
+        } else {
+            LOGGER.info("Error sending to the server, status: " + HttpStatus.getError(status));
+        }
     }
 }

@@ -1,6 +1,8 @@
 package patterns.src.java.app;
 
 import org.stanford.ravel.rrt.*;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.NetworkEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
@@ -174,9 +176,9 @@ public class AppDispatcher  extends AbstractDispatcher {
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override
-    public void driver__sendDone(Error networkError, byte[] data, Endpoint endpoint) {
+    public void driver__sendDone(int status, Error networkError, byte[] data, Endpoint endpoint) {
         pprint("driver_send_done, ERROR: " + networkError);
-        super.driver__sendDone(networkError, data, endpoint);
+        super.driver__sendDone(status, networkError, data, endpoint);
     }
 
 

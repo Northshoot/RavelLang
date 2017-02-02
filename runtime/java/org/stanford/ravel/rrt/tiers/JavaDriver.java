@@ -34,17 +34,20 @@ public class JavaDriver implements DriverAPI {
     }
     public Error sendData(byte[] data, Endpoint endpoint) {
         //send data to the right channel
+        int responsecode = 1;
         if(endpoint.getType() == Endpoint.TYPE.SOCKET){
                 //TODO: mmmrm not the best way to keep reconnecting
                 new Thread(new Runnable() {
                     public void run() {
+                        int responsecode = 1;
                         try {
-                        clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
-                        clientSocket.getOutputStream().write(data);
-                        clientSocket.close();
-                        appDispatcher.driver__sendDone(Error.SUCCESS, data, endpoint);
+
+                            clientSocket = new Socket(endpoint.getAddress(), endpoint.getPort());
+                            clientSocket.getOutputStream().write(data);
+                            clientSocket.close();
+                            appDispatcher.driver__sendDone(responsecode,Error.SUCCESS, data, endpoint);
                         } catch (IOException e) {
-                            appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);
+                            appDispatcher.driver__sendDone(responsecode, Error.NETWORK_ERROR, data, endpoint);
                         }
                     }
                 }).start();
@@ -53,10 +56,11 @@ public class JavaDriver implements DriverAPI {
         } else if (endpoint.getType() == Endpoint.TYPE.HTTP){
             httpClient = new HttpClient(endpoint);
             try {
-                httpClient.post(data);
+                responsecode = httpClient.post(data);
+                appDispatcher.driver__sendDone(responsecode, Error.SUCCESS, data, endpoint);
             } catch (Exception e) {
-                e.printStackTrace();
-                appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);
+                //e.printStackTrace();
+                appDispatcher.driver__sendDone(responsecode, Error.ENDPOINT_UNREACHABLE, data, endpoint);
             }
         }
         return Error.WRITE_ERROR;

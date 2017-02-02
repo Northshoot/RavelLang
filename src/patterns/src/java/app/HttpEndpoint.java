@@ -20,10 +20,11 @@ public class HttpEndpoint extends Endpoint {
     public HttpEndpoint(){
         super();
         super.name = "";
-        super.port = 4444;
-        super.base = "http://" + "171.64.70.90";
+        super.port = 8000;
+        super.base = "http://" + "127.0.0.1";
         super.method = "POST";
-        super.url = "simple/";
+        //TODO: resolve the http path
+        super.url = "simple/pushModel/";
         super.type = TYPE.HTTP;
         super.user_agent = "Ravel:Java/Client";
     }

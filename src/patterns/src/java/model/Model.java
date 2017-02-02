@@ -25,6 +25,7 @@ public class Model extends StreamingModel<Model.Record>{
     //AUTOGEN: controller naming
     private ModelController mcntr;
 
+
     public void setModelController(ModelController mc){
         this.mcntr = mc;
     }

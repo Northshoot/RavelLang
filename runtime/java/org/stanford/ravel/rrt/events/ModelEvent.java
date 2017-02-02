@@ -1,5 +1,6 @@
-package org.stanford.ravel.rrt;
+package org.stanford.ravel.rrt.events;
 
+import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.model.ModelRecord;
 
 /**

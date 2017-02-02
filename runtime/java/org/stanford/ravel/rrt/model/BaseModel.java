@@ -1,10 +1,10 @@
 package org.stanford.ravel.rrt.model;
 
-import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.rrt.*;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.ModelEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
-import patterns.src.java.app.AppDispatcher;
 
 import java.util.ArrayList;
 

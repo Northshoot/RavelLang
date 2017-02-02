@@ -1,4 +1,4 @@
-package org.stanford.ravel.rrt;
+package org.stanford.ravel.rrt.events;
 
 /**
  * Created by lauril on 1/31/17.
