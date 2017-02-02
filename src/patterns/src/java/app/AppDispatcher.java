@@ -86,7 +86,7 @@ public class AppDispatcher  extends AbstractDispatcher {
         // FIXME should not create new objects
         //AUTOGEN:
         switch (name) {
-            case "Gateway"
+            case "Gateway":
                 return gatewayEndpoint;
             case "Cloud":
                 return cloudEndpoint;
