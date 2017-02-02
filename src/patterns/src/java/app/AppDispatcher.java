@@ -57,20 +57,20 @@ public class AppDispatcher  extends AbstractDispatcher {
         mcntr_id_1.setName(mName);
         switch (mName){
             case "EMD":
-                ep_1 = new Endpoint("Gateway", Endpoint.TYPE.SOCKET, "127.0.0.1", 4444);
+                ep_1 = new Endpoint();
                 mDriver.register_endpoint(ep_1);
                 model_id_1.setEndpointUpp(ep_1);
                 break;
             case "GTW":
-                ep_1 = new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
+                ep_1 = new Endpoint();
                 mDriver.register_endpoint(ep_1);
-                ep_2 = new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
+                ep_2 = new HttpEndpoint();
                 mDriver.register_endpoint(ep_2);
                 model_id_1.setEndpointDown(ep_1);
                 model_id_1.setEndpointUpp(ep_2);
                 break;
             case "CLD":
-                ep_1 =new Endpoint("Gateway", Endpoint.TYPE.SOCKET , "127.0.0.1", 4444);
+                ep_1 =new Endpoint();
                 mDriver.register_endpoint(ep_1);
                 model_id_1.setEndpointDown(ep_1);
                 break;
@@ -86,11 +86,11 @@ public class AppDispatcher  extends AbstractDispatcher {
         // FIXME should not create new objects
         switch (name) {
             case "Gateway":
-                return new Endpoint("Gateway", Endpoint.TYPE.SOCKET, "127.0.0.1", 4444);
+                return new Endpoint();
             case "Cloud":
-                return new HttpEndpoint("Cloud", "http://127.0.0.1:8000/");
+                return new HttpEndpoint();
             case "Embedded":
-                return new Endpoint("Embedded", Endpoint.TYPE.SOCKET);
+                return new Endpoint();
             default:
                 throw new IllegalArgumentException("Invalid endpoint name " + name);
         }

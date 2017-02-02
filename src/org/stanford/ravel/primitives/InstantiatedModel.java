@@ -9,7 +9,6 @@ public class InstantiatedModel extends BaseEventComponent {
     public final static int DEFAULT_MODEL_SIZE = 10;
 
     private final Model mModel;
-    private final Map<String, Object> mPropertyMap = new HashMap<>();
     private final Set<Space> mStreamingSinks = new HashSet<>();
     private final Set<Space> mStreamingSources = new HashSet<>();
 
@@ -21,16 +20,9 @@ public class InstantiatedModel extends BaseEventComponent {
             createEvent(e.name());
 
         // set defaults
-        mPropertyMap.put("records", DEFAULT_MODEL_SIZE);
-        mPropertyMap.put("reliable", false);
-        mPropertyMap.put("durable", false);
-    }
-
-    void setProperty(String name, Object value) {
-        mPropertyMap.put(name, value);
-    }
-    private Object getProperty(String name) {
-        return mPropertyMap.get(name);
+        setProperty("records", DEFAULT_MODEL_SIZE);
+        setProperty("reliable", false);
+        setProperty("durable", false);
     }
 
     public int getSize() {

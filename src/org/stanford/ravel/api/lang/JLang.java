@@ -1,5 +1,6 @@
 package org.stanford.ravel.api.lang;
 
+import org.apache.commons.lang3.StringUtils;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
@@ -81,6 +82,20 @@ public class JLang extends BaseLanguage {
         }
     };
     private static final LiteralFormatter JLITERAL = new CStyleLiteralFormatter();
+    private static final AttributeRenderer JSTRING = new AttributeRenderer() {
+        @Override
+        public String toString(Object o, String s, Locale locale) {
+            if (s == null)
+                return o.toString();
+
+            switch (s) {
+                case "literal":
+                    return JLITERAL.toLiteral(o);
+                default:
+                    return o.toString();
+            }
+        }
+    };
 
     private final STGroup controllerGroup;
     private final STGroup modelGroup;
@@ -91,12 +106,19 @@ public class JLang extends BaseLanguage {
     public JLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
         controllerGroup.registerRenderer(Type.class, JTYPES);
+        controllerGroup.registerRenderer(String.class, JSTRING);
+
         modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
         modelGroup.registerRenderer(Type.class, JTYPES);
+        modelGroup.registerRenderer(String.class, JSTRING);
+
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, JTYPES);
+        dispatcherGroup.registerRenderer(String.class, JSTRING);
+
         irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
         irGroup.registerRenderer(Type.class, JTYPES);
+        irGroup.registerRenderer(String.class, JSTRING);
 
         // quirks for Java implemented as a nested class
         irTranslator = new STIRTranslator(irGroup, JLITERAL) {
@@ -197,6 +219,7 @@ public class JLang extends BaseLanguage {
 
         STGroupFile ifaceGroup = new STGroupFile(ifaceGroupName);
         ifaceGroup.registerRenderer(Type.class, JTYPES);
+        ifaceGroup.registerRenderer(String.class, JSTRING);
         ST ifaceTmpl = ifaceGroup.getInstanceOf("file");
 
         String packageName = options.getPackageName() + ".interfaces";

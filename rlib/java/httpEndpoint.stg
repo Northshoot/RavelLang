@@ -1,26 +1,23 @@
 import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
 
-file(package,imports,interface) ::=<<
+file(package,imports,name,interface) ::=<<
 package <package>;
 
 <imports:do_import()>
 
-public class HttpEndpoint extends Endpoint{
-
-
-
-    public HttpEndpoint() {
+public class <name> extends Endpoint {
+    public <name>(AppDispatcher app) {
         super();
-            super.name = <name>
-            super.port = <interface.configuration.port>;
-            super.base = "<interface.configuration.base>";
-            super.method = "<interface.configuration.method>";
-            super.url = "<interface.configuration.url>";
-            super.type = "<interface.configuration.type>";
-            super.user_agent = "<interface.configuration.user_agent>";
-    }
+        super.name = <name; format="literal">;
+        super.port = <interface.configuration.port; format="literal">;
+        super.base = <interface.configuration.base; format="literal">;
+        super.method = <interface.configuration.method; format="literal">;
+        super.url = <interface.configuration.url; format="literal">;
+        super.type = <interface.configuration.type; format="literal">;
+        super.user_agent = <interface.configuration.user_agent; format="literal">;
+   }
 
-   public String getHttpAddress(){
+   public String getHttpAddress() {
        String full_url = "";
        full_url += super.base;
        if(super.port >0){
@@ -31,7 +28,7 @@ public class HttpEndpoint extends Endpoint{
        return full_url;
    }
 
-   public String getFullURL(){
+   public String getFullURL() {
        if(path == null)
            return getHttpAddress();
        else

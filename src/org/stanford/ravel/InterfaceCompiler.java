@@ -2,10 +2,7 @@ package org.stanford.ravel;
 
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.scope.Scope;
-import org.stanford.ravel.compiler.symbol.ConstantSymbol;
-import org.stanford.ravel.compiler.symbol.InterfaceMemberSymbol;
-import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
-import org.stanford.ravel.compiler.symbol.Symbol;
+import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Interface;
 
@@ -23,9 +20,9 @@ class InterfaceCompiler {
     }
 
     public Interface compileInterface(InterfaceSymbol symbol) throws FatalCompilerErrorException {
-        Scope implementation = symbol.getImplementationScope();
-
         Interface iface = new Interface(symbol.getName(), symbol);
+
+        Scope implementation = symbol.getImplementationScope();
 
         for (Symbol implSym : implementation.getSymbols()) {
             boolean good = false;
@@ -38,6 +35,18 @@ class InterfaceCompiler {
             }
             if (!good) {
                 driver.emitError(new SourceLocation(implSym.getDefNode()), "bad value for " + implSym.getName() + " implementation, must be a string");
+            }
+        }
+
+        Scope config = symbol.getConfigurationScope();
+        if (config != null) {
+            for (Symbol s : config.getSymbols()) {
+                if (s instanceof ConstantSymbol)
+                    iface.addConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
+                else if (s instanceof ReferenceSymbol)
+                    iface.addReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
+                else
+                    throw new AssertionError();
             }
         }
 

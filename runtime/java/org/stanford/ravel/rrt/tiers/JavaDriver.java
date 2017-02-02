@@ -44,7 +44,6 @@ public class JavaDriver implements DriverAPI {
                         clientSocket.close();
                         appDispatcher.driver__sendDone(Error.SUCCESS, data, endpoint);
                         } catch (IOException e) {
-                            endpoint.setDisconnected();
                             appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);
                         }
                     }
@@ -54,7 +53,7 @@ public class JavaDriver implements DriverAPI {
         } else if (endpoint.getType() == Endpoint.TYPE.HTTP){
             httpClient = new HttpClient(endpoint);
             try {
-                httpClient.post(data, "simple/pushModel/");
+                httpClient.post(data);
             } catch (Exception e) {
                 e.printStackTrace();
                 appDispatcher.driver__sendDone(Error.NETWORK_ERROR, data, endpoint);

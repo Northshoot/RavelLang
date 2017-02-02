@@ -1,5 +1,9 @@
 package org.stanford.ravel.primitives;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * An interface that has been instantiated in a platform.
  *
@@ -18,5 +22,9 @@ public class InstantiatedInterface extends BaseEventComponent {
 
     public Interface getBaseInterface() {
         return mIface;
+    }
+
+    public Map<String, Object> getConfiguration() {
+        return Collections.unmodifiableMap(getPropertyMap());
     }
 }

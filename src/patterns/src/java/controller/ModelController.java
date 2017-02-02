@@ -95,8 +95,6 @@ public class ModelController {
     }
 
     public void system_stopped(){
-        faosfhashdn
-                asjfasld
 
     }
 

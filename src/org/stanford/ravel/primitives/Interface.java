@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * Created by gcampagn on 1/30/17.
  */
-public class Interface extends Primitive {
+public class Interface extends ConfigurableComponent {
     private final InterfaceSymbol symbol;
     private final Map<String, String> implementation = new HashMap<>();
     private final List<String> events = new ArrayList<>();
@@ -20,9 +20,10 @@ public class Interface extends Primitive {
 
     public InstantiatedInterface instantiate(Space space, Map<String, Object> parameters, String varName) {
         InstantiatedInterface instantiated = new InstantiatedInterface(space, this, varName);
-        instantiated.setManyParam(parameters);
         // TODO: check types of parameters
         // TODO: check that all parameters are set
+        instantiated.setManyParam(parameters);
+        applyProperties(instantiated);
         return instantiated;
     }
 

@@ -97,6 +97,8 @@ public class CLang extends BaseLanguage {
                     return getUnderscoreName(name);
                 case "macro_def":
                     return getUnderscoreName(name).toUpperCase(locale);
+                case "literal":
+                    return CLITERAL.toLiteral(o);
                 default:
                     return name;
             }

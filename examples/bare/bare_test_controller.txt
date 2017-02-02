@@ -27,17 +27,17 @@ interface RandomSource():
     def next(): int32
 
 
-view RandomCounter(timer: TimerSource):
-    counter: int32
-    time: timestamp
+#view RandomCounter(timer: TimerSource):
+#    counter: int32
+#    time: timestamp
 
-    def update(rec: Random.Record):
-        time = timer.getNow()
-        counter += 1
-        value = rec.value
+#    def update(rec: Random.Record):
+#        time = timer.getNow()
+#        counter += 1
+#        value = rec.value
 
 
-controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : RandomSource, view: RandomView):
+controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : RandomSource):
     event random.departed():
         x = 7
 
@@ -49,7 +49,7 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : Ra
 
         if ctx.error:
             timer.cancel()
-        view.update(rec)
+        #view.update(rec)
 
     event system.started():
         timer.start_periodic(5000)
@@ -63,19 +63,19 @@ controller CController(random: Random):
         # do something with rec.value
 
 
-interface Database<T>(model: T):
-    implementation:
-        python = "rlib/py/django.stg"
+#interface Database<T>(model: T):
+#    implementation:
+#        python = "rlib/py/django.stg"
 
-    def save(r : T.Record): Random.Context
+#    def save(r : T.Record): Random.Context
 
-controller CloudController(random: Random, db1: Database<Random>, db2: Database<Random2>):
-    event random.arrived():
-        rec = self.record
-        if rec.value >= 0:
-            db.save(rec)
-        if rec.origin == GatewaySpace:
-            #
+#controller CloudController(random: Random, db1: Database<Random>, db2: Database<Random2>):
+#    event random.arrived():
+#        rec = self.record
+#        if rec.value >= 0:
+#            db.save(rec)
+#        if rec.origin == GatewaySpace:
+#            #
 
 space CloudSpace:
     platform:
@@ -86,10 +86,25 @@ space CloudSpace:
         random = Random(size=1)
 
     interfaces:
-        database =
+        #database =
 
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+        #rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+
+
+interface CloudEndpoint(p):
+    configuration:
+        base = '171.64.70.90'
+        port = p
+        type = 'HTTP'
+        method = 'POST'
+        url = '<app.name>/'
+        user_agent = 'Ravel:Java/Client'
+
+    implementation:
+        java = "rlib/java/httpEndpoint.stg"
+        c = "rlib/c/httpEndpoint.stg"
+
 
 space GatewaySpace:
     platform:
@@ -102,6 +117,7 @@ space GatewaySpace:
     interfaces:
         timer_1 = TimerSource()
         rng_1 = RandomSource()
+        cp = CloudEndpoint(p = 1000)
 
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)

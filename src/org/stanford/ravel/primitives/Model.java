@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Model extends Primitive {
+public class Model extends ConfigurableComponent {
     private static int idCounter = 1;
 
     public enum Type {
@@ -23,8 +23,6 @@ public class Model extends Primitive {
     private final int id;
 
     private final Map<String, FieldSymbol> mFields = new HashMap<>();
-    private final Map<String, Object> mConstantProperties = new HashMap<>();
-    private final Map<String, String> mRefProperties = new HashMap<>();
 
     public Model(String name, ModelSymbol symbol) {
         super(name);
@@ -40,14 +38,11 @@ public class Model extends Primitive {
 
     public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
         InstantiatedModel instantiated = new InstantiatedModel(space, this, varName);
-        // TODO: check types of parameters
-        instantiated.setManyParam(parameters);
 
-        for (Map.Entry<String, Object> entry : mConstantProperties.entrySet())
-            instantiated.setProperty(entry.getKey(), entry.getValue());
+        // TODO: check types of parameters
         // TODO: check that all parameters are set
-        for (Map.Entry<String, String> entry : mRefProperties.entrySet())
-            instantiated.setProperty(entry.getKey(), instantiated.getParam(entry.getValue()));
+        instantiated.setManyParam(parameters);
+        applyProperties(instantiated);
         return instantiated;
     }
 
@@ -69,13 +64,6 @@ public class Model extends Primitive {
     }
     public void addField(FieldSymbol field) {
         this.mFields.put(field.getName(), field);
-    }
-
-    public void addConstantProperty(String name, Object value) {
-        mConstantProperties.put(name, value);
-    }
-    public void addReferenceProperty(String name, String ref) {
-        mRefProperties.put(name, ref);
     }
 
     @Override

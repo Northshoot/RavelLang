@@ -30,6 +30,10 @@ public class InterfaceSymbol extends ComponentSymbol {
         return getNestedScope("implementation");
     }
 
+    public Scope getConfigurationScope() {
+        return getNestedScope("configuration");
+    }
+
     public void createInterfaceType() {
         for (Symbol sym : getSymbols()) {
             assert sym instanceof InterfaceMemberSymbol;

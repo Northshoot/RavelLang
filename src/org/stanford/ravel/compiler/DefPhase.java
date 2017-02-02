@@ -182,6 +182,25 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
+    public void exitImplementationScope(RavelParser.ImplementationScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterConfigurationScope(RavelParser.ConfigurationScopeContext ctx) {
+        LocalScope ls = new LocalScope("configuration", currentScope);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        ls.setDefNode(ctx);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitConfigurationScope(RavelParser.ConfigurationScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
     public void enterInterfaceDef(RavelParser.InterfaceDefContext ctx) {
         String name = ctx.Identifier().getText();
         Type returnType;
@@ -224,11 +243,6 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
-        popScope();
-    }
-
-    @Override
-    public void exitImplementationScope(RavelParser.ImplementationScopeContext ctx) {
         popScope();
     }
 
@@ -402,11 +416,12 @@ public class DefPhase extends RavelBaseListener {
     public void enterRef_assign(RavelParser.Ref_assignContext ctx) {
         String currentScopeName = currentScope.getName();
 
-        // FIXME models and controllers use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
         boolean allowLiteral = currentScopeName.equals("implementation") ||
-                currentScopeName.equals("models") ||
-                currentScopeName.equals("controllers") ||
-                currentScopeName.equals("properties");
+                currentScopeName.equals("properties") ||
+                currentScopeName.equals("configuration");
+        boolean allowReference = currentScopeName.equals("properties") ||
+                currentScopeName.equals("configuration") ||
+                currentScopeName.equals("platform");
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
@@ -421,9 +436,13 @@ public class DefPhase extends RavelBaseListener {
                 emitError(value.literal(), "literal value not allowed in this context");
             }
         } else {
-            ReferenceSymbol ref = new ReferenceSymbol(name, value.qualified_name().getText());
-            ref.setDefNode(ctx);
-            currentScope.define(ref);
+            if (allowReference) {
+                ReferenceSymbol ref = new ReferenceSymbol(name, value.qualified_name().getText());
+                ref.setDefNode(ctx);
+                currentScope.define(ref);
+            } else {
+                emitError(value.qualified_name(), "reference to a component parameter not allowed in this context");
+            }
         }
     }
 

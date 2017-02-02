@@ -24,7 +24,7 @@ public class HttpClient {
             this.endpoint = (HttpEndpoint) endpoint;
         }
 
-        public void sendData(byte[] data){
+        public void sendData(byte[] data) throws Exception {
             if(this.endpoint.getMethod() == "GET")
                 get(data);
             else
