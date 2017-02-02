@@ -1,6 +1,9 @@
 package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.lang.CLang;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
+import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.primitives.Interface;
 import org.stanford.ravel.primitives.Space;
 import org.stanford.ravel.api.Settings;
@@ -48,6 +51,10 @@ public class nrf52Platform extends BasePlatform {
         mFiles = new ArrayList<>();
     }
 
+    @Override
+    public boolean allowsLanguage(ConcreteLanguage lang) {
+        return lang instanceof CLang;
+    }
 
     public void setPath(String path) {
         mBuildPath = path;

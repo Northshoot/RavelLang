@@ -2,6 +2,7 @@ package org.stanford.ravel.compiler.types;
 
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.primitives.ModelEvent;
+import org.stanford.ravel.primitives.Primitive;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +39,11 @@ public class ModelType extends ClassType {
 
         this.addMethod("save", new Type[]{recordType}, ctxType);
         this.addMethod("create", new Type[0], recordType);
+        this.addMethod("first", new Type[0], recordType);
+        this.addMethod("last", new Type[0], recordType);
+        this.addMethod("get", new Type[]{PrimitiveType.INT32}, recordType);
+        this.addMethod("all", new Type[0], new ArrayType(recordType));
+        this.addMethod("clear", new Type[0], PrimitiveType.VOID);
 
         for (ModelEvent e : ModelEvent.values()) {
             this.addEvent(e.name(), new Type[]{ctxType}, true);

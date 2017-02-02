@@ -2,6 +2,8 @@ package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
+import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
@@ -41,5 +43,10 @@ public class J2SE extends BasePlatform {
         module.addFile(file);
 
         return module;
+    }
+
+    @Override
+    public boolean allowsLanguage(ConcreteLanguage lang) {
+        return lang instanceof JLang;
     }
 }

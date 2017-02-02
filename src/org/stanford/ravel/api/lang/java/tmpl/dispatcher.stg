@@ -29,6 +29,7 @@ import java.util.Map;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.model.ModelBottomAPI;
+import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.SystemEventAPI;
@@ -36,8 +37,10 @@ import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.SourceAPI;
 import org.stanford.ravel.rrt.SinkAPI;
-import org.stanford.ravel.rrt.Event;
-import org.stanford.ravel.rrt.NetworkEvent;
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.events.ModelEvent;
 
 <imports:do_import()>
 
@@ -95,6 +98,12 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         switch (rp.model_id){
             <models:model_case_event("record_arrived"); separator="\n">
         }
+    }
+
+    protected void models__notifyFull(Event event){
+        Context\<? extends ModelRecord> data = ((ModelEvent) event).ctx;
+        // FIXME
+        // data.model.full();
     }
 
     /***********************************************************************/

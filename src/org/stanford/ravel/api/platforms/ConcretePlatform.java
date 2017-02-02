@@ -2,6 +2,7 @@ package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
  */
 public interface ConcretePlatform {
     OptionParser getOptions();
+
+    boolean allowsLanguage(ConcreteLanguage lang);
 
     List<FileObject> build(Space s);
 }

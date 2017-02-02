@@ -25,6 +25,11 @@ public class GlobalScope extends BaseScope {
             if (type.isValid())
                 define(new PrimitiveTypeSymbol(type));
         }
+
+        // FIXME
+        // this effectively allows declaring variables with type ANY
+        // which breaks the type system in subtle ways
+        define(new PrimitiveTypeSymbol(PrimitiveType.ANY));
     }
     public String getName() { return "global"; }
 

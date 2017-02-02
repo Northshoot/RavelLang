@@ -118,6 +118,8 @@ public abstract class BaseScope implements Scope {
             } else {
                 // try resolving as a nested scope
                 Scope pureScope = getEnclosingScope().getNestedScope(qualifier);
+                if (pureScope == null)
+                    return null;
                 return pureScope.resolve(qualifiedname);
             }
         }

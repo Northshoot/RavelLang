@@ -21,8 +21,8 @@ public class ArrayType implements Type {
     }
 
     private ArrayType(Type elementType, int bound, boolean mutable) {
-        if (bound < 0)
-            throw new IllegalArgumentException("Array size less than 0");
+        //if (bound < 0)
+        //    throw new IllegalArgumentException("Array size less than 0");
         this.bound = bound;
         this.mutable = mutable;
         this.elementType = elementType;

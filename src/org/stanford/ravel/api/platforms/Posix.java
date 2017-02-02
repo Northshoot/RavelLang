@@ -2,6 +2,9 @@ package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.lang.CLang;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
+import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
@@ -26,6 +29,11 @@ public class Posix extends BasePlatform {
     public Posix() {
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
         makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
+    }
+
+    @Override
+    public boolean allowsLanguage(ConcreteLanguage lang) {
+        return lang instanceof CLang;
     }
 
     @Override

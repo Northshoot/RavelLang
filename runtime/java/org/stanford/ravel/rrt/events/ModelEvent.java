@@ -8,8 +8,8 @@ import org.stanford.ravel.rrt.model.ModelRecord;
  */
 public class ModelEvent extends Event {
 
-    public Event.Type type;
-    public Context<? extends ModelRecord> ctx;
+    public final Event.Type type;
+    public final Context<? extends ModelRecord> ctx;
 
     public ModelEvent(Context<? extends ModelRecord> ctx, Event.Type type){
         this.ctx = ctx;

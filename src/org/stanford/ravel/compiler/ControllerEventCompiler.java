@@ -23,6 +23,7 @@ import java.util.Set;
 public class ControllerEventCompiler {
     private final boolean debug;
     private final RavelCompiler driver;
+    private boolean hadError = false;
 
     public ControllerEventCompiler(RavelCompiler driver, boolean debug) {
         this.driver = driver;
@@ -68,12 +69,12 @@ public class ControllerEventCompiler {
         visitor.visit(tree);
 
         if (debug) {
-            System.out.println("event " + tree.scope.getName());
+            System.out.println("event " + tree.scope.toQualifierString("."));
             for (VariableSymbol var : variables)
                 System.out.println("var " + var.getName() + " @ " + var.getType().getName() + " : " + var.getRegister());
             System.out.println(visitor.getIR().getRoot());
         }
-        if (!driver.success())
+        if (hadError)
             return null;
 
         TypeResolvePass typeResolvePass = new TypeResolvePass(this);
@@ -90,7 +91,7 @@ public class ControllerEventCompiler {
             System.out.println(ir2.getLoopTree());
         }
 
-        if (!driver.success())
+        if (hadError)
             return null;
 
         ValidateIR.validate(ir2);
@@ -103,6 +104,7 @@ public class ControllerEventCompiler {
 
     public void emitError(SourceLocation loc, String message) {
         driver.emitError(loc, message);
+        hadError = true;
     }
     public void emitWarning(SourceLocation loc, String message) {
         driver.emitWarning(loc, message);

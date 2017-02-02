@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -456,6 +456,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitController_scope(RavelParser.Controller_scopeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void enterController_entry(RavelParser.Controller_entryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void exitController_entry(RavelParser.Controller_entryContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.
 	 * @param ctx the parse tree
@@ -603,6 +613,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitType(RavelParser.TypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#array_marker}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray_marker(RavelParser.Array_markerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#array_marker}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray_marker(RavelParser.Array_markerContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#assignment}.
 	 * @param ctx the parse tree
@@ -929,36 +949,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitForControl(RavelParser.ForControlContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#component_parameters}.
-	 * @param ctx the parse tree
-	 */
-	void enterComponent_parameters(RavelParser.Component_parametersContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#component_parameters}.
-	 * @param ctx the parse tree
-	 */
-	void exitComponent_parameters(RavelParser.Component_parametersContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#params}.
-	 * @param ctx the parse tree
-	 */
-	void enterParams(RavelParser.ParamsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#params}.
-	 * @param ctx the parse tree
-	 */
-	void exitParams(RavelParser.ParamsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#param}.
-	 * @param ctx the parse tree
-	 */
-	void enterParam(RavelParser.ParamContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#param}.
-	 * @param ctx the parse tree
-	 */
-	void exitParam(RavelParser.ParamContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

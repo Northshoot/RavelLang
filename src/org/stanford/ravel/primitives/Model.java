@@ -37,13 +37,7 @@ public class Model extends ConfigurableComponent {
     }
 
     public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
-        InstantiatedModel instantiated = new InstantiatedModel(space, this, varName);
-
-        // TODO: check types of parameters
-        // TODO: check that all parameters are set
-        instantiated.setManyParam(parameters);
-        applyProperties(instantiated);
-        return instantiated;
+        return new InstantiatedModel(space, this, varName);
     }
 
     public int getId() {

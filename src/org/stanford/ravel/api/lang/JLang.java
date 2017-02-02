@@ -41,8 +41,6 @@ public class JLang extends BaseLanguage {
                         return "java.lang.String";
                     case ERROR_MSG:
                         return RUNTIME_PKG + ".tiers.Error";
-                    case DATE:
-                    case DATE_TIME:
                     case TIMESTAMP:
                         return "java.util.Date";
                     case BYTE:

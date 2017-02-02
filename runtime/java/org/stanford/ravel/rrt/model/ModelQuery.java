@@ -15,14 +15,14 @@ public interface ModelQuery<RecordType> {
      *
      * @return pointer to the first record
      */
-    RecordType getFirst();
+    RecordType first();
 
     /**
      * Queries local model storage
      *
      * @return pointer to the last record
      */
-    RecordType getLast();
+    RecordType last();
 
     /**
      * Queries local model storage
@@ -41,4 +41,9 @@ public interface ModelQuery<RecordType> {
     // FIXME this needs to be Object because ArrayList.toArray cannot
     // be generic otherwise
     Object[] all();
+
+    /**
+     * Clears local model storage
+     */
+    void clear();
 }

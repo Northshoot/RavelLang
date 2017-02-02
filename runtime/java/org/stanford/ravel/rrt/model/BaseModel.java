@@ -191,12 +191,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     /*************** Model Query API implementation ***************/
     /***************************************************************/
     @Override
-    public RecordType getFirst() {
+    public RecordType first() {
         return mRecords.get(0);
     }
 
     @Override
-    public RecordType getLast() {
+    public RecordType last() {
         return mRecords.get(currentPos);
     }
 
@@ -208,5 +208,11 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     @Override
     public Object[] all() {
         return mRecords.toArray();
+    }
+
+    @Override
+    public void clear() {
+        mRecords.clear();
+        currentPos = 0;
     }
 }

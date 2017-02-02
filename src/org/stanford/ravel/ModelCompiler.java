@@ -1,6 +1,7 @@
 package org.stanford.ravel;
 
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
@@ -30,9 +31,23 @@ public class ModelCompiler {
         String name = ms.getName();
         Model m = new Model(name, ms);
 
+        for (Symbol s : ms.getSymbols()) {
+            if (s instanceof VariableSymbol)
+                m.addParameter(s.getName(), ((VariableSymbol) s).getType());
+        }
+
         Scope propScope = ms.getNestedScope("properties");
 
         for (Symbol s : propScope.getAllSymbols()) {
+            switch (s.getName()) {
+                case "records":
+                case "durable":
+                case "reliable":
+                    break;
+                default:
+                    driver.emitWarning(new SourceLocation(s.getDefNode()), "ignored model property " + s.getName());
+            }
+
             if (s instanceof ConstantSymbol)
                 m.addConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
             else if (s instanceof ReferenceSymbol)

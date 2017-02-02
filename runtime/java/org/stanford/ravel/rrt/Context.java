@@ -15,10 +15,10 @@ public class Context<RecordType extends ModelRecord> {
     // so they must not be renamed
     public RecordType record;
     public Error error;
+    public final ModelCommandAPI model;
 
     // These fields are private and for future use
     private LocalDateTime createTime;
-    private ModelCommandAPI mModel;
 
     public Context(ModelCommandAPI<RecordType> model, RecordType record){
         this(model);
@@ -32,7 +32,7 @@ public class Context<RecordType extends ModelRecord> {
 
     public Context(ModelCommandAPI<RecordType> model) {
         createTime = LocalDateTime.now();
-        this.mModel = model;
+        this.model = model;
         this.error = Error.SUCCESS;
     }
 

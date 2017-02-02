@@ -36,13 +36,15 @@ public class InterfaceSymbol extends ComponentSymbol {
 
     public void createInterfaceType() {
         for (Symbol sym : getSymbols()) {
-            assert sym instanceof InterfaceMemberSymbol;
-            InterfaceMemberSymbol imsym = (InterfaceMemberSymbol)sym;
+            assert sym instanceof InterfaceMemberSymbol || sym instanceof VariableSymbol;
+            if (sym instanceof InterfaceMemberSymbol) {
+                InterfaceMemberSymbol imsym = (InterfaceMemberSymbol) sym;
 
-            if (imsym.isEvent())
-                definedType.addEvent(imsym.getName(), imsym.getArguments());
-            else
-                definedType.addMethod(imsym.getName(), imsym.getArguments(), imsym.getReturnValue());
+                if (imsym.isEvent())
+                    definedType.addEvent(imsym.getName(), imsym.getArguments());
+                else
+                    definedType.addMethod(imsym.getName(), imsym.getArguments(), imsym.getReturnValue());
+            }
         }
     }
 }

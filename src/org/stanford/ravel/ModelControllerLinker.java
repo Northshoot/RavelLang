@@ -25,6 +25,34 @@ public class ModelControllerLinker {
         this.app = app;
     }
 
+    private void applyParametersAndProperties(ConfigurableComponent component, ParametrizedComponent instance, InstanceSymbol is) {
+        for (Map.Entry<String, Object> entry : is.getParameterMap().entrySet()) {
+            String pname = entry.getKey();
+            Object pvalue = entry.getValue();
+            Type type = ParserUtils.typeFromLiteral(pvalue);
+
+            if (!component.hasParameter(pname)) {
+                driver.emitError(new SourceLocation(is.getDefNode()), component.getName()  + " has no parameter " + pname);
+            } else if (!component.getParameterType(pname).isAssignable(type)) {
+                driver.emitError(new SourceLocation(is.getDefNode()), "cannot assign value of type " + type.getName() + " to parameter " + pname + " of type " +
+                        component.getParameterType(pname).getName());
+            } else {
+                instance.setParam(pname, pvalue);
+            }
+        }
+        boolean ok = true;
+        // check that all parameters are set
+        for (String param : component.getParameterNames()) {
+            if (!instance.isParamSet(param)) {
+                driver.emitError(new SourceLocation(is.getDefNode()), "missing value for parameter " + param);
+                ok = false;
+            }
+        }
+        if (!ok)
+            return;
+        component.applyProperties(instance);
+    }
+
     public Space processSpace(SpaceSymbol ssb) {
         RavelParser.SpaceScopeContext ctx = (RavelParser.SpaceScopeContext) ssb.getDefNode();
 
@@ -92,6 +120,7 @@ public class ModelControllerLinker {
 
             // instantiate the interface on this space
             InstantiatedInterface iiface = i.instantiate(space, is.getParameterMap(), is.getName());
+            applyParametersAndProperties(i, iiface, is);
             space.add(is.getName(), iiface);
         });
 
@@ -109,6 +138,7 @@ public class ModelControllerLinker {
 
             // instantiate the model on this space
             InstantiatedModel im = m.instantiate(space, is.getParameterMap(), is.getName());
+            applyParametersAndProperties(m, im, is);
             space.add(is.getName(), im);
         });
 
@@ -169,8 +199,11 @@ public class ModelControllerLinker {
                     value = pvalue;
                 }
 
-                if (type != null && !ctr.getParameterType(pname).isAssignable(type)) {
-                    driver.emitError(new SourceLocation(is.getDefNode()), "cannot assign value of type " + type.getName() + " to a parameter of type " +
+                if (!ctr.hasParameter(pname)) {
+                    driver.emitError(new SourceLocation(is.getDefNode()), "controller " + ctr.getName() + " has no parameter " + pname);
+                    ok = false;
+                } else if (type != null && !ctr.getParameterType(pname).isAssignable(type)) {
+                    driver.emitError(new SourceLocation(is.getDefNode()), "cannot assign value of type " + type.getName() + " to parameter " + pname + " of type " +
                         ctr.getParameterType(pname).getName());
                     ok = false;
                 } else {

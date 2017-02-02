@@ -34,6 +34,10 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
         return mInterface.get(name);
     }
 
+    public boolean hasParameter(String pname) {
+        return mInterface.containsKey(pname);
+    }
+
     public Collection<String> getParameterNames() {
         return mInterface.keySet();
     }

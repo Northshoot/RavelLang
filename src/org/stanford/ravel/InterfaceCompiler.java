@@ -22,6 +22,11 @@ class InterfaceCompiler {
     public Interface compileInterface(InterfaceSymbol symbol) throws FatalCompilerErrorException {
         Interface iface = new Interface(symbol.getName(), symbol);
 
+        for (Symbol s : symbol.getSymbols()) {
+            if (s instanceof VariableSymbol)
+                iface.addParameter(s.getName(), ((VariableSymbol) s).getType());
+        }
+
         Scope implementation = symbol.getImplementationScope();
 
         for (Symbol implSym : implementation.getSymbols()) {
@@ -51,9 +56,11 @@ class InterfaceCompiler {
         }
 
         for (Symbol defSym : symbol.getSymbols()) {
-            InterfaceMemberSymbol imsym = (InterfaceMemberSymbol)defSym;
-            if (imsym.isEvent())
-                iface.addEvent(imsym.getName());
+            if (defSym instanceof InterfaceMemberSymbol) {
+                InterfaceMemberSymbol imsym = (InterfaceMemberSymbol) defSym;
+                if (imsym.isEvent())
+                    iface.addEvent(imsym.getName());
+            }
         }
 
         return iface;

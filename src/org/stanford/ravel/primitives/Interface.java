@@ -19,12 +19,7 @@ public class Interface extends ConfigurableComponent {
     }
 
     public InstantiatedInterface instantiate(Space space, Map<String, Object> parameters, String varName) {
-        InstantiatedInterface instantiated = new InstantiatedInterface(space, this, varName);
-        // TODO: check types of parameters
-        // TODO: check that all parameters are set
-        instantiated.setManyParam(parameters);
-        applyProperties(instantiated);
-        return instantiated;
+        return new InstantiatedInterface(space, this, varName);
     }
 
     public Type getType() {

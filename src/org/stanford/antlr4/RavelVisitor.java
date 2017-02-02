@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -278,6 +278,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitController_scope(RavelParser.Controller_scopeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitController_entry(RavelParser.Controller_entryContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.
 	 * @param ctx the parse tree
@@ -365,6 +371,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitType(RavelParser.TypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#array_marker}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArray_marker(RavelParser.Array_markerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#assignment}.
 	 * @param ctx the parse tree
@@ -560,24 +572,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitForControl(RavelParser.ForControlContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#component_parameters}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComponent_parameters(RavelParser.Component_parametersContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#params}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParams(RavelParser.ParamsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParam(RavelParser.ParamContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

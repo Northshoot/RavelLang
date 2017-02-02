@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *
  * Created by lauril on 10/6/16.
  */
-class ParametrizedComponent extends Primitive {
+public class ParametrizedComponent extends Primitive {
     private static Logger LOGGER = Logger.getLogger(ParametrizedComponent.class.getName());
 
     private final Map<String, Object> mParameterMap = new LinkedHashMap<>();
@@ -23,10 +23,8 @@ class ParametrizedComponent extends Primitive {
     }
 
     public void setParam(String key, Object value) {
+        assert value != null;
         mParameterMap.put(key, value);
-    }
-    void setManyParam(Map<? extends String, ?> map) {
-        mParameterMap.putAll(map);
     }
     public Object getParam(String key) {
         return mParameterMap.get(key);
@@ -40,6 +38,7 @@ class ParametrizedComponent extends Primitive {
     }
 
     void setProperty(String name, Object value) {
+        assert value != null;
         mPropertyMap.put(name, value);
     }
     Object getProperty(String name) {

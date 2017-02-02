@@ -7,7 +7,7 @@ import java.util.Map;
  * Created by gcampagn on 1/23/17.
  */
 public enum ComparisonOperation {
-    GT(">"), LT(">"), EQUAL("=="), LE("<="), GE(">="), NOTEQUAL("!=");
+    GT(">"), LT("<"), EQUAL("=="), LE("<="), GE(">="), NOTEQUAL("!=");
 
     private static final Map<String, ComparisonOperation> symbolMap = new HashMap<>();
 
@@ -27,6 +27,7 @@ public enum ComparisonOperation {
     }
 
     static ComparisonOperation forSymbol(String symbol) {
+        assert symbolMap.containsKey(symbol);
         return symbolMap.get(symbol);
     }
 }

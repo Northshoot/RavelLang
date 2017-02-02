@@ -40,9 +40,6 @@ public class CLang extends BaseLanguage {
                         return "char *";
                     case ERROR_MSG:
                         return "int";
-                    case DATE:
-                    case DATE_TIME:
-                        return "struct tm";
                     case TIMESTAMP:
                         return "time_t";
                     case BYTE:
@@ -57,6 +54,7 @@ public class CLang extends BaseLanguage {
                         return "void";
 
                     case ANY:
+                        return "void*";
                     case ERROR:
                     default:
                         throw new AssertionError();

@@ -1,6 +1,12 @@
 package org.stanford.ravel.rrt.utils;
 
+import org.stanford.ravel.rrt.tiers.Error;
+
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.util.Date;
 
 /**
  * Created by lauril on 1/25/17.
@@ -43,6 +49,10 @@ public class ByteWork {
         return buffer.getInt();
     }
 
+    public static Error convertFourBytesToError(byte[] bytes) {
+        return Error.values()[convertFourBytesToInt(bytes)];
+    }
+
     public static double convertEightBytesToDouble(byte[] bytes) {
 //            if (bytes.length !=4 ) throw new AssertionError("Expected 4 bytes");
 //            return (bytes[3] << 24) | (bytes[2] & 0xFF) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF);
@@ -54,9 +64,24 @@ public class ByteWork {
     public static boolean convertOneByteToBool(byte[] bytes) {
         return bytes[0] != 0;
     }
+    public static byte convertOneByteToByte(byte[] bytes) {
+        return bytes[0];
+    }
+
+    public static String convertBytesToString(byte[] bytes) {
+        try {
+            return new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // UTF-8 is guaranteed to be supported
+            throw new RuntimeException(e);
+        }
+    }
 
     /***
      * Convert two unsigned bytes to int Litle Endian!
+     *
+     * This is used by string and array length serialization
+     *
      * @param bytes
      * @return converted int
      */
@@ -101,5 +126,40 @@ public class ByteWork {
 
     public static byte[] getByteArray(boolean val) {
         return ByteBuffer.allocate(4).put((byte) (val ? 1 : 0)).array();
+    }
+
+    public static byte[] getByteArray(String val) {
+        byte[] stringBytes = val.getBytes(Charset.forName("UTF-8"));
+        if (stringBytes.length > 65535)
+            throw new RuntimeException("String is too long");
+        byte[] buffer = new byte[2 + stringBytes.length];
+        // careful, this little endian, because it matches convertTwoUnsignedBytesToInt
+        buffer[0] = (byte) (stringBytes.length & 0xFF);
+        buffer[1] = (byte) ((stringBytes.length >> 8) & 0xFF);
+        System.arraycopy(stringBytes, 0, buffer, 2, stringBytes.length);
+        return buffer;
+    }
+
+    public static byte[] getByteArray(Error e) {
+        return getByteArray(e.ordinal());
+    }
+
+    public static byte[] getByteArray(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(2 + bytes.length);
+        if (bytes.length > 65535)
+            throw new RuntimeException("byte array is too long");
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.putShort((short)bytes.length);
+        buffer.put(bytes);
+        return buffer.array();
+    }
+
+    public static Date convertFourBytesToDate(byte[] bytes) {
+        int timestamp = convertFourBytesToInt(bytes);
+        return new Date(timestamp*1000);
+    }
+
+    public static byte[] getByteArray(Date time) {
+        return getByteArray((int)(time.getTime()/1000));
     }
 }

@@ -108,6 +108,22 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
+    private Type parseType(RavelParser.TypeContext ctx) {
+        String typeName = ctx.Identifier().getText();
+        Symbol typeSymbol = currentScope.resolve(typeName);
+        if (!(typeSymbol instanceof TypeSymbol)) {
+            emitError(ctx, typeName + " does not name a type");
+            return PrimitiveType.ERROR;
+        } else {
+            Type baseType = ((TypeSymbol) typeSymbol).getDefinedType();
+
+            for (RavelParser.Array_markerContext array : ctx.array_marker())
+                baseType = new ArrayType(baseType);
+
+            return baseType;
+        }
+    }
+
     @Override
     public void enterFieldDeclaration(RavelParser.FieldDeclarationContext ctx) {
         // can only be inside the schema scope!
@@ -116,16 +132,7 @@ public class DefPhase extends RavelBaseListener {
         fs.setDefNode(ctx);
         fs.setScope(currentScope);
 
-        String fieldTypeName = ctx.type().Identifier().getText();
-        Symbol typeSymbol = currentScope.resolve(fieldTypeName);
-        Type fieldType;
-        if (!(typeSymbol instanceof TypeSymbol)) {
-            emitError(ctx.type(), fieldTypeName + " does not name a type");
-            fieldType = PrimitiveType.ERROR;
-        } else {
-            fieldType = ((TypeSymbol) typeSymbol).getDefinedType();
-        }
-        fs.setType(fieldType);
+        fs.setType(parseType(ctx.type()));
         currentScope.define(fs);
      }
 
@@ -206,14 +213,7 @@ public class DefPhase extends RavelBaseListener {
         Type returnType;
 
         if (ctx.type() != null) {
-            String returnTypeName = ctx.type().Identifier().getText();
-            Symbol typeSymbol = currentScope.resolve(returnTypeName);
-            if (!(typeSymbol instanceof TypeSymbol)) {
-                emitError(ctx.type(), returnTypeName + " does not name a type");
-                returnType = PrimitiveType.ERROR;
-            } else {
-                returnType = ((TypeSymbol) typeSymbol).getDefinedType();
-            }
+            returnType = parseType(ctx.type());
         } else {
             returnType = PrimitiveType.VOID;
         }
@@ -332,12 +332,7 @@ public class DefPhase extends RavelBaseListener {
 
         Type type;
         if (ctx.type() != null) {
-            Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
-            if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-                emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
-                return;
-            }
-            type = ((TypeSymbol) typeSymbol).getDefinedType();
+            type = parseType(ctx.type());
         } else {
             type = PrimitiveType.ANY;
         }
@@ -350,13 +345,7 @@ public class DefPhase extends RavelBaseListener {
         String varName = ctx.Identifier().getText();
         VariableSymbol var = new VariableSymbol(varName);
 
-        Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
-        if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-            emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
-            return;
-        }
-        Type type = ((TypeSymbol) typeSymbol).getDefinedType();
-        var.setType(type);
+        var.setType(parseType(ctx.type()));
         var.setDefNode(ctx);
         currentScope.define(var);
     }
@@ -422,6 +411,7 @@ public class DefPhase extends RavelBaseListener {
         boolean allowReference = currentScopeName.equals("properties") ||
                 currentScopeName.equals("configuration") ||
                 currentScopeName.equals("platform");
+        boolean allowUnboundedReference = currentScopeName.equals("platform");
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
@@ -437,9 +427,15 @@ public class DefPhase extends RavelBaseListener {
             }
         } else {
             if (allowReference) {
-                ReferenceSymbol ref = new ReferenceSymbol(name, value.qualified_name().getText());
-                ref.setDefNode(ctx);
-                currentScope.define(ref);
+                String refName = value.qualified_name().getText();
+                Symbol refSymbol = currentScope.getEnclosingScope().resolve(refName);
+                if (!allowUnboundedReference && !(refSymbol instanceof VariableSymbol)) {
+                    emitError(value.qualified_name(), "undeclared variable " + refName);
+                } else {
+                    ReferenceSymbol ref = new ReferenceSymbol(name, refName);
+                    ref.setDefNode(ctx);
+                    currentScope.define(ref);
+                }
             } else {
                 emitError(value.qualified_name(), "reference to a component parameter not allowed in this context");
             }

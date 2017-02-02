@@ -1,5 +1,9 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.Type;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -12,6 +16,7 @@ import java.util.function.BiConsumer;
  * Created by gcampagn on 2/1/17.
  */
 public class ConfigurableComponent extends Primitive {
+    private final Map<String, Type> mInterface = new HashMap<>();
     private final Map<String, Object> mConstantProperties = new HashMap<>();
     private final Map<String, String> mRefProperties = new HashMap<>();
 
@@ -19,7 +24,23 @@ public class ConfigurableComponent extends Primitive {
         super(name);
     }
 
-    void applyProperties(ParametrizedComponent instance) {
+    public void addParameter(String name, Type type) {
+        mInterface.put(name, type);
+    }
+
+    public Type getParameterType(String name) {
+        return mInterface.get(name);
+    }
+
+    public boolean hasParameter(String pname) {
+        return mInterface.containsKey(pname);
+    }
+
+    public Collection<String> getParameterNames() {
+        return mInterface.keySet();
+    }
+
+    public void applyProperties(ParametrizedComponent instance) {
         for (Map.Entry<String, Object> entry : mConstantProperties.entrySet()) {
             instance.setProperty(entry.getKey(), entry.getValue());
         }

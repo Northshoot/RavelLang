@@ -39,6 +39,10 @@ public class Platform {
 
         mLanguage = (ConcreteLanguage) Class.forName("org.stanford.ravel.api.lang." + mLang).newInstance();
         mPlatform = (BasePlatform) Class.forName("org.stanford.ravel.api.platforms." + platform).newInstance();
+        if (!mPlatform.allowsLanguage(mLanguage)) {
+            // FIXME emit a better error
+            throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());
+        }
         if (pAPI.length > 1)
             mPlatform.setAPILevel(pAPI[1]);
 
