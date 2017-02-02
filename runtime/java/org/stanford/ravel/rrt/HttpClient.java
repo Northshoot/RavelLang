@@ -4,15 +4,13 @@ package org.stanford.ravel.rrt;
  * Created by lauril on 1/31/17.
  */
 import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.HttpEndpoint;
+import patterns.src.java.app.HttpEndpoint;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class HttpClient {
 
@@ -26,7 +24,11 @@ public class HttpClient {
 
         public void sendData(byte[] data) throws Exception {
             if(this.endpoint.getMethod() == "GET")
-                get(data);
+                try {
+                    get(data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             else
                 post(data);
 

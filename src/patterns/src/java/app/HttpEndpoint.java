@@ -1,9 +1,11 @@
-package org.stanford.ravel.rrt.tiers;
+package patterns.src.java.app;
+
+import org.stanford.ravel.rrt.tiers.Endpoint;
 
 /**
  * Created by lauril on 1/31/17.
  */
-public class HttpEndpoint extends Endpoint{
+public class HttpEndpoint extends Endpoint {
 //    interface CloudEndpoint:
 //        configuration:
 //        base: '171.64.70.90/'
@@ -19,11 +21,16 @@ public class HttpEndpoint extends Endpoint{
         super();
         super.name = "";
         super.port = 4444;
-        super.base = "171.64.70.90";
+        super.base = "http://" + "171.64.70.90";
         super.method = "POST";
         super.url = "simple/";
         super.type = TYPE.HTTP;
         super.user_agent = "Ravel:Java/Client";
+    }
+
+    public HttpEndpoint(String name) {
+        this();
+        super.name = name;
     }
 
     public void setPath(String path){

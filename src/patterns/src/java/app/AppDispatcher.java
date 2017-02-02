@@ -2,7 +2,6 @@ package patterns.src.java.app;
 
 import org.stanford.ravel.rrt.*;
 import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
@@ -10,8 +9,6 @@ import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.Error;
 
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.Map;
 
 /**
@@ -27,8 +24,9 @@ public class AppDispatcher  extends AbstractDispatcher {
 
     JavaDriver mDriver;
     //AUTOGEN endpoints
-    Endpoint ep_1 ;
-    Endpoint ep_2;
+    Endpoint embeddedEndpoint ;
+    Endpoint gatewayEndpoint;
+    Endpoint cloudEndpoint;
     //USED for test
 
     //AUTOGEN: system components
@@ -57,22 +55,24 @@ public class AppDispatcher  extends AbstractDispatcher {
         mcntr_id_1.setName(mName);
         switch (mName){
             case "EMD":
-                ep_1 = new Endpoint();
-                mDriver.register_endpoint(ep_1);
-                model_id_1.setEndpointUpp(ep_1);
+                gatewayEndpoint = new SocketEndpoint("Gateway","127.0.0.1", 4444);
+
+                mDriver.register_endpoint(gatewayEndpoint);
+                model_id_1.setEndpointUpp(gatewayEndpoint);
                 break;
             case "GTW":
-                ep_1 = new Endpoint();
-                mDriver.register_endpoint(ep_1);
-                ep_2 = new HttpEndpoint();
-                mDriver.register_endpoint(ep_2);
-                model_id_1.setEndpointDown(ep_1);
-                model_id_1.setEndpointUpp(ep_2);
+                embeddedEndpoint = new SocketEndpoint("Embedded", "127.0.0.1", 5555);
+                mDriver.register_endpoint(embeddedEndpoint);
+                model_id_1.setEndpointDown(embeddedEndpoint);
+
+                cloudEndpoint = new HttpEndpoint("Cloud");
+                mDriver.register_endpoint(cloudEndpoint);
+                model_id_1.setEndpointUpp(cloudEndpoint);
                 break;
             case "CLD":
-                ep_1 =new Endpoint();
-                mDriver.register_endpoint(ep_1);
-                model_id_1.setEndpointDown(ep_1);
+                gatewayEndpoint =new SocketEndpoint("Gateway",  "127.0.0.1", 4444);
+                mDriver.register_endpoint(gatewayEndpoint);
+                model_id_1.setEndpointDown(gatewayEndpoint);
                 break;
             default:
                 System.out.println("OPS");
@@ -84,13 +84,14 @@ public class AppDispatcher  extends AbstractDispatcher {
     @Override
     public Endpoint getEndpointByName(String name) {
         // FIXME should not create new objects
+        //AUTOGEN:
         switch (name) {
-            case "Gateway":
-                return new Endpoint();
+            case "Gateway"
+                return gatewayEndpoint;
             case "Cloud":
-                return new HttpEndpoint();
+                return cloudEndpoint;
             case "Embedded":
-                return new Endpoint();
+                return embeddedEndpoint;
             default:
                 throw new IllegalArgumentException("Invalid endpoint name " + name);
         }
