@@ -20,8 +20,22 @@ public class HttpEndpoint extends Endpoint{
             super.user_agent = "<interface.configuration.user_agent>";
     }
 
-    public String getMethod() {
-        return this.method;
-    }
+   public String getHttpAddress(){
+       String full_url = "";
+       full_url += super.base;
+       if(super.port >0){
+           full_url += ":" + Integer.toString(super.port);
+       }
+       full_url +="/" + super.url;
+
+       return full_url;
+   }
+
+   public String getFullURL(){
+       if(path == null)
+           return getHttpAddress();
+       else
+           return getHttpAddress() + this.path;
+   }
 }
 >>

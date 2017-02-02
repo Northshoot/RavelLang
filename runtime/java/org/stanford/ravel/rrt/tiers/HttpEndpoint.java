@@ -13,16 +13,40 @@ public class HttpEndpoint extends Endpoint{
 //        url: <app.name>/
 
 
-
+    private String path=null;
 
     public HttpEndpoint(){
         super();
         super.name = "";
         super.port = 4444;
-        super.base = "171.64.70.90/";
+        super.base = "171.64.70.90";
         super.method = "POST";
         super.url = "simple/";
         super.type = TYPE.HTTP;
-        super.USER_AGENT = "Ravel:Java/Client";
+        super.user_agent = "Ravel:Java/Client";
+    }
+
+    public void setPath(String path){
+        this.path = path;
+    }
+
+    public String getPath() { return path; }
+
+    public String getHttpAddress(){
+        String full_url = "";
+        full_url += super.base;
+        if(super.port >0){
+            full_url += ":" + Integer.toString(super.port);
+        }
+        full_url +="/" + super.url;
+
+        return full_url;
+    }
+
+    public String getFullURL(){
+        if(path == null)
+            return getHttpAddress();
+        else
+            return getHttpAddress() + this.path;
     }
 }

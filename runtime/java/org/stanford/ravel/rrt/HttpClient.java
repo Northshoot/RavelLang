@@ -34,15 +34,15 @@ public class HttpClient {
         // HTTP GET request
         public void get(byte[] data) throws Exception {
 
-            URL obj = new URL(endpoint.url + url);
+            URL obj = new URL(endpoint.getFullURL());
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("GET");
             //add request header
-            con.setRequestProperty("User-Agent", endpoint.USER_AGENT);
+            con.setRequestProperty("User-Agent", endpoint.getUserAgent());
 
             int responseCode = con.getResponseCode();
             //TODO: handle errors
-            System.out.println("\nSending 'GET' request to URL : " + url);
+            System.out.println("\nSending 'GET' request to URL : " + endpoint.getFullURL());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
@@ -57,12 +57,12 @@ public class HttpClient {
         }
 
         // HTTP POST request
-        public void post(byte[] data, String url) throws Exception {
+        public void post(byte[] data) throws Exception {
 
-            URL obj = new URL(endpoint.url + url);
+            URL obj = new URL(endpoint.getFullURL());
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("POST");
-            con.setRequestProperty("User-Agent", endpoint.USER_AGENT);
+            con.setRequestProperty("User-Agent", endpoint.getUserAgent());
 
 
             // Send post request
@@ -74,7 +74,7 @@ public class HttpClient {
 
             int responseCode = con.getResponseCode();
             //TODO: handle errors
-            System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("\nSending 'POST' request to URL : " + endpoint.getFullURL());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(

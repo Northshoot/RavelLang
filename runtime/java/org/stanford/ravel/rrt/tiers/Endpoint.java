@@ -13,7 +13,7 @@ public class Endpoint {
     protected String method = null;
     protected String url = null;
     protected Endpoint.TYPE type = null;
-    protected String USER_AGENT = null;
+    protected String user_agent = null;
 
 
     protected boolean mConnected = false;
@@ -30,9 +30,9 @@ public class Endpoint {
         return base;
     }
 
-    public String getUrl() { return url;}
+    public String getUrl() { return this.url;}
 
-    public String setUrl(String url) { this.url = url;  }
+    public void setUrl(String url) { this.url = url;  }
 
     public TYPE getType() { return type; }
 
@@ -48,7 +48,9 @@ public class Endpoint {
 
     public boolean isConnected(){ return mConnected; }
 
+    public String getMethod() { return method; }
 
+    public String getUserAgent(){ return user_agent;}
     @Override
     public String toString() {
         return "[Type: " + this.type
