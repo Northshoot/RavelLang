@@ -4,58 +4,57 @@ package org.stanford.ravel.rrt.tiers;
  * Created by lauril on 1/23/17.
  */
 public class Endpoint {
+    public enum TYPE { BLE, SQUARE, SOCKET, HTTP, HTTPS, GCM }
 
-    public Endpoint(String name, TYPE socket, String address, int port) {
-        this(name, socket);
-        this.mPort = port;
-        this.mAddress = address;
+
+    protected String name = null;
+    protected int port = -1;
+    protected String base = null;
+    protected String method = null;
+    protected String url = null;
+    protected Endpoint.TYPE type = null;
+    protected String USER_AGENT = null;
+
+
+    protected boolean mConnected = false;
+
+    public Endpoint() {
+
     }
 
     public int getPort() {
-        return mPort;
+        return port;
     }
 
     public String getAddress() {
-        return mAddress;
+        return base;
     }
 
-    public enum TYPE { BLE, SQUARE, SOCKET, HTTP, HTTPS, GCM }
+    public String getUrl() { return url;}
 
-    private String mName;
-    //TODO: deal with setters and getters
-    private boolean mConnected = true;
-    private Endpoint.TYPE mType;
-    private String mAddress;
-    private int mPort;
+    public String setUrl(String url) { this.url = url;  }
 
-    public Endpoint(String name, Endpoint.TYPE type){
-        this.mType = type;
-        this.mName = name;
-    }
+    public TYPE getType() { return type; }
 
-    public void setAddress(String address){ this.mAddress = address; }
-    public TYPE getType() { return mType; }
-    public String getName(){ return  mName; }
-    public void setConnected(){
+    public String getName(){ return  name; }
+
+    public void connected(){
         mConnected = true;
     }
 
-    public void setDisconnected(){
+    public void disconnected(){
         mConnected = false;
     }
 
     public boolean isConnected(){ return mConnected; }
 
-    public void write(byte[] data){
-        System.out.println("Writes to endpoint: " + mName);
-    }
 
     @Override
     public String toString() {
-        return "[Type: " + this.mType
-                +", name: " + this.mName
+        return "[Type: " + this.type
+                +", name: " + this.name
                 + ", connected: " + mConnected
-                + ", addr: " + this.mAddress
+                + ", addr: " + this.base +this.url
                 + "]";
     }
 }

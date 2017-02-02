@@ -21,7 +21,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     }
 
     public void stop() {
-        pushEvent(new SystemEvent(Event.Type.DISPATCHER__QUIT));
+        pushEvent(new SystemEvent(Event.Type.DISPATCHER__STOP));
         try {
             loopThread.join(10000);
         } catch(InterruptedException e) {
@@ -30,17 +30,23 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     }
 
     /***********************************************************************/
-    /*************** Callbacks to the model to AD **************************/
+    /*************** Callbacks to form the AD to the model *****************/
     /***********************************************************************/
     protected abstract void models__notifyDeparted(Event event);
 
     protected abstract void models__notifyArrived(Event event);
+
+    protected abstract void models__notifyFull(Event e);
 
     /******************* ******* event queue ***************************/
     private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<Event>(5);
 
     protected synchronized void runNextEvent(Event e) {
         switch (e.getType()) {
+            case DISPATCHER__STOP:
+                this.stopped();
+                pushEvent(new SystemEvent(Event.Type.DISPATCHER__QUIT));
+                break;
             case DRIVER__DATA_RECEIVED:
                 models__notifyArrived(e);
                 break;
@@ -50,10 +56,15 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
             case DRIVER__SEND_DATA:
                 driver__sendData(e);
                 break;
+            case MODEL__NOTIFY_FULL:
+                models__notifyFull(e);
+                break;
             case MODELS__NOTIFY_RECORD_ARRIVED:
                 break;
         }
     }
+
+
 
     private void eventLoop() {
         LOGGER.info("Dispatcher event loop started");
@@ -61,9 +72,9 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
         try {
             while (true) {
                 Event e = eventQueue.take();
-                runNextEvent(e);
                 if (e.getType() == Event.Type.DISPATCHER__QUIT)
                     return;
+                runNextEvent(e);
             }
         } catch(InterruptedException e) {
             // nothing to do if interrupted

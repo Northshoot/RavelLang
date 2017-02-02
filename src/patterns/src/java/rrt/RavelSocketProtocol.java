@@ -1,6 +1,7 @@
 package patterns.src.java.rrt;
 
 import org.stanford.ravel.rrt.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.JavaDriver;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.net.InetAddress;
  */
 public class RavelSocketProtocol {
 
-    public RavelSocketProtocol(){
+    public RavelSocketProtocol(JavaDriver javaDriver){
 
 
     }

@@ -4,8 +4,6 @@ import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.HttpClient;
 import org.stanford.ravel.rrt.SocketServer;
-import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.Error;
 import patterns.src.java.rrt.RavelSocketProtocol;
 
 
@@ -18,7 +16,7 @@ import java.util.Timer;
 /**
  * Created by lauril on 1/23/17.
  */
-public class AndroidDriver implements DriverAPI {
+public class JavaDriver implements DriverAPI {
 
     Map<String, Endpoint> endpointsMap = new HashMap<>();
     private AbstractDispatcher appDispatcher;
@@ -27,7 +25,7 @@ public class AndroidDriver implements DriverAPI {
     private Socket clientSocket;
     private HttpClient httpClient;
 
-    public AndroidDriver(AbstractDispatcher appDispatcher){
+    public JavaDriver(AbstractDispatcher appDispatcher){
         this.appDispatcher = appDispatcher;
     }
     void pprint(String s){

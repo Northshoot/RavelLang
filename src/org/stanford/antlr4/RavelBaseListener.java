@@ -296,6 +296,18 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterConfigurationScope(RavelParser.ConfigurationScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConfigurationScope(RavelParser.ConfigurationScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIface_members(RavelParser.Iface_membersContext ctx) { }
 	/**
 	 * {@inheritDoc}

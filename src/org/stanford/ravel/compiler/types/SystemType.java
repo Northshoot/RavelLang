@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.types;
 
+import org.stanford.ravel.primitives.Primitive;
 import org.stanford.ravel.primitives.SystemEvent;
 
 /**

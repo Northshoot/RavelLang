@@ -6,7 +6,7 @@ import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
-import org.stanford.ravel.rrt.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.Error;
 
 
@@ -25,7 +25,7 @@ public class AppDispatcher  extends AbstractDispatcher {
 
     Map<String, Endpoint> mEndpoints;
 
-    AndroidDriver mDriver;
+    JavaDriver mDriver;
     //AUTOGEN endpoints
     Endpoint ep_1 ;
     Endpoint ep_2;
@@ -53,7 +53,7 @@ public class AppDispatcher  extends AbstractDispatcher {
         timerSource.setModelController(mcntr_id_1);
 
         //AUTOGEN: create system driver
-        mDriver = new AndroidDriver(this);
+        mDriver = new JavaDriver(this);
         mcntr_id_1.setName(mName);
         switch (mName){
             case "EMD":
@@ -154,6 +154,12 @@ public class AppDispatcher  extends AbstractDispatcher {
         }
     }
 
+    @Override
+    protected void models__notifyFull(Event e) {
+        //AUTOGEN: list of controllers subscribing to the event
+
+    }
+
     /***********************************************************************/
     /************** Network callbacks from AD to Driver ********************/
     /***********************************************************************/
@@ -191,14 +197,14 @@ public class AppDispatcher  extends AbstractDispatcher {
      */
     @Override
     public void stopped() {
-
+        //AUTOGEN: list of controllers subscribing to the event
     }
     /**
      * System has restarted
      */
     @Override
     public void restarted() {
-
+        //AUTOGEN: list of controllers subscribing to the event
     }
     /**
      * Low battery indicator

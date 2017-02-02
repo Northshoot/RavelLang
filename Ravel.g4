@@ -219,11 +219,15 @@ iface_comp returns [Scope scope]
     ;
 
 iface_body
-    : NEWLINE INDENT impl_scope iface_members* DEDENT
+    : NEWLINE INDENT config_scope? impl_scope iface_members* DEDENT
     ;
 
 impl_scope returns [Scope scope]
     : 'implementation:' space_assignments* #ImplementationScope
+    ;
+
+config_scope returns [Scope scope]
+    : 'configuration:' space_assignments* #ConfigurationScope
     ;
 
 iface_members

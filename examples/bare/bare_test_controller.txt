@@ -54,6 +54,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : Ra
     event system.started():
         timer.start_periodic(5000)
 
+    event system.stopped():
+        x = 4
+
 controller CController(random: Random):
     event random.arrived():
         rec = self.record

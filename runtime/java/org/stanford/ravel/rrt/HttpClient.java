@@ -17,25 +17,31 @@ import javax.net.ssl.HttpsURLConnection;
 public class HttpClient {
 
 
-        private HttpEndpoint endpoint; //containts base information
+        private HttpEndpoint endpoint; //contains base information
 
 
         public HttpClient (Endpoint endpoint){
             this.endpoint = (HttpEndpoint) endpoint;
         }
 
+        public void sendData(byte[] data){
+            if(this.endpoint.getMethod() == "GET")
+                get(data);
+            else
+                post(data);
+
+        }
         // HTTP GET request
-        public void get(String url) throws Exception {
+        public void get(byte[] data) throws Exception {
 
             URL obj = new URL(endpoint.url + url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            // optional default is GET
             con.setRequestMethod("GET");
-
             //add request header
             con.setRequestProperty("User-Agent", endpoint.USER_AGENT);
 
             int responseCode = con.getResponseCode();
+            //TODO: handle errors
             System.out.println("\nSending 'GET' request to URL : " + url);
             System.out.println("Response Code : " + responseCode);
 
@@ -48,10 +54,6 @@ public class HttpClient {
                 response.append(inputLine);
             }
             in.close();
-
-            //print result
-            System.out.println(response.toString());
-
         }
 
         // HTTP POST request
@@ -59,13 +61,9 @@ public class HttpClient {
 
             URL obj = new URL(endpoint.url + url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-            //add reuqest header
             con.setRequestMethod("POST");
             con.setRequestProperty("User-Agent", endpoint.USER_AGENT);
-            con.setRequestProperty("User-Agent", endpoint.USER_AGENT);
 
-            String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
 
             // Send post request
             con.setDoOutput(true);
@@ -75,8 +73,8 @@ public class HttpClient {
             wr.close();
 
             int responseCode = con.getResponseCode();
+            //TODO: handle errors
             System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Post parameters : " + urlParameters);
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
@@ -88,10 +86,6 @@ public class HttpClient {
                 response.append(inputLine);
             }
             in.close();
-
-            //print result
-            System.out.println(response.toString());
-
         }
 
 

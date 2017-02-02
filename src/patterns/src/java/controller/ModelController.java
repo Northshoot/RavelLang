@@ -94,6 +94,12 @@ public class ModelController {
         pprint("system started: " + start);
     }
 
+    public void system_stopped(){
+        faosfhashdn
+                asjfasld
+
+    }
+
     public String getName() {
         return mName;
     }

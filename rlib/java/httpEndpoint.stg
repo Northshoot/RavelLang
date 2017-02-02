@@ -1,0 +1,27 @@
+import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+file(package,imports,interface) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class HttpEndpoint extends Endpoint{
+
+
+
+    public HttpEndpoint() {
+        super();
+            super.name = <name>
+            super.port = <interface.configuration.port>;
+            super.base = "<interface.configuration.base>";
+            super.method = "<interface.configuration.method>";
+            super.url = "<interface.configuration.url>";
+            super.type = "<interface.configuration.type>";
+            super.user_agent = "<interface.configuration.user_agent>";
+    }
+
+    public String getMethod() {
+        return this.method;
+    }
+}
+>>

@@ -49,6 +49,11 @@ name/
         connectivity.rv
 
 config.json
+Makefile
+    build rout/ -> bin/
+    clean bin/ rout/
+    run (run simulation)
+    deploy
 
 
 
