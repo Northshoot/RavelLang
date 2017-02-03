@@ -16,4 +16,6 @@ public interface ConcretePlatform {
     boolean allowsLanguage(ConcreteLanguage lang);
 
     List<FileObject> build(Space s);
+
+    List<FileObject> createBuildSystem(List<FileObject> files);
 }

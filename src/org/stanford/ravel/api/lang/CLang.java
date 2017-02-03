@@ -109,7 +109,6 @@ public class CLang extends BaseLanguage {
     //private final STGroup irGroup;
     private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
-    private final STGroup makefileGroup;
 
     public CLang() {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
@@ -123,8 +122,6 @@ public class CLang extends BaseLanguage {
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, CTYPES);
         dispatcherGroup.registerRenderer(String.class, CIDENT);
-
-        makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
 
         //irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
         //irGroup.registerRenderer(Type.class, CTYPES);
@@ -210,32 +207,6 @@ public class CLang extends BaseLanguage {
         }
 
         return simpleModule(dispatcher_h, dispatcher_c, "AppDispatcher", "");
-    }
-
-    @Override
-    protected CodeModule createBuildSystem(List<FileObject> files) {
-        List<String> cfiles = new ArrayList<>();
-
-        for (FileObject file : files) {
-            String fileName = file.getRelativeName();
-            if (fileName.endsWith(".c"))
-                cfiles.add(fileName.substring(0, fileName.length()-2));
-        }
-
-        CLanguageOptions options = CLanguageOptions.getInstance();
-        String runtimePath = new File(options.getRuntimePath()).getAbsolutePath();
-
-        ST tmpl = makefileGroup.getInstanceOf("static_lib");
-        tmpl.add("target", "libravelapp.a");
-        tmpl.add("sources", cfiles);
-        tmpl.add("runtime", runtimePath);
-
-        CodeModule module = new CodeModule();
-        FileObject makefile = new FileObject();
-        makefile.setFileName("app.mk");
-        makefile.setContent(tmpl.render());
-        module.addFile(makefile);
-        return module;
     }
 
     @Override

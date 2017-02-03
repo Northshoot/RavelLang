@@ -59,6 +59,7 @@ class PlatformBuilder {
         List<FileObject> spaceFiles = new ArrayList<>();
         spaceFiles.addAll(lang.build(s));
         spaceFiles.addAll(concretePlatform.build(s));
+        spaceFiles.addAll(concretePlatform.createBuildSystem(spaceFiles));
         for (FileObject fo : spaceFiles)
             fo.setBasePath(path);
         mFiles.addAll(spaceFiles);

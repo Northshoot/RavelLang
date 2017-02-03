@@ -53,9 +53,6 @@ public abstract class BaseLanguage implements ConcreteLanguage {
             addModule(createInterface(iiface));
     }
     protected abstract CodeModule createDispatcher(Space s);
-    protected CodeModule createBuildSystem(List<FileObject> files) {
-        return null;
-    }
 
     public List<FileObject> build(Space s) {
         LOGGER.info("Building Space: " +s.getName());
@@ -63,7 +60,6 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         createControllers(s);
         createInterfaces(s);
         addModule(createDispatcher(s));
-        addModule(createBuildSystem(mFileObjects));
         return mFileObjects;
     }
 }

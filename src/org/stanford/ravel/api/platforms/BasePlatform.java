@@ -6,6 +6,7 @@ import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,6 +42,10 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
     }
     protected CodeModule createBuildSystem(Space s, List<FileObject> files) {
         return null;
+    }
+
+    public List<FileObject> createBuildSystem(List<FileObject> files) {
+        return Collections.emptyList();
     }
 
     @Override

@@ -3,17 +3,26 @@ compile_c(target) ::=<<
 <\t>$(CC) $(CPPFLAGS) $(CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -I$(RAVEL_RUNTIME_DIR) -I. -c -o $@ $\<
 >>
 
-application(target) ::=<<
+static_lib(runtime,target,sources) ::=<<
+clean-app:
+<\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
+
+<sources:compile_c(); separator="\n">
+
+<target>: <sources:{s|<s>.o}; separator=" ">
+<\t>$(AR) crs -o $@ $^
+>>
+
+application(runtime,target,sources) ::=<<
+RAVEL_RUNTIME_DIR = <runtime>
+
 all: <target>
 
 clean:
-<\t>rm -f <target> main.o
-<\t>make clean-app
+<\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
 
-include app.mk
+<sources:compile_c(); separator="\n">
 
-<["main"]:compile_c(); separator="\n">
-
-<target>: main.o libravelapp.a
+<target>: <sources:{s|<s>.o}; separator=" ">
 <\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_RUNTIME_DIR) -lravel
 >>
