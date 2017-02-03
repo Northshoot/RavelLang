@@ -25,7 +25,7 @@ public class AppDispatcher  extends AbstractDispatcher {
     Map<String, Endpoint> mEndpoints;
 
     JavaDriver mDriver;
-    //AUTOGEN endpoints
+    //AUTOGEN: endpoints
     Endpoint embeddedEndpoint ;
     Endpoint gatewayEndpoint;
     Endpoint cloudEndpoint;

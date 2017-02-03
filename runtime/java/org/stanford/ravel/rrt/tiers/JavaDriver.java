@@ -111,7 +111,7 @@ public class JavaDriver implements DriverAPI {
 
     @Override
     public void appDispatcherReady() {
-        //TODO: clean out for generations
+        //TODO: clean out for generated code
         if(appDispatcher.getAppName() == "GTW"){
             rsp = new RavelSocketProtocol(this);
             ss = new SocketServer(4444, rsp);
