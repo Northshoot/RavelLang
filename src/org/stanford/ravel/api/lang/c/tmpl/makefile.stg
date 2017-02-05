@@ -1,0 +1,17 @@
+
+compile_c(target) ::=<<
+<target>.o: <target>.c
+<\t>$(CC) $(CPPFLAGS) $(CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -I$(RAVEL_RUNTIME_DIR) -I. -c -o $@ $\<
+>>
+
+static_lib(runtime,target,sources) ::=<<
+RAVEL_RUNTIME_DIR = <runtime>
+
+clean-app:
+<\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
+
+<sources:compile_c(); separator="\n">
+
+<target>: <sources:{s|<s>.o}; separator=" ">
+<\t>$(AR) crs -o $@ $^
+>>

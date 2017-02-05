@@ -1,7 +1,7 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.c.Declaration;
+import org.stanford.ravel.api.platforms.nrf52.Declaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 import org.stanford.ravel.primitives.Space;
@@ -37,7 +37,7 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         mMainTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/main.stg");
         mCnfgTmlp = new STGroupFile(BASE_PALTFORM_TMPL_PATH+"/config.stg");
         //create main App
-        obj.setPath(mBuildPath);
+        obj.setBasePath(mBuildPath);
         obj.setFileName(fileName);
         makeCnf();
         //Base stuff that is needed by nrf
@@ -71,12 +71,14 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
         addToMakeObj("api/api_ble.c");
         FileObject ble_header = new FileObject();
         ble_header.setFileName("api_ble.h");
-        ble_header.setPath(mBuildPath+"/api/");
+        ble_header.setBasePath(mBuildPath);
+        ble_header.setSubPath("api/");
         ble_header.setContent(tmpl_h.render());
 
         FileObject ble_obj= new FileObject();
         ble_obj.setFileName("api_ble.c");
-        ble_obj.setPath(mBuildPath+"/api/");
+        ble_obj.setBasePath(mBuildPath);
+        ble_obj.setSubPath("api/");
         ble_obj.setContent(tmpl_o.render());
 
         mFileList.add(ble_header);
@@ -136,7 +138,8 @@ public class MainApp extends RavelAPIObject implements RavelObjectInterface {
 
     private void addCnfFile(String name, String content){
         FileObject fo = new FileObject();
-        fo.setPath(mBuildPath + "/config/");
+        fo.setBasePath(mBuildPath);
+        fo.setSubPath("config/");
         fo.setFileName(name);
         fo.setContent(content);
         mFileList.add(fo);

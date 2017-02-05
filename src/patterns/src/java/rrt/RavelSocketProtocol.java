@@ -1,9 +1,9 @@
 package patterns.src.java.rrt;
 
-import patterns.src.java.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.JavaDriver;
 
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 
 /**
@@ -11,29 +11,22 @@ import java.net.InetAddress;
  */
 public class RavelSocketProtocol {
 
-    public RavelSocketProtocol(){
-
-
-    }
-
-    AndroidDriver androidDriver;
-    public RavelSocketProtocol(AndroidDriver androidDriver) {
+    JavaDriver androidDriver;
+    public RavelSocketProtocol(JavaDriver androidDriver) {
         this.androidDriver = androidDriver;
     }
 
 
-    public String processInput(InputStream in, InetAddress inetAddress) {
+    public String processInput(DataInputStream in, InetAddress inetAddress) {
         //TODO: fix the hack
-        byte[] bytes = new byte[16*1024];
+        //TODO:  needs more dynamic
+        byte[] bytes = new byte[4*1024];
         try {
-            int count;
-            while ((count = in.read(bytes)) > 0) {
-            }
+            int count = in.read(bytes);
             this.androidDriver.rx_data_from_socket(bytes, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return "OK";
     }
 }

@@ -135,19 +135,59 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitControllerInstantiation(RavelParser.ControllerInstantiationContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code SinkLinks}
-	 * labeled alternative in {@link RavelParser#sink_scope}.
+	 * Visit a parse tree produced by the {@code InterfaceInstantiation}
+	 * labeled alternative in {@link RavelParser#interface_scope}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSinkLinks(RavelParser.SinkLinksContext ctx);
+	T visitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code SourceLinks}
-	 * labeled alternative in {@link RavelParser#source_scope}.
+	 * Visit a parse tree produced by the {@code InterfaceScope}
+	 * labeled alternative in {@link RavelParser#iface_comp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSourceLinks(RavelParser.SourceLinksContext ctx);
+	T visitInterfaceScope(RavelParser.InterfaceScopeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#iface_body}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIface_body(RavelParser.Iface_bodyContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ImplementationScope}
+	 * labeled alternative in {@link RavelParser#impl_scope}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImplementationScope(RavelParser.ImplementationScopeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ConfigurationScope}
+	 * labeled alternative in {@link RavelParser#config_scope}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConfigurationScope(RavelParser.ConfigurationScopeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#iface_members}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIface_members(RavelParser.Iface_membersContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code InterfaceDef}
+	 * labeled alternative in {@link RavelParser#iface_def}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterfaceDef(RavelParser.InterfaceDefContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code InterfaceEvent}
+	 * labeled alternative in {@link RavelParser#iface_event}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInterfaceEvent(RavelParser.InterfaceEventContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ModelScope}
 	 * labeled alternative in {@link RavelParser#model_comp}.
@@ -193,25 +233,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProperty_line(RavelParser.Property_lineContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code VarAssignment}
-	 * labeled alternative in {@link RavelParser#property}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVarAssignment(RavelParser.VarAssignmentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#propValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPropValue(RavelParser.PropValueContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#propArray}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPropArray(RavelParser.PropArrayContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code SchemaScope}
 	 * labeled alternative in {@link RavelParser#schema_block}.
 	 * @param ctx the parse tree
@@ -256,6 +277,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitController_scope(RavelParser.Controller_scopeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitController_entry(RavelParser.Controller_entryContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.
@@ -344,6 +371,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitType(RavelParser.TypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#array_marker}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArray_marker(RavelParser.Array_markerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#assignment}.
 	 * @param ctx the parse tree
@@ -539,48 +572,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitForControl(RavelParser.ForControlContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#component_parameters}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComponent_parameters(RavelParser.Component_parametersContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#params}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParams(RavelParser.ParamsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParam(RavelParser.ParamContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#elementValuePairs}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElementValuePairs(RavelParser.ElementValuePairsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#elementValuePair}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElementValuePair(RavelParser.ElementValuePairContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#elementValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElementValue(RavelParser.ElementValueContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#elementValueArrayInitializer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElementValueArrayInitializer(RavelParser.ElementValueArrayInitializerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

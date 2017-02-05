@@ -10,7 +10,7 @@ public class FunctionType implements Type {
     private final Type[] arguments;
     private final Type returnValue;
 
-    public FunctionType(String name, Type[] arguments, Type returnValue) {
+    FunctionType(String name, Type[] arguments, Type returnValue) {
         this.name = name;
         owner = null;
         isStatic = true;
@@ -18,7 +18,7 @@ public class FunctionType implements Type {
         this.returnValue = returnValue;
     }
 
-    public FunctionType(String name, ClassType owner, boolean isStatic, Type[] arguments, Type returnValue) {
+    FunctionType(String name, ClassType owner, boolean isStatic, Type[] arguments, Type returnValue) {
         this.name = name;
         this.owner = owner;
         this.isStatic = isStatic;
@@ -44,5 +44,9 @@ public class FunctionType implements Type {
     @Override
     public String getName() {
         return (owner != null ? owner.getName() + "." : "") + name;
+    }
+
+    public String getFunctionName() {
+        return name;
     }
 }

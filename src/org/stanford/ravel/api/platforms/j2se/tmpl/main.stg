@@ -1,0 +1,46 @@
+file(package) ::=<<
+package <package>;
+
+import org.stanford.ravel.rrt.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
+
+import <package>.AppDispatcher;
+
+class Application {
+    public static void main(String[] args) {
+        if (args.length \< 1) {
+            System.err.println("Expected endpoint configuration file as first argument.");
+            return;
+        }
+        String configFileName = args[0];
+        Map\<String, Endpoint> endpointMap = new HashMap\<>();
+        try (Scanner scanner = new Scanner(new FileInputStream(configFileName))) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] split = line.split("\t");
+                if (split.length != 2) {
+                    System.err.println("Badly formatted line " + line);
+                    continue;
+                }
+                String address = split[1];
+                String[] parts = address.split(":");
+                Endpoint ep = new Endpoint(split[0], Endpoint.TYPE.SOCKET, parts[0], Integer.valueOf(parts[1]));
+                endpointMap.put(split[0], ep);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load config file: " + e.getMessage());
+        }
+
+        AppDispatcher dispatcher = new AppDispatcher(endpointMap);
+        AndroidDriver driver = new AndroidDriver(dispatcher);
+        dispatcher.setDriver(driver);
+        driver.appDispatcherReady();
+    }
+}
+>>

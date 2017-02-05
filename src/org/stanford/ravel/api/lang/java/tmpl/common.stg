@@ -1,0 +1,15 @@
+do_import(imp) ::=<<
+import <imp>;
+
+>>
+
+// default constructor is public and empty
+constructor(className) ::= <<
+public <className>() {}
+>>
+
+set_controller_method(c) ::=<<
+public void setController_<c.varName>(<c.name> ctr) {
+    this.ctr_<c.varName> = ctr;
+}
+>>

@@ -2,10 +2,7 @@ package org.stanford.ravel;
 
 import org.stanford.ravel.primitives.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Internal representation of the ravel application
@@ -41,37 +38,32 @@ public class RavelApplication  {
     public List<Space> getSpaces(){ return new ArrayList<>(mSpace.values());}
 
     private final Map<String, View> mViews = new LinkedHashMap<>();
-    public void addView(String name, View v){
+    public void addView(String name, View v) {
         mViews.put(name, v);
     }
     public View getView(String name) { return mViews.get(name); }
     public List<View> getViews(){ return new ArrayList<>(mViews.values());}
 
-    private final Map<String, Source> mSource = new LinkedHashMap<>();
-    public void addSource(String name, Source s){
-        mSource.put(name, s);
+    private final Map<String, Interface> mInterfaces = new LinkedHashMap<>();
+    public void addInterface(String name, Interface s) {
+        mInterfaces.put(name, s);
     }
-    public Source getSource(String name) { return mSource.get(name); }
-    public List<Source> getSource(){ return new ArrayList<>(mSource.values());}
+    public Interface getInterface(String name) { return mInterfaces.get(name); }
+    public List<Interface> getInterfaces(){ return new ArrayList<>(mInterfaces.values());}
 
-    private final Map<String, Sink> mSink = new LinkedHashMap<>();
-    public void addSink(String name, Sink s){
-        mSink.put(name, s);
+    private final Set<Flow> mFlow = new HashSet<>();
+    public void addFlow(Flow f) {
+        mFlow.add(f);
     }
-    public Sink getSink(String name) { return mSink.get(name); }
-    public List<Sink> getSinks(){ return new ArrayList<>(mSink.values());}
-
-    private final Map<String, Flow> mFlow = new LinkedHashMap<>();
-    public void addFlow(String name, Flow f){
-        mFlow.put(name, f);
+    public Collection<Flow> getFlows() {
+        return Collections.unmodifiableCollection(mFlow);
     }
-    public Flow getFlow(String name) { return mFlow.get(name); }
-    public List<Flow> getFlows(){ return new ArrayList<>(mFlow.values());}
 
     private Object getFirst(Map m) {
         Object firstKey = m.keySet().toArray()[0];
         return m.get(firstKey);
     }
+
     public String toString() {
         String ret ="Ravel applications: \n";
         if(mModels.size() >0) {
@@ -110,28 +102,18 @@ public class RavelApplication  {
             ret+="\t No Views";
         }
         ret+="\n/**********************************************************/\n";
-        if(mSource.size() >0) {
-            ret += "\tSource: \n\t";
-            for (Map.Entry<String, Source> entry : mSource.entrySet()) {
-                ret += "Source : " + entry.getKey() + "\n\t" + entry.getValue();
+        if(mInterfaces.size() >0) {
+            ret += "\tInterfaces: \n\t";
+            for (Map.Entry<String, Interface> entry : mInterfaces.entrySet()) {
+                ret += "Interface : " + entry.getKey() + "\n\t" + entry.getValue();
             }
         } else {
-            ret+="\t No models";
+            ret+="\t No Interfaces";
         }
-        ret+="\n/**********************************************************/\n";
-        if(mSink.size() >0) {
-            ret += "\tSinks: \n\t";
-            for (Map.Entry<String, Sink> entry : mSink.entrySet()) {
-                ret += "Sink : " + entry.getKey() + "\n\t" + entry.getValue();
-            }
-        } else {
-            ret+="\t No Sinks";
-        }
-        ret+="\n/**********************************************************/\n";
-        if(mFlow.size() >0) {
-            ret += "\tModels: \n\t";
-            for (Map.Entry<String, Flow> entry : mFlow.entrySet()) {
-                ret += "Flow : " + entry.getKey() + "\n\t" + entry.getValue();
+        if (mFlow.size() >0) {
+            ret += "\tFlows: \n\t";
+            for (Flow entry : mFlow) {
+                ret += "Flow : " + entry;
             }
         } else {
             ret+="\t No Flow";

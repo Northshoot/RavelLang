@@ -7,12 +7,14 @@ import java.util.*;
  * Created by lauril on 7/29/16.
  */
 public class Space extends Primitive {
-    private String mTransmitFunction;
     private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
     private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
     private final Map<String, View> mViews = new LinkedHashMap<>();
-    private final Map<String, Sink> mSink = new LinkedHashMap<>();
-    private final Map<String, Source> mSource = new LinkedHashMap<>();
+    private final Map<String, InstantiatedInterface> mInterfaces = new LinkedHashMap<>();
+    private final List<Flow> mInFlows = new ArrayList<>();
+    private final List<Flow> mOutFlows = new ArrayList<>();
+    private final SystemAPI mSystemAPI = new SystemAPI(this, this, "system");
+
     private Platform mPlatform;
 
     public Space(String name) {
@@ -23,57 +25,77 @@ public class Space extends Primitive {
     public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
     public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
-    public void add(String ref, Sink s) { this.mSink.put(ref,  s); }
-    public void add(String ref, Source v) { this.mSource.put(ref,  v); }
+    public void add(String ref, InstantiatedInterface s) { this.mInterfaces.put(ref,  s); }
 
-
-    public String getTransmitFunction(){
-        return "random_char_update";
-    }
-
-    public String getService(){
-        return "ravel_service";
-    }
-
-    public InstantiatedModel resolveModel(String name){
-        if(name.startsWith("tier.models.")){
-            String modelName = name.replace("tier.models.","");
-            if(mModels.containsKey(modelName))
-                return mModels.get(modelName);
-            else
-                throw new RuntimeException("Cannot resolve model: " + modelName + " in " + mName + " space.");
-        } else {
-            throw new RuntimeException("Cannot resolve path " + name);
+    private InstantiatedModel findModel(Model m) {
+        for (InstantiatedModel im : mModels.values()) {
+            if (im.getBaseModel() == m)
+                return im;
         }
-    }
-    public List<InstantiatedModel> getModels() {
-        List<InstantiatedModel> lst = new ArrayList<>();
-        lst.addAll(mModels.values());
-        return lst;
+        return null;
     }
 
-    public List<InstantiatedController> getControllers() {
-        List<InstantiatedController> lst = new ArrayList<>();
-        lst.addAll(mControllers.values());
-        return lst;
+    public boolean hasModel(Model m) {
+        return findModel(m) != null;
     }
+
+    /**
+     * Add a flow directed to a controller in this space
+     * @param f the flow
+     */
+    public void addInboundFlow(Flow f) {
+        assert f.getSink().getSpace() == this;
+        mInFlows.add(f);
+        InstantiatedModel im = findModel(f.getModel());
+        assert im != null;
+        if (f.getSource().getSpace() != this)
+            im.addStreamingSource(f.getSource().getSpace());
+    }
+
+    /**
+     * Add a flow departing from a controller from this space
+     * @param f the flow
+     */
+    public void addOutboundFlow(Flow f) {
+        assert f.getSource().getSpace() == this;
+        mOutFlows.add(f);
+        InstantiatedModel im = findModel(f.getModel());
+        assert im != null;
+        if (f.getSink().getSpace() != this)
+            im.addStreamingSink(f.getSink().getSpace());
+    }
+
+    public Collection<InstantiatedModel> getModels() {
+        return Collections.unmodifiableCollection(mModels.values());
+    }
+    public InstantiatedModel getModel(String modelName) {
+        return mModels.get(modelName);
+    }
+    public Collection<InstantiatedInterface> getInterfaces() {
+        return Collections.unmodifiableCollection(mInterfaces.values());
+    }
+    public InstantiatedInterface getInterface(String sourceName) {
+        return mInterfaces.get(sourceName);
+    }
+    public Collection<InstantiatedController> getControllers() {
+        return Collections.unmodifiableCollection(mControllers.values());
+    }
+
+    public SystemAPI getSystemAPI() {
+        return mSystemAPI;
+    }
+
+    public void freezeAll() {
+        mSystemAPI.freeze();
+        for (InstantiatedModel im : mModels.values())
+            im.freeze();
+        for (InstantiatedInterface is : mInterfaces.values())
+            is.freeze();
+    }
+
     public void setPlatform(Platform build) {
         mPlatform = build;
     }
-
-    public void addSource(Source s){
-        this.mSource.put(s.getSinkIdentifier(), s);
-    }
-
-    public Source getSource(String name){
-        return mSource.get(name);
-    }
-    public List<Source> getSources(){
-        List<Source> lst = new ArrayList<>();
-        lst.addAll(mSource.values());
-        return lst;
-    }
-
     public Platform getPlatform() {
         return mPlatform;
     }

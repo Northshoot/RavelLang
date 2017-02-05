@@ -1,4 +1,137 @@
-import "class.stg"
-file(package,className) ::=<<
-<class(package,className,"Model")>
+import "common.stg"
+
+record_deserialize ::= [
+    "boolean": "OneByteToBool",
+    "byte": "OneByteToByte",
+    "int": "FourBytesToInt",
+    "double": "EightBytesToDouble",
+    "java.lang.String": "BytesToString",
+    "org.stanford.ravel.rrt.tiers.Error": "FourBytesToError",
+    "java.util.Date": "FourBytesToDate",
+    default: "Unsupported<! this will blow up !>"
+]
+record_field_size ::= [
+    "boolean": "1",
+    "byte": "1",
+    "int": "4",
+    "double": "8",
+    "java.lang.String": "ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, pos, pos + 2)); pos += 2",
+    "org.stanford.ravel.rrt.tiers.Error": "4",
+    "java.util.Date": "4",
+    default: "0"
+]
+
+deserialize_prim(type, where) ::=<<
+sz = <record_field_size.(type)>;
+<where> = ByteWork.convert<record_deserialize.(type)>(ByteWork.getBytes(data, pos, pos + sz));
+pos += sz;
+>>
+
+deserialize_field(f) ::=<<
+<! duck typing to find array types... !><if(f.type.elementType)>len = ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, pos, pos + 2));
+pos += 2;
+this.<f.name> = new <f.type.elementType>[len];
+for (int i = 0; i \< len; i++) {
+    <deserialize_prim(f.type.elementType, {this.<f.name>[i]})>
+}<else><deserialize_prim(f.type, {this.<f.name>})><endif>
+>>
+
+record_class(fields) ::=<<
+public static class Record implements ModelRecord {
+    private int __idx;
+
+    <fields:{f|public <f.type> <f.name>;}; separator="\n">
+
+    public Record() {
+    }
+
+    public Record(byte[] data) {
+        // Skip model ID
+
+        this.__idx = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 4, 8));
+        int pos = 8;
+        int sz, len;
+        <fields:deserialize_field(); separator="\n">
+    }
+
+    @Override
+    public byte[] toBytes() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(ByteWork.getByteArray(MODEL_ID));
+            outputStream.write(ByteWork.getByteArray(__idx));
+            <fields:{f|outputStream.write(ByteWork.getByteArray(<f.name>));}; separator="\n">
+        } catch (IOException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        }
+        return outputStream.toByteArray();
+    }
+
+    @Override
+    public void index(int i) {
+        __idx = i;
+    }
+};
+>>
+
+file(package,imports,name,base,model,set_endpoints) ::=<<
+package <package>;
+
+import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+
+import org.stanford.ravel.rrt.model.<base>;
+import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.utils.ByteWork;
+import org.stanford.ravel.rrt.Context;
+
+<imports:do_import()>
+
+public class <name> extends <base>\<<name>.Record> {
+    <record_class(model.baseModel.fields)>
+
+    public static final int MODEL_ID = <model.baseModel.id>;
+
+    private static final int MODEL_SIZE = <model.size>;
+
+    <model.controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+
+    public <name>(AppDispatcher dispatcher) {
+        super(dispatcher, MODEL_SIZE);
+    }
+
+    // Setter methods for AppDispatcher
+    public void addAllEndpoints() {
+        <if(set_endpoints)><model.streamingSinks:{s|addEndpoint(mDispatcher.getEndpointByName("<s.name>"));}; separator="\n"><endif>
+    }
+    <model.controllerList:set_controller_method(); separator="\n">
+
+    // Event listener dispatch
+    @Override
+    protected void notifyFull(Context\<Record> ctx) {
+        <model.controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyArrived(Context\<Record> ctx) {
+        <model.controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifyDeparted(Context\<Record> ctx) {
+        <model.controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
+    }
+    @Override
+    protected void notifySaveDone(Context\<Record> ctx) {
+        <model.controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
+    }
+
+    // Record creation functions
+    @Override
+    protected Record unmarshall(byte[] data) {
+        return new Record(data);
+    }
+    public Record create() {
+        return new Record();
+    }
+};
 >>

@@ -29,13 +29,23 @@ public class ValidateIR {
 
                 for (int i = 0; i < sources.length; i++) {
                     assert Registers.isNormal(sources[i]);
-                    assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID
-                            && sourceTypes[i] != PrimitiveType.ANY;
+                    // FIXME change this assert when you change PrimitiveType.ANY.isAssignable back to strict equality
+                    //assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID
+                    //        && sourceTypes[i] != PrimitiveType.ANY;
+                    assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID;
                     assert ir.getRegisterType(sources[i]).equals(sourceTypes[i]);
                 }
                 if (sink != Registers.VOID_REG) {
                     assert Registers.isNormal(sink);
                     assert ir.getRegisterType(sink).equals(sinkType);
+
+                    // this is not true always:
+                    // AstToUntypedIRVisitor will assign registers to the result of function calls,
+                    // even if those calls return void, in which case TypeResolvePass will set those
+                    // registers to VOID
+                    // if the user attempts to do anything with the result it will result in a type error
+                    // though
+                    //assert sinkType != PrimitiveType.VOID;
                 } else {
                     assert sinkType == PrimitiveType.VOID;
                 }

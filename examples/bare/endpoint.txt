@@ -1,0 +1,18 @@
+interface CloudEndpoint(p):
+    configuration:
+        base = '171.64.70.90'
+        port = p
+        type = 'HTTP'
+        method = 'POST'
+        url = '<app.name>/'
+        user_agent = 'Ravel:Java/Client'
+
+    implementation:
+        java = "rlib/java/httpEndpoint.stg"
+        c = "rlib/c/httpEndpoint.stg"
+
+
+space Space:
+    interfaces:
+        cp = CloudEndpoint(p=4444)
+        cp2 = CloudEndppoint(p=4445)

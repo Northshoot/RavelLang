@@ -24,15 +24,16 @@ import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
  * Created by gcampagn on 1/20/17.
  */
 public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
-    private final UntypedIR ir = new UntypedIR();
+    private final UntypedIR ir;
     private final List<Block> blockStack = new ArrayList<>();
 
     private final ControllerEventCompiler compiler;
     private Scope currentScope;
     private int currentReg = VOID_REG;
 
-    public AstToUntypedIRVisitor(ControllerEventCompiler compiler) {
+    public AstToUntypedIRVisitor(ControllerEventCompiler compiler, int firstGpRegister) {
         this.compiler = compiler;
+        ir = new UntypedIR(firstGpRegister);
         blockStack.add(ir.getRoot());
     }
 
@@ -505,5 +506,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
     @Override public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
         addCurrent(new Continue(ctx));
         return VOID_REG;
+    }
+
+    public void declare(VariableSymbol var) {
+        ensureVarRegister(var);
     }
 }

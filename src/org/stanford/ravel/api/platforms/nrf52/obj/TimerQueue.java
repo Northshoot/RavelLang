@@ -1,11 +1,11 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.c.FuncDeclaration;
+import org.stanford.ravel.api.platforms.nrf52.FuncDeclaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.Source;
+import org.stanford.ravel.primitives.Interface;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -45,9 +45,9 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
                 "All timers are collected in the single file";
 
         header.setFileName(fileName + ".h");
-        header.setPath(mBuildPath);
+        header.setBasePath(mBuildPath);
         obj.setFileName(fileName + ".c");
-        obj.setPath(mBuildPath);
+        obj.setBasePath(mBuildPath);
 
         addToMakeIncludePathSDK("/components/drivers_nrf/timer");
         addToMakeIncludePathSDK("/components/libraries/timer");
@@ -56,9 +56,9 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
         addToMakeObj("api/" + this.fileName +".c");
     }
 
-    public String getControllerInclude(){
-
-        return controller.getHeaderFileName();}
+    public String getControllerInclude() {
+        return "controller/" + controller.getName() + ".h";
+    }
 
     public List<FuncDeclaration> getFuncDeclaration(){
 
@@ -83,8 +83,8 @@ public class TimerQueue extends RavelAPIObject implements RavelObjectInterface {
     }
 
 
-    public void addTimer(Source timer_name, boolean periodic) {
-        mTimerMap.put(timer_name.getCName(), new Timer(timer_name, this, periodic));
+    public void addTimer(Interface timer_name, boolean periodic) {
+        mTimerMap.put(timer_name.getName(), new Timer(timer_name, this, periodic));
     }
 
     public Timer getTimer(String timer_name) {

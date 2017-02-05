@@ -18,8 +18,6 @@ public interface TInstructionVisitor {
     void visit(TIfStatement ifStatement);
     void visit(TImmediateLoad immediateLoad);
     void visit(TMethodCall methodCall);
-    void visit(TModelCreateCall modelCreateCall);
-    void visit(TModelRecordLoad modelRecordLoad);
     void visit(TMove move);
     void visit(TUnaryArithOp arithOp);
 }

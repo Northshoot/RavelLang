@@ -1,8 +1,8 @@
 package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.c.Declaration;
-import org.stanford.ravel.api.lang.c.FuncDeclaration;
+import org.stanford.ravel.api.platforms.nrf52.Declaration;
+import org.stanford.ravel.api.platforms.nrf52.FuncDeclaration;
 import org.stanford.ravel.api.platforms.nrf52.obj.MainApp;
 
 import java.text.SimpleDateFormat;

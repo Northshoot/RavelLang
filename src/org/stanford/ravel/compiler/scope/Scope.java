@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler.scope;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.Symbol;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -105,19 +106,19 @@ public interface Scope {
      *  scope. E.g., does not get local scopes within a function.
      *  This returns a subset or same set as {@link #getNestedScopes}.
      */
-    List<Scope> getNestedScopedSymbols();
+    Collection<Scope> getNestedScopedSymbols();
 
     /** Return the symbols defined within this scope. The order of insertion
      *  into the scope is the order returned in this list.
      */
-    List<? extends Symbol> getSymbols();
+    Collection<Symbol> getSymbols();
 
     /** Return all symbols found in all nested scopes. The order
      *  of insertion into the scope is the order returned in this
      *  list for each scope.  The scopes are traversed in the
      *  order in which they are encountered in the input.
      */
-    List<? extends Symbol> getAllSymbols();
+    Collection<Symbol> getAllSymbols();
 
     /** Return the set of names associated with all symbols in the scope. */
     Set<String> getSymbolNames();

@@ -1,7 +1,7 @@
 package patterns.src.java;
 
+import org.stanford.ravel.rrt.RavelPacket;
 import patterns.src.java.app.AppDispatcher;
-import patterns.src.java.rrt.RavelPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class TestTemplates {
         }
 
 
-        RavelPacket rp = new RavelPacket(outputStream.toByteArray());
+        RavelPacket rp = RavelPacket.empty(30);
         System.out.println(rp);
     }
 
@@ -69,15 +69,15 @@ public class TestTemplates {
             }
         };
 
-        embedded_thread.start();
 
-        Thread gateway_thread = new Thread(){
-        public void run(){
+
+        Thread gateway_thread = new Thread(() -> {
             AppDispatcher gateway = new AppDispatcher("GTW");
-        }
-    };
+        });
 
         gateway_thread.start();
+        embedded_thread.start();
+
 //
 //        Thread cloud_thread = new Thread(){
 //            public void run(){
@@ -86,6 +86,15 @@ public class TestTemplates {
 //        };
 //
 //        cloud_thread.start();
+
+        Thread cloud_thread = new Thread(){
+            public void run(){
+                AppDispatcher cloud = new AppDispatcher("CLD");
+            }
+        };
+
+        cloud_thread.start();
+
 
 
 

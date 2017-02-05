@@ -16,6 +16,8 @@ public class TComparisonOp extends TInstruction {
     public final ComparisonOperation op;
 
     public TComparisonOp(Type type, int target, int src1, int src2, ComparisonOperation op) {
+        assert op != null;
+
         this.type = type;
         this.target = target;
         this.src1 = src1;

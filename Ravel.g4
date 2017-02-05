@@ -128,6 +128,7 @@ file_input returns [Scope scope]
 comp_def
     : model_comp
     | controller_comp
+    | iface_comp
     | space_comp
     ;
 
@@ -145,8 +146,7 @@ space_block
     : platform_scope
     | models_scope
     | controllers_scope
-    | sink_scope
-    | source_scope
+    | interface_scope
     | NEWLINE
     ;
 
@@ -191,7 +191,7 @@ instance_def returns [InstanceSymbol symbol]
     ;
 
 param_assig_list
-    : param_assig (',' param_assig)? #ParameterAssignments
+    : param_assig (',' param_assig)* #ParameterAssignments
     ;
 
 param_assig
@@ -206,19 +206,50 @@ instance_name
 controllers_scope returns [Scope scope]
     : 'controllers:' instantiations #ControllerInstantiation
     ;
-sink_scope returns [Scope scope]
-    : 'sinks:' space_assignments #SinkLinks
+interface_scope returns [Scope scope]
+    : 'interfaces:' instantiations #InterfaceInstantiation
     ;
 
-source_scope returns [Scope scope]
-    : 'sources:' space_assignments #SourceLinks
+/**
+ *
+ * Interface parser rules
+ */
+iface_comp returns [Scope scope]
+    : INTERFACE Identifier function_args ':' iface_body #InterfaceScope
     ;
+
+iface_body
+    : NEWLINE INDENT config_scope? impl_scope iface_members* DEDENT
+    ;
+
+impl_scope returns [Scope scope]
+    : 'implementation:' space_assignments* #ImplementationScope
+    ;
+
+config_scope returns [Scope scope]
+    : 'configuration:' space_assignments* #ConfigurationScope
+    ;
+
+iface_members
+    : iface_def
+    | iface_event
+    | NEWLINE
+    ;
+
+iface_def returns [InterfaceMemberSymbol symbol]
+    : DEF Identifier '(' typed_identifier_list? ')' (':' type)? #InterfaceDef
+    ;
+
+iface_event returns [InterfaceMemberSymbol symbol]
+    : EVENT Identifier '(' typed_identifier_list? ')' #InterfaceEvent
+    ;
+
 /**
  *
  * Model parser rules
  */
 model_comp returns [Scope scope]
-    :  modelType MODEL Identifier  component_parameters ':' model_body # ModelScope
+    :  modelType MODEL Identifier  function_args ':' model_body # ModelScope
     ;
 
 
@@ -245,21 +276,8 @@ properties
     ;
 
 property_line
-    : property
+    : ref_assign
     | NEWLINE
-    ;
-
-property
-    : Identifier '=' propValue NEWLINE #VarAssignment
-    ;
-
-propValue
-    : propArray
-    | literal
-    ;
-
-propArray
-    : '[' literal (',' literal)* ']'
     ;
 
 schema_block returns [Scope scope]
@@ -276,7 +294,7 @@ field_line
     ;
 
 field
-    : Identifier '=' field_type '(' elementValuePairs? ')'  NEWLINE? #FieldDeclaration
+    : Identifier ':' type  NEWLINE? #FieldDeclaration
     ;
 
 /**
@@ -308,7 +326,12 @@ controller_comp returns [Scope scope]
     ;
 
 controller_scope
-    : NEWLINE INDENT eventdef+ DEDENT
+    : NEWLINE INDENT controller_entry* DEDENT
+    ;
+
+controller_entry
+    : eventdef
+    | NEWLINE
     ;
 
 /**
@@ -377,7 +400,9 @@ var_decl
     ;
 
 type
-    : Identifier ;
+    : Identifier array_marker*;
+
+array_marker: '[' ']' ;
 
 assignment
     : lvalue assign_op expressionList
@@ -523,30 +548,6 @@ forControl
     :   identifier_list IN expressionList
     ;
 
-component_parameters
-    : '(' params? ')'
-    ;
-params
-    : param (',' param)?
-    ;
-param
-    : Identifier
-    ;
-elementValuePairs
-    :   elementValuePair (',' elementValuePair)*
-    ;
-elementValuePair
-    :   Identifier '=' elementValue
-    ;
-
-elementValue
-    : expression
-    | elementValueArrayInitializer
-    ;
-elementValueArrayInitializer
-    :   '{' (elementValue (',' elementValue)*)? (',')? '}'
-    ;
-
 qualified_name
     : Identifier ('.' Identifier)*
     ;
@@ -565,6 +566,9 @@ CONTROLLER          : 'controller' ;
 VIEW                : 'view';
 FLOW                : 'flow' ;
 
+// interface
+INTERFACE           : 'interface' ;
+DEF                 : 'def' ;
 
 //controller
 EVENT               : 'event' ;
@@ -663,41 +667,92 @@ number
      : integer
      | float_point
      ;
+
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
-     : DECIMAL_INTEGER
+     : DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
      ;
+/// decimalinteger ::=  nonzerodigit digit* | "0"+
 DECIMAL_INTEGER
-     : NON_ZERO_DIGIT DIGIT*
-     | '0'+
-     ;
+ : NON_ZERO_DIGIT DIGIT*
+ | '0'+
+ ;
+
+/// octinteger     ::=  "0" ("o" | "O") octdigit+
+OCT_INTEGER
+ : '0' [oO] OCT_DIGIT+
+ ;
+
+/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
+HEX_INTEGER
+ : '0' [xX] HEX_DIGIT+
+ ;
+
+/// bininteger     ::=  "0" ("b" | "B") bindigit+
+BIN_INTEGER
+ : '0' [bB] BIN_DIGIT+
+ ;
+
+
+/// nonzerodigit   ::=  "1"..."9"
 fragment NON_ZERO_DIGIT
-     : [1-9]
-     ;
+ : [1-9]
+ ;
+
 /// digit          ::=  "0"..."9"
 fragment DIGIT
-     : [0-9]
-     ;
+ : [0-9]
+ ;
+
+/// octdigit       ::=  "0"..."7"
+fragment OCT_DIGIT
+ : [0-7]
+ ;
+
+/// hexdigit       ::=  digit | "a"..."f" | "A"..."F"
+fragment HEX_DIGIT
+ : [0-9a-fA-F]
+ ;
+
+/// bindigit       ::=  "0" | "1"
+fragment BIN_DIGIT
+ : [01]
+ ;
+
 /// floatnumber   ::=  pointfloat | exponentfloat
 float_point
      : FLOAT_NUMBER
      ;
 
 FLOAT_NUMBER
-    : POINT_FLOAT
+    : POINT_FLOAT | EXPONENT_FLOAT
     ;
 
+/// pointfloat    ::=  [intpart] fraction | intpart "."
 fragment POINT_FLOAT
-     : INT_PART? FRACTION
-     | INT_PART '.'
-     ;
+ : INT_PART? FRACTION
+ | INT_PART '.'
+ ;
+
+/// exponentfloat ::=  (intpart | pointfloat) exponent
+fragment EXPONENT_FLOAT
+ : ( INT_PART | POINT_FLOAT ) EXPONENT
+ ;
+
+/// intpart       ::=  digit+
 fragment INT_PART
-     : DIGIT+
-     ;
+ : DIGIT+
+ ;
+
 /// fraction      ::=  "." digit+
 fragment FRACTION
-     : '.' DIGIT+
-     ;
+ : '.' DIGIT+
+ ;
+
+/// exponent      ::=  ("e" | "E") ["+" | "-"] digit+
+fragment EXPONENT
+ : [eE] [+-]? DIGIT+
+ ;
 
 boolean_rule
     : TRUE
@@ -710,41 +765,52 @@ NullLiteral
 
 // §3.12 Operators
 
-ASSIGN          : '=';
-GT              : '>';
-LT              : '<';
-BANG            : '!';
-TILDE           : '~';
-QUESTION        : '?';
-COLON           : ':';
-EQUAL           : '==';
-LE              : '<=';
-GE              : '>=';
-NOTEQUAL        : '!=';
-AND_S           : '&&';
-OR_S             : '||';
-INC             : '++';
-DEC             : '--';
-ADD             : '+';
-SUB             : '-';
-MUL             : '*';
-DIV             : '/';
-BITAND          : '&';
-BITOR           : '|';
-CARET           : '^';
-MOD             : '%';
-
-ADD_ASSIGN      : '+=';
-SUB_ASSIGN      : '-=';
-MUL_ASSIGN      : '*=';
-DIV_ASSIGN      : '/=';
-AND_ASSIGN      : '&=';
-OR_ASSIGN       : '|=';
-XOR_ASSIGN      : '^=';
-MOD_ASSIGN      : '%=';
-LSHIFT_ASSIGN   : '<<=';
-RSHIFT_ASSIGN   : '>>=';
-URSHIFT_ASSIGN  : '>>>=';
+DOT : '.';
+ELLIPSIS : '...';
+STAR : '*';
+OPEN_PAREN : '(' {opened++;};
+CLOSE_PAREN : ')' {opened--;};
+COMMA : ',';
+COLON : ':';
+SEMI_COLON : ';';
+POWER : '**';
+ASSIGN : '=';
+OPEN_BRACK : '[' {opened++;};
+CLOSE_BRACK : ']' {opened--;};
+OR_OP : '|';
+XOR : '^';
+AND_OP : '&';
+LEFT_SHIFT : '<<';
+RIGHT_SHIFT : '>>';
+ADD : '+';
+MINUS : '-';
+DIV : '/';
+MOD : '%';
+IDIV : '//';
+NOT_OP : '~';
+OPEN_BRACE : '{' {opened++;};
+CLOSE_BRACE : '}' {opened--;};
+LT : '<';
+GT : '>';
+EQUAL : '==';
+GE : '>=';
+LE : '<=';
+NOTEQUAL : '<>' | '!=';
+AT : '@';
+ARROW : '->';
+ADD_ASSIGN : '+=';
+SUB_ASSIGN : '-=';
+MULT_ASSIGN : '*=';
+AT_ASSIGN : '@=';
+DIV_ASSIGN : '/=';
+MOD_ASSIGN : '%=';
+AND_ASSIGN : '&=';
+OR_ASSIGN : '|=';
+XOR_ASSIGN : '^=';
+LEFT_SHIFT_ASSIGN : '<<=';
+RIGHT_SHIFT_ASSIGN : '>>=';
+POWER_ASSIGN : '**=';
+IDIV_ASSIGN : '//=';
 
 Identifier
     :   ID_START ID_CONTINUE*
@@ -763,9 +829,12 @@ fragment ID_CONTINUE
 
 
 SKIP_
-    : ( SPACES | COMMENT | LINE_JOINING ) -> skip
-    ;
+ : ( SPACES | COMMENT | LINE_JOINING ) -> skip
+ ;
 
+UNKNOWN_CHAR
+ : .
+ ;
 
 /*
  * fragments
@@ -782,4 +851,3 @@ fragment COMMENT
 fragment LINE_JOINING
  : '\\' SPACES? ( '\r'? '\n' | '\r' )
  ;
-

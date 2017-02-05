@@ -1,0 +1,138 @@
+import "common.stg"
+
+component_field(comp, prefix) ::=<<
+private final <comp.name> <prefix>_<comp.varName> = new <comp.name>(this);
+>>
+
+controller_field(ctr) ::=<<
+private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
+>>
+
+sink_field(sink) ::=<<
+private final SinkAPI sink_<sink.varName> = null;
+>>
+
+model_case_event(model, event) ::=<<
+case <model.baseModel.id>:
+    model_<model.varName>.<event>(rp, endpoint);
+    break;
+>>
+
+set_component_controller(comp, prefix) ::=<<
+<comp.controllerList:{c|<prefix>_<comp.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
+>>
+
+file(package,imports,name,models,interfaces,controllers,space) ::=<<
+package <package>;
+
+import java.util.Map;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.model.ModelBottomAPI;
+import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.SystemEventAPI;
+import org.stanford.ravel.rrt.AbstractDispatcher;
+import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.SourceAPI;
+import org.stanford.ravel.rrt.SinkAPI;
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.events.ModelEvent;
+
+<imports:do_import()>
+
+public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemEventAPI {
+    <models:component_field("model"); separator="\n">
+    <interfaces:component_field("iface"); separator="\n">
+    <controllers:controller_field(); separator="\n">
+
+    private final Map\<String, Endpoint> endpointMap;
+    private DriverAPI driver;
+
+    public AppDispatcher(Map\<String, Endpoint> endpointMap) {
+        this.endpointMap = endpointMap;
+
+        <models:set_component_controller("model"); separator="\n">
+        <interfaces:set_component_controller("iface"); separator="\n">
+
+        <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
+    }
+
+    void setDriver(DriverAPI driver) {
+        this.driver = driver;
+    }
+
+    @Override
+    public String getAppName() {
+        return "<space.name>";
+    }
+
+    @Override
+    public Endpoint getEndpointByName(String name) {
+        Endpoint ep = endpointMap.get(name);
+        if (ep == null)
+            throw new IllegalArgumentException("Invalid endpoint " + name);
+        return ep;
+    }
+
+    /***********************************************************************/
+    /************** AD callbacks to the models ****************************/
+    /***********************************************************************/
+
+    protected void models__notifyDeparted(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
+        RavelPacket rp = RavelPacket.fromNetwork(data);
+        switch (rp.model_id) {
+            <models:model_case_event("record_departed"); separator="\n">
+        }
+    }
+
+    protected void models__notifyArrived(Event event){
+        byte[] data = ((NetworkEvent) event).data;
+        Endpoint endpoint = ((NetworkEvent) event).endpoint;
+        RavelPacket rp = RavelPacket.fromNetwork(data);
+        switch (rp.model_id){
+            <models:model_case_event("record_arrived"); separator="\n">
+        }
+    }
+
+    protected void models__notifyFull(Event event){
+        Context\<? extends ModelRecord> data = ((ModelEvent) event).ctx;
+        // FIXME
+        // data.model.full();
+    }
+
+    /***********************************************************************/
+    /************** Network callbacks from AD to Driver ********************/
+    /***********************************************************************/
+    public void driver__sendData(Event event) {
+        driver.sendData(((NetworkEvent) event).data,
+                        ((NetworkEvent) event).endpoint);
+    }
+
+    /***********************************************************************/
+    /************** System callbacks from Driver to AD *********************/
+    /***********************************************************************/
+    @Override
+    public void started() {
+        <space.systemAPI.controllerMap.started:{c|ctr_<c.varName>.SystemAPI_started();}; separator="\n">
+    }
+
+    @Override
+    public void stopped() {
+        <space.systemAPI.controllerMap.stopped:{c|ctr_<c.varName>.SystemAPI_stopped();}; separator="\n">
+    }
+
+    @Override
+    public void restarted() {
+        <space.systemAPI.controllerMap.restarted:{c|ctr_<c.varName>.SystemAPI_restarted();}; separator="\n">
+    }
+
+    @Override
+    public void battery(SystemEventAPI.BatteryLevel bl) {}
+};
+>>

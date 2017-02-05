@@ -15,6 +15,7 @@ public class ComparisonOp extends Instruction {
 
     public ComparisonOp(ParserRuleContext definer, int target, int src1, int src2, ComparisonOperation op) {
         super(definer);
+        assert op != null;
 
         this.target = target;
         this.src1 = src1;

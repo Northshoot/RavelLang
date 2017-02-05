@@ -5,34 +5,30 @@ package org.stanford.ravel.compiler;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.InstanceSymbol;
-import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.ModelType;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.symbol.*;
-import org.stanford.ravel.primitives.ModelEvent;
-import org.stanford.ravel.primitives.Primitive;
-import sun.java2d.pipe.SpanShapeRenderer;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Created by lauril on 8/17/16.
  */
 public class DefPhase extends RavelBaseListener {
-    private final static boolean DEBUG = true;
+    private final boolean debug;
 
     private final RavelCompiler driver;
 
-    public DefPhase(RavelCompiler driver) {
+    public DefPhase(RavelCompiler driver, boolean debug) {
         this.driver = driver;
+        this.debug = debug;
     }
 
     private Scope currentScope;
@@ -65,7 +61,16 @@ public class DefPhase extends RavelBaseListener {
     public void enterModelScope(RavelParser.ModelScopeContext ctx) {
         String name = ctx.Identifier().getText();
         String type = ctx.modelType().getText();
-        ModelSymbol model = new ModelSymbol(name, Model.getType(type));
+
+        Model.Type modelType;
+        try {
+            modelType = Model.Type.valueOf(type.toUpperCase());
+        } catch(IllegalArgumentException e) {
+            emitError(ctx.modelType(), "invalid model type");
+            modelType = Model.Type.INVALID;
+        }
+
+        ModelSymbol model = new ModelSymbol(name, modelType);
         currentScope.define(model);
         ctx.scope=model;
         model.setDefNode(ctx);
@@ -84,11 +89,6 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
-    public void exitParameterAssignments(RavelParser.ParameterAssignmentsContext ctx) {
-
-    }
-
-    @Override
     public void exitPropertiesScope(RavelParser.PropertiesScopeContext ctx) {
         if(currentScope instanceof SpaceSymbol) {
             for(Symbol re: ctx.scope.getSymbols()) {
@@ -96,23 +96,6 @@ public class DefPhase extends RavelBaseListener {
             }
         }
         popScope();
-    }
-
-    @Override
-    public void enterVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend++;
-        String name = ctx.Identifier().getText();
-        VariableSymbol vs = new VariableSymbol(name);
-        vs.setScope(currentScope);
-        vs.setDefNode(ctx);
-        // FIXME figure out the right type
-        vs.setType(PrimitiveType.ANY);
-        currentScope.define(vs);
-    }
-
-    @Override
-    public void exitVarAssignment(RavelParser.VarAssignmentContext ctx) {
-        intend--;
     }
 
     @Override
@@ -125,26 +108,19 @@ public class DefPhase extends RavelBaseListener {
         pushScope(ls);
     }
 
-    private static Type typeFromField(String fieldType) {
-        switch (fieldType) {
-            case "ByteField":
-                return new ArrayType(PrimitiveType.BYTE);
-            case "BooleanField":
-                return PrimitiveType.BOOL;
-            case "StringField":
-                return PrimitiveType.STR;
-            case "IntegerField":
-                return PrimitiveType.INT32;
-            case "NumberField":
-                return PrimitiveType.DOUBLE;
-            case "DateField":
-                return PrimitiveType.DATE;
-            case "DateTimeField":
-                return PrimitiveType.DATE_TIME;
-            case "TimeStampField":
-                return PrimitiveType.TIMESTAMP;
-            default:
-                return PrimitiveType.ANY;
+    private Type parseType(RavelParser.TypeContext ctx) {
+        String typeName = ctx.Identifier().getText();
+        Symbol typeSymbol = currentScope.resolve(typeName);
+        if (!(typeSymbol instanceof TypeSymbol)) {
+            emitError(ctx, typeName + " does not name a type");
+            return PrimitiveType.ERROR;
+        } else {
+            Type baseType = ((TypeSymbol) typeSymbol).getDefinedType();
+
+            for (RavelParser.Array_markerContext array : ctx.array_marker())
+                baseType = new ArrayType(baseType);
+
+            return baseType;
         }
     }
 
@@ -156,9 +132,7 @@ public class DefPhase extends RavelBaseListener {
         fs.setDefNode(ctx);
         fs.setScope(currentScope);
 
-        String fieldType = ctx.field_type().getText();
-        fs.setType(typeFromField(fieldType));
-
+        fs.setType(parseType(ctx.type()));
         currentScope.define(fs);
      }
 
@@ -195,7 +169,91 @@ public class DefPhase extends RavelBaseListener {
         popScope();
     }
 
+    @Override
+    public void enterInterfaceScope(RavelParser.InterfaceScopeContext ctx) {
+        String name = ctx.Identifier().getText();
+        InterfaceSymbol sym = new InterfaceSymbol(name);
+        ctx.scope = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
 
+    @Override
+    public void enterImplementationScope(RavelParser.ImplementationScopeContext ctx) {
+        LocalScope ls = new LocalScope("implementation", currentScope);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        ls.setDefNode(ctx);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitImplementationScope(RavelParser.ImplementationScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterConfigurationScope(RavelParser.ConfigurationScopeContext ctx) {
+        LocalScope ls = new LocalScope("configuration", currentScope);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        ls.setDefNode(ctx);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitConfigurationScope(RavelParser.ConfigurationScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterInterfaceDef(RavelParser.InterfaceDefContext ctx) {
+        String name = ctx.Identifier().getText();
+        Type returnType;
+
+        if (ctx.type() != null) {
+            returnType = parseType(ctx.type());
+        } else {
+            returnType = PrimitiveType.VOID;
+        }
+
+        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, returnType, false);
+        ctx.symbol = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
+
+    @Override
+    public void exitInterfaceDef(RavelParser.InterfaceDefContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
+        String name = ctx.Identifier().getText();
+
+        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, PrimitiveType.VOID, true);
+        ctx.symbol = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
+
+    @Override
+    public void exitInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void exitInterfaceScope(RavelParser.InterfaceScopeContext ctx) {
+        if (((InterfaceSymbol)currentScope).getImplementationScope() == null)
+            emitError(ctx, "must define an 'implementation:' block for an interface pointing to the template files");
+
+        ((InterfaceSymbol)currentScope).createInterfaceType();
+        popScope();
+    }
 
     @Override
     public void enterControllerScope(RavelParser.ControllerScopeContext ctx) {
@@ -205,6 +263,11 @@ public class DefPhase extends RavelBaseListener {
         ctr.setDefNode(ctx);
         currentScope.define(ctr);
         pushScope(ctr);
+
+        VariableSymbol system = new VariableSymbol("system");
+        system.setDefNode(ctx);
+        system.setType(new SystemType());
+        currentScope.define(system);
     }
 
     @Override
@@ -214,46 +277,44 @@ public class DefPhase extends RavelBaseListener {
         String modelVarName = ctx.Identifier(0).getText();
         String eventName = ctx.Identifier(1).getText();
 
-        EventSymbol es;
-        try {
-            ModelEvent event = ModelEvent.valueOf(eventName);
-            es = new EventSymbol(modelVarName, event);
-        } catch(IllegalArgumentException e) {
-            emitError(ctx, "invalid event declaration " + modelVarName + "." + eventName + ": not a valid event name");
-            return;
-        }
+        EventHandlerSymbol es = new EventHandlerSymbol(modelVarName, eventName);
 
-        //we create a local scope for each event
+        // we create a local scope for each event
+        // we must push the scope regardless of the errors we emit later because
+        // we'll pop in exitEventScope()
         ctx.scope = es;
         es.setDefNode(ctx);
         currentScope.define(es);
+        pushScope(es);
 
         Symbol modelVarSym = currentScope.resolve(modelVarName);
 
-        pushScope(es);
-
-        VariableSymbol selfVar = new VariableSymbol("self");
-        // it's a stretch to say that the whole event defines self, but if
-        // we ever need to emit type errors related to it, that's probably the
-        // best AST node to attach to it
-        selfVar.setDefNode(ctx);
-
-        if (modelVarSym == null) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": undeclared model");
-            return;
-        }
         if (!(modelVarSym instanceof VariableSymbol)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model, source or sink");
             return;
         }
-        Type modelType =  ((VariableSymbol) modelVarSym).getType();
-        if (!(modelType instanceof ModelType)) {
-            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model");
+        Type classType =  ((VariableSymbol) modelVarSym).getType();
+        if (!(classType instanceof ClassType)) {
+            emitError(ctx, "invalid event declaration " + es.getName() + ": does not refer to a declared model, source or sink");
             return;
         }
+        Type eventType = ((ClassType) classType).getMemberType(eventName);
+        if (!(eventType instanceof EventType)) {
+            emitError(ctx, "invalid event declaration " + modelVarName + "." + eventName + ": not a valid event name");
+            return;
+        }
+        es.setType(eventType);
 
-        selfVar.setType(((ModelType) modelType).getInstanceType());
-        currentScope.define(selfVar);
+        if (((EventType) eventType).hasSelf()) {
+            VariableSymbol selfVar = new VariableSymbol("self");
+            // it's a stretch to say that the whole event defines self, but if
+            // we ever need to emit type errors related to it, that's probably the
+            // best AST node to attach to it
+            selfVar.setDefNode(ctx);
+            selfVar.setRegister(Registers.SELF_REG);
+            selfVar.setType(((EventType) eventType).getArgumentTypes()[0]);
+            currentScope.define(selfVar);
+        }
     }
 
     @Override
@@ -271,12 +332,7 @@ public class DefPhase extends RavelBaseListener {
 
         Type type;
         if (ctx.type() != null) {
-            Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
-            if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-                emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
-                return;
-            }
-            type = ((TypeSymbol) typeSymbol).getDefinedType();
+            type = parseType(ctx.type());
         } else {
             type = PrimitiveType.ANY;
         }
@@ -289,13 +345,7 @@ public class DefPhase extends RavelBaseListener {
         String varName = ctx.Identifier().getText();
         VariableSymbol var = new VariableSymbol(varName);
 
-        Symbol typeSymbol = currentScope.resolve(ctx.type().Identifier().getText());
-        if (typeSymbol == null || !(typeSymbol instanceof TypeSymbol)) {
-            emitError(ctx.type(), ctx.type().Identifier().getText() + " does not name a type");
-            return;
-        }
-        Type type = ((TypeSymbol) typeSymbol).getDefinedType();
-        var.setType(type);
+        var.setType(parseType(ctx.type()));
         var.setDefNode(ctx);
         currentScope.define(var);
     }
@@ -353,13 +403,15 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void enterRef_assign(RavelParser.Ref_assignContext ctx) {
-        assert currentScope.getEnclosingScope() instanceof SpaceSymbol;
-
         String currentScopeName = currentScope.getName();
 
-        // FIXME this can actually never be true, because models and controllers
-        // use instantiation (InstanceSymbol) not ref_assign (ReferenceSymbol/ConstantSymbol)
-        boolean allowLiteral = currentScopeName.equals("models") || currentScopeName.equals("controllers");
+        boolean allowLiteral = currentScopeName.equals("implementation") ||
+                currentScopeName.equals("properties") ||
+                currentScopeName.equals("configuration");
+        boolean allowReference = currentScopeName.equals("properties") ||
+                currentScopeName.equals("configuration") ||
+                currentScopeName.equals("platform");
+        boolean allowUnboundedReference = currentScopeName.equals("platform");
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
@@ -374,9 +426,19 @@ public class DefPhase extends RavelBaseListener {
                 emitError(value.literal(), "literal value not allowed in this context");
             }
         } else {
-            ReferenceSymbol ref = new ReferenceSymbol(name, value.qualified_name().getText());
-            ref.setDefNode(ctx);
-            currentScope.define(ref);
+            if (allowReference) {
+                String refName = value.qualified_name().getText();
+                Symbol refSymbol = currentScope.getEnclosingScope().resolve(refName);
+                if (!allowUnboundedReference && !(refSymbol instanceof VariableSymbol)) {
+                    emitError(value.qualified_name(), "undeclared variable " + refName);
+                } else {
+                    ReferenceSymbol ref = new ReferenceSymbol(name, refName);
+                    ref.setDefNode(ctx);
+                    currentScope.define(ref);
+                }
+            } else {
+                emitError(value.qualified_name(), "reference to a component parameter not allowed in this context");
+            }
         }
     }
 
@@ -464,35 +526,20 @@ public class DefPhase extends RavelBaseListener {
         popScope();
     }
 
-    @Override public void enterSinkLinks(RavelParser.SinkLinksContext ctx) {
-        LocalScope ls = new LocalScope("sinks", currentScope);
+    @Override public void enterInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) {
+        LocalScope ls = new LocalScope("interfaces", currentScope);
         ctx.scope = ls;
         ls.setDefNode(ctx);
         currentScope.nest(ls);
         pushScope(ls);
     }
-    @Override public void exitSinkLinks(RavelParser.SinkLinksContext ctx) {
+    @Override public void exitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) {
         for (Symbol re: ctx.scope.getSymbols()) {
-            ((SpaceSymbol) currentScope.getEnclosingScope()).addSink(re.getName(),(ReferenceSymbol) re);
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addInterface(re.getName(),(InstanceSymbol) re);
         }
         popScope();
     }
 
-
-    @Override public void enterSourceLinks(RavelParser.SourceLinksContext ctx) {
-        LocalScope ls = new LocalScope("sources", currentScope);
-        ctx.scope = ls;
-        ls.setDefNode(ctx);
-        currentScope.nest(ls);
-        pushScope(ls);
-    }
-
-    @Override public void exitSourceLinks(RavelParser.SourceLinksContext ctx) {
-        for (Symbol re: ctx.scope.getSymbols()) {
-            ((SpaceSymbol) currentScope.getEnclosingScope()).addSource(re.getName(),(ReferenceSymbol) re);
-        }
-        popScope();
-    }
     @Override public void exitSpaceScope(RavelParser.SpaceScopeContext ctx) {
         popScope();
     }
@@ -509,13 +556,13 @@ public class DefPhase extends RavelBaseListener {
 
     private void pushScope(Scope s) {
         currentScope = s;
-        if (DEBUG)
+        if (debug)
             prettyPrint("entering: "+currentScope.getName()+":"+s);
         intend++;
     }
 
     private void popScope() {
-        if (DEBUG)
+        if (debug)
             prettyPrint("leaving: "+currentScope.getName()+":"+currentScope);
         currentScope = currentScope.getEnclosingScope();
         intend--;

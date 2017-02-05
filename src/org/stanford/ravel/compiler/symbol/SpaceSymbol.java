@@ -13,10 +13,9 @@ public class SpaceSymbol extends ComponentSymbol {
     private final SpaceType definedType;
     private final Map<String, InstanceSymbol> modelInitMap;
     private final Map<String, InstanceSymbol> ctrInitMap;
+    private final Map<String, InstanceSymbol> ifaceInitMap;
     private final Map<String, ReferenceSymbol> propInitMap;
     private final Map<String, ReferenceSymbol> platInitMap;
-    private final Map<String, ReferenceSymbol> srcInitMap;
-    private final Map<String, ReferenceSymbol> sinkInitMap;
 
     public SpaceSymbol(String name) {
         super(name);
@@ -26,8 +25,7 @@ public class SpaceSymbol extends ComponentSymbol {
         ctrInitMap = new LinkedHashMap<>();
         propInitMap = new LinkedHashMap<>();
         platInitMap = new LinkedHashMap<>();
-        srcInitMap = new LinkedHashMap<>();
-        sinkInitMap = new LinkedHashMap<>();
+        ifaceInitMap = new LinkedHashMap<>();
     }
 
     @Override
@@ -60,22 +58,12 @@ public class SpaceSymbol extends ComponentSymbol {
         this.platInitMap.put(name, ls);
     }
 
-    public Map<String, ReferenceSymbol> getSource() {
-        return srcInitMap;
+    public Map<String, InstanceSymbol> getInterfaces() {
+        return ifaceInitMap;
     }
 
-    public void addSource(String name, ReferenceSymbol ls) {
-        this.srcInitMap.put(name, ls);
+    public void addInterface(String name, InstanceSymbol is) {
+        ifaceInitMap.put(name, is);
     }
-
-    public Map<String, ReferenceSymbol> getSink() {
-        return sinkInitMap;
-    }
-
-    public void addSink(String name, ReferenceSymbol ls) {
-        this.sinkInitMap.put(name, ls);
-    }
-
-
 }
 

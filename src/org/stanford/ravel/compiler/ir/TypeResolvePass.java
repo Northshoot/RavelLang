@@ -11,6 +11,7 @@ import org.stanford.ravel.compiler.ir.untyped.ImmediateLoad;
 import org.stanford.ravel.compiler.ir.untyped.Instruction;
 import org.stanford.ravel.compiler.ir.untyped.Move;
 import org.stanford.ravel.compiler.ir.untyped.UnaryArithOp;
+import org.stanford.ravel.compiler.symbol.TypeSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 
@@ -34,6 +35,7 @@ public class TypeResolvePass implements InstructionVisitor {
 
     public TypeResolvePass(ControllerEventCompiler compiler) {
         this.compiler = compiler;
+        loopTreeBuilder.addBasicBlock(cfgBuilder.getEntry());
     }
 
     public void declare(VariableSymbol sym) {
@@ -42,6 +44,8 @@ public class TypeResolvePass implements InstructionVisitor {
             return;
         if (sym.getRegister() == Registers.UNSET_REG)
             return;
+        if (type instanceof ClassType)
+            type = ((ClassType) type).getInstanceType();
         setRegisterType(sym.getRegister(), type);
     }
 
@@ -59,6 +63,8 @@ public class TypeResolvePass implements InstructionVisitor {
         return ir.getRegisterType(reg);
     }
     private int allocateRegister(Type type) {
+        assert type != PrimitiveType.VOID;
+
         int reg = nextRegister++;
         setRegisterType(reg, type);
         return reg;
@@ -401,6 +407,7 @@ public class TypeResolvePass implements InstructionVisitor {
         if (targetType == PrimitiveType.ANY) {
             target = instr.target;
             setRegisterType(target, resultType);
+            targetType = resultType;
         } else if (targetType.equals(resultType)) {
             target = instr.target;
         } else if (targetType.isAssignable(resultType)) {
@@ -410,8 +417,13 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
+        if (resultType == PrimitiveType.VOID) {
+            assert targetType == resultType || target == Registers.ERROR_REG;
+            target = Registers.VOID_REG;
+        }
+
         cfgBuilder.addInstruction(new TMethodCall(functionType, target, instr.owner, instr.method, arguments));
-        if (target != instr.target && target != Registers.ERROR_REG)
+        if (target != instr.target && target != Registers.ERROR_REG && target != Registers.VOID_REG)
             cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
     }
 

@@ -1,0 +1,23 @@
+import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class <name> extends org.stanford.ravel.rrt.TimerSource {
+    <interface.controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+
+    public <name>(AppDispatcher dispatcher) {
+    }
+
+    // Setter methods for AppDispatcher
+    <interface.controllerList:set_controller_method(); separator="\n">
+
+    // Event listener dispatch
+    @Override
+    protected void dispatch() {
+        <interface.controllerMap.fired:{c|ctr_<c.varName>.<name>_fired();}; separator="\n">
+    }
+}
+>>

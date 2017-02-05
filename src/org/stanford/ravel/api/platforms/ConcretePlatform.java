@@ -1,23 +1,19 @@
 package org.stanford.ravel.api.platforms;
 
+import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.primitives.Space;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by lauril on 9/7/16.
+ * Created by gcampagn on 1/31/17.
  */
-public abstract class ConcretePlatform implements SystemApi{
-    protected String mAPI;
-    protected final List<FileObject> mFileObjects;
+public interface ConcretePlatform {
+    OptionParser getOptions();
 
-    public abstract List<FileObject> build(Space s, String buildPath);
-    public ConcretePlatform() { mFileObjects = new ArrayList<>();}
+    boolean allowsLanguage(ConcreteLanguage lang);
 
-    @Override
-    public void setAPILevel(String name) {
-        this.mAPI = name;
-    }
+    List<FileObject> build(Space s);
 }

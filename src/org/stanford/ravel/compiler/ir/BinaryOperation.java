@@ -38,6 +38,7 @@ public enum BinaryOperation {
     }
 
     static BinaryOperation forSymbol(String symbol) {
+        assert symbolMap.containsKey(symbol);
         return symbolMap.get(symbol);
     }
 }

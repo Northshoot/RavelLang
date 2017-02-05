@@ -1,8 +1,10 @@
 package org.stanford.ravel.api.platforms;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.Source;
+import org.stanford.ravel.api.lang.CLang;
+import org.stanford.ravel.api.lang.ConcreteLanguage;
+import org.stanford.ravel.api.lang.JLang;
+import org.stanford.ravel.primitives.Interface;
 import org.stanford.ravel.primitives.Space;
 import org.stanford.ravel.api.Settings;
 import org.stanford.ravel.api.platforms.nrf52.obj.*;
@@ -10,8 +12,6 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 9/21/16.
  */
-public class nrf52Platform extends ConcretePlatform{
+public class nrf52Platform extends BasePlatform {
     private static Logger LOGGER = Logger.getLogger(nrf52Platform.class.getName());
     public final static String BASE_PALTFORM_TMPL_PATH = Settings.BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
     public final static String MAKE_SDK_PREFIX = "$(SDK_ROOT)";
@@ -51,13 +51,17 @@ public class nrf52Platform extends ConcretePlatform{
         mFiles = new ArrayList<>();
     }
 
+    @Override
+    public boolean allowsLanguage(ConcreteLanguage lang) {
+        return lang instanceof CLang;
+    }
 
     public void setPath(String path) {
         mBuildPath = path;
         mBuildPathApi += mBuildPath + "/api/";
 
     }
-    public void addSourceBoot(String name, Source src){
+    public void addSourceBoot(String name, Interface src){
         if(mBoot == null) {
             this.mBoot = new Boot(mBuildPathApi);
         }
@@ -65,6 +69,7 @@ public class nrf52Platform extends ConcretePlatform{
         mFiles.addAll(mBoot.getFiles());
     }
 
+    /*
     public void addSourceTimer(String timer_name, Source src){
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
@@ -73,22 +78,24 @@ public class nrf52Platform extends ConcretePlatform{
         src.setInitCallName(tQueue.innit_name);
         tQueue.addTimer(src, true);
     }
+    */
 
-    public void addSourceVibration(String name, Source src){
+    public void addSourceVibration(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceVibration >>>>>");
     }
-    public void addSourceTemperature(String name, Source src){
+    public void addSourceTemperature(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceTemperature >>>>>");
     }
-    public void addSourceVoltageIO(String name, Source src){
+    public void addSourceVoltageIO(String name, Interface src){
         //TODO: implement sources
         LOGGER.severe("<<<<< not implemented addSourceVoltageIO >>>>>");
     }
-    public void addSourceRandom(String name, Source src) {
+    public void addSourceRandom(String name, Interface src) {
 
     }
+    /*
     public void  addSourcePeriodicTimer(String name, Source src) {
         if(tQueue == null) {
             this.tQueue = new TimerQueue(mBuildPathApi, src.getController());
@@ -96,6 +103,7 @@ public class nrf52Platform extends ConcretePlatform{
         src.setInitCallName(tQueue.innit_name);
         tQueue.addTimer(src, true);
     }
+    */
     public static boolean providesAPI(String v){
         return VERSION.contentEquals(v);
     }
@@ -108,12 +116,12 @@ public class nrf52Platform extends ConcretePlatform{
     public Random getRandom() { return mRandom; }
 
     @Override
-    public List<FileObject> build(Space s, String buildPath) {
+    public List<FileObject> build(Space s) {
         mSpace = s;
-        setPath(buildPath);
         mMainApp = new MainApp(mBuildPath, mSpace);
         //TODO: add a check first that api provides methods
-        for(Source src: s.getSources()){
+        /*
+        for (Source src: s.getSources()){
             // get the method
             String n = src.getSinkReference().replace("platform.system.", "");
             String name = "addSource" + n.substring(0, 1).toUpperCase() + n.substring(1);
@@ -132,10 +140,7 @@ public class nrf52Platform extends ConcretePlatform{
                 e.printStackTrace();
             }
         }
-        for(InstantiatedController c: mSpace.getControllers()){
-            ControllerImpl cImp = new ControllerImpl(c, mMainApp);
-            mFiles.addAll(cImp.getFiles());
-        }
+        */
         return getFiles();
     }
 
@@ -177,7 +182,7 @@ public class nrf52Platform extends ConcretePlatform{
         r.add("space", mSpace);
         //create and populate file object
         FileObject fo = new FileObject();
-        fo.setPath(mBuildPath);
+        fo.setBasePath(mBuildPath);
         fo.setFileName("Makefile");
         fo.setContent(r.render());
         return fo;

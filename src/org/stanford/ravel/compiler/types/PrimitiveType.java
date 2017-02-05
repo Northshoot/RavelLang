@@ -11,7 +11,13 @@ public enum PrimitiveType implements Type {
 
     // the type of an expression whose type we haven't determined yet
     // (before type inference/type resolution)
-    ANY,
+    ANY {
+        @Override
+        public boolean isAssignable(Type type) {
+            // FIXME FIXME FIXME THIS BREAKS THE TYPE SYSTEM
+            return true;
+        }
+    },
 
     // the type of an expression which does not type check
     ERROR {
@@ -22,7 +28,14 @@ public enum PrimitiveType implements Type {
     },
 
     // regular types
-    BOOL,
+    BOOL {
+        @Override
+        public boolean isAssignable(Type type) {
+            // error messages can be converted to bool to check if
+            // error is set
+            return type == BOOL || type == ERROR_MSG;
+        }
+    },
     BYTE {
         @Override
         public boolean isAssignable(Type type) {
@@ -43,8 +56,6 @@ public enum PrimitiveType implements Type {
     },
     STR,
     ERROR_MSG,
-    DATE,
-    DATE_TIME,
     TIMESTAMP;
 
     public String getName() {

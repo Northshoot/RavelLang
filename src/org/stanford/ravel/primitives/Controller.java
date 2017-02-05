@@ -1,43 +1,56 @@
 package org.stanford.ravel.primitives;
 
-import org.stanford.ravel.compiler.scope.Scope;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by lauril on 7/21/16.
  */
-public class Controller extends Primitive implements Iterable<Event> {
-    private final List<Event> mEvents = new ArrayList<>();
+public class Controller extends Primitive implements Iterable<EventHandler> {
+    private final List<EventHandler> mEvents = new ArrayList<>();
     private final Map<String, Type> mInterface =  new HashMap<>();
+    private final List<VariableSymbol> mParamSymbols = new ArrayList<>();
 
     public Controller(String name) {
-        super(name, name+"Ctr");
+        super(name);
     }
 
-    public void addEvent(Event event) {
+    public void addEvent(EventHandler event) {
         mEvents.add(event);
     }
 
-    public void addParameter(String name, Type type) {
-        mInterface.put(name, type);
+    public void addParameter(VariableSymbol sym) {
+        mParamSymbols.add(sym);
+        mInterface.put(sym.getName(), sym.getType());
+    }
+    public void addAllParameters(Collection<VariableSymbol> syms) {
+        for (VariableSymbol sym : syms)
+            addParameter(sym);
     }
 
     public Type getParameterType(String name) {
         return mInterface.get(name);
     }
 
+    public boolean hasParameter(String pname) {
+        return mInterface.containsKey(pname);
+    }
+
     public Collection<String> getParameterNames() {
         return mInterface.keySet();
     }
 
-    public Iterator<Event> iterator() {
+    public List<VariableSymbol> getParameterSymbols() {
+        return Collections.unmodifiableList(mParamSymbols);
+    }
+
+    public Iterator<EventHandler> iterator() {
         return mEvents.iterator();
     }
 
-    public InstantiatedController instantiate(Space space) {
-        return new InstantiatedController(space, this);
+    public InstantiatedController instantiate(Space space, String varName) {
+        return new InstantiatedController(space, this, varName);
     }
 }

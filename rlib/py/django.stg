@@ -1,0 +1,26 @@
+from django.db import models
+
+<! create field with the options !>
+field_options(field) ::<<
+<field.options:{o | <o.name> = <o.value> <if(!last(o))>,<endif>}>
+>>
+
+<! create model !>
+model(model)::=<<
+class <model.name>(models.Model):
+    <model.fields:{f | <f.name> =<f.type>(<field_options(f)>), separator = '\n'}>
+>>
+
+<! controller, or view in terms of Django !>
+controller(cntr, model)::=<<
+def <cntr.name>(request):
+    if request.method == 'POST':
+        data =  bytearray(request.body)
+        <model.fields:{f | <f.name> = int.from_bytes(data[<i0>:<i>*<f.byte_size>], byteorder=\'big\'), separator = '\n'}>
+
+>>
+
+<! url routing !>
+url(endpoint)::<<
+
+>>

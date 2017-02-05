@@ -2,7 +2,6 @@ package org.stanford.ravel.compiler.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.Type;
-import org.stanford.ravel.primitives.Variable;
 
 import java.util.ArrayList;
 import java.util.Collection;

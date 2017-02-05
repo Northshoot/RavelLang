@@ -1,7 +1,7 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.c.Declaration;
+import org.stanford.ravel.api.platforms.nrf52.Declaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 import org.stanford.ravel.primitives.Space;
@@ -41,11 +41,11 @@ public class RavelLayer extends RavelAPIObject implements RavelObjectInterface {
         ST t_h = mRavelLayerTmpl.getInstanceOf("ravel_layer_header");
         t_obj.add("space", mSpace);
         t_h.add("space", mSpace);
-        obj.setPath(mBuildPath);
+        obj.setBasePath(mBuildPath);
         obj.setFileName(fileName+".c");
         obj.setContent(t_obj.render());
 
-        header.setPath(mBuildPath);
+        header.setBasePath(mBuildPath);
         header.setFileName(fileName+".h");
         header.setContent(t_h.render());
         return super.getFiles();

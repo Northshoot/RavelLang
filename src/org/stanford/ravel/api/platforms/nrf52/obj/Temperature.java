@@ -1,6 +1,6 @@
 package org.stanford.ravel.api.platforms.nrf52.obj;
 
-import org.stanford.ravel.api.lang.c.Declaration;
+import org.stanford.ravel.api.platforms.nrf52.Declaration;
 import org.stanford.ravel.api.platforms.RavelAPIObject;
 import org.stanford.ravel.api.platforms.RavelObjectInterface;
 
