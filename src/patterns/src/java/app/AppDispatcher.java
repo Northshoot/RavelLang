@@ -66,10 +66,12 @@ public class AppDispatcher implements DispatherAPI, SystemEventAPI {
     }
 
 
-    public Context send_data( Model.Record record, Endpoint endpoint){
+    public Context send_data(byte[] record, Endpoint endpoint){
         //send data to the driver
-        mDriver.send_data(record.getData(), endpoint);
-        return null;
+        new Model.Record()
+        Context ctx = mDriver.send_data(record.getData(), endpoint);
+        ctx.mRecord = record;
+        return ctx;
     }
     @Override
     public void data_received(byte[] data, Endpoint endpoint) {

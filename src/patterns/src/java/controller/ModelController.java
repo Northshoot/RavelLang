@@ -56,6 +56,7 @@ public class ModelController {
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;
         rec.field4 = rec.field3 / 2;
+        System.out.println("MCTRL: " + rec);
         Context ctx = mModel.save(rec);
 
         System.out.println(ctx.mError);

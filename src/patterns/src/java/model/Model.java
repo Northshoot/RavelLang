@@ -141,12 +141,16 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         System.out.println("Setting ep" + this.mEndpoint);
     }
 
-    private void addRecord(Model.Record r){
+    private void addRecord(Record r){
         //if durable save to disk
-        mRecords[current_pos++]=r;
-        Context ctx = new Context();
-        ctx.mError = Error.OUT_OF_STORAGE;
-        if(current_pos == mSize) {
+        if(current_pos < mSize) {
+            r.idx = current_pos;
+            System.out.println("AddRecord rec: " + r);
+            mRecords[current_pos] = r;
+            current_pos++;
+        } else  {
+            Context ctx = new Context();
+            ctx.mError = Error.OUT_OF_STORAGE;
             mModelListeners.forEach((k,v) -> v.full(ctx));
         }
     }
@@ -186,6 +190,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         Context ctx = new Context(this);
         ctx.mError = Error.SUCCESS;
         ctx.mRecord = record;
+        record_sent(record.idx);
         //notify all subscribers
         mModelListeners.forEach((k,v) -> v.departed(ctx));
     }
@@ -228,21 +233,24 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         //AUTOGEN code will depend on the type
         //local can not be reliable!
         Context ctx = new Context(this);
+        ctx.mRecord = rec;
         if(current_pos >= mSize){ // no more space
             ctx.mError = Error.OUT_OF_STORAGE;
             return ctx;
         }
 
+        addRecord(ctx.mRecord);
         if( this.mType == ModelType.LOCAL) {// all set, add record locally
             ctx.mError = Error.SUCCESS;
             //TODO: handle durable models
-            addRecord(ctx.mRecord);
+
             return ctx;
         } else {
-            System.out.println("ENDPOINT:     "  + mEndpoint);
+            System.out.println("Save record: " + rec.idx);
             if (! mEndpoint.isConnected() ){
                 //TODO: queue packets
-                addRecord(ctx.mRecord);
+                ctx.mError = Error.WAITING_FOR_NETWORK;
+                return ctx;
             }
         }//endpoint is connected
 
@@ -251,12 +259,13 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
             case REPLICATED:
                 //TODO: Packetize the record and send it
                 //TODO: determine and send to endpoints
-                ctx.mError = Error.WRITE_ERROR;
+                mAppDispacher.send_data(rec, mEndpoint);
                 return ctx;
             case STREAMING:
                 //Packetize the record and send it
                 // determine and send to endpoints
                 mAppDispacher.send_data(rec, mEndpoint);
+                ctx.mError = Error.SUCCESS;
                 return ctx;
             default:
                 //Should never end up here
@@ -271,7 +280,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
         //delete from local array
         for(int i=deleteField ; i< mSize ;i++) {
             mRecords[i] = mRecords[i + 1];
-            mRecords[i].position=i+1;
+            mRecords[i].idx=i+1;
         }
         current_pos--;
         return new Context(this, mDeletedRecord, Error.SUCCESS);
@@ -306,7 +315,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
 
     public class Record implements Serializable {
         int model_id = Model.MODEL_ID;
-        int position;
+        int idx=0;
         int state;
         public int field1;
         public int field2;
@@ -319,7 +328,7 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
                       int field3_val,
                       int field4_val){
 
-            this.position = position;
+            this.idx = position;
             this.field1 = field1_val;
             this.field2 = field2_val;
             this.field3 = field3_val;
@@ -351,13 +360,18 @@ public class Model implements ModelCommandAPI, ModelQuery, ModelBottomAPI{
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
             //AUTOGEN: write to
             outputStream.write(model_id);
-            outputStream.write(position);
+            outputStream.write(idx);
             outputStream.write(field1);
             outputStream.write(field2);
             outputStream.write(field3);
             outputStream.write(field4);
             //AUTOGEN END
             return outputStream.toByteArray();
+        }
+
+        @Override
+        public String toString() {
+            return "REC: [m_id:"+this.model_id+", idx:" +this.idx +"]";
         }
     }
 
