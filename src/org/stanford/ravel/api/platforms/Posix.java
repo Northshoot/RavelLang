@@ -1,5 +1,6 @@
 package org.stanford.ravel.api.platforms;
 
+import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.CLang;
@@ -7,6 +8,8 @@ import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
+import org.stanford.ravel.api.platforms.posix.PosixRuntimeOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -33,6 +36,11 @@ public class Posix extends BasePlatform {
     public Posix() {
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
         makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
+    }
+
+    @Override
+    public OptionParser getOptions() {
+        return PosixRuntimeOptions.getInstance();
     }
 
     @Override
@@ -63,13 +71,17 @@ public class Posix extends BasePlatform {
                 cfiles.add(fileName.substring(0, fileName.length()-2));
         }
 
-        CLanguageOptions options = CLanguageOptions.getInstance();
-        String runtimePath = new File(options.getRuntimePath()).getAbsolutePath();
+        CLanguageOptions coptions = CLanguageOptions.getInstance();
+        String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
+
+        PosixRuntimeOptions platoptions = PosixRuntimeOptions.getInstance();
+        String platformRuntimePath = new File(platoptions.getRuntimePath()).getAbsolutePath();
 
         ST tmpl = makefileGroup.getInstanceOf("application");
         tmpl.add("target", s.getName());
         tmpl.add("sources", cfiles);
-        tmpl.add("runtime", runtimePath);
+        tmpl.add("c_runtime", runtimePath);
+        tmpl.add("posix_runtime", platformRuntimePath);
 
         FileObject file = new FileObject();
         file.setFileName("Makefile");

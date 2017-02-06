@@ -8,6 +8,7 @@ import org.stanford.ravel.rrt.tiers.Error;
  * Created by lauril on 1/23/17.
  */
 public interface DispatcherAPI {
+    void print(String msg);
 
     String getAppName();
 

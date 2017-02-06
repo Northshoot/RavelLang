@@ -8,7 +8,7 @@ file(name) ::=<<
 
 #include "contiki.h"
 
-#include \<ravel/driver.h>
+#include \<ravel/contiki-driver.h>
 #include \<AppDispatcher.h>
 
 /*---------------------------------------------------------------------------*/
@@ -25,6 +25,8 @@ PROCESS_THREAD(<name>_process, ev, data)
 
   ravel_generated_app_dispatcher_init(&dispatcher);
   ravel_contiki_driver_init(&driver, &dispatcher);
+  ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
+  ravel_contiki_driver_app_dispatcher_ready(&driver);
 
   while (1) {
       PROCESS_WAIT_EVENT();

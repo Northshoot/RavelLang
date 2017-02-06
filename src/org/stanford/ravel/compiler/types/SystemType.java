@@ -16,5 +16,7 @@ public class SystemType extends ClassType {
         for (SystemEvent event : SystemEvent.values()) {
             addEvent(event.name(), new Type[]{}, false);
         }
+
+        addMethod("print", new Type[]{PrimitiveType.STR}, PrimitiveType.VOID);
     }
 }

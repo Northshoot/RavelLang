@@ -14,16 +14,27 @@ controller CController(random: Random):
         rec = random.create()
         rec.value = 42
         random.save(rec)
+        system.print("started")
 
     event random.departed():
         # do something here
         x = 7
 
-
 space EmbeddedSpace:
     platform:
         language = CLang
         system = Contiki.v1
+
+    models:
+        random = Random(size=5)
+
+    controllers:
+        rndcnt_1 = CController(random = models.random)
+
+space GatewaySpace:
+    platform:
+        language = CLang
+        system = Posix.v2008
 
     models:
         random = Random(size=5)

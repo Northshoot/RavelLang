@@ -146,6 +146,8 @@ public class CCodeTranslator extends BaseIRTranslator {
         if (functionType.getOwner() instanceof ModelType ||
                 functionType.getOwner() instanceof InterfaceType)
             ownerName = "ravel_generated_" + ownerName;
+        else
+            ownerName = "ravel_" + ownerName;
         addCode(ownerName);
         addCode("_");
         addCode(functionType.getFunctionName());

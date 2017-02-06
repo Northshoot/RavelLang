@@ -103,6 +103,15 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     }
 
     /***********************************************************************/
+    /*************** AD Commands from controller to AD *********************/
+    /***********************************************************************/
+
+    @Override
+    public void print(String msg) {
+        System.err.println(msg);
+    }
+
+    /***********************************************************************/
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override

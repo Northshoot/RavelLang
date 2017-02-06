@@ -99,17 +99,8 @@ public class AppDispatcher  extends AbstractDispatcher {
         }
     }
 
-<<<<<<< HEAD
-    public Context send_data(byte[] record, Endpoint endpoint){
-        //send data to the driver
-        new Model.Record()
-        Context ctx = mDriver.send_data(record.getData(), endpoint);
-        ctx.mRecord = record;
-        return ctx;
-=======
     private void pprint(String s){
         System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
->>>>>>> f762b97915ed048b40d6d427f513c3f5577dfffa
     }
 
     /***********************************************************************/

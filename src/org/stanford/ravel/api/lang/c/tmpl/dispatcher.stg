@@ -26,7 +26,7 @@ c_file(includes,name,models,interfaces,controllers,space) ::=<<
 void
 ravel_generated_<name; format="function">_init(<name> *self)
 {
-    system_api_init(&self->sys_api);
+    ravel_system_init(&self->sys_api);
 
     <models:init_component("model"); separator="\n">
     <interfaces:init_component("iface"); separator="\n">
@@ -42,7 +42,13 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
     <interfaces:finalize_component("iface"); separator="\n">
     <controllers:finalize_controller(); separator="\n">
 
-    system_api_finalize(&self->sys_api);
+    ravel_system_finalize(&self->sys_api);
+}
+
+void
+ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver)
+{
+    self->driver = driver;
 }
 
 void
@@ -68,11 +74,15 @@ h_file(includes,name,models,interfaces,controllers,space) ::=<<
 
 #include \<api/endpoint.h>
 #include \<api/system.h>
+#include \<api/driver.h>
+
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
 
 typedef struct <name> {
+    RavelDriver *driver;
+
     <models:{c|<c.name> model_<c.varName>;}; separator="\n">
     <interfaces:{c|<c.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
@@ -82,6 +92,9 @@ typedef struct <name> {
 
 void ravel_generated_<name; format="function">_init(<name> *self);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver);
+
 void ravel_generated_<name; format="function">_started(<name> *self);
 void ravel_generated_<name; format="function">_stopped(<name> *self);
 void ravel_generated_<name; format="function">_restarted(<name> *self);

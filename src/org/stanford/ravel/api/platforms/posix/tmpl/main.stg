@@ -7,21 +7,25 @@ file() ::=<<
  */
 
 #include \<stdlib.h>
+
+#include \<ravel/posix-driver.h>
 #include \<AppDispatcher.h>
+
+static AppDispatcher dispatcher;
+static RavelPosixDriver driver;
 
 int
 main(int argc, char **argv)
 {
-    AppDispatcher dispatcher;
+    ravel_generated_app_dispatcher_init(&dispatcher);
+    ravel_posix_driver_init(&driver, &dispatcher);
+    ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
+    ravel_posix_driver_app_dispatcher_ready(&driver);
 
-    app_dispatcher_init(&dispatcher);
+    ravel_posix_driver_main_loop(&driver);
 
-    while(true) {
-        /* EVENT LOOP */
-        break;
-    }
-
-    app_dispatcher_finalize(&dispatcher);
+    ravel_posix_driver_finalize(&driver);
+    ravel_generated_app_dispatcher_finalize(&dispatcher);
     return 0;
 }
 >>

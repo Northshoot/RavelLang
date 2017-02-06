@@ -14,11 +14,13 @@ typedef struct {
     int dummy;
 } SystemAPI;
 
-static inline void system_api_init(SystemAPI *self)
+static inline void ravel_system_init(SystemAPI *self)
 {}
 
-static inline void system_api_finalize(SystemAPI *self)
+static inline void ravel_system_finalize(SystemAPI *self)
 {}
+
+void ravel_system_print(SystemAPI *self, const char *msg);
 
 #endif /* API_SYSTEM_H */
 

@@ -1,6 +1,6 @@
 compile_c(target) ::=<<
 <target>.o: <target>.c
-<\t>$(CC) $(CPPFLAGS) $(CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -I$(RAVEL_RUNTIME_DIR) -I. -c -o $@ $\<
+<\t>$(CC) $(CPPFLAGS) $(CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_POSIX_RUNTIME_DIR) -I. -c -o $@ $\<
 >>
 
 static_lib(runtime,target,sources) ::=<<
@@ -13,8 +13,9 @@ clean-app:
 <\t>$(AR) crs -o $@ $^
 >>
 
-application(runtime,target,sources) ::=<<
-RAVEL_RUNTIME_DIR = <runtime>
+application(c_runtime,posix_runtime,target,sources) ::=<<
+RAVEL_C_RUNTIME_DIR = <c_runtime>
+RAVEL_POSIX_RUNTIME_DIR = <posix_runtime>
 
 all: <target>
 
@@ -24,5 +25,5 @@ clean:
 <sources:compile_c(); separator="\n">
 
 <target>: <sources:{s|<s>.o}; separator=" ">
-<\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_RUNTIME_DIR) -lravel
+<\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_POSIX_RUNTIME_DIR) -lravel
 >>
