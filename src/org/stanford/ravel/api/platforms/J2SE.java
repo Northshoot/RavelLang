@@ -29,7 +29,7 @@ public class J2SE extends BasePlatform {
     }
 
     @Override
-    protected CodeModule createLauncher() {
+    protected CodeModule createLauncher(Space s) {
         JavaLanguageOptions javaOptions = JavaLanguageOptions.getInstance();
 
         ST tmpl = mainGroup.getInstanceOf("file");

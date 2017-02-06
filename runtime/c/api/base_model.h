@@ -35,13 +35,14 @@ typedef struct {
     size_t num_records;
 
     size_t current_pos;
+
+    Context current_ctx;
 } RavelBaseModel;
 
 void ravel_base_model_init(RavelBaseModel *self, size_t num_records, size_t record_size);
 void ravel_base_model_finalize(RavelBaseModel *self);
 
 void    *ravel_base_model_create(RavelBaseModel *self);
-Context *ravel_base_model_save(RavelBaseModel *self, void *record);
 
 typedef struct {
     RavelBaseModel base;
@@ -53,6 +54,7 @@ static inline void ravel_local_model_init(RavelLocalModel *self, size_t num_reco
 static inline void ravel_local_model_finalize(RavelLocalModel *self) {
     ravel_base_model_finalize(&self->base);
 }
+Context *ravel_local_model_save(RavelLocalModel *self, void *record);
 
 typedef struct {
     RavelBaseModel base;
@@ -66,6 +68,7 @@ static inline void ravel_streaming_model_init(RavelStreamingModel *self, size_t 
 static inline void ravel_streaming_model_finalize(RavelStreamingModel *self) {
     ravel_base_model_finalize(&self->base);
 }
+Context *ravel_streaming_model_save(RavelStreamingModel *self, void *record);
 
 typedef struct {
     RavelBaseModel base;
@@ -77,5 +80,6 @@ static inline void ravel_replicated_model_init(RavelReplicatedModel *self, size_
 static inline void ravel_replicated_model_finalize(RavelReplicatedModel *self) {
     ravel_base_model_finalize(&self->base);
 }
+Context *ravel_replicated_model_save(RavelReplicatedModel *self, void *record);
 
 #endif /* API_BASE_MODEL_H */

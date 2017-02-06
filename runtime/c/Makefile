@@ -1,6 +1,6 @@
 all: libravel.a
 
-OBJS = api/context.o api/ringbuf.o
+OBJS = ravel-context.o ravel-ringbuf.o
 
 clean:
 	rm -f libravel.a $(OBJS)

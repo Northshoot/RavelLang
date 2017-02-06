@@ -8,19 +8,24 @@
 
 #include <stddef.h>
 
+typedef enum {
+    RAVEL_ERROR_SUCCESS,
+    RAVEL_ERROR_WRITE_ERROR
+} RavelError;
+
 typedef struct {
-    void *record;
-    int   error;
+    void       *record;
+    RavelError  error;
 } Context;
 
-void Context_init_ok(Context *ctx, void *record);
-void Context_init_error(Context *ctx, int error);
+void ravel_context_init_ok(Context *ctx, void *record);
+void ravel_context_init_error(Context *ctx, RavelError error);
 
-void Context_finalize(Context *ctx);
+void ravel_context_finalize(Context *ctx);
 
-static inline void Context_clear(Context **pctx) {
+static inline void ravel_context_clear(Context **pctx) {
     if (*pctx != NULL) {
-        Context_finalize(*pctx);
+        ravel_context_finalize(*pctx);
         *pctx = NULL;
     }
 }

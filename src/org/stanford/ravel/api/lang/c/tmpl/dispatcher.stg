@@ -1,67 +1,90 @@
 import "common.stg"
 
 init_component(comp, prefix) ::=<<
-<comp.name; format="function">_init(&self-><prefix>_<comp.varName>);
+ravel_generated_<comp.name; format="function">_init(&self-><prefix>_<comp.varName>);
 >>
 finalize_component(comp, prefix) ::=<<
-<comp.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
+ravel_generated_<comp.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
 >>
 
 init_controller(c) ::=<<
-<c.name; format="function">_init(&self->ctr_<c.varName><if(c.parameterValues)>, <c.parameterValues; separator=", "><endif>);
+ravel_generated_<c.name; format="function">_init(&self->ctr_<c.varName><if(c.parameterValues)>, <c.parameterValues; separator=", "><endif>);
 >>
 finalize_controller(c) ::=<<
-<c.name; format="function">_finalize(&self->ctr_<c.varName>);
+ravel_generated_<c.name; format="function">_finalize(&self->ctr_<c.varName>);
 >>
 
 set_component_controller(comp, prefix) ::=<<
-<comp.controllerList:{c|<comp.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
+<comp.controllerList:{c|ravel_generated_<comp.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
 >>
 
-c_file(includes,name,models,interfaces,controllers,endpoints) ::=<<
+c_file(includes,name,models,interfaces,controllers,space) ::=<<
 <begin_source(name)>
 
 <includes:do_include(); separator="\n">
 
 void
-<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self)
 {
+    system_api_init(&self->sys_api);
+
     <models:init_component("model"); separator="\n">
     <interfaces:init_component("iface"); separator="\n">
     <controllers:init_controller(); separator="\n">
-    <! FIXME endpoints !>
 
     <models:set_component_controller("model"); separator="\n">
     <interfaces:set_component_controller("iface"); separator="\n">
 }
 void
-<name; format="function">_finalize(<name> *self)
+ravel_generated_<name; format="function">_finalize(<name> *self)
 {
     <models:finalize_component("model"); separator="\n">
     <interfaces:finalize_component("iface"); separator="\n">
     <controllers:finalize_controller(); separator="\n">
-    <! FIXME endpoints !>
+
+    system_api_finalize(&self->sys_api);
+}
+
+void
+ravel_generated_<name; format="function">_started(<name> *self)
+{
+    <space.systemAPI.controllerMap.started:{c|ravel_generated_<c.name; format="function">_system_started(&self->ctr_<c.varName>);}; separator="\n">
+}
+void
+ravel_generated_<name; format="function">_stopped(<name> *self)
+{
+    <space.systemAPI.controllerMap.stopped:{c|ravel_generated_<c.name; format="function">_system_stopped(&self->ctr_<c.varName>);}; separator="\n">
+}
+void
+ravel_generated_<name; format="function">_restarted(<name> *self)
+{
+    <space.systemAPI.controllerMap.restarted:{c|ravel_generated_<c.name; format="function">_system_restarted(&self->ctr_<c.varName>);}; separator="\n">
 }
 
 >>
 
-h_file(includes,name,models,interfaces,controllers,endpoints) ::=<<
+h_file(includes,name,models,interfaces,controllers,space) ::=<<
 <begin_header("", name)>
 
 #include \<api/endpoint.h>
+#include \<api/system.h>
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
 
-typedef struct {
+typedef struct <name> {
     <models:{c|<c.name> model_<c.varName>;}; separator="\n">
     <interfaces:{c|<c.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
-    <endpoints:{ep|RavelEndpoint ep_<ep.name>;}; separator="\n">
+
+    SystemAPI sys_api;
 } <name>;
 
-void <name; format="function">_init(<name> *self);
-void <name; format="function">_finalize(<name> *self);
+void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+void ravel_generated_<name; format="function">_started(<name> *self);
+void ravel_generated_<name; format="function">_stopped(<name> *self);
+void ravel_generated_<name; format="function">_restarted(<name> *self);
 
 <end_extern_c()>
 <end_header("", name)>

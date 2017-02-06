@@ -5,6 +5,7 @@ import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.platforms.BasePlatform;
+import org.stanford.ravel.api.platforms.ConcretePlatform;
 import org.stanford.ravel.primitives.Platform;
 import org.stanford.ravel.primitives.Space;
 
@@ -34,7 +35,9 @@ class PlatformBuilder {
         for (Space s : rApp.getSpaces()) {
             Platform platform = s.getPlatform();
             ConcreteLanguage lang = platform.getConcreteLanguage();
+            ConcretePlatform plat = platform.getConcretePlatform();
             parsers.add(lang.getOptions());
+            parsers.add(plat.getOptions());
         }
 
         for (OptionParser op : parsers) {
@@ -59,7 +62,7 @@ class PlatformBuilder {
         List<FileObject> spaceFiles = new ArrayList<>();
         spaceFiles.addAll(lang.build(s));
         spaceFiles.addAll(concretePlatform.build(s));
-        spaceFiles.addAll(concretePlatform.createBuildSystem(spaceFiles));
+        spaceFiles.addAll(concretePlatform.createBuildSystem(s, spaceFiles));
         for (FileObject fo : spaceFiles)
             fo.setBasePath(path);
         mFiles.addAll(spaceFiles);

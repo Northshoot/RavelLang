@@ -14,6 +14,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -40,7 +41,7 @@ public class Posix extends BasePlatform {
     }
 
     @Override
-    protected CodeModule createLauncher() {
+    protected CodeModule createLauncher(Space s) {
         ST tmpl = mainGroup.getInstanceOf("file");
 
         FileObject file = new FileObject();
@@ -53,7 +54,7 @@ public class Posix extends BasePlatform {
     }
 
     @Override
-    protected CodeModule createBuildSystem(Space s, List<FileObject> files) {
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
         List<String> cfiles = new ArrayList<>();
 
         for (FileObject file : files) {
@@ -73,9 +74,6 @@ public class Posix extends BasePlatform {
         FileObject file = new FileObject();
         file.setFileName("Makefile");
         file.setContent(tmpl.render());
-        CodeModule module = new CodeModule();
-        module.addFile(file);
-
-        return module;
+        return Collections.singletonList(file);
     }
 }

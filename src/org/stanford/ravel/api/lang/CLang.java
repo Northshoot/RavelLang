@@ -8,10 +8,7 @@ import org.stanford.ravel.api.lang.c.CCodeTranslator;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
-import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.InstantiatedInterface;
-import org.stanford.ravel.primitives.InstantiatedModel;
-import org.stanford.ravel.primitives.Space;
+import org.stanford.ravel.primitives.*;
 import org.stringtemplate.v4.AttributeRenderer;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -80,6 +77,8 @@ public class CLang extends BaseLanguage {
     };
     private static final AttributeRenderer CIDENT = new AttributeRenderer() {
         private String getUnderscoreName(String name) {
+            if (name.endsWith("API"))
+                name = name.substring(0, name.length()-3);
             return StringUtils.join(name.split("(?=\\p{Upper})"),"_").toLowerCase();
         }
 
@@ -198,6 +197,8 @@ public class CLang extends BaseLanguage {
                     concrete.parameterValues.add("&self->model_" + ((InstantiatedModel) pvalue).getVarName());
                 } else if (pvalue instanceof InstantiatedInterface) {
                     concrete.parameterValues.add("&self->iface_" + ((InstantiatedInterface) pvalue).getVarName());
+                } else if (pvalue instanceof SystemAPI) {
+                    concrete.parameterValues.add("&self->sys_api");
                 } else {
                     concrete.parameterValues.add(CLITERAL.toLiteral(pvalue));
                 }
@@ -205,6 +206,8 @@ public class CLang extends BaseLanguage {
             dispatcher_h.add("controllers", concrete);
             dispatcher_c.add("controllers", concrete);
         }
+        dispatcher_h.add("space", s);
+        dispatcher_c.add("space", s);
 
         return simpleModule(dispatcher_h, dispatcher_c, "AppDispatcher", "");
     }

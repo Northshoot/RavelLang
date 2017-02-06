@@ -2,7 +2,7 @@ import "common.stg"
 
 define_event_handler(handler, controller_name) ::=<<
 void
-<controller_name; format="function">_<handler.model; format="function">_<handler.name>(<controller_name>* this<! this is not a keyword in C, so we can use it !><append_parameter_list(handler.arguments)>)
+ravel_generated_<controller_name; format="function">_<handler.model; format="function">_<handler.name>(<controller_name>* this<! this is not a keyword in C, so we can use it !><append_parameter_list(handler.arguments)>)
 {
     <handler.code>}
 >>
@@ -11,16 +11,17 @@ c_file(includes,name,parameters,eventHandlers) ::=<<
 <begin_source(name)>
 
 #include \<api/context.h>
+#include \<api/system.h>
 <includes:do_include(); separator="\n">
 
 void
-<name; format="function">_init(<name>* self<append_parameter_list(parameters)>)
+ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>)
 {
     <parameters:{p|self-><p.name> = <p.name>;}; separator="\n">
 }
 
 void
-<name; format="function">_finalize(<name>* self)
+ravel_generated_<name; format="function">_finalize(<name>* self)
 {
     /* Free any allocated resources here */
 }
@@ -29,15 +30,16 @@ void
 >>
 
 declare_event_handler(handler, controller_name) ::=<<
-void <controller_name; format="function">_<handler.model; format="function">_<handler.name>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
+void ravel_generated_<controller_name; format="function">_<handler.model; format="function">_<handler.name>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
 >>
 
 h_file(includes,name,parameters,eventHandlers) ::=<<
 <begin_header("CONTROLLER", name)>
 
 #include \<api/context.h>
+#include \<api/system.h>
 
-/* Forward declare our controller class before we include the controller headers */
+/* Forward declare our controller class before we include the model headers */
 typedef struct s_<name> <name>;
 
 <includes:do_include(); separator="\n">
@@ -48,8 +50,8 @@ struct s_<name> {
     <parameters:{p|<p.type> <p.name>;}; separator="\n">
 };
 
-void <name; format="function">_init(<name>* self<append_parameter_list(parameters)>);
-void <name; format="function">_finalize(<name>* self);
+void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name>* self);
 
 <eventHandlers:declare_event_handler(name); separator="\n">
 

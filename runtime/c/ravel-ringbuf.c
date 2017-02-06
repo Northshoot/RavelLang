@@ -29,7 +29,7 @@
 
 
 #include <string.h>
-#include "ringbuf.h"
+#include <api/ringbuf.h>
 
 
 ghpringbuf* ghpringbuf_create(size_t capacity, size_t item_size, int is_overwriting, void (*item_cleaner)(void*))

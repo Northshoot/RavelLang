@@ -1,0 +1,16 @@
+application(c_runtime,plat_runtime,contiki,target,sources) ::=<<
+RAVEL_C_RUNTIME_DIR = <c_runtime>
+RAVEL_PLATFORM_RUNTIME_DIR = <plat_runtime>
+CONTIKI = <contiki>
+
+CONTIKI_PROJECT = <target>
+all: $(CONTIKI_PROJECT)
+
+PROJECTDIRS = ./models ./controller ./interfaces
+PROJECT_SOURCEFILES = <sources:{s|<s>.c}; separator=" ">
+
+include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
+CFLAGS += -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_PLATFORM_RUNTIME_DIR)
+
+include $(CONTIKI)/Makefile.include
+>>

@@ -37,21 +37,18 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
     }
 
     // FIXME should be abstract, but nrf52platform...
-    protected CodeModule createLauncher() {
-        return null;
-    }
-    protected CodeModule createBuildSystem(Space s, List<FileObject> files) {
+    protected CodeModule createLauncher(Space s) {
         return null;
     }
 
-    public List<FileObject> createBuildSystem(List<FileObject> files) {
+    @Override
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
         return Collections.emptyList();
     }
 
     @Override
     public List<FileObject> build(Space s) {
-        addModule(createLauncher());
-        addModule(createBuildSystem(s, mFileObjects));
+        addModule(createLauncher(s));
         return mFileObjects;
     }
 

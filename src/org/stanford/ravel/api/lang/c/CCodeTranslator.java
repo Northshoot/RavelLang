@@ -142,7 +142,11 @@ public class CCodeTranslator extends BaseIRTranslator {
             addCode(getRegisterName(methodCall.target));
             addCode(" = ");
         }
-        addCode(nameToUnderscore(functionType.getOwner().getName()));
+        String ownerName = nameToUnderscore(functionType.getOwner().getName());
+        if (functionType.getOwner() instanceof ModelType ||
+                functionType.getOwner() instanceof InterfaceType)
+            ownerName = "ravel_generated_" + ownerName;
+        addCode(ownerName);
         addCode("_");
         addCode(functionType.getFunctionName());
         addCode("(");

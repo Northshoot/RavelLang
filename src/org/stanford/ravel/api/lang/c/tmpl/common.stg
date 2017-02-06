@@ -52,12 +52,12 @@ append_parameter_list(params)::=<<<if(params)>, <params:{p|<p.type> <p.name>}; s
 >>
 
 declare_set_controller_method(c, component_name) ::=<<
-void <component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr);
+void ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr);
 >>
 
 define_set_controller_method(c, component_name) ::=<<
 void
-<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr)
+ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr)
 {
     self->ctr_<c.varName> = ctr;
 }

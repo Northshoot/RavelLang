@@ -44,11 +44,11 @@ public class FileObject {
     public void setSubPath(String path) {
         this.subPath = path;
     }
-    private String getFileName() {
+
+    public String getFileName() {
         assert fileName != null;
         return fileName;
     }
-
     public void setFileName(String name) {
         this.fileName = name;
     }
