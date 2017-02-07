@@ -1,12 +1,10 @@
 package org.stanford.ravel.api.lang;
 
-import org.apache.commons.lang3.StringUtils;
-import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
+import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.compiler.ir.typed.TConvert;
-import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
@@ -55,6 +53,7 @@ public class JLang extends BaseLanguage {
                         return "void";
 
                     case ANY:
+                        return "Object"; // FIXME
                     case ERROR:
                     default:
                         throw new AssertionError();

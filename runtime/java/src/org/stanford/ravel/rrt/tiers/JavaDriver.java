@@ -32,10 +32,10 @@ public class JavaDriver implements DriverAPI {
         //TODO
         System.out.println("[" + appDispatcher.getAppName() + "::AndroidDriver]>" + s);
     }
-    public Error sendData(byte[] data, Endpoint endpoint) {
+    public Error sendData(final byte[] data, final Endpoint endpoint) {
         //send data to the right channel
         int responsecode = 1;
-        if(endpoint.getType() == Endpoint.TYPE.SOCKET){
+        if (endpoint.getType() == Endpoint.TYPE.SOCKET){
                 //TODO: mmmrm not the best way to keep reconnecting
                 new Thread(new Runnable() {
                     public void run() {

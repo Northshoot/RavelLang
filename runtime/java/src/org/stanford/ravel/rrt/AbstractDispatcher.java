@@ -19,7 +19,12 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     private Thread loopThread;
 
     protected AbstractDispatcher() {
-        loopThread = new Thread(this::eventLoop);
+        loopThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                eventLoop();
+            }
+        });
         loopThread.setDaemon(true);
         loopThread.start();
     }

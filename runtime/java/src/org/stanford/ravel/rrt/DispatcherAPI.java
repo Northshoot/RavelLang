@@ -7,7 +7,7 @@ import org.stanford.ravel.rrt.tiers.Error;
 /**
  * Created by lauril on 1/23/17.
  */
-public interface DispatcherAPI {
+public interface DispatcherAPI extends SystemEventAPI {
     void print(String msg);
 
     String getAppName();

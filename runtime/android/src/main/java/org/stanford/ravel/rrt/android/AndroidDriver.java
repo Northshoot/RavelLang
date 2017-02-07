@@ -1,6 +1,6 @@
 package org.stanford.ravel.rrt.android;
 
-import android.app.Service;
+import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
@@ -9,12 +9,15 @@ import org.stanford.ravel.rrt.tiers.Error;
  * Created by gcampagn on 2/6/17.
  */
 public class AndroidDriver implements DriverAPI {
-    private Service mService;
+    private final DispatcherAPI mDispatcher;
 
+    public AndroidDriver(DispatcherAPI dispatcher) {
+        mDispatcher = dispatcher;
+    }
 
     @Override
     public void appDispatcherReady() {
-
+        mDispatcher.started();
     }
 
     @Override

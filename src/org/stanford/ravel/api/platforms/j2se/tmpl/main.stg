@@ -1,7 +1,7 @@
 file(package) ::=<<
 package <package>;
 
-import org.stanford.ravel.rrt.tiers.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 
 import java.io.FileInputStream;
@@ -38,7 +38,7 @@ class Application {
         }
 
         AppDispatcher dispatcher = new AppDispatcher(endpointMap);
-        AndroidDriver driver = new AndroidDriver(dispatcher);
+        JavaDriver driver = new JavaDriver(dispatcher);
         dispatcher.setDriver(driver);
         driver.appDispatcherReady();
     }

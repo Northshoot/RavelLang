@@ -18,9 +18,14 @@ public class JavaLanguageOptions extends LanguageOptions {
     }
 
     private String packageName = "org.stanford.ravel.generated";
+    private String runtimePath = "./runtime/java/runtime.jar";
 
     public String getPackageName() {
         return packageName;
+    }
+
+    public String getRuntimePath() {
+        return runtimePath;
     }
 
     @Override
@@ -29,6 +34,9 @@ public class JavaLanguageOptions extends LanguageOptions {
             switch (option) {
                 case "package":
                     packageName = value;
+                    break;
+                case "runtime-path":
+                    runtimePath = value;
                     break;
                 default:
                     throw new InvalidOptionException("Unrecognized option -Xjava:" + option);

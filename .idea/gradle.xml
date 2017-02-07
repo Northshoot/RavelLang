@@ -4,6 +4,16 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="distributionType" value="WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/android/test-GatewaySpace-app" />
+        <option name="gradleHome" value="$PROJECT_DIR$/android/gradle" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/android/test-GatewaySpace-app" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/runtime/android" />
         <option name="gradleHome" value="$PROJECT_DIR$/android" />
         <option name="modules">

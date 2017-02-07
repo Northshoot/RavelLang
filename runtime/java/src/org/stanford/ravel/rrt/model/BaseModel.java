@@ -56,7 +56,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
 
     private void post_task(){
-        new Thread(() -> runNextEvent()).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runNextEvent();
+            }
+        }).start();
     }
 
     // the generated methods for dispatching events

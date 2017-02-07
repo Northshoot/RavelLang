@@ -320,7 +320,7 @@ space EmbeddedSpace:
         language = CLang
         # FIXME
         #system = nrf52Platform.v12
-        system = Posix.v2008
+        system = Contiki.v1
 
     models:
 	    app_device = AppDevice()
@@ -355,7 +355,7 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        system = J2SE.v18
+        system = Android.v19
 
     models:
         app_gtw_config = GatewayAppConfig(buffer_size=10) # FIXME buffer_size?
@@ -369,8 +369,8 @@ space GatewaySpace:
 
 space CloudSpace:
     platform:
-	    language = PyLang
-	    system = Django.v2
+	    language = JLang
+	    system = J2SE.v18
 
     models:
 	    device = AppDevice()

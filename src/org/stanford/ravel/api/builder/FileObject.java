@@ -45,6 +45,13 @@ public class FileObject {
         this.subPath = path;
     }
 
+    public void addSubPath(String path) {
+        if (subPath == null)
+            subPath = path;
+        else
+            subPath = path + '/' + subPath;
+    }
+
     public String getFileName() {
         assert fileName != null;
         return fileName;
