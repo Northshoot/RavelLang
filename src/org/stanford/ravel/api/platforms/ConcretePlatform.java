@@ -18,4 +18,6 @@ public interface ConcretePlatform {
     List<FileObject> build(Space s);
 
     List<FileObject> createBuildSystem(Space s, List<FileObject> files);
+
+    void setAPILevel(int level);
 }

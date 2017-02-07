@@ -1,7 +1,7 @@
 package org.stanford.ravel.primitives;
 
 import org.stanford.ravel.api.lang.ConcreteLanguage;
-import org.stanford.ravel.api.platforms.BasePlatform;
+import org.stanford.ravel.api.platforms.ConcretePlatform;
 
 import java.util.logging.Logger;
 
@@ -14,7 +14,7 @@ public class Platform {
     private final String mSystem;
     private final String mLang;
 
-    private BasePlatform mPlatform;
+    private ConcretePlatform mPlatform;
     private ConcreteLanguage mLanguage;
 
     //we instantiate a real platform that will provide API
@@ -24,7 +24,7 @@ public class Platform {
         this.mLang = lang;
     }
 
-    public BasePlatform getConcretePlatform() {
+    public ConcretePlatform getConcretePlatform() {
         return mPlatform;
     }
     public ConcreteLanguage getConcreteLanguage() {
@@ -38,13 +38,13 @@ public class Platform {
         LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
 
         mLanguage = (ConcreteLanguage) Class.forName("org.stanford.ravel.api.lang." + mLang).newInstance();
-        mPlatform = (BasePlatform) Class.forName("org.stanford.ravel.api.platforms." + platform).newInstance();
+        mPlatform = (ConcretePlatform) Class.forName("org.stanford.ravel.api.platforms." + platform).newInstance();
         if (!mPlatform.allowsLanguage(mLanguage)) {
             // FIXME emit a better error
             throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());
         }
         if (pAPI.length > 1)
-            mPlatform.setAPILevel(pAPI[1]);
+            mPlatform.setAPILevel(Integer.valueOf(pAPI[1].substring(1)));
 
         //TODO: resolve existence of the references to sinks and sources
     }

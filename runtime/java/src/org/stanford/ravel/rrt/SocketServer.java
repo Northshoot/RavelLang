@@ -1,7 +1,5 @@
 package org.stanford.ravel.rrt;
 
-import patterns.src.java.rrt.RavelSocketProtocol;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;

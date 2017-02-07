@@ -3,9 +3,8 @@ package org.stanford.ravel.rrt;
 /**
  * Created by lauril on 1/31/17.
  */
-import org.jetbrains.annotations.NotNull;
 import org.stanford.ravel.rrt.tiers.Endpoint;
-import patterns.src.java.app.HttpEndpoint;
+import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -23,7 +22,7 @@ public class HttpClient {
             this.endpoint = (HttpEndpoint) endpoint;
         }
 
-        public int sendData(@NotNull byte[] data) throws Exception {
+        public int sendData(byte[] data) throws Exception {
             if(this.endpoint.getMethod() == "GET")
                 return get(data);
             else
@@ -56,7 +55,7 @@ public class HttpClient {
         }
 
         // HTTP POST request
-        public int post(@NotNull byte[] data) throws Exception {
+        public int post(byte[] data) throws Exception {
 
             URL obj = new URL(endpoint.getFullURL());
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();

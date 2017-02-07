@@ -4,7 +4,7 @@ import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.HttpClient;
 import org.stanford.ravel.rrt.SocketServer;
-import patterns.src.java.rrt.RavelSocketProtocol;
+import org.stanford.ravel.rrt.RavelSocketProtocol;
 
 
 import java.io.IOException;

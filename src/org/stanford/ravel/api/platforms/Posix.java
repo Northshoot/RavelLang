@@ -34,6 +34,8 @@ public class Posix extends BasePlatform {
     private final STGroup makefileGroup;
 
     public Posix() {
+        // POSIX.1-2008/SUSv4 minimum required
+        super(2008, Integer.MAX_VALUE);
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
         makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
     }

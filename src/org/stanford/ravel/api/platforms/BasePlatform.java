@@ -13,13 +13,18 @@ import java.util.List;
  * Created by lauril on 9/7/16.
  */
 public abstract class BasePlatform implements SystemApi, ConcretePlatform {
-    // FIXME should be private
-    protected String mAPI;
-    // FIXME should be private
-    protected final List<FileObject> mFileObjects;
+    private final int mMinAPI, mMaxAPI;
+    private int mAPI;
+
+    private final List<FileObject> mFileObjects = new ArrayList<>();
 
     protected BasePlatform() {
-        mFileObjects = new ArrayList<>();
+        this(0, Integer.MAX_VALUE);
+    }
+
+    protected BasePlatform(int minApi, int maxApi) {
+        mMinAPI = minApi;
+        mMaxAPI = maxApi;
     }
 
     protected void addModule(CodeModule module) {
@@ -52,8 +57,16 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
         return mFileObjects;
     }
 
+    protected int getAPILevel() {
+        return mAPI;
+    }
+
     @Override
-    public void setAPILevel(String name) {
-        this.mAPI = name;
+    public void setAPILevel(int level) {
+        if (level < mMinAPI)
+            throw new IllegalArgumentException("Invalid API version, must be >= " + mMinAPI);
+        if (level > mMaxAPI)
+            throw new IllegalArgumentException("Invalid API version, must be <= " + mMaxAPI);
+        this.mAPI = level;
     }
 }

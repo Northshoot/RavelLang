@@ -1,4 +1,4 @@
-package patterns.src.java.rrt;
+package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.tiers.JavaDriver;
 

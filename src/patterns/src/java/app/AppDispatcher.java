@@ -4,6 +4,7 @@ import org.stanford.ravel.rrt.*;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;

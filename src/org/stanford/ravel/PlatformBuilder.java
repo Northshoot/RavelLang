@@ -4,7 +4,6 @@ import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
-import org.stanford.ravel.api.platforms.BasePlatform;
 import org.stanford.ravel.api.platforms.ConcretePlatform;
 import org.stanford.ravel.primitives.Platform;
 import org.stanford.ravel.primitives.Space;
@@ -56,7 +55,7 @@ class PlatformBuilder {
 
         Platform platform = s.getPlatform();
         ConcreteLanguage lang = platform.getConcreteLanguage();
-        BasePlatform concretePlatform = platform.getConcretePlatform();
+        ConcretePlatform concretePlatform = platform.getConcretePlatform();
 
         String path = this.path + s.getName();
         List<FileObject> spaceFiles = new ArrayList<>();

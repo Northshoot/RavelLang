@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RavelLang.iml" filepath="$PROJECT_DIR$/RavelLang.iml" />
+      <module fileurl="file://$PROJECT_DIR$/runtime/android/android-runtime.iml" filepath="$PROJECT_DIR$/runtime/android/android-runtime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/runtime/java/java-runtime.iml" filepath="$PROJECT_DIR$/runtime/java/java-runtime.iml" />
     </modules>
   </component>
 </project>

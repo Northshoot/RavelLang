@@ -25,6 +25,8 @@ public class J2SE extends BasePlatform {
     private final STGroup mainGroup;
 
     public J2SE() {
+        // java 1.8 required
+        super(18, Integer.MAX_VALUE);
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
     }
 

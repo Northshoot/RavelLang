@@ -187,10 +187,4 @@ public class nrf52Platform extends BasePlatform {
         fo.setContent(r.render());
         return fo;
     }
-
-
-    @Override
-    public void setAPILevel(String name) {
-
-    }
 }

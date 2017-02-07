@@ -1,6 +1,7 @@
 package patterns.src.java.app;
 
 import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.HttpEndpoint;
 
 /**
  * Created by lauril on 2/1/17.

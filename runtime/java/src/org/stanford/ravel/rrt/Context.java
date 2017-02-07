@@ -3,7 +3,8 @@ package org.stanford.ravel.rrt;
 import org.stanford.ravel.rrt.model.ModelCommandAPI;
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.tiers.Error;
-import java.time.LocalDateTime;
+
+import java.util.Date;
 
 /**
  * The runtime context object, for Java-based platforms
@@ -18,7 +19,7 @@ public class Context<RecordType extends ModelRecord> {
     public final ModelCommandAPI model;
 
     // These fields are private and for future use
-    private LocalDateTime createTime;
+    private Date createTime;
 
     public Context(ModelCommandAPI<RecordType> model, RecordType record){
         this(model);
@@ -31,7 +32,7 @@ public class Context<RecordType extends ModelRecord> {
     }
 
     public Context(ModelCommandAPI<RecordType> model) {
-        createTime = LocalDateTime.now();
+        createTime = new Date();
         this.model = model;
         this.error = Error.SUCCESS;
     }

@@ -1,4 +1,4 @@
-package patterns.src.java.app;
+package org.stanford.ravel.rrt.tiers;
 
 import org.stanford.ravel.rrt.tiers.Endpoint;
 

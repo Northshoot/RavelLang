@@ -1,7 +1,5 @@
 package org.stanford.ravel.rrt.model;
 
-import patterns.src.java.model.Model;
-
 /**
  * The interface to query the model, exposed to Ravel on the model object
  * (not yet actually, but maybe in the future)

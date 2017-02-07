@@ -5,5 +5,5 @@ package org.stanford.ravel.api.platforms;
  */
 public interface SystemApi {
 
-    void setAPILevel(String name);
+
 }
