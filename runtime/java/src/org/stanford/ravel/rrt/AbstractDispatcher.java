@@ -2,10 +2,10 @@ package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.events.SystemEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
-import org.stanford.ravel.rrt.utils.HttpStatus;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Logger;
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 1/31/17.
  */
-public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAPI  {
+public abstract class AbstractDispatcher implements DispatcherAPI {
     private static final Logger LOGGER = Logger.getLogger(AbstractDispatcher.class.getName());
 
     private Thread loopThread;
@@ -30,7 +30,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     }
 
     public void stop() {
-        pushEvent(new SystemEvent(Event.Type.DISPATCHER__STOP));
+        queueEvent(new SystemEvent(Event.Type.DISPATCHER__STOP));
         try {
             loopThread.join(10000);
         } catch(InterruptedException e) {
@@ -41,12 +41,9 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     /***********************************************************************/
     /*************** Callbacks to form the AD to the model *****************/
     /***********************************************************************/
-    protected abstract void models__notifyDeparted(Event event);
+    protected abstract void models__notifyDeparted(NetworkEvent event);
 
-
-    protected abstract void models__notifyArrived(Event event);
-
-    protected abstract void models__notifyFull(Event e);
+    protected abstract void models__notifyArrived(NetworkEvent event);
 
     /******************* ******* event queue ***************************/
     private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<Event>(5);
@@ -55,26 +52,22 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
         switch (e.getType()) {
             case DISPATCHER__STOP:
                 this.stopped();
-                pushEvent(new SystemEvent(Event.Type.DISPATCHER__QUIT));
+                queueEvent(new SystemEvent(Event.Type.DISPATCHER__QUIT));
                 break;
             case DRIVER__DATA_RECEIVED:
-                models__notifyArrived(e);
+                models__notifyArrived((NetworkEvent)e);
                 break;
             case MODELS__NOTIFY_RECORD_DEPARTED:
-                models__notifyDeparted(e);
-                break;
-            case DRIVER__SEND_DATA:
-                driver__sendData(e);
-                break;
-            case MODEL__NOTIFY_FULL:
-                models__notifyFull(e);
+                models__notifyDeparted((NetworkEvent)e);
                 break;
             case MODELS__NOTIFY_RECORD_ARRIVED:
                 break;
+
+            case GENERIC__RUNNABLE:
+                ((RunnableEvent)e).run();
+                break;
         }
     }
-
-
 
     private void eventLoop() {
         LOGGER.info("Dispatcher event loop started");
@@ -91,20 +84,9 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
         }
     }
 
-    private void pushEvent(Event event) {
-        eventQueue.offer(event);
-    }
-
-    /***********************************************************************/
-    /*************** AD Commands from model to AD **************************/
-    /***********************************************************************/
-
     @Override
-    public Error model__sendData(RavelPacket pkt, Endpoint endpoint) {
-        // FIXME set src and dest
-        NetworkEvent ne = new NetworkEvent(pkt.toBytes(), endpoint, Event.Type.DRIVER__SEND_DATA);
-        eventQueue.offer(ne);
-        return Error.SUCCESS;
+    public void queueEvent(Event event) {
+        eventQueue.offer(event);
     }
 
     /***********************************************************************/
@@ -120,18 +102,18 @@ public abstract class AbstractDispatcher implements DispatcherAPI, SystemEventAP
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override
-    public void driver__dataReceived(byte[] data, Endpoint endpoint) {
-        NetworkEvent ne = new NetworkEvent(data, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
-        pushEvent(ne);
+    public void driver__dataReceived(RavelPacket pkt, Endpoint endpoint) {
+        NetworkEvent ne = new NetworkEvent(pkt, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
+        queueEvent(ne);
     }
 
     @Override
-    public void driver__sendDone(int status, Error networkError, byte[] data, Endpoint endpoint) {
-        if(status == 200) {
+    public void driver__sendDone(Error networkError, RavelPacket data, Endpoint endpoint) {
+        if (networkError == Error.SUCCESS) {
             NetworkEvent ne = new NetworkEvent(data, endpoint, networkError, Event.Type.MODELS__NOTIFY_RECORD_DEPARTED);
-            pushEvent(ne);
+            queueEvent(ne);
         } else {
-            LOGGER.info("Error sending to the server, status: " + HttpStatus.getError(status));
+            LOGGER.info("Error sending to the server, status: " + networkError);
         }
     }
 }

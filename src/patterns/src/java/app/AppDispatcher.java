@@ -1,17 +1,19 @@
 package patterns.src.java.app;
 
-import org.stanford.ravel.rrt.*;
-import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.AbstractDispatcher;
+import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.events.NetworkEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.HttpEndpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.tiers.JavaDriver;
 import patterns.src.java.controller.ModelController;
 import patterns.src.java.model.Model;
 import patterns.src.java.sources.TimerSource1;
-import org.stanford.ravel.rrt.tiers.JavaDriver;
-import org.stanford.ravel.rrt.tiers.Error;
 
-
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -56,51 +58,42 @@ public class AppDispatcher  extends AbstractDispatcher {
         //AUTOGEN: create system driver
         mDriver = new JavaDriver(this);
         mcntr_id_1.setName(mName);
+
+        try {
+            cloudEndpoint = Endpoint.fromString("Cloud", new URI("http://127.0.0.1:8000/api/push"), null);
+            gatewayEndpoint = Endpoint.fromString("Gateway", new URI("tcp://127.0.0.1:4444"), null);
+            embeddedEndpoint = Endpoint.fromString("Embedded", new URI("tcp://127.0.0.1:5555"), null);
+
+            Error err = mDriver.registerEndpoint(cloudEndpoint);
+            assert err == Error.SUCCESS;
+            err = mDriver.registerEndpoint(gatewayEndpoint);
+            assert err == Error.SUCCESS;
+            err = mDriver.registerEndpoint(embeddedEndpoint);
+            assert err == Error.SUCCESS;
+        } catch(URISyntaxException|MalformedURLException e) {
+            throw new AssertionError(e);
+        }
+
         switch (mName){
-            case "EMD":
-                gatewayEndpoint = new SocketEndpoint("Gateway","127.0.0.1", 4444);
-
-                mDriver.register_endpoint(gatewayEndpoint);
-                model_id_1.setEndpointUpp(gatewayEndpoint);
+            case "Embedded":
+                // embedded sends to gateway
+                model_id_1.addEndpoints(mDriver.getEndpointsByName("Gateway"));
                 break;
-            case "GTW":
-                embeddedEndpoint = new SocketEndpoint("Embedded", "127.0.0.1", 5555);
-                mDriver.register_endpoint(embeddedEndpoint);
-                model_id_1.setEndpointDown(embeddedEndpoint);
-
-                cloudEndpoint = new HttpEndpoint("Cloud");
-                mDriver.register_endpoint(cloudEndpoint);
-                model_id_1.setEndpointUpp(cloudEndpoint);
+            case "Gateway":
+                // gateway sends to cloud
+                model_id_1.addEndpoints(mDriver.getEndpointsByName("Cloud"));
                 break;
-            case "CLD":
-                gatewayEndpoint =new SocketEndpoint("Gateway",  "127.0.0.1", 4444);
-                mDriver.register_endpoint(gatewayEndpoint);
-                model_id_1.setEndpointDown(gatewayEndpoint);
+            case "Cloud":
+                // cloud does not send anywhere
                 break;
             default:
-                System.out.println("OPS");
-                break;
+                throw new AssertionError();
         }
+
         mDriver.appDispatcherReady();
     }
 
-    @Override
-    public Endpoint getEndpointByName(String name) {
-        // FIXME should not create new objects
-        //AUTOGEN:
-        switch (name) {
-            case "Gateway":
-                return gatewayEndpoint;
-            case "Cloud":
-                return cloudEndpoint;
-            case "Embedded":
-                return embeddedEndpoint;
-            default:
-                throw new IllegalArgumentException("Invalid endpoint name " + name);
-        }
-    }
-
-    private void pprint(String s){
+    private void pprint(String s) {
         System.out.println("[" + this.mName +"::AppDispatcher]>" + s);
     }
 
@@ -109,12 +102,12 @@ public class AppDispatcher  extends AbstractDispatcher {
     /***********************************************************************/
 
     @Override
-    public Error model__sendData(RavelPacket pkt, Endpoint endpoint){
+    public Error model__sendData(RavelPacket pkt, Endpoint endpoint) {
         //send data to the driver
         //TODO: fix form sim
         int src =0;
         int dst = 0;
-        switch (mName){
+        switch (mName) {
             case "EMD":
                 src = 11111111;
                 dst = 22222222;
@@ -128,17 +121,16 @@ public class AppDispatcher  extends AbstractDispatcher {
         pkt.dst = dst;
         pprint("pkt to send: " + pkt);
 
-        return super.model__sendData(pkt, endpoint);
+        return mDriver.sendData(pkt, endpoint);
     }
 
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/
 
-    protected void models__notifyDeparted(Event event){
-        byte[] data = ((NetworkEvent) event).data;
-        Endpoint endpoint = ((NetworkEvent) event).endpoint;
-        RavelPacket rp = RavelPacket.fromNetwork(data);
+    protected void models__notifyDeparted(NetworkEvent event) {
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
         switch (rp.model_id){
             case 1:
                 model_id_1.record_departed(rp, endpoint);
@@ -146,10 +138,9 @@ public class AppDispatcher  extends AbstractDispatcher {
         }
     }
 
-    protected void models__notifyArrived(Event event){
-        byte[] data = ((NetworkEvent) event).data;
-        Endpoint endpoint = ((NetworkEvent) event).endpoint;
-        RavelPacket rp = RavelPacket.fromNetwork(data);
+    protected void models__notifyArrived(NetworkEvent event) {
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
         switch (rp.model_id){
             case Model.MODEL_ID:
@@ -159,17 +150,8 @@ public class AppDispatcher  extends AbstractDispatcher {
     }
 
     @Override
-    protected void models__notifyFull(Event e) {
-        //AUTOGEN: list of controllers subscribing to the event
-
-    }
-
-    /***********************************************************************/
-    /************** Network callbacks from AD to Driver ********************/
-    /***********************************************************************/
-    public void driver__sendData(Event event) {
-        mDriver.sendData(((NetworkEvent) event).data,
-                        ((NetworkEvent) event).endpoint);
+    public Collection<Endpoint> getEndpointsByName(String name) {
+        return mDriver.getEndpointsByName(name);
     }
 
 
@@ -177,9 +159,9 @@ public class AppDispatcher  extends AbstractDispatcher {
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override
-    public void driver__sendDone(int status, Error networkError, byte[] data, Endpoint endpoint) {
+    public void driver__sendDone(Error networkError, RavelPacket data, Endpoint endpoint) {
         pprint("driver_send_done, ERROR: " + networkError);
-        super.driver__sendDone(status, networkError, data, endpoint);
+        super.driver__sendDone(networkError, data, endpoint);
     }
 
 
@@ -193,7 +175,7 @@ public class AppDispatcher  extends AbstractDispatcher {
     public void started() {
         //AUTOGEN: controllers that subscribe to the event
         pprint("SYS Started: " + mName);
-        if(this.mName == "EMD") mcntr_id_1.start = true;
+        if(this.mName.equals("Embedded")) mcntr_id_1.start = true;
         mcntr_id_1.system_started();
     }
     /**

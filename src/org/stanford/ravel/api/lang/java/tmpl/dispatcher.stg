@@ -25,7 +25,7 @@ set_component_controller(comp, prefix) ::=<<
 file(package,imports,name,models,interfaces,controllers,space) ::=<<
 package <package>;
 
-import java.util.Map;
+import java.util.Collection;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.model.ModelBottomAPI;
@@ -49,20 +49,19 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     <interfaces:component_field("iface"); separator="\n">
     <controllers:controller_field(); separator="\n">
 
-    private final Map\<String, Endpoint> endpointMap;
     private DriverAPI driver;
 
-    public AppDispatcher(Map\<String, Endpoint> endpointMap) {
-        this.endpointMap = endpointMap;
-
+    public AppDispatcher() {
         <models:set_component_controller("model"); separator="\n">
         <interfaces:set_component_controller("iface"); separator="\n">
-
-        <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
     }
 
     void setDriver(DriverAPI driver) {
         this.driver = driver;
+    }
+
+    void addAllEndpoints() {
+        <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
     }
 
     @Override
@@ -71,47 +70,35 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     }
 
     @Override
-    public Endpoint getEndpointByName(String name) {
-        Endpoint ep = endpointMap.get(name);
-        if (ep == null)
-            throw new IllegalArgumentException("Invalid endpoint " + name);
-        return ep;
+    public Collection\<Endpoint> getEndpointsByName(String name) {
+        return driver.getEndpointsByName(name);
     }
 
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/
 
-    protected void models__notifyDeparted(Event event){
-        byte[] data = ((NetworkEvent) event).data;
-        Endpoint endpoint = ((NetworkEvent) event).endpoint;
-        RavelPacket rp = RavelPacket.fromNetwork(data);
+    protected void models__notifyDeparted(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
         switch (rp.model_id) {
             <models:model_case_event("record_departed"); separator="\n">
         }
     }
 
-    protected void models__notifyArrived(Event event){
-        byte[] data = ((NetworkEvent) event).data;
-        Endpoint endpoint = ((NetworkEvent) event).endpoint;
-        RavelPacket rp = RavelPacket.fromNetwork(data);
-        switch (rp.model_id){
+    protected void models__notifyArrived(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        switch (rp.model_id) {
             <models:model_case_event("record_arrived"); separator="\n">
         }
     }
 
-    protected void models__notifyFull(Event event){
-        Context\<? extends ModelRecord> data = ((ModelEvent) event).ctx;
-        // FIXME
-        // data.model.full();
-    }
-
     /***********************************************************************/
-    /************** Network callbacks from AD to Driver ********************/
+    /************** AD Commands from model to AD ***************************/
     /***********************************************************************/
-    public void driver__sendData(Event event) {
-        driver.sendData(((NetworkEvent) event).data,
-                        ((NetworkEvent) event).endpoint);
+    public Error model__sendData(RavelPacket data, Endpoint ep) {
+        return driver.sendData(data, ep);
     }
 
     /***********************************************************************/

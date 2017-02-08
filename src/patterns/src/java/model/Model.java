@@ -2,23 +2,21 @@
 package patterns.src.java.model;
 
 //AUTOGEN imports
-import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.model.StreamingModel;
-import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.utils.ByteWork;
+import org.stanford.ravel.rrt.utils.GrowableByteArray;
 import patterns.src.java.app.AppDispatcher;
 import patterns.src.java.controller.ModelController;
 
-//Standard utilities
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
+
+//Standard utilities
 
 /**
  * Created by lauril on 1/23/14.
  */
-public class Model extends StreamingModel<Model.Record>{
+public class Model extends StreamingModel<Model.Record> {
     /**
      * Controller Listeners
      */
@@ -60,6 +58,8 @@ public class Model extends StreamingModel<Model.Record>{
     @Override
     protected void notifyArrived(org.stanford.ravel.rrt.Context<Record> ctx) {
         pprint("notifyArrived");
+
+        /* FIXME
         //TODO: this is fast hack
         if(super.mEndpointUpp != null){
             pprint("resending");
@@ -68,6 +68,7 @@ public class Model extends StreamingModel<Model.Record>{
             mDispatcher.model__sendData(ravelPacket, mEndpointUpp);
             //TODO: deal with forward error
         }
+        */
         //AUTOGEN: list of subscribing controllers
 
         mcntr.Model_arrived(ctx);
@@ -129,7 +130,7 @@ public class Model extends StreamingModel<Model.Record>{
                     ByteWork.getBytes(data,16,20)
             );
             this.field4 = ByteWork.convertFourBytesToInt(
-                    ByteWork.getBytes(data,20,24)
+                    ByteWork.getBytes(data, 20, 24)
             );
         }
 
@@ -137,22 +138,18 @@ public class Model extends StreamingModel<Model.Record>{
 
         }
 
-        public byte[] toBytes(){
-            //TODO: handle this mess better
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-            //AUTOGEN: write to
-            try {
-                outputStream.write(ByteWork.getByteArray(model_id));
-                outputStream.write(ByteWork.getByteArray(idx));
-                outputStream.write(ByteWork.getByteArray(field1));
-                outputStream.write(ByteWork.getByteArray(field2));
-                outputStream.write(ByteWork.getByteArray(field3));
-                outputStream.write(ByteWork.getByteArray(field4));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        public byte[] toBytes() {
+            GrowableByteArray outputStream = new GrowableByteArray();
 
+            //AUTOGEN: write to
+            outputStream.write(ByteWork.getByteArray(model_id));
+            outputStream.write(ByteWork.getByteArray(idx));
+            outputStream.write(ByteWork.getByteArray(field1));
+            outputStream.write(ByteWork.getByteArray(field2));
+            outputStream.write(ByteWork.getByteArray(field3));
+            outputStream.write(ByteWork.getByteArray(field4));
             //AUTOGEN END
+
             return outputStream.toByteArray();
         }
 

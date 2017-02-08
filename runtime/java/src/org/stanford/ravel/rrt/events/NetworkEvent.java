@@ -10,41 +10,26 @@ import org.stanford.ravel.rrt.tiers.Error;
 public class NetworkEvent extends Event {
 
 
-    public byte[] data = null;
+    public RavelPacket data = null;
     public Endpoint endpoint;
     public Event.Type eventType;
     public Error error;
-    public RavelPacket pkt = null;
 
-    public NetworkEvent(byte[] data, Endpoint ed, Event.Type eventType){
+    public NetworkEvent(RavelPacket data, Endpoint ed, Event.Type eventType){
         super();
         this.data = data;
         this.endpoint = ed;
         this.eventType = eventType;
     }
-    public NetworkEvent(byte[] data, Endpoint ed, Error err, Event.Type eventType){
+    public NetworkEvent(RavelPacket data, Endpoint ed, Error err, Event.Type eventType){
         this(data, ed, eventType);
         this.error = err;
     }
 
-    public NetworkEvent(byte[] data, Endpoint ed, Error err, Event.Type eventType, RavelPacket pkt){
-        this(data, ed, eventType);
-        this.error = err;
-        this.pkt = pkt;
-    }
-
-    public NetworkEvent(byte[] data, Endpoint ed, Event.Type eventType, RavelPacket pkt){
-        this(data, ed, eventType);
-        this.pkt = pkt;
-    }
-
-    public boolean hasPacket(){
-        return this.pkt != null;
-    }
-
-    public boolean hasData(){
+    public boolean hasData() {
         return this.data != null;
     }
+
     @Override
     public Type getType() {
         return this.eventType;

@@ -10,6 +10,8 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -23,11 +25,13 @@ public class J2SE extends BasePlatform {
     private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/platforms/j2se/tmpl";
 
     private final STGroup mainGroup;
+    private final STGroup buildGroup;
 
     public J2SE() {
         // java 1.8 required
         super(18, Integer.MAX_VALUE);
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
+        buildGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/build.stg");
     }
 
     @Override
@@ -45,6 +49,20 @@ public class J2SE extends BasePlatform {
         module.addFile(file);
 
         return module;
+    }
+
+    @Override
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
+        JavaLanguageOptions joptions = JavaLanguageOptions.getInstance();
+        String runtimePath = new File(joptions.getRuntimePath()).getAbsolutePath();
+
+        ST tmpl = buildGroup.getInstanceOf("ant");
+        tmpl.add("java_runtime", runtimePath);
+
+        FileObject build_xml = new FileObject();
+        build_xml.setFileName("build.xml");
+        build_xml.setContent(tmpl.render());
+        return Collections.singletonList(build_xml);
     }
 
     @Override

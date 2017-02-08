@@ -3,7 +3,6 @@ package patterns.src.java.controller;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.TimerSource;
 import patterns.src.java.model.Model;
-import patterns.src.java.sources.TimerSource1;
 
 
 /**
@@ -32,12 +31,9 @@ public class ModelController {
         //AUTOGEN:create timers
         // initialize timer from AppDispatcher
         this.timer = timersource;
-
-        //We set DThread to true.
-        //A daemon thread will execute only as long as the rest of the program continues to execute.
     }
 
-    void pprint(String s){
+    private void pprint(String s){
         System.out.println("[" + this.mName +"]>" + s);
     }
     public void setName(String name){
@@ -46,7 +42,7 @@ public class ModelController {
 
     public void timer_1_fired() {
         //create a record and save it.
-        Model.Record rec = mModel.create();
+        Model.Record rec = Model.create();
         rec.field1 = 1444444;
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;
@@ -69,7 +65,7 @@ public class ModelController {
     }
 
     public void Model_full(Context<Model.Record> ctx){
-        if(mName == "EMD" ) {
+        if(mName.equals("Embedded")) {
             timer.cancel();
             running = false;
         }
@@ -87,7 +83,7 @@ public class ModelController {
      */
     public void system_started() {
         //TODO: test only in simulation
-        if(mName == "EMD" ) {
+        if(mName.equals("Embedded")) {
             timer.start_periodic(2000);
             running = true;
         }

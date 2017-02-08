@@ -56,15 +56,10 @@ public static class Record implements ModelRecord {
 
     @Override
     public byte[] toBytes() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            outputStream.write(ByteWork.getByteArray(MODEL_ID));
-            outputStream.write(ByteWork.getByteArray(__idx));
-            <fields:{f|outputStream.write(ByteWork.getByteArray(<f.name>));}; separator="\n">
-        } catch (IOException e) {
-            // Should never happen
-            throw new RuntimeException(e);
-        }
+        GrowableByteArray outputStream = new GrowableByteArray();
+        outputStream.write(ByteWork.getByteArray(MODEL_ID));
+        outputStream.write(ByteWork.getByteArray(__idx));
+        <fields:{f|outputStream.write(ByteWork.getByteArray(<f.name>));}; separator="\n">
         return outputStream.toByteArray();
     }
 
@@ -78,12 +73,10 @@ public static class Record implements ModelRecord {
 file(package,imports,name,base,model,set_endpoints) ::=<<
 package <package>;
 
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-
 import org.stanford.ravel.rrt.model.<base>;
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.utils.ByteWork;
+import org.stanford.ravel.rrt.utils.GrowableByteArray;
 import org.stanford.ravel.rrt.Context;
 
 <imports:do_import()>
@@ -103,7 +96,7 @@ public class <name> extends <base>\<<name>.Record> {
 
     // Setter methods for AppDispatcher
     public void addAllEndpoints() {
-        <if(set_endpoints)><model.streamingSinks:{s|addEndpoint(mDispatcher.getEndpointByName("<s.name>"));}; separator="\n"><endif>
+        <if(set_endpoints)><model.streamingSinks:{s|addEndpoints(mDispatcher.getEndpointsByName("<s.name>"));}; separator="\n"><endif>
     }
     <model.controllerList:set_controller_method(); separator="\n">
 

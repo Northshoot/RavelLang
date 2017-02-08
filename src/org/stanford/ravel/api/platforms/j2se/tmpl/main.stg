@@ -3,6 +3,8 @@ package <package>;
 
 import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.utils.EndpointListReader;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,28 +20,27 @@ class Application {
             System.err.println("Expected endpoint configuration file as first argument.");
             return;
         }
+
+        AppDispatcher dispatcher = new AppDispatcher();
+        JavaDriver driver = new JavaDriver(dispatcher);
+        dispatcher.setDriver(driver);
+
         String configFileName = args[0];
-        Map\<String, Endpoint> endpointMap = new HashMap\<>();
-        try (Scanner scanner = new Scanner(new FileInputStream(configFileName))) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] split = line.split("\t");
-                if (split.length != 2) {
-                    System.err.println("Badly formatted line " + line);
-                    continue;
+        try (EndpointListReader reader = new EndpointListReader(new FileInputStream(configFileName))) {
+            Endpoint ep = reader.next();
+            while (ep != null) {
+                Error err = driver.registerEndpoint(ep);
+                if (err != Error.SUCCESS) {
+                    System.err.println("Failed to register endpoint " + ep.getName() + ": " + err);
+                    // die immediately if endpoint registration failed (it means we could not
+                    // bind the right ports)
+                    return;
                 }
-                String address = split[1];
-                String[] parts = address.split(":");
-                Endpoint ep = new Endpoint(split[0], Endpoint.TYPE.SOCKET, parts[0], Integer.valueOf(parts[1]));
-                endpointMap.put(split[0], ep);
             }
         } catch (IOException e) {
             System.err.println("Failed to load config file: " + e.getMessage());
         }
 
-        AppDispatcher dispatcher = new AppDispatcher(endpointMap);
-        JavaDriver driver = new JavaDriver(dispatcher);
-        dispatcher.setDriver(driver);
         driver.appDispatcherReady();
     }
 }

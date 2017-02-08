@@ -1,8 +1,9 @@
 package org.stanford.ravel.rrt.model;
 
-import org.stanford.ravel.rrt.*;
-import org.stanford.ravel.rrt.events.Event;
-import org.stanford.ravel.rrt.events.ModelEvent;
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
@@ -33,35 +34,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         mRecords.ensureCapacity(size);
         mDispatcher = dispatcher;
         stateArray = new RecordState[size];
-    }
-
-
-    /******************* ******* event queue ***************************/
-    QueueArray<Event> eventQueue = new QueueArray<>();
-
-    protected synchronized void runNextEvent(){
-        try {
-            Event e = eventQueue.remove();
-
-            switch (e.getType()) {
-                case MODEL__NOTIFY_FULL:
-                    notifyFull((Context<RecordType>) ((ModelEvent)e).ctx);
-                    break;
-
-            }
-        } catch (java.util.NoSuchElementException e){
-            pprint("No events to process");
-        }
-    }
-
-
-    private void post_task(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                runNextEvent();
-            }
-        }).start();
     }
 
     // the generated methods for dispatching events
@@ -110,15 +82,22 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         System.out.println("[BaseModel::]>" + s);
     }
 
+    private void queueFullEvent() {
+        mDispatcher.queueEvent(new RunnableEvent() {
+            @Override
+            public void run() {
+                Context<RecordType> ctx = new Context<>(BaseModel.this, Error.OUT_OF_STORAGE);
+                notifyFull(ctx);
+            }
+        });
+    }
+
     protected Context<RecordType> addRecord(RecordType record) {
         if (!tryAddRecord(record))
             return new Context<>(this, Error.OUT_OF_STORAGE);
-        //TODO: race conditions
-        if (currentPos == mModelSize) {
-            Context<RecordType> ctx = new Context<>(this, Error.OUT_OF_STORAGE);
-            eventQueue.add(new ModelEvent(ctx, Event.Type.MODEL__NOTIFY_FULL));
 
-        }
+        if (currentPos == mModelSize)
+            queueFullEvent();
 
         return new Context<>(this, record);
     }
@@ -157,8 +136,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         Context<RecordType> ctx = new Context<>(this);
         ctx.record = unmarshall(pkt.record_data);
 
-        //mark saved durably
-        //notify all subscribers
+        // mark saved durably
+        // notify all subscribers
         notifySaveDone(ctx);
     }
 

@@ -14,16 +14,18 @@ import java.util.List;
  * Created by gcampagn on 1/30/17.
  */
 public abstract class ReplicatedModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
-    private int index = 0;
-
-    private List<Endpoint> mEndpoints = new ArrayList<>();
+    private final List<Endpoint> mEndpoints = new ArrayList<>();
 
     protected ReplicatedModel(DispatcherAPI dispatcher, int size) {
         super(dispatcher, size);
     }
 
-    protected void addEndpoint(Endpoint e) {
-        mEndpoints.add(e);
+    void pprint(String s){
+        System.out.println("[ReplicatedModel::]>" + s);
+    }
+
+    public void addEndpoints(Collection<Endpoint> e) {
+        mEndpoints.addAll(e);
     }
 
     private Error sendOne(RavelPacket pkt, Endpoint e) {

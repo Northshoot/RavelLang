@@ -116,6 +116,14 @@ public class ByteWork {
         return new String(hexChars);
     }
 
+    public static byte[] getLengthByteArray(int length) {
+        byte[] buffer = new byte[2];
+        // careful, this little endian, because it matches convertTwoUnsignedBytesToInt
+        buffer[0] = (byte) (length & 0xFF);
+        buffer[1] = (byte) ((length >> 8) & 0xFF);
+        return buffer;
+    }
+
     public static byte[] getByteArray(int val) {
         return ByteBuffer.allocate(4).putInt(val).array();
     }

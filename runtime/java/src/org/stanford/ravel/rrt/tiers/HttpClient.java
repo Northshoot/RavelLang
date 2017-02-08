@@ -1,45 +1,58 @@
-package org.stanford.ravel.rrt;
+package org.stanford.ravel.rrt.tiers;
 
 /**
  * Created by lauril on 1/31/17.
  */
-import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.HttpEndpoint;
+
+import org.stanford.ravel.rrt.RavelPacket;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class HttpClient {
-
-
+class HttpClient implements RavelSocket {
         private HttpEndpoint endpoint; //contains base information
 
-
-        public HttpClient (Endpoint endpoint){
+        public HttpClient (Endpoint endpoint) {
             this.endpoint = (HttpEndpoint) endpoint;
         }
 
-        public int sendData(byte[] data) throws Exception {
-            if(this.endpoint.getMethod() == "GET")
-                return get(data);
-            else
-                return post(data);
-        }
-        // HTTP GET request
-        public int get(byte[] data) throws Exception {
+        @Override
+        public void write(RavelPacket data) throws RavelIOException {
+            try {
+                int responseCode;
+                switch (this.endpoint.getMethod()) {
+                    case "GET":
+                    case "HEAD":
+                        responseCode = get(data.toBytes());
+                        break;
+                    default:
+                        responseCode = post(data.toBytes());
+                        break;
+                }
 
-            URL obj = new URL(endpoint.getFullURL());
+                if (responseCode != 200)
+                    throw new RavelIOException(Error.SYSTEM_ERROR);
+            } catch(IOException e) {
+                throw new RavelIOException(e);
+            }
+        }
+
+        // HTTP GET request
+        public int get(byte[] data) throws IOException {
+
+            URL obj = endpoint.getUrl();
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod("GET");
+            con.setRequestMethod(endpoint.getMethod());
             //add request header
             con.setRequestProperty("User-Agent", endpoint.getUserAgent());
 
             int responseCode = con.getResponseCode();
             //TODO: handle errors
-            System.out.println("\nSending 'GET' request to URL : " + endpoint.getFullURL());
+            System.out.println("\nSending 'GET' request to URL : " + obj.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
@@ -55,13 +68,12 @@ public class HttpClient {
         }
 
         // HTTP POST request
-        public int post(byte[] data) throws Exception {
+        public int post(byte[] data) throws IOException {
 
-            URL obj = new URL(endpoint.getFullURL());
+            URL obj = endpoint.getUrl();;
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod("POST");
+            con.setRequestMethod(endpoint.getMethod());
             con.setRequestProperty("User-Agent", endpoint.getUserAgent());
-
 
             // Send post request
             con.setDoOutput(true);
@@ -72,7 +84,7 @@ public class HttpClient {
 
             int responseCode = con.getResponseCode();
             //TODO: handle errors
-            System.out.println("\nSending 'POST' request to URL : " + endpoint.getFullURL());
+            System.out.println("\nSending 'POST' request to URL : " + obj.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
@@ -87,6 +99,8 @@ public class HttpClient {
             return responseCode;
         }
 
+    @Override
+    public void close() throws IOException {
 
-
+    }
 }

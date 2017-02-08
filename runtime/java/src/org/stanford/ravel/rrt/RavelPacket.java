@@ -1,19 +1,22 @@
 package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.utils.ByteWork;
+import org.stanford.ravel.rrt.utils.GrowableByteArray;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * Created by lauril on 1/25/17.
  */
 public class RavelPacket {
+    private final static int SRC = 4; // 32 bits for source
+    private final static int DST = 8; // 32 bits for destination
+    private final static int RESERVED = 12; // reserved for byte mapping
 
-    public final static int SRC = 4; // 32 bits for source
-    public final static int DST = 8; // 32 bits for destination
-    public final static int RESERVED = 12; // reserved for byte mapping
+    /**
+     * The minimum length of a RavelPacket
+     */
+    public static final int MIN_LENGTH = RESERVED;
 
     public int model_id =-1;
     public byte[] record_data=null;
@@ -82,22 +85,14 @@ public class RavelPacket {
         return buffer.getInt();
     }
 
-
-    public byte[] toBytes(){
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-        try {
-            outputStream.write(ByteWork.getByteArray(src));
-            outputStream.write(ByteWork.getByteArray(dst));
-            outputStream.write(ByteWork.getByteArray(getPartial()));
-            outputStream.write(record_data, 0, record_data.length);
-            //AUTOGEN END
-            return outputStream.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public byte[] toBytes() {
+        GrowableByteArray outputStream = new GrowableByteArray();
+        outputStream.write(ByteWork.getByteArray(src));
+        outputStream.write(ByteWork.getByteArray(dst));
+        outputStream.write(ByteWork.getByteArray(getPartial()));
+        outputStream.write(record_data, 0, record_data.length);
+        return outputStream.toByteArray();
     }
-
 
     public boolean isLast(){
         return this.last == 1;

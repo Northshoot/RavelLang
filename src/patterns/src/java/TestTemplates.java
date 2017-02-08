@@ -62,43 +62,22 @@ public class TestTemplates {
 
     public static void main(String [] args)
     {
-        //AppDispather
-        Thread embedded_thread = new Thread(){
-            public void run(){
-                AppDispatcher embedded = new AppDispatcher("EMD");
-            }
-        };
-
-
-
-        Thread gateway_thread = new Thread(() -> {
-            AppDispatcher gateway = new AppDispatcher("GTW");
+        Thread embedded_thread = new Thread(() -> {
+            AppDispatcher embedded = new AppDispatcher("Embedded");
         });
+        Thread gateway_thread = new Thread(() -> {
+            AppDispatcher gateway = new AppDispatcher("Gateway");
+        });
+
+        // Do not create a cloud thread
+        // The cloud thread wants to listen on HTTP, which it cannot do
+        /*Thread cloud_thread = new Thread(() -> {
+            AppDispatcher cloud = new AppDispatcher("Cloud");
+        });*/
 
         gateway_thread.start();
         embedded_thread.start();
-
-//
-//        Thread cloud_thread = new Thread(){
-//            public void run(){
-//                AppDispatcher cloud = new AppDispatcher("CLD");
-//            }
-//        };
-//
-//        cloud_thread.start();
-
-        Thread cloud_thread = new Thread(){
-            public void run(){
-                AppDispatcher cloud = new AppDispatcher("CLD");
-            }
-        };
-
-        cloud_thread.start();
-
-
-
-
-
+        //cloud_thread.start();
 
         //test diver
        // androidDriver.rx_data_from_socket(getTestPacket());

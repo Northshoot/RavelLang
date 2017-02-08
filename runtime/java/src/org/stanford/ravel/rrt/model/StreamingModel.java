@@ -6,53 +6,48 @@ import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Created by gcampagn on 1/30/17.
  */
 public abstract class StreamingModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
-    protected Endpoint mEndpointDown = null;
-    protected Endpoint mEndpointUpp = null;
+    private final List<Endpoint> mEndpoints = new ArrayList<>();
 
-    private int index = 0;
     protected StreamingModel(DispatcherAPI dispatcher, int size) {
         super(dispatcher, size);
     }
 
-    public void setEndpointDown(Endpoint endpoint) {
-        this.mEndpointDown = endpoint;
-    }
-    public void setEndpointUpp(Endpoint endpoint) {
-        this.mEndpointUpp = endpoint;
+    public void addEndpoints(Collection<Endpoint> e) {
+        mEndpoints.addAll(e);
     }
 
     void pprint(String s){
         System.out.println("[StreamingModel::]>" + s);
     }
 
+    private Error sendOne(RavelPacket pkt, Endpoint e) {
+        return mDispatcher.model__sendData(pkt, e);
+    }
 
     @Override
     public Context<RecordType> save(RecordType record) {
-        pprint("save");
-//        if (! mEndpoint.isConnected() ){
-//            //TODO: queue packets
-//            Context<RecordType> ctx = addRecord(record);
-//            if (ctx.hasError())
-//                return ctx;
-//        }
-        record.index(++index);
+        // save locally first
+        Context<RecordType> local = addRecord(record);
+        if (local.error != Error.SUCCESS)
+            return local;
+
         // Packetize the record and send it
         byte[] rec = record.toBytes();
-        RavelPacket ravelPacket = RavelPacket.fromRecord(rec);
+        RavelPacket pkt = RavelPacket.fromRecord(rec);
 
-
-        // determine and send to endpoints
-        Error error = null;
-        //TODO: this is fast hack
-        if (mEndpointDown != null) {
-            error = mDispatcher.model__sendData(ravelPacket, mEndpointDown);
-        }
-        if (mEndpointUpp != null) {
-            error = mDispatcher.model__sendData(ravelPacket, mEndpointUpp);
+        Error error = Error.SUCCESS;
+        for (Endpoint e : mEndpoints) {
+            Error error2 = sendOne(pkt, e);
+            if (error2 != Error.SUCCESS)
+                error = error2;
         }
         if (error != Error.SUCCESS)
             return new Context<>(this, error);

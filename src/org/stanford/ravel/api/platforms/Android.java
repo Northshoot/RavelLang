@@ -69,7 +69,7 @@ public class Android  extends BasePlatform {
         for (FileObject file : files) {
             String fileName = file.getFileName();
             if (fileName.endsWith(".java"))
-                file.setSubPath("src/main/java/" + joptions.getPackageName().replace('.', '/'));
+                file.setSubPath(file.getSubPath().replace("src/", "src/main/java/"));
         }
 
         String runtimePath = new File(joptions.getRuntimePath()).getAbsolutePath();
