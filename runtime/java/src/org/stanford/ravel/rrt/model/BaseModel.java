@@ -8,6 +8,7 @@ import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -18,22 +19,24 @@ import java.util.ArrayList;
 public abstract class BaseModel<RecordType extends ModelRecord> implements ModelQuery<RecordType>, ModelBottomAPI, ModelCommandAPI<RecordType> {
     private static class RecordState {
         boolean inRest = false;
-        boolean inTransit = false;
         boolean inUse = false;
-        boolean ack = false;
+        int acks = 0;
     }
 
+    // this is accessed by the generated code so it must be protected
     protected final DispatcherAPI mDispatcher;
     private final RecordState[] stateArray;
     private final ArrayList<RecordType> mRecords = new ArrayList<RecordType>();
     private int currentPos = 0;
 
     private int mModelSize;
-    protected BaseModel(DispatcherAPI dispatcher, int size) {
+    BaseModel(DispatcherAPI dispatcher, int size) {
         mModelSize = size;
         mRecords.ensureCapacity(size);
         mDispatcher = dispatcher;
         stateArray = new RecordState[size];
+        for (int i = 0; i < stateArray.length; i++)
+            stateArray[i] = new RecordState();
     }
 
     // the generated methods for dispatching events
@@ -45,27 +48,28 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     // the generated methods for marshalling/unmarshalling
     protected abstract RecordType unmarshall(byte[] data);
 
-    private void markRecordAtRest(int record) {
+    void markRecordAtRest(int record) {
         stateArray[record].inRest = true;
     }
-    private void markRecordInTransit(int record) {
-        stateArray[record].inTransit = true;
+    void markRecordArrived(int record) {
+        stateArray[record].acks = 0;
     }
-    private void markRecordArrived(int record) {
-        stateArray[record].inTransit = false;
-    }
-    private void markRecordInUse(int record) {
+    void markRecordInUse(int record) {
         stateArray[record].inUse = true;
     }
-    private void markRecordReleasedFromUse(int record) {
+    void markRecordReleasedFromUse(int record) {
         stateArray[record].inUse = false;
     }
-    private void recordAck(int record){
-        stateArray[record].ack = true;
+    private void requireRecordAcks(int record, int acks) {
+        stateArray[record].acks = acks;
+    }
+    boolean recordAck(int record) {
+        stateArray[record].acks--;
+        return (stateArray[record].acks == 0);
     }
     private boolean safeToDeleteRecord(int record){
         RecordState rec = stateArray[record];
-        return !rec.inTransit && !rec.inUse && rec.ack;
+        return !rec.inUse && rec.acks == 0;
     }
 
     private boolean tryAddRecord(RecordType record) {
@@ -78,6 +82,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         mRecords.add(idx, record);
         return true;
     }
+
     void pprint(String s){
         System.out.println("[BaseModel::]>" + s);
     }
@@ -92,7 +97,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         });
     }
 
-    protected Context<RecordType> addRecord(RecordType record) {
+    Context<RecordType> addRecord(RecordType record) {
         if (!tryAddRecord(record))
             return new Context<>(this, Error.OUT_OF_STORAGE);
 
@@ -102,14 +107,56 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return new Context<>(this, record);
     }
 
+    Error sendOneRecord(RavelPacket pkt, Endpoint e) {
+        return mDispatcher.model__sendData(pkt, e);
+    }
+
+    Context<RecordType> sendRecord(RecordType record, Collection<Endpoint> endpoints) {
+        RavelPacket pkt = RavelPacket.fromRecord(record);
+
+        Error error = Error.SUCCESS;
+        requireRecordAcks(record.index(), endpoints.size());
+        for (Endpoint e : endpoints) {
+            Error error2 = sendOneRecord(pkt, e);
+            if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
+                error = error2;
+        }
+        if (error != Error.IN_TRANSIT && error != Error.SUCCESS)
+            return new Context<>(this, error);
+        else
+            return new Context<>(this, record);
+    }
+
+    abstract void recordAcknowledged(int recordId);
+
     @Override
-    public void record_arrived(RavelPacket pkt, Endpoint endpoint) {
+    public void recordArrived(RavelPacket pkt, Endpoint endpoint) {
+        if (pkt.isAck()) {
+            // we received an ack, count it towards the number of acks
+            // we expected, and if we reach zero tell the subclass to do something
+
+            // FIXME duplicate acks?
+            if (recordAck(pkt.record_id)) {
+                pprint("record fully acknowledged");
+                recordAcknowledged(pkt.record_id);
+            }
+            return;
+        }
+
+        pprint("record_arrived");
+
+        // Let the controllers and local model deal with it first...
         Context<RecordType> ctx = new Context<>(this);
-        RecordType record = unmarshall(pkt.record_data);
+        RecordType record = unmarshall(pkt.getRecordData());
         addRecord(record);
         ctx.record = record;
         //notify all subscribers
         notifyArrived(ctx);
+
+        // then send an ack back to the endpoint where this came from
+        //
+        // FIXME: combine ack with packet in the opposite direction?
+        mDispatcher.model__sendData(RavelPacket.makeAck(pkt.model_id, pkt.record_id), endpoint);
     }
 
     /**
@@ -118,14 +165,14 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
      * @param endpoint
      */
     @Override
-    public void record_departed(RavelPacket pkt, Endpoint endpoint) {
-        //TODO: is this an ACK?
+    public void recordDeparted(RavelPacket pkt, Endpoint endpoint) {
+        if (pkt.isAck()) // we sent an ACK, great no need to fuss about it...
+            return;
 
-        //TODO: is this system packet?
         //normal data
         pprint("record_departed");
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.getRecordData());
         //notify all subscribers
         notifyDeparted(ctx);
     }
@@ -134,7 +181,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     public void record_saved_durably(RavelPacket pkt) {
         //TODO: only true do remote and durable
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.getRecordData());
 
         // mark saved durably
         // notify all subscribers
@@ -144,7 +191,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     @Override
     public void record_saved_endpoint(RavelPacket pkt, Endpoint endpoint) {
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.record_data);
+        ctx.record = unmarshall(pkt.getRecordData());
 
         //notify all subscribers
         notifySaveDone(ctx);
@@ -159,13 +206,16 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     /*************** Model Command API implementation **************/
     /***************************************************************/
 
-    public Context<RecordType> delete(int deleteField){
+    public Context<RecordType> delete(int deleteField) {
+        if (deleteField > currentPos || deleteField < 0)
+            throw new IndexOutOfBoundsException();
         // take a copy for return
         RecordType mDeletedRecord = mRecords.get(deleteField);
-        // delete from local array
 
-        for(int i = deleteField ; i < mModelSize ;i++) {
+        // delete from local array
+        for(int i = deleteField ; i < currentPos-1;i++) {
             mRecords.set(i, mRecords.get(i + 1));
+            mRecords.get(i).index(i);
         }
         currentPos--;
         return new Context<>(this, mDeletedRecord);

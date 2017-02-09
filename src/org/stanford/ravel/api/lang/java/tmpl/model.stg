@@ -67,6 +67,11 @@ public static class Record implements ModelRecord {
     public void index(int i) {
         __idx = i;
     }
+
+    @Override
+    public int index() {
+        return __idx;
+    }
 };
 >>
 

@@ -35,6 +35,7 @@ public class RavelSocketServer implements Runnable, Closeable {
                     readLoop(ClientSocket.this);
                 }
             });
+            listeningThread.setName("ClientSocket " + endpoint.getAddress() + ":" + endpoint.getPort());
             listeningThread.start();
         }
 
@@ -88,6 +89,7 @@ public class RavelSocketServer implements Runnable, Closeable {
             throw new RavelIOException(e);
         }
         listeningThread = new Thread(this);
+        listeningThread.setName("SocketServer " + endpoint.getAddress() + ":" + endpoint.getPort());
         listeningThread.start();
     }
 

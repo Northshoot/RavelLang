@@ -12,6 +12,6 @@ public class SystemEvent extends Event {
 
     @Override
     public Type getType() {
-        return null;
+        return type;
     }
 }

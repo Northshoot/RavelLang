@@ -5,15 +5,14 @@ package org.stanford.ravel.rrt.events;
  */
 public abstract class Event {
     public enum Type {
-        DISPATCHER__QUIT,
-        DISPATCHER__STOP,
+        DISPATCHER__QUIT, // SystemEvent
+        DISPATCHER__STOP, // SystemEvent
 
-        DRIVER__DATA_RECEIVED,
+        DRIVER__DATA_RECEIVED, // NetworkEvent
+        MODELS__NOTIFY_RECORD_DEPARTED, // NetworkEvent
+        MODELS__NOTIFY_RECORD_FAILED_TO_SEND, // NetworkEvent
 
-        MODELS__NOTIFY_RECORD_DEPARTED,
-        MODELS__NOTIFY_RECORD_ARRIVED,
-
-        GENERIC__RUNNABLE
+        GENERIC__RUNNABLE // RunnableEvent
     }
 
     public abstract Type getType();

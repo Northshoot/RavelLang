@@ -17,6 +17,11 @@ case <model.baseModel.id>:
     model_<model.varName>.<event>(rp, endpoint);
     break;
 >>
+model_case_event_error(model, event) ::=<<
+case <model.baseModel.id>:
+    model_<model.varName>.<event>(rp, endpoint, error);
+    break;
+>>
 
 set_component_controller(comp, prefix) ::=<<
 <comp.controllerList:{c|<prefix>_<comp.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
@@ -40,7 +45,6 @@ import org.stanford.ravel.rrt.SinkAPI;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
-import org.stanford.ravel.rrt.events.ModelEvent;
 
 <imports:do_import()>
 
@@ -82,7 +86,7 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         RavelPacket rp = event.data;
         Endpoint endpoint = event.endpoint;
         switch (rp.model_id) {
-            <models:model_case_event("record_departed"); separator="\n">
+            <models:model_case_event("recordDeparted"); separator="\n">
         }
     }
 
@@ -90,7 +94,16 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         RavelPacket rp = event.data;
         Endpoint endpoint = event.endpoint;
         switch (rp.model_id) {
-            <models:model_case_event("record_arrived"); separator="\n">
+            <models:model_case_event("recordArrived"); separator="\n">
+        }
+    }
+
+    protected void models__notifyFailedToSend(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        Error error = event.error;
+        switch (rp.model_id) {
+            <models:model_case_event_error("recordFailedToSend"); separator="\n">
         }
     }
 

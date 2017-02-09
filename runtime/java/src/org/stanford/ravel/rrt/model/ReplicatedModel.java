@@ -28,10 +28,6 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
         mEndpoints.addAll(e);
     }
 
-    private Error sendOne(RavelPacket pkt, Endpoint e) {
-        return mDispatcher.model__sendData(pkt, e);
-    }
-
     @Override
     public Context<RecordType> save(RecordType record) {
         // save locally first
@@ -40,18 +36,19 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
             return local;
 
         // Packetize the record and send it
-        byte[] rec = record.toBytes();
-        RavelPacket pkt = RavelPacket.fromRecord(rec);
+        return sendRecord(record, mEndpoints);
+    }
 
-        Error error = Error.SUCCESS;
-        for (Endpoint e : mEndpoints) {
-            Error error2 = sendOne(pkt, e);
-            if (error2 != Error.SUCCESS)
-                error = error2;
-        }
-        if (error != Error.SUCCESS)
-            return new Context<>(this, error);
-        else
-            return new Context<>(this, record);
+    @Override
+    public void recordFailedToSend(RavelPacket pkt, Endpoint endpoint, Error error) {
+        // FIXME what to do in this case?
+        // for now, drop on the floor
+        markRecordArrived(pkt.record_id);
+    }
+
+    @Override
+    public void recordAcknowledged(int recordId) {
+        // FIXME what to do in this case?
+        // for now, ignore the ack except for bookkeeping
     }
 }

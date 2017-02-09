@@ -24,12 +24,8 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         mEndpoints.addAll(e);
     }
 
-    void pprint(String s){
+    void pprint(String s) {
         System.out.println("[StreamingModel::]>" + s);
-    }
-
-    private Error sendOne(RavelPacket pkt, Endpoint e) {
-        return mDispatcher.model__sendData(pkt, e);
     }
 
     @Override
@@ -40,18 +36,20 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             return local;
 
         // Packetize the record and send it
-        byte[] rec = record.toBytes();
-        RavelPacket pkt = RavelPacket.fromRecord(rec);
+        return sendRecord(record, mEndpoints);
+    }
 
-        Error error = Error.SUCCESS;
-        for (Endpoint e : mEndpoints) {
-            Error error2 = sendOne(pkt, e);
-            if (error2 != Error.SUCCESS)
-                error = error2;
-        }
-        if (error != Error.SUCCESS)
-            return new Context<>(this, error);
-        else
-            return new Context<>(this, record);
+    @Override
+    public void recordFailedToSend(RavelPacket pkt, Endpoint endpoint, Error error) {
+        // try again at sending the packet,
+        sendOneRecord(pkt, endpoint);
+    }
+
+    @Override
+    public void recordAcknowledged(int recordId) {
+        // FIXME what to do in this case?
+        // for now, just delete the record and move on
+
+        delete(recordId);
     }
 }

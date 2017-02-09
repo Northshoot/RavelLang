@@ -26,6 +26,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
             }
         });
         loopThread.setDaemon(true);
+        loopThread.setName("AppDispatcher: " + getAppName());
         loopThread.start();
     }
 
@@ -45,13 +46,17 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
 
     protected abstract void models__notifyArrived(NetworkEvent event);
 
-    /******************* ******* event queue ***************************/
-    private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<Event>(5);
+    protected abstract void models__notifyFailedToSend(NetworkEvent event);
 
-    protected synchronized void runNextEvent(Event e) {
+    /******************* ******* event queue ***************************/
+    private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<>(5);
+
+    private void runNextEvent(Event e) {
         switch (e.getType()) {
             case DISPATCHER__STOP:
                 this.stopped();
+                // queue a new event so that we process all events in the queue up to
+                // here
                 queueEvent(new SystemEvent(Event.Type.DISPATCHER__QUIT));
                 break;
             case DRIVER__DATA_RECEIVED:
@@ -60,7 +65,8 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
             case MODELS__NOTIFY_RECORD_DEPARTED:
                 models__notifyDeparted((NetworkEvent)e);
                 break;
-            case MODELS__NOTIFY_RECORD_ARRIVED:
+            case MODELS__NOTIFY_RECORD_FAILED_TO_SEND:
+                models__notifyFailedToSend((NetworkEvent)e);
                 break;
 
             case GENERIC__RUNNABLE:
@@ -70,7 +76,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     }
 
     private void eventLoop() {
-        LOGGER.info("Dispatcher event loop started");
+        LOGGER.info(getAppName() + ": dispatcher event loop started");
 
         try {
             while (true) {
@@ -109,11 +115,11 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
 
     @Override
     public void driver__sendDone(Error networkError, RavelPacket data, Endpoint endpoint) {
-        if (networkError == Error.SUCCESS) {
-            NetworkEvent ne = new NetworkEvent(data, endpoint, networkError, Event.Type.MODELS__NOTIFY_RECORD_DEPARTED);
-            queueEvent(ne);
-        } else {
+        if (networkError != Error.SUCCESS) {
             LOGGER.info("Error sending to the server, status: " + networkError);
         }
+        NetworkEvent ne = new NetworkEvent(data, endpoint, networkError,
+                networkError == Error.SUCCESS ? Event.Type.MODELS__NOTIFY_RECORD_DEPARTED : Event.Type.MODELS__NOTIFY_RECORD_FAILED_TO_SEND);
+        queueEvent(ne);
     }
 }

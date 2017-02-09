@@ -7,4 +7,6 @@ public interface ModelRecord {
     byte[] toBytes();
 
     void index(int i);
+
+    int index();
 }

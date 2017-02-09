@@ -157,6 +157,11 @@ public class Model extends StreamingModel<Model.Record> {
         public void index(int i) {
             this.idx = i;
         }
+
+        @Override
+        public int index() {
+            return idx;
+        }
     }
 
 }

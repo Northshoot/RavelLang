@@ -133,8 +133,7 @@ public class AppDispatcher  extends AbstractDispatcher {
         Endpoint endpoint = event.endpoint;
         switch (rp.model_id){
             case 1:
-                model_id_1.record_departed(rp, endpoint);
-
+                model_id_1.recordDeparted(rp, endpoint);
         }
     }
 
@@ -144,8 +143,17 @@ public class AppDispatcher  extends AbstractDispatcher {
         pprint("Received data from: " + endpoint.getName() + " pkt:" + rp);
         switch (rp.model_id){
             case Model.MODEL_ID:
-                model_id_1.record_arrived(rp, endpoint);
+                model_id_1.recordArrived(rp, endpoint);
+        }
+    }
 
+    protected void models__notifyFailedToSend(NetworkEvent event) {
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        Error error = event.error;
+        switch (rp.model_id){
+            case Model.MODEL_ID:
+                model_id_1.recordFailedToSend(rp, endpoint, error);
         }
     }
 
