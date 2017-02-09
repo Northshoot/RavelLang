@@ -5,13 +5,6 @@ import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.*;
-import org.stanford.ravel.compiler.ir.untyped.BinaryArithOp;
-import org.stanford.ravel.compiler.ir.untyped.IfStatement;
-import org.stanford.ravel.compiler.ir.untyped.ImmediateLoad;
-import org.stanford.ravel.compiler.ir.untyped.Instruction;
-import org.stanford.ravel.compiler.ir.untyped.Move;
-import org.stanford.ravel.compiler.ir.untyped.UnaryArithOp;
-import org.stanford.ravel.compiler.symbol.TypeSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 
@@ -540,6 +533,8 @@ public class TypeResolvePass implements InstructionVisitor {
                 return PrimitiveType.ERROR;
             return resultType;
         }
+        if (op == UnaryOperation.NOT)
+            return PrimitiveType.BOOL;
 
         return resultType;
     }

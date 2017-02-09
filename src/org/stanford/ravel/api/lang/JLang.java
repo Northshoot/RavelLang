@@ -65,9 +65,9 @@ public class JLang extends BaseLanguage {
             } else if (type instanceof ModelType.RecordType) {
                 return ((ModelType.RecordType) type).getModel().getName() + ".Record";
             } else if (type instanceof ModelType.ContextType) {
-                return "Context<" + toNativeType(((ModelType.ContextType) type).getOwner()) + ".Record>";
+                return RUNTIME_PKG + ".Context<" + toNativeType(((ModelType.ContextType) type).getOwner()) + ".Record>";
             } else if (type instanceof SystemType) {
-                return "DispatcherAPI";
+                return RUNTIME_PKG + ".DispatcherAPI";
             } else {
                 return type.getName();
             }
@@ -130,7 +130,7 @@ public class JLang extends BaseLanguage {
             public void visit(TConvert convert) {
                 if (convert.srcType == PrimitiveType.ERROR_MSG &&
                         convert.tgtType == PrimitiveType.BOOL) {
-                    addCode(getRegisterName(convert.target) + " = " + getRegisterName(convert.source) + " != Error.SUCCESS;\n");
+                    addCode(getRegisterName(convert.target) + " = " + getRegisterName(convert.source) + " != " + RUNTIME_PKG + ".tiers.Error.SUCCESS;\n");
                 } else {
                     super.visit(convert);
                 }
@@ -254,7 +254,7 @@ public class JLang extends BaseLanguage {
             modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
         modelTmpl.add("base", baseClass);
         modelTmpl.add("model", im);
-        modelTmpl.add("set_endpoints", im.getBaseModel().getModelType() == Model.Type.REPLICATED);
+        modelTmpl.add("set_endpoints", im.getBaseModel().getModelType() != Model.Type.LOCAL);
 
         return simpleModule(modelTmpl, im.getName(), packageName);
     }

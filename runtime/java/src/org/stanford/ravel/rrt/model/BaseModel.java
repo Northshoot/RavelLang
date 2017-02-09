@@ -23,10 +23,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         int acks = 0;
     }
 
-    // this is accessed by the generated code so it must be protected
-    protected final DispatcherAPI mDispatcher;
+    private final DispatcherAPI mDispatcher;
     private final RecordState[] stateArray;
-    private final ArrayList<RecordType> mRecords = new ArrayList<RecordType>();
+    private final ArrayList<RecordType> mRecords = new ArrayList<>();
     private int currentPos = 0;
 
     private int mModelSize;
@@ -111,8 +110,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return mDispatcher.model__sendData(pkt, e);
     }
 
-    Context<RecordType> sendRecord(RecordType record, Collection<Endpoint> endpoints) {
+    Context<RecordType> sendRecord(RecordType record, Collection<String> endpointNames) {
         RavelPacket pkt = RavelPacket.fromRecord(record);
+
+        Collection<Endpoint> endpoints = new ArrayList<>();
+        for (String name : endpointNames)
+            endpoints.addAll(mDispatcher.getEndpointsByName(name));
 
         Error error = Error.SUCCESS;
         requireRecordAcks(record.index(), endpoints.size());

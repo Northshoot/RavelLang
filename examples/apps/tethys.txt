@@ -165,8 +165,8 @@ interface FFT():
 
 interface OCBEncryption():
     implementation:
+        java = "rlib/java/ocb.stg"
         # FIXME
-        #java = "rlib/java/ocb.stg"
         #c = "rlib/c/ocb.stg"
 
     # FIXME?

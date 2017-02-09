@@ -1,13 +1,10 @@
 package org.stanford.ravel;
 
-import org.stanford.ravel.compiler.ir.typed.ControlFlowGraphVisitor;
-import org.stanford.ravel.compiler.ir.typed.TBlock;
 import org.stanford.ravel.compiler.ir.typed.TInstruction;
 import org.stanford.ravel.compiler.ir.typed.TMethodCall;
 import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.primitives.*;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 
 /**
@@ -142,7 +139,7 @@ public class FlowAnalysis {
             for (InstantiatedController writer : writingControllers.get(m)) {
                 if (reader == writer)
                     continue;
-                addFlow(m, reader, writer);
+                addFlow(m, writer, reader);
             }
         }
     }

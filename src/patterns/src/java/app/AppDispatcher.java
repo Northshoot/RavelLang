@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -77,11 +78,11 @@ public class AppDispatcher  extends AbstractDispatcher {
         switch (mName){
             case "Embedded":
                 // embedded sends to gateway
-                model_id_1.addEndpoints(mDriver.getEndpointsByName("Gateway"));
+                model_id_1.addEndpoints(Collections.singletonList("Gateway"));
                 break;
             case "Gateway":
                 // gateway sends to cloud
-                model_id_1.addEndpoints(mDriver.getEndpointsByName("Cloud"));
+                model_id_1.addEndpoints(Collections.singletonList("Cloud"));
                 break;
             case "Cloud":
                 // cloud does not send anywhere

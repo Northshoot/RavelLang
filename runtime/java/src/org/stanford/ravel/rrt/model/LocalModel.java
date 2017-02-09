@@ -16,6 +16,11 @@ public abstract class LocalModel<RecordType extends ModelRecord> extends BaseMod
 
     @Override
     public Context<RecordType> save(RecordType record) {
+        if (record.index() != -1) {
+            // the record was already saved once
+            return new Context<>(this, record);
+        }
+
         Context<RecordType> ctx = addRecord(record);
         if (ctx.error != Error.SUCCESS)
             return ctx;
