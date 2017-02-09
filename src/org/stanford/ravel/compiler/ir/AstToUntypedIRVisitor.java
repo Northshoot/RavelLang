@@ -3,7 +3,6 @@ package org.stanford.ravel.compiler.ir;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.antlr4.RavelBaseVisitor;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.untyped.*;
@@ -23,15 +22,15 @@ import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
 /**
  * Created by gcampagn on 1/20/17.
  */
-public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
+class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
     private final UntypedIR ir;
     private final List<Block> blockStack = new ArrayList<>();
 
-    private final ControllerEventCompiler compiler;
+    private final CompileToIRPass compiler;
     private Scope currentScope;
     private int currentReg = VOID_REG;
 
-    public AstToUntypedIRVisitor(ControllerEventCompiler compiler, int firstGpRegister) {
+    AstToUntypedIRVisitor(CompileToIRPass compiler, int firstGpRegister) {
         this.compiler = compiler;
         ir = new UntypedIR(firstGpRegister);
         blockStack.add(ir.getRoot());

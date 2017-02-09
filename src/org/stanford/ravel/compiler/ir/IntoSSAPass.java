@@ -23,7 +23,7 @@ import java.util.*;
  *
  * Created by gcampagn on 2/8/17.
  */
-public class IntoSSAPass {
+class IntoSSAPass {
     private static class Definition {
         TBlock inBlock;
 
@@ -76,7 +76,7 @@ public class IntoSSAPass {
 
     private final Map<TBlock, Map<Integer, Integer>> renamesAtBlockEnd = new HashMap<>();
 
-    public IntoSSAPass(TypedIR ir) {
+    IntoSSAPass(TypedIR ir) {
         this.ir = ir;
     }
 

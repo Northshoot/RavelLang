@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.ir;
 
-import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
@@ -15,7 +14,7 @@ import org.stanford.ravel.compiler.types.*;
  * Created by gcampagn on 1/23/17.
  */
 public class TypeResolvePass implements InstructionVisitor {
-    private final ControllerEventCompiler compiler;
+    private final CompileToIRPass compiler;
     private final ControlFlowGraphBuilder cfgBuilder = new ControlFlowGraphBuilder();
     private final LoopTreeBuilder loopTreeBuilder = new LoopTreeBuilder();
 
@@ -23,7 +22,7 @@ public class TypeResolvePass implements InstructionVisitor {
     private TBlock currentLoopHead = null;
     private TBlock currentLoopContinuation = null;
 
-    public TypeResolvePass(ControllerEventCompiler compiler) {
+    public TypeResolvePass(CompileToIRPass compiler) {
         this.compiler = compiler;
         loopTreeBuilder.addBasicBlock(cfgBuilder.getEntry());
     }

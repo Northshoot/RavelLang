@@ -1,11 +1,8 @@
-package org.stanford.ravel.compiler;
+package org.stanford.ravel.compiler.ir;
 
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
-import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
-import org.stanford.ravel.compiler.ir.IntoSSAPass;
-import org.stanford.ravel.compiler.ir.OutofSSAPass;
-import org.stanford.ravel.compiler.ir.TypeResolvePass;
+import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.ControlFlowGraph;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.ir.typed.ValidateIR;
@@ -21,19 +18,21 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Compile each event from symbols to TypedIR in SSA form
+ *
  * Created by gcampagn on 1/20/17.
  */
-public class ControllerEventCompiler {
+public class CompileToIRPass {
     private final boolean debug;
     private final RavelCompiler driver;
     private boolean hadError = false;
 
-    public ControllerEventCompiler(RavelCompiler driver, boolean debug) {
+    public CompileToIRPass(RavelCompiler driver, boolean debug) {
         this.driver = driver;
         this.debug = debug;
     }
 
-    public TypedIR compileEvent(EventHandlerSymbol eventSym, RavelParser.EventScopeContext tree, int firstGpRegister) throws FatalCompilerErrorException {
+    public TypedIR run(EventHandlerSymbol eventSym, RavelParser.EventScopeContext tree, int firstGpRegister) throws FatalCompilerErrorException {
         // Check arguments
         List<VariableSymbol> declaredArguments = eventSym.getArguments();
         Type[] expected = eventSym.getType().getArgumentTypes();
@@ -99,28 +98,17 @@ public class ControllerEventCompiler {
 
         ValidateIR.validate(ir2);
 
-        if (true) {
-            IntoSSAPass intoSSA = new IntoSSAPass(ir2);
-            intoSSA.run();
+        IntoSSAPass intoSSA = new IntoSSAPass(ir2);
+        intoSSA.run();
 
-            ValidateIR.validate(ir2);
-            ValidateSSA.validate(ir2);
-            if (debug) {
-                System.out.println("SSA CFG");
-                cfg.visitForward(System.out::println);
-            }
-
-            // run analysis and optimization passes
-            // lower IR
-
-            OutofSSAPass outofSSAPass = new OutofSSAPass(ir2);
-            outofSSAPass.run();
-
-            if (debug) {
-                System.out.println("Ouf of SSA CFG");
-                cfg.visitForward(System.out::println);
-            }
+        ValidateIR.validate(ir2);
+        ValidateSSA.validate(ir2);
+        if (debug) {
+            System.out.println("SSA CFG");
+            cfg.visitForward(System.out::println);
         }
+
+        // run local (non interprocedural) analysis and optimization passes
 
         return ir2;
     }

@@ -13,10 +13,10 @@ import java.util.Iterator;
  *
  * Created by gcampagn on 2/8/17.
  */
-public class OutofSSAPass {
+class OutofSSAPass {
     private final TypedIR ir;
 
-    public OutofSSAPass(TypedIR ir) {
+    OutofSSAPass(TypedIR ir) {
         this.ir = ir;
     }
 

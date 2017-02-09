@@ -1,15 +1,22 @@
 package org.stanford.ravel;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.stanford.ravel.api.InvalidOptionException;
-import org.stanford.ravel.compiler.*;
+import org.stanford.ravel.compiler.CompileError;
+import org.stanford.ravel.compiler.DefPhase;
+import org.stanford.ravel.compiler.SourceLocation;
+import org.stanford.ravel.compiler.ValidateScope;
 import org.stanford.ravel.compiler.scope.GlobalScope;
-import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.symbol.ControllerSymbol;
+import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
+import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
+import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
@@ -30,6 +37,7 @@ public class RavelCompiler {
     private boolean hadErrors = false;
     private final RavelOptionParser options = new RavelOptionParser();
     private final List<CompileError> errors = new ArrayList<>();
+    private ControllerCompiler controllerCompiler;
 
     public boolean success() {
         return !hadErrors;
@@ -120,11 +128,15 @@ public class RavelCompiler {
         }
     }
 
-    private void compileControllers(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ControllerCompiler compiler = new ControllerCompiler(this, options.hasFOption("dump-ir"));
+    private void compileControllersPreAnalysis(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
         for (ControllerSymbol c : scope.getControllers()) {
-            app.addController(c.getName(), compiler.compile(c));
+            app.addController(c.getName(), controllerCompiler.preAnalysis(c));
         }
+    }
+
+    private void compileControllersPostAnalysis(RavelApplication app) throws FatalCompilerErrorException {
+        for (Controller c : app.getControllers())
+            controllerCompiler.postAnalysis(c);
     }
 
     private void compileSpaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
@@ -193,7 +205,8 @@ public class RavelCompiler {
                     return;
 
                 // compile the controllers to IR
-                compileControllers(globalScope, app);
+                controllerCompiler = new ControllerCompiler(this, options.hasFOption("dump-ir"));
+                compileControllersPreAnalysis(globalScope, app);
                 if (!success())
                     return;
 
@@ -207,6 +220,9 @@ public class RavelCompiler {
                 flowAnalysis.run();
                 if (!success())
                     return;
+
+                // lower IR and prepare for code generation
+                compileControllersPostAnalysis(app);
 
                 LOGGER.info("Internal representation is created!");
 
