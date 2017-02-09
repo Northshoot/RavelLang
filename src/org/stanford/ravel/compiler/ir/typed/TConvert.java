@@ -8,8 +8,8 @@ import org.stanford.ravel.compiler.types.Type;
 public class TConvert extends TInstruction {
     public final Type srcType;
     public final Type tgtType;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
 
     public TConvert(Type tgtType, Type srcType, int target, int source) {
         if (tgtType.equals(srcType))
@@ -30,7 +30,7 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
@@ -40,7 +40,7 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return tgtType;
     }
 

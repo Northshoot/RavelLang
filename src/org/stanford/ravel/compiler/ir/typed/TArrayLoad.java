@@ -1,7 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
 import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -11,9 +10,9 @@ import org.stanford.ravel.compiler.types.Type;
 public class TArrayLoad extends TInstruction {
     public final Type type;
     public final ArrayType arrayType;
-    public final int target;
-    public final int source;
-    public final int index;
+    public int target;
+    public int source;
+    public int index;
 
     public TArrayLoad(Type type, ArrayType arrayType, int target, int source, int index) {
         this.type = type;
@@ -28,12 +27,12 @@ public class TArrayLoad extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 

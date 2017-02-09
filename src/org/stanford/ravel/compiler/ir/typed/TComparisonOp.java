@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.stanford.ravel.compiler.ir.BinaryOperation;
 import org.stanford.ravel.compiler.ir.ComparisonOperation;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
@@ -10,9 +9,9 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TComparisonOp extends TInstruction {
     public final Type type;
-    public final int target;
-    public final int src1;
-    public final int src2;
+    public int target;
+    public int src1;
+    public int src2;
     public final ComparisonOperation op;
 
     public TComparisonOp(Type type, int target, int src1, int src2, ComparisonOperation op) {
@@ -35,7 +34,7 @@ public class TComparisonOp extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
@@ -45,7 +44,7 @@ public class TComparisonOp extends TInstruction {
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return PrimitiveType.BOOL;
     }
 

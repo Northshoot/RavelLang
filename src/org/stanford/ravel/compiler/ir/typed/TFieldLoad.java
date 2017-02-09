@@ -1,7 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.stanford.ravel.compiler.ir.untyped.InstructionVisitor;
 import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -11,8 +9,8 @@ import org.stanford.ravel.compiler.types.Type;
 public class TFieldLoad extends TInstruction {
     public final Type type;
     public final CompoundType compoundType;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
     public final String field;
 
     public TFieldLoad(Type type, CompoundType compoundType, int target, int source, String field) {
@@ -28,12 +26,12 @@ public class TFieldLoad extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 

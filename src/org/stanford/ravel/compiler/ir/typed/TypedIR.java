@@ -7,8 +7,6 @@ import org.stanford.ravel.compiler.types.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
@@ -19,6 +17,7 @@ public class TypedIR {
     private final Map<Integer, Type> registerTypes = new HashMap<>();
     private ControlFlowGraph cfg;
     private LoopTreeNode loopTree;
+    private int nextRegister = UNSET_REG;
 
     public ControlFlowGraph getControlFlowGraph() {
         return cfg;
@@ -48,7 +47,22 @@ public class TypedIR {
             return type;
     }
 
+    public void setNextRegister(int firstGpRegister) {
+        nextRegister = firstGpRegister;
+    }
+    public int allocateRegister(Type type) {
+        assert type != PrimitiveType.VOID;
+
+        int reg = nextRegister++;
+        setRegisterType(reg, type);
+        return reg;
+    }
+
     public Collection<Map.Entry<Integer, Type>> getRegisterTypes() {
         return registerTypes.entrySet();
+    }
+
+    public void deleteRegister(int var) {
+        registerTypes.remove(var);
     }
 }

@@ -3,16 +3,19 @@ package org.stanford.ravel.compiler;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
 import org.stanford.ravel.compiler.ir.AstToUntypedIRVisitor;
+import org.stanford.ravel.compiler.ir.IntoSSAPass;
+import org.stanford.ravel.compiler.ir.OutofSSAPass;
 import org.stanford.ravel.compiler.ir.TypeResolvePass;
-import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.ir.typed.ControlFlowGraph;
+import org.stanford.ravel.compiler.ir.typed.TypedIR;
+import org.stanford.ravel.compiler.ir.typed.ValidateIR;
+import org.stanford.ravel.compiler.ir.typed.ValidateSSA;
 import org.stanford.ravel.compiler.symbol.EventHandlerSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
-import org.stanford.ravel.primitives.EventHandler;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,8 +99,28 @@ public class ControllerEventCompiler {
 
         ValidateIR.validate(ir2);
 
-        // run analysis and optimization passes
-        // lower IR
+        if (true) {
+            IntoSSAPass intoSSA = new IntoSSAPass(ir2);
+            intoSSA.run();
+
+            ValidateIR.validate(ir2);
+            ValidateSSA.validate(ir2);
+            if (debug) {
+                System.out.println("SSA CFG");
+                cfg.visitForward(System.out::println);
+            }
+
+            // run analysis and optimization passes
+            // lower IR
+
+            OutofSSAPass outofSSAPass = new OutofSSAPass(ir2);
+            outofSSAPass.run();
+
+            if (debug) {
+                System.out.println("Ouf of SSA CFG");
+                cfg.visitForward(System.out::println);
+            }
+        }
 
         return ir2;
     }

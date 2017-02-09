@@ -103,6 +103,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 if (var == null || !(var instanceof VariableSymbol)) {
                     compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
                     varReg = ERROR_REG;
+                } else if (!((VariableSymbol) var).isWritable()) {
+                    compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
+                    varReg = ERROR_REG;
                 } else {
                     varReg = ensureVarRegister((VariableSymbol) var);
                 }
@@ -153,6 +156,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 Symbol var = currentScope.resolve(varName);
                 if (var == null || !(var instanceof VariableSymbol)) {
                     compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+                    varReg = ERROR_REG;
+                } else if (!((VariableSymbol) var).isWritable()) {
+                    compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
                     varReg = ERROR_REG;
                 } else {
                     varReg = ensureVarRegister((VariableSymbol)var);
@@ -265,6 +271,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
             VariableSymbol replacement = new VariableSymbol(name);
             replacement.setType(PrimitiveType.ERROR);
+            replacement.setWritable(true);
             currentScope.define(replacement);
             return replacement;
         } else {

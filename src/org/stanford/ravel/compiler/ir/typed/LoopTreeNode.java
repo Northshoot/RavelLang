@@ -81,11 +81,11 @@ public abstract class LoopTreeNode {
     }
 
     public static class IfStatement extends LoopTreeNode {
-        private final int cond;
+        private final TIfStatement cond;
         private LoopTreeNode iftrue;
         private LoopTreeNode iffalse;
 
-        IfStatement(int cond, LoopTreeNode iftrue, LoopTreeNode iffalse) {
+        IfStatement(TIfStatement cond, LoopTreeNode iftrue, LoopTreeNode iffalse) {
             this.cond = cond;
             this.iftrue = iftrue;
             this.iffalse = iffalse;
@@ -94,7 +94,7 @@ public abstract class LoopTreeNode {
         }
 
         public int getCondition() {
-            return cond;
+            return cond.cond;
         }
 
         public LoopTreeNode getIftrue() {

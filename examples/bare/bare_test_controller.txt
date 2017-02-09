@@ -40,11 +40,22 @@ interface RandomSource():
 #        value = rec.value
 
 
-controller RandomControllerEmbedded(random: Random, timer: TimerSource, rnd : RandomSource):
+controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
     #foo
 
     event random.departed():
         x = 7
+        y = 5
+        t = timer
+        if y > 0:
+            t = timer2
+        while x >= 0:
+            x -= 2
+        timer.cancel()
+        if y < 6:
+            x += 2
+        else:
+            x += 3
 
     event timer.fired():
         #self
@@ -97,20 +108,6 @@ space CloudSpace:
         #rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
 
 
-interface CloudEndpoint(p : int32):
-    configuration:
-        base = '171.64.70.90'
-        port = p
-        type = 'HTTP'
-        method = 'POST'
-        url = '<app.name>/'
-        user_agent = 'Ravel:Java/Client'
-
-    implementation:
-        java = "rlib/java/httpEndpoint.stg"
-        c = "rlib/c/httpEndpoint.stg"
-
-
 space GatewaySpace:
     platform:
         language = JLang
@@ -121,11 +118,11 @@ space GatewaySpace:
 
     interfaces:
         timer_1 = TimerSource()
+        timer_2 = TimerSource()
         rng_1 = RandomSource()
-        cp = CloudEndpoint(p = 1000)
 
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
 
 
 

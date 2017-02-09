@@ -1,8 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.ir.Registers;
-import org.stanford.ravel.compiler.ir.untyped.InstructionVisitor;
 import org.stanford.ravel.compiler.types.FunctionType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -11,10 +9,10 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TMethodCall extends TInstruction {
     public final FunctionType type;
-    public final int owner;
+    public int owner;
     public final String method;
     public final int[] arguments;
-    public final int target;
+    public int target;
 
     public TMethodCall(FunctionType type, int target, int owner, String method, int[] arguments) {
         this.type = type;
@@ -34,12 +32,12 @@ public class TMethodCall extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type.getReturnType();
     }
 

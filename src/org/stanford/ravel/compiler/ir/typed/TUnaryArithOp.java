@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.stanford.ravel.compiler.ir.BinaryOperation;
 import org.stanford.ravel.compiler.ir.UnaryOperation;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -9,8 +8,8 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TUnaryArithOp extends TInstruction {
     public final Type type;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
     public final UnaryOperation op;
 
     public TUnaryArithOp(Type type, int target, int source, UnaryOperation op) {
@@ -30,7 +29,7 @@ public class TUnaryArithOp extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
@@ -40,7 +39,7 @@ public class TUnaryArithOp extends TInstruction {
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 

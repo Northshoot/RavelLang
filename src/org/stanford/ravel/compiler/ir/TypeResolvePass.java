@@ -8,8 +8,6 @@ import org.stanford.ravel.compiler.ir.untyped.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 
-import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
-
 /**
  * Converts tree-like UntypedIR to TypedIR, checking the type of
  * expressions and converting to control flow graph in the process
@@ -22,7 +20,6 @@ public class TypeResolvePass implements InstructionVisitor {
     private final LoopTreeBuilder loopTreeBuilder = new LoopTreeBuilder();
 
     private TypedIR ir = new TypedIR();
-    private int nextRegister = UNSET_REG;
     private TBlock currentLoopHead = null;
     private TBlock currentLoopContinuation = null;
 
@@ -43,7 +40,7 @@ public class TypeResolvePass implements InstructionVisitor {
     }
 
     public TypedIR run(UntypedIR ir) {
-        this.nextRegister = ir.numUsedRegisters();
+        this.ir.setNextRegister(ir.numUsedRegisters());
         ir.getRoot().accept(this);
         this.ir.finish(cfgBuilder, loopTreeBuilder);
         return this.ir;
@@ -56,11 +53,7 @@ public class TypeResolvePass implements InstructionVisitor {
         return ir.getRegisterType(reg);
     }
     private int allocateRegister(Type type) {
-        assert type != PrimitiveType.VOID;
-
-        int reg = nextRegister++;
-        setRegisterType(reg, type);
-        return reg;
+        return ir.allocateRegister(type);
     }
 
     private void typeError(Instruction instr, String message) {
@@ -398,8 +391,11 @@ public class TypeResolvePass implements InstructionVisitor {
         int target;
         Type targetType = getRegisterType(instr.target);
         if (targetType == PrimitiveType.ANY) {
-            target = instr.target;
-            setRegisterType(target, resultType);
+            setRegisterType(instr.target, resultType);
+            if (resultType != PrimitiveType.VOID)
+                target = instr.target;
+            else
+                target = Registers.VOID_REG;
             targetType = resultType;
         } else if (targetType.equals(resultType)) {
             target = instr.target;
@@ -439,9 +435,10 @@ public class TypeResolvePass implements InstructionVisitor {
         TBlock iftrue = cfgBuilder.newBlock();
         TBlock iffalse = cfgBuilder.newBlock();
 
-        cfgBuilder.addInstruction(new TIfStatement(cond, iftrue, iffalse));
+        TIfStatement ifStatement = new TIfStatement(cond, iftrue, iffalse);
+        cfgBuilder.addInstruction(ifStatement);
 
-        loopTreeBuilder.ifStatement(cond, iftrue, iffalse);
+        loopTreeBuilder.ifStatement(ifStatement, iftrue, iffalse);
 
         // continue in a new block
         TBlock continuation = cfgBuilder.newBlock();
@@ -622,9 +619,10 @@ public class TypeResolvePass implements InstructionVisitor {
 
         cfgBuilder.addSuccessor(empty);
         cfgBuilder.addSuccessor(breakBlock);
-        cfgBuilder.addInstruction(new TIfStatement(cond, empty, breakBlock));
+        TIfStatement ifStatement = new TIfStatement(cond, empty, breakBlock);
+        cfgBuilder.addInstruction(ifStatement);
 
-        loopTreeBuilder.ifStatement(cond, empty, breakBlock);
+        loopTreeBuilder.ifStatement(ifStatement, empty, breakBlock);
         cfgBuilder.pushBlock(empty);
         cfgBuilder.addSuccessor(loopBody);
         cfgBuilder.popBlock();

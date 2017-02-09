@@ -8,9 +8,9 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TBinaryArithOp extends TInstruction {
     public final Type type;
-    public final int target;
-    public final int src1;
-    public final int src2;
+    public int target;
+    public int src1;
+    public int src2;
     public final BinaryOperation op;
 
     public TBinaryArithOp(Type type, int target, int src1, int src2, BinaryOperation op) {
@@ -31,7 +31,7 @@ public class TBinaryArithOp extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
@@ -41,7 +41,7 @@ public class TBinaryArithOp extends TInstruction {
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 

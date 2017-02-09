@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -17,11 +16,11 @@ public abstract class TInstruction {
         return new Type[0];
     }
 
-    int getSink() {
+    public int getSink() {
         return VOID_REG;
     }
 
-    Type getSinkType() {
+    public Type getSinkType() {
         return PrimitiveType.VOID;
     }
 

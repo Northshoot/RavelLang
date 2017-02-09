@@ -1,16 +1,8 @@
 package org.stanford.ravel.compiler.ir.typed;
 
 import org.stanford.ravel.compiler.ir.Registers;
-import org.stanford.ravel.compiler.ir.typed.ControlFlowGraph;
-import org.stanford.ravel.compiler.ir.typed.TBlock;
-import org.stanford.ravel.compiler.ir.typed.TInstruction;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
-import org.stanford.ravel.primitives.Primitive;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by gcampagn on 1/24/17.
@@ -45,7 +37,7 @@ public class ValidateIR {
                     // registers to VOID
                     // if the user attempts to do anything with the result it will result in a type error
                     // though
-                    //assert sinkType != PrimitiveType.VOID;
+                    assert sinkType != PrimitiveType.VOID;
                 } else {
                     assert sinkType == PrimitiveType.VOID;
                 }

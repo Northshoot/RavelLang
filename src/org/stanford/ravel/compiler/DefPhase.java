@@ -2,6 +2,7 @@ package org.stanford.ravel.compiler;
 
 
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
@@ -9,13 +10,10 @@ import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.scope.LocalScope;
 import org.stanford.ravel.compiler.scope.Scope;
-import org.stanford.ravel.compiler.symbol.InstanceSymbol;
+import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Model;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.stanford.ravel.compiler.symbol.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -267,6 +265,7 @@ public class DefPhase extends RavelBaseListener {
         VariableSymbol system = new VariableSymbol("system");
         system.setDefNode(ctx);
         system.setType(new SystemType());
+        system.setWritable(false);
         currentScope.define(system);
     }
 
@@ -313,6 +312,7 @@ public class DefPhase extends RavelBaseListener {
             selfVar.setDefNode(ctx);
             selfVar.setRegister(Registers.SELF_REG);
             selfVar.setType(((EventType) eventType).getArgumentTypes()[0]);
+            selfVar.setWritable(false);
             currentScope.define(selfVar);
         }
     }
@@ -329,6 +329,7 @@ public class DefPhase extends RavelBaseListener {
 
         VariableSymbol var = new VariableSymbol(varName);
         var.setDefNode(ctx);
+        var.setWritable(true);
 
         Type type;
         if (ctx.type() != null) {
@@ -347,6 +348,7 @@ public class DefPhase extends RavelBaseListener {
 
         var.setType(parseType(ctx.type()));
         var.setDefNode(ctx);
+        var.setWritable(false);
         currentScope.define(var);
     }
 

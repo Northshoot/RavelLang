@@ -9,7 +9,7 @@ public class TBlock implements Iterable<TInstruction> {
     private final int id;
     private final Set<TBlock> predecessors = new HashSet<>();
     private final Set<TBlock> successors = new HashSet<>();
-    private final List<TInstruction> instructions = new ArrayList<>();
+    private final List<TInstruction> instructions = new LinkedList<>();
     private int sequenceId;
 
     TBlock(int id) {
@@ -41,7 +41,7 @@ public class TBlock implements Iterable<TInstruction> {
     Set<TBlock> getSuccessors() {
         return successors;
     }
-    Set<TBlock> getPredecessors() {
+    public Set<TBlock> getPredecessors() {
         return predecessors;
     }
 
@@ -49,6 +49,9 @@ public class TBlock implements Iterable<TInstruction> {
         return instructions.isEmpty();
     }
 
+    public void prepend(TInstruction instr) {
+        instructions.add(0, instr);
+    }
     public void add(TInstruction instr) {
         instructions.add(instr);
     }
@@ -83,6 +86,10 @@ public class TBlock implements Iterable<TInstruction> {
     @Override
     public Iterator<TInstruction> iterator() {
         return instructions.iterator();
+    }
+
+    public ListIterator<TInstruction> listIterator() {
+        return instructions.listIterator();
     }
 
     TInstruction getLastInstruction() {

@@ -7,8 +7,8 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TMove extends TInstruction {
     public final Type type;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
 
     public TMove(Type type, int target, int source) {
         this.type = type;
@@ -26,7 +26,7 @@ public class TMove extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
@@ -36,7 +36,7 @@ public class TMove extends TInstruction {
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 
