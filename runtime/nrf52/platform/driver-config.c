@@ -1,3 +1,4 @@
+#include "driver-config.h"
 #include <string.h>
 
 #include "nrf.h"
@@ -130,5 +131,13 @@ void config_persist(uint32_t current_time) {
     m_config.config.global_time_offset = current_time;
     LOG("writing config to flash");
     flash_write(config_code, m_config.buffer);
+
+}
+
+SystemContext init_ble(){
+
+}
+
+SystemContext init_flash(){
 
 }

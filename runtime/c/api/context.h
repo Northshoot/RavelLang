@@ -18,6 +18,13 @@ typedef struct {
     RavelError  error;
 } Context;
 
+typedef struct {
+    void       *record;
+    RavelError  error;
+} SystemContext;
+
+
+
 void ravel_context_init_ok(Context *ctx, void *record);
 void ravel_context_init_error(Context *ctx, RavelError error);
 

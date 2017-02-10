@@ -70,7 +70,7 @@ int main(void) {
     /* start the softdevice */
     ble_stack_init();
 
-    /* start the persistant memory queue */
+    /* start the persistent memory queue */
     flash_init();
 
     /* start ble */
