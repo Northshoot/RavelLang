@@ -26,7 +26,7 @@ public class TBinaryArithOp extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ src1, src2 };
     }
 

@@ -1,13 +1,11 @@
 package org.stanford.ravel.primitives;
 
-import org.antlr.v4.misc.OrderedHashMap;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
-import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.EventType;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Returns event hooks in various languages
@@ -49,5 +47,9 @@ public class EventHandler {
 
     public List<VariableSymbol> getArguments() {
         return arguments;
+    }
+
+    public Collection<Integer> getVariables() {
+        return body.getVariables();
     }
 }

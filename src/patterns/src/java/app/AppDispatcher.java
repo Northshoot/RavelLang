@@ -63,7 +63,7 @@ public class AppDispatcher  extends AbstractDispatcher {
         try {
             cloudEndpoint = Endpoint.fromString("Cloud", new URI("http://127.0.0.1:8000/api/push"), null);
             gatewayEndpoint = Endpoint.fromString("Gateway", new URI("tcp://127.0.0.1:4444"), null);
-            embeddedEndpoint = Endpoint.fromString("Embedded", new URI("tcp://127.0.0.1:5555"), null);
+            embeddedEndpoint = Endpoint.fromString("Embedded", new URI("tcp://127.0.0.1:5555"), null); // ble://uuid/uuid
 
             Error err = mDriver.registerEndpoint(cloudEndpoint);
             assert err == Error.SUCCESS;

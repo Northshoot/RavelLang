@@ -65,4 +65,8 @@ public class TypedIR {
     public void deleteRegister(int var) {
         registerTypes.remove(var);
     }
+
+    public Collection<Integer> getVariables() {
+        return registerTypes.keySet();
+    }
 }

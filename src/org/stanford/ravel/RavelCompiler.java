@@ -5,6 +5,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.analysis.FlowAnalysis;
+import org.stanford.ravel.analysis.ModelOperationAnalysis;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.CompileError;
 import org.stanford.ravel.compiler.DefPhase;
@@ -218,6 +220,12 @@ public class RavelCompiler {
                 // analyze flows
                 FlowAnalysis flowAnalysis = new FlowAnalysis(this, app);
                 flowAnalysis.run();
+                if (!success())
+                    return;
+
+                // analyze variable creation and field usage
+                ModelOperationAnalysis operationAnalysis = new ModelOperationAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
+                operationAnalysis.run();
                 if (!success())
                     return;
 

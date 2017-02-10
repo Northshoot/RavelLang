@@ -1,5 +1,7 @@
-package org.stanford.ravel;
+package org.stanford.ravel.analysis;
 
+import org.stanford.ravel.RavelApplication;
+import org.stanford.ravel.RavelCompiler;
 import org.stanford.ravel.compiler.ir.typed.TInstruction;
 import org.stanford.ravel.compiler.ir.typed.TMethodCall;
 import org.stanford.ravel.compiler.types.ModelType;
@@ -50,9 +52,6 @@ public class FlowAnalysis {
     private final RavelCompiler driver;
     private final RavelApplication app;
     private final Map<Model, Map<InstantiatedController, DataOperations>> dataflowState = new HashMap<>();
-
-    private final Map<Model, Set<InstantiatedController>> readingControllers = new HashMap<>();
-    private final Map<Model, Set<InstantiatedController>> writingControllers = new HashMap<>();
 
     private final Map<Model, Set<Flow>> allFlows = new HashMap<>();
 
@@ -114,14 +113,14 @@ public class FlowAnalysis {
         for (Map.Entry<InstantiatedController, DataOperations> entry : dataflowState.get(m).entrySet()) {
             switch (entry.getValue()) {
                 case READ:
-                    readingControllers.get(m).add(entry.getKey());
+                    m.addReader(entry.getKey());
                     break;
                 case WRITE:
-                    writingControllers.get(m).add(entry.getKey());
+                    m.addWriter(entry.getKey());
                     break;
                 case READ_WRITE:
-                    readingControllers.get(m).add(entry.getKey());
-                    writingControllers.get(m).add(entry.getKey());
+                    m.addReader(entry.getKey());
+                    m.addWriter(entry.getKey());
                     break;
                 case NOOP:
                 default:
@@ -135,8 +134,8 @@ public class FlowAnalysis {
     }
 
     private void computeFlows(Model m) {
-        for (InstantiatedController reader : readingControllers.get(m)) {
-            for (InstantiatedController writer : writingControllers.get(m)) {
+        for (InstantiatedController reader : m.getReaders()) {
+            for (InstantiatedController writer : m.getWriters()) {
                 if (reader == writer)
                     continue;
                 addFlow(m, writer, reader);
@@ -301,8 +300,6 @@ public class FlowAnalysis {
         // prepare state
         for (Model m : app.getModels()) {
             dataflowState.put(m, new HashMap<>());
-            readingControllers.put(m, new HashSet<>());
-            writingControllers.put(m, new HashSet<>());
             allFlows.put(m, new HashSet<>());
 
             for (Space s : app.getSpaces()) {

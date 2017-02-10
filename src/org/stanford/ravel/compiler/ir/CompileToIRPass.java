@@ -110,6 +110,19 @@ public class CompileToIRPass {
 
         // run local (non interprocedural) analysis and optimization passes
 
+        DeadValueEliminationPass deadValueEliminationPass = new DeadValueEliminationPass(ir2);
+        boolean progress;
+        int pass = 0;
+        do {
+            progress = false;
+            progress = deadValueEliminationPass.run() || progress;
+            if (debug && progress) {
+                System.out.println("Opt pass #" + (pass+1));
+                cfg.visitForward(System.out::println);
+            }
+            pass++;
+        } while(progress);
+
         return ir2;
     }
 

@@ -25,7 +25,7 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ source };
     }
 
@@ -45,12 +45,12 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    boolean writesMemory() {
+    public boolean writesMemory() {
         return false;
     }
 
     @Override
-    boolean readsMemory() {
+    public boolean readsMemory() {
         return false;
     }
 

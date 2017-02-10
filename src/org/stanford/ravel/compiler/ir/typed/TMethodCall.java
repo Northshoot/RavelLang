@@ -42,7 +42,7 @@ public class TMethodCall extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return arguments;
     }
 

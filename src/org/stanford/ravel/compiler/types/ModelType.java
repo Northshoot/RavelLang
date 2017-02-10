@@ -2,11 +2,9 @@ package org.stanford.ravel.compiler.types;
 
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.primitives.ModelEvent;
-import org.stanford.ravel.primitives.Primitive;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * The type of a model object.
@@ -35,8 +33,10 @@ public class ModelType extends ClassType {
         super(symbol.getName());
 
         recordType = new RecordType(symbol.getName() + "::Record");
-        ctxType = new ContextType(this);
+        ctxType = new ContextType();
 
+        // If you add new functions here, you must update LocalOwnershipTaggingPass
+        // to handle them correctly
         this.addMethod("save", new Type[]{recordType}, ctxType);
         this.addMethod("create", new Type[0], recordType);
         this.addMethod("first", new Type[0], recordType);
@@ -59,23 +59,14 @@ public class ModelType extends ClassType {
      *
      * Created by gcampagn on 1/29/17.
      */
-    public static class ContextType implements CompoundType {
-        private final ClassType component;
-
-        ContextType(ClassType model) {
-            this.component = model;
-        }
-
-        public ClassType getOwner() {
-            return component;
+    public class ContextType implements CompoundType {
+        public ModelType getOwner() {
+            return ModelType.this;
         }
 
         @Override
         public Collection<String> getMemberList() {
-            if (component instanceof ModelType)
-                return Arrays.asList("record", "error");
-            else
-                return Collections.singletonList("error");
+            return Arrays.asList("record", "error");
         }
 
         @Override
@@ -84,10 +75,7 @@ public class ModelType extends ClassType {
                 case "error":
                     return PrimitiveType.ERROR_MSG;
                 case "record":
-                    if (component instanceof ModelType)
-                        return ((ModelType) component).getRecordType();
-                    else
-                        return null;
+                    return getRecordType();
                 default:
                     return null;
             }
@@ -100,7 +88,7 @@ public class ModelType extends ClassType {
 
         @Override
         public String getName() {
-            return this.component.getName() + "::Context";
+            return ModelType.this.getName() + "::Context";
         }
     }
 }

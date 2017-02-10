@@ -26,7 +26,7 @@ public class TFieldStore extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[] { object, value };
     }
 

@@ -30,4 +30,8 @@ public class EventType implements Type {
     public Type[] getArgumentTypes() {
         return this.fn.getArgumentTypes();
     }
+
+    public ClassType getOwner() {
+        return fn.getOwner();
+    }
 }

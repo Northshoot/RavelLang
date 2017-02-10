@@ -22,13 +22,17 @@ public class TIfStatement extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ cond };
     }
 
     @Override
     Type[] getSourceTypes() {
         return new Type[]{PrimitiveType.BOOL};
+    }
+
+    public boolean affectsControlFlow() {
+        return true;
     }
 
     @Override

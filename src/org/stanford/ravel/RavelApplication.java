@@ -59,6 +59,23 @@ public class RavelApplication  {
         return Collections.unmodifiableCollection(mFlow);
     }
 
+    public Collection<InstantiatedController> getWritersTo(Model m, InstantiatedController ic) {
+        Set<InstantiatedController> writers = new HashSet<>();
+        for (Flow f : mFlow) {
+            if (f.getSink() == ic && f.getModel() == m)
+                writers.add(f.getSource());
+        }
+        return Collections.unmodifiableCollection(writers);
+    }
+    public Collection<InstantiatedController> getReadersFrom(Model m, InstantiatedController ic) {
+        Set<InstantiatedController> readers = new HashSet<>();
+        for (Flow f : mFlow) {
+            if (f.getSource() == ic && f.getModel() == m)
+                readers.add(f.getSink());
+        }
+        return Collections.unmodifiableCollection(readers);
+    }
+
     private Object getFirst(Map m) {
         Object firstKey = m.keySet().toArray()[0];
         return m.get(firstKey);

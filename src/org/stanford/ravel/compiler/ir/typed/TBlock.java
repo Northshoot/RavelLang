@@ -92,6 +92,10 @@ public class TBlock implements Iterable<TInstruction> {
         return instructions.listIterator();
     }
 
+    public ListIterator<TInstruction> listIteratorAtLast() {
+        return instructions.listIterator(instructions.size());
+    }
+
     TInstruction getLastInstruction() {
         if (instructions.isEmpty())
             return null;

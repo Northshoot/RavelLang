@@ -21,7 +21,7 @@ public class TMove extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ source };
     }
 

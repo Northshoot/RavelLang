@@ -130,12 +130,7 @@ class IntoSSAPass {
     }
 
     private void addPhiNode(TBlock block, int var, PhiNode node) {
-        phiNodes.compute(block, (key, nodes) -> {
-            if (nodes == null)
-                nodes = new HashMap<>();
-            nodes.put(var, node);
-            return nodes;
-        });
+        phiNodes.computeIfAbsent(block, (key) -> new HashMap<>()).put(var, node);
     }
 
     private void visitBlockDataflow(TBlock block) {
@@ -203,16 +198,13 @@ class IntoSSAPass {
     }
 
     private int getDefinitionRegister(Definition def) {
-        return allocatedRegisters.compute(def, (key, reg) -> {
-            if (reg == null) {
-                if (key.phiNode != null)
-                    reg = ir.allocateRegister(ir.getRegisterType(key.phiNode.variable));
-                else if (affectedVars.contains(key.instruction.getSink()))
-                    reg = ir.allocateRegister(key.instruction.getSinkType());
-                else
-                    reg = key.instruction.getSink();
-            }
-            return reg;
+        return allocatedRegisters.computeIfAbsent(def, (key) -> {
+            if (key.phiNode != null)
+                return ir.allocateRegister(ir.getRegisterType(key.phiNode.variable));
+            else if (affectedVars.contains(key.instruction.getSink()))
+                return ir.allocateRegister(key.instruction.getSinkType());
+            else
+                return key.instruction.getSink();
         });
     }
 

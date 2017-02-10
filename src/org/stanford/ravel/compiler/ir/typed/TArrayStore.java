@@ -27,7 +27,7 @@ public class TArrayStore extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[] { object, index, value };
     }
 
