@@ -57,7 +57,7 @@ public class ModelControllerLinker {
         RavelParser.SpaceScopeContext ctx = (RavelParser.SpaceScopeContext) ssb.getDefNode();
 
         String name = ssb.getName();
-        Space space  = new Space(name);
+        Space space  = new Space(ssb);
 
         //TODO: makes this static part of the process rather than hardcoded strings
 

@@ -21,10 +21,9 @@ public class Model extends ConfigurableComponent {
     private final ModelSymbol symbol;
     private final Type mModelType;
     private final int id;
-    private final Set<InstantiatedController> writers = new HashSet<>();
-    private final Set<InstantiatedController> readers = new HashSet<>();
 
     private final Map<String, ModelField> mFields = new HashMap<>();
+    private final Set<Flow> flow = new HashSet<>();
 
     public Model(String name, ModelSymbol symbol) {
         super(name);
@@ -38,43 +37,8 @@ public class Model extends ConfigurableComponent {
         this.id = idCounter++;
     }
 
-    /**
-     * Retrieve the set of all writers (controllers that call .save())
-     *
-     * @return the set of writers
-     */
-    public Collection<InstantiatedController> getWriters() {
-        return Collections.unmodifiableCollection(writers);
-    }
-
-    /**
-     * Retrieve the set of all readers (controllers that subscribe to .arrived)
-     *
-     * @return the set of readers
-     */
-    public Collection<InstantiatedController> getReaders() {
-        return Collections.unmodifiableCollection(readers);
-    }
-
-    /**
-     * Mark that the given controller subscribes to arrived() events on this model
-     * (making it a reader of the model, because it can see what other controllers
-     * write into it, even if does nothing with it)
-     *
-     * @param ic the reader controller
-     */
-    public void addReader(InstantiatedController ic) {
-        readers.add(ic);
-    }
-
-    /**
-     * Mark that the given controller calls save() on this model, meaning that it
-     * changes the content of records in this model, or adds records in this model
-     *
-     * @param ic the writer controller
-     */
-    public void addWriter(InstantiatedController ic) {
-        writers.add(ic);
+    public ModelSymbol getSymbol() {
+        return symbol;
     }
 
     public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
@@ -91,6 +55,25 @@ public class Model extends ConfigurableComponent {
 
     public Type getModelType() {
         return mModelType;
+    }
+
+    public Collection<Flow> getFlows() {
+        return Collections.unmodifiableCollection(flow);
+    }
+
+    public void addFlow(Flow f) {
+        assert mModelType != Type.LOCAL;
+        assert f != null;
+        flow.add(f);
+    }
+
+    public Collection<Flow> findFlowsForSpace(Space s) {
+        List<Flow> flows = new ArrayList<>();
+        for (Flow f : flow) {
+            if (f.involvesSpace(s))
+                flows.add(f);
+        }
+        return Collections.unmodifiableCollection(flows);
     }
 
     // This is called by the STG templates to generate the Record class

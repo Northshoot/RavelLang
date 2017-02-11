@@ -277,7 +277,13 @@ properties
 
 property_line
     : ref_assign
+    | flow_assign
     | NEWLINE
+    ;
+
+flow_assign
+    : 'flow' '=' Identifier ('->' Identifier)+ #DirectedFlow
+    | 'flow' '=' Identifier (',' Identifier)+ #UndirectedFlow
     ;
 
 schema_block returns [Scope scope]
@@ -294,7 +300,7 @@ field_line
     ;
 
 field
-    : Identifier ':' type  NEWLINE? #FieldDeclaration
+    : Identifier ':' type #FieldDeclaration
     ;
 
 /**

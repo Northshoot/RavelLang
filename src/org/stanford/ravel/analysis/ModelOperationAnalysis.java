@@ -72,13 +72,13 @@ public class ModelOperationAnalysis {
 
                                     case REMOTE:
                                         // variable is a record created by a different controller
-                                        m = app.getModel(tag.model.getName());
+                                        m = app.getModel(tag.model.getName());/*
                                         assert m != null;
                                         assert m.getReaders().contains(ic);
                                         for (InstantiatedController writer : app.getWritersTo(m, ic)) {
                                             if (writer != ic)
                                                 tagOneVariableCreator(event, var, writer);
-                                        }
+                                        }*/
                                         break;
 
                                     case STORED:
@@ -91,11 +91,12 @@ public class ModelOperationAnalysis {
                                         m = app.getModel(tag.model.getName());
                                         assert m != null;
 
+                                        /*
                                         if (m.getWriters().contains(ic))
                                             tagOneVariableCreator(event, var, ic);
                                         for (InstantiatedController writer : app.getWritersTo(m, ic)) {
                                             tagOneVariableCreator(event, var, writer);
-                                        }
+                                        }*/
                                 }
                             }
                         } else {

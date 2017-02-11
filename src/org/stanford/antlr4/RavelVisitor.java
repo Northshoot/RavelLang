@@ -233,6 +233,20 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProperty_line(RavelParser.Property_lineContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code DirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDirectedFlow(RavelParser.DirectedFlowContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code UndirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUndirectedFlow(RavelParser.UndirectedFlowContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code SchemaScope}
 	 * labeled alternative in {@link RavelParser#schema_block}.
 	 * @param ctx the parse tree

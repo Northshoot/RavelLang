@@ -3,6 +3,7 @@ package org.stanford.ravel.compiler;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stanford.antlr4.RavelBaseListener;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.RavelCompiler;
@@ -84,6 +85,30 @@ public class DefPhase extends RavelBaseListener {
         ls.setDefNode(ctx);
         pushScope(ls);
         //can only be defined ONCE per model, through error otherwise
+    }
+
+    @Override
+    public void enterDirectedFlow(RavelParser.DirectedFlowContext ctx) {
+        FlowSymbol fs = new FlowSymbol(true);
+        fs.setDefNode(ctx);
+
+        for (TerminalNode ident : ctx.Identifier()) {
+            fs.addSpace(ident.getText());
+        }
+
+        currentScope.define(fs);
+    }
+
+    @Override
+    public void enterUndirectedFlow(RavelParser.UndirectedFlowContext ctx) {
+        FlowSymbol fs = new FlowSymbol(false);
+        fs.setDefNode(ctx);
+
+        for (TerminalNode ident : ctx.Identifier()) {
+            fs.addSpace(ident.getText());
+        }
+
+        currentScope.define(fs);
     }
 
     @Override

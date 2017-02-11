@@ -39,7 +39,7 @@ public class InstantiatedModel extends BaseEventComponent {
         return mModel;
     }
 
-    void addStreamingSink(Space target) {
+    public void addStreamingSink(Space target) {
         assert mModel.getModelType() != Model.Type.LOCAL;
         assert target != getSpace();
         mStreamingSinks.add(target);
@@ -48,7 +48,7 @@ public class InstantiatedModel extends BaseEventComponent {
         return Collections.unmodifiableCollection(mStreamingSinks);
     }
 
-    void addStreamingSource(Space target) {
+    public void addStreamingSource(Space target) {
         assert mModel.getModelType() != Model.Type.LOCAL;
         assert target != getSpace();
         mStreamingSources.add(target);

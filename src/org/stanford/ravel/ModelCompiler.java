@@ -1,13 +1,12 @@
 package org.stanford.ravel;
 
-import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.scope.Scope;
 import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Model;
 
-import java.util.*;
+import java.util.Collection;
 
 /**
  * Compile a ModelSymbol into the resulting primitive Model.
@@ -43,15 +42,21 @@ public class ModelCompiler {
                 case "records":
                 case "durable":
                 case "reliable":
+                case "flow":
                     break;
                 default:
                     driver.emitWarning(new SourceLocation(s.getDefNode()), "ignored model property " + s.getName());
             }
 
+            if (s.getName().equals("flow") && !(s instanceof FlowSymbol))
+                driver.emitError(new SourceLocation(s.getDefNode()), "flow property must be in flow syntax (space1 -> space2 -> ... spaceN for streaming models, space1, space2, ... spaceN for replicated models)");
+
             if (s instanceof ConstantSymbol)
                 m.addConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
             else if (s instanceof ReferenceSymbol)
                 m.addReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
+            else if (s instanceof FlowSymbol)
+                ; // let FlowAnalysis deal with that
             else
                 throw new AssertionError();
         }

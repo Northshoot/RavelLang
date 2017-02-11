@@ -1,42 +1,64 @@
 package org.stanford.ravel.primitives;
 
+import java.util.Iterator;
+import java.util.List;
+
 /**
- * Mark that the data is flowing from one controller to another
+ * Mark that the data is flowing from one space to another
  *
- * The controllers need not be on different spaces, but they usually would.
- * Indeed, the flow primitive is used to compute the direction of transmission
- * for streaming models.
+ * A flow is always directed (unlike a FlowSymbol). For replicated models,
+ * which use undirected flows, we generate as many flows as needed.
  *
  * Created by lauril on 8/16/16.
  */
-public class Flow {
-    private final InstantiatedController source;
-    private final InstantiatedController sink;
+public class Flow implements Iterable<Space> {
+    private final List<Space> spaces;
     private final Model model;
 
-    public Flow(InstantiatedController from, InstantiatedController to, Model model) {
+    public Flow(List<Space> spaces, Model model) {
         super();
-        assert from != to;
-        this.source = from;
-        this.sink = to;
+        assert spaces.size() >= 2;
+        this.spaces = spaces;
         this.model = model;
     }
 
-    public InstantiatedController getSource() {
-        return source;
+    public Iterator<Space> iterator() {
+        return spaces.iterator();
     }
 
-    public InstantiatedController getSink() {
-        return sink;
+    public Space getSource() {
+        return spaces.get(0);
+    }
+
+    public Space getSink() {
+        return spaces.get(spaces.size()-1);
     }
 
     public Model getModel() {
         return model;
     }
 
+    public boolean involvesSpace(Space s) {
+        return spaces.contains(s);
+    }
+
+    public Space getNext(Space s) {
+        int i = spaces.indexOf(s);
+        if (i < 0 || i == spaces.size()-1)
+            return null;
+        return spaces.get(i+1);
+    }
+
+    public Space getPrevious(Space s) {
+        int i = spaces.indexOf(s);
+        if (i <= 0)
+            return null;
+        return spaces.get(i-1);
+    }
+
     public String toString() {
-        return model.getName() + ": from " + source.getSpace().getName() + "." + source.getVarName() + " to "
-                + sink.getSpace().getName() + "." + sink.getVarName();
+        return model.getName() + ": from " + getSource().getName() + " to "
+                + getSink().getName();
     }
 
     @Override
@@ -46,15 +68,13 @@ public class Flow {
 
         Flow flow = (Flow) o;
 
-        if (!source.equals(flow.source)) return false;
-        if (!sink.equals(flow.sink)) return false;
+        if (!spaces.equals(flow.spaces)) return false;
         return model.equals(flow.model);
     }
 
     @Override
     public int hashCode() {
-        int result = source.hashCode();
-        result = 31 * result + sink.hashCode();
+        int result = spaces.hashCode();
         result = 31 * result + model.hashCode();
         return result;
     }

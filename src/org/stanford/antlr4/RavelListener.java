@@ -380,6 +380,30 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitProperty_line(RavelParser.Property_lineContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code DirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 */
+	void enterDirectedFlow(RavelParser.DirectedFlowContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 */
+	void exitDirectedFlow(RavelParser.DirectedFlowContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code UndirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 */
+	void enterUndirectedFlow(RavelParser.UndirectedFlowContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UndirectedFlow}
+	 * labeled alternative in {@link RavelParser#flow_assign}.
+	 * @param ctx the parse tree
+	 */
+	void exitUndirectedFlow(RavelParser.UndirectedFlowContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code SchemaScope}
 	 * labeled alternative in {@link RavelParser#schema_block}.
 	 * @param ctx the parse tree
