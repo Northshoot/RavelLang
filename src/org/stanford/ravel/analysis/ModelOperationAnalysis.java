@@ -36,10 +36,32 @@ public class ModelOperationAnalysis {
         // to one and only event handler, and we run the local pass until convergence
         runLocalOwnership();
 
+        if (debug) {
+            dumpAllOwnerships();
+        }
     }
 
-    private void tagOneVariableCreator(LinkedEvent handler, int variable, InstantiatedController ic) {
-        handler.addVariableCreator(variable, ic);
+    private void dumpAllOwnerships() {
+        System.out.println("Ownership of event handler variables:");
+        for (Space s : app.getSpaces()) {
+            for (InstantiatedController ic : s.getControllers()) {
+                for (LinkedEvent event : ic) {
+                    System.out.println(ic);
+                    event.getVariableCreators().forEach((var, creators) -> {
+                        System.out.print(var + " [");
+                        for (Space creator : creators) {
+                            System.out.print(creator.getName() + ", ");
+                        }
+                        System.out.println("]");
+                    });
+                    System.out.println();
+                }
+            }
+        }
+    }
+
+    private void tagOneVariableCreator(LinkedEvent handler, int variable, Space space) {
+        handler.addVariableCreator(variable, space);
     }
 
     private void runLocalOwnership() {
@@ -66,19 +88,20 @@ public class ModelOperationAnalysis {
                             for (ModelTag tag : modelTags) {
                                 switch (tag.creator) {
                                     case CREATED:
-                                        // variable is a record created from this controller
-                                        tagOneVariableCreator(event, var, ic);
+                                        // variable is a record created from this space
+                                        tagOneVariableCreator(event, var, s);
                                         break;
 
                                     case REMOTE:
-                                        // variable is a record created by a different controller
-                                        m = app.getModel(tag.model.getName());/*
+                                        // variable is a record created by a different space
+                                        m = app.getModel(tag.model.getName());
+
                                         assert m != null;
-                                        assert m.getReaders().contains(ic);
-                                        for (InstantiatedController writer : app.getWritersTo(m, ic)) {
-                                            if (writer != ic)
+                                        assert m.getReaders().contains(s);
+                                        for (Space writer : m.getWriters()) {
+                                            if (writer != s)
                                                 tagOneVariableCreator(event, var, writer);
-                                        }*/
+                                        }
                                         break;
 
                                     case STORED:
@@ -91,17 +114,14 @@ public class ModelOperationAnalysis {
                                         m = app.getModel(tag.model.getName());
                                         assert m != null;
 
-                                        /*
-                                        if (m.getWriters().contains(ic))
-                                            tagOneVariableCreator(event, var, ic);
-                                        for (InstantiatedController writer : app.getWritersTo(m, ic)) {
+                                        for (Space writer : m.getWriters()) {
                                             tagOneVariableCreator(event, var, writer);
-                                        }*/
+                                        }
                                 }
                             }
                         } else {
                             // variable does not come from a model, it must be locally created
-                            tagOneVariableCreator(event, var, ic);
+                            tagOneVariableCreator(event, var, s);
                         }
                     }
                 }

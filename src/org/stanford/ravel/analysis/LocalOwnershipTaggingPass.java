@@ -150,15 +150,9 @@ public class LocalOwnershipTaggingPass {
                     tagModel(Registers.SELF_REG, ((ModelType.ContextType) selfType).getOwner(), Creator.REMOTE);
                     break;
                 case departed:
-                    tagModel(Registers.SELF_REG, ((ModelType.ContextType) selfType).getOwner(), Creator.STORED);
-                    break;
                 case save_done:
-                    // FIXME verify this
-                    tagModel(Registers.SELF_REG, ((ModelType.ContextType) selfType).getOwner(), Creator.CREATED);
-                    break;
                 case full:
-                    // FIXME verify this
-                    tagModel(Registers.SELF_REG, ((ModelType.ContextType) selfType).getOwner(), Creator.CREATED);
+                    tagModel(Registers.SELF_REG, ((ModelType.ContextType) selfType).getOwner(), Creator.STORED);
                     break;
                 default:
                     throw new AssertionError();

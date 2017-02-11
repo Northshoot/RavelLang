@@ -12,6 +12,7 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     private final List<EventHandler> mEvents = new ArrayList<>();
     private final Map<String, Type> mInterface =  new HashMap<>();
     private final List<VariableSymbol> mParamSymbols = new ArrayList<>();
+    private final Set<Model> mWrittenToModels = new HashSet<>();
 
     public Controller(String name) {
         super(name);
@@ -52,5 +53,19 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
 
     public InstantiatedController instantiate(Space space, String varName) {
         return new InstantiatedController(space, this, varName);
+    }
+
+    public void addWrittenToModel(Model m) {
+        mWrittenToModels.add(m);
+    }
+
+    // Get all the models this controller writes to
+    // (in the sense of having a call to .save())
+    public Collection<Model> getWrittenToModels() {
+        return Collections.unmodifiableCollection(mWrittenToModels);
+    }
+
+    public boolean writesTo(Model m) {
+        return mWrittenToModels.contains(m);
     }
 }

@@ -76,6 +76,7 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
 controller CController(random: Random):
     event random.arrived():
         rec = self.record
+        system.print(rec.str_value)
         # do something with rec.value
 
 

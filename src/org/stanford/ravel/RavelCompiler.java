@@ -7,6 +7,7 @@ import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.analysis.FlowAnalysis;
 import org.stanford.ravel.analysis.ModelOperationAnalysis;
+import org.stanford.ravel.analysis.ModelWritingAnalysis;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.CompileError;
 import org.stanford.ravel.compiler.DefPhase;
@@ -214,6 +215,12 @@ public class RavelCompiler {
 
                 // link controllers, models and platforms
                 compileSpaces(globalScope, app);
+                if (!success())
+                    return;
+
+                // determine who is writing where
+                ModelWritingAnalysis writingAnalysis = new ModelWritingAnalysis(this, app);
+                writingAnalysis.run();
                 if (!success())
                     return;
 

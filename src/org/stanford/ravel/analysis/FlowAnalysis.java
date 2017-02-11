@@ -6,10 +6,7 @@ import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.symbol.FlowSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
-import org.stanford.ravel.primitives.Flow;
-import org.stanford.ravel.primitives.InstantiatedModel;
-import org.stanford.ravel.primitives.Model;
-import org.stanford.ravel.primitives.Space;
+import org.stanford.ravel.primitives.*;
 
 import java.util.*;
 
@@ -33,6 +30,15 @@ public class FlowAnalysis {
         FlowSymbol flowSym = (FlowSymbol) ms.getNestedScope("properties").resolve("flow");
         if (flowSym != null)
             driver.emitError(new SourceLocation(flowSym.getDefNode()), "local models cannot define flows");
+
+        // build fake flows from one space to itself
+        for (Space s : app.getSpaces()) {
+            if (s.hasModel(m)) {
+                Flow f = new Flow(Arrays.asList(s, s), m);
+                app.addFlow(f);
+                m.addFlow(f);
+            }
+        }
     }
 
     private List<Space> makeSpaceList(FlowSymbol flowSym) {
@@ -54,6 +60,14 @@ public class FlowAnalysis {
         }
 
         return spaces;
+    }
+
+    private boolean writesTo(Space s, Model m) {
+        for (InstantiatedController ic : s.getControllers()) {
+            if (ic.getController().writesTo(m))
+                return true;
+        }
+        return false;
     }
 
     private void runStreaming(Model m) {
@@ -79,6 +93,11 @@ public class FlowAnalysis {
 
         // build a single directed flow
         Flow flow = new Flow(spaces, m);
+
+        if (!writesTo(flow.getSource(), m)) {
+            driver.emitWarning(new SourceLocation(flowSym.getDefNode()), "space " + flow.getSource() + " is the source of a streaming flow for model " + m.getName() + " but does not write into it");
+        }
+
         m.addFlow(flow);
         app.addFlow(flow);
     }
@@ -111,12 +130,12 @@ public class FlowAnalysis {
             }
         }
 
-        // build a flow from every space to every space
+        // build a flow from every writing space to every other space
         for (Space s1 : spaces) {
-            for (Space s2 : spaces) {
-                if (s1 == s2)
-                    continue;
+            if (!writesTo(s1, m))
+                continue;
 
+            for (Space s2 : spaces) {
                 Flow flow = new Flow(Arrays.asList(s1, s2), m);
                 m.addFlow(flow);
                 app.addFlow(flow);
@@ -147,10 +166,25 @@ public class FlowAnalysis {
                 Space next = f.getNext(s);
                 Space previous = f.getPrevious(s);
 
-                if (next != null)
+                if (next != null && next != s)
                     im.addStreamingSink(next);
-                if (previous != null)
+                if (previous != null && previous != s)
                     im.addStreamingSource(previous);
+            }
+        }
+
+        for (InstantiatedController ic : s.getControllers()) {
+            for (Model m : ic.getController().getWrittenToModels()) {
+                boolean found = false;
+                for (Flow f : m.getFlows()) {
+                    if (f.getSource() == s) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    driver.emitError(new SourceLocation(s.getSymbol().getDefNode()), "Controller " + ic.getName() + " in space " + s.getName() + " writes to model " + m.getName() + " but the space is not a source for any model flow");
+                }
             }
         }
     }

@@ -23,7 +23,9 @@ public class Model extends ConfigurableComponent {
     private final int id;
 
     private final Map<String, ModelField> mFields = new HashMap<>();
-    private final Set<Flow> flow = new HashSet<>();
+    private final Set<Flow> mFlows = new HashSet<>();
+    private final Set<Space> mWriters = new HashSet<>();
+    private final Set<Space> mReaders = new HashSet<>();
 
     public Model(String name, ModelSymbol symbol) {
         super(name);
@@ -58,22 +60,36 @@ public class Model extends ConfigurableComponent {
     }
 
     public Collection<Flow> getFlows() {
-        return Collections.unmodifiableCollection(flow);
+        return Collections.unmodifiableCollection(mFlows);
     }
 
     public void addFlow(Flow f) {
         assert mModelType != Type.LOCAL;
         assert f != null;
-        flow.add(f);
+        mFlows.add(f);
+
+        mWriters.add(f.getSource());
+        for (Space s : f) {
+            if (s == f.getSource())
+                continue;
+            mReaders.add(s);
+        }
     }
 
     public Collection<Flow> findFlowsForSpace(Space s) {
         List<Flow> flows = new ArrayList<>();
-        for (Flow f : flow) {
+        for (Flow f : mFlows) {
             if (f.involvesSpace(s))
                 flows.add(f);
         }
         return Collections.unmodifiableCollection(flows);
+    }
+
+    public Collection<Space> getReaders() {
+        return mReaders;
+    }
+    public Collection<Space> getWriters() {
+        return mWriters;
     }
 
     // This is called by the STG templates to generate the Record class

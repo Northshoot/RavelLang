@@ -13,7 +13,7 @@ public class LinkedEvent {
     private final EventHandler event;
     private final Map<Metadata, Map<Integer, Object>> variableMetas = new EnumMap<>(Metadata.class);
 
-    private final Map<Integer, Set<InstantiatedController>> variableCreators = new HashMap<>();
+    private final Map<Integer, Set<Space>> variableCreators = new HashMap<>();
 
     LinkedEvent(InstantiatedController controller, EventComponent component, EventHandler event) {
         this.controller = controller;
@@ -36,8 +36,16 @@ public class LinkedEvent {
         return variableMetas.computeIfAbsent(key, (ignored) -> new HashMap<>());
     }
 
-    public boolean addVariableCreator(int var, InstantiatedController ic) {
-        Set<InstantiatedController> ctrls = variableCreators.computeIfAbsent(var, (ignored) -> new HashSet<>());
-        return ctrls.add(ic);
+    public boolean addVariableCreator(int var, Space space) {
+        Set<Space> spaces = variableCreators.computeIfAbsent(var, (ignored) -> new HashSet<>());
+        return spaces.add(space);
+    }
+
+    public Map<Integer, Set<Space>> getVariableCreators() {
+        return Collections.unmodifiableMap(variableCreators);
+    }
+
+    public String toString() {
+        return "Event " + controller.getSpace().getName() + "." + controller.getVarName() + "." + event.getEventName();
     }
 }
