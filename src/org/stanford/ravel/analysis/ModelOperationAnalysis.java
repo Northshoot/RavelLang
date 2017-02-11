@@ -2,7 +2,6 @@ package org.stanford.ravel.analysis;
 
 import org.stanford.ravel.RavelApplication;
 import org.stanford.ravel.RavelCompiler;
-import org.stanford.ravel.analysis.LocalOwnershipTaggingPass.ModelTag;
 import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.primitives.*;
 
@@ -38,6 +37,8 @@ public class ModelOperationAnalysis {
 
         if (debug) {
             dumpAllOwnerships();
+            dumpAllModelTags();
+            dumpAllFieldTags();
         }
     }
 
@@ -46,8 +47,8 @@ public class ModelOperationAnalysis {
         for (Space s : app.getSpaces()) {
             for (InstantiatedController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
-                    System.out.println(ic);
-                    event.getVariableCreators().forEach((var, creators) -> {
+                    System.out.println(event);
+                    event.getAllVariableCreators().forEach((var, creators) -> {
                         System.out.print(var + " [");
                         for (Space creator : creators) {
                             System.out.print(creator.getName() + ", ");
@@ -60,8 +61,52 @@ public class ModelOperationAnalysis {
         }
     }
 
+    private void dumpAllModelTags() {
+        System.out.println("Model tags of event handler variables:");
+        for (Space s : app.getSpaces()) {
+            for (InstantiatedController ic : s.getControllers()) {
+                for (LinkedEvent event : ic) {
+                    System.out.println(event);
+                    event.getAllVariableModelTags().forEach((var, tags) -> {
+                        System.out.print(var + " [");
+                        for (ModelTag tag : tags) {
+                            System.out.print(tag + ", ");
+                        }
+                        System.out.println("]");
+                    });
+                    System.out.println();
+                }
+            }
+        }
+    }
+
+    private void dumpAllFieldTags() {
+        System.out.println("Field tags of event handler variables:");
+        for (Space s : app.getSpaces()) {
+            for (InstantiatedController ic : s.getControllers()) {
+                for (LinkedEvent event : ic) {
+                    System.out.println(event);
+                    event.getAllVariableFieldTags().forEach((var, tags) -> {
+                        System.out.print(var + " [");
+                        for (FieldTag tag : tags) {
+                            System.out.print(tag + ", ");
+                        }
+                        System.out.println("]");
+                    });
+                    System.out.println();
+                }
+            }
+        }
+    }
+
     private void tagOneVariableCreator(LinkedEvent handler, int variable, Space space) {
         handler.addVariableCreator(variable, space);
+    }
+    private void tagOneVariableModelTag(LinkedEvent handler, int variable, Model model, Space space) {
+        handler.addVariableModelTag(variable, new ModelTag(model, space));
+    }
+    private void tagOneVariableFieldTag(LinkedEvent handler, int variable, Model model, Space space, String field) {
+        handler.addVariableFieldTag(variable, new FieldTag(model, space, field));
     }
 
     private void runLocalOwnership() {
@@ -78,14 +123,17 @@ public class ModelOperationAnalysis {
                     LocalOwnershipTaggingPass pass = new LocalOwnershipTaggingPass(handler.getBody(), modelEvent);
                     pass.run();
 
-                    Map<Integer, Set<ModelTag>> allModelTags = pass.getModelTags();
+                    Map<Integer, Set<LocalOwnershipTaggingPass.LocalModelTag>> allModelTags = pass.getModelTags();
+                    Map<Integer, Set<LocalOwnershipTaggingPass.LocalFieldTag>> allFieldTags = pass.getFieldTags();
 
                     for (int var : event.getHandler().getVariables()) {
                         if (allModelTags.containsKey(var)) {
-                            Set<ModelTag> modelTags = allModelTags.get(var);
-                            Model m;
+                            Set<LocalOwnershipTaggingPass.LocalModelTag> modelTags = allModelTags.get(var);
 
-                            for (ModelTag tag : modelTags) {
+                            for (LocalOwnershipTaggingPass.LocalModelTag tag : modelTags) {
+                                Model m = app.getModel(tag.model.getName());
+                                assert m != null;
+
                                 switch (tag.creator) {
                                     case CREATED:
                                         // variable is a record created from this space
@@ -94,9 +142,6 @@ public class ModelOperationAnalysis {
 
                                     case REMOTE:
                                         // variable is a record created by a different space
-                                        m = app.getModel(tag.model.getName());
-
-                                        assert m != null;
                                         assert m.getReaders().contains(s);
                                         for (Space writer : m.getWriters()) {
                                             if (writer != s)
@@ -118,10 +163,26 @@ public class ModelOperationAnalysis {
                                             tagOneVariableCreator(event, var, writer);
                                         }
                                 }
+
+                                for (Space creator : event.getVariableCreators(var)) {
+                                    tagOneVariableModelTag(event, var, m, creator);
+                                }
                             }
                         } else {
                             // variable does not come from a model, it must be locally created
                             tagOneVariableCreator(event, var, s);
+                        }
+
+                        Set<LocalOwnershipTaggingPass.LocalFieldTag> fieldTags = allFieldTags.get(var);
+                        if (fieldTags != null) {
+                            for (LocalOwnershipTaggingPass.LocalFieldTag tag : fieldTags) {
+                                Model m = app.getModel(tag.model.getName());
+                                assert m != null;
+
+                                for (ModelTag modelTag : event.getVariableModelTags(var)) {
+                                    tagOneVariableFieldTag(event, var, modelTag.model, modelTag.creator, tag.field);
+                                }
+                            }
                         }
                     }
                 }

@@ -1,5 +1,8 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.analysis.FieldTag;
+import org.stanford.ravel.analysis.ModelTag;
+
 import java.util.*;
 
 /**
@@ -11,9 +14,10 @@ public class LinkedEvent {
     private final InstantiatedController controller;
     private final EventComponent component;
     private final EventHandler event;
-    private final Map<Metadata, Map<Integer, Object>> variableMetas = new EnumMap<>(Metadata.class);
 
     private final Map<Integer, Set<Space>> variableCreators = new HashMap<>();
+    private final Map<Integer, Set<ModelTag>> variableModelTags = new HashMap<>();
+    private final Map<Integer, Set<FieldTag>> variableFieldTags = new HashMap<>();
 
     LinkedEvent(InstantiatedController controller, EventComponent component, EventHandler event) {
         this.controller = controller;
@@ -32,17 +36,36 @@ public class LinkedEvent {
         return controller;
     }
 
-    public Map<Integer, Object> getMeta(Metadata key) {
-        return variableMetas.computeIfAbsent(key, (ignored) -> new HashMap<>());
-    }
-
     public boolean addVariableCreator(int var, Space space) {
         Set<Space> spaces = variableCreators.computeIfAbsent(var, (ignored) -> new HashSet<>());
         return spaces.add(space);
     }
+    public boolean addVariableModelTag(int var, ModelTag tag) {
+        Set<ModelTag> tags = variableModelTags.computeIfAbsent(var, (ignored) -> new HashSet<>());
+        return tags.add(tag);
+    }
+    public boolean addVariableFieldTag(int var, FieldTag tag) {
+        Set<FieldTag> tags = variableFieldTags.computeIfAbsent(var, (ignored) -> new HashSet<>());
+        return tags.add(tag);
+    }
 
-    public Map<Integer, Set<Space>> getVariableCreators() {
+    public Map<Integer, Set<Space>> getAllVariableCreators() {
         return Collections.unmodifiableMap(variableCreators);
+    }
+    public Set<Space> getVariableCreators(int var) {
+        return Collections.unmodifiableSet(variableCreators.getOrDefault(var, Collections.emptySet()));
+    }
+    public Map<Integer, Set<ModelTag>> getAllVariableModelTags() {
+        return Collections.unmodifiableMap(variableModelTags);
+    }
+    public Set<ModelTag> getVariableModelTags(int var) {
+        return Collections.unmodifiableSet(variableModelTags.getOrDefault(var, Collections.emptySet()));
+    }
+    public Map<Integer, Set<FieldTag>> getAllVariableFieldTags() {
+        return Collections.unmodifiableMap(variableFieldTags);
+    }
+    public Set<FieldTag> getVariableFieldTags(int var) {
+        return Collections.unmodifiableSet(variableFieldTags.getOrDefault(var, Collections.emptySet()));
     }
 
     public String toString() {

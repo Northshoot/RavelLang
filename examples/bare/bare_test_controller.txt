@@ -9,6 +9,7 @@ replicated model Random(size : int32):
         value : int32
         array_value : byte[]
         str_value : str
+        str2_value : str
         err_value : error_msg
 
 interface TimerSource():
@@ -76,7 +77,13 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
 controller CController(random: Random):
     event random.arrived():
         rec = self.record
-        system.print(rec.str_value)
+        x  = 7
+        s : str
+        if x > 0:
+            s = rec.str_value
+        else:
+            s = rec.str2_value
+        system.print(s)
         # do something with rec.value
 
 

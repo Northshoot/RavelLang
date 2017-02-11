@@ -53,11 +53,11 @@ public class LocalOwnershipTaggingPass {
      * 3) the variable was extracted from a field of a variable of type 1)
      * 4) the variable was computed from arithmetic operations
      */
-    public static class ModelTag {
+    public static class LocalModelTag {
         public final ModelType model;
         public final Creator creator;
 
-        public ModelTag(ModelType model, Creator creator) {
+        public LocalModelTag(ModelType model, Creator creator) {
             this.model = model;
             this.creator = creator;
         }
@@ -67,7 +67,7 @@ public class LocalOwnershipTaggingPass {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            ModelTag modelTag = (ModelTag) o;
+            LocalModelTag modelTag = (LocalModelTag) o;
 
             if (!model.equals(modelTag.model)) return false;
             return creator == modelTag.creator;
@@ -82,15 +82,15 @@ public class LocalOwnershipTaggingPass {
 
         @Override
         public String toString() {
-            return "ModelTag: " + model.getName() + " (" + creator.toString().toLowerCase() + ")";
+            return "LocalModelTag: " + model.getName() + " (" + creator.toString().toLowerCase() + ")";
         }
     }
 
-    public static class FieldTag {
-        public final ModelTag model;
+    public static class LocalFieldTag {
+        public final ModelType model;
         public final String field;
 
-        public FieldTag(ModelTag model, String field) {
+        public LocalFieldTag(ModelType model, String field) {
             this.model = model;
             this.field = field;
         }
@@ -100,7 +100,7 @@ public class LocalOwnershipTaggingPass {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            FieldTag fieldTag = (FieldTag) o;
+            LocalFieldTag fieldTag = (LocalFieldTag) o;
 
             if (!model.equals(fieldTag.model)) return false;
             return field.equals(fieldTag.field);
@@ -115,12 +115,12 @@ public class LocalOwnershipTaggingPass {
 
         @Override
         public String toString() {
-            return "FieldTag: " + model.model.getName() + "." + field + " (" + model.creator.toString().toLowerCase() + ")";
+            return "LocalFieldTag: " + model.getName() + "." + field ;
         }
     }
 
-    private Map<Integer, Set<ModelTag>> modelTags = new HashMap<>();
-    private Map<Integer, Set<FieldTag>> fieldTags = new HashMap<>();
+    private Map<Integer, Set<LocalModelTag>> modelTags = new HashMap<>();
+    private Map<Integer, Set<LocalFieldTag>> fieldTags = new HashMap<>();
     private final TypedIR ir;
     private final ModelEvent event;
     private boolean progress;
@@ -130,10 +130,10 @@ public class LocalOwnershipTaggingPass {
         this.event = event;
     }
 
-    public Map<Integer, Set<ModelTag>> getModelTags() {
+    public Map<Integer, Set<LocalModelTag>> getModelTags() {
         return modelTags;
     }
-    public Map<Integer, Set<FieldTag>> getFieldTags() {
+    public Map<Integer, Set<LocalFieldTag>> getFieldTags() {
         return fieldTags;
     }
 
@@ -166,9 +166,9 @@ public class LocalOwnershipTaggingPass {
     }
 
     private void tagModel(int var, ModelType model, Creator creator) {
-        ModelTag tag = new ModelTag(model, creator);
+        LocalModelTag tag = new LocalModelTag(model, creator);
 
-        Set<ModelTag> existing = modelTags.get(var);
+        Set<LocalModelTag> existing = modelTags.get(var);
         if (existing == null) {
             existing = new HashSet<>();
             existing.add(tag);
@@ -179,11 +179,11 @@ public class LocalOwnershipTaggingPass {
         }
     }
 
-    private void tagAllModels(int var, Set<ModelTag> tags) {
+    private void tagAllModels(int var, Set<LocalModelTag> tags) {
         if (tags == null)
             return;
 
-        Set<ModelTag> existing = modelTags.get(var);
+        Set<LocalModelTag> existing = modelTags.get(var);
         if (existing == null) {
             existing = new HashSet<>();
             existing.addAll(tags);
@@ -194,10 +194,10 @@ public class LocalOwnershipTaggingPass {
         }
     }
 
-    private void tagField(int var, ModelTag model, String field) {
-        FieldTag tag = new FieldTag(model, field);
+    private void tagField(int var, ModelType model, String field) {
+        LocalFieldTag tag = new LocalFieldTag(model, field);
 
-        Set<FieldTag> existing = fieldTags.get(var);
+        Set<LocalFieldTag> existing = fieldTags.get(var);
         if (existing == null) {
             existing = new HashSet<>();
             existing.add(tag);
@@ -208,11 +208,11 @@ public class LocalOwnershipTaggingPass {
         }
     }
 
-    private void tagAllFields(int var, Set<FieldTag> tags) {
+    private void tagAllFields(int var, Set<LocalFieldTag> tags) {
         if (tags == null)
             return;
 
-        Set<FieldTag> existing = fieldTags.get(var);
+        Set<LocalFieldTag> existing = fieldTags.get(var);
         if (existing == null) {
             existing = new HashSet<>();
             existing.addAll(tags);
@@ -310,8 +310,8 @@ public class LocalOwnershipTaggingPass {
                 // FIXME: I'm not quite sure that's correct
                 CompoundType compound = ((TFieldLoad) instr).compoundType;
                 if (compound instanceof ModelType.RecordType) {
-                    for (ModelTag modelTag : modelTags.get(((TFieldLoad) instr).source)) {
-                        tagField(instr.getSink(), modelTag, ((TFieldLoad) instr).field);
+                    for (LocalModelTag modelTag : modelTags.get(((TFieldLoad) instr).source)) {
+                        tagField(instr.getSink(), modelTag.model, ((TFieldLoad) instr).field);
                     }
                 }
             } else if (instr instanceof TFieldStore) {
@@ -358,6 +358,7 @@ public class LocalOwnershipTaggingPass {
                 if (instr.getSink() != Registers.VOID_REG) {
                     for (int source : instr.getSources()) {
                         tagAllModels(instr.getSink(), modelTags.get(source));
+                        tagAllFields(instr.getSink(), fieldTags.get(source));
                     }
                 } else {
                     assert instr.affectsControlFlow();
