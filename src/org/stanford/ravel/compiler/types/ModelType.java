@@ -26,7 +26,7 @@ public class ModelType extends ClassType {
         }
     }
 
-    private final StructType recordType;
+    private final RecordType recordType;
     private final ContextType ctxType;
 
     public ModelType(ModelSymbol symbol) {
@@ -50,7 +50,7 @@ public class ModelType extends ClassType {
         }
     }
 
-    public StructType getRecordType() {
+    public RecordType getRecordType() {
         return recordType;
     }
 
@@ -81,6 +81,13 @@ public class ModelType extends ClassType {
             }
         }
 
+        /**
+         * No member of context types is writable.
+         * This is important for alias analysis.
+         *
+         * @param member ignored
+         * @return false
+         */
         @Override
         public boolean isWritable(String member) {
             return false;

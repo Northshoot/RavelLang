@@ -19,7 +19,6 @@ public class RavelApplication  {
     public void addModel(String name, Model m){
         mModels.put(name, m);
     }
-    public Model getModel() { return (Model) getFirst(mModels); }
     public Model getModel(String name) { return mModels.get(name); }
     public List<Model> getModels(){ return new ArrayList<>(mModels.values());}
 
@@ -57,11 +56,6 @@ public class RavelApplication  {
     }
     public Collection<Flow> getFlows() {
         return Collections.unmodifiableCollection(mFlow);
-    }
-
-    private Object getFirst(Map m) {
-        Object firstKey = m.keySet().toArray()[0];
-        return m.get(firstKey);
     }
 
     public String toString() {

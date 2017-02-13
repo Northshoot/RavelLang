@@ -8,10 +8,7 @@ import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.ModelEvent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * "Tags" each variable/register in the IR with a set of model fields
@@ -323,7 +320,31 @@ public class LocalOwnershipTaggingPass {
                 // from r2
                 // (although it's imprecise, as usual with pointer analysis)
                 //
-                // FIXME: what about field analysis? not sure yet
+                // furthemore, if you write into a record, you create a brand new field tag for that concrete
+                // field, and you put that in the written to variable
+                // this is to say that the written variable carries a value coming from another source
+                // in that field
+                // we do this for this variable, and for all its aliases
+                //
+                // The tricky case that proves the need for alias analysis is:
+                // r1 = m.create()
+                // m.save(r1)
+                // r2 = m.get(...)
+                // r1.foo = v
+                //
+                // we need to say that r2 has a field tag of <foo, whatever model tag of v>
+                // (this way, if later code does, say, system.print(r2.foo), we know that we need to decrypt
+                // r2.foo based on how v came to be)
+
+                CompoundType compound = ((TFieldStore) instr).compoundType;
+                if (compound instanceof ModelType.RecordType) {
+                    for (LocalModelTag modelTag : modelTags.getOrDefault(((TFieldStore) instr).value,Collections.emptySet())) {
+                        tagField(instr.getSink(), modelTag.model, ((TFieldStore) instr).field);
+                        for (int alias : ir.getAliases(instr.getSink())) {
+                            tagField(alias, modelTag.model, ((TFieldStore) instr).field);
+                        }
+                    }
+                }
 
                 tagAllModels(((TFieldStore) instr).object, modelTags.get(((TFieldStore) instr).value));
                 tagAllFields(((TFieldStore) instr).object, fieldTags.get(((TFieldStore) instr).value));

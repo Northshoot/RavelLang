@@ -15,6 +15,7 @@ import org.stanford.ravel.error.FatalCompilerErrorException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -122,6 +123,18 @@ public class CompileToIRPass {
             }
             pass++;
         } while(progress);
+
+        // run alias analysis for record variables, which will be used by the security analysis
+        AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
+        Map<Integer, Set<Integer>> aliasResult = aliasAnalysis.run();
+        ir2.setAliases(aliasResult);
+        if (debug) {
+            System.out.println("Alias analysis");
+            aliasResult.forEach((var, alias) -> {
+                System.out.println(var + ": " + alias);
+            });
+            System.out.println();
+        }
 
         return ir2;
     }

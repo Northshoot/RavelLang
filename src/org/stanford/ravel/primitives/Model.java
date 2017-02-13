@@ -100,6 +100,10 @@ public class Model extends ConfigurableComponent {
         this.mFields.put(field.getName(), new ModelField(field));
     }
 
+    public ModelField getField(String field) {
+        return mFields.get(field);
+    }
+
     @Override
     public String toString() {
         String ret = "Concrete Model:" + " type : " + mModelType + " name: " + getName() +

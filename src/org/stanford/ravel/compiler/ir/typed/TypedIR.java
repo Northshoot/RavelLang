@@ -4,9 +4,7 @@ import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
@@ -18,6 +16,7 @@ public class TypedIR {
     private ControlFlowGraph cfg;
     private LoopTreeNode loopTree;
     private int nextRegister = UNSET_REG;
+    private Map<Integer, Set<Integer>> aliases;
 
     public ControlFlowGraph getControlFlowGraph() {
         return cfg;
@@ -68,5 +67,13 @@ public class TypedIR {
 
     public Collection<Integer> getVariables() {
         return registerTypes.keySet();
+    }
+
+    public void setAliases(Map<Integer, Set<Integer>> aliases) {
+        this.aliases = aliases;
+    }
+
+    public Set<Integer> getAliases(int var) {
+        return aliases.getOrDefault(var, Collections.emptySet());
     }
 }
