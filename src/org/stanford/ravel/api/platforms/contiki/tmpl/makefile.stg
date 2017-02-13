@@ -1,5 +1,5 @@
-application(c_runtime,plat_runtime,path,target,sources) ::=<<
-RAVEL_C_RUNTIME_DIR = <c_runtime>
+application(runtime,plat_runtime,path,target,sources) ::=<<
+RAVEL_C_RUNTIME_DIR = <runtime>
 RAVEL_PLATFORM_RUNTIME_DIR = <plat_runtime>
 CONTIKI = <path>
 

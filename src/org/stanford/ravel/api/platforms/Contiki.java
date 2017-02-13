@@ -31,8 +31,7 @@ public class Contiki extends BaseCPlatform {
 
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
-        ContikiPlatformOptions platoptions = ContikiPlatformOptions.getInstance();
-        return super.createBuildSystem(s, files, platoptions);
+        return super.createBuildSystem(s, files, ContikiPlatformOptions.getInstance());
     }
 
     @Override

@@ -74,7 +74,7 @@ public class BaseCPlatform extends BasePlatform {
         ST tmpl = makefileGroup.getInstanceOf("application");
         tmpl.add("target", s.getName());
         tmpl.add("sources", cfiles);
-        tmpl.add("c_runtime", runtimePath);
+        tmpl.add("runtime", runtimePath);
         tmpl.add("plat_runtime", platformRuntimePath);
         tmpl.add("path", path);
 

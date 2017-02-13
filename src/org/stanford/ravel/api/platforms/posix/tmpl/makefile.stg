@@ -13,9 +13,9 @@ clean-app:
 <\t>$(AR) crs -o $@ $^
 >>
 
-application(c_runtime,posix_runtime,target,sources) ::=<<
-RAVEL_C_RUNTIME_DIR = <c_runtime>
-RAVEL_POSIX_RUNTIME_DIR = <posix_runtime>
+application(runtime,plat_runtime,path,target,sources) ::=<<
+RAVEL_C_RUNTIME_DIR = <runtime>
+RAVEL_POSIX_RUNTIME_DIR = <plat_runtime>
 
 all: <target>
 

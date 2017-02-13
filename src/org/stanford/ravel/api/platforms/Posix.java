@@ -47,23 +47,6 @@ public class Posix extends BaseCPlatform {
 
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
-        List<String> cfiles = getFileList(s,files);
-
-        CLanguageOptions coptions = CLanguageOptions.getInstance();
-        String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
-
-        PosixRuntimeOptions platoptions = PosixRuntimeOptions.getInstance();
-        String platformRuntimePath = new File(platoptions.getRuntimePath()).getAbsolutePath();
-
-        ST tmpl = super.makefileGroup.getInstanceOf("application");
-        tmpl.add("target", s.getName());
-        tmpl.add("sources", cfiles);
-        tmpl.add("c_runtime", runtimePath);
-        tmpl.add("posix_runtime", platformRuntimePath);
-
-        FileObject file = new FileObject();
-        file.setFileName("Makefile");
-        file.setContent(tmpl.render());
-        return Collections.singletonList(file);
+        return super.createBuildSystem(s, files, PosixRuntimeOptions.getInstance());
     }
 }
