@@ -34,7 +34,7 @@ public class TUnaryArithOp extends TInstruction {
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{ type };
     }
 

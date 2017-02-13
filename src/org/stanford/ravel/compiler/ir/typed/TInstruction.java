@@ -12,7 +12,7 @@ public abstract class TInstruction {
     public int[] getSources() {
         return new int[0];
     }
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[0];
     }
 

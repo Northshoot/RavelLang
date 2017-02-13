@@ -7,6 +7,7 @@ import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.analysis.FlowAnalysis;
 import org.stanford.ravel.analysis.ModelOperationAnalysis;
+import org.stanford.ravel.analysis.ModelOwnershipAnalysis;
 import org.stanford.ravel.analysis.ModelWritingAnalysis;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.CompileError;
@@ -230,7 +231,13 @@ public class RavelCompiler {
                 if (!success())
                     return;
 
-                // analyze variable creation and field usage
+                // analyze record creation and map variables to fields
+                ModelOwnershipAnalysis ownershipAnalysis = new ModelOwnershipAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
+                ownershipAnalysis.run();
+                if (!success())
+                    return;
+
+                // analyze operations computed on fields
                 ModelOperationAnalysis operationAnalysis = new ModelOperationAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
                 operationAnalysis.run();
                 if (!success())

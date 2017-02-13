@@ -47,7 +47,7 @@ public class TMethodCall extends TInstruction {
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return type.getArgumentTypes();
     }
 

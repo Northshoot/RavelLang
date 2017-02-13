@@ -35,7 +35,7 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{ srcType };
     }
 

@@ -45,7 +45,7 @@ public class TPhi extends TInstruction {
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         Type[] types = new Type[sources.length];
         Arrays.fill(types, type);
         return types;

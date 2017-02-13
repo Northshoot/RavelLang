@@ -27,7 +27,7 @@ public class TIfStatement extends TInstruction {
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{PrimitiveType.BOOL};
     }
 
