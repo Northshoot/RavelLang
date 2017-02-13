@@ -5,11 +5,8 @@ import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.CLang;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
-import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
-import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
-import org.stanford.ravel.api.platforms.posix.PosixRuntimeOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -23,26 +20,23 @@ import java.util.List;
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
 
 /**
- * Standard C/POSIX OS
+ * The Contiki Embedded OS
  *
- * Created by gcampagn on 1/31/17.
+ * Created by gcampagn on 2/3/17.
  */
-public class Posix extends BasePlatform {
-    private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/platforms/posix/tmpl";
+public class BaseCPlatform extends BasePlatform {
 
     private final STGroup mainGroup;
     private final STGroup makefileGroup;
 
-    public Posix() {
-        // POSIX.1-2008/SUSv4 minimum required
-        super(2008, Integer.MAX_VALUE);
-        mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
-        makefileGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg");
+    public BaseCPlatform( STGroupFile mainGroup, STGroupFile makefileGroup ) {
+        this.mainGroup = mainGroup;
+        this.makefileGroup = makefileGroup;
     }
 
     @Override
     public OptionParser getOptions() {
-        return PosixRuntimeOptions.getInstance();
+        return ContikiPlatformOptions.getInstance();
     }
 
     @Override
@@ -50,14 +44,28 @@ public class Posix extends BasePlatform {
         return lang instanceof CLang;
     }
 
+    @Override
+    protected CodeModule createLauncher(Space s) {
+        ST tmpl = mainGroup.getInstanceOf("file");
+        tmpl.add("name", s.getName());
 
+        FileObject file = new FileObject();
+        file.setFileName(s.getName() + ".c");
+        file.setContent(tmpl.render());
+        CodeModule module = new CodeModule();
+        module.addFile(file);
+
+        return module;
+    }
 
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
         List<String> cfiles = new ArrayList<>();
 
         for (FileObject file : files) {
-            String fileName = file.getRelativeName();
+            String fileName = file.getFileName();
+            if (fileName.equals(s.getName() + ".c"))
+                continue;
             if (fileName.endsWith(".c"))
                 cfiles.add(fileName.substring(0, fileName.length()-2));
         }
@@ -65,14 +73,16 @@ public class Posix extends BasePlatform {
         CLanguageOptions coptions = CLanguageOptions.getInstance();
         String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
 
-        PosixRuntimeOptions platoptions = PosixRuntimeOptions.getInstance();
+        ContikiPlatformOptions platoptions = ContikiPlatformOptions.getInstance();
+        String contikiPath = new File(platoptions.getContikiPath()).getAbsolutePath();
         String platformRuntimePath = new File(platoptions.getRuntimePath()).getAbsolutePath();
 
         ST tmpl = makefileGroup.getInstanceOf("application");
         tmpl.add("target", s.getName());
         tmpl.add("sources", cfiles);
         tmpl.add("c_runtime", runtimePath);
-        tmpl.add("posix_runtime", platformRuntimePath);
+        tmpl.add("plat_runtime", platformRuntimePath);
+        tmpl.add("contiki", contikiPath);
 
         FileObject file = new FileObject();
         file.setFileName("Makefile");

@@ -4,6 +4,7 @@ replicated model AppDevice():
         durable = True
         records = 1
         reliable = True
+        flow = EmbeddedSpace, CloudSpace
 
     schema:
         uuid : int32
@@ -20,6 +21,7 @@ streaming model BootError(size : int32):
         reliable = True
         durable = True
         records = size
+        flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
 
     schema:
         #origin = ModelField( from_model="AppDevice" )

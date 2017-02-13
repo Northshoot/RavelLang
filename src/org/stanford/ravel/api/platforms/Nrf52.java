@@ -3,11 +3,11 @@ package org.stanford.ravel.api.platforms;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.BaseLanguage;
 import org.stanford.ravel.api.lang.CLang;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
+import org.stanford.ravel.api.platforms.nrf52.NrfPlatformOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -25,21 +25,19 @@ import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
  *
  * Created by gcampagn on 2/3/17.
  */
-public class Contiki extends BaseCPlatform {
-    private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/platforms/contiki/tmpl";
+public class Nrf52 extends BaseCPlatform {
+    private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
 
-
-
-    public Contiki() {
+    public Nrf52() {
         super(
                 new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg"),
                 new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg")
-                );
+        );
     }
 
     @Override
     public OptionParser getOptions() {
-        return ContikiPlatformOptions.getInstance();
+        return NrfPlatformOptions.getInstance();
     }
 
     @Override

@@ -1,0 +1,19 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/system.stg"
+
+    int32 clock_seconds
+
+    def timer_init()
+    def clock_time()
+    def clock_seconds()
+    def clock_delay(delay : int32)
+    def clock_wait(wait : int32)
+
+interface Timer():
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+
+    event fired()
+
