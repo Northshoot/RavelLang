@@ -5,10 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.ravel.analysis.FlowAnalysis;
-import org.stanford.ravel.analysis.ModelOperationAnalysis;
-import org.stanford.ravel.analysis.ModelOwnershipAnalysis;
-import org.stanford.ravel.analysis.ModelWritingAnalysis;
+import org.stanford.ravel.analysis.*;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.CompileError;
 import org.stanford.ravel.compiler.DefPhase;
@@ -240,6 +237,12 @@ public class RavelCompiler {
                 // analyze operations computed on fields
                 ModelOperationAnalysis operationAnalysis = new ModelOperationAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
                 operationAnalysis.run();
+                if (!success())
+                    return;
+
+                // assign security primitives to each space
+                SecurityAnalysis securityAnalysis = new SecurityAnalysis(this, app, options.hasFOption("debug-security-analysis"));
+                securityAnalysis.run();
                 if (!success())
                     return;
 
