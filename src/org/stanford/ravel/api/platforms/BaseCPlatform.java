@@ -1,6 +1,5 @@
 package org.stanford.ravel.api.platforms;
 
-import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.CLang;
@@ -17,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
-
 /**
  * The Contiki Embedded OS
  *
@@ -26,22 +23,65 @@ import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
  */
 public class BaseCPlatform extends BasePlatform {
 
-    private final STGroup mainGroup;
-    private final STGroup makefileGroup;
+    protected final STGroup mainGroup;
+    protected final STGroup makefileGroup;
 
     public BaseCPlatform( STGroupFile mainGroup, STGroupFile makefileGroup ) {
+        super();
+        this.mainGroup = mainGroup;
+        this.makefileGroup = makefileGroup;
+    }
+
+    public BaseCPlatform(int i, int maxValue, STGroupFile mainGroup, STGroupFile makefileGroup) {
+        super(i, maxValue);
         this.mainGroup = mainGroup;
         this.makefileGroup = makefileGroup;
     }
 
     @Override
-    public OptionParser getOptions() {
+    public PlatformOptions getOptions() {
         return ContikiPlatformOptions.getInstance();
     }
 
     @Override
     public boolean allowsLanguage(ConcreteLanguage lang) {
         return lang instanceof CLang;
+    }
+
+    public List<String> getFileList(Space s, List<FileObject> files){
+        List<String> cfiles = new ArrayList<>();
+        for (FileObject file : files) {
+            String fileName = file.getFileName();
+            if (fileName.equals(s.getName() + ".c"))
+                continue;
+            if (fileName.endsWith(".c"))
+                cfiles.add(fileName.substring(0, fileName.length()-2));
+        }
+        return cfiles;
+    }
+
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files, PlatformOptions platformOptions) {
+        List<String> cfiles = getFileList(s,files);
+
+
+
+        CLanguageOptions coptions = CLanguageOptions.getInstance();
+        String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
+
+        String path = new File(platformOptions.getPlatformPath()).getAbsolutePath();
+        String platformRuntimePath = new File(platformOptions.getRuntimePath()).getAbsolutePath();
+
+        ST tmpl = makefileGroup.getInstanceOf("application");
+        tmpl.add("target", s.getName());
+        tmpl.add("sources", cfiles);
+        tmpl.add("c_runtime", runtimePath);
+        tmpl.add("plat_runtime", platformRuntimePath);
+        tmpl.add("path", path);
+
+        FileObject file = new FileObject();
+        file.setFileName("Makefile");
+        file.setContent(tmpl.render());
+        return Collections.singletonList(file);
     }
 
     @Override
@@ -58,35 +98,4 @@ public class BaseCPlatform extends BasePlatform {
         return module;
     }
 
-    @Override
-    public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
-        List<String> cfiles = new ArrayList<>();
-
-        for (FileObject file : files) {
-            String fileName = file.getFileName();
-            if (fileName.equals(s.getName() + ".c"))
-                continue;
-            if (fileName.endsWith(".c"))
-                cfiles.add(fileName.substring(0, fileName.length()-2));
-        }
-
-        CLanguageOptions coptions = CLanguageOptions.getInstance();
-        String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
-
-        ContikiPlatformOptions platoptions = ContikiPlatformOptions.getInstance();
-        String contikiPath = new File(platoptions.getContikiPath()).getAbsolutePath();
-        String platformRuntimePath = new File(platoptions.getRuntimePath()).getAbsolutePath();
-
-        ST tmpl = makefileGroup.getInstanceOf("application");
-        tmpl.add("target", s.getName());
-        tmpl.add("sources", cfiles);
-        tmpl.add("c_runtime", runtimePath);
-        tmpl.add("plat_runtime", platformRuntimePath);
-        tmpl.add("contiki", contikiPath);
-
-        FileObject file = new FileObject();
-        file.setFileName("Makefile");
-        file.setContent(tmpl.render());
-        return Collections.singletonList(file);
-    }
 }

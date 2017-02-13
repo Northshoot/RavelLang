@@ -1,21 +1,12 @@
 package org.stanford.ravel.api.platforms;
 
-import org.stanford.ravel.api.OptionParser;
-import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.api.lang.BaseLanguage;
 import org.stanford.ravel.api.lang.CLang;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
-import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
 import org.stanford.ravel.primitives.Space;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -37,8 +28,15 @@ public class Contiki extends BaseCPlatform {
                 );
     }
 
+
     @Override
-    public OptionParser getOptions() {
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
+        ContikiPlatformOptions platoptions = ContikiPlatformOptions.getInstance();
+        return super.createBuildSystem(s, files, platoptions);
+    }
+
+    @Override
+    public PlatformOptions getOptions() {
         return ContikiPlatformOptions.getInstance();
     }
 

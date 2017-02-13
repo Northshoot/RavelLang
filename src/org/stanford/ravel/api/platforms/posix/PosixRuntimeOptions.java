@@ -10,13 +10,14 @@ import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
 public class PosixRuntimeOptions extends PlatformOptions {
     private static PosixRuntimeOptions instance = new PosixRuntimeOptions();
 
-    private PosixRuntimeOptions() {}
+    private PosixRuntimeOptions() {
+        super("./runtime/posix", "");
+    }
 
     public static PosixRuntimeOptions getInstance() {
         return instance;
     }
 
-    private String runtimePath = "./runtime/posix";
 
     public String getRuntimePath() {
         return runtimePath;

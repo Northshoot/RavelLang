@@ -6,6 +6,7 @@ import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.api.platforms.android.AndroidPlatformOptions;
+import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -36,6 +37,11 @@ public class Android  extends BasePlatform {
 
         mainGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg");
         buildGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/build.stg");
+    }
+
+    @Override
+    public PlatformOptions getOptions() {
+        return ContikiPlatformOptions.getInstance();
     }
 
     @Override

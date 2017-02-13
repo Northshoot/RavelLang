@@ -9,13 +9,14 @@ import org.stanford.ravel.api.platforms.PlatformOptions;
 public class AndroidPlatformOptions extends PlatformOptions {
     private static AndroidPlatformOptions instance = new AndroidPlatformOptions();
 
-    private AndroidPlatformOptions() {}
+    private AndroidPlatformOptions() {
+        super("./runtime/android/build/outputs/aar/android-debug.aar", "");
+    }
 
     public static AndroidPlatformOptions getInstance() {
         return instance;
     }
 
-    private String runtimePath = "./runtime/android/build/outputs/aar/android-debug.aar";
 
     public String getRuntimePath() {
         return runtimePath;

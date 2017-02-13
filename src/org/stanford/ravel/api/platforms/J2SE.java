@@ -5,6 +5,7 @@ import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.lang.JLang;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -63,6 +64,11 @@ public class J2SE extends BasePlatform {
         build_xml.setFileName("build.xml");
         build_xml.setContent(tmpl.render());
         return Collections.singletonList(build_xml);
+    }
+
+    @Override
+    public PlatformOptions getOptions() {
+        return ContikiPlatformOptions.getInstance();
     }
 
     @Override

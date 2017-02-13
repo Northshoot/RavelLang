@@ -10,22 +10,14 @@ import org.stanford.ravel.api.platforms.PlatformOptions;
 public class ContikiPlatformOptions extends PlatformOptions {
     private static ContikiPlatformOptions instance = new ContikiPlatformOptions();
 
-    private ContikiPlatformOptions() {}
+    private ContikiPlatformOptions() {
+        super( "./runtime/contiki",  "../contiki");
+    }
 
     public static ContikiPlatformOptions getInstance() {
         return instance;
     }
 
-    private String runtimePath = "./runtime/contiki";
-    private String path = "../contiki";
-
-    public String getContikiPath() {
-        return path;
-    }
-
-    public String getRuntimePath() {
-        return runtimePath;
-    }
 
     @Override
     public boolean setOption(String prefix, String option, String value) throws InvalidOptionException {

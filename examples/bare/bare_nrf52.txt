@@ -1,0 +1,43 @@
+replicated model Random(size : int32):
+    properties:
+        durable = False
+        reliable = False
+        records = size
+
+    schema:
+        # comment here
+        value : int32
+
+
+controller CController(random: Random):
+    event system.started():
+        rec = random.create()
+        rec.value = 42
+        random.save(rec)
+        system.print("started")
+
+    event random.departed():
+        # do something here
+        x = 7
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    models:
+        random = Random(size=5)
+
+    controllers:
+        rndcnt_1 = CController(random = models.random)
+
+space GatewaySpace:
+    platform:
+        language = CLang
+        system = Posix.v2008
+
+    models:
+        random = Random(size=5)
+
+    controllers:
+        rndcnt_1 = CController(random = models.random)

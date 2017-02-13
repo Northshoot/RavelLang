@@ -37,10 +37,7 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
         mFileObjects.add(fo);
     }
 
-    @Override
-    public OptionParser getOptions() {
-        return new PlatformOptions();
-    }
+
 
     // FIXME should be abstract, but nrf52platform...
     protected CodeModule createLauncher(Space s) {

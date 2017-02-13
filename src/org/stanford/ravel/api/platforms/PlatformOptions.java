@@ -8,8 +8,23 @@ import org.stanford.ravel.api.OptionParser;
  */
 public class PlatformOptions implements OptionParser {
     private boolean debug = false;
+    protected String runtimePath;
+    protected String path;
+
+    public PlatformOptions(String runtimePath, String path) {
+        this.runtimePath = runtimePath;
+        this.path = path;
+    }
 
     public boolean getDebug() { return this.debug; }
+
+    public String getPlatformPath() {
+        return path;
+    }
+
+    public String getRuntimePath() {
+        return runtimePath;
+    }
 
     @Override
     public boolean setOption(String prefix, String option, String value) throws InvalidOptionException {

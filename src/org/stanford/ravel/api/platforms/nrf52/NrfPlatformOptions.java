@@ -9,23 +9,18 @@ import org.stanford.ravel.api.platforms.PlatformOptions;
 public class NrfPlatformOptions extends PlatformOptions {
     private static NrfPlatformOptions instance = new NrfPlatformOptions();
 
-    private NrfPlatformOptions() {}
+    private NrfPlatformOptions() {
+        super( "./runtime/nrf52",  "../nrf52");
+    }
 
     public static NrfPlatformOptions getInstance() {
         return instance;
     }
 
-    private String runtimePath = "./runtime/nrf52";
-    private String path = "../nrf52";
 
 
-    public String getNrf52Path() {
-        return path;
-    }
 
-    public String getRuntimePath() {
-        return runtimePath;
-    }
+
 
     @Override
     public boolean setOption(String prefix, String option, String value) throws InvalidOptionException {
