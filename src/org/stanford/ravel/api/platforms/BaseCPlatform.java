@@ -1,11 +1,16 @@
 package org.stanford.ravel.api.platforms;
 
+
+import com.sun.tools.javac.util.Pair;
+import org.jetbrains.annotations.Nullable;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.CLang;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
 import org.stanford.ravel.api.platforms.contiki.ContikiPlatformOptions;
+
+import org.stanford.ravel.misc.TemplatePair;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -60,10 +65,12 @@ public class BaseCPlatform extends BasePlatform {
         return cfiles;
     }
 
-    public List<FileObject> createBuildSystem(Space s, List<FileObject> files, PlatformOptions platformOptions) {
+
+    public List<FileObject> createBuildSystem(Space s, List<FileObject> files,
+                                              PlatformOptions platformOptions,
+                                              //Optional parameter
+                                              @Nullable List<TemplatePair> make_addon) {
         List<String> cfiles = getFileList(s,files);
-
-
 
         CLanguageOptions coptions = CLanguageOptions.getInstance();
         String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
@@ -77,6 +84,11 @@ public class BaseCPlatform extends BasePlatform {
         tmpl.add("runtime", runtimePath);
         tmpl.add("plat_runtime", platformRuntimePath);
         tmpl.add("path", path);
+        if ( make_addon != null) {
+            for (TemplatePair p: make_addon){
+                tmpl.add(p.getKeyword(), p.getValue());
+            }
+        }
 
         FileObject file = new FileObject();
         file.setFileName("Makefile");

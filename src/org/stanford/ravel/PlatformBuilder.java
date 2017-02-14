@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 10/6/16.
  */
 class PlatformBuilder {
+    private static Logger LOGGER = Logger.getLogger(PlatformBuilder.class.getName());
     private final RavelApplication rApp;
     private final List<FileObject> mFiles; //collect all the files to generate
 
@@ -51,8 +53,6 @@ class PlatformBuilder {
     }
 
     private void buildSpace(Space s) {
-        System.out.println("Building Space: \n" + s.getName());
-
         Platform platform = s.getPlatform();
         ConcreteLanguage lang = platform.getConcreteLanguage();
         ConcretePlatform concretePlatform = platform.getConcretePlatform();
@@ -69,6 +69,7 @@ class PlatformBuilder {
 
     void render() {
         for (FileObject fo : mFiles) {
+            System.out.println(" building " + fo.getFileName() +" " + fo.getPath());
             fo.toFile();
         }
     }

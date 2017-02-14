@@ -31,7 +31,7 @@ public class Contiki extends BaseCPlatform {
 
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
-        return super.createBuildSystem(s, files, ContikiPlatformOptions.getInstance());
+        return super.createBuildSystem(s, files, ContikiPlatformOptions.getInstance(), null);
     }
 
     @Override
@@ -39,9 +39,5 @@ public class Contiki extends BaseCPlatform {
         return ContikiPlatformOptions.getInstance();
     }
 
-    @Override
-    public boolean allowsLanguage(ConcreteLanguage lang) {
-        return lang instanceof CLang;
-    }
 
 }

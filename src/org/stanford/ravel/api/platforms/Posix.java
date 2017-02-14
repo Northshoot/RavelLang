@@ -38,15 +38,9 @@ public class Posix extends BaseCPlatform {
         return PosixRuntimeOptions.getInstance();
     }
 
-    @Override
-    public boolean allowsLanguage(ConcreteLanguage lang) {
-        return lang instanceof CLang;
-    }
-
-
 
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
-        return super.createBuildSystem(s, files, PosixRuntimeOptions.getInstance());
+        return super.createBuildSystem(s, files, PosixRuntimeOptions.getInstance(), null);
     }
 }

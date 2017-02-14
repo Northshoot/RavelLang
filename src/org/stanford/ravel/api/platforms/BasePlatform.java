@@ -1,8 +1,10 @@
 package org.stanford.ravel.api.platforms;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
+import org.stanford.ravel.api.platforms.nrf52.NrfPlatformOptions;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 
@@ -33,7 +35,9 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
             return;
         mFileObjects.addAll(module.getFiles());
     }
-    protected void addFile(FileObject fo) {
+    protected void addFile(FileObject fo)
+    {
+        System.out.println(" ADDING " + fo.getFileName());
         mFileObjects.add(fo);
     }
 
@@ -67,4 +71,6 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
             throw new IllegalArgumentException("Invalid API version, must be <= " + mMaxAPI);
         this.mAPI = level;
     }
+
+
 }

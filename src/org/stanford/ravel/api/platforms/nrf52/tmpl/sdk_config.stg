@@ -1,0 +1,21 @@
+sdk_config(config)::=<<
+
+
+#ifndef SDK_CONFIG_H
+#define SDK_CONFIG_H
+// \<\<\< Use Configuration Wizard in Context Menu \>\>\>\n
+#ifdef USE_APP_CONFIG
+#include "app_config.h"
+#endif
+// \<h\> nRF_BLE
+
+//==========================================================
+// \<q\> BLE_ADVERTISING_ENABLED  - ble_advertising - Advertising module
+
+#ifndef BLE_ADVERTISING_ENABLED
+#define BLE_ADVERTISING_ENABLED <config.BLE_ADVERTISING_ENABLED>
+#endif
+#endif
+
+
+>>
