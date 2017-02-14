@@ -1,3 +1,7 @@
+
+
+
+
 replicated model Random(size : int32):
     properties:
         durable = False

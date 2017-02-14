@@ -69,7 +69,6 @@ class PlatformBuilder {
 
     void render() {
         for (FileObject fo : mFiles) {
-            System.out.println(" building " + fo.getFileName() +" " + fo.getPath());
             fo.toFile();
         }
     }
