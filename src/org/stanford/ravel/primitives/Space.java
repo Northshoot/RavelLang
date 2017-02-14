@@ -82,4 +82,9 @@ public class Space extends Primitive {
     public Symbol getSymbol() {
         return mSymbol;
     }
+
+    @Override
+    public String toString() {
+        return "Space " + getName();
+    }
 }

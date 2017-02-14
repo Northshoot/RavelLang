@@ -113,10 +113,12 @@ public class LocalModelOperationAnalysis {
                 meetOperation(((TArrayStore) instr).value, Operation.MOVE);
                 meetOperation(((TArrayStore) instr).object, Operation.INDEX_LOAD);
             } else if (instr instanceof TFieldLoad) {
-                meetOperation(((TFieldLoad) instr).source, Operation.INDEX_LOAD);
+                if (!(((TFieldLoad) instr).compoundType instanceof ModelType.RecordType))
+                    meetOperation(((TFieldLoad) instr).source, Operation.INDEX_LOAD);
             } else if (instr instanceof TFieldStore) {
                 meetOperation(((TFieldStore) instr).value, Operation.MOVE);
-                meetOperation(((TFieldStore) instr).object, Operation.INDEX_STORE);
+                if (!(((TFieldStore) instr).compoundType instanceof ModelType.RecordType))
+                    meetOperation(((TFieldStore) instr).object, Operation.INDEX_STORE);
             } else if (instr instanceof TMove) {
                 meetOperation(((TMove) instr).source, Operation.MOVE);
             } else if (instr instanceof TBinaryArithOp) {
@@ -124,17 +126,22 @@ public class LocalModelOperationAnalysis {
                     if (((TBinaryArithOp) instr).type == PrimitiveType.STR) {
                         for (int source : instr.getSources())
                             meetOperation(source, Operation.CONCAT);
+                    } else {
+                        // FIXME handle add constant
+                        int src1 = ((TBinaryArithOp) instr).src1;
+                        int src2 = ((TBinaryArithOp) instr).src2;
+                        if (event.getVariableModelTags(src1).equals(event.getVariableModelTags(src2))) {
+                            meetOperation(src1, Operation.ADD_SAME);
+                            meetOperation(src2, Operation.ADD_SAME);
+                        } else {
+                            meetOperation(src1, Operation.ADD_FOREIGN);
+                            meetOperation(src2, Operation.ADD_FOREIGN);
+                        }
                     }
                 } else {
-                    // FIXME handle add constant
-                    int src1 = ((TBinaryArithOp) instr).src1;
-                    int src2 = ((TBinaryArithOp) instr).src2;
-                    if (event.getVariableModelTags(src1).equals(event.getVariableModelTags(src2))) {
-                        meetOperation(src1, Operation.ADD_SAME);
-                        meetOperation(src2, Operation.ADD_SAME);
-                    } else {
-                        meetOperation(src1, Operation.ADD_FOREIGN);
-                        meetOperation(src2, Operation.ADD_FOREIGN);
+                    // anything else is here-be-dragons, anything can happen, need full decryption
+                    for (int source : instr.getSources()) {
+                        meetOperation(source, Operation.ANY);
                     }
                 }
             } else if (instr instanceof TPhi) {

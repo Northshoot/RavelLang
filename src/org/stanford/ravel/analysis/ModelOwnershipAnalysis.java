@@ -42,6 +42,11 @@ public class ModelOwnershipAnalysis {
         }
     }
 
+    // for debugging only
+    private String getVarType(LinkedEvent event, int var) {
+        return event.getHandler().getBody().getRegisterType(var).getName();
+    }
+
     private void dumpAllOwnerships() {
         System.out.println("Ownership of event handler variables:");
         for (Space s : app.getSpaces()) {
@@ -49,7 +54,7 @@ public class ModelOwnershipAnalysis {
                 for (LinkedEvent event : ic) {
                     System.out.println(event);
                     event.getAllVariableCreators().forEach((var, creators) -> {
-                        System.out.print(var + " [");
+                        System.out.print(var + " @" + getVarType(event, var) + " [");
                         for (Space creator : creators) {
                             System.out.print(creator.getName() + ", ");
                         }
@@ -68,7 +73,7 @@ public class ModelOwnershipAnalysis {
                 for (LinkedEvent event : ic) {
                     System.out.println(event);
                     event.getAllVariableModelTags().forEach((var, tags) -> {
-                        System.out.print(var + " [");
+                        System.out.print(var + " @" + getVarType(event, var) + " [");
                         for (ModelTag tag : tags) {
                             System.out.print(tag + ", ");
                         }
@@ -105,8 +110,14 @@ public class ModelOwnershipAnalysis {
     private void tagOneVariableModelTag(LinkedEvent handler, int variable, Model model, Space space) {
         handler.addVariableModelTag(variable, new ModelTag(model, space));
     }
+    private void tagOneVariableModelTagLocal(LinkedEvent handler, int variable) {
+        handler.addVariableModelTag(variable, new ModelTag());
+    }
     private void tagOneVariableFieldTag(LinkedEvent handler, int variable, Model model, Space space, String field) {
         handler.addVariableFieldTag(variable, new FieldTag(model, space, field));
+    }
+    private void tagOneVariableFieldTagLocal(LinkedEvent handler, int variable) {
+        handler.addVariableFieldTag(variable, new FieldTag());
     }
 
     private void runLocalOwnership() {
@@ -144,8 +155,10 @@ public class ModelOwnershipAnalysis {
                                         // variable is a record created by a different space
                                         assert m.getReaders().contains(s);
                                         for (Space writer : m.getWriters()) {
-                                            if (writer != s)
+                                            if (writer != s) {
                                                 tagOneVariableCreator(event, var, writer);
+                                                tagOneVariableModelTag(event, var, m, writer);
+                                            }
                                         }
                                         break;
 
@@ -161,16 +174,14 @@ public class ModelOwnershipAnalysis {
 
                                         for (Space writer : m.getWriters()) {
                                             tagOneVariableCreator(event, var, writer);
+                                            tagOneVariableModelTag(event, var, m, writer);
                                         }
-                                }
-
-                                for (Space creator : event.getVariableCreators(var)) {
-                                    tagOneVariableModelTag(event, var, m, creator);
                                 }
                             }
                         } else {
                             // variable does not come from a model, it must be locally created
                             tagOneVariableCreator(event, var, s);
+                            tagOneVariableModelTagLocal(event, var);
                         }
 
                         Set<LocalOwnershipTaggingPass.LocalFieldTag> fieldTags = allFieldTags.get(var);
@@ -180,9 +191,13 @@ public class ModelOwnershipAnalysis {
                                 assert m != null;
 
                                 for (ModelTag modelTag : event.getVariableModelTags(var)) {
+                                    if (modelTag.model != m)
+                                        continue;
                                     tagOneVariableFieldTag(event, var, modelTag.model, modelTag.creator, tag.field);
                                 }
                             }
+                        } else {
+                            tagOneVariableFieldTagLocal(event, var);
                         }
                     }
                 }
