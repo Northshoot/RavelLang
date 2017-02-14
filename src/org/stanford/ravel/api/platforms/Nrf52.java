@@ -40,7 +40,7 @@ public class Nrf52 extends BaseCPlatform {
         TemplatePair tmpl_extra1 = new TemplatePair("sdk_config", "sdk_config");
         List<TemplatePair> make_addons = new ArrayList<>();
         make_addons.add(tmpl_extra);
-        make_addons.add(tmpl_extra1);
+        //make_addons.add(tmpl_extra1);
         List<FileObject> all_files = new ArrayList<>(super.createBuildSystem(s,files, NrfPlatformOptions.getInstance(), make_addons));
         all_files.add(makeLinkerScript(tmpl_extra));
         all_files.add(makeConfigFile(tmpl_extra1, new NrfConfig()));
@@ -69,7 +69,6 @@ public class Nrf52 extends BaseCPlatform {
 
     private FileObject makeConfigFile(TemplatePair p, NrfConfig configObj){
         //TODO: these could come from config
-        System.out.println("config file");
         ST tmpl_sd = configGroup.getInstanceOf("sdk_config");
         tmpl_sd.add("config", configObj);
         FileObject sdk_config_file = new FileObject();
