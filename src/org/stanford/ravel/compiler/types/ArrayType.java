@@ -1,7 +1,5 @@
 package org.stanford.ravel.compiler.types;
 
-import java.lang.reflect.Array;
-
 /**
  * Created by gcampagn on 1/24/17.
  */
@@ -44,6 +42,10 @@ public class ArrayType implements Type {
         return bound;
     }
 
+    public ArrayType makeImmutable() {
+        return new ArrayType(elementType, bound, false);
+    }
+
     @Override
     public String getName() {
         return elementType.getName() + "[]";
@@ -52,5 +54,23 @@ public class ArrayType implements Type {
     @Override
     public boolean isAssignable(Type t) {
         return t instanceof ArrayType && elementType.equals(((ArrayType) t).elementType);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ArrayType arrayType = (ArrayType) o;
+
+        if (mutable != arrayType.mutable) return false;
+        return elementType.equals(arrayType.elementType);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (mutable ? 1 : 0);
+        result = 31 * result + elementType.hashCode();
+        return result;
     }
 }

@@ -6,6 +6,7 @@ replicated model Random(size : int32):
 
     schema:
         # comment here
+        initial : bool
         value : int32
         array_value : byte[]
         str_value : str
@@ -74,8 +75,12 @@ controller CController(random: Random, sum : Sum):
             s = rec.str2_value
         system.print(s)
 
-        sum_record = sum.get(0)
-        sum_record.value = rec.value + sum_record.value
+        if rec.initial:
+            sum_record = sum.create()
+            sum_record.value = rec.value
+        else:
+            sum_record = sum.get(0)
+            sum_record.value = rec.value + sum_record.value
         sum.save(sum_record)
         # do something with rec.value
 

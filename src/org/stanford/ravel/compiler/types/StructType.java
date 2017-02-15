@@ -18,9 +18,13 @@ public class StructType implements CompoundType {
     public StructType(String name) {
         this(name, true);
     }
-    private StructType(String name, boolean mutable) {
+    StructType(String name, boolean mutable) {
         this.name = name;
         this.mutable = mutable;
+    }
+
+    StructType constructImmutable() {
+        return new StructType(name, false);
     }
 
     public StructType makeImmutable() {
@@ -30,7 +34,7 @@ public class StructType implements CompoundType {
         if (immutableVersion != null)
             return immutableVersion;
 
-        immutableVersion = new StructType(name, false);
+        immutableVersion = constructImmutable();
         immutableVersion.memberNames.addAll(memberNames);
         immutableVersion.memberTypes.putAll(memberTypes);
         return immutableVersion;
@@ -41,6 +45,9 @@ public class StructType implements CompoundType {
             throw new IllegalArgumentException("Duplicate field " + name + " in struct " + this.name);
         memberNames.add(name);
         memberTypes.put(name, type);
+
+        if (immutableVersion != null)
+            immutableVersion.addField(name, type);
     }
 
     @Override
@@ -61,5 +68,14 @@ public class StructType implements CompoundType {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean isAssignable(Type type) {
+        if (!mutable && type instanceof StructType && this == ((StructType) type).immutableVersion) {
+            return true;
+        } else {
+            return CompoundType.super.isAssignable(type);
+        }
     }
 }
