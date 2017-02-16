@@ -26,6 +26,7 @@ public class TypedIR {
     }
     public void finish(ControlFlowGraphBuilder cfg, LoopTreeBuilder loopTreeBuilder) {
         this.cfg = cfg.build();
+        loopTreeBuilder.addBasicBlock(cfg.getExit());
         this.loopTree = loopTreeBuilder.getRoot();
     }
 

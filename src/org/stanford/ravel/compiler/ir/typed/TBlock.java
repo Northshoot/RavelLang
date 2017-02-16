@@ -101,4 +101,11 @@ public class TBlock implements Iterable<TInstruction> {
             return null;
         return instructions.get(instructions.size()-1);
     }
+
+    public void destroy() {
+        for (TBlock pred : predecessors)
+            pred.successors.remove(this);
+        for (TBlock succ : successors)
+            succ.predecessors.remove(this);
+    }
 }

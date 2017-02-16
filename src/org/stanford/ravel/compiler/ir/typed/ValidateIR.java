@@ -4,12 +4,20 @@ import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by gcampagn on 1/24/17.
  */
 public class ValidateIR {
     public static void validate(TypedIR ir) {
         ControlFlowGraph cfg = ir.getControlFlowGraph();
+        Set<TBlock> fromCfg = new HashSet<>();
+
+        for (TBlock block : cfg)
+            fromCfg.add(block);
+
         for (TBlock block : cfg) {
             for (TInstruction instruction : block) {
                 int[] sources = instruction.getSources();
@@ -41,6 +49,12 @@ public class ValidateIR {
                 } else {
                     assert sinkType == PrimitiveType.VOID;
                 }
+
+                if (instruction instanceof TPhi) {
+                    for (TBlock definer : ((TPhi) instruction).blocks) {
+                        assert fromCfg.contains(definer);
+                    }
+                }
             }
         }
 
@@ -64,5 +78,25 @@ public class ValidateIR {
         assert cfg.getEntry().getPredecessors().isEmpty();
         assert cfg.getExit().getSuccessors().isEmpty();
         assert cfg.getExit().isEmpty();
+
+        Set<TBlock> fromLoopTree = new HashSet<>();
+        ir.getLoopTree().accept(new LoopTreeVisitor() {
+            @Override
+            public void visit(LoopTreeNode.BasicBlock bblock) {
+                fromLoopTree.add(bblock.getBlock());
+            }
+
+            @Override
+            public void visit(LoopTreeNode.Loop loop) {
+                loop.getBody().accept(this);
+            }
+
+            @Override
+            public void visit(LoopTreeNode.IfStatement ifStatement) {
+                ifStatement.getIftrue().accept(this);
+                ifStatement.getIffalse().accept(this);
+            }
+        });
+        assert fromCfg.equals(fromLoopTree);
     }
 }

@@ -119,7 +119,9 @@ public class CompileToIRPass {
 
         DeadValueEliminationPass deadValueEliminationPass = new DeadValueEliminationPass(ir2);
         DeadStoreEliminationPass deadStoreEliminationPass = new DeadStoreEliminationPass(ir2);
+        DeadControlFlowElimination deadControlFlowElimination = new DeadControlFlowElimination(ir2);
         ConstantFolding constantFolding = new ConstantFolding(ir2);
+
         for (VariableSymbol param : parameters)
             constantFolding.declare(param.getRegister());
         AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
@@ -131,8 +133,13 @@ public class CompileToIRPass {
 
             // run constant folding first (which helps dead value elimination)
             progress = constantFolding.run() || progress;
-            // run dead value elimination second (which helps the alias analysis)
+            ValidateIR.validate(ir2);
+            // run dead control flow second (which helps dead value elimination)
+            progress = deadControlFlowElimination.run() || progress;
+            ValidateIR.validate(ir2);
+            // run dead value elimination third (which helps the alias analysis)
             progress = deadValueEliminationPass.run() || progress;
+            ValidateIR.validate(ir2);
 
             // run alias analysis for record variables, which will be used by the security analysis
             Map<Integer, Set<Integer>> aliasResult = aliasAnalysis.run();
@@ -147,6 +154,7 @@ public class CompileToIRPass {
 
             // run dead store elimination with the alias analysis
             progress = deadStoreEliminationPass.run() || progress;
+            ValidateIR.validate(ir2);
 
             if (debug && progress) {
                 System.out.println("Opt pass #" + (pass+1));
@@ -154,6 +162,9 @@ public class CompileToIRPass {
             }
             pass++;
         } while(progress);
+
+        System.out.println("Final Loop Tree");
+        System.out.println(ir2.getLoopTree());
 
         return ir2;
     }
