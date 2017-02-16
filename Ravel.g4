@@ -254,9 +254,9 @@ model_comp returns [Scope scope]
 
 
 modelType
-    : 'local'
-    | 'streaming'
-    | 'replicated'
+    : LOCAL
+    | STREAMING
+    | REPLICATED
     ;
 
 model_body
@@ -282,8 +282,8 @@ property_line
     ;
 
 flow_assign
-    : 'flow' '=' Identifier ('->' Identifier)+ #DirectedFlow
-    | 'flow' '=' Identifier (',' Identifier)+ #UndirectedFlow
+    : FLOW '=' Identifier ('->' Identifier)+ #DirectedFlow
+    | FLOW '=' Identifier (',' Identifier)+ #UndirectedFlow
     ;
 
 schema_block returns [Scope scope]
@@ -301,26 +301,6 @@ field_line
 
 field
     : Identifier ':' type #FieldDeclaration
-    ;
-
-/**
- *
- * Field types, currently only in parser. But maybe it should be like a Ravel library
- * that you can write your own field in Ravel and then get it translated
- * TODO: dynamic field loading
- *
- */
-field_type
-    : T_BYTE_FIELD
-    | T_STRING_FIELD
-    | T_BOOLEAN_FIELD
-    | T_INTEGER_FIELD
-    | T_NUMBER_FIELD
-    | T_DATE_FIELD
-    | T_DATE_TIME_FIELD
-    | T_TIME_STAMP_FIELD
-    | T_CONTEXT_FIELD
-    | T_MODEL_FIELD
     ;
 
 /**
@@ -571,6 +551,9 @@ SPACE               : 'space' ;
 CONTROLLER          : 'controller' ;
 VIEW                : 'view';
 FLOW                : 'flow' ;
+LOCAL               : 'local' ;
+STREAMING           : 'streaming' ;
+REPLICATED          : 'replicated' ;
 
 // interface
 INTERFACE           : 'interface' ;
@@ -580,25 +563,13 @@ DEF                 : 'def' ;
 EVENT               : 'event' ;
 COMMAND             : 'command' ;
 
-//fields
-T_BYTE_FIELD        : 'ByteField' ;
-T_STRING_FIELD      : 'StringField' ;
-T_BOOLEAN_FIELD     : 'BooleanField' ;
-T_INTEGER_FIELD     : 'IntegerField';
-T_NUMBER_FIELD      : 'NumberField' ;
-T_DATE_FIELD        : 'DateField' ;
-T_DATE_TIME_FIELD   : 'DateTimeField' ;
-T_TIME_STAMP_FIELD  : 'TimeStampField' ;
-T_CONTEXT_FIELD     : 'ContextField' ;
-T_MODEL_FIELD       : 'ModelField' ;
-
 //expression operators
 ASSERT              : 'assert' ;
 RETURN              : 'return' ;
 TRUE                : 'True' ;
 FALSE               : 'False' ;
 IF                  : 'if' ;
-ELIF                : 'else if' ;
+ELIF                : 'elif' ;
 ELSE                : 'else';
 FOR                 : 'for' ;
 WHILE               : 'while' ;
@@ -607,11 +578,11 @@ NOT                 : 'not';
 OR                  : 'or' ;
 IN                  : 'in' ;
 IS                  : 'is' ;
-DELETE              : 'delete' ;
+DELETE              : 'del' ;
 PASS                : 'pass';
 CONTINUE            : 'continue';
 BREAK               : 'break' ;
-NONE                : 'none' ;
+NONE                : 'None' ;
 
 NEWLINE
  : ( {atStartOfInput()}?   SPACES

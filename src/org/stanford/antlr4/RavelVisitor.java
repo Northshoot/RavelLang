@@ -273,12 +273,6 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFieldDeclaration(RavelParser.FieldDeclarationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#field_type}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitField_type(RavelParser.Field_typeContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code ControllerScope}
 	 * labeled alternative in {@link RavelParser#controller_comp}.
 	 * @param ctx the parse tree

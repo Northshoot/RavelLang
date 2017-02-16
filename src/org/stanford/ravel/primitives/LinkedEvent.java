@@ -42,10 +42,12 @@ public class LinkedEvent {
     }
     public boolean addVariableModelTag(int var, ModelTag tag) {
         Set<ModelTag> tags = variableModelTags.computeIfAbsent(var, (ignored) -> new HashSet<>());
+        assert tags.isEmpty() || !tag.isLocal();
         return tags.add(tag);
     }
     public boolean addVariableFieldTag(int var, FieldTag tag) {
         Set<FieldTag> tags = variableFieldTags.computeIfAbsent(var, (ignored) -> new HashSet<>());
+        assert tags.isEmpty() || !tag.isLocal();
         return tags.add(tag);
     }
 

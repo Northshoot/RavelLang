@@ -20,29 +20,39 @@ public class ModelType extends ClassType {
         private RecordType(String name) {
             super(name);
         }
+        private RecordType(String name, boolean mutable) {
+            super(name, mutable);
+        }
 
         public ModelType getModel() {
             return ModelType.this;
         }
+
+        @Override
+        StructType constructImmutable() {
+            return new RecordType(getName(), false);
+        }
     }
 
     private final RecordType recordType;
+    private final RecordType immutableRecordType;
     private final ContextType ctxType;
 
     public ModelType(ModelSymbol symbol) {
         super(symbol.getName());
 
         recordType = new RecordType(symbol.getName() + "::Record");
+        immutableRecordType = (RecordType) recordType.makeImmutable();
         ctxType = new ContextType();
 
         // If you add new functions here, you must update LocalOwnershipTaggingPass
         // to handle them correctly
-        this.addMethod("save", new Type[]{recordType}, ctxType);
+        this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
         this.addMethod("create", new Type[0], recordType);
-        this.addMethod("first", new Type[0], recordType);
-        this.addMethod("last", new Type[0], recordType);
-        this.addMethod("get", new Type[]{PrimitiveType.INT32}, recordType);
-        this.addMethod("all", new Type[0], new ArrayType(recordType));
+        this.addMethod("first", new Type[0], immutableRecordType);
+        this.addMethod("last", new Type[0], immutableRecordType);
+        this.addMethod("get", new Type[]{PrimitiveType.INT32}, immutableRecordType);
+        this.addMethod("all", new Type[0], new ArrayType(immutableRecordType).makeImmutable());
         this.addMethod("clear", new Type[0], PrimitiveType.VOID);
 
         for (ModelEvent e : ModelEvent.values()) {
@@ -75,7 +85,7 @@ public class ModelType extends ClassType {
                 case "error":
                     return PrimitiveType.ERROR_MSG;
                 case "record":
-                    return getRecordType();
+                    return immutableRecordType;
                 default:
                     return null;
             }

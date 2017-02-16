@@ -1,7 +1,5 @@
 package org.stanford.ravel.compiler;
 
-
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stanford.antlr4.RavelBaseListener;

@@ -448,16 +448,6 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitFieldDeclaration(RavelParser.FieldDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#field_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterField_type(RavelParser.Field_typeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#field_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitField_type(RavelParser.Field_typeContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code ControllerScope}
 	 * labeled alternative in {@link RavelParser#controller_comp}.
 	 * @param ctx the parse tree

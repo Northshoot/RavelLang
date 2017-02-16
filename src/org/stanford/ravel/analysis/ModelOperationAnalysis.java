@@ -121,6 +121,9 @@ public class ModelOperationAnalysis {
     private void saveOperations() {
         operations.forEach((ic, icOperations) -> {
             icOperations.forEach((fieldTag, op) -> {
+                if (fieldTag.isLocal())
+                    return;
+                assert fieldTag.model != null;
                 ModelField field = fieldTag.model.getField(fieldTag.field);
                 assert field != null;
 
@@ -134,6 +137,8 @@ public class ModelOperationAnalysis {
         operations.forEach((ic, icOperations) -> {
             System.out.println("By " + ic);
             icOperations.forEach((field, op) -> {
+                if (field.isLocal())
+                    return;
                 System.out.println(field + ": " + op);
             });
             System.out.println();

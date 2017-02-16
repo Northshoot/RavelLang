@@ -19,13 +19,24 @@ import org.stanford.ravel.primitives.Space;
  * This is the global (meaning interprocedural/after we computed ownership
  * information) version of LocalOwnershipTaggingPass.ModelTag.
  *
+ * A special kind of field tag (for which {@link ModelTag#isLocal()} is true) is
+ * applied to event variables that are fully local.
+ *
  * Created by gcampagn on 2/10/17.
  */
 public class ModelTag {
+    private final boolean isEmpty;
     public final Model model;
     public final Space creator;
 
+    public ModelTag() {
+        isEmpty = true;
+        model = null;
+        creator = null;
+    }
+
     public ModelTag(Model model, Space creator) {
+        isEmpty = false;
         this.model = model;
         this.creator = creator;
     }
@@ -37,19 +48,25 @@ public class ModelTag {
 
         ModelTag modelTag = (ModelTag) o;
 
-        if (!model.equals(modelTag.model)) return false;
-        return creator.equals(modelTag.creator);
+        if (isEmpty != modelTag.isEmpty) return false;
+        if (model != null ? !model.equals(modelTag.model) : modelTag.model != null) return false;
+        return creator != null ? creator.equals(modelTag.creator) : modelTag.creator == null;
     }
 
     @Override
     public int hashCode() {
-        int result = model.hashCode();
-        result = 31 * result + creator.hashCode();
+        int result = (isEmpty ? 1 : 0);
+        result = 31 * result + (model != null ? model.hashCode() : 0);
+        result = 31 * result + (creator != null ? creator.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return model.getName() + " from " + creator.getName();
+        return isEmpty ? "local value" : (model.getName() + " from " + creator.getName());
+    }
+
+    public boolean isLocal() {
+        return isEmpty;
     }
 }

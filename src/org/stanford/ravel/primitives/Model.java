@@ -64,8 +64,9 @@ public class Model extends ConfigurableComponent {
     }
 
     public void addFlow(Flow f) {
-        assert mModelType != Type.LOCAL;
+        // local models only have fake flows
         assert f != null;
+        assert mModelType != Type.LOCAL || f.getSource() == f.getSink();
         mFlows.add(f);
 
         mWriters.add(f.getSource());

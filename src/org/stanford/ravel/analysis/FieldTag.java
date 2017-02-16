@@ -14,17 +14,33 @@ import org.stanford.ravel.primitives.Space;
  * This is the global (meaning interprocedural/after we computed ownership
  * information) version of LocalOwnershipTaggingPass.FieldTag.
  *
+ * A special kind of field tag (for which {@link FieldTag#isLocal()} is true) is
+ * applied to event variables that are fully local.
+ *
  * Created by gcampagn on 2/10/17.
  */
 public class FieldTag {
+    private final boolean isEmpty;
     public final Model model;
     public final Space creator;
     public final String field;
 
+    public FieldTag() {
+        isEmpty = true;
+        model = null;
+        creator = null;
+        field = null;
+    }
+
     public FieldTag(Model model, Space creator, String field) {
+        isEmpty = false;
         this.model = model;
         this.creator = creator;
         this.field = field;
+    }
+
+    public boolean isLocal() {
+        return isEmpty;
     }
 
     @Override
@@ -34,21 +50,23 @@ public class FieldTag {
 
         FieldTag fieldTag = (FieldTag) o;
 
-        if (!model.equals(fieldTag.model)) return false;
-        if (!creator.equals(fieldTag.creator)) return false;
-        return field.equals(fieldTag.field);
+        if (isEmpty != fieldTag.isEmpty) return false;
+        if (model != null ? !model.equals(fieldTag.model) : fieldTag.model != null) return false;
+        if (creator != null ? !creator.equals(fieldTag.creator) : fieldTag.creator != null) return false;
+        return field != null ? field.equals(fieldTag.field) : fieldTag.field == null;
     }
 
     @Override
     public int hashCode() {
-        int result = model.hashCode();
-        result = 31 * result + creator.hashCode();
-        result = 31 * result + field.hashCode();
+        int result = (isEmpty ? 1 : 0);
+        result = 31 * result + (model != null ? model.hashCode() : 0);
+        result = 31 * result + (creator != null ? creator.hashCode() : 0);
+        result = 31 * result + (field != null ? field.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return model.getName() + "." + field + " from " + creator.getName();
+        return isEmpty ? "local value" : (model.getName() + "." + field + " from " + creator.getName());
     }
 }
