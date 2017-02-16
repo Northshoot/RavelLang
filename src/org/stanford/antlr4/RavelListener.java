@@ -942,6 +942,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitForStatement(RavelParser.ForStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#forControl}.
+	 * @param ctx the parse tree
+	 */
+	void enterForControl(RavelParser.ForControlContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#forControl}.
+	 * @param ctx the parse tree
+	 */
+	void exitForControl(RavelParser.ForControlContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code IfStatement}
 	 * labeled alternative in {@link RavelParser#if_stmt}.
 	 * @param ctx the parse tree
@@ -953,16 +963,6 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIfStatement(RavelParser.IfStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RavelParser#forControl}.
-	 * @param ctx the parse tree
-	 */
-	void enterForControl(RavelParser.ForControlContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RavelParser#forControl}.
-	 * @param ctx the parse tree
-	 */
-	void exitForControl(RavelParser.ForControlContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

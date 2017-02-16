@@ -143,7 +143,7 @@ public class TypeResolvePass implements InstructionVisitor {
     }
 
     private Type promote(Type t1, Type t2) {
-        // convert bool -> int -> double
+        // convert bool -> byte -> int -> double
         if (t1.equals(t2))
             return t1;
         if (t1.isAssignable(t2))
@@ -154,7 +154,7 @@ public class TypeResolvePass implements InstructionVisitor {
         return PrimitiveType.ERROR;
     }
 
-    private Type adjustTypeForBinaryOp(BinaryOperation op, Type resultType) {
+    private static Type adjustTypeForBinaryOp(BinaryOperation op, Type resultType) {
         if (resultType == PrimitiveType.ERROR)
             return resultType;
         if (!(resultType instanceof PrimitiveType))
@@ -163,18 +163,26 @@ public class TypeResolvePass implements InstructionVisitor {
         if (op.isBitwise()) {
             if (resultType == PrimitiveType.INT32)
                 return resultType;
+            if (resultType == PrimitiveType.BYTE)
+                return resultType;
             if (resultType == PrimitiveType.BOOL)
                 return PrimitiveType.INT32;
             return PrimitiveType.ERROR;
         }
         if (op.isNumeric()) {
-            if (resultType == PrimitiveType.BOOL)
-                return PrimitiveType.INT32;
+            if (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE) {
+                if (op == BinaryOperation.POW || op == BinaryOperation.DIV)
+                    return PrimitiveType.DOUBLE;
+                else
+                    return PrimitiveType.INT32;
+            }
             if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE)
                 return PrimitiveType.ERROR;
+            if (op == BinaryOperation.POW || op == BinaryOperation.DIV)
+                return PrimitiveType.DOUBLE;
             return resultType;
         }
-        if (op == BinaryOperation.ADD && resultType == PrimitiveType.BOOL)
+        if (op == BinaryOperation.ADD && (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE))
             return PrimitiveType.INT32;
 
         return resultType;
@@ -225,12 +233,29 @@ public class TypeResolvePass implements InstructionVisitor {
             cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
     }
 
+    private static Type adjustTypeForComparisonOp(ComparisonOperation op, Type resultType) {
+        if (resultType == PrimitiveType.ERROR)
+            return resultType;
+        if (op == ComparisonOperation.EQUAL || op == ComparisonOperation.NOTEQUAL)
+            return resultType;
+        if (!(resultType instanceof PrimitiveType))
+            return PrimitiveType.ERROR;
+
+        if (resultType == PrimitiveType.BOOL)
+            return PrimitiveType.INT32;
+        if (resultType == PrimitiveType.BYTE || resultType == PrimitiveType.INT32 || resultType == PrimitiveType.DOUBLE
+                || resultType == PrimitiveType.STR)
+            return resultType;
+        return PrimitiveType.ERROR;
+    }
+
     @Override
     public void visit(ComparisonOp instr) {
         Type srcType1 = getRegisterType(instr.src1);
         Type srcType2 = getRegisterType(instr.src2);
 
         Type opType = promote(srcType1, srcType2);
+        opType = adjustTypeForComparisonOp(instr.op, opType);
         Type resultType = PrimitiveType.BOOL;
         if (opType == PrimitiveType.ERROR) {
             typeError(instr, "invalid operand types " + srcType1.getName() + " and " + srcType2.getName() + " for comparison " + instr.op);
@@ -246,7 +271,7 @@ public class TypeResolvePass implements InstructionVisitor {
         int src2;
         if (!opType.equals(srcType2)) {
             src2 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(opType, srcType1, src2, instr.src2));
+            cfgBuilder.addInstruction(new TConvert(opType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
         }
@@ -509,7 +534,7 @@ public class TypeResolvePass implements InstructionVisitor {
             cfgBuilder.addInstruction(new TMove(targetType, instr.target, instr.source));
     }
 
-    private Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
+    private static Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
         if (resultType == PrimitiveType.ERROR)
             return resultType;
         if (!(resultType instanceof PrimitiveType))
@@ -518,12 +543,14 @@ public class TypeResolvePass implements InstructionVisitor {
         if (op.isBitwise()) {
             if (resultType == PrimitiveType.INT32)
                 return resultType;
+            if (resultType == PrimitiveType.BYTE)
+                return resultType;
             if (resultType == PrimitiveType.BOOL)
                 return PrimitiveType.INT32;
             return PrimitiveType.ERROR;
         }
         if (op.isNumeric()) {
-            if (resultType == PrimitiveType.BOOL)
+            if (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE)
                 return PrimitiveType.INT32;
             if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE)
                 return PrimitiveType.ERROR;

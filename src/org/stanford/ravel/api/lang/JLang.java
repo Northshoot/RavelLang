@@ -4,6 +4,9 @@ import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
+import org.stanford.ravel.compiler.ir.BinaryOperation;
+import org.stanford.ravel.compiler.ir.typed.TBinaryArithOp;
+import org.stanford.ravel.compiler.ir.typed.TComparisonOp;
 import org.stanford.ravel.compiler.ir.typed.TConvert;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
@@ -130,9 +133,45 @@ public class JLang extends BaseLanguage {
             public void visit(TConvert convert) {
                 if (convert.srcType == PrimitiveType.ERROR_MSG &&
                         convert.tgtType == PrimitiveType.BOOL) {
-                    addCode(getRegisterName(convert.target) + " = " + getRegisterName(convert.source) + " != " + RUNTIME_PKG + ".tiers.Error.SUCCESS;\n");
+                    addLine(convert.target, " = ", convert.source,  " != ", RUNTIME_PKG + ".tiers.Error.SUCCESS");
                 } else {
                     super.visit(convert);
+                }
+            }
+
+            /**
+             * Quirk certain binary operators:
+             *
+             * - IDIV for doubles is quirked to Math.floor(src1/src2)
+             * - IDIV for ints is quirked to src1/src2
+             *   (otherwise we would output src1//src2 which is not valid Java)
+             * - POW is quirked to Math.pow(src1, src2)
+             */
+            @Override
+            public void visit(TBinaryArithOp arithOp) {
+                if (arithOp.op == BinaryOperation.IDIV) {
+                    if (arithOp.type == PrimitiveType.DOUBLE) {
+                        addLine(arithOp.target, " = java.lang.Math.floor(", arithOp.src1, " / ", arithOp.src2, ")");
+                    } else {
+                        addLine(arithOp.target, " = ", arithOp.src1, " / ", arithOp.src2);
+                    }
+                } else if (arithOp.op == BinaryOperation.POW) {
+                    addLine(arithOp.target, " = java.lang.Math.pow(", arithOp.src1, ", ", arithOp.src2, ")");
+                } else {
+                    super.visit(arithOp);
+                }
+            }
+
+            /**
+             * Quirk string comparisons to str1.compareTo(str2) op 0
+             * (eg str1.compareTo(str2) > 0)
+             */
+            @Override
+            public void visit(TComparisonOp compOp) {
+                if (compOp.type == PrimitiveType.STR) {
+                    addLine(compOp.target, " = ", compOp.src1, ".compareTo(", compOp.src2, ") ", compOp.op, " 0");
+                } else {
+                    super.visit(compOp);
                 }
             }
         };

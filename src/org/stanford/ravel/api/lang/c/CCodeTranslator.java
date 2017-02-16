@@ -69,16 +69,6 @@ public class CCodeTranslator extends BaseIRTranslator {
         addCode("}\n");
     }
 
-    private void addLine(Object... elements) {
-        for (Object el : elements) {
-            if (el instanceof Integer)
-                addCode(getRegisterName(((Integer) el)));
-            else
-                addCode(el.toString());
-        }
-        addCode(";\n");
-    }
-
     @Override
     public void visit(TArrayLoad arrayLoad) {
         addLine(arrayLoad.target, " = ", arrayLoad.source, "[", arrayLoad.index, "]");

@@ -1,6 +1,5 @@
 package org.stanford.ravel.api.lang;
 
-import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.PrimitiveType;
@@ -34,6 +33,16 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
 
     protected void addCode(String code) {
         builder.append(code);
+    }
+
+    protected void addLine(Object... elements) {
+        for (Object el : elements) {
+            if (el instanceof Integer)
+                addCode(getRegisterName(((Integer) el)));
+            else
+                addCode(el.toString());
+        }
+        addCode(";\n");
     }
 
     protected void declareControllerScope(VariableSymbol sym) {

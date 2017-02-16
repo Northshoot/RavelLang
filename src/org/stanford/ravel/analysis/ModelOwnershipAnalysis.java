@@ -149,6 +149,7 @@ public class ModelOwnershipAnalysis {
                                     case CREATED:
                                         // variable is a record created from this space
                                         tagOneVariableCreator(event, var, s);
+                                        tagOneVariableModelTag(event, var, m, s);
                                         break;
 
                                     case REMOTE:

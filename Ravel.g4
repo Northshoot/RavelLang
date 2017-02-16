@@ -343,6 +343,7 @@ statement
     | for_stmt
     | break_stmt
     | continue_stmt
+    | PASS
     | NEWLINE
     ;
 
@@ -386,7 +387,7 @@ var_decl
     ;
 
 type
-    : Identifier array_marker*;
+    : Identifier ('.' Identifier)* array_marker*;
 
 array_marker: '[' ']' ;
 
@@ -515,23 +516,20 @@ expression
 
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
 while_stmt
- : WHILE expression ':' block_stmt #WhileStatement
- ;
+    : WHILE expression ':' block_stmt #WhileStatement
+    ;
 
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt returns [Scope scope]
-     : FOR forControl ':' block_stmt #ForStatement
-     ;
+    : FOR forControl ':' block_stmt #ForStatement
+    ;
+
+forControl
+    : ident_decl IN expression
+    ;
 
 if_stmt returns [Scope scope]
     : IF expression ':' block_stmt ( ELIF expression ':' block_stmt )* ( ELSE ':' block_stmt )? #IfStatement
-    ;
-
-//for_stmt
-// : FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
-// ;
-forControl
-    :   identifier_list IN expressionList
     ;
 
 qualified_name

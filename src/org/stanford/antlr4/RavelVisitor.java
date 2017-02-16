@@ -1,9 +1,6 @@
 // Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
-import org.stanford.ravel.compiler.scope.*;
-import org.stanford.ravel.compiler.symbol.*;
-
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -568,18 +565,18 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForStatement(RavelParser.ForStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link RavelParser#forControl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForControl(RavelParser.ForControlContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code IfStatement}
 	 * labeled alternative in {@link RavelParser#if_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitIfStatement(RavelParser.IfStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link RavelParser#forControl}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitForControl(RavelParser.ForControlContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#qualified_name}.
 	 * @param ctx the parse tree

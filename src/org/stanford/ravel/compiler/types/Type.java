@@ -12,7 +12,7 @@ public interface Type {
     String getName();
 
     /**
-     * Checks if @param other can be assigned to a variable of this type.
+     * Checks if {@param other} can be assigned to a variable of this type.
      * The default implementation just checks that the type is equal or is an error type
      *
      * @param other the type on the right hand side of the assignment
@@ -20,5 +20,22 @@ public interface Type {
      */
     default boolean isAssignable(Type other) {
         return this.equals(other) || other == PrimitiveType.ERROR;
+    }
+
+    /**
+     * Checks if {@param other} is the same as {@param this}, but ignoring const
+     * qualifiers.
+     *
+     * This is used by AliasAnalysis, because const pointers can alias non-const pointers.
+     *
+     * @param other the other type
+     * @return true if the types are the same (up to qualifiers), false otherwise
+     */
+    default boolean equalsExceptQualifiers(Type other) {
+        return this.equals(other);
+    }
+
+    default Type getNestedType(String subTypeName) {
+        return null;
     }
 }

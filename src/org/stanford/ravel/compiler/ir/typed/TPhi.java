@@ -68,4 +68,15 @@ public class TPhi extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public Object evaluate(Object[] args) {
+        Object res = args[0];
+        for (Object o : args) {
+            if (!o.equals(res))
+                return null;
+        }
+        return res;
+    }
+
 }

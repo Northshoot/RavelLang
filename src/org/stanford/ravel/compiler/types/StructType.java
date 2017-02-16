@@ -67,7 +67,7 @@ public class StructType implements CompoundType {
 
     @Override
     public String getName() {
-        return name;
+        return (mutable ? "" : "const ") + name;
     }
 
     @Override
@@ -77,5 +77,19 @@ public class StructType implements CompoundType {
         } else {
             return CompoundType.super.isAssignable(type);
         }
+    }
+
+    @Override
+    public boolean equalsExceptQualifiers(Type type) {
+        if (type == null)
+            return false;
+        if (type.getClass() != this.getClass())
+            return false;
+
+        StructType otherStruct = (StructType)type;
+        if (this == otherStruct.immutableVersion || this.immutableVersion == otherStruct)
+            return true;
+
+        return this == otherStruct;
     }
 }

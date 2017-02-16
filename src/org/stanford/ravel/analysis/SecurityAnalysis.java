@@ -121,11 +121,6 @@ public class SecurityAnalysis {
         for (Model m : app.getModels()) {
             for (ModelField field : m.getFields()) {
                 // first compute who can encrypt it
-                for (Space writer : field.getWriters()) {
-                    field.forEachOperation((space, creator, op) -> {
-
-                    });
-                }
 
                 // second compute who can mac it
 
