@@ -33,7 +33,7 @@ public enum PrimitiveType implements Type {
         public boolean isAssignable(Type type) {
             // error messages can be converted to bool to check if
             // error is set
-            return type == BOOL || type == ERROR_MSG;
+            return type == BOOL || type == ERROR_MSG || type == ERROR;
         }
     },
     BYTE {

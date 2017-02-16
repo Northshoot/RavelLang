@@ -26,6 +26,7 @@ class DeadValueEliminationPass {
 
     public boolean run() {
         madeChanges = false;
+        liveVariables.clear();
 
         // first compute the dead values
         do {

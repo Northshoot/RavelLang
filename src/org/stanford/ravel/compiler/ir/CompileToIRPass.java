@@ -49,21 +49,27 @@ public class CompileToIRPass {
             }
         }
 
-        // hoist all variables up the register scope (the whole compilation unit)
+        // variables is the set of names that should be known to AstToUntypedIRVisitor and TypeResolvePass
+        // parameters is the set of variables that are set externally from the code here (and thus never constant)
+        //
+        // these sets must be filled from the outermost scope to the innermost scope for shadowing to work correctly
         Set<VariableSymbol> variables = new HashSet<>();
+        Set<VariableSymbol> parameters = new HashSet<>();
+        // add controller level variables
+        for (Symbol s : tree.scope.getEnclosingScope().getSymbols()) {
+            if (s instanceof VariableSymbol)
+                parameters.add((VariableSymbol) s);
+        }
+        // add event arguments
+        parameters.addAll(declaredArguments);
+
+        variables.addAll(parameters);
+        // hoist all variables up the register scope (the whole compilation unit)
         for (Symbol s : tree.scope.getAllSymbols()) {
             if (s instanceof VariableSymbol)
                 variables.add((VariableSymbol)s);
         }
-        // add controller level variables
-        for (Symbol s : tree.scope.getEnclosingScope().getSymbols()) {
-            if (s instanceof VariableSymbol)
-                variables.add((VariableSymbol)s);
-        }
-        // add event arguments
-        for (VariableSymbol s : declaredArguments) {
-            variables.add(s);
-        }
+
 
         // compile to untyped IR
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this, firstGpRegister);
@@ -113,6 +119,9 @@ public class CompileToIRPass {
 
         DeadValueEliminationPass deadValueEliminationPass = new DeadValueEliminationPass(ir2);
         DeadStoreEliminationPass deadStoreEliminationPass = new DeadStoreEliminationPass(ir2);
+        ConstantFolding constantFolding = new ConstantFolding(ir2);
+        for (VariableSymbol param : parameters)
+            constantFolding.declare(param.getRegister());
         AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
 
         boolean progress;
@@ -120,7 +129,9 @@ public class CompileToIRPass {
         do {
             progress = false;
 
-            // run dead value elimination first (which helps the alias analysis)
+            // run constant folding first (which helps dead value elimination)
+            progress = constantFolding.run() || progress;
+            // run dead value elimination second (which helps the alias analysis)
             progress = deadValueEliminationPass.run() || progress;
 
             // run alias analysis for record variables, which will be used by the security analysis

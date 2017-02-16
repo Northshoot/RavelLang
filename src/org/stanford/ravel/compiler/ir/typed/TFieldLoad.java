@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
+import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -54,4 +55,14 @@ public class TFieldLoad extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public Object evaluate(Object[] args) {
+        if (type instanceof ArrayType) {
+            return ((Object[])args[0]).length;
+        } else {
+            return null;
+        }
+    }
+
 }

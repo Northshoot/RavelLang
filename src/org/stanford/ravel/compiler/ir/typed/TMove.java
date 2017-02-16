@@ -44,4 +44,10 @@ public class TMove extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public Object evaluate(Object[] args) {
+        return args[0];
+    }
+
 }

@@ -1,5 +1,8 @@
 package org.stanford.ravel.compiler.ir;
 
+import org.stanford.ravel.compiler.types.PrimitiveType;
+import org.stanford.ravel.compiler.types.Type;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,5 +32,23 @@ public enum ComparisonOperation {
     static ComparisonOperation forSymbol(String symbol) {
         assert symbolMap.containsKey(symbol);
         return symbolMap.get(symbol);
+    }
+
+    public boolean isLegalType(Type type) {
+        switch (this) {
+            case EQUAL:
+            case NOTEQUAL:
+                return true;
+
+            case GT:
+            case LT:
+            case LE:
+            case GE:
+                return type == PrimitiveType.BYTE || type == PrimitiveType.INT32 || type == PrimitiveType.DOUBLE ||
+                        type == PrimitiveType.STR;
+
+            default:
+                return false;
+        }
     }
 }

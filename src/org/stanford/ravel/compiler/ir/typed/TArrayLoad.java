@@ -55,4 +55,10 @@ public class TArrayLoad extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public Object evaluate(Object[] args) {
+        return ((Object[])args[0])[(int)args[1]];
+    }
+
 }

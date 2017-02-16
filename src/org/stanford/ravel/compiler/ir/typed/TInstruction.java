@@ -45,7 +45,7 @@ public abstract class TInstruction {
      * @param sources the constant inputs, which are literals
      * @return the constant result, or null if the result is non-deterministic or non computable
      */
-    Object evaluate(Object[] sources) {
+    public Object evaluate(Object[] sources) {
         return null;
     }
 }
