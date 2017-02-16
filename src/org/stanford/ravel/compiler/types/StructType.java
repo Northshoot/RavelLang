@@ -83,7 +83,7 @@ public class StructType implements CompoundType {
     public boolean equalsExceptQualifiers(Type type) {
         if (type == null)
             return false;
-        if (type.getClass().equals(this.getClass()))
+        if (type.getClass() != this.getClass())
             return false;
 
         StructType otherStruct = (StructType)type;

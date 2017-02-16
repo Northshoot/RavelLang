@@ -55,6 +55,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
         rec2 = random.create()
         rec2.value = rec.value
 
+        for r in random.all():
+            system.print("one record")
+
     event system.started():
         timer.start_periodic(5000)
 
@@ -77,6 +80,7 @@ controller CController(random: Random, sum : Sum):
             s = rec.str2_value
         system.print(s)
 
+        sum_record : Sum.Record
         if sum.size() == 0:
             sum_record = sum.create()
             sum_record.value = rec.value
@@ -84,7 +88,6 @@ controller CController(random: Random, sum : Sum):
             sum_record = sum.get(0)
             sum_record.value = rec.value + sum_record.value
         sum.save(sum_record)
-        # do something with rec.value
 
 
 #interface Database<T>(model: T):

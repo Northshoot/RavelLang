@@ -69,8 +69,10 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override
     public Integer visitBlock(RavelParser.BlockContext ctx) {
+        Scope parentScope = currentScope;
         currentScope = ctx.scope;
         visitChildren(ctx);
+        currentScope = parentScope;
         return VOID_REG;
     }
 
@@ -511,6 +513,79 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
         addCurrent(new Continue(ctx));
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitForStatement(RavelParser.ForStatementContext ctx) {
+        Scope parentScope = currentScope;
+        currentScope = ctx.scope;
+
+        RavelParser.Ident_declContext decl = ctx.forControl().ident_decl();
+        RavelParser.ExpressionContext expr = ctx.forControl().expression();
+
+        String varName = decl.Identifier().getText();
+        int varReg;
+
+        Symbol var = currentScope.resolve(varName);
+        if (var == null || !(var instanceof VariableSymbol)) {
+            compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+            varReg = ERROR_REG;
+        } else if (!((VariableSymbol) var).isWritable()) {
+            compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
+            varReg = ERROR_REG;
+        } else {
+            varReg = ensureVarRegister((VariableSymbol) var);
+        }
+
+        // Lower to
+        // array = ...
+        // for (int i = 0; i < array.length; i++) {
+        //  var = array[i];
+        //  ...
+        // }
+        //
+        // and then to
+        // int i = 0;
+        // while (i < array.length) {
+        //   var = array[i];
+        //   ...
+        //   i++;
+        // }
+
+        int arrayReg = visit(expr);
+        int indexReg = ir.allocateRegister();
+
+        // int i = 0;
+        addCurrent(new ImmediateLoad(decl, indexReg, 0));
+
+        // array lengths are constant so we compute them outside the loop
+        int lengthReg = ir.allocateRegister();
+        addCurrent(new FieldLoad(expr, lengthReg, arrayReg, "length"));
+
+        // load 1 into a register, for later use
+        int immediateOne = ir.allocateRegister();
+        addCurrent(new ImmediateLoad(decl, immediateOne, 1));
+
+        // while (...
+        Block head = pushBlock();
+        int cond = ir.allocateRegister();
+        // i < array.length
+        addCurrent(new ComparisonOp(decl, cond, indexReg, lengthReg, ComparisonOperation.LT));
+        popBlock();
+        // ) {
+        Block body = pushBlock();
+        // var = array[i];
+        addCurrent(new ArrayLoad(decl, varReg, arrayReg, indexReg));
+        // ...
+        this.visit(ctx.block_stmt());
+        // i++
+        addCurrent(new BinaryArithOp(decl, indexReg, indexReg, immediateOne, BinaryOperation.ADD));
+        popBlock();
+        // }
+        addCurrent(new WhileLoop(ctx, cond, head, body));
+
+        currentScope = parentScope;
         return VOID_REG;
     }
 

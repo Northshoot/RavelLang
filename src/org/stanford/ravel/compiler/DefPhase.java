@@ -13,6 +13,7 @@ import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.Model;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -130,13 +131,27 @@ public class DefPhase extends RavelBaseListener {
     }
 
     private Type parseType(RavelParser.TypeContext ctx) {
-        String typeName = ctx.Identifier().getText();
+        List<TerminalNode> identList = ctx.Identifier();
+        String typeName = identList.get(0).getText();
         Symbol typeSymbol = currentScope.resolve(typeName);
         if (!(typeSymbol instanceof TypeSymbol)) {
             emitError(ctx, typeName + " does not name a type");
             return PrimitiveType.ERROR;
         } else {
             Type baseType = ((TypeSymbol) typeSymbol).getDefinedType();
+
+            Iterator<TerminalNode> it = identList.iterator();
+            it.next();
+            while (it.hasNext()) {
+                String subTypeName = it.next().getText();
+                Type subType = baseType.getNestedType(subTypeName);
+                typeName = typeName + '.' + subTypeName;
+                if (subType == null) {
+                    emitError(ctx, typeName + " does not name a type");
+                    return PrimitiveType.ERROR;
+                }
+                baseType = subType;
+            }
 
             for (RavelParser.Array_markerContext array : ctx.array_marker())
                 baseType = new ArrayType(baseType);
@@ -386,6 +401,21 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitBlock(RavelParser.BlockContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterForStatement(RavelParser.ForStatementContext ctx) {
+        // push a scope for the for control
+        LocalScope ls = new LocalScope("for_stmt_" + nextBlockId++, currentScope);
+        ls.setDefNode(ctx);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitForStatement(RavelParser.ForStatementContext ctx) {
         popScope();
     }
 

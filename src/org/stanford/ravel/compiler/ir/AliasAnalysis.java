@@ -116,6 +116,15 @@ public class AliasAnalysis {
         localReadRecords.computeIfAbsent(modelType, (key) -> new HashSet<>()).add(var);
     }
 
+    private void handleMove(Map<Integer, Set<Integer>> localMayAlias, int target, int source) {
+        // make a copy of the existing aliases of instr.source before we iterate and mutate it
+        Set<Integer> existingAliases = new HashSet<>(localMayAlias.getOrDefault(source, Collections.emptySet()));
+        for (int alias : existingAliases) {
+            tagMayAlias(localMayAlias, target, alias);
+        }
+        tagMayAlias(localMayAlias, target, source);
+    }
+
     private void visitBlock(TBlock block) {
         // Compute the state at the start of the block
         Map<ModelType, Set<Integer>> localWrittenRecords = new HashMap<>();
@@ -212,26 +221,25 @@ public class AliasAnalysis {
             } else if (instr instanceof TMove) {
                 TMove move = (TMove) instr;
                 if (move.type instanceof ModelType.RecordType) {
-                    // make a copy of the existing aliases of instr.source before we iterate and mutate it
-                    Set<Integer> existingAliases = new HashSet<>(localMayAlias.getOrDefault(move.source, Collections.emptySet()));
-                    for (int alias : existingAliases) {
-                        tagMayAlias(localMayAlias, move.target, alias);
-                    }
-                    tagMayAlias(localMayAlias, move.target, move.source);
+                    handleMove(localMayAlias, move.target, move.source);
                 }
             } else if (instr instanceof TConvert) {
                 TConvert convert = (TConvert) instr;
                 if (convert.tgtType instanceof ModelType.RecordType) {
                     // convert Record -> const Record
-                    // treat like a move
                     assert convert.srcType instanceof ModelType.RecordType;
 
-                    // make a copy of the existing aliases of instr.source before we iterate and mutate it
-                    Set<Integer> existingAliases = new HashSet<>(localMayAlias.getOrDefault(convert.source, Collections.emptySet()));
-                    for (int alias : existingAliases) {
-                        tagMayAlias(localMayAlias, convert.target, alias);
+                    // treat like a move
+                    handleMove(localMayAlias, convert.target, convert.source);
+                } else {
+                    assert !(convert.srcType instanceof ModelType.RecordType);
+                }
+            } else if (instr instanceof TPhi) {
+                TPhi phi = (TPhi) instr;
+                if (phi.type instanceof ModelType.RecordType) {
+                    for (int source : phi.sources) {
+                        handleMove(localMayAlias, phi.target, source);
                     }
-                    tagMayAlias(localMayAlias, convert.target, convert.source);
                 }
             } else {
                 // no other instruction can involve records

@@ -42,7 +42,7 @@ public class ModelType extends ClassType {
     public ModelType(ModelSymbol symbol, Model.Type modelType) {
         super(symbol.getName());
 
-        recordType = new RecordType(symbol.getName() + "::Record");
+        recordType = new RecordType(symbol.getName() + ".Record");
         immutableRecordType = (RecordType) recordType.makeImmutable();
         ctxType = new ContextType();
 
@@ -79,6 +79,18 @@ public class ModelType extends ClassType {
 
     public RecordType getRecordType() {
         return recordType;
+    }
+
+    @Override
+    public Type getNestedType(String name) {
+        switch (name) {
+            case "Record":
+                return recordType;
+            case "Context":
+                return ctxType;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -122,7 +134,7 @@ public class ModelType extends ClassType {
 
         @Override
         public String getName() {
-            return ModelType.this.getName() + "::Context";
+            return ModelType.this.getName() + ".Context";
         }
     }
 }

@@ -1,9 +1,12 @@
 package org.stanford.ravel.compiler.types;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Created by gcampagn on 1/24/17.
  */
-public class ArrayType implements Type {
+public class ArrayType implements CompoundType {
     private final static int UNBOUNDED = -1;
 
     private final int bound;
@@ -78,10 +81,28 @@ public class ArrayType implements Type {
     public boolean equalsExceptQualifiers(Type type) {
         if (type == null)
             return false;
-        if (type.getClass().equals(this.getClass()))
+        if (type.getClass() != this.getClass())
             return false;
 
         ArrayType otherArray = (ArrayType)type;
         return elementType.equalsExceptQualifiers(otherArray.elementType);
+    }
+
+    @Override
+    public Collection<String> getMemberList() {
+        return Collections.singletonList("length");
+    }
+
+    @Override
+    public Type getMemberType(String member) {
+        if ("length".equals(member))
+            return PrimitiveType.INT32;
+        else
+            return null;
+    }
+
+    @Override
+    public boolean isWritable(String member) {
+        return false;
     }
 }

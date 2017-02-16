@@ -34,4 +34,8 @@ public interface Type {
     default boolean equalsExceptQualifiers(Type other) {
         return this.equals(other);
     }
+
+    default Type getNestedType(String subTypeName) {
+        return null;
+    }
 }
