@@ -1,19 +1,16 @@
-
-
-
-
-replicated model Random(size : int32):
+streaming model Random(size : int32):
     properties:
         durable = False
         reliable = False
         records = size
 
     schema:
-        # comment here
         value : int32
+	value : int32
 
 
 controller CController(random: Random):
+
     event system.started():
         rec = random.create()
         rec.value = 42
@@ -22,7 +19,6 @@ controller CController(random: Random):
 
     event random.departed():
         # do something here
-        x = 7
 
 space EmbeddedSpace:
     platform:
