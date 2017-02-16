@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.types;
 
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.ModelEvent;
 
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class ModelType extends ClassType {
     private final RecordType immutableRecordType;
     private final ContextType ctxType;
 
-    public ModelType(ModelSymbol symbol) {
+    public ModelType(ModelSymbol symbol, Model.Type modelType) {
         super(symbol.getName());
 
         recordType = new RecordType(symbol.getName() + "::Record");
@@ -49,11 +50,27 @@ public class ModelType extends ClassType {
         // to handle them correctly
         this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
         this.addMethod("create", new Type[0], recordType);
-        this.addMethod("first", new Type[0], immutableRecordType);
-        this.addMethod("last", new Type[0], immutableRecordType);
-        this.addMethod("get", new Type[]{PrimitiveType.INT32}, immutableRecordType);
-        this.addMethod("all", new Type[0], new ArrayType(immutableRecordType).makeImmutable());
+
+        Type queryRecordType;
+        switch (modelType) {
+            case LOCAL:
+            case REPLICATED:
+                queryRecordType = recordType;
+                break;
+
+            case STREAMING:
+                queryRecordType = immutableRecordType;
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+        this.addMethod("first", new Type[0], queryRecordType);
+        this.addMethod("last", new Type[0], queryRecordType);
+        this.addMethod("get", new Type[]{PrimitiveType.INT32}, queryRecordType);
+        this.addMethod("all", new Type[0], new ArrayType(queryRecordType).makeImmutable());
         this.addMethod("clear", new Type[0], PrimitiveType.VOID);
+        this.addMethod("size", new Type[0], PrimitiveType.INT32);
 
         for (ModelEvent e : ModelEvent.values()) {
             this.addEvent(e.name(), new Type[]{ctxType}, true);

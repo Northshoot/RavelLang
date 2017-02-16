@@ -48,7 +48,7 @@ public class ArrayType implements Type {
 
     @Override
     public String getName() {
-        return elementType.getName() + "[]";
+        return elementType.getName() + (mutable ? "" : " const") + "[]";
     }
 
     @Override
@@ -72,5 +72,16 @@ public class ArrayType implements Type {
         int result = (mutable ? 1 : 0);
         result = 31 * result + elementType.hashCode();
         return result;
+    }
+
+    @Override
+    public boolean equalsExceptQualifiers(Type type) {
+        if (type == null)
+            return false;
+        if (type.getClass().equals(this.getClass()))
+            return false;
+
+        ArrayType otherArray = (ArrayType)type;
+        return elementType.equalsExceptQualifiers(otherArray.elementType);
     }
 }

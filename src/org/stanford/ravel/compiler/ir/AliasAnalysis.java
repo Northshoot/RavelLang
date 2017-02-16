@@ -66,7 +66,7 @@ public class AliasAnalysis {
             if (!(ir.getRegisterType(var) instanceof ModelType.RecordType))
                 return;
             for (int alias : aliases) {
-                if (ir.getRegisterType(var).equals(ir.getRegisterType(alias)))
+                if (ir.getRegisterType(var).equalsExceptQualifiers(ir.getRegisterType(alias)))
                     result.computeIfAbsent(var, (key) -> new HashSet<>()).add(alias);
             }
         });
@@ -92,6 +92,16 @@ public class AliasAnalysis {
             else
                 localState.put(var, new HashSet<>(regs)); // always create a copy so we don't worry about mutation
         });
+    }
+
+    private static <K, V> Map<K, Set<V>> deepCopy(Map<K, Set<V>> map) {
+        Map<K, Set<V>> newMap = new HashMap<>();
+
+        map.forEach((key, value) -> {
+            newMap.put(key, new HashSet<>(value));
+        });
+
+        return newMap;
     }
 
     private void aliasReadModel(Map<ModelType, Set<Integer>> localWrittenRecords,
@@ -122,9 +132,9 @@ public class AliasAnalysis {
             progress = true;
         if (!localMayAlias.equals(mayAliasAtStart.getOrDefault(block, Collections.emptyMap())))
             progress = true;
-        writtenRecordsAtStart.put(block, new HashMap<>(localWrittenRecords));
-        readRecordsAtStart.put(block, new HashMap<>(localReadRecords));
-        mayAliasAtStart.put(block, new HashMap<>(localMayAlias));
+        writtenRecordsAtStart.put(block, deepCopy(localWrittenRecords));
+        readRecordsAtStart.put(block, deepCopy(localReadRecords));
+        mayAliasAtStart.put(block, deepCopy(localMayAlias));
 
         for (TInstruction instr : block) {
             if (instr instanceof TMethodCall) {
@@ -147,6 +157,10 @@ public class AliasAnalysis {
                         case "save":
                             // mark that this record went into the model (so a successive call to .get() may-alias it)
                             localWrittenRecords.computeIfAbsent(modelType, (key) -> new HashSet<>()).add(instr.getSources()[0]);
+                            break;
+
+                        case "size":
+                            // no pointers, no alias
                             break;
 
                         default:
@@ -196,7 +210,7 @@ public class AliasAnalysis {
                 if (((TArrayStore) instr).type instanceof ModelType.RecordType)
                     tagMayAlias(localMayAlias, ((TArrayStore) instr).object, ((TArrayStore) instr).value);
             } else if (instr instanceof TMove) {
-                TMove move = (TMove)instr;
+                TMove move = (TMove) instr;
                 if (move.type instanceof ModelType.RecordType) {
                     // make a copy of the existing aliases of instr.source before we iterate and mutate it
                     Set<Integer> existingAliases = new HashSet<>(localMayAlias.getOrDefault(move.source, Collections.emptySet()));
@@ -204,6 +218,20 @@ public class AliasAnalysis {
                         tagMayAlias(localMayAlias, move.target, alias);
                     }
                     tagMayAlias(localMayAlias, move.target, move.source);
+                }
+            } else if (instr instanceof TConvert) {
+                TConvert convert = (TConvert) instr;
+                if (convert.tgtType instanceof ModelType.RecordType) {
+                    // convert Record -> const Record
+                    // treat like a move
+                    assert convert.srcType instanceof ModelType.RecordType;
+
+                    // make a copy of the existing aliases of instr.source before we iterate and mutate it
+                    Set<Integer> existingAliases = new HashSet<>(localMayAlias.getOrDefault(convert.source, Collections.emptySet()));
+                    for (int alias : existingAliases) {
+                        tagMayAlias(localMayAlias, convert.target, alias);
+                    }
+                    tagMayAlias(localMayAlias, convert.target, convert.source);
                 }
             } else {
                 // no other instruction can involve records

@@ -259,6 +259,9 @@ public class LocalOwnershipTaggingPass {
                             assert instr.getSink() == Registers.VOID_REG;
                             break;
 
+                        case "size":
+                            break;
+
                         default:
                             throw new AssertionError("Unexpected model function " + type.getFunctionName());
                     }

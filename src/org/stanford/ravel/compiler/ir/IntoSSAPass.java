@@ -125,6 +125,16 @@ class IntoSSAPass {
         });
     }
 
+    private static <K, V> Map<K, Set<V>> deepCopy(Map<K, Set<V>> map) {
+        Map<K, Set<V>> newMap = new HashMap<>();
+
+        map.forEach((key, value) -> {
+            newMap.put(key, new HashSet<>(value));
+        });
+
+        return newMap;
+    }
+
     private PhiNode findExisting(TBlock block, int var) {
         return phiNodes.getOrDefault(block, Collections.emptyMap()).get(var);
     }
@@ -141,7 +151,7 @@ class IntoSSAPass {
         }
         if (!localState.equals(atBlockStart.getOrDefault(block, Collections.emptyMap())))
             progress = true;
-        atBlockStart.put(block, new HashMap<>(localState));
+        atBlockStart.put(block, deepCopy(localState));
 
         // Compute any new phi nodes that we need
         Set<PhiNode> newPhiNodes = new HashSet<>();

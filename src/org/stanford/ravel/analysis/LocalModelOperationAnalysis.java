@@ -70,6 +70,7 @@ public class LocalModelOperationAnalysis {
                 case "first":
                 case "last":
                 case "clear":
+                case "size":
                     assert instr.getSources().length == 0;
                     // all these have no sources, so no operations to meet
                     break;

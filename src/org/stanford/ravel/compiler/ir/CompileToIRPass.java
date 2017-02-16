@@ -112,29 +112,37 @@ public class CompileToIRPass {
         // run local (non interprocedural) analysis and optimization passes
 
         DeadValueEliminationPass deadValueEliminationPass = new DeadValueEliminationPass(ir2);
+        DeadStoreEliminationPass deadStoreEliminationPass = new DeadStoreEliminationPass(ir2);
+        AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
+
         boolean progress;
         int pass = 0;
         do {
             progress = false;
+
+            // run dead value elimination first (which helps the alias analysis)
             progress = deadValueEliminationPass.run() || progress;
+
+            // run alias analysis for record variables, which will be used by the security analysis
+            Map<Integer, Set<Integer>> aliasResult = aliasAnalysis.run();
+            ir2.setAliases(aliasResult);
+            if (debug) {
+                System.out.println("Alias analysis");
+                aliasResult.forEach((var, alias) -> {
+                    System.out.println(var + ": " + alias);
+                });
+                System.out.println();
+            }
+
+            // run dead store elimination with the alias analysis
+            progress = deadStoreEliminationPass.run() || progress;
+
             if (debug && progress) {
                 System.out.println("Opt pass #" + (pass+1));
                 cfg.visitForward(System.out::println);
             }
             pass++;
         } while(progress);
-
-        // run alias analysis for record variables, which will be used by the security analysis
-        AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
-        Map<Integer, Set<Integer>> aliasResult = aliasAnalysis.run();
-        ir2.setAliases(aliasResult);
-        if (debug) {
-            System.out.println("Alias analysis");
-            aliasResult.forEach((var, alias) -> {
-                System.out.println(var + ": " + alias);
-            });
-            System.out.println();
-        }
 
         return ir2;
     }

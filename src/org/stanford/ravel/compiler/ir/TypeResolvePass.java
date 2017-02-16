@@ -246,7 +246,7 @@ public class TypeResolvePass implements InstructionVisitor {
         int src2;
         if (!opType.equals(srcType2)) {
             src2 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(opType, srcType1, src2, instr.src2));
+            cfgBuilder.addInstruction(new TConvert(opType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
         }

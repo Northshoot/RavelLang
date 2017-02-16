@@ -16,7 +16,6 @@ import java.util.*;
 public class ModelField {
     private final FieldSymbol symbol;
     private final Map<Space, Map<Space, Operation>> operations = new HashMap<>();
-    private final Set<Space> writers = new HashSet<>();
 
     public ModelField(FieldSymbol symbol) {
         this.symbol = symbol;
@@ -46,12 +45,5 @@ public class ModelField {
     }
     public Map<Space, Operation> getOperations(Space operator) {
         return operations.getOrDefault(operator, Collections.emptyMap());
-    }
-
-    public void addWriter(Space space) {
-        writers.add(space);
-    }
-    public Collection<Space> getWriters() {
-        return Collections.unmodifiableCollection(writers);
     }
 }

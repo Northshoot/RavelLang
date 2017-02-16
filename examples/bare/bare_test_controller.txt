@@ -3,10 +3,10 @@ replicated model Random(size : int32):
         durable = False
         reliable = False
         records = size
+        flow = EmbeddedSpace, GatewaySpace
 
     schema:
         # comment here
-        initial : bool
         value : int32
         array_value : byte[]
         str_value : str
@@ -44,7 +44,6 @@ interface RandomSource():
 
 controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
     event timer.fired():
-        #self
         rec = random.create()
         rec.value = rnd.next()
         ctx = random.save(rec)
@@ -52,6 +51,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
         if ctx.error:
             timer.cancel()
         #view.update(rec)
+
+        rec2 = random.create()
+        rec2.value = rec.value
 
     event system.started():
         timer.start_periodic(5000)
@@ -75,7 +77,7 @@ controller CController(random: Random, sum : Sum):
             s = rec.str2_value
         system.print(s)
 
-        if rec.initial:
+        if sum.size() == 0:
             sum_record = sum.create()
             sum_record.value = rec.value
         else:
@@ -142,4 +144,4 @@ space EmbeddedSpace:
         sum = Sum()
 
     controllers:
-        rndcnt_1 = CController(random = models.random, sum = models.sum)
+        ccntrl = CController(random = models.random, sum = models.sum)
