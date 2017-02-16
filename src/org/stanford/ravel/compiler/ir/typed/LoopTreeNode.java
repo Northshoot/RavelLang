@@ -90,6 +90,14 @@ public abstract class LoopTreeNode {
         public boolean isEmpty() {
             return children.isEmpty();
         }
+
+        public int size() {
+            return children.size();
+        }
+
+        public LoopTreeNode get(int i) {
+            return children.get(i);
+        }
     }
 
     public static class IfStatement extends LoopTreeNode {
@@ -143,7 +151,7 @@ public abstract class LoopTreeNode {
 
         @Override
         public String toString() {
-            return "if " + cond.cond + " {\n" + iftrue + "} else {" + iffalse + "}\n";
+            return "if " + cond.cond + " {\n" + iftrue + "} else {\n" + iffalse + "}\n";
         }
 
         @Override

@@ -121,6 +121,7 @@ public class CompileToIRPass {
         DeadStoreEliminationPass deadStoreEliminationPass = new DeadStoreEliminationPass(ir2);
         DeadControlFlowElimination deadControlFlowElimination = new DeadControlFlowElimination(ir2);
         ConstantFolding constantFolding = new ConstantFolding(ir2);
+        CopyPropagation copyPropagation = new CopyPropagation(ir2);
 
         for (VariableSymbol param : parameters)
             constantFolding.declare(param.getRegister());
@@ -137,7 +138,11 @@ public class CompileToIRPass {
             // run dead control flow second (which helps dead value elimination)
             progress = deadControlFlowElimination.run() || progress;
             ValidateIR.validate(ir2);
-            // run dead value elimination third (which helps the alias analysis)
+            // run copy propagation (which helps the alias analysis and the dead value elimination)
+            progress = copyPropagation.run() || progress;
+            ValidateIR.validate(ir2);
+            ValidateSSA.validate(ir2);
+            // run dead value elimination third (which also helps the alias analysis)
             progress = deadValueEliminationPass.run() || progress;
             ValidateIR.validate(ir2);
 

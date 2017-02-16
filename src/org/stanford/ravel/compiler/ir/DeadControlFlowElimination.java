@@ -28,7 +28,23 @@ public class DeadControlFlowElimination {
             ir.getControlFlowGraph().buildForwardBackward();
             ir.getControlFlowGraph().visitForward(this::adjustPhis);
         }
+        collapseBlocks((LoopTreeNode.Block) ir.getLoopTree());
+
         return madeChanges;
+    }
+
+    private void collapseBlocks(LoopTreeNode.Block block) {
+        ListIterator<LoopTreeNode> children = block.listIterator();
+        while (children.hasNext()) {
+            LoopTreeNode child = children.next();
+
+            if (child instanceof LoopTreeNode.Block) {
+                if (((LoopTreeNode.Block) child).size() == 1) {
+                    children.set(((LoopTreeNode.Block) child).get(0));
+                    madeChanges = true;
+                }
+            }
+        }
     }
 
     private void collectConstants(TBlock block) {
@@ -129,7 +145,25 @@ public class DeadControlFlowElimination {
             LoopTreeNode child = children.next();
 
             if (child instanceof LoopTreeNode.BasicBlock) {
-                collectConstants(((LoopTreeNode.BasicBlock) child).getBlock());
+                TBlock bblock = ((LoopTreeNode.BasicBlock) child).getBlock();
+                collectConstants(bblock);
+
+                if (bblock.isEmpty() && bblock != ir.getControlFlowGraph().getExit()
+                        && bblock != ir.getControlFlowGraph().getEntry()) {
+                    destroyedBlocks.add(bblock);
+                    // the block is empty so it cannot branch
+                    assert bblock.getSuccessors().size() == 1;
+                    bblock.destroy();
+                    for (TBlock pred : bblock.getPredecessors()) {
+                        for (TBlock succ : bblock.getSuccessors()) {
+                            succ.addPredecessor(pred);
+                            pred.addSuccessor(succ);
+                        }
+                    }
+
+                    children.remove();
+                    madeChanges = true;
+                }
             } else if (child instanceof LoopTreeNode.Loop) {
                 runRecursiveSkip(child);
             } else if (child instanceof LoopTreeNode.IfStatement) {
@@ -147,6 +181,40 @@ public class DeadControlFlowElimination {
                         destroyRecursive(((LoopTreeNode.IfStatement) child).getIftrue());
                     }
                     madeChanges = true;
+                } else {
+                    LoopTreeNode ifTrue = ((LoopTreeNode.IfStatement) child).getIftrue();
+                    LoopTreeNode ifFalse = ((LoopTreeNode.IfStatement) child).getIffalse();
+
+                    // if both branches are empty, then delete the if statement altoghether
+                    if (ifTrue instanceof LoopTreeNode.BasicBlock &&
+                            ((LoopTreeNode.BasicBlock) ifTrue).getBlock().isEmpty() &&
+                        ifFalse instanceof LoopTreeNode.BasicBlock &&
+                            ((LoopTreeNode.BasicBlock) ifFalse).getBlock().isEmpty()) {
+                        LoopTreeNode previous = children.previous();
+                        child = children.next();
+                        removeIfInstruction(previous, (LoopTreeNode.IfStatement)child);
+
+                        TBlock ifTrueBlock = ((LoopTreeNode.BasicBlock) ifTrue).getBlock();
+                        TBlock ifFalseBlock = ((LoopTreeNode.BasicBlock) ifFalse).getBlock();
+                        destroyedBlocks.add(ifTrueBlock);
+                        destroyedBlocks.add(ifFalseBlock);
+                        assert ifTrueBlock.getPredecessors().equals(ifFalseBlock.getPredecessors());
+                        // the blocks are empty so they cannot branch
+                        assert ifTrueBlock.getSuccessors().size() == 1;
+                        assert ifFalseBlock.getSuccessors().size() == 1;
+                        assert ifTrueBlock.getSuccessors().equals(ifFalseBlock.getSuccessors());
+                        ifTrueBlock.destroy();
+                        ifFalseBlock.destroy();
+                        for (TBlock pred : ifTrueBlock.getPredecessors()) {
+                            for (TBlock succ : ifTrueBlock.getSuccessors()) {
+                                succ.addPredecessor(pred);
+                                pred.addSuccessor(succ);
+                            }
+                        }
+
+                        children.remove();
+                        madeChanges = true;
+                    }
                 }
             } else if (child instanceof LoopTreeNode.Block) {
                 runRecursive((LoopTreeNode.Block)child);
