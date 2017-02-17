@@ -71,6 +71,7 @@ timer_<name; format="function">_fired(nrf_timer_event_t event_type, void* p_cont
                 //Do nothing.
                 break;
         }
+         //TODO: fix it, bohooo solution
         if (one_shot) <name; format="function">_cancel();
 
 }
