@@ -15,15 +15,12 @@ public class ControlFlowGraph implements Iterable<TBlock> {
     // in topological sort order from entry to exit
     private final List<TBlock> blocks = new ArrayList<>();
 
-    void freeze() {
+    public void buildForwardBackward() {
+        blocks.clear();
         Set<TBlock> visited = new HashSet<>();
 
         topologicalSort(visited, entry);
-        for (int i = 0; i < blocks.size()/2; i++) {
-             TBlock tmp = blocks.get(i);
-             blocks.set(i, blocks.get(blocks.size()-1-i));
-             blocks.set(blocks.size()-1-i, tmp);
-        }
+        Collections.reverse(blocks);
     }
 
     public TBlock getEntry() {

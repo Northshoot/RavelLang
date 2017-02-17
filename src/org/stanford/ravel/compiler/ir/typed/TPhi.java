@@ -12,8 +12,8 @@ import java.util.Arrays;
 public class TPhi extends TInstruction {
     public final Type type;
     public final int target;
-    public final int[] sources;
-    public final TBlock[] blocks;
+    public int[] sources;
+    public TBlock[] blocks;
 
     public TPhi(Type type, int target, int[] sources, TBlock[] blocks) {
         assert sources.length == blocks.length;

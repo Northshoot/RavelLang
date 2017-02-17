@@ -50,6 +50,21 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
 
         if ctx.error:
             timer.cancel()
+
+        z = 7
+        y : bool
+        if z > 0:
+            y = True
+        else:
+            y = False
+        if False:
+            system.print("yes")
+        if rec.value > 0:
+            z = y
+        else:
+            z = y
+        if z > 0:
+            system.print("lol")
         #view.update(rec)
 
         rec2 = random.create()

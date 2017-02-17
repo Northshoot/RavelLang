@@ -31,14 +31,14 @@ public class TBlock implements Iterable<TInstruction> {
         return this.sequenceId > other.sequenceId;
     }
 
-    void addPredecessor(TBlock other) {
+    public void addPredecessor(TBlock other) {
         this.predecessors.add(other);
     }
-    void addSuccessor(TBlock other) {
+    public void addSuccessor(TBlock other) {
         this.successors.add(other);
     }
 
-    Set<TBlock> getSuccessors() {
+    public Set<TBlock> getSuccessors() {
         return successors;
     }
     public Set<TBlock> getPredecessors() {
@@ -100,5 +100,12 @@ public class TBlock implements Iterable<TInstruction> {
         if (instructions.isEmpty())
             return null;
         return instructions.get(instructions.size()-1);
+    }
+
+    public void destroy() {
+        for (TBlock pred : predecessors)
+            pred.successors.remove(this);
+        for (TBlock succ : successors)
+            succ.predecessors.remove(this);
     }
 }

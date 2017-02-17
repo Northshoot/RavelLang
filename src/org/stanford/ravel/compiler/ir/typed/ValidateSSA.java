@@ -34,6 +34,15 @@ public class ValidateSSA {
                     for (int i = 0; i < sources.length; i++) {
                         assert blocks[i] != block;
 
+                        boolean found = false;
+                        for (TInstruction inSourceBlock : blocks[i]) {
+                            if (inSourceBlock.getSink() == sources[i]) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        assert found;
+
                         // the source definition might be later in the code
                         // (eg in the body of a loop)
                         //TInstruction sourceDef = definition.get(sources[i]);

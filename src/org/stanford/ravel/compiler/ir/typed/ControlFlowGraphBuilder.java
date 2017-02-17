@@ -22,7 +22,7 @@ public class ControlFlowGraphBuilder {
             currentBlock.addSuccessor(getExit());
             getExit().addPredecessor(currentBlock);
         }
-        cfg.freeze();
+        cfg.buildForwardBackward();
         return cfg;
     }
 
