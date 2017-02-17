@@ -9,6 +9,7 @@ interface Timer():
 
 interface Led(led_num: int32):
     configuration:
+        # 0 - 3
         led_id = led_num
     implementation:
         c = "rlib/nrf52/led.stg"

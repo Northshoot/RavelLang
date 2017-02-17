@@ -1,3 +1,5 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
 extra_cflags() ::=<<
 >>
 extra_ldflags() ::=<<
@@ -7,14 +9,21 @@ extra_includes() ::=<<
 
 >>
 
+extra_src(path) ::=<<
+<path>/drivers_nrf/timer/nrf_drv_timer.c
+<path>/libraries/util/sdk_errors.c
+>>
+
 c_file(includes,name,interface) ::=<<
 
-int LED_ID = <interface.configuration.led_id; format="literal">;
+
 
 <begin_source(name)>
 
 <includes:do_include(); separator="\n">
 #include "boards.h"
+
+int LED_ID = <interface.configuration.led_id; format="literal">;
 
 void
 <name; format="function">_init(<name> *self)
@@ -26,19 +35,19 @@ void
 }
 
 void
-<name; format="function">_on(<name> *self)
+<name; format="function">_on()
 {
-    return rand();
+    bsp_board_led_on(LED_ID);
 }
 void
-<name; format="function">_off(<name> *self)
+<name; format="function">_off()
 {
-    return rand();
+    bsp_board_led_off(LED_ID);
 }
 void
-<name; format="function">_toggle(<name> *self)
+<name; format="function">_toggle()
 {
-    return rand();
+    bsp_board_led_invert(LED_ID);
 }
 >>
 
@@ -52,9 +61,9 @@ h_file(includes,name,interface) ::=<<
 void <name; format="function">_init(<name> *self);
 void <name; format="function">_finalize(<name> *self);
 
-void <name; format="function">_on(<name> *self);
-void <name; format="function">_off(<name> *self);
-void <name; format="function">_toggle(<name> *self);
+void <name; format="function">_on();
+void <name; format="function">_off();
+void <name; format="function">_toggle();
 <end_extern_c()>
 <end_header("", name)>
 >>

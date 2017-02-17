@@ -126,6 +126,7 @@ Interface is defined in Ravel language:
 interface Led(led_num: int32):
     configuration:
         led_id = led_num
+        
     implementation:
         c = "rlib/nrf52/led.stg"
 

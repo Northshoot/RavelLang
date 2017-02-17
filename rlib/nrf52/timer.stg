@@ -1,3 +1,95 @@
-timer() ::=<<
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
 
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+#include "nrf_drv_timer.h"
+#include "app_error.h"
+
+// this can be implemented smarter to avoid generating functions that are not used
+//TODO:  improve template
+
+const nrf_drv_timer_t <name>__TIMER = NRF_DRV_TIMER_INSTANCE(0);
+nrf_drv_timer_config_t <name>__timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+uint32_t <name>__err_code = NRF_SUCCESS;
+bool one_shoot = false;
+
+
+void
+<name; format="function">_init(<name> *self)
+{
+<name>__err_code = nrf_drv_timer_init(&<name>__TIMER, &<name>__timer_cfg, timer_led_event_handler);
+APP_ERROR_CHECK(<name>__err_code);
+}
+void
+<name; format="function">_finalize(<name> *self)
+{
+//nothing to do
+}
+
+void
+<name; format="function">_start_one_shot(uint32_t time_ms)
+{
+    uint32_t time_tics = nrf_drv_timer_ms_to_ticks(&<name>__TIMER, time_ms);
+    one_shoot = true;
+    nrf_drv_timer_extended_compare(
+             &TIMER_LED, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+
+        nrf_drv_timer_enable(&TIMER_LED);
+}
+void
+<name; format="function">_cancel()
+{
+    nrf_drv_timer_clear(&<name>__TIMER);
+}
+void
+<name; format="function">_start_periodic(uint32_t time)
+{
+    uint32_t time_tics = nrf_drv_timer_ms_to_ticks(&<name>__TIMER, time_ms);
+
+}
+void
+timer_<name; format="function">_fired(nrf_timer_event_t event_type, void* p_context)
+{
+        switch (event_type)
+        {
+            case NRF_TIMER_EVENT_COMPARE0:
+                //injection of the actual code from controller
+                break;
+
+            default:
+                //Do nothing.
+                break;
+        }
+        if (one_shot) <name; format="function">_cancel();
+
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+void <name; format="function">_init(<name> *self);
+void <name; format="function">_finalize(<name> *self);
+
+void <name; format="function">_start_one_shot(uint32_t time);
+void <name; format="function">_cancel();
+void <name; format="function">_start_periodic(uint32_t time);
+void timer_<name; format="function">fired(nrf_timer_event_t event_type, void* p_context);
+<end_extern_c()>
+<end_header("", name)>
 >>
