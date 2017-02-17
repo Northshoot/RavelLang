@@ -75,7 +75,7 @@ public class BaseCPlatform extends BasePlatform {
         String runtimePath = new File(coptions.getRuntimePath()).getAbsolutePath();
 
         String path = new File(platformOptions.getPlatformPath()).getAbsolutePath();
-        System.out.println("PATH: " +path);
+        System.out.println("SPACE " + s.getName() + " PATH: " +path);
         String platformRuntimePath = new File(platformOptions.getRuntimePath()).getAbsolutePath();
 
         ST tmpl = makefileGroup.getInstanceOf("application");

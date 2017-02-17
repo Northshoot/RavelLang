@@ -3,13 +3,14 @@ streaming model Random(size : int32):
         durable = False
         reliable = False
         records = size
+        flow = EmbeddedSpace -> GatewaySpace
 
     schema:
         value : int32
-	value : int32
+        value1 : int32
 
 
-controller CController(random: Random):
+controller EController(random: Random):
 
     event system.started():
         rec = random.create()
@@ -18,6 +19,14 @@ controller CController(random: Random):
         system.print("started")
 
     event random.departed():
+        # do something here
+
+controller CController(random: Random):
+
+    event system.started():
+        system.print("started")
+
+    event random.arrived():
         # do something here
 
 space EmbeddedSpace:
@@ -29,7 +38,7 @@ space EmbeddedSpace:
         random = Random(size=5)
 
     controllers:
-        rndcnt_1 = CController(random = models.random)
+        rndcnt_1 = EController(random = models.random)
 
 space GatewaySpace:
     platform:

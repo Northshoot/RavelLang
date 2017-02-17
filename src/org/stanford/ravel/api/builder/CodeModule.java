@@ -2,9 +2,7 @@ package org.stanford.ravel.api.builder;
 
 import org.stanford.ravel.api.builder.FileObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * A collection of code files that implement a related function, eg a .c and associated .h
@@ -14,6 +12,7 @@ import java.util.List;
  */
 public class CodeModule {
     private final List<FileObject> files = new ArrayList<>();
+    public final Map<String, String> buildSystemMeta = new HashMap<>();
 
     public void addFile(FileObject fo) {
         files.add(fo);

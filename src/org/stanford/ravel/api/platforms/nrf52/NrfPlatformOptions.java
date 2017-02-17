@@ -10,7 +10,7 @@ public class NrfPlatformOptions extends PlatformOptions {
     private static NrfPlatformOptions instance = new NrfPlatformOptions();
 
     private NrfPlatformOptions() {
-        super( "./runtime/nrf52",  "../nrf52");
+        super( "runtime/nrf52",  "/Users/lauril/workspace/12-sdk/nRF5_SDK_12.0.0/");
     }
 
     public static NrfPlatformOptions getInstance() {
@@ -34,7 +34,7 @@ public class NrfPlatformOptions extends PlatformOptions {
                     break;
 
                 default:
-                    throw new InvalidOptionException("Unrecognized option -Xcontiki:" + option);
+                    throw new InvalidOptionException("Unrecognized option -Xnrf:" + option);
             }
         }
 

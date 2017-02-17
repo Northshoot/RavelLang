@@ -1,0 +1,60 @@
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+
+int LED_ID = <interface.configuration.led_id; format="literal">;
+
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+#include "boards.h"
+
+void
+<name; format="function">_init(<name> *self)
+{bsp_board_leds_init();}
+void
+<name; format="function">_finalize(<name> *self)
+{
+//nothing to do
+}
+
+void
+<name; format="function">_on(<name> *self)
+{
+    return rand();
+}
+void
+<name; format="function">_off(<name> *self)
+{
+    return rand();
+}
+void
+<name; format="function">_toggle(<name> *self)
+{
+    return rand();
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+void <name; format="function">_init(<name> *self);
+void <name; format="function">_finalize(<name> *self);
+
+void <name; format="function">_on(<name> *self);
+void <name; format="function">_off(<name> *self);
+void <name; format="function">_toggle(<name> *self);
+<end_extern_c()>
+<end_header("", name)>
+>>

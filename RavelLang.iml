@@ -23,18 +23,6 @@
     <orderEntry type="library" name="com.google.code.gson:gson:2.7" level="project" />
     <orderEntry type="library" name="com.squareup.retrofit2:retrofit:Release" level="project" />
     <orderEntry type="library" name="com.squareup.retrofit2:converter-gson:2.1.0" level="project" />
-    <orderEntry type="library" name="org.antlr:antlr4:4.5.3" level="project" />
-    <orderEntry type="library" name="com.yuvalshavit:antlr-denter:1.1" level="project" />
-    <orderEntry type="module-library">
-      <library name="JUnit5">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/junit-jupiter-api-5.0.0-M3.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/opentest4j-1.0.0-M1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -45,5 +33,14 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="java-runtime" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../12-sdk/antrl/antlr-4.6-complete.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

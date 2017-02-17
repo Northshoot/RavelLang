@@ -10,10 +10,10 @@ static void dispatch_<event>(<model.name> *self, Context *ctx)
 c_file(includes,name,base,model) ::=<<
 <begin_source(name)>
 
-#include \<api/context.h>
-#include \<api/packet.h>
-#include \<api/endpoint.h>
-#include \<api/base_model.h>
+#include "api/context.h"
+#include "api/packet.h"
+#include "api/endpoint.h"
+#include "api/base_model.h"
 <includes:do_include(); separator="\n">
 
 #define MODEL_ID   <model.baseModel.id>
@@ -84,10 +84,10 @@ void ravel_generated_<model_name; format="function">_record_finalize(<model_name
 h_file(includes,name,base,model) ::=<<
 <begin_header("MODEL", name)>
 
-#include \<api/context.h>
-#include \<api/packet.h>
-#include \<api/endpoint.h>
-#include \<api/base_model.h>
+#include "api/context.h"
+#include "api/packet.h"
+#include "api/endpoint.h"
+#include "api/base_model.h"
 
 /* Forward declare our model class before we include the controller headers */
 typedef struct s_<name> <name>;

@@ -135,6 +135,7 @@ public class CLang extends BaseLanguage {
 
     @Override
     public CodeModule createInterface(InstantiatedInterface iiface) {
+        //TODO: fix dependency injection properly
         String ifaceGroupName = iiface.getBaseInterface().getImplementation("c");
         if (ifaceGroupName == null) {
             LOGGER.severe("Missing C implementation of " + iiface.getName());
@@ -154,7 +155,14 @@ public class CLang extends BaseLanguage {
         iface_h.add("interface", iiface);
         iface_c.add("interface", iiface);
 
-        return simpleModule(iface_h, iface_c, iiface.getName(), "interfaces");
+        CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), "interfaces");
+
+        ST extra_cflags = interfaceGroup.getInstanceOf("extra_cflags");
+        if (extra_cflags != null) {
+            module.buildSystemMeta.put("CFLAGS", extra_cflags.render());
+        }
+
+        return module;
     }
 
     // A helper class to pass down to StringTemplates

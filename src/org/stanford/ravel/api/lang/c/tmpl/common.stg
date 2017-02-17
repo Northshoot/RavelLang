@@ -1,5 +1,5 @@
 do_include(incl) ::=<<
-#include \<<incl>\>
+#include "<incl>"
 >>
 
 begin_header(prefix, name) ::=<<

@@ -10,8 +10,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <api/context.h>
-#include <api/endpoint.h>
+#include "context.h"
+#include "endpoint.h"
 
 typedef struct {
     bool in_rest;
