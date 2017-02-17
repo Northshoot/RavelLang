@@ -9,7 +9,7 @@ file(name) ::=<<
 #include "nrf52.h"
 
 #include \<ravel/nrf52-driver.h>
-#include \<AppDispatcher.h>
+#include "AppDispatcher.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -34,34 +34,6 @@ int main(void) {
     #ifdef DEBUG
         LOG("Device starting...");
     #endif
-
-    /* setup the scheduler */
-//    APP_SCHED_INIT(0, 5);
-//
-//    /* start the softdevice */
-//    ble_stack_init();
-//
-//    /* start the persistent memory queue */
-//    flash_init();
-//
-//    /* start ble */
-//    ble_start();
-//
-//    /* check to see if we're properly configured */
-//    if (config_get_state() == CONFIG_STATE_VALID) {
-//        LOG("Sensor configured: Name %s Time offset %lu Threshold %lu ",
-//            config_get_name(),
-//            config_get_global_time_offset(),
-//            config_get_sensor_threshold()
-//        );
-//
-//    } else {
-//        LOG("Sensor not configured");
-//    }
-//
-//    /* start the sensor */
-//    sensor_init();
-//    sensor_start();
 
   ravel_generated_app_dispatcher_init(&dispatcher);
   ravel_nrf52_driver_init(&driver, &dispatcher);

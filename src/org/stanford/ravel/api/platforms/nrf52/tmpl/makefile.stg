@@ -1,27 +1,24 @@
 application(runtime,plat_runtime,path,target,sources, linker_script) ::=<<
 <! NRF52 make file !>
-RAVEL_C_RUNTIME_DIR = <runtime>
+APP_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+RAVEL_C_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang<runtime>
 RAVEL_PLATFORM_RUNTIME_DIR = <plat_runtime>
 NRF52 = <path>
 
 NRF52_PROJECT = <target>
-all: $(NRF52_PROJECT)
 
-PROJECTDIRS = ./models ./controller ./interfaces
-PROJECT_SOURCEFILES = <sources:{s|<s>.c}; separator=" ">
-
-include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
-CFLAGS += -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_PLATFORM_RUNTIME_DIR)
-
-include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
+PROJECTDIRS = $(APP_DIR)/app_files
+APP_SRC = <sources:{s|$(PROJECTDIRS)/<s>.c}; separator=" ">
 
 PROJECT_NAME     := <target>
 TARGETS          := nrf52832_<target>
 OUTPUT_DIRECTORY := _build
 
 SDK_ROOT := $(NRF52SDK)
-PROJ_DIR :=
+PROJ_DIR := $(NRF52_PROJECT)
 
-$(OUTPUT_DIRECTORY)/$(TARGETS).out: \
+$(OUTPUT_DIRECTORY)/nrf52832_<target>.out: \
   LINKER_SCRIPT  := <linker_script>.ld
+
+include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
 >>

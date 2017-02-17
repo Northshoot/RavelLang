@@ -26,26 +26,26 @@ c_file(includes,name,interface) ::=<<
 int LED_ID = <interface.configuration.led_id; format="literal">;
 
 void
-<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self)
 {bsp_board_leds_init();}
 void
-<name; format="function">_finalize(<name> *self)
+ravel_generated_<name; format="function">_finalize(<name> *self)
 {
 //nothing to do
 }
 
 void
-<name; format="function">_on()
+ravel_generated_<name; format="function">_on()
 {
     bsp_board_led_on(LED_ID);
 }
 void
-<name; format="function">_off()
+ravel_generated_<name; format="function">_off()
 {
     bsp_board_led_off(LED_ID);
 }
 void
-<name; format="function">_toggle()
+ravel_generated_<name; format="function">_toggle()
 {
     bsp_board_led_invert(LED_ID);
 }
@@ -53,17 +53,22 @@ void
 
 h_file(includes,name,interface) ::=<<
 <begin_header("LIBRARY", name)>
-
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
 
-void <name; format="function">_init(<name> *self);
-void <name; format="function">_finalize(<name> *self);
+typedef struct s_<name> {
+    int dummy;
+} <name>;
 
-void <name; format="function">_on();
-void <name; format="function">_off();
-void <name; format="function">_toggle();
+void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_on();
+void ravel_generated_<name; format="function">_off();
+void ravel_generated_<name; format="function">_toggle();
 <end_extern_c()>
 <end_header("", name)>
 >>

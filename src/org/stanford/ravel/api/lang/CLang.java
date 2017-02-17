@@ -28,6 +28,7 @@ import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
 public class CLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
     public final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/lang/c/tmpl";
+    private final static String app_dir = "app_files/";
 
     private static final AttributeRenderer CTYPES = new AttributeRenderer() {
         private String toNativeType(Type type) {
@@ -149,13 +150,13 @@ public class CLang extends BaseLanguage {
         ST iface_c = interfaceGroup.getInstanceOf("c_file");
 
         for (InstantiatedController ictr : iiface.getControllerList())
-            iface_h.add("includes", "controller/" + ictr.getName() + ".h");
-        iface_c.add("includes", "interfaces/" + iiface.getName() + ".h");
+            iface_h.add("includes", this.app_dir + ictr.getName() + ".h");
+        iface_c.add("includes", this.app_dir + iiface.getName() + ".h");
         iface_c.add("includes", "AppDispatcher.h");
         iface_h.add("interface", iiface);
         iface_c.add("interface", iiface);
 
-        CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), "interfaces");
+        CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), this.app_dir);
 
         ST extra_cflags = interfaceGroup.getInstanceOf("extra_cflags");
         if (extra_cflags != null) {
@@ -178,11 +179,11 @@ public class CLang extends BaseLanguage {
         ST dispatcher_c = dispatcherGroup.getInstanceOf("c_file");
 
         for (InstantiatedModel im : s.getModels())
-            dispatcher_h.add("includes", "models/" + im.getName() + ".h");
+            dispatcher_h.add("includes", this.app_dir + im.getName() + ".h");
         for (InstantiatedInterface iiface : s.getInterfaces())
-            dispatcher_h.add("includes", "interfaces/" + iiface.getName() + ".h");
+            dispatcher_h.add("includes", this.app_dir + iiface.getName() + ".h");
         for (InstantiatedController ictr : s.getControllers())
-            dispatcher_h.add("includes", "controller/" + ictr.getName() + ".h");
+            dispatcher_h.add("includes", this.app_dir + ictr.getName() + ".h");
         dispatcher_c.add("includes", "AppDispatcher.h");
 
         for (InstantiatedModel im : s.getModels()) {
@@ -225,24 +226,25 @@ public class CLang extends BaseLanguage {
         ST h_tmpl = controllerGroup.getInstanceOf("h_file");
         h_tmpl.add("name", ictr.getName());
         for (InstantiatedModel im : ictr.getLinkedModels()) {
-            h_tmpl.add("includes", "models/" + im.getName() + ".h");
+            h_tmpl.add("includes", this.app_dir + im.getName() + ".h");
         }
         for (InstantiatedInterface iiface : ictr.getLinkedInterfaces()) {
-            h_tmpl.add("includes", "interfaces/" + iiface.getName() + ".h");
+            h_tmpl.add("includes", this.app_dir + iiface.getName() + ".h");
         }
 
         STControllerTranslator.FileConfig h_file = new STControllerTranslator.FileConfig(ictr.getName() + ".h", h_tmpl);
 
         ST c_tmpl = controllerGroup.getInstanceOf("c_file");
         c_tmpl.add("name", ictr.getName());
-        c_tmpl.add("includes", "controller/" + ictr.getName() + ".h");
+        //TODO: removed "controller/" +
+        c_tmpl.add("includes", this.app_dir + ictr.getName() + ".h");
         c_tmpl.add("includes", "AppDispatcher.h");
 
         STControllerTranslator.FileConfig c_file = new STControllerTranslator.FileConfig(ictr.getName() + ".c", c_tmpl);
 
         STControllerTranslator controllerTranslator = new STControllerTranslator(Arrays.asList(h_file, c_file), irTranslator);
         CodeModule generated = controllerTranslator.translate(ictr.getController());
-        generated.setSubPath("controller");
+        generated.setSubPath(this.app_dir);
         return generated;
     }
 
@@ -256,7 +258,8 @@ public class CLang extends BaseLanguage {
         c_tmpl.add("name", name);
         FileObject cFile = new FileObject();
         cFile.setFileName(name + ".c");
-        cFile.setSubPath(subpath);
+        //TODO: need fix for the build system
+        cFile.setSubPath(this.app_dir);
         cFile.setContent(c_tmpl.render());
 
         CodeModule module = new CodeModule();
@@ -286,14 +289,14 @@ public class CLang extends BaseLanguage {
         }
 
         for (InstantiatedController ictr : im.getControllerList())
-            model_h.add("includes", "controller/" + ictr.getName() + ".h");
-        model_c.add("includes", "models/" + im.getName() + ".h");
+            model_h.add("includes", this.app_dir + ictr.getName() + ".h");
+        model_c.add("includes", this.app_dir + im.getName() + ".h");
         model_c.add("includes", "AppDispatcher.h");
         model_h.add("base", baseClass);
         model_c.add("base", baseClass);
         model_h.add("model", im);
         model_c.add("model", im);
 
-        return simpleModule(model_h, model_c, im.getName(), "models");
+        return simpleModule(model_h, model_c, im.getName(), this.app_dir);
     }
 }

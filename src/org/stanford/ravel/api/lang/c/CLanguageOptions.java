@@ -16,7 +16,8 @@ public class CLanguageOptions extends LanguageOptions {
         return instance;
     }
 
-    private String runtimePath = "./runtime/c";
+    //TODO: needs to by dynamic configured
+    private String runtimePath = "/runtime/c";
 
     public String getRuntimePath() {
         return runtimePath;

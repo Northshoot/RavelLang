@@ -23,9 +23,10 @@ controller EController(timer : Timer, led_1 : Led):
 
     event system.started():
         timer.start_periodic(1000)
+
+
+    event timer.fired():
         led_1.toggle()
-
-
 
 space EmbeddedSpace:
     platform:

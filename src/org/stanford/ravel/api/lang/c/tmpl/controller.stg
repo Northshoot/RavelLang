@@ -10,8 +10,8 @@ ravel_generated_<controller_name; format="function">_<handler.model; format="fun
 c_file(includes,name,parameters,eventHandlers) ::=<<
 <begin_source(name)>
 
-#include \"api/context.h"
-#include \"api/system.h"
+#include "api/context.h"
+#include "api/system.h"
 <includes:do_include(); separator="\n">
 
 void

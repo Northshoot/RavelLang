@@ -969,21 +969,21 @@
         // <o> TIMER_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
 
 
-        // <i> Priorities = 0;,2 (nRF51) and = 0;,1,4,5 (nRF52) are reserved for SoftDevice
-        // <0=> = 0; (highest)
-        // <1=> = 1;
+        // <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+        // <0=> 0 (highest)
+        // <1=> 1
         // <2=> 2
         // <3=> 3
         // <4=> 4
         // <5=> 5
-        // <= 6;=> = 6;
+        // <6=> 6
         // <7=> 7
 
         public int  TIMER_DEFAULT_CONFIG_IRQ_PRIORITY = 6;
         // <q> TIMER0_ENABLED  - Enable TIMER0 instance
 
 
-        public int  TIMER0_ENABLED = 0;
+        public int  TIMER0_ENABLED = 1;
         // <q> TIMER1_ENABLED  - Enable TIMER1 instance
 
 
