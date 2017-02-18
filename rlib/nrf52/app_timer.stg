@@ -1,0 +1,133 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+#include \<stdbool.h>
+#include "boards.h"
+#include "nrf_drv_gpiote.h"
+#include "app_error.h"
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
+
+<includes:do_include(); separator="\n">
+
+// General application timer settings.
+#define APP_TIMER_PRESCALER             15    // Value of the RTC1 PRESCALER register.
+#define APP_TIMER_OP_QUEUE_SIZE         3     // Size of timer operation queues.
+
+// this can be implemented smarter to avoid generating functions that are not used
+//TODO:  improve template
+
+
+APP_TIMER_DEF(m_<name>_timer_id);
+
+static uint32_t <name>__err_code = NRF_SUCCESS;
+static bool one_shoot = false;
+static <name>* instance;
+
+// Function starting the internal LFCLK oscillator.
+// This is needed by RTC1 which is used by the application timer
+// (When SoftDevice is enabled the LFCLK is always running and this is not needed).
+static void lfclk_request(void)
+{
+    uint32_t err_code = nrf_drv_clock_init();
+    APP_ERROR_CHECK(err_code);
+    nrf_drv_clock_lfclk_request(NULL);
+}
+
+
+void
+timer_start(uint32_t time, uint32_t mode)
+{
+    <name>__err_code = app_timer_create(&m_<name>_timer_id,
+                                mode,
+                                ravel_generated_<name; format="function">_fired);
+    APP_ERROR_CHECK(<name>__err_code);
+    <name>__err_code = app_timer_start(m_<name>_timer_id, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER), NULL);
+    APP_ERROR_CHECK(<name>__err_code);
+}
+
+
+void
+ravel_generated_<name; format="function">_init(<name> *self)
+{
+    lfclk_request();
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    //nothing to do
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
+{
+    one_shoot = true;
+    timer_start(time, APP_TIMER_MODE_SINGLE_SHOT);
+}
+void
+ravel_generated_<name; format="function">_cancel(<name>* self)
+{
+    app_timer_stop(m_<name>_timer_id);
+}
+void
+ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
+{
+    one_shoot = false;
+    timer_start(time,APP_TIMER_MODE_REPEATED);
+}
+
+
+void
+ravel_generated_<name; format="function">_fired( void* p_context)
+{
+    ravel_generated_<interface.controllerMap.fired:{c|<c.name; format="function">_<name; format="function">_fired(instance->ctr_<c.varName>);}; separator="\n">
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+#include "nrf.h"
+#include "nrf_drv_timer.h"
+#include "bsp.h"
+#include "app_error.h"
+
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    <interface.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_cancel(<name>* self);
+void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_fired(void* p_context);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

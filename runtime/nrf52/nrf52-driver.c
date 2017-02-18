@@ -6,14 +6,19 @@
 #include "app_scheduler.h"
 #include "nrf_soc.h"
 #include "softdevice_handler.h"
-
+#include <stdbool.h>
+#include "boards.h"
+#include "nrf_drv_gpiote.h"
+#include "app_error.h"
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
 /* local includes */
 #include "platform/ble_core.h"
 #include "platform/network.h"
 #include "platform/flash.h"
 #include "platform/config.h"
 #include "platform/log.h"
-
+#include "boards.h"
 #include "AppDispatcher.h"
 #include "ravel/nrf52-driver.h"
 
@@ -36,7 +41,7 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
 
 //static void power_manage(void) {
 //    /* execute any scheduled operations */
-//    ravel_nrf52_driver_dispatch_event(&driver, ev);
+//    //ravel_nrf52_driver_dispatch_event(&driver);
 //    app_sched_execute();
 //
 //    /* Wait for an interrupt/event */
@@ -47,7 +52,7 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
 void
 ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
 {
-    /* TODO */
+    /* TODO: init any internal systems */
     self->base.dispatcher = dispatcher;
 }
 
@@ -56,14 +61,30 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 {
     /* Free any context resource here */
 }
+
+//TODO: delete timer and led JUST a test
+#define APP_TIMER_PRESCALER             15    // Value of the RTC1 PRESCALER register.
+#define APP_TIMER_OP_QUEUE_SIZE         3     // Size of timer operation queues.
+APP_TIMER_DEF(m_timer_t);
+void
+this_fired(void *context)
+{
+bsp_board_led_invert(3);
+}
 void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // TODO
-     for (;;) {
-            // this is where the main execution happens
-            //power_manage();
-        }
+    // Main loop.
+    app_timer_create(&m_timer_t,
+                                APP_TIMER_MODE_REPEATED,
+                                this_fired);
+    app_timer_start(m_timer_t, APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER), NULL);
+    while (true)
+    {
+        // Wait for interrupt.
+        __WFI();
+    }
 }
 
 void

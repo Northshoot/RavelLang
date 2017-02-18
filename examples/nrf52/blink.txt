@@ -1,6 +1,6 @@
 interface Timer():
     implementation:
-        c = "rlib/nrf52/timer.stg"
+        c = "rlib/nrf52/app_timer.stg"
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
