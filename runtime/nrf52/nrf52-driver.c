@@ -54,6 +54,12 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
 {
     /* TODO: init any internal systems */
     self->base.dispatcher = dispatcher;
+    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+
+        // Initialize the SoftDevice handler module.
+        SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+
+
 }
 
 void
@@ -61,11 +67,17 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 {
     /* Free any context resource here */
 }
+static void power_manage(void)
+{
+    uint32_t err_code = sd_app_evt_wait();
 
+    APP_ERROR_CHECK(err_code);
+}
 //TODO: delete timer and led JUST a test
 #define APP_TIMER_PRESCALER             15    // Value of the RTC1 PRESCALER register.
 #define APP_TIMER_OP_QUEUE_SIZE         3     // Size of timer operation queues.
 APP_TIMER_DEF(m_timer_t);
+
 void
 this_fired(void *context)
 {
@@ -76,14 +88,18 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // TODO
     // Main loop.
+    uint32_t err_code = nrf_drv_clock_init();
+        APP_ERROR_CHECK(err_code);
+        nrf_drv_clock_lfclk_request(NULL);
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
     app_timer_create(&m_timer_t,
                                 APP_TIMER_MODE_REPEATED,
                                 this_fired);
-    app_timer_start(m_timer_t, APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER), NULL);
+    app_timer_start(m_timer_t, 500, NULL);
+
     while (true)
     {
-        // Wait for interrupt.
-        __WFI();
+        power_manage();
     }
 }
 

@@ -32,8 +32,6 @@ int main(void) {
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
   ravel_nrf52_driver_app_dispatcher_ready(&driver);
 
-
-
   ravel_nrf52__driver_main_loop(&driver);
 
   ravel_nrf52_driver_finalize(&driver);
