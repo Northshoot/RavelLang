@@ -11,15 +11,17 @@
 
 typedef struct {
     RavelDriver base;
-} RavelNRFDriver;
+} RavelNrf52Driver;
 
 struct AppDispatcher;
-void ravel_NRF_driver_init(RavelNRFDriver *self, struct AppDispatcher *dispatcher);
 
-void ravel_NRF_driver_finalize(RavelNRFDriver *self);
+void ravel_nrf52_driver_init(RavelNrf52Driver *self, struct AppDispatcher *dispatcher);
 
-void ravel_NRF_driver_dispatch_event(RavelNRFDriver *self, void* event);
+void ravel_nrf52_driver_finalize(RavelNrf52Driver *self);
 
-void ravel_NRF_driver_app_dispatcher_ready(RavelNRFDriver *self);
+void ravel_nrf52__driver_main_loop(RavelNrf52Driver *self);
 
+void ravel_nrf52_driver_app_dispatcher_ready(RavelNrf52Driver *self);
+
+void ravel_nrf_driver_dispatch_event(RavelNrf52Driver *self);
 #endif /* NRF_DRIVER_H */

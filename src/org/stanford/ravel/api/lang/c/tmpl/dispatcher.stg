@@ -1,5 +1,6 @@
 import "common.stg"
 
+
 init_component(comp, prefix) ::=<<
 ravel_generated_<comp.name; format="function">_init(&self-><prefix>_<comp.varName>);
 >>

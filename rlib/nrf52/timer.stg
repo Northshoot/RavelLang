@@ -41,14 +41,14 @@ void timer_start(<name>* self, uint32_t time)
 }
 
 void
-<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self)
 {
     <name>__err_code = nrf_drv_timer_init(&<name>__TIMER, &<name>__timer_cfg, ravel_generated_<name; format="function">_fired);
     APP_ERROR_CHECK(<name>__err_code);
     instance = self;
 }
 void
-<name; format="function">_finalize(<name> *self)
+ravel_generated_<name; format="function">_finalize(<name> *self)
 {
     //nothing to do
 }

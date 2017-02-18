@@ -1,4 +1,4 @@
-application(runtime,plat_runtime,path,target,sources, linker_script) ::=<<
+application(runtime,plat_runtime,path,target,sources, linker_script, main) ::=<<
 <! NRF52 make file !>
 APP_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 RAVEL_C_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang<runtime>
@@ -7,8 +7,8 @@ NRF52 = <path>
 
 NRF52_PROJECT = <target>
 
-PROJECTDIRS = $(APP_DIR)/app_files
-APP_SRC = <sources:{s|$(PROJECTDIRS)/<s>.c}; separator=" ">
+APP_FILE_DIR = $(APP_DIR)/app_files
+SRC_APP = <sources:{s|$(APP_FILE_DIR)/<s>.c}; separator=" "> <main>.c
 
 PROJECT_NAME     := <target>
 TARGETS          := nrf52832_<target>

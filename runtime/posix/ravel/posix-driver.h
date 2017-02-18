@@ -13,6 +13,7 @@ typedef struct {
 } RavelPosixDriver;
 
 struct AppDispatcher;
+
 void ravel_posix_driver_init(RavelPosixDriver *self, struct AppDispatcher *dispatcher);
 
 void ravel_posix_driver_finalize(RavelPosixDriver *self);

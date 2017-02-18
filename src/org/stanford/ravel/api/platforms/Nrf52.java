@@ -4,12 +4,15 @@ import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.platforms.nrf52.NrfConfig;
 import org.stanford.ravel.api.platforms.nrf52.NrfPlatformOptions;
 import org.stanford.ravel.misc.TemplatePair;
+import org.stanford.ravel.primitives.InstantiatedInterface;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 //TODO:
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 //TODO: platforms should be separated form the compiler
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -42,10 +45,26 @@ public class Nrf52 extends BaseCPlatform {
         make_addons.add(tmpl_extra);
         //make_addons.add(tmpl_extra1);
         List<FileObject> all_files = new ArrayList<>(super.createBuildSystem(s,files, NrfPlatformOptions.getInstance(), make_addons));
+
         all_files.add(makeLinkerScript(tmpl_extra));
-        all_files.add(makeConfigFile(tmpl_extra1, new NrfConfig()));
+        all_files.add(makeConfigFile(tmpl_extra1, buid_nrf_config_file(s)));
 
         return all_files;
+    }
+
+    private NrfConfig buid_nrf_config_file(Space s) {
+        
+        NrfConfig nc = new NrfConfig();
+        //TODO: add to interface
+        //define = {val: key}
+        nc.TIMER_ENABLED = 1;
+//        Collection<InstantiatedInterface> interfaces = s.getInterfaces();
+//        Iterator<InstantiatedInterface> interfaceIterator = interfaces.iterator();
+//        while (interfaceIterator.hasNext()){
+//            InstantiatedInterface next = interfaceIterator.next();
+//            Object define = next.getConfiguration().get("DEFINE");
+//        }
+        return nc;
     }
 
     private FileObject makeLinkerScript(TemplatePair p){

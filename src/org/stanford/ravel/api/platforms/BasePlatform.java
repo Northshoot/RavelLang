@@ -37,7 +37,6 @@ public abstract class BasePlatform implements SystemApi, ConcretePlatform {
     }
     protected void addFile(FileObject fo)
     {
-        System.out.println(" ADDING " + fo.getFileName());
         mFileObjects.add(fo);
     }
 

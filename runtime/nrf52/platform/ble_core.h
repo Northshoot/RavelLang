@@ -14,4 +14,3 @@ void gap_params_init(void);
 //void advertising_start(void);
 
 #endif
-0

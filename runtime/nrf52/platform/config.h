@@ -1,28 +1,7 @@
-/**
- * driver.h: the nrf52 driver config
- *
- */
-
-#ifndef DRIVER_CONFIG_H
-#define DRIVER_CONFIG_H
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
 #include <stddef.h>
-#include <api/context.h>
-#include "ble.h"
-#include "config.h"
-#include "encryption.h"
-#include "flash.h"
-#include "network.h"
-#include "queue.h"
-
-
-// configure BLE
-SystemContext init_ble();
-
-//init storage
-SystemContext init_flash();
-
-
 
 /* The config operation is somewhat subtle.
  *
@@ -55,4 +34,4 @@ config_state_t config_get_state(void);
 
 void config_persist(uint32_t);
 
-#endif DRIVER_CONFIG_H /* DRIVER_CONFIG_H */
+#endif

@@ -94,7 +94,7 @@ void flash_init(void) {
 
 void flash_read(uint8_t code, uint8_t *readdest){
 
-    uint32_t err_code;
+    uint32_t err_code=0;
     m_pstorage_load_complete = false;
 
     switch(code){

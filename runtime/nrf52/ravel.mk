@@ -1,18 +1,18 @@
-C_RUNTIME_SOURCES  := $(wildcard $(LOCAL_PATH)/*.c)
-C_RUNTIME_SOURCES  := $(C_RUNTIME_SOURCES:$(LOCAL_PATH)/%=%)
+C_RUNTIME_SOURCES  := $(wildcard $(RAVEL_C_RUNTIME_DIR)/*.c)
 
-PLATFORM_RUNTIME_SOURCES   := $(wildcard $(LOCAL_PATH)/platform/*.c)
-PLATFORM_RUNTIME_SOURCES   := $(PLATFORM_RUNTIME_SOURCES:$(LOCAL_PATH)/%=%)
+PLATFORM_RUNTIME_SOURCES   := $(wildcard $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/*.c)
+PLATFORM_RUNTIME_SOURCES   += $(RAVEL_PLATFORM_RUNTIME_DIR)/nrf52-driver.c
+RPI := $(RAVEL_PLATFORM_RUNTIME_DIR)/platform
 
+PROJECT_SOURCEFILES := $(C_RUNTIME_SOURCES) $(PLATFORM_RUNTIME_SOURCES)
 
-PROJECT_SOURCEFILES := $(APP_SRC) $(C_RUNTIME_SOURCES) $(PLATFORM_RUNTIME_SOURCES)
-
-PROJECTDIRS += $(RAVEL_C_RUNTIME_DIR) $(RAVEL_PLATFORM_RUNTIME_DIR)
+PROJECTDIRS += $(RAVEL_C_RUNTIME_DIR) $(RAVEL_PLATFORM_RUNTIME_DIR) $(RPI)
 
 
 
 # Source files common to all targets
 SRC_FILES += \
+  $(SRC_APP) \
   $(PROJECT_SOURCEFILES) \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
@@ -49,6 +49,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ble/peer_manager/gatt_cache_manager.c \
   $(SDK_ROOT)/components/ble/peer_manager/gatts_cache_manager.c \
   $(SDK_ROOT)/components/ble/peer_manager/id_manager.c \
+  $(SDK_ROOT)/components/ble/nrf_ble_gatt/nrf_ble_gatt.c \
   $(SDK_ROOT)/components/ble/peer_manager/peer_data.c \
   $(SDK_ROOT)/components/ble/peer_manager/peer_data_storage.c \
   $(SDK_ROOT)/components/ble/peer_manager/peer_database.c \
@@ -61,7 +62,6 @@ SRC_FILES += \
   $(SDK_ROOT)/components/toolchain/gcc/gcc_startup_nrf52.S \
   $(SDK_ROOT)/components/toolchain/system_nrf52.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas/ble_bas.c \
-  $(SDK_ROOT)/components/ble/ble_services/ble_bps/ble_bps.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_dis/ble_dis.c \
   $(SDK_ROOT)/components/softdevice/common/softdevice_handler/softdevice_handler.c \
 
@@ -97,8 +97,9 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/uart \
   $(APP_DIR)/config \
   $(SDK_ROOT)/components/ble/common \
-  $(APP_DIR)/ \
-  $(PROJECTDIRS)/ \
+  $(APP_DIR) \
+  $(APP_FILE_DIR) \
+  $(PROJECTDIRS) \
   $(SDK_ROOT)/components/ble/ble_services/ble_lls \
   $(SDK_ROOT)/components/drivers_nrf/wdt \
   $(SDK_ROOT)/components/libraries/bsp \
