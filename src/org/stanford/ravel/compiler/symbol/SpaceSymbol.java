@@ -3,7 +3,7 @@ package org.stanford.ravel.compiler.symbol;
 
 import org.stanford.ravel.compiler.types.SpaceType;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,11 +21,11 @@ public class SpaceSymbol extends ComponentSymbol {
         super(name);
 
         definedType = new SpaceType(name);
-        modelInitMap = new LinkedHashMap<>();
-        ctrInitMap = new LinkedHashMap<>();
-        propInitMap = new LinkedHashMap<>();
-        platInitMap = new LinkedHashMap<>();
-        ifaceInitMap = new LinkedHashMap<>();
+        modelInitMap = new HashMap<>();
+        ctrInitMap = new HashMap<>();
+        propInitMap = new HashMap<>();
+        platInitMap = new HashMap<>();
+        ifaceInitMap = new HashMap<>();
     }
 
     @Override
@@ -48,7 +48,6 @@ public class SpaceSymbol extends ComponentSymbol {
     public void addControllers(String name, InstanceSymbol ls) {
         this.ctrInitMap.put(name, ls);
     }
-
 
     public Map<String, ReferenceSymbol> getPlatform() {
         return platInitMap;

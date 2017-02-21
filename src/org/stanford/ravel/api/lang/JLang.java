@@ -8,6 +8,7 @@ import org.stanford.ravel.compiler.ir.BinaryOperation;
 import org.stanford.ravel.compiler.ir.typed.TBinaryArithOp;
 import org.stanford.ravel.compiler.ir.typed.TComparisonOp;
 import org.stanford.ravel.compiler.ir.typed.TConvert;
+import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
@@ -104,14 +105,6 @@ public class JLang extends BaseLanguage {
     private final STGroup dispatcherGroup;
 
     public JLang() {
-        controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
-        controllerGroup.registerRenderer(Type.class, JTYPES);
-        controllerGroup.registerRenderer(String.class, JSTRING);
-
-        modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
-        modelGroup.registerRenderer(Type.class, JTYPES);
-        modelGroup.registerRenderer(String.class, JSTRING);
-
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, JTYPES);
         dispatcherGroup.registerRenderer(String.class, JSTRING);
@@ -175,6 +168,24 @@ public class JLang extends BaseLanguage {
                 }
             }
         };
+
+        controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
+        controllerGroup.registerRenderer(Type.class, JTYPES);
+        controllerGroup.registerRenderer(String.class, JSTRING);
+        controllerGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
+
+        modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
+        modelGroup.registerRenderer(Type.class, JTYPES);
+        modelGroup.registerRenderer(String.class, JSTRING);
+        modelGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
     }
 
     @Override

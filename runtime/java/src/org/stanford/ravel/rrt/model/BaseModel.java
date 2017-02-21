@@ -243,8 +243,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     @Override
-    public Object[] all() {
-        return mRecords.toArray();
+    public RecordType[] all(RecordType[] unused) {
+        return mRecords.toArray(unused);
     }
 
     @Override

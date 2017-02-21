@@ -25,21 +25,14 @@ public enum Operation {
     MOVE,
 
     /**
-     * The value is being added to a constant
+     * The value is an integer being added to another integer
      */
-    ADD_CONSTANT,
+    IADD,
 
     /**
-     * The value is being added to another value from the same creator
-     * (so homomorphic is possible)
+     * The value is an integer being multiplied to another integer
      */
-    ADD_SAME,
-
-    /**
-     * The value is being added to another value from a different creator
-     * (so multiparty is possible)
-     */
-    ADD_FOREIGN,
+    IMUL,
 
     /**
      * The value is being concatenated to another value

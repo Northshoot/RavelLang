@@ -81,11 +81,8 @@ public class ConstantFolding {
 
     public ConstantFolding(TypedIR ir) {
         this.ir = ir;
-    }
 
-    public void declare(int reg) {
-        assert Registers.isNormal(reg);
-        declaredVariables.add(reg);
+        declaredVariables.addAll(ir.getParameters());
     }
 
     public boolean run() {

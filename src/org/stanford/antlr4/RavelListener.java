@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -545,6 +545,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitContinue_stmt(RavelParser.Continue_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#return_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturn_stmt(RavelParser.Return_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#return_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturn_stmt(RavelParser.Return_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#lvalue}.
 	 * @param ctx the parse tree

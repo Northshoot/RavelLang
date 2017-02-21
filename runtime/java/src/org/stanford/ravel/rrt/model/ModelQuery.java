@@ -34,11 +34,14 @@ public interface ModelQuery<RecordType> {
     /**
      * Queries local model storage
      *
+     * The unused argument is to be able to dynamically create an array of the right
+     * record type.
+     * In practice, you should the version of all() with no arguments provided
+     * by the concrete model subclass, which is not polymorphic.
+     *
      * @return pointers to all records
      */
-    // FIXME this needs to be Object because ArrayList.toArray cannot
-    // be generic otherwise
-    Object[] all();
+    RecordType[] all(RecordType[] unused);
 
     /**
      * Clears local model storage

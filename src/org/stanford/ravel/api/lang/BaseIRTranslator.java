@@ -1,20 +1,21 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by gcampagn on 1/25/17.
  */
 public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor, TInstructionVisitor {
-    private StringBuilder builder;
-    private Map<Integer, String> registerNames = new HashMap<>();
+    private final StringBuilder builder;
+    private final Map<Integer, String> registerNames = new HashMap<>();
+    private TypedIR ir;
 
     protected BaseIRTranslator() {
         builder = new StringBuilder();
@@ -55,17 +56,27 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
 
     protected abstract void declareRegister(int reg, Type type);
 
+    protected Type getRegisterType(int reg) {
+        return ir.getRegisterType(reg);
+    }
+
     @Override
-    public void translate(List<VariableSymbol> controllerParams, List<VariableSymbol> eventParams, TypedIR ir) {
+    public void translate(TypedIR ir) {
         registerNames.clear();
         builder.setLength(0);
+        this.ir = ir;
 
         // declare all the controller parameters
-        for (VariableSymbol sym : controllerParams)
+        for (VariableSymbol sym : ir.getClassScopeVariables())
             declareControllerScope(sym);
         // declare all event parameters
-        for (VariableSymbol sym : eventParams)
+        for (VariableSymbol sym : ir.getArguments())
             declareEventScope(sym);
+        // declare the return value, if present
+        if (ir.getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID) {
+            setRegisterName(Registers.RETURN_REG, "__returnValue");
+            declareRegister(Registers.RETURN_REG, ir.getRegisterType(Registers.RETURN_REG));
+        }
 
         // declare all unnamed (temporary, gp) registers
         // (this includes also named variables in the original code,

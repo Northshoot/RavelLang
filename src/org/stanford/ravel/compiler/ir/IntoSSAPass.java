@@ -355,6 +355,8 @@ class IntoSSAPass {
                     for (int i = 0; i < arguments.length; i++) {
                         arguments[i] = getNewSourceName(localState, arguments[i]);
                     }
+                    if (methodCall.owner != Registers.VOID_REG)
+                        methodCall.owner = getNewSourceName(localState, methodCall.owner);
                     if (methodCall.target != Registers.VOID_REG) {
                         int newTarget = getNewSinkName(methodCall.target, block, methodCall);
                         if (newTarget != methodCall.target)
@@ -379,6 +381,20 @@ class IntoSSAPass {
                     if (newTarget != arithOp.target)
                         localState.put(arithOp.target, newTarget);
                     arithOp.target = newTarget;
+                }
+
+                @Override
+                public void visit(TIntrinsic intrinsic) {
+                    int[] arguments = intrinsic.arguments;
+                    for (int i = 0; i < arguments.length; i++) {
+                        arguments[i] = getNewSourceName(localState, arguments[i]);
+                    }
+                    if (intrinsic.target != Registers.VOID_REG) {
+                        int newTarget = getNewSinkName(intrinsic.target, block, intrinsic);
+                        if (newTarget != intrinsic.target)
+                            localState.put(intrinsic.target, newTarget);
+                        intrinsic.target = newTarget;
+                    }
                 }
             });
         }

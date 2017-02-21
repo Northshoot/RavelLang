@@ -6,16 +6,15 @@ import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.ControlFlowGraph;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.ir.typed.ValidateIR;
-import org.stanford.ravel.compiler.ir.typed.ValidateSSA;
 import org.stanford.ravel.compiler.symbol.EventHandlerSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,27 +48,32 @@ public class CompileToIRPass {
             }
         }
 
-        // variables is the set of names that should be known to AstToUntypedIRVisitor and TypeResolvePass
-        // parameters is the set of variables that are set externally from the code here (and thus never constant)
+        // controllerScopeVariables is the set of names that can be accessed from the controller scope
+        // temporaries is the set of names declared in the body of the event
         //
-        // these sets must be filled from the outermost scope to the innermost scope for shadowing to work correctly
+        // variables is the set of names that should be known to AstToUntypedIRVisitor and TypeResolvePass
+        // (because they have not yet been assigned a register)
+        Set<VariableSymbol> controllerScopeVariables = new HashSet<>();
         Set<VariableSymbol> variables = new HashSet<>();
-        Set<VariableSymbol> parameters = new HashSet<>();
-        // add controller level variables
+        Set<VariableSymbol> temporaries = new HashSet<>();
+
         for (Symbol s : tree.scope.getEnclosingScope().getSymbols()) {
             if (s instanceof VariableSymbol)
-                parameters.add((VariableSymbol) s);
+                controllerScopeVariables.add((VariableSymbol) s);
         }
-        // add event arguments
-        parameters.addAll(declaredArguments);
-
-        variables.addAll(parameters);
         // hoist all variables up the register scope (the whole compilation unit)
         for (Symbol s : tree.scope.getAllSymbols()) {
-            if (s instanceof VariableSymbol)
-                variables.add((VariableSymbol)s);
+            if (s instanceof VariableSymbol && !declaredArguments.contains(s))
+                temporaries.add((VariableSymbol)s);
         }
 
+
+        // add controller level variables
+        variables.addAll(controllerScopeVariables);
+        // add event arguments
+        variables.addAll(declaredArguments);
+        // add temporaries
+        variables.addAll(temporaries);
 
         // compile to untyped IR
         AstToUntypedIRVisitor visitor = new AstToUntypedIRVisitor(this, firstGpRegister);
@@ -87,9 +91,15 @@ public class CompileToIRPass {
             return null;
 
         TypeResolvePass typeResolvePass = new TypeResolvePass(this);
-        for (VariableSymbol var : variables)
-            typeResolvePass.declare(var);
+        for (VariableSymbol var : controllerScopeVariables)
+            typeResolvePass.declareParameter(var, true);
+        for (VariableSymbol var : declaredArguments)
+            typeResolvePass.declareParameter(var, false);
+        for (VariableSymbol var : temporaries)
+            typeResolvePass.declareTemporary(var);
+        typeResolvePass.setReturnType(PrimitiveType.VOID);
         TypedIR ir2 = typeResolvePass.run(visitor.getIR());
+
         ControlFlowGraph cfg = ir2.getControlFlowGraph();
 
         if (debug) {
@@ -105,71 +115,8 @@ public class CompileToIRPass {
 
         ValidateIR.validate(ir2);
 
-        IntoSSAPass intoSSA = new IntoSSAPass(ir2);
-        intoSSA.run();
-
-        ValidateIR.validate(ir2);
-        ValidateSSA.validate(ir2);
-        if (debug) {
-            System.out.println("SSA CFG");
-            cfg.visitForward(System.out::println);
-        }
-
-        // run local (non interprocedural) analysis and optimization passes
-
-        DeadValueEliminationPass deadValueEliminationPass = new DeadValueEliminationPass(ir2);
-        DeadStoreEliminationPass deadStoreEliminationPass = new DeadStoreEliminationPass(ir2);
-        DeadControlFlowElimination deadControlFlowElimination = new DeadControlFlowElimination(ir2);
-        ConstantFolding constantFolding = new ConstantFolding(ir2);
-        CopyPropagation copyPropagation = new CopyPropagation(ir2);
-
-        for (VariableSymbol param : parameters)
-            constantFolding.declare(param.getRegister());
-        AliasAnalysis aliasAnalysis = new AliasAnalysis(ir2);
-
-        boolean progress;
-        int pass = 0;
-        do {
-            progress = false;
-
-            // run constant folding first (which helps dead value elimination)
-            progress = constantFolding.run() || progress;
-            ValidateIR.validate(ir2);
-            // run dead control flow second (which helps dead value elimination)
-            progress = deadControlFlowElimination.run() || progress;
-            ValidateIR.validate(ir2);
-            // run copy propagation (which helps the alias analysis and the dead value elimination)
-            progress = copyPropagation.run() || progress;
-            ValidateIR.validate(ir2);
-            ValidateSSA.validate(ir2);
-            // run dead value elimination third (which also helps the alias analysis)
-            progress = deadValueEliminationPass.run() || progress;
-            ValidateIR.validate(ir2);
-
-            // run alias analysis for record variables, which will be used by the security analysis
-            Map<Integer, Set<Integer>> aliasResult = aliasAnalysis.run();
-            ir2.setAliases(aliasResult);
-            if (debug) {
-                System.out.println("Alias analysis");
-                aliasResult.forEach((var, alias) -> {
-                    System.out.println(var + ": " + alias);
-                });
-                System.out.println();
-            }
-
-            // run dead store elimination with the alias analysis
-            progress = deadStoreEliminationPass.run() || progress;
-            ValidateIR.validate(ir2);
-
-            if (debug && progress) {
-                System.out.println("Opt pass #" + (pass+1));
-                cfg.visitForward(System.out::println);
-            }
-            pass++;
-        } while(progress);
-
-        System.out.println("Final Loop Tree");
-        System.out.println(ir2.getLoopTree());
+        OptimizePass optimizer = new OptimizePass(ir2, debug);
+        optimizer.run();
 
         return ir2;
     }

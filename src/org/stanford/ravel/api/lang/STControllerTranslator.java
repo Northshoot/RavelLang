@@ -2,8 +2,6 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.Type;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.EventHandler;
 import org.stringtemplate.v4.ST;
@@ -37,19 +35,10 @@ public class STControllerTranslator implements ControllerTranslator {
 
     @Override
     public CodeModule translate(Controller ctr) {
-        List<ConcreteEventHandler> eventHandlers = new ArrayList<>();
+        List<EventHandler> eventHandlers = new ArrayList<>();
 
-        for (EventHandler event : ctr) {
-            String name = event.getEventType().getEventName();
-            Type model = event.getModelVar().getType();
-            String modelName = model.getName();
-
-            List<VariableSymbol> arguments = event.getArguments();
-            irTranslator.translate(ctr.getParameterSymbols(), arguments, event.getBody());
-
-            ConcreteEventHandler handler = new ConcreteEventHandler(name, modelName, arguments, irTranslator.getCode());
-            eventHandlers.add(handler);
-        }
+        for (EventHandler event : ctr)
+            eventHandlers.add(event);
 
         CodeModule module = new CodeModule();
         for (FileConfig fc : controllerFiles) {

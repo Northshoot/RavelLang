@@ -13,7 +13,7 @@ clean-app:
 <\t>$(AR) crs -o $@ $^
 >>
 
-application(runtime,plat_runtime,path,target,sources) ::=<<
+application(runtime,plat_runtime,path,target,sources,main) ::=<<
 RAVEL_C_RUNTIME_DIR = <runtime>
 RAVEL_POSIX_RUNTIME_DIR = <plat_runtime>
 
@@ -24,6 +24,6 @@ clean:
 
 <sources:compile_c(); separator="\n">
 
-<target>: <sources:{s|<s>.o}; separator=" ">
+<target>: <sources:{s|<s>.o}; separator=" "> <main>.o
 <\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_POSIX_RUNTIME_DIR) -lravel
 >>

@@ -89,3 +89,26 @@ method_call(call) ::=<<
 <call.target.name> = <call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
 
 >>
+
+intrinsic_map ::=[
+    "recordFromBytes": "new Record(<instr.arguments.0.name>)",
+    "recordToBytes": "<instr.arguments.0.name>.toBytes()",
+    default: "org.stanford.ravel.rrt.lang.Intrinsic.<instr.name>(<instr.arguments:{a|<a.name>}; separator=", ">)"
+]
+void_intrinsic(instr) ::=<<
+<intrinsic_map(instr.name)>;
+
+>>
+intrinsic(instr) ::=<<
+<instr.target.name> = <intrinsic_map(instr.name)>;
+
+>>
+
+void_return() ::=<<
+return;
+
+>>
+nonvoid_return() ::=<<
+return __returnValue;
+
+>>

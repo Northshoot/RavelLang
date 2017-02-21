@@ -20,6 +20,8 @@ public interface TInstructionVisitor {
     void visit(TMethodCall methodCall);
     void visit(TMove move);
     void visit(TUnaryArithOp arithOp);
+    void visit(TIntrinsic intrinsic);
+    void visit(TReturn returnInstr);
 
     // phi nodes are special because we expect they would appear and
     // disappear as we go in an out of SSA form

@@ -15,10 +15,12 @@ import java.util.*;
  */
 public class ModelField {
     private final FieldSymbol symbol;
+    private final Model model;
     private final Map<Space, Map<Space, Operation>> operations = new HashMap<>();
 
-    public ModelField(FieldSymbol symbol) {
+    public ModelField(FieldSymbol symbol, Model model) {
         this.symbol = symbol;
+        this.model = model;
     }
 
     public String getName() {
@@ -29,8 +31,12 @@ public class ModelField {
         return symbol.getType();
     }
 
+    public Model getModel() {
+        return model;
+    }
+
     public String toString() {
-        return "Field: " + getName() + " @" + getType().getName();
+        return "Field: " + getModel().getName() + "." + getName() + " @" + getType().getName();
     }
 
     public void addOperation(Space operator, Space creator, Operation op) {

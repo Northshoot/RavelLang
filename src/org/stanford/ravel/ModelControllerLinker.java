@@ -77,37 +77,6 @@ public class ModelControllerLinker {
         }
         space.setPlatform(platform);
 
-        /*
-        // build sinks
-        Map<String, ReferenceSymbol> sinks = ssb.getSink();
-        for (ReferenceSymbol re: sinks.values()) {
-            //TODO: is reference starting good?
-            String identifier = re.getName();
-            String reference = re.getValue();
-            //must start with platform.system.
-            if (reference.startsWith("platform.system.")) {
-                space.add(identifier, new Sink(identifier, reference));
-            } else {
-                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " refers to an unknown location "
-                        + reference);
-            }
-        }
-        // build sources
-        Map<String, ReferenceSymbol> source = ssb.getSource();
-
-        for (ReferenceSymbol re: source.values()) {
-            //TODO: is reference starting good?
-            String identifier = re.getName();
-            String reference = re.getValue();
-            //must start with platform.system.
-            if (reference.startsWith("platform.system.")) {
-                space.add(identifier, new Source(identifier, reference));
-            } else {
-                driver.emitError(new SourceLocation(re.getDefNode()), identifier + " refers to an unknown location "
-                        + reference);
-            }
-        }*/
-
         // instantiate interfaces
         ssb.getInterfaces().forEach((iName, is) -> {
             // get the interface
@@ -119,7 +88,7 @@ public class ModelControllerLinker {
             }
 
             // instantiate the interface on this space
-            InstantiatedInterface iiface = i.instantiate(space, is.getParameterMap(), is.getName());
+            InstantiatedInterface iiface = i.instantiate(space, is.getName());
             applyParametersAndProperties(i, iiface, is);
             space.add(is.getName(), iiface);
         });
@@ -135,9 +104,13 @@ public class ModelControllerLinker {
                 driver.emitError(new SourceLocation(is.getDefNode()), modelName + " does not refer to a valid model");
                 return;
             }
+            if (space.hasModel(m)) {
+                driver.emitError(new SourceLocation(is.getDefNode()), modelName + " is already present on this space");
+                return;
+            }
 
             // instantiate the model on this space
-            InstantiatedModel im = m.instantiate(space, is.getParameterMap(), is.getName());
+            InstantiatedModel im = m.instantiate(space, is.getName());
             applyParametersAndProperties(m, im, is);
             space.add(is.getName(), im);
         });

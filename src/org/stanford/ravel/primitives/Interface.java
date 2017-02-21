@@ -18,7 +18,7 @@ public class Interface extends ConfigurableComponent {
         this.symbol = symbol;
     }
 
-    public InstantiatedInterface instantiate(Space space, Map<String, Object> parameters, String varName) {
+    public InstantiatedInterface instantiate(Space space, String varName) {
         return new InstantiatedInterface(space, this, varName);
     }
 

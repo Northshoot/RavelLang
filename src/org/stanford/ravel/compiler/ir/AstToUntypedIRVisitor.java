@@ -480,6 +480,11 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override public Integer visitAnd_exp(RavelParser.And_expContext ctx) {
         if (ctx.and_exp() != null) {
+            // We need to lower "a and b" to
+            // r = a
+            // if r then:
+            //   r = b
+            // (which shortcuts side effects when computing the b part)
             int reg = visit(ctx.and_exp());
             Block iftrue = pushBlock();
             int reg2 = visit(ctx.not_exp());
@@ -506,13 +511,25 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         }
     }
 
-    @Override public Integer visitBreak_stmt(RavelParser.Break_stmtContext ctx) {
+    @Override
+    public Integer visitBreak_stmt(RavelParser.Break_stmtContext ctx) {
         addCurrent(new Break(ctx));
         return VOID_REG;
     }
 
-    @Override public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
+    @Override
+    public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
         addCurrent(new Continue(ctx));
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitReturn_stmt(RavelParser.Return_stmtContext ctx) {
+        if (ctx.expression() != null) {
+            int reg = visit(ctx.expression());
+            addCurrent(new Move(ctx, Registers.RETURN_REG, reg));
+        }
+        addCurrent(new Return(ctx));
         return VOID_REG;
     }
 

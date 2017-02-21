@@ -28,21 +28,42 @@ public class DeadControlFlowElimination {
             ir.getControlFlowGraph().buildForwardBackward();
             ir.getControlFlowGraph().visitForward(this::adjustPhis);
         }
-        collapseBlocks((LoopTreeNode.Block) ir.getLoopTree());
+        collapseBlocks(ir.getLoopTree());
 
         return madeChanges;
     }
 
-    private void collapseBlocks(LoopTreeNode.Block block) {
-        ListIterator<LoopTreeNode> children = block.listIterator();
-        while (children.hasNext()) {
-            LoopTreeNode child = children.next();
+    private boolean isSingleBlock(LoopTreeNode child) {
+        return child instanceof LoopTreeNode.Block && ((LoopTreeNode.Block) child).size() == 1;
+    }
 
-            if (child instanceof LoopTreeNode.Block) {
-                if (((LoopTreeNode.Block) child).size() == 1) {
+    private void collapseBlocks(LoopTreeNode node) {
+        if (node instanceof LoopTreeNode.Block) {
+            ListIterator<LoopTreeNode> children = node.listIterator();
+            while (children.hasNext()) {
+                LoopTreeNode child = children.next();
+                collapseBlocks(child);
+
+                if (isSingleBlock(child)) {
                     children.set(((LoopTreeNode.Block) child).get(0));
                     madeChanges = true;
                 }
+            }
+        } else if (node instanceof LoopTreeNode.Loop) {
+            LoopTreeNode.Loop loop = (LoopTreeNode.Loop)node;
+            collapseBlocks(loop.getBody());
+            if (isSingleBlock(loop.getBody())) {
+                node.replaceChild(loop.getBody(), ((LoopTreeNode.Block)(loop.getBody())).get(0));
+            }
+        } else if (node instanceof LoopTreeNode.IfStatement) {
+            LoopTreeNode.IfStatement ifStatement = (LoopTreeNode.IfStatement)node;
+            collapseBlocks(ifStatement.getIftrue());
+            collapseBlocks(ifStatement.getIffalse());
+            if (isSingleBlock(ifStatement.getIftrue())) {
+                node.replaceChild(ifStatement.getIftrue(), ((LoopTreeNode.Block)(ifStatement.getIftrue())).get(0));
+            }
+            if (isSingleBlock(ifStatement.getIffalse())) {
+                node.replaceChild(ifStatement.getIffalse(), ((LoopTreeNode.Block)(ifStatement.getIffalse())).get(0));
             }
         }
     }
@@ -176,9 +197,15 @@ public class DeadControlFlowElimination {
                     if ((boolean)bool) {
                         children.set(((LoopTreeNode.IfStatement) child).getIftrue());
                         destroyRecursive(((LoopTreeNode.IfStatement) child).getIffalse());
+
+                        // reprocess the new node
+                        children.previous();
                     } else {
                         children.set(((LoopTreeNode.IfStatement) child).getIffalse());
                         destroyRecursive(((LoopTreeNode.IfStatement) child).getIftrue());
+
+                        // reprocess the new node
+                        children.previous();
                     }
                     madeChanges = true;
                 } else {
@@ -214,6 +241,9 @@ public class DeadControlFlowElimination {
 
                         children.remove();
                         madeChanges = true;
+                    } else {
+                        runRecursiveSkip(ifTrue);
+                        runRecursiveSkip(ifFalse);
                     }
                 }
             } else if (child instanceof LoopTreeNode.Block) {
@@ -225,6 +255,11 @@ public class DeadControlFlowElimination {
     }
 
     private void runRecursiveSkip(LoopTreeNode node) {
+        if (node instanceof LoopTreeNode.Block) {
+            runRecursive((LoopTreeNode.Block) node);
+            return;
+        }
+
         ListIterator<LoopTreeNode> children = node.listIterator();
         while (children.hasNext()) {
             LoopTreeNode child = children.next();

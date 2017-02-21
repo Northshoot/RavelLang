@@ -3,6 +3,7 @@ package org.stanford.ravel.api.lang.c;
 import org.stanford.ravel.api.lang.BaseIRTranslator;
 import org.stanford.ravel.api.lang.LiteralFormatter;
 import org.stanford.ravel.compiler.ir.BinaryOperation;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
@@ -163,5 +164,22 @@ public class CCodeTranslator extends BaseIRTranslator {
     @Override
     public void visit(TUnaryArithOp arithOp) {
         addLine(arithOp.target, " = ", arithOp.op, arithOp.source);
+    }
+
+    @Override
+    public void visit(TIntrinsic intrinsic) {
+        switch (intrinsic.name) {
+            default:
+                throw new AssertionError("Unsupported intrinsic " + intrinsic);
+        }
+    }
+
+    @Override
+    public void visit(TReturn returnInstr) {
+        if (getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID) {
+            addLine("return ", Registers.RETURN_REG);
+        } else {
+            addLine("return");
+        }
     }
 }

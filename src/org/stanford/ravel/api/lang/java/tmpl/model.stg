@@ -133,5 +133,10 @@ public class <name> extends <base>\<<name>.Record> {
     public Record create() {
         return new Record();
     }
+
+    // Adjust the type of all() to what the controllers expect
+    public Record[] all() {
+        return super.all(new Record[]{});
+    }
 };
 >>

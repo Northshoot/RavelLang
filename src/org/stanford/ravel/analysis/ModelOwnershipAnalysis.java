@@ -173,10 +173,16 @@ public class ModelOwnershipAnalysis {
                                         m = app.getModel(tag.model.getName());
                                         assert m != null;
 
-                                        for (Space writer : m.getWriters()) {
-                                            tagOneVariableCreator(event, var, writer);
-                                            tagOneVariableModelTag(event, var, m, writer);
+                                        if (m.getModelType() == Model.Type.LOCAL) {
+                                            tagOneVariableCreator(event, var, s);
+                                            tagOneVariableModelTag(event, var, m, s);
+                                        } else {
+                                            for (Space writer : m.getWriters()) {
+                                                tagOneVariableCreator(event, var, writer);
+                                                tagOneVariableModelTag(event, var, m, writer);
+                                            }
                                         }
+                                        break;
                                 }
                             }
                         } else {

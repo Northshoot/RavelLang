@@ -33,6 +33,8 @@ public class DeadStoreEliminationPass {
     public boolean run() {
         madeChanges = false;
         liveVariables.clear();
+        // the return value is always live
+        liveVariables.add(Registers.RETURN_REG);
 
         // first compute the dead values
         do {

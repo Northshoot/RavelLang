@@ -1,5 +1,7 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.analysis.security.Key;
+import org.stanford.ravel.analysis.security.SecurityPrimitive;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 
@@ -86,5 +88,11 @@ public class Space extends Primitive {
     @Override
     public String toString() {
         return "Space " + getName();
+    }
+
+    public void addSecurityOperation(ModelField field, Space target, Key key, SecurityPrimitive primitive, boolean isInbound) {
+        InstantiatedModel im = findModel(field.getModel());
+        assert im != null;
+        im.addSecurityOperation(field, target, key, primitive, isInbound);
     }
 }

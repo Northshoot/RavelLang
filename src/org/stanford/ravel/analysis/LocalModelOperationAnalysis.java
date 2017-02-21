@@ -123,21 +123,29 @@ public class LocalModelOperationAnalysis {
             } else if (instr instanceof TMove) {
                 meetOperation(((TMove) instr).source, Operation.MOVE);
             } else if (instr instanceof TBinaryArithOp) {
+                // str + str => concat
+                // int32 + int32 => iadd
+                // int32 * int32 => imul
+                // anything else => any
+
                 if (((TBinaryArithOp) instr).op == BinaryOperation.ADD) {
                     if (((TBinaryArithOp) instr).type == PrimitiveType.STR) {
                         for (int source : instr.getSources())
                             meetOperation(source, Operation.CONCAT);
+                    } else if (((TBinaryArithOp) instr).type == PrimitiveType.INT32) {
+                        for (int source : instr.getSources())
+                            meetOperation(source, Operation.IADD);
                     } else {
-                        // FIXME handle add constant
-                        int src1 = ((TBinaryArithOp) instr).src1;
-                        int src2 = ((TBinaryArithOp) instr).src2;
-                        if (event.getVariableModelTags(src1).equals(event.getVariableModelTags(src2))) {
-                            meetOperation(src1, Operation.ADD_SAME);
-                            meetOperation(src2, Operation.ADD_SAME);
-                        } else {
-                            meetOperation(src1, Operation.ADD_FOREIGN);
-                            meetOperation(src2, Operation.ADD_FOREIGN);
-                        }
+                        for (int source : instr.getSources())
+                            meetOperation(source, Operation.ANY);
+                    }
+                } else if (((TBinaryArithOp) instr).op == BinaryOperation.MUL) {
+                    if (((TBinaryArithOp) instr).type == PrimitiveType.INT32) {
+                        for (int source : instr.getSources())
+                            meetOperation(source, Operation.IMUL);
+                    } else {
+                        for (int source : instr.getSources())
+                            meetOperation(source, Operation.ANY);
                     }
                 } else {
                     // anything else is here-be-dragons, anything can happen, need full decryption
@@ -146,14 +154,20 @@ public class LocalModelOperationAnalysis {
                     }
                 }
             } else if (instr instanceof TPhi) {
-                // a phi is nothing but a fancy move
-                meetOperation(instr.getSink(), Operation.MOVE);
-
                 // propagate back from the sink to the sources
                 for (FieldTag fieldTag : event.getVariableFieldTags(instr.getSink())) {
                     for (int source : instr.getSources()) {
                         meetOperation(source, operations.get(fieldTag));
                     }
+                }
+            } else if (instr instanceof TConvert) {
+                if (((TConvert) instr).srcType.equalsExceptQualifiers(((TConvert) instr).tgtType)) {
+                    // if the types are actually the same, this is just a move
+                    meetOperation(((TConvert) instr).source, Operation.MOVE);
+                } else {
+                    // otherwise, this requires the full plaintext representation of the input
+                    // (eg, it's a sign extension, or a conversion between double and int)
+                    meetOperation(((TConvert) instr).source, Operation.ANY);
                 }
             } else {
                 // anything else is here-be-dragons, anything can happen, need full decryption

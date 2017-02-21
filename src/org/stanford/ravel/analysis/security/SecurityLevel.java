@@ -1,17 +1,19 @@
-package org.stanford.ravel.analysis;
+package org.stanford.ravel.analysis.security;
+
+import org.stanford.ravel.analysis.Operation;
 
 /**
  * The available and understood security primitives / security levels,
  * applied to a model field or set of model fields.
  *
  * Like {@link Operation}, this forms a lattice, in which the minimum
- * element is {@link SecurityPrimitive#NONE}, and the maxmimum element
- * is {@link SecurityPrimitive#DECRYPT}. See {@link SecurityPrimitive#meet}
+ * element is {@link SecurityLevel#NONE}, and the maxmimum element
+ * is {@link SecurityLevel#DECRYPT}. See {@link SecurityLevel#meet}
  * for details
  *
  * Created by gcampagn on 2/13/17.
  */
-public enum SecurityPrimitive {
+public enum SecurityLevel {
     /**
      * Nothing to do with this field/sets of fields
      */
@@ -23,15 +25,16 @@ public enum SecurityPrimitive {
     VERIFY_MAC,
 
     /**
-     * Homomorphically add a constant (after verifying MAC)
-     */
-    HOMO_ADD_CONSTANT,
-
-    /**
      * Homomorphically add to another value encrypted by the same
      * creator
      */
     HOMO_ADD,
+
+    /**
+     * Homomorphically multiply to another (integer) value encrypted by the same
+     * creator
+     */
+    HOMO_MUL,
 
     /**
      * Homomorphically add to another value encrypted by a different
@@ -44,7 +47,7 @@ public enum SecurityPrimitive {
      */
     DECRYPT;
 
-    public static SecurityPrimitive meet(SecurityPrimitive sp1, SecurityPrimitive sp2) {
+    public static SecurityLevel meet(SecurityLevel sp1, SecurityLevel sp2) {
         // equal elements compare equals
         if (sp1 == sp2)
             return sp1;
@@ -74,5 +77,9 @@ public enum SecurityPrimitive {
 
         // any other operation decays to full decryption
         return DECRYPT;
+    }
+
+    public boolean requiresVerifyMac() {
+        return this != NONE;
     }
 }

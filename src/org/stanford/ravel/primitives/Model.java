@@ -2,6 +2,7 @@ package org.stanford.ravel.primitives;
 
 import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.compiler.types.ModelType;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -43,7 +44,7 @@ public class Model extends ConfigurableComponent {
         return symbol;
     }
 
-    public InstantiatedModel instantiate(Space space, Map<String, Object> parameters, String varName) {
+    public InstantiatedModel instantiate(Space space, String varName) {
         return new InstantiatedModel(space, this, varName);
     }
 
@@ -51,7 +52,7 @@ public class Model extends ConfigurableComponent {
         return id;
     }
 
-    public org.stanford.ravel.compiler.types.Type getType() {
+    public ModelType getType() {
         return symbol.getDefinedType();
     }
 
@@ -98,7 +99,7 @@ public class Model extends ConfigurableComponent {
         return Collections.unmodifiableCollection(mFields.values());
     }
     public void addField(FieldSymbol field) {
-        this.mFields.put(field.getName(), new ModelField(field));
+        this.mFields.put(field.getName(), new ModelField(field, this));
     }
 
     public ModelField getField(String field) {

@@ -170,4 +170,25 @@ public class STIRTranslator extends BaseIRTranslator {
         tmpl.add("op", arithOp);
         addCode(tmpl.render());
     }
+
+    @Override
+    public void visit(TIntrinsic intrinsic) {
+        ST tmpl;
+        if (intrinsic.returnType == PrimitiveType.VOID)
+            tmpl = this.irGroup.getInstanceOf("void_intrinsic");
+        else
+            tmpl = this.irGroup.getInstanceOf("intrinsic");
+        tmpl.add("instr", intrinsic);
+        addCode(tmpl.render());
+    }
+
+    @Override
+    public void visit(TReturn returnInstr) {
+        ST tmpl;
+        if (getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID)
+            tmpl = this.irGroup.getInstanceOf("void_return");
+        else
+            tmpl = this.irGroup.getInstanceOf("nonvoid_return");
+        addCode(tmpl.render());
+    }
 }

@@ -76,4 +76,14 @@ public class BaseTInstructionVisitor implements TInstructionVisitor {
     public void visit(TUnaryArithOp arithOp) {
 
     }
+
+    @Override
+    public void visit(TIntrinsic intrinsic) {
+        
+    }
+
+    @Override
+    public void visit(TReturn returnInstr) {
+
+    }
 }

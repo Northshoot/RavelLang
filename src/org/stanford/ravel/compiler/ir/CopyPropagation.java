@@ -93,6 +93,11 @@ public class CopyPropagation {
                 }
 
                 @Override
+                public void visit(TReturn returnInstr) {
+
+                }
+
+                @Override
                 public void visit(TConvert convert) {
                     convert.source = copyProp(convert.source);
                 }
@@ -119,6 +124,7 @@ public class CopyPropagation {
 
                 @Override
                 public void visit(TMethodCall methodCall) {
+                    methodCall.owner = copyProp(methodCall.owner);
                     for (int i = 0; i < methodCall.arguments.length; i++)
                         methodCall.arguments[i] = copyProp(methodCall.arguments[i]);
                 }
@@ -169,6 +175,12 @@ public class CopyPropagation {
                         iter.set(new TMove(phi.type, phi.target, src0));
                         addCopy(phi.target, src0, phi.blocks[0]);
                     }
+                }
+
+                @Override
+                public void visit(TIntrinsic intrinsic) {
+                    for (int i = 0; i < intrinsic.arguments.length; i++)
+                        intrinsic.arguments[i] = copyProp(intrinsic.arguments[i]);
                 }
             });
         }

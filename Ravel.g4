@@ -343,6 +343,7 @@ statement
     | for_stmt
     | break_stmt
     | continue_stmt
+    | return_stmt
     | PASS
     | NEWLINE
     ;
@@ -357,6 +358,10 @@ break_stmt
 
 continue_stmt
     : CONTINUE
+    ;
+
+return_stmt
+    : RETURN expression?
     ;
 
 lvalue

@@ -46,6 +46,8 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
     event timer.fired():
         rec = random.create()
         rec.value = rnd.next()
+        rec.str_value = "lol"
+        rec.str2_value = "lol2"
         ctx = random.save(rec)
 
         if ctx.error:
@@ -89,7 +91,7 @@ controller CController(random: Random, sum : Sum):
         rec = self.record
         x  = 7
         s : str
-        if x > 0:
+        if rec.err_value:
             s = rec.str_value
         else:
             s = rec.str2_value
@@ -103,6 +105,12 @@ controller CController(random: Random, sum : Sum):
             sum_record = sum.get(0)
             sum_record.value = rec.value + sum_record.value
         sum.save(sum_record)
+
+        # FIXME this does not work because it cannot optimize
+        #if sum_record.value > 5 and False:
+        if sum_record.value > 5:
+            if False:
+                system.print("big")
 
 
 #interface Database<T>(model: T):

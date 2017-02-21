@@ -1,8 +1,5 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
-
-import org.stanford.ravel.compiler.scope.*;
-import org.stanford.ravel.compiler.symbol.*;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -330,6 +327,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitContinue_stmt(RavelParser.Continue_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#return_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturn_stmt(RavelParser.Return_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#lvalue}.
 	 * @param ctx the parse tree
