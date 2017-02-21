@@ -47,17 +47,25 @@ public class Nrf52 extends BaseCPlatform {
         List<FileObject> all_files = new ArrayList<>(super.createBuildSystem(s,files, NrfPlatformOptions.getInstance(), make_addons));
 
         all_files.add(makeLinkerScript(tmpl_extra));
-        all_files.add(makeConfigFile(tmpl_extra1, buid_nrf_config_file(s)));
+        all_files.add(makeConfigFile(tmpl_extra1, build_nrf_config_file(s)));
 
         return all_files;
     }
 
-    private NrfConfig buid_nrf_config_file(Space s) {
+    private NrfConfig build_nrf_config_file(Space s) {
         
         NrfConfig nc = new NrfConfig();
         //TODO: add to interface
         //define = {val: key}
-        nc.TIMER_ENABLED = 1;
+        nc.TIMER_ENABLED = 0;
+        nc.NRF_LOG_ENABLED =1;
+        nc.NRF_LOG_USES_COLORS =1;
+        nc.NRF_LOG_COLOR_DEFAULT = 3;
+        nc.NRF_LOG_WARNING_COLOR = 4;
+        nc.NRF_LOG_DEFAULT_LEVEL =4;
+        nc.NRF_LOG_DEFERRED =0; //no buffering
+        nc.NRF_LOG_DEFAULT_LEVEL =4; //Debug level 4
+
 //        Collection<InstantiatedInterface> interfaces = s.getInterfaces();
 //        Iterator<InstantiatedInterface> interfaceIterator = interfaces.iterator();
 //        while (interfaceIterator.hasNext()){

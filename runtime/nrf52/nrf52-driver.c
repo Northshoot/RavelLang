@@ -21,14 +21,20 @@
 #include "boards.h"
 #include "AppDispatcher.h"
 #include "ravel/nrf52-driver.h"
+#define NRF_LOG_MODULE_NAME "Driver"
+
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+#define APP_TIMER_PRESCALER              0
+#define APP_TIMER_OP_QUEUE_SIZE          4
+APP_TIMER_DEF(m_driver_timer_periodic);
 
 extern void ravel_generated_app_dispatcher_started(struct AppDispatcher*);
 
 
 //void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name) {
-//    #ifdef DEBUG
-//        LOG("ERROR - %lu, %lu, %s", error_code, line_num, p_file_name);
-//    #endif
+//    LOG("ERROR - %lu, %lu, %s", error_code, line_num, p_file_name);
 //    // On assert, the system can only recover on reset
 //    //while (1) {}
 //    //NVIC_SystemReset();
@@ -36,28 +42,20 @@ extern void ravel_generated_app_dispatcher_started(struct AppDispatcher*);
 //}
 
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
+    NRF_LOG_INFO("assert_nrf_callback!\r\n");
     app_error_handler(0xDEADBEEF, line_num, p_file_name);
 }
 
-//static void power_manage(void) {
-//    /* execute any scheduled operations */
-//    //ravel_nrf52_driver_dispatch_event(&driver);
-//    app_sched_execute();
-//
-//    /* Wait for an interrupt/event */
-//    uint32_t err_code = sd_app_evt_wait();
-//    APP_ERROR_CHECK(err_code);
-//}
+
 
 void
 ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
 {
     /* TODO: init any internal systems */
-    self->base.dispatcher = dispatcher;
-    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+    NRF_LOG_INFO("INIT!\r\n");
 
-        // Initialize the SoftDevice handler module.
-        SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+    self->base.dispatcher = dispatcher;
+
 
 
 }
@@ -66,40 +64,21 @@ void
 ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 {
     /* Free any context resource here */
+    NRF_LOG_INFO("FINALIZE!\r\n");
 }
-static void power_manage(void)
-{
-    uint32_t err_code = sd_app_evt_wait();
 
-    APP_ERROR_CHECK(err_code);
-}
-//TODO: delete timer and led JUST a test
-#define APP_TIMER_PRESCALER             15    // Value of the RTC1 PRESCALER register.
-#define APP_TIMER_OP_QUEUE_SIZE         3     // Size of timer operation queues.
-APP_TIMER_DEF(m_timer_t);
 
-void
-this_fired(void *context)
-{
-bsp_board_led_invert(3);
-}
+
+
 void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // TODO
     // Main loop.
-    uint32_t err_code = nrf_drv_clock_init();
-        APP_ERROR_CHECK(err_code);
-        nrf_drv_clock_lfclk_request(NULL);
-    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-    app_timer_create(&m_timer_t,
-                                APP_TIMER_MODE_REPEATED,
-                                this_fired);
-    app_timer_start(m_timer_t, 500, NULL);
-
+    NRF_LOG_INFO("LOOP\r\n");
     while (true)
     {
-        power_manage();
+         __WFI();
     }
 }
 

@@ -17,56 +17,56 @@ c_file(includes,name,interface) ::=<<
 #include "app_error.h"
 #include "app_timer.h"
 #include "nrf_drv_clock.h"
+#define NRF_LOG_MODULE_NAME "TIMER"
 
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
 <includes:do_include(); separator="\n">
 
 // General application timer settings.
-#define APP_TIMER_PRESCALER             15    // Value of the RTC1 PRESCALER register.
-#define APP_TIMER_OP_QUEUE_SIZE         3     // Size of timer operation queues.
+#define APP_TIMER_PRESCALER              15
+#define APP_TIMER_OP_QUEUE_SIZE          4
 
 // this can be implemented smarter to avoid generating functions that are not used
 //TODO:  improve template
 
 
-APP_TIMER_DEF(m_<name>_timer_id);
+APP_TIMER_DEF(m_<name>_timer_one_shoot);
+APP_TIMER_DEF(m_<name>_timer_periodic);
 
 static uint32_t <name>__err_code = NRF_SUCCESS;
 static bool one_shoot = false;
-static <name>* instance;
-
-// Function starting the internal LFCLK oscillator.
-// This is needed by RTC1 which is used by the application timer
-// (When SoftDevice is enabled the LFCLK is always running and this is not needed).
-static void lfclk_request(void)
-{
-    uint32_t err_code = nrf_drv_clock_init();
-    APP_ERROR_CHECK(err_code);
-    nrf_drv_clock_lfclk_request(NULL);
-}
-
-
-void
-timer_start(uint32_t time, uint32_t mode)
-{
-    <name>__err_code = app_timer_create(&m_<name>_timer_id,
-                                mode,
-                                ravel_generated_<name; format="function">_fired);
-    APP_ERROR_CHECK(<name>__err_code);
-    <name>__err_code = app_timer_start(m_<name>_timer_id, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER), NULL);
-    APP_ERROR_CHECK(<name>__err_code);
-}
 
 
 void
 ravel_generated_<name; format="function">_init(<name> *self)
 {
-    lfclk_request();
+    //TODO: parse in the application to determine if which timer are used and optimize the code
+
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+    //create single shoot timer
+    <name>__err_code = app_timer_create(&m_<name>_timer_one_shoot,
+                                    APP_TIMER_MODE_SINGLE_SHOT,
+                                    ravel_generated_<name; format="function">_fired);
+        APP_ERROR_CHECK(<name>__err_code);
+
+     //create periodic timer
+        <name>__err_code = app_timer_create(&m_<name>_timer_periodic,
+                                    APP_TIMER_MODE_REPEATED,
+                                    ravel_generated_<name; format="function">_fired);
+        APP_ERROR_CHECK(<name>__err_code);
+
+    NRF_LOG_INFO("INIT!\r\n");
+
 }
 void
 ravel_generated_<name; format="function">_finalize(<name> *self)
 {
-    //nothing to do
+    //cancel all the timers to exit gracefully
+    if(one_shoot)
+            app_timer_stop(m_<name>_timer_one_shoot);
+     else
+        app_timer_stop(m_<name>_timer_periodic);
 }
 
 <interface.controllerList:define_set_controller_method(name); separator="\n">
@@ -75,25 +75,32 @@ void
 ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
 {
     one_shoot = true;
-    timer_start(time, APP_TIMER_MODE_SINGLE_SHOT);
+    <name>__err_code = app_timer_start(m_<name>_timer_one_shoot, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , NULL);
+    APP_ERROR_CHECK(<name>__err_code);
+
 }
 void
 ravel_generated_<name; format="function">_cancel(<name>* self)
 {
-    app_timer_stop(m_<name>_timer_id);
+    if(one_shoot)
+        app_timer_stop(m_<name>_timer_one_shoot);
+    else
+        app_timer_stop(m_<name>_timer_periodic);
 }
 void
 ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
 {
+    NRF_LOG_INFO("start_periodic %d\r\n",time);
     one_shoot = false;
-    timer_start(time,APP_TIMER_MODE_REPEATED);
+    <name>__err_code = app_timer_start(m_<name>_timer_periodic, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , NULL);
+    APP_ERROR_CHECK(<name>__err_code);
 }
 
 
 void
 ravel_generated_<name; format="function">_fired( void* p_context)
 {
-    ravel_generated_<interface.controllerMap.fired:{c|<c.name; format="function">_<name; format="function">_fired(instance->ctr_<c.varName>);}; separator="\n">
+    ravel_generated_<interface.controllerMap.fired:{c|<c.name; format="function">_<name; format="function">_fired(NULL);}; separator="\n">
 }
 >>
 

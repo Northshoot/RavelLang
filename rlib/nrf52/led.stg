@@ -6,7 +6,6 @@ extra_ldflags() ::=<<
 >>
 
 extra_includes() ::=<<
-
 >>
 
 extra_src(path) ::=<<
@@ -16,18 +15,22 @@ extra_src(path) ::=<<
 
 c_file(includes,name,interface) ::=<<
 
-
-
 <begin_source(name)>
 
 <includes:do_include(); separator="\n">
 #include "boards.h"
+#define NRF_LOG_MODULE_NAME "LED"
 
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
 int LED_ID = <interface.configuration.led_id; format="literal">;
 
 void
 ravel_generated_<name; format="function">_init(<name> *self)
-{bsp_board_leds_init();}
+{
+    bsp_board_leds_init();
+    NRF_LOG_INFO("INIT!\r\n");
+}
 void
 ravel_generated_<name; format="function">_finalize(<name> *self)
 {

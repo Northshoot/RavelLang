@@ -11,6 +11,11 @@ file(name) ::=<<
 #include "ravel/nrf52-driver.h"
 #include "AppDispatcher.h"
 
+#define NRF_LOG_MODULE_NAME "MAIN"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "softdevice_handler.h"
+
 /*---------------------------------------------------------------------------*/
 
 
@@ -23,19 +28,38 @@ RavelNrf52Driver driver;
 
 
 int main(void) {
-    #ifdef DEBUG
-        LOG("Device starting...");
-    #endif
+uint32_t err_code;
 
+
+    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+
+    // Initialize the SoftDevice handler module.
+    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+    // Initialize.
+    err_code = NRF_LOG_INIT(NULL);
+    APP_ERROR_CHECK(err_code);
+     NRF_LOG_DEBUG("Main Starting\n");
+     NRF_LOG_FLUSH();
+
+//system flow:
+    //init driver
+    ravel_nrf52_driver_init(&driver, &dispatcher);
+
+    //init dispatcher
   ravel_generated_app_dispatcher_init(&dispatcher);
-  ravel_nrf52_driver_init(&driver, &dispatcher);
+
+    //set driver
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
+
+  //system ready
   ravel_nrf52_driver_app_dispatcher_ready(&driver);
 
+   //enter main loop
   ravel_nrf52__driver_main_loop(&driver);
 
   ravel_nrf52_driver_finalize(&driver);
   ravel_generated_app_dispatcher_finalize(&dispatcher);
+  NRF_LOG_FINAL_FLUSH();
 }
 
 /*---------------------------------------------------------------------------*/
