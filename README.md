@@ -22,6 +22,30 @@
 
 #### System API ####
 
+#### Interface API ####
+1) interfaces now receive an "instance id" as the first argument to the constructor (after self in C)
+
+[6:50]  
+2) interfaces must have a field in their struct called __id, and they must store the instance id in there in the constructor, if they have any event
+
+[6:51]  
+3) interfaces must use the template <dispatch_event(interface, eventName, params)> (where params is a list of additional event parameters) to dispatch events
+
+[6:51]  
+4) interfaces (and models) receive additional parameters (as declared in ravel) as part of their constructors
+
+[6:52]  
+5) you can no longer rely on interfaces.configuration being made only of constants, as it could refer to one of the parameters, which are only available in the constructor (so you must copy the stuff over to the instance struct)
+
+[6:52]  
+6) same for model.size, but the templates have been updated
+
+[6:53]  
+7) you can now have two controllers of the same type, connected to different interfaces, in the same space
+
+[6:53]  
+:sunglasses:  you still cannot have two models of the same type in the same space, and now you get a compile error if you try
+
 #### Template API ####
 Ravel uses StringTemplate developed by Terence Parr. Please refer http://www.stringtemplate.org/ for details.
 Below we elaborate on Ravel's template structure.

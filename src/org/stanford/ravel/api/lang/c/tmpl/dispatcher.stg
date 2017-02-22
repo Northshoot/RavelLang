@@ -8,7 +8,7 @@ init_model(comp) ::=<<
 ravel_generated_<comp.component.name; format="function">_init(&self->model_<comp.varName><append_params(comp)>);
 >>
 init_interface(comp) ::=<<
-ravel_generated_<comp.component.name; format="function">_init(&self->iface_<comp.varName><append_params(comp)>);
+ravel_generated_<comp.component.name; format="function">_init(&self->iface_<comp.varName>, <comp.instanceId><append_params(comp)>);
 >>
 finalize_component(comp, prefix) ::=<<
 ravel_generated_<comp.component.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
@@ -61,17 +61,17 @@ ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *
 void
 ravel_generated_<name; format="function">_started(<name> *self)
 {
-    <dispatch_event_single_instance(space.systemAPI.component, "started", [])>
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "started", [])>
 }
 void
 ravel_generated_<name; format="function">_stopped(<name> *self)
 {
-    <dispatch_event_single_instance(space.systemAPI.component, "stopped", [])>
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "stopped", [])>
 }
 void
 ravel_generated_<name; format="function">_restarted(<name> *self)
 {
-    <dispatch_event_single_instance(space.systemAPI.component, "restarted", [])>
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "restarted", [])>
 }
 
 >>
@@ -90,8 +90,8 @@ h_file(includes,name,models,interfaces,controllers,space) ::=<<
 typedef struct <name> {
     RavelDriver *driver;
 
-    <models:{c|<c.name> model_<c.varName>;}; separator="\n">
-    <interfaces:{c|<c.name> iface_<c.varName>;}; separator="\n">
+    <models:{c|<c.component.name> model_<c.varName>;}; separator="\n">
+    <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
 
     SystemAPI sys_api;

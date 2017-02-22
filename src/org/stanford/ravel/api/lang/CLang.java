@@ -6,6 +6,7 @@ import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.c.CCodeTranslator;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
+import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
@@ -110,14 +111,6 @@ public class CLang extends BaseLanguage {
     private final STGroup dispatcherGroup;
 
     public CLang() {
-        controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
-        controllerGroup.registerRenderer(Type.class, CTYPES);
-        controllerGroup.registerRenderer(String.class, CIDENT);
-
-        modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
-        modelGroup.registerRenderer(Type.class, CTYPES);
-        modelGroup.registerRenderer(String.class, CIDENT);
-
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, CTYPES);
         dispatcherGroup.registerRenderer(String.class, CIDENT);
@@ -126,6 +119,24 @@ public class CLang extends BaseLanguage {
         //irGroup.registerRenderer(Type.class, CTYPES);
         //irGroup.registerRenderer(String.class, CIDENT);
         irTranslator = new CCodeTranslator(CTYPES, CIDENT, CLITERAL);
+
+        controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
+        controllerGroup.registerRenderer(Type.class, CTYPES);
+        controllerGroup.registerRenderer(String.class, CIDENT);
+        controllerGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
+
+        modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
+        modelGroup.registerRenderer(Type.class, CTYPES);
+        modelGroup.registerRenderer(String.class, CIDENT);
+        modelGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
     }
 
     @Override
@@ -157,11 +168,25 @@ public class CLang extends BaseLanguage {
 
         CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), this.app_dir);
 
+        //TODO: add
+//        extra_includes
+//        extra_src(path)
         ST extra_cflags = interfaceGroup.getInstanceOf("extra_cflags");
         if (extra_cflags != null) {
             module.buildSystemMeta.put("CFLAGS", extra_cflags.render());
         }
-
+        ST extra_ldflags = interfaceGroup.getInstanceOf("extra_ldflags");
+        if (extra_ldflags != null) {
+            module.buildSystemMeta.put("LDFLAGS", extra_cflags.render());
+        }
+        ST extra_includes = interfaceGroup.getInstanceOf("extra_includes");
+        if (extra_includes != null) {
+            module.buildSystemMeta.put("EXTRA_INCLUDE", extra_cflags.render());
+        }
+        ST extra_src = interfaceGroup.getInstanceOf("extra_src");
+        if (extra_src != null) {
+            module.buildSystemMeta.put("EXTRA_SRC", extra_cflags.render());
+        }
         return module;
     }
 

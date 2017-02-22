@@ -151,6 +151,7 @@ public class CCodeTranslator extends BaseIRTranslator {
         for (int arg : methodCall.arguments) {
             if (!first)
                 addCode(", ");
+            first = false;
             addCode(getRegisterName(arg));
         }
         addCode(");\n");
@@ -166,11 +167,59 @@ public class CCodeTranslator extends BaseIRTranslator {
         addLine(arithOp.target, " = ", arithOp.op, arithOp.source);
     }
 
+    private String getTypeSize(Type type) {
+        if (type instanceof PrimitiveType) {
+            switch ((PrimitiveType)type) {
+                case VOID:
+                case ANY:
+                case ERROR:
+                    throw new AssertionError();
+
+                case BOOL:
+                    return "sizeof(bool)";
+                case BYTE:
+                    return "sizeof(uint8_t)";
+                case INT32:
+                    return "sizeof(uint32_t)";
+                case DOUBLE:
+                    return "sizeof(double)";
+                case STR:
+                    return "sizeof(char*)";
+                case ERROR_MSG:
+                    return "sizeof(uint32_t)";
+                case TIMESTAMP:
+                    return "sizeof(uint32_t)";
+
+                default:
+                    throw new AssertionError();
+            }
+        } else {
+            return "sizeof(void*)";
+        }
+    }
+
     @Override
     public void visit(TIntrinsic intrinsic) {
+        if (intrinsic.returnType != PrimitiveType.VOID) {
+            addCode(getRegisterName(intrinsic.target));
+            addCode(" = ");
+        }
+
         switch (intrinsic.name) {
+            case "array_new":
+                addLine("calloc(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType)intrinsic.returnType).getElementType()), ")");
+                addLine("if (", intrinsic.target, " == NULL) abort() /* FIXME */");
+                break;
             default:
-                throw new AssertionError("Unsupported intrinsic " + intrinsic);
+                addCode("ravel_intrinsic_" + intrinsic.name + "(");
+                boolean first = true;
+                for (int arg : intrinsic.arguments) {
+                    if (!first)
+                        addCode(", ");
+                    first = false;
+                    addCode(getRegisterName(arg));
+                }
+                addCode(");\n");
         }
     }
 

@@ -50,4 +50,7 @@ public class ConfigurableComponent extends Primitive {
     public Object getProperty(String name) {
         return mProperties.get(name);
     }
+    public Map<String, Object> getPropertyMap() {
+        return Collections.unmodifiableMap(mProperties);
+    }
 }

@@ -9,8 +9,8 @@ extra_includes() ::=<<
 >>
 
 extra_src(path) ::=<<
-<path>/drivers_nrf/timer/nrf_drv_timer.c
-<path>/libraries/util/sdk_errors.c
+/drivers_nrf/timer/nrf_drv_timer.c
+/libraries/util/sdk_errors.c
 >>
 
 c_file(includes,name,interface) ::=<<
@@ -23,14 +23,13 @@ c_file(includes,name,interface) ::=<<
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-<name> m_<name>_led;
 
-m_<name>_led.led_id = <interface.configuration.led_id; format="literal">;
 
 void
-ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
 {
     bsp_board_leds_init();
+    self->led_id = <interface.configuration.led_id>;
     NRF_LOG_INFO("INIT!\r\n");
 }
 void
@@ -68,7 +67,7 @@ typedef struct s_<name> {
     int led_id;
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_on(<name> *self);

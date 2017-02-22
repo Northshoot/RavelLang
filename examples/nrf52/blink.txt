@@ -19,19 +19,19 @@ interface Led(led_num: int32):
     def off()
     def toggle()
 
-controller EController(timer : Timer, timer1 : Timer, led_0 : Led, led_1 : Led):
+controller EController(timer : Timer, timer1 : Timer,led_0 : Led,led_1 : Led):
 
     event system.started():
         timer.start_periodic(2000)
         timer1.start_periodic(500)
 
 
+    event timer.fired():
+        led_0.toggle()
 
     event timer1.fired():
         led_1.toggle()
 
-    event timer.fired():
-        led_0.toggle()
 
 
 space EmbeddedSpace:
@@ -45,6 +45,7 @@ space EmbeddedSpace:
         led0 = Led(led_num = 0)
         led1 = Led(led_num = 1)
 
+
     controllers:
-        rndcnt_1 = EController(timer = interfaces.timer, timer1 = interfaces.timer, led_1 = interfaces.led1, led_0 = interfaces.led0)
+        main_ctrl = EController(timer = interfaces.timer, timer1 = interfaces.timer1, led_0 = interfaces.led0, led_1 = interfaces.led1)
 

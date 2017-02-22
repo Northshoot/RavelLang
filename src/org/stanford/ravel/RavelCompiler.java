@@ -7,17 +7,20 @@ import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.analysis.*;
 import org.stanford.ravel.analysis.security.SecurityAnalysis;
+import org.stanford.ravel.analysis.security.SecurityTransformation;
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.compiler.CompileError;
 import org.stanford.ravel.compiler.DefPhase;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ValidateScope;
+import org.stanford.ravel.compiler.ir.LowerIRPass;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
+import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.Space;
 
@@ -141,6 +144,17 @@ public class RavelCompiler {
             controllerCompiler.postAnalysis(c);
     }
 
+    private void compileModelsPostAnalysis(RavelApplication app) throws FatalCompilerErrorException {
+        LowerIRPass pass = new LowerIRPass(this, options.hasFOption("dump-ir"));
+
+        for (Space s : app.getSpaces()) {
+            for (ConcreteModel model : s.getModels()) {
+                pass.run(model.getReceiveCode());
+                pass.run(model.getSendCode());
+            }
+        }
+    }
+
     private void compileSpaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
         // this is effectively the ref/link phase, where
         // models, controllers, and platforms are linked together
@@ -247,8 +261,16 @@ public class RavelCompiler {
                 if (!success())
                     return;
 
+                // transform the IR with security info
+                // FIXME: for now, we always disable encryption and MAC
+                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), true, true);
+                securityTransformation.run();
+                if (!success())
+                    return;
+
                 // lower IR and prepare for code generation
                 compileControllersPostAnalysis(app);
+                compileModelsPostAnalysis(app);
 
                 LOGGER.info("Internal representation is created!");
 

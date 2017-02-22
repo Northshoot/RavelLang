@@ -39,9 +39,10 @@ static bool one_shoot = false;
 
 
 void
-ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
 {
     //TODO: parse in the application to determine if which timer are used and optimize the code
+    self->__id = instance_id;
 
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
     //create single shoot timer
@@ -92,15 +93,16 @@ ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t 
 {
     NRF_LOG_INFO("start_periodic %d\r\n",time);
     one_shoot = false;
-    <name>__err_code = app_timer_start(m_<name>_timer_periodic, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , NULL);
+    <name>__err_code = app_timer_start(m_<name>_timer_periodic, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , self);
     APP_ERROR_CHECK(<name>__err_code);
 }
 
 
 void
-ravel_generated_<name; format="function">_fired( void* p_context)
+ravel_generated_<name; format="function">_fired( void* data)
 {
-    ravel_generated_<interface.controllerMap.fired:{c|<c.name; format="function">_<name; format="function">_fired(NULL);}; separator="\n">
+        <name> *self = data;
+        <dispatch_event(interface, "fired",[])>
 }
 >>
 
@@ -122,10 +124,11 @@ typedef struct s_<name> <name>;
 <begin_extern_c()>
 
 typedef struct s_<name> {
-    <interface.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);

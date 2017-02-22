@@ -74,11 +74,19 @@ case <instance_id>:
 >>
 
 dispatch_event(component, event, params) ::=<<
-switch (__id) {
+switch (self->__id) {
 <component.controllerMap.(event):dispatch_event_case(event, component, params); separator="\n">
 }
 >>
 
 dispatch_event_single_instance(component, event, params) ::=<<
 <component.controllerMap.(event):{instance_id|<component.controllerMap.(event).(instance_id):call_event(event, params); separator="\n">}; separator="\n">
+>>
+
+call_event_ptr(handler, event, params) ::=<<
+ravel_generated_<handler.controller.name; format="function">_<handler.varName>_<event>(&self->ctr_<handler.controllerInstance.varName><if(params)>, <params; separator=", "><endif>);
+>>
+
+dispatch_event_single_instance_ptr(component, event, params) ::=<<
+<component.controllerMap.(event):{instance_id|<component.controllerMap.(event).(instance_id):call_event_ptr(event, params); separator="\n">}; separator="\n">
 >>

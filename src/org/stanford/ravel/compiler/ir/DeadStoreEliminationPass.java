@@ -35,6 +35,10 @@ public class DeadStoreEliminationPass {
         liveVariables.clear();
         // the return value is always live
         liveVariables.add(Registers.RETURN_REG);
+        // parameters are always live for the purposes of this pass
+        // (so we don't dead store eliminate field sets to parameters!)
+        // stores to the actual variables are handled by dead value elimination
+        liveVariables.addAll(ir.getParameters());
 
         // first compute the dead values
         do {

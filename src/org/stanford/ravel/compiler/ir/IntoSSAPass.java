@@ -101,9 +101,21 @@ class IntoSSAPass {
         Definition def = new Definition();
         def.inBlock = inBlock;
         def.instruction = instr;
-        // drop all r
-        localState.put(var, new HashSet<>());
-        localState.get(var).add(def);
+
+        localState.compute(var, (existingKey, existingDefs) -> {
+            Set<Definition> newDefs = new HashSet<>();
+            newDefs.add(def);
+
+            if (existingDefs != null && newDefs.equals(existingDefs))
+                return existingDefs;
+            if (existingDefs != null && !newDefs.equals(existingDefs)) {
+                // mark that this var has multiple definitions (
+                affectedVars.add(var);
+            }
+
+            // drop whatever was existing
+            return newDefs;
+        });
     }
     private void define(Map<Integer, Set<Definition>> localState, PhiNode phi) {
         Definition def = new Definition();

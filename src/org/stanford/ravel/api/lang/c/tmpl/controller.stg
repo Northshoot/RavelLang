@@ -2,7 +2,7 @@ import "common.stg"
 
 define_event_handler(handler, controller_name) ::=<<
 void
-ravel_generated_<controller_name; format="function">_<handler.modelVar.type.name; format="function">_<handler.eventType.eventName>(<controller_name>* this<! this is not a keyword in C, so we can use it !><append_parameter_list(handler.arguments)>)
+ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<handler.eventType.eventName>(<controller_name>* this<! this is not a keyword in C, so we can use it !><append_parameter_list(handler.arguments)>)
 {
     <handler.body>}
 >>
@@ -30,7 +30,7 @@ ravel_generated_<name; format="function">_finalize(<name>* self)
 >>
 
 declare_event_handler(handler, controller_name) ::=<<
-void ravel_generated_<controller_name; format="function">_<handler.modelVar.type.name; format="function">_<handler.eventType.eventName>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
+void ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<handler.eventType.eventName>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
 >>
 
 h_file(includes,name,parameters,eventHandlers) ::=<<
