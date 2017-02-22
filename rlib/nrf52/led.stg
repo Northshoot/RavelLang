@@ -23,7 +23,9 @@ c_file(includes,name,interface) ::=<<
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-int LED_ID = <interface.configuration.led_id; format="literal">;
+<name> m_<name>_led;
+
+m_<name>_led.led_id = <interface.configuration.led_id; format="literal">;
 
 void
 ravel_generated_<name; format="function">_init(<name> *self)
@@ -38,19 +40,19 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
 }
 
 void
-ravel_generated_<name; format="function">_on()
+ravel_generated_<name; format="function">_on(<name> *self)
 {
-    bsp_board_led_on(LED_ID);
+    bsp_board_led_on(self->led_id);
 }
 void
-ravel_generated_<name; format="function">_off()
+ravel_generated_<name; format="function">_off(<name> *self)
 {
-    bsp_board_led_off(LED_ID);
+    bsp_board_led_off(self->led_id);
 }
 void
-ravel_generated_<name; format="function">_toggle()
+ravel_generated_<name; format="function">_toggle(<name> *self)
 {
-    bsp_board_led_invert(LED_ID);
+    bsp_board_led_invert(self->led_id);
 }
 >>
 
@@ -63,15 +65,15 @@ typedef struct s_<name> <name>;
 <begin_extern_c()>
 
 typedef struct s_<name> {
-    int dummy;
+    int led_id;
 } <name>;
 
 void ravel_generated_<name; format="function">_init(<name> *self);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
-void ravel_generated_<name; format="function">_on();
-void ravel_generated_<name; format="function">_off();
-void ravel_generated_<name; format="function">_toggle();
+void ravel_generated_<name; format="function">_on(<name> *self);
+void ravel_generated_<name; format="function">_off(<name> *self);
+void ravel_generated_<name; format="function">_toggle(<name> *self);
 <end_extern_c()>
 <end_header("", name)>
 >>
