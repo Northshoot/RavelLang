@@ -50,7 +50,7 @@ public class TypedIRBuilder {
         return ir;
     }
 
-    public void addInstruction(TInstruction instr) {
+    public void add(TInstruction instr) {
         cfgBuilder.addInstruction(instr);
     }
 }

@@ -160,7 +160,8 @@ space GatewaySpace:
 
     controllers:
         rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
-
+        # swap the timers now
+        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
 
 
 space EmbeddedSpace:

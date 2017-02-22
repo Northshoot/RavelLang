@@ -1,42 +1,6 @@
 import "common.stg"
 
-record_deserialize ::= [
-    "boolean": "OneByteToBool",
-    "byte": "OneByteToByte",
-    "int": "FourBytesToInt",
-    "double": "EightBytesToDouble",
-    "java.lang.String": "BytesToString",
-    "org.stanford.ravel.rrt.tiers.Error": "FourBytesToError",
-    "java.util.Date": "FourBytesToDate",
-    default: "Unsupported<! this will blow up !>"
-]
-record_field_size ::= [
-    "boolean": "1",
-    "byte": "1",
-    "int": "4",
-    "double": "8",
-    "java.lang.String": "ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, pos, pos + 2)); pos += 2",
-    "org.stanford.ravel.rrt.tiers.Error": "4",
-    "java.util.Date": "4",
-    default: "0"
-]
-
-deserialize_prim(type, where) ::=<<
-sz = <record_field_size.(type)>;
-<where> = ByteWork.convert<record_deserialize.(type)>(ByteWork.getBytes(data, pos, pos + sz));
-pos += sz;
->>
-
-deserialize_field(f) ::=<<
-<! duck typing to find array types... !><if(f.type.elementType)>len = ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, pos, pos + 2));
-pos += 2;
-this.<f.name> = new <f.type.elementType>[len];
-for (int i = 0; i \< len; i++) {
-    <deserialize_prim(f.type.elementType, {this.<f.name>[i]})>
-}<else><deserialize_prim(f.type, {this.<f.name>})><endif>
->>
-
-record_class(fields) ::=<<
+record_class(model, fields) ::=<<
 public static class Record implements ModelRecord {
     private int __idx = -1;
 
@@ -46,16 +10,13 @@ public static class Record implements ModelRecord {
     }
 
     public Record(byte[] data) {
-        // Skip model ID
-
-        this.__idx = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 4, 8));
-        int pos = 8;
-        int sz, len;
-        <fields:deserialize_field(); separator="\n">
+        <model.receiveCode>
     }
 
     @Override
     public byte[] toBytes() {
+        <model.sendCode>
+
         GrowableByteArray outputStream = new GrowableByteArray();
         outputStream.write(ByteWork.getByteArray(MODEL_ID));
         outputStream.write(ByteWork.getByteArray(__idx));
@@ -89,7 +50,7 @@ import org.stanford.ravel.rrt.Context;
 <imports:do_import()>
 
 public class <name> extends <base>\<<name>.Record> {
-    <record_class(model.baseModel.fields)>
+    <record_class(model, model.baseModel.fields)>
 
     public static final int MODEL_ID = <model.baseModel.id>;
 

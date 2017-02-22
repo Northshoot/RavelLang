@@ -21,12 +21,25 @@ c_file(includes,name,base,model) ::=<<
 #define ravel_base_model(m) (&(m)->__base.base)
 
 void
-ravel_generated_<model.name; format="function">_record_init(<model.name>_Record *record)
+ravel_generated_<model.name; format="function">_record_init(<model.name>_Record *this)
 {
-    /* TODO */
+    /* TODO Clear the record */
 }
+
 void
-ravel_generated_<model.name; format="function">_record_finalize(<model.name>_Record *record)
+ravel_generated_<model.name; format="function">_record_init_from_network(<model.name>_Record *this, uint8_t *data)
+{
+    <model.receiveCode>
+}
+
+uint8_t *
+ravel_generated_<model.name; format="function">_record_get_bytes(<model.name>_Record *this)
+{
+    <model.sendCode>
+}
+
+void
+ravel_generated_<model.name; format="function">_record_finalize(<model.name>_Record *this)
 {
     /* Free any record resources (eg strings) */
 }
@@ -78,6 +91,8 @@ typedef struct {
 
 void ravel_generated_<model_name; format="function">_record_init(<model_name>_Record *record);
 void ravel_generated_<model_name; format="function">_record_finalize(<model_name>_Record *record);
+void ravel_generated_<model.name; format="function">_record_init_from_network(<model.name>_Record *this, uint8_t *data);
+uint8_t *ravel_generated_<model.name; format="function">_record_get_bytes(<model.name>_Record *this);
 >>
 
 h_file(includes,name,base,model) ::=<<
