@@ -51,8 +51,8 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
         return mEvents.iterator();
     }
 
-    public InstantiatedController instantiate(Space space, String varName) {
-        return new InstantiatedController(space, this, varName);
+    public ConcreteController instantiate(Space space) {
+        return new ConcreteController(space, this);
     }
 
     public void addWrittenToModel(Model m) {

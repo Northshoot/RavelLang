@@ -98,7 +98,7 @@ public class SecurityAnalysis {
     }
 
     private static boolean writesToField(Space space, ModelField field) {
-        for (InstantiatedController ic : space.getControllers()) {
+        for (ConcreteController ic : space.getControllers()) {
             for (LinkedEvent event : ic) {
                 for (TBlock block : event.getHandler().getBody().getControlFlowGraph()) {
                     for (TInstruction instr : block) {

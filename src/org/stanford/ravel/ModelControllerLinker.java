@@ -25,7 +25,7 @@ public class ModelControllerLinker {
         this.app = app;
     }
 
-    private void applyParametersAndProperties(ConfigurableComponent component, ParametrizedComponent instance, InstanceSymbol is) {
+    private void applyParametersAndProperties(ConfigurableComponent component, ComponentInstance instance, InstanceSymbol is) {
         for (Map.Entry<String, Object> entry : is.getParameterMap().entrySet()) {
             String pname = entry.getKey();
             Object pvalue = entry.getValue();
@@ -40,17 +40,12 @@ public class ModelControllerLinker {
                 instance.setParam(pname, pvalue);
             }
         }
-        boolean ok = true;
         // check that all parameters are set
         for (String param : component.getParameterNames()) {
             if (!instance.isParamSet(param)) {
                 driver.emitError(new SourceLocation(is.getDefNode()), "missing value for parameter " + param);
-                ok = false;
             }
         }
-        if (!ok)
-            return;
-        component.applyProperties(instance);
     }
 
     public Space processSpace(SpaceSymbol ssb) {
@@ -87,10 +82,15 @@ public class ModelControllerLinker {
                 return;
             }
 
+            // see if we have build the interface already
+            ConcreteInterface iiface = space.findInterface(i);
+            if (iiface == null)
+                iiface = i.instantiate(space);
+
             // instantiate the interface on this space
-            InstantiatedInterface iiface = i.instantiate(space, is.getName());
-            applyParametersAndProperties(i, iiface, is);
-            space.add(is.getName(), iiface);
+            ConcreteInterfaceInstance instance = new ConcreteInterfaceInstance(iiface, is.getName());
+            applyParametersAndProperties(i, instance, is);
+            space.add(is.getName(), instance);
         });
 
         // instantiate models
@@ -110,9 +110,11 @@ public class ModelControllerLinker {
             }
 
             // instantiate the model on this space
-            InstantiatedModel im = m.instantiate(space, is.getName());
-            applyParametersAndProperties(m, im, is);
-            space.add(is.getName(), im);
+            ConcreteModel im = m.instantiate(space);
+            ConcreteModelInstance instance = new ConcreteModelInstance(im, is.getName());
+
+            applyParametersAndProperties(m, instance, is);
+            space.add(is.getName(), instance);
         });
 
         // instantiate controllers
@@ -125,12 +127,16 @@ public class ModelControllerLinker {
                 return;
             }
 
-            InstantiatedController ictr = ctr.instantiate(space, is.getName());
+            ConcreteController ictr = space.findController(ctr);
+            if (ictr == null)
+                ictr = ctr.instantiate(space);
+
+            ConcreteControllerInstance instance = new ConcreteControllerInstance(ictr, is.getName());
 
             // set parameters
-            Map<String, EventComponent> eventMap = new HashMap<>();
+            Map<String, EventComponentInstance> eventMap = new HashMap<>();
             eventMap.put("system", space.getSystemAPI());
-            ictr.setParam("system", space.getSystemAPI());
+            instance.setParam("system", space.getSystemAPI());
 
             boolean ok = true;
             for (Map.Entry<String, Object> param : is.getParameterMap().entrySet()) {
@@ -152,17 +158,17 @@ public class ModelControllerLinker {
                             type = null;
                             ok = false;
                         } else {
-                            InstantiatedInterface iiface = space.getInterface(((InstanceSymbol) pvalue).getName());
+                            ConcreteInterfaceInstance iiface = space.getInterface(((InstanceSymbol) pvalue).getName());
                             assert iiface != null;
-                            assert i == iiface.getBaseInterface();
+                            assert i == iiface.getComponent().getBaseInterface();
                             eventMap.put(pname, iiface);
                             value = iiface;
                             type = i.getType();
                         }
                     } else {
-                        InstantiatedModel im = space.getModel(((InstanceSymbol) pvalue).getName());
+                        ConcreteModelInstance im = space.getModel(((InstanceSymbol) pvalue).getName());
                         assert im != null;
-                        assert m == im.getBaseModel();
+                        assert m == im.getComponent().getBaseModel();
                         eventMap.put(pname, im);
                         type = m.getType();
                         value = im;
@@ -180,17 +186,17 @@ public class ModelControllerLinker {
                         ctr.getParameterType(pname).getName());
                     ok = false;
                 } else {
-                    if (ictr.isParamSet(pname)) {
+                    if (instance.isParamSet(pname)) {
                         driver.emitError(new SourceLocation(is.getDefNode()), "duplicate assignment to parameter " + pname);
                     } else {
-                        ictr.setParam(pname, value);
+                        instance.setParam(pname, value);
                     }
                 }
             }
 
             // check that all parameters are set
             for (String param : ctr.getParameterNames()) {
-                if (!ictr.isParamSet(param)) {
+                if (!instance.isParamSet(param)) {
                     driver.emitError(new SourceLocation(is.getDefNode()), "missing value for parameter " + param);
                     ok = false;
                 }
@@ -198,18 +204,22 @@ public class ModelControllerLinker {
             if (!ok)
                 return;
 
+            // link components
+            for (EventComponentInstance ec : eventMap.values())
+                ictr.linkComponent(ec.getComponent());
+
             // link events
             for (EventHandler e : ctr) {
                 VariableSymbol modelVar = e.getModelVar();
-                EventComponent ec = eventMap.get(modelVar.getName());
+                EventComponentInstance ec = eventMap.get(modelVar.getName());
                 // we know modelVar is a parameter of ctr (from DefPhase), we know it is of model type (because we checked types in
                 // DefPhase), we know the value we're passing is actually a model (because we just checked) and we know
                 // that we're passing a value (because we just checked)
                 assert ec != null;
-                ictr.linkEvent(e, ec);
+                instance.linkEvent(e, ec);
             }
 
-            space.add(is.getName(), ictr);
+            space.add(is.getName(), instance);
         });
 
         // freeze the space to build the derived state

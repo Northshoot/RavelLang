@@ -2,9 +2,9 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.InstantiatedInterface;
-import org.stanford.ravel.primitives.InstantiatedModel;
+import org.stanford.ravel.primitives.ConcreteController;
+import org.stanford.ravel.primitives.ConcreteInterface;
+import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.ArrayList;
@@ -34,22 +34,22 @@ public abstract class BaseLanguage implements ConcreteLanguage {
     }
 
     // should be abstract, but CLang...
-    protected abstract CodeModule createModel(InstantiatedModel im);
-    protected abstract CodeModule createController(InstantiatedController ictr);
-    protected CodeModule createInterface(InstantiatedInterface iiface) {
+    protected abstract CodeModule createModel(ConcreteModel im);
+    protected abstract CodeModule createController(ConcreteController ictr);
+    protected CodeModule createInterface(ConcreteInterface iiface) {
         return null;
     }
 
     private void createModels(Space s) {
-        for (InstantiatedModel im : s.getModels())
+        for (ConcreteModel im : s.getModels())
             addModule(createModel(im));
     }
     private void createControllers(Space s) {
-        for (InstantiatedController ictr : s.getControllers())
+        for (ConcreteController ictr : s.getControllers())
             addModule(createController(ictr));
     }
     private void createInterfaces(Space s) {
-        for (InstantiatedInterface iiface : s.getInterfaces())
+        for (ConcreteInterface iiface : s.getInterfaces())
             addModule(createInterface(iiface));
     }
     protected abstract CodeModule createDispatcher(Space s);

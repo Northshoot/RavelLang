@@ -19,7 +19,7 @@ public class ModelOperationAnalysis {
     private final boolean debug;
     private boolean progress;
 
-    private final Map<InstantiatedController, Map<FieldTag, Operation>> operations = new HashMap<>();
+    private final Map<ConcreteController, Map<FieldTag, Operation>> operations = new HashMap<>();
 
     public ModelOperationAnalysis(RavelCompiler driver, RavelApplication app, boolean debug) {
         this.driver = driver;
@@ -72,7 +72,7 @@ public class ModelOperationAnalysis {
 
     private void runModelOperations() {
         for (Space s : app.getSpaces()) {
-            for (InstantiatedController ic : s.getControllers()) {
+            for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     LocalModelOperationAnalysis localAnalysis = new LocalModelOperationAnalysis(event, event.getHandler().getBody());
                     localAnalysis.run();

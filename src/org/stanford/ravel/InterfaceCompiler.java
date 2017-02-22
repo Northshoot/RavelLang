@@ -24,7 +24,7 @@ class InterfaceCompiler {
 
         for (Symbol s : symbol.getSymbols()) {
             if (s instanceof VariableSymbol)
-                iface.addParameter(s.getName(), ((VariableSymbol) s).getType());
+                iface.addParameter((VariableSymbol)s);
         }
 
         Scope implementation = symbol.getImplementationScope();
@@ -47,9 +47,9 @@ class InterfaceCompiler {
         if (config != null) {
             for (Symbol s : config.getSymbols()) {
                 if (s instanceof ConstantSymbol)
-                    iface.addConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
+                    iface.setConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
                 else if (s instanceof ReferenceSymbol)
-                    iface.addReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
+                    iface.setReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
                 else
                     throw new AssertionError();
             }

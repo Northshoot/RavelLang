@@ -3,7 +3,7 @@ import "common.stg"
 define_dispatch_func(model, event, controllers) ::=<<
 static void dispatch_<event>(<model.name> *self, Context *ctx)
 {
-    <controllers:{c|ravel_generated_<c.name; format="function">_<model.name; format="function">_<event>(self->ctr_<c.varName>, ctx);}; separator="\n">
+    <dispatch_event_single_instance(model, event, ["ctx"])>
 }
 >>
 
@@ -17,7 +17,6 @@ c_file(includes,name,base,model) ::=<<
 <includes:do_include(); separator="\n">
 
 #define MODEL_ID   <model.baseModel.id>
-#define MODEL_SIZE <model.size>
 
 #define ravel_base_model(m) (&(m)->__base.base)
 
@@ -45,9 +44,9 @@ static const RavelModelVTable vtable = {
 };
 
 void
-ravel_generated_<model.name; format="function">_init(<model.name> *self)
+ravel_generated_<model.name; format="function">_init(<model.name> *self<append_parameter_list(model.baseModel.parameters)>)
 {
-    <base; format="function">_init(&self->__base, MODEL_SIZE, sizeof(<model.name>_Record));
+    <base; format="function">_init(&self->__base, <model.baseModel.size>, sizeof(<model.name>_Record));
     ravel_base_model(self)->vtable = &vtable;
 }
 
@@ -104,7 +103,7 @@ struct s_<name> {
     <model.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
 };
 
-void ravel_generated_<model.name; format="function">_init(<model.name> *self);
+void ravel_generated_<model.name; format="function">_init(<model.name> *self<append_parameter_list(model.baseModel.parameters)>);
 void ravel_generated_<model.name; format="function">_finalize(<model.name> *self);
 
 /* The Top API, used by the Controller */

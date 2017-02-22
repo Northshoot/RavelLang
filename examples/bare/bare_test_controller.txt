@@ -75,6 +75,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
         for r in random.all():
             system.print("one record")
 
+    event timer2.fired():
+        system.print("timer2")
+
     event system.started():
         timer.start_periodic(5000)
 

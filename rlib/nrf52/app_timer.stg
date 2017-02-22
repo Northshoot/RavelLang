@@ -39,7 +39,7 @@ static bool one_shoot = false;
 
 
 void
-ravel_generated_<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
 {
     //TODO: parse in the application to determine if which timer are used and optimize the code
 
@@ -125,7 +125,7 @@ typedef struct s_<name> {
     <interface.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);

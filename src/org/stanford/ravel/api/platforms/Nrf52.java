@@ -4,15 +4,12 @@ import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.platforms.nrf52.NrfConfig;
 import org.stanford.ravel.api.platforms.nrf52.NrfPlatformOptions;
 import org.stanford.ravel.misc.TemplatePair;
-import org.stanford.ravel.primitives.InstantiatedInterface;
 import org.stanford.ravel.primitives.Space;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 //TODO:
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 //TODO: platforms should be separated form the compiler
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -66,10 +63,10 @@ public class Nrf52 extends BaseCPlatform {
         nc.NRF_LOG_DEFERRED =0; //no buffering
         nc.NRF_LOG_DEFAULT_LEVEL =4; //Debug level 4
 
-//        Collection<InstantiatedInterface> interfaces = s.getInterfaces();
-//        Iterator<InstantiatedInterface> interfaceIterator = interfaces.iterator();
+//        Collection<ConcreteInterface> interfaces = s.getInterfaces();
+//        Iterator<ConcreteInterface> interfaceIterator = interfaces.iterator();
 //        while (interfaceIterator.hasNext()){
-//            InstantiatedInterface next = interfaceIterator.next();
+//            ConcreteInterface next = interfaceIterator.next();
 //            Object define = next.getConfiguration().get("DEFINE");
 //        }
         return nc;

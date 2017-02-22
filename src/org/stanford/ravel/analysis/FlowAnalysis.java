@@ -63,7 +63,7 @@ public class FlowAnalysis {
     }
 
     private boolean writesTo(Space s, Model m) {
-        for (InstantiatedController ic : s.getControllers()) {
+        for (ConcreteController ic : s.getControllers()) {
             if (ic.getController().writesTo(m))
                 return true;
         }
@@ -154,7 +154,7 @@ public class FlowAnalysis {
     }
 
     private void verify(Space s) {
-        for (InstantiatedModel im : s.getModels()) {
+        for (ConcreteModel im : s.getModels()) {
             Collection<Flow> flows = im.getBaseModel().findFlowsForSpace(s);
 
             if (flows.isEmpty()) {
@@ -173,7 +173,7 @@ public class FlowAnalysis {
             }
         }
 
-        for (InstantiatedController ic : s.getControllers()) {
+        for (ConcreteController ic : s.getControllers()) {
             for (Model m : ic.getController().getWrittenToModels()) {
                 boolean found = false;
                 for (Flow f : m.getFlows()) {

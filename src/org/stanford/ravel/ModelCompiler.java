@@ -32,7 +32,7 @@ public class ModelCompiler {
 
         for (Symbol s : ms.getSymbols()) {
             if (s instanceof VariableSymbol)
-                m.addParameter(s.getName(), ((VariableSymbol) s).getType());
+                m.addParameter((VariableSymbol)s);
         }
 
         Scope propScope = ms.getNestedScope("properties");
@@ -52,9 +52,9 @@ public class ModelCompiler {
                 driver.emitError(new SourceLocation(s.getDefNode()), "flow property must be in flow syntax (space1 -> space2 -> ... spaceN for streaming models, space1, space2, ... spaceN for replicated models)");
 
             if (s instanceof ConstantSymbol)
-                m.addConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
+                m.setConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
             else if (s instanceof ReferenceSymbol)
-                m.addReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
+                m.setReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
             else if (s instanceof FlowSymbol)
                 ; // let FlowAnalysis deal with that
             else
@@ -72,6 +72,7 @@ public class ModelCompiler {
 
         if (debug)
             System.out.println(m);
+
         return m;
     }
 }
