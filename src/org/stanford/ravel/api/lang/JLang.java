@@ -218,30 +218,30 @@ public class JLang extends BaseLanguage {
         ST tmpl = dispatcherGroup.getInstanceOf("file");
         String packageName = options.getPackageName();
 
-        for (InstantiatedModel im : s.getModels())
+        for (ConcreteModel im : s.getModels())
             tmpl.add("imports", packageName + ".models." + im.getName());
-        for (InstantiatedInterface iiface : s.getInterfaces())
+        for (ConcreteInterface iiface : s.getInterfaces())
             tmpl.add("imports", packageName + ".interfaces." + iiface.getName());
-        for (InstantiatedController ictr : s.getControllers())
+        for (org.stanford.ravel.primitives.ConcreteController ictr : s.getControllers())
             tmpl.add("imports", packageName + ".controller." + ictr.getName());
 
-        for (InstantiatedModel im : s.getModels())
+        for (ConcreteModelInstance im : s.getModelInstances())
             tmpl.add("models", im);
-        for (InstantiatedInterface iiface : s.getInterfaces())
+        for (ConcreteInterfaceInstance iiface : s.getInterfaceInstances())
             tmpl.add("interfaces", iiface);
-        for (InstantiatedController ictr : s.getControllers()) {
+        for (ConcreteControllerInstance ictr : s.getControllerInstances()) {
             ConcreteController concrete = new ConcreteController();
-            concrete.name = ictr.getName();
+            concrete.name = ictr.getComponent().getName();
             concrete.varName = ictr.getVarName();
 
-            for (VariableSymbol sym : ictr.getController().getParameterSymbols()) {
+            for (VariableSymbol sym : ictr.getComponent().getController().getParameterSymbols()) {
                 Object pvalue = ictr.getParam(sym.getName());
 
-                if (pvalue instanceof InstantiatedModel) {
-                    concrete.parameterValues.add("model_" + ((InstantiatedModel) pvalue).getVarName());
-                } else if (pvalue instanceof InstantiatedInterface) {
-                    concrete.parameterValues.add("iface_" + ((InstantiatedInterface) pvalue).getVarName());
-                } else if (pvalue instanceof SystemAPI) {
+                if (pvalue instanceof ConcreteModelInstance) {
+                    concrete.parameterValues.add("model_" + ((ConcreteModelInstance) pvalue).getVarName());
+                } else if (pvalue instanceof ConcreteInterfaceInstance) {
+                    concrete.parameterValues.add("iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
+                } else if (pvalue instanceof SystemAPIInstance) {
                     concrete.parameterValues.add("this");
                 } else {
                     concrete.parameterValues.add(JLITERAL.toLiteral(pvalue));
@@ -255,7 +255,7 @@ public class JLang extends BaseLanguage {
     }
 
     @Override
-    public CodeModule createInterface(InstantiatedInterface iiface) {
+    public CodeModule createInterface(ConcreteInterface iiface) {
         JavaLanguageOptions options = JavaLanguageOptions.getInstance();
 
         String ifaceGroupName = iiface.getBaseInterface().getImplementation("java");
@@ -271,15 +271,15 @@ public class JLang extends BaseLanguage {
 
         String packageName = options.getPackageName() + ".interfaces";
         ifaceTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
-        for (InstantiatedController ictr : iiface.getControllerList())
-            ifaceTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
+        for (ConcreteControllerInstance ictr : iiface.getControllerList())
+            ifaceTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getComponent().getName());
         ifaceTmpl.add("interface", iiface);
 
         return simpleModule(ifaceTmpl, iiface.getName(), packageName);
     }
 
     @Override
-    protected CodeModule createModel(InstantiatedModel im) {
+    protected CodeModule createModel(ConcreteModel im) {
         JavaLanguageOptions options = JavaLanguageOptions.getInstance();
         ST modelTmpl = modelGroup.getInstanceOf("file");
 
@@ -300,8 +300,8 @@ public class JLang extends BaseLanguage {
                 throw new AssertionError();
         }
         modelTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
-        for (InstantiatedController ictr : im.getControllerList())
-            modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getName());
+        for (ConcreteControllerInstance ictr : im.getControllerList())
+            modelTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getComponent().getName());
         modelTmpl.add("base", baseClass);
         modelTmpl.add("model", im);
         modelTmpl.add("set_endpoints", im.getBaseModel().getModelType() != Model.Type.LOCAL);
@@ -310,7 +310,7 @@ public class JLang extends BaseLanguage {
     }
 
     @Override
-    protected CodeModule createController(InstantiatedController ictr) {
+    protected CodeModule createController(org.stanford.ravel.primitives.ConcreteController ictr) {
         JavaLanguageOptions options = JavaLanguageOptions.getInstance();
 
         ST controllerTmpl = controllerGroup.getInstanceOf("file");
@@ -318,10 +318,10 @@ public class JLang extends BaseLanguage {
         controllerTmpl.add("package", packageName);
         controllerTmpl.add("name", ictr.getName());
 
-        for (InstantiatedModel im : ictr.getLinkedModels()) {
+        for (ConcreteModel im : ictr.getLinkedModels()) {
             controllerTmpl.add("imports", options.getPackageName() + ".models." + im.getName());
         }
-        for (InstantiatedInterface iiface : ictr.getLinkedInterfaces()) {
+        for (ConcreteInterface iiface : ictr.getLinkedInterfaces()) {
             controllerTmpl.add("imports", options.getPackageName() + ".interfaces." + iiface.getName());
         }
 

@@ -10,7 +10,7 @@ void
 CLOCK_SECOND; // The number of ticks per second.
 
 void
-<name; format="function">_init(<name> *self)
+<name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>)
 {
 void clock_init(void); // Initialize the clock module.
 }
@@ -53,7 +53,7 @@ typedef struct {
     int dummy;
 } <name>;
 
-void <name; format="function">_init(<name> *self);
+void <name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>);
 void <name; format="function">_finalize(<name> *self);
 
 int <name; format="function">_next(<name> *self);

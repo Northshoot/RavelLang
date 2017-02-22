@@ -50,7 +50,7 @@ public class ModelOwnershipAnalysis {
     private void dumpAllOwnerships() {
         System.out.println("Ownership of event handler variables:");
         for (Space s : app.getSpaces()) {
-            for (InstantiatedController ic : s.getControllers()) {
+            for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     System.out.println(event);
                     event.getAllVariableCreators().forEach((var, creators) -> {
@@ -69,7 +69,7 @@ public class ModelOwnershipAnalysis {
     private void dumpAllModelTags() {
         System.out.println("Model tags of event handler variables:");
         for (Space s : app.getSpaces()) {
-            for (InstantiatedController ic : s.getControllers()) {
+            for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     System.out.println(event);
                     event.getAllVariableModelTags().forEach((var, tags) -> {
@@ -88,7 +88,7 @@ public class ModelOwnershipAnalysis {
     private void dumpAllFieldTags() {
         System.out.println("Field tags of event handler variables:");
         for (Space s : app.getSpaces()) {
-            for (InstantiatedController ic : s.getControllers()) {
+            for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     System.out.println(event);
                     event.getAllVariableFieldTags().forEach((var, tags) -> {
@@ -122,7 +122,7 @@ public class ModelOwnershipAnalysis {
 
     private void runLocalOwnership() {
         for (Space s : app.getSpaces()) {
-            for (InstantiatedController ic : s.getControllers()) {
+            for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     ModelEvent modelEvent;
                     EventHandler handler = event.getHandler();

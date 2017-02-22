@@ -52,13 +52,33 @@ append_parameter_list(params)::=<<<if(params)>, <params:{p|<p.type> <p.name>}; s
 >>
 
 declare_set_controller_method(c, component_name) ::=<<
-void ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr);
+void ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.component.name> *ctr);
 >>
 
 define_set_controller_method(c, component_name) ::=<<
 void
-ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.name> *ctr)
+ravel_generated_<component_name; format="function">_set_controller_<c.varName>(<component_name> *self, <c.component.name> *ctr)
 {
     self->ctr_<c.varName> = ctr;
 }
+>>
+
+call_event(handler, event, params) ::=<<
+ravel_generated_<handler.controller.name; format="function">_<handler.varName>_<event>(self->ctr_<handler.controllerInstance.varName><if(params)>, <params; separator=", "><endif>);
+>>
+
+dispatch_event_case(instance_id, event, component, params) ::=<<
+case <instance_id>:
+    <component.controllerMap.(event).(instance_id):call_event(event, params); separator="\n">
+    break;
+>>
+
+dispatch_event(component, event, params) ::=<<
+switch (__id) {
+<component.controllerMap.(event):dispatch_event_case(event, component, params); separator="\n">
+}
+>>
+
+dispatch_event_single_instance(component, event, params) ::=<<
+<component.controllerMap.(event):{instance_id|<component.controllerMap.(event).(instance_id):call_event(event, params); separator="\n">}; separator="\n">
 >>

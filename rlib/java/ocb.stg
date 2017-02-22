@@ -6,7 +6,7 @@ package <package>;
 <imports:do_import()>
 
 public class <name> {
-    public <name>(AppDispatcher dispatcher) {
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseModel.parameters)>) {
     }
 
     public byte[] encrypt(Object o) {

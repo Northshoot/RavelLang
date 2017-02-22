@@ -14,7 +14,6 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -135,7 +134,7 @@ public class CLang extends BaseLanguage {
     }
 
     @Override
-    public CodeModule createInterface(InstantiatedInterface iiface) {
+    public CodeModule createInterface(ConcreteInterface iiface) {
         //TODO: fix dependency injection properly
         String ifaceGroupName = iiface.getBaseInterface().getImplementation("c");
         if (ifaceGroupName == null) {
@@ -149,9 +148,9 @@ public class CLang extends BaseLanguage {
         ST iface_h = interfaceGroup.getInstanceOf("h_file");
         ST iface_c = interfaceGroup.getInstanceOf("c_file");
 
-        for (InstantiatedController ictr : iiface.getControllerList())
-            iface_h.add("includes", this.app_dir + ictr.getName() + ".h");
-        iface_c.add("includes", this.app_dir + iiface.getName() + ".h");
+        for (ConcreteControllerInstance ictr : iiface.getControllerList())
+            iface_h.add("includes", app_dir + ictr.getComponent().getName() + ".h");
+        iface_c.add("includes", app_dir + iiface.getName() + ".h");
         iface_c.add("includes", "AppDispatcher.h");
         iface_h.add("interface", iiface);
         iface_c.add("interface", iiface);
@@ -178,35 +177,36 @@ public class CLang extends BaseLanguage {
         ST dispatcher_h = dispatcherGroup.getInstanceOf("h_file");
         ST dispatcher_c = dispatcherGroup.getInstanceOf("c_file");
 
-        for (InstantiatedModel im : s.getModels())
+        for (ConcreteModel im : s.getModels())
             dispatcher_h.add("includes", this.app_dir + im.getName() + ".h");
-        for (InstantiatedInterface iiface : s.getInterfaces())
+        for (ConcreteInterface iiface : s.getInterfaces())
             dispatcher_h.add("includes", this.app_dir + iiface.getName() + ".h");
-        for (InstantiatedController ictr : s.getControllers())
+        for (org.stanford.ravel.primitives.ConcreteController ictr : s.getControllers())
             dispatcher_h.add("includes", this.app_dir + ictr.getName() + ".h");
         dispatcher_c.add("includes", "AppDispatcher.h");
 
-        for (InstantiatedModel im : s.getModels()) {
+        for (ConcreteModelInstance im : s.getModelInstances()) {
             dispatcher_h.add("models", im);
             dispatcher_c.add("models", im);
         }
-        for (InstantiatedInterface iiface : s.getInterfaces()) {
+        for (ConcreteInterfaceInstance iiface : s.getInterfaceInstances()) {
             dispatcher_h.add("interfaces", iiface);
             dispatcher_c.add("interfaces", iiface);
         }
-        for (InstantiatedController ictr : s.getControllers()) {
+
+        for (ConcreteControllerInstance ictr : s.getControllerInstances()) {
             ConcreteController concrete = new ConcreteController();
-            concrete.name = ictr.getName();
+            concrete.name = ictr.getComponent().getName();
             concrete.varName = ictr.getVarName();
 
-            for (VariableSymbol sym : ictr.getController().getParameterSymbols()) {
+            for (VariableSymbol sym : ictr.getComponent().getController().getParameterSymbols()) {
                 Object pvalue = ictr.getParam(sym.getName());
 
-                if (pvalue instanceof InstantiatedModel) {
-                    concrete.parameterValues.add("&self->model_" + ((InstantiatedModel) pvalue).getVarName());
-                } else if (pvalue instanceof InstantiatedInterface) {
-                    concrete.parameterValues.add("&self->iface_" + ((InstantiatedInterface) pvalue).getVarName());
-                } else if (pvalue instanceof SystemAPI) {
+                if (pvalue instanceof ConcreteModelInstance) {
+                    concrete.parameterValues.add("&self->model_" + ((ConcreteModelInstance) pvalue).getVarName());
+                } else if (pvalue instanceof ConcreteInterfaceInstance) {
+                    concrete.parameterValues.add("&self->iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
+                } else if (pvalue instanceof SystemAPIInstance) {
                     concrete.parameterValues.add("&self->sys_api");
                 } else {
                     concrete.parameterValues.add(CLITERAL.toLiteral(pvalue));
@@ -222,13 +222,13 @@ public class CLang extends BaseLanguage {
     }
 
     @Override
-    protected CodeModule createController(InstantiatedController ictr) {
+    protected CodeModule createController(org.stanford.ravel.primitives.ConcreteController ictr) {
         ST h_tmpl = controllerGroup.getInstanceOf("h_file");
         h_tmpl.add("name", ictr.getName());
-        for (InstantiatedModel im : ictr.getLinkedModels()) {
+        for (ConcreteModel im : ictr.getLinkedModels()) {
             h_tmpl.add("includes", this.app_dir + im.getName() + ".h");
         }
-        for (InstantiatedInterface iiface : ictr.getLinkedInterfaces()) {
+        for (ConcreteInterface iiface : ictr.getLinkedInterfaces()) {
             h_tmpl.add("includes", this.app_dir + iiface.getName() + ".h");
         }
 
@@ -269,7 +269,7 @@ public class CLang extends BaseLanguage {
     }
 
     @Override
-    protected CodeModule createModel(InstantiatedModel im) {
+    protected CodeModule createModel(ConcreteModel im) {
         ST model_h = modelGroup.getInstanceOf("h_file");
         ST model_c = modelGroup.getInstanceOf("c_file");
 
@@ -288,8 +288,8 @@ public class CLang extends BaseLanguage {
                 throw new AssertionError();
         }
 
-        for (InstantiatedController ictr : im.getControllerList())
-            model_h.add("includes", this.app_dir + ictr.getName() + ".h");
+        for (ConcreteControllerInstance ictr : im.getControllerList())
+            model_h.add("includes", this.app_dir + ictr.getComponent().getName() + ".h");
         model_c.add("includes", this.app_dir + im.getName() + ".h");
         model_c.add("includes", "AppDispatcher.h");
         model_h.add("base", baseClass);

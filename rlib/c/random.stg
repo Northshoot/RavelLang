@@ -6,7 +6,7 @@ c_file(includes,name,interface) ::=<<
 <includes:do_include(); separator="\n">
 
 void
-<name; format="function">_init(<name> *self)
+<name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>)
 {}
 void
 <name; format="function">_finalize(<name> *self)
@@ -31,7 +31,7 @@ typedef struct {
     int dummy;
 } <name>;
 
-void <name; format="function">_init(<name> *self);
+void <name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>);
 void <name; format="function">_finalize(<name> *self);
 
 int <name; format="function">_next(<name> *self);

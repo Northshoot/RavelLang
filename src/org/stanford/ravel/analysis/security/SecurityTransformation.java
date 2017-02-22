@@ -12,7 +12,7 @@ import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
-import org.stanford.ravel.primitives.InstantiatedModel;
+import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class SecurityTransformation {
         this.enableMAC = !disableMAC;
     }
 
-    private TypedIR compileEncrypt(InstantiatedModel model, List<SecurityOperation> ops) {
+    private TypedIR compileEncrypt(ConcreteModel model, List<SecurityOperation> ops) {
         TypedIRBuilder builder = new TypedIRBuilder();
         // we never access any named registers in this context
         builder.setNextRegister(Registers.FIRST_GP_REG);
@@ -75,7 +75,7 @@ public class SecurityTransformation {
         return ir;
     }
 
-    private TypedIR compileDecrypt(InstantiatedModel model, List<SecurityOperation> ops) {
+    private TypedIR compileDecrypt(ConcreteModel model, List<SecurityOperation> ops) {
         TypedIRBuilder builder = new TypedIRBuilder();
         // we never access any named registers in this context
         builder.setNextRegister(Registers.FIRST_GP_REG);
@@ -113,7 +113,7 @@ public class SecurityTransformation {
 
     public void run() {
         for (Space space : app.getSpaces()) {
-            for (InstantiatedModel im : space.getModels()) {
+            for (ConcreteModel im : space.getModels()) {
                 im.setReceiveCode(compileDecrypt(im, im.getSecurityOperations(true)));
                 im.setSendCode(compileEncrypt(im, im.getSecurityOperations(false)));
             }

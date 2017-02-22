@@ -3,10 +3,7 @@ package org.stanford.ravel.primitives;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.Type;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.*;
 
 /**
  * A base class for interfaces and model, because they both
@@ -16,43 +13,41 @@ import java.util.function.BiConsumer;
  * Created by gcampagn on 2/1/17.
  */
 public class ConfigurableComponent extends Primitive {
-    private final Map<String, Type> mInterface = new HashMap<>();
-    private final Map<String, Object> mConstantProperties = new HashMap<>();
-    private final Map<String, String> mRefProperties = new HashMap<>();
+    private final Map<String, Type> mParameterTypes = new HashMap<>();
+    private final List<String> mParameterNames = new ArrayList<>();
+    private final List<VariableSymbol> mParameters = new ArrayList<>();
+
+    private final Map<String, Object> mProperties = new HashMap<>();
 
     ConfigurableComponent(String name) {
         super(name);
     }
 
-    public void addParameter(String name, Type type) {
-        mInterface.put(name, type);
+    public void addParameter(VariableSymbol sym) {
+        mParameterTypes.put(sym.getName(), sym.getType());
+        mParameterNames.add(sym.getName());
+        mParameters.add(sym);
     }
-
     public Type getParameterType(String name) {
-        return mInterface.get(name);
+        return mParameterTypes.get(name);
     }
-
     public boolean hasParameter(String pname) {
-        return mInterface.containsKey(pname);
+        return mParameterTypes.containsKey(pname);
     }
-
     public Collection<String> getParameterNames() {
-        return mInterface.keySet();
+        return Collections.unmodifiableCollection(mParameterNames);
+    }
+    public Collection<VariableSymbol> getParameters() {
+        return Collections.unmodifiableCollection(mParameters);
     }
 
-    public void applyProperties(ParametrizedComponent instance) {
-        for (Map.Entry<String, Object> entry : mConstantProperties.entrySet()) {
-            instance.setProperty(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<String, String> entry : mRefProperties.entrySet()) {
-            instance.setProperty(entry.getKey(), instance.getParam(entry.getValue()));
-        }
+    public void setConstantProperty(String name, Object value) {
+        mProperties.put(name, value);
     }
-
-    public void addConstantProperty(String name, Object value) {
-        mConstantProperties.put(name, value);
+    public void setReferenceProperty(String name, String ref) {
+        mProperties.put(name, new Reference(ref));
     }
-    public void addReferenceProperty(String name, String ref) {
-        mRefProperties.put(name, ref);
+    public Object getProperty(String name) {
+        return mProperties.get(name);
     }
 }

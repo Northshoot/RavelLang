@@ -2,8 +2,8 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
-import org.stanford.ravel.primitives.InstantiatedController;
-import org.stanford.ravel.primitives.InstantiatedModel;
+import org.stanford.ravel.primitives.ConcreteController;
+import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Space;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -31,13 +31,13 @@ public class PyLang extends BaseLanguage {
     }
 
     @Override
-    protected CodeModule createModel(InstantiatedModel im) {
+    protected CodeModule createModel(ConcreteModel im) {
         // TODO
         return new CodeModule();
     }
 
     @Override
-    protected CodeModule createController(InstantiatedController ictr) {
+    protected CodeModule createController(ConcreteController ictr) {
         // TODO
         return new CodeModule();
     }

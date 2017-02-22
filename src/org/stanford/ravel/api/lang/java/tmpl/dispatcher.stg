@@ -1,9 +1,15 @@
 import "common.stg"
 
-component_field(comp, prefix) ::=<<
-private final <comp.name> <prefix>_<comp.varName> = new <comp.name>(this);
+append_params(comp) ::=<<
+<if(comp.allParameters)>, <comp.allParameters:{p|<p; format="literal">}; separator=", "><endif>
 >>
 
+interface_field(comp) ::=<<
+private final <comp.component.name> iface_<comp.varName> = new <comp.component.name>(this, <comp.instanceId><append_params(comp)>);
+>>
+model_field(comp) ::=<<
+private final <comp.component.name> model_<comp.varName> = new <comp.component.name>(this<append_params(comp)>);
+>>
 controller_field(ctr) ::=<<
 private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
 >>
@@ -13,12 +19,12 @@ private final SinkAPI sink_<sink.varName> = null;
 >>
 
 model_case_event(model, event) ::=<<
-case <model.baseModel.id>:
+case <model.component.baseModel.id>:
     model_<model.varName>.<event>(rp, endpoint);
     break;
 >>
 model_case_event_error(model, event) ::=<<
-case <model.baseModel.id>:
+case <model.component.baseModel.id>:
     model_<model.varName>.<event>(rp, endpoint, error);
     break;
 >>
@@ -49,8 +55,8 @@ import org.stanford.ravel.rrt.events.NetworkEvent;
 <imports:do_import()>
 
 public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemEventAPI {
-    <models:component_field("model"); separator="\n">
-    <interfaces:component_field("iface"); separator="\n">
+    <models:model_field(); separator="\n">
+    <interfaces:interface_field(); separator="\n">
     <controllers:controller_field(); separator="\n">
 
     private DriverAPI driver;
@@ -119,17 +125,17 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     /***********************************************************************/
     @Override
     public void started() {
-        <space.systemAPI.controllerMap.started:{c|ctr_<c.varName>.SystemAPI_started();}; separator="\n">
+        <dispatch_event_single_instance(space.systemAPI.component, "started", [])>
     }
 
     @Override
     public void stopped() {
-        <space.systemAPI.controllerMap.stopped:{c|ctr_<c.varName>.SystemAPI_stopped();}; separator="\n">
+        <dispatch_event_single_instance(space.systemAPI.component, "stopped", [])>
     }
 
     @Override
     public void restarted() {
-        <space.systemAPI.controllerMap.restarted:{c|ctr_<c.varName>.SystemAPI_restarted();}; separator="\n">
+        <dispatch_event_single_instance(space.systemAPI.component, "restarted", [])>
     }
 
     @Override

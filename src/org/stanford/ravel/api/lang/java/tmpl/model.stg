@@ -93,12 +93,10 @@ public class <name> extends <base>\<<name>.Record> {
 
     public static final int MODEL_ID = <model.baseModel.id>;
 
-    private static final int MODEL_SIZE = <model.size>;
-
     <model.controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
 
-    public <name>(AppDispatcher dispatcher) {
-        super(dispatcher, MODEL_SIZE);
+    public <name>(AppDispatcher dispatcher<append_parameter_list(model.baseModel.parameters)>) {
+        super(dispatcher, <model.baseModel.size; format="literal">);
     }
 
     // Setter methods for AppDispatcher
@@ -110,19 +108,19 @@ public class <name> extends <base>\<<name>.Record> {
     // Event listener dispatch
     @Override
     protected void notifyFull(Context\<Record> ctx) {
-        <model.controllerMap.full:{c|ctr_<c.varName>.<name>_full(ctx);}; separator="\n">
+        <dispatch_event_single_instance(model, "full", ["ctx"])>
     }
     @Override
     protected void notifyArrived(Context\<Record> ctx) {
-        <model.controllerMap.arrived:{c|ctr_<c.varName>.<name>_arrived(ctx);}; separator="\n">
+        <dispatch_event_single_instance(model, "arrived", ["ctx"])>
     }
     @Override
     protected void notifyDeparted(Context\<Record> ctx) {
-        <model.controllerMap.departed:{c|ctr_<c.varName>.<name>_departed(ctx);}; separator="\n">
+        <dispatch_event_single_instance(model, "departed", ["ctx"])>
     }
     @Override
     protected void notifySaveDone(Context\<Record> ctx) {
-        <model.controllerMap.save_done:{c|ctr_<c.varName>.<name>_save_done(ctx);}; separator="\n">
+        <dispatch_event_single_instance(model, "save_done", ["ctx"])>
     }
 
     // Record creation functions

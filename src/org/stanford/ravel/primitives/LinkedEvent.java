@@ -11,15 +11,15 @@ import java.util.*;
  * Created by gcampagn on 1/26/17.
  */
 public class LinkedEvent {
-    private final InstantiatedController controller;
-    private final EventComponent component;
+    private final ConcreteControllerInstance controller;
+    private final EventComponentInstance component;
     private final EventHandler event;
 
     private final Map<Integer, Set<Space>> variableCreators = new HashMap<>();
     private final Map<Integer, Set<ModelTag>> variableModelTags = new HashMap<>();
     private final Map<Integer, Set<FieldTag>> variableFieldTags = new HashMap<>();
 
-    LinkedEvent(InstantiatedController controller, EventComponent component, EventHandler event) {
+    LinkedEvent(ConcreteControllerInstance controller, EventComponentInstance component, EventHandler event) {
         this.controller = controller;
         this.component = component;
         this.event = event;
@@ -28,11 +28,23 @@ public class LinkedEvent {
     public EventHandler getHandler() {
         return event;
     }
+    public String getVarName() {
+        return event.getModelVar().getName();
+    }
+    public String getEventName() {
+        return event.getEventName();
+    }
 
     public EventComponent getComponent() {
+        return component.getComponent();
+    }
+    public EventComponentInstance getComponentInstance() {
         return component;
     }
-    public InstantiatedController getController() {
+    public ConcreteController getController() {
+        return controller.getComponent();
+    }
+    public ConcreteControllerInstance getControllerInstance() {
         return controller;
     }
 
@@ -71,6 +83,6 @@ public class LinkedEvent {
     }
 
     public String toString() {
-        return "Event " + controller.getSpace().getName() + "." + controller.getVarName() + "." + event.getEventName();
+        return "Event " + controller.getComponent().getSpace().getName() + "." + controller.getVarName() + "." + event.getEventName();
     }
 }

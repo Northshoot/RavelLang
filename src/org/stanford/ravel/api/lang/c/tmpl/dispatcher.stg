@@ -1,11 +1,17 @@
 import "common.stg"
 
+append_params(comp) ::=<<
+<if(comp.allParameters)>, <comp.allParameters:{p|<p; format="literal">}; separator=", "><endif>
+>>
 
-init_component(comp, prefix) ::=<<
-ravel_generated_<comp.name; format="function">_init(&self-><prefix>_<comp.varName>);
+init_model(comp) ::=<<
+ravel_generated_<comp.component.name; format="function">_init(&self->model_<comp.varName><append_params(comp)>);
+>>
+init_interface(comp) ::=<<
+ravel_generated_<comp.component.name; format="function">_init(&self->iface_<comp.varName><append_params(comp)>);
 >>
 finalize_component(comp, prefix) ::=<<
-ravel_generated_<comp.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
+ravel_generated_<comp.component.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
 >>
 
 init_controller(c) ::=<<
@@ -16,7 +22,7 @@ ravel_generated_<c.name; format="function">_finalize(&self->ctr_<c.varName>);
 >>
 
 set_component_controller(comp, prefix) ::=<<
-<comp.controllerList:{c|ravel_generated_<comp.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
+<comp.controllerList:{c|ravel_generated_<comp.component.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
 >>
 
 c_file(includes,name,models,interfaces,controllers,space) ::=<<
@@ -29,8 +35,8 @@ ravel_generated_<name; format="function">_init(<name> *self)
 {
     ravel_system_init(&self->sys_api);
 
-    <models:init_component("model"); separator="\n">
-    <interfaces:init_component("iface"); separator="\n">
+    <models:init_model(); separator="\n">
+    <interfaces:init_interface(); separator="\n">
     <controllers:init_controller(); separator="\n">
 
     <models:set_component_controller("model"); separator="\n">
@@ -55,17 +61,17 @@ ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *
 void
 ravel_generated_<name; format="function">_started(<name> *self)
 {
-    <space.systemAPI.controllerMap.started:{c|ravel_generated_<c.name; format="function">_system_started(&self->ctr_<c.varName>);}; separator="\n">
+    <dispatch_event_single_instance(space.systemAPI.component, "started", [])>
 }
 void
 ravel_generated_<name; format="function">_stopped(<name> *self)
 {
-    <space.systemAPI.controllerMap.stopped:{c|ravel_generated_<c.name; format="function">_system_stopped(&self->ctr_<c.varName>);}; separator="\n">
+    <dispatch_event_single_instance(space.systemAPI.component, "stopped", [])>
 }
 void
 ravel_generated_<name; format="function">_restarted(<name> *self)
 {
-    <space.systemAPI.controllerMap.restarted:{c|ravel_generated_<c.name; format="function">_system_restarted(&self->ctr_<c.varName>);}; separator="\n">
+    <dispatch_event_single_instance(space.systemAPI.component, "restarted", [])>
 }
 
 >>

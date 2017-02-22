@@ -59,7 +59,7 @@ public class CStyleLiteralFormatter implements LiteralFormatter {
     public String toLiteral(Object o) {
         if (o instanceof String)
             return stringEscape((String)o);
-        else // Boolean, Integer, Double
+        else // Boolean, Integer, Double, Reference
             return o.toString();
     }
 }

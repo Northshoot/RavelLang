@@ -5,21 +5,21 @@ import org.stanford.ravel.analysis.security.SecurityPrimitive;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.compiler.symbol.Symbol;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by lauril on 7/29/16.
  */
 public class Space extends Primitive {
-    private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
-    private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
-    private final Map<String, View> mViews = new LinkedHashMap<>();
-    private final Map<String, InstantiatedInterface> mInterfaces = new LinkedHashMap<>();
+    private final Set<ConcreteModel> mModels = new HashSet<>();
+    private final Map<String, ConcreteModelInstance> mModelInstances = new HashMap<>();
+    private final Set<ConcreteController> mControllers = new HashSet<>();
+    private final Map<String, ConcreteControllerInstance> mControllerInstances = new HashMap<>();
+    private final Map<String, View> mViews = new HashMap<>();
+    private final Set<ConcreteInterface> mInterfaces = new HashSet<>();
+    private final Map<String, ConcreteInterfaceInstance> mInterfaceInstances = new HashMap<>();
     private final SpaceSymbol mSymbol;
-    private final SystemAPI mSystemAPI = new SystemAPI(this, this, "system");
+    private final SystemAPIInstance mSystemAPI = new SystemAPIInstance(new SystemAPI(this, this), "system");
 
     private Platform mPlatform;
 
@@ -29,15 +29,39 @@ public class Space extends Primitive {
     }
 
     /** add components to the particular space */
-    public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
-    public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
-    public void add(String ref, InstantiatedInterface s) { this.mInterfaces.put(ref,  s); }
 
-    private InstantiatedModel findModel(Model m) {
-        for (InstantiatedModel im : mModels.values()) {
+    public void add(String ref, ConcreteModelInstance m) {
+        this.mModels.add(m.getComponent());
+        this.mModelInstances.put(ref, m);
+    }
+    public void add(String ref, ConcreteControllerInstance c) {
+        this.mControllers.add(c.getComponent());
+        this.mControllerInstances.put(ref, c);
+    }
+    public void add(String ref, ConcreteInterfaceInstance s) {
+        this.mInterfaces.add(s.getComponent());
+        this.mInterfaceInstances.put(ref, s);
+    }
+
+    private ConcreteModel findModel(Model m) {
+        for (ConcreteModel im : mModels) {
             if (im.getBaseModel() == m)
                 return im;
+        }
+        return null;
+    }
+    public ConcreteInterface findInterface(Interface iface) {
+        for (ConcreteInterface iiface : mInterfaces) {
+            if (iiface.getBaseInterface() == iface)
+                return iiface;
+        }
+        return null;
+    }
+    public ConcreteController findController(Controller ctr) {
+        for (ConcreteController ictr : mControllers) {
+            if (ictr.getController() == ctr)
+                return ictr;
         }
         return null;
     }
@@ -45,33 +69,57 @@ public class Space extends Primitive {
     public boolean hasModel(Model m) {
         return findModel(m) != null;
     }
-
-    public Collection<InstantiatedModel> getModels() {
-        return Collections.unmodifiableCollection(mModels.values());
-    }
-    public InstantiatedModel getModel(String modelName) {
-        return mModels.get(modelName);
-    }
-    public Collection<InstantiatedInterface> getInterfaces() {
-        return Collections.unmodifiableCollection(mInterfaces.values());
-    }
-    public InstantiatedInterface getInterface(String sourceName) {
-        return mInterfaces.get(sourceName);
-    }
-    public Collection<InstantiatedController> getControllers() {
-        return Collections.unmodifiableCollection(mControllers.values());
+    public boolean hasInterface(Interface iface) {
+        return findInterface(iface) != null;
     }
 
-    public SystemAPI getSystemAPI() {
+    public Collection<ConcreteModel> getModels() {
+        return Collections.unmodifiableCollection(mModels);
+    }
+    public ConcreteModelInstance getModel(String modelName) {
+        return mModelInstances.get(modelName);
+    }
+    public Collection<ConcreteModelInstance> getModelInstances() {
+        return Collections.unmodifiableCollection(mModelInstances.values());
+    }
+
+    public Collection<ConcreteInterface> getInterfaces() {
+        return Collections.unmodifiableCollection(mInterfaces);
+    }
+    public ConcreteInterfaceInstance getInterface(String sourceName) {
+        return mInterfaceInstances.get(sourceName);
+    }
+
+    public Collection<ConcreteInterfaceInstance> getInterfaceInstances() {
+        return Collections.unmodifiableCollection(mInterfaceInstances.values());
+    }
+
+    public Collection<ConcreteController> getControllers() {
+        return Collections.unmodifiableCollection(mControllers);
+    }
+    public Collection<ConcreteControllerInstance> getControllerInstances() {
+        return Collections.unmodifiableCollection(mControllerInstances.values());
+    }
+
+    public SystemAPIInstance getSystemAPI() {
         return mSystemAPI;
     }
 
     public void freezeAll() {
-        mSystemAPI.freeze();
-        for (InstantiatedModel im : mModels.values())
+        // freeze the components
+        mSystemAPI.getComponent().freeze();
+        for (ConcreteModel im : mModels)
             im.freeze();
-        for (InstantiatedInterface is : mInterfaces.values())
+        for (ConcreteInterface is : mInterfaces)
             is.freeze();
+
+        // freeze the instances
+        for (ConcreteInterfaceInstance inst : mInterfaceInstances.values())
+            inst.freeze();
+        for (ConcreteModelInstance inst : mModelInstances.values())
+            inst.freeze();
+        for (ConcreteControllerInstance inst : mControllerInstances.values())
+            inst.freeze();
     }
 
     public void setPlatform(Platform build) {
@@ -91,7 +139,7 @@ public class Space extends Primitive {
     }
 
     public void addSecurityOperation(ModelField field, Space target, Key key, SecurityPrimitive primitive, boolean isInbound) {
-        InstantiatedModel im = findModel(field.getModel());
+        ConcreteModel im = findModel(field.getModel());
         assert im != null;
         im.addSecurityOperation(field, target, key, primitive, isInbound);
     }

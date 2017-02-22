@@ -8,8 +8,8 @@ package org.stanford.ravel.primitives;
  * Created by gcampagn on 1/31/17.
  */
 public class SystemAPI extends BaseEventComponent {
-    public SystemAPI(Space space, Primitive primitive, String varName) {
-        super(space, primitive, varName);
+    public SystemAPI(Space space, Primitive primitive) {
+        super(space, primitive);
 
         for (SystemEvent event : SystemEvent.values())
             createEvent(event.name());

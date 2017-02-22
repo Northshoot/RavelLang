@@ -41,11 +41,12 @@ void timer_start(<name>* self, uint32_t time)
 }
 
 void
-ravel_generated_<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
 {
     <name>__err_code = nrf_drv_timer_init(&<name>__TIMER, &<name>__timer_cfg, ravel_generated_<name; format="function">_fired);
     APP_ERROR_CHECK(<name>__err_code);
     instance = self;
+    self->__id = instance_id;
 }
 void
 ravel_generated_<name; format="function">_finalize(<name> *self)
@@ -78,10 +79,12 @@ ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t 
 void
 ravel_generated_<name; format="function">_fired(nrf_timer_event_t event_type, void* p_context)
 {
+        <name>* self = instance;
+
         switch (event_type)
         {
             case NRF_TIMER_EVENT_COMPARE0:
-                ravel_generated_<interface.controllerMap.fired:{c|<c.name; format="function">_<name; format="function">_fired(instance->ctr_<c.varName>);}; separator="\n">
+                <dispatch_event(interface, "fired", []); separator="\n">
                 break;
 
             default:
@@ -112,10 +115,11 @@ typedef struct s_<name> <name>;
 <begin_extern_c()>
 
 typedef struct s_<name> {
-    <interface.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);

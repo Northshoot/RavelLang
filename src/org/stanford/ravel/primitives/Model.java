@@ -11,6 +11,8 @@ import java.util.logging.Logger;
  * Created by lauril on 7/21/16.
  */
 public class Model extends ConfigurableComponent {
+    public final static int DEFAULT_MODEL_SIZE = 10;
+
     private static int idCounter = 1;
 
     public enum Type {
@@ -38,14 +40,29 @@ public class Model extends ConfigurableComponent {
             throw new IllegalArgumentException("Invalid model type");
 
         this.id = idCounter++;
+
+        // set defaults
+        setConstantProperty("records", DEFAULT_MODEL_SIZE);
+        setConstantProperty("reliable", false);
+        setConstantProperty("durable", false);
+    }
+
+    public Object getSize() {
+        return getProperty("records");
+    }
+    public Object getReliable() {
+        return getProperty("reliable");
+    }
+    public Object getDurable() {
+        return getProperty("durable");
     }
 
     public ModelSymbol getSymbol() {
         return symbol;
     }
 
-    public InstantiatedModel instantiate(Space space, String varName) {
-        return new InstantiatedModel(space, this, varName);
+    public ConcreteModel instantiate(Space space) {
+        return new ConcreteModel(space, this);
     }
 
     public int getId() {

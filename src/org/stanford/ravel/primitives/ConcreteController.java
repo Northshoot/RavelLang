@@ -7,22 +7,21 @@ import java.util.*;
  *
  * Created by gcampagn on 1/26/17.
  */
-public class InstantiatedController extends ParametrizedComponent implements Iterable<LinkedEvent> {
+public class ConcreteController extends Primitive implements Iterable<LinkedEvent> {
     private final Space mSpace;
     private final Controller mController;
     private final List<LinkedEvent> mLinkedEvents = new ArrayList<>();
-    private final String mVarName;
+    private final Set<EventComponent> mEventComponents = new HashSet<>();
 
-    InstantiatedController(Space space, Controller controller, String varName) {
+    ConcreteController(Space space, Controller controller) {
         super(controller.getName());
         mSpace = space;
         mController = controller;
-        mVarName = varName;
     }
 
     @Override
     public String toString() {
-        return "Instantiated Controller " + mSpace.getName() + "." + mVarName;
+        return "Concrete Controller " + mSpace.getName() + "." + getName();
     }
 
     public Space getSpace() {
@@ -33,20 +32,16 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
         return mController;
     }
 
-    public String getVarName() {
-        return mVarName;
+    public Collection<ConcreteModel> getLinkedModels() {
+        return getLinkedComponents(ConcreteModel.class);
     }
-
-    public Collection<InstantiatedModel> getLinkedModels() {
-        return getLinkedComponents(InstantiatedModel.class);
-    }
-    public Collection<InstantiatedInterface> getLinkedInterfaces() {
-        return getLinkedComponents(InstantiatedInterface.class);
+    public Collection<ConcreteInterface> getLinkedInterfaces() {
+        return getLinkedComponents(ConcreteInterface.class);
     }
 
     private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
         Set<E> components = new HashSet<E>();
-        for (Object object : getAllParameters()) {
+        for (EventComponent object : mEventComponents) {
             if (ofClass.isInstance(object)) {
                 components.add(ofClass.cast(object));
             }
@@ -54,10 +49,11 @@ public class InstantiatedController extends ParametrizedComponent implements Ite
         return components;
     }
 
-    public void linkEvent(EventHandler event, EventComponent component) {
-        LinkedEvent linkedEvent = new LinkedEvent(this, component, event);
-        mLinkedEvents.add(linkedEvent);
-        component.addLinkedEvent(linkedEvent);
+    public void addLinkedEvent(LinkedEvent event) {
+        mLinkedEvents.add(event);
+    }
+    public void linkComponent(EventComponent component) {
+        mEventComponents.add(component);
     }
 
     public Iterator<LinkedEvent> iterator() {

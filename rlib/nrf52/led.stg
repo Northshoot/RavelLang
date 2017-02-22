@@ -28,7 +28,7 @@ c_file(includes,name,interface) ::=<<
 m_<name>_led.led_id = <interface.configuration.led_id; format="literal">;
 
 void
-ravel_generated_<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
 {
     bsp_board_leds_init();
     NRF_LOG_INFO("INIT!\r\n");
@@ -68,7 +68,7 @@ typedef struct s_<name> {
     int led_id;
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_on(<name> *self);

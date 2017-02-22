@@ -10,9 +10,7 @@ import java.util.*;
 /**
  * Created by gcampagn on 1/26/17.
  */
-public class InstantiatedModel extends BaseEventComponent {
-    public final static int DEFAULT_MODEL_SIZE = 10;
-
+public class ConcreteModel extends BaseEventComponent {
     private final Model mModel;
     private final Set<Space> mStreamingSinks = new HashSet<>();
     private final Set<Space> mStreamingSources = new HashSet<>();
@@ -25,27 +23,17 @@ public class InstantiatedModel extends BaseEventComponent {
     private TypedIR sendCode;
     private TypedIR receiveCode;
 
-    InstantiatedModel(Space space, Model model, String varName) {
-        super(space, model, varName);
-        this.mModel = model;
+    ConcreteModel(Space space, Model model) {
+        super(space, model);
+        mModel = model;
 
         for (ModelEvent e : ModelEvent.values())
             createEvent(e.name());
-
-        // set defaults
-        setProperty("records", DEFAULT_MODEL_SIZE);
-        setProperty("reliable", false);
-        setProperty("durable", false);
     }
 
-    public int getSize() {
-        return (Integer) getProperty("records");
-    }
-    public boolean isReliable() {
-        return (Boolean) getProperty("reliable");
-    }
-    public boolean isDurable() {
-        return (Boolean) getProperty("durable");
+    @Override
+    public String toString() {
+        return "Concrete Model " + getSpace().getName() + "." + getName();
     }
 
     public Model getBaseModel() {

@@ -1,7 +1,7 @@
 import "common.stg"
 
 event_handler(handler) ::=<<
-public void <handler.modelVar.type.name>_<handler.eventType.eventName>(<handler.arguments:{a|<a.type> <a.name>}; separator=", ">) {
+public void <handler.modelVar.name>_<handler.eventType.eventName>(<handler.arguments:{a|<a.type> <a.name>}; separator=", ">) {
     <handler.body>}
 >>
 
