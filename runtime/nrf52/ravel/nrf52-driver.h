@@ -8,6 +8,11 @@
 
 
 #include "api/driver.h"
+#include "ravel/module.h"
+typedef struct {
+    RAVEL_MODULE __module;
+
+} ravel_schedule_event_cntx;
 
 typedef struct {
     RavelDriver base;

@@ -62,6 +62,7 @@ public class Nrf52 extends BaseCPlatform {
         nc.NRF_LOG_DEFAULT_LEVEL =4;
         nc.NRF_LOG_DEFERRED =0; //no buffering
         nc.NRF_LOG_DEFAULT_LEVEL =4; //Debug level 4
+        nc.APP_SCHEDULER_ENABLED = 1;
 
 //        Collection<ConcreteInterface> interfaces = s.getInterfaces();
 //        Iterator<ConcreteInterface> interfaceIterator = interfaces.iterator();

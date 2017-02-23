@@ -1,0 +1,95 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+#define NRF_LOG_MODULE_NAME "TIMER"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+<includes:do_include(); separator="\n">
+
+
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    //TODO: parse in the application to determine if which timer are used and optimize the code
+    self->__id = instance_id;
+    create_new_timer(&self->__timer, self->__id);
+    NRF_LOG_INFO("INIT!\r\n");
+
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    //cancel all the timers to exit gracefully
+    timer_cancel_all();
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
+{
+    timer_start_single_shoot(&self->__timer, time);
+}
+void
+ravel_generated_<name; format="function">_cancel(<name>* self)
+{
+    timer_cancel(&self->__timer);
+}
+void
+ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
+{
+    NRF_LOG_INFO("start_periodic %d\r\n",time);
+    timer_start_periodic(&self->__timer, time);
+}
+
+
+void
+ravel_generated_<name; format="function">_fired( void* data)
+{
+        <name> *self = data;
+        <dispatch_event(interface, "fired",[])>
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+#include "ravel_timer.h"
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    DriverTimer __timer;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_cancel(<name>* self);
+void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_fired(void* p_context);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

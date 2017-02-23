@@ -1,17 +1,18 @@
 #include <stdlib.h>
-
-/* soft device inlcudes */
+#include <stdbool.h>
 #include "app_util.h"
 #include "app_error.h"
 #include "app_scheduler.h"
+#include "nordic_common.h"
 #include "nrf_soc.h"
 #include "softdevice_handler.h"
-#include <stdbool.h>
 #include "boards.h"
 #include "nrf_drv_gpiote.h"
 #include "app_error.h"
 #include "app_timer.h"
 #include "nrf_drv_clock.h"
+
+
 /* local includes */
 #include "platform/ble_core.h"
 #include "platform/network.h"
@@ -20,26 +21,19 @@
 #include "platform/log.h"
 #include "boards.h"
 #include "AppDispatcher.h"
+#include "ravel_timer.h"
 #include "ravel/nrf52-driver.h"
 #define NRF_LOG_MODULE_NAME "Driver"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
-#define APP_TIMER_PRESCALER              0
-#define APP_TIMER_OP_QUEUE_SIZE          4
-APP_TIMER_DEF(m_driver_timer_periodic);
+
+#define SCHED_MAX_EVENT_DATA_SIZE       sizeof(ravel_schedule_event_cntx)
+#define SCHED_QUEUE_SIZE                20
 
 extern void ravel_generated_app_dispatcher_started(struct AppDispatcher*);
 
-
-//void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name) {
-//    LOG("ERROR - %lu, %lu, %s", error_code, line_num, p_file_name);
-//    // On assert, the system can only recover on reset
-//    //while (1) {}
-//    //NVIC_SystemReset();
-//    sd_nvic_SystemReset();
-//}
 
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
     NRF_LOG_INFO("assert_nrf_callback!\r\n");
@@ -52,6 +46,9 @@ void
 ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
 {
     /* TODO: init any internal systems */
+
+    //init_timer_module();
+
     NRF_LOG_INFO("INIT!\r\n");
 
     self->base.dispatcher = dispatcher;
@@ -78,7 +75,8 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
     NRF_LOG_INFO("LOOP\r\n");
     while (true)
     {
-         __WFI();
+        app_sched_execute();
+        sd_app_evt_wait();
     }
 }
 
