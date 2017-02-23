@@ -83,6 +83,7 @@ public class CCodeTranslator extends BaseIRTranslator {
     @Override
     public void visit(TBinaryArithOp arithOp) {
         if (arithOp.op == BinaryOperation.ADD && arithOp.type == PrimitiveType.STR) {
+            // FIXME this should be lowered at the IR level to have the proper check for overflow
             addLine(arithOp.target, " = malloc(strlen(", arithOp.src1, ") + strlen(", arithOp.src2, ") + 1)");
             addLine("if (", arithOp.target, " == NULL) abort() /* FIXME */");
             addLine("stpcpy(stpcpy(", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
@@ -98,7 +99,11 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TComparisonOp compOp) {
-        addLine(compOp.target, " = ", compOp.src1, compOp.op, compOp.src2);
+        if (compOp.type == PrimitiveType.STR) {
+            addLine(compOp.target, " = strcmp(", compOp.src1, ", ", compOp.src2, ") ", compOp.op, "0");
+        } else {
+            addLine(compOp.target, " = ", compOp.src1, compOp.op, compOp.src2);
+        }
     }
 
     @Override
@@ -209,6 +214,9 @@ public class CCodeTranslator extends BaseIRTranslator {
             case "array_new":
                 addLine("calloc(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType)intrinsic.returnType).getElementType()), ")");
                 addLine("if (", intrinsic.target, " == NULL) abort() /* FIXME */");
+                break;
+            case "strlen":
+                addLine("strlen(", intrinsic.arguments[0], ")");
                 break;
             default:
                 addCode("ravel_intrinsic_" + intrinsic.name + "(");

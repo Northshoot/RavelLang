@@ -185,7 +185,7 @@ public class STIRTranslator extends BaseIRTranslator {
     @Override
     public void visit(TReturn returnInstr) {
         ST tmpl;
-        if (getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID)
+        if (getRegisterType(Registers.RETURN_REG) == PrimitiveType.VOID)
             tmpl = this.irGroup.getInstanceOf("void_return");
         else
             tmpl = this.irGroup.getInstanceOf("nonvoid_return");

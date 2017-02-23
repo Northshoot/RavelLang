@@ -8,10 +8,7 @@ import org.stanford.ravel.compiler.ir.OptimizePass;
 import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
-import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.ModelType;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.ModelField;
 import org.stanford.ravel.primitives.Space;
@@ -41,21 +38,109 @@ public class SecurityTransformation {
         this.enableMAC = !disableMAC;
     }
 
+    private void addWritePrimitive(TypedIRBuilder builder, int buffer, int value, PrimitiveType type) {
+        FunctionType fn = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_" + type.getName().toLowerCase());
+        builder.add(new TMethodCall(fn, Registers.VOID_REG, buffer, fn.getFunctionName(), new int[]{value}));
+    }
+
+    private void addWriteArray(TypedIRBuilder builder, int buffer, int value, ArrayType arrayType) {
+        int len = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(TIntrinsic.createArrayLength(arrayType, len, value));
+
+        FunctionType writeLength = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_uint16");
+        builder.add(new TMethodCall(writeLength, Registers.VOID_REG, buffer, writeLength.getFunctionName(), new int[]{len}));
+
+        // int i;
+        int i = builder.allocateRegister(PrimitiveType.INT32);
+        // i = 0;
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, i, 0));
+
+        ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
+        LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
+
+        // while(true) {
+        TBlock loopHead = cfgBuilder.newBlock();
+        TBlock continuation = cfgBuilder.newBlock();
+
+        loopTreeBuilder.beginLoop(loopHead);
+        cfgBuilder.addSuccessor(loopHead);
+
+        cfgBuilder.pushBlock(loopHead);
+
+        // bool cond;
+        int cond = builder.allocateRegister(PrimitiveType.BOOL);
+        // cond = i < len
+        builder.add(new TComparisonOp(PrimitiveType.INT32, cond, i, len, ComparisonOperation.LT));
+
+        // if (cond) {}
+        // else { break }
+        TBlock empty = cfgBuilder.newBlock();
+        TBlock breakBlock = cfgBuilder.newBlock();
+        TBlock loopBody = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(empty);
+        cfgBuilder.addSuccessor(breakBlock);
+        TIfStatement ifStatement = new TIfStatement(cond, empty, breakBlock);
+        builder.add(ifStatement);
+
+        loopTreeBuilder.ifStatement(ifStatement, empty, breakBlock);
+        cfgBuilder.pushBlock(empty);
+        cfgBuilder.addSuccessor(loopBody);
+        cfgBuilder.popBlock();
+        loopTreeBuilder.elseStatement(cond);
+        cfgBuilder.pushBlock(breakBlock);
+        builder.add(new TBreak());
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+        loopTreeBuilder.endIfStatement(cond);
+
+        cfgBuilder.replaceBlock(loopBody);
+        loopTreeBuilder.addBasicBlock(loopBody);
+
+        // elem = value[i]
+        int elem = builder.allocateRegister(arrayType.getElementType());
+        builder.add(new TArrayLoad(arrayType.getElementType(), arrayType, elem, value, i));
+
+        // write(elem)
+        addWrite(builder, buffer, elem, arrayType.getElementType());
+
+        // i++
+        int oneReg = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, oneReg, 1));
+        builder.add(new TBinaryArithOp(PrimitiveType.INT32, i, i, oneReg, BinaryOperation.ADD));
+
+        // } end while
+        cfgBuilder.addSuccessor(loopHead);
+        cfgBuilder.popBlock();
+        loopTreeBuilder.endLoop();
+        loopTreeBuilder.addBasicBlock(continuation);
+        cfgBuilder.replaceBlock(continuation);
+    }
+
+    private void addWrite(TypedIRBuilder builder, int buffer, int value, Type type) {
+        if (type instanceof PrimitiveType)
+            addWritePrimitive(builder, buffer, value, (PrimitiveType)type);
+        else if (type instanceof ArrayType)
+            addWriteArray(builder, buffer, value, (ArrayType) type);
+        else
+            throw new AssertionError("Unsupported field type " + type.getName());
+    }
+
     private TypedIR compileEncrypt(ConcreteModel model, List<SecurityOperation> ops) {
         TypedIRBuilder builder = new TypedIRBuilder();
 
         // this code ends up in the "to bytes" method of Model.Record, so
         // declare class level variables for the model fields
         int firstReg = Registers.FIRST_GP_REG;
-        VariableSymbol sym = new VariableSymbol("__idx");
-        sym.setRegister(firstReg++);
-        sym.setType(PrimitiveType.INT32);
-        sym.setWritable(false);
-        builder.declareParameter(sym, true);
+        VariableSymbol idxSym = new VariableSymbol("__idx");
+        idxSym.setRegister(firstReg++);
+        idxSym.setType(PrimitiveType.INT32);
+        idxSym.setWritable(false);
+        builder.declareParameter(idxSym, true);
 
         Map<String, Integer> fields = new HashMap<>();
         for (ModelField field : model.getBaseModel().getFields()) {
-            sym = new VariableSymbol(field.getName());
+            VariableSymbol sym = new VariableSymbol(field.getName());
             sym.setRegister(firstReg++);
             sym.setType(field.getType());
             sym.setWritable(false);
@@ -66,17 +151,54 @@ public class SecurityTransformation {
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, new ArrayType(PrimitiveType.BYTE));
 
+        // create a buffer to write into
+        int buffer = builder.allocateRegister(IntrinsicTypes.GROWABLE_BYTE_ARRAY);
+        builder.add(new TMethodCall((FunctionType)IntrinsicTypes.GROWABLE_BYTE_ARRAY.getMemberType("create"), buffer, Registers.VOID_REG, "create", new int[]{}));
+
+        // write the model ID
+        int modelId = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, modelId, model.getBaseModel().getId()));
+        addWritePrimitive(builder, buffer, modelId, PrimitiveType.INT32);
+
+        // write the record ID
+        addWritePrimitive(builder, buffer, idxSym.getRegister(), PrimitiveType.INT32);
+
         if (enableEncryption) {
             // TODO do something and encrypt
         } else {
-            //builder.add(new TIntrinsic(new ArrayType(PrimitiveType.BYTE), new Type[]{recordType}, Registers.RETURN_REG, "recordToBytes", new int[]{recordReg}));
+            // write each field sequentially
+            for (ModelField field : model.getBaseModel().getFields()) {
+                Type fieldType = field.getType();
+
+                addWrite(builder, buffer, fields.get(field.getName()), fieldType);
+            }
         }
 
+        int byteArray = builder.allocateRegister(new ArrayType(PrimitiveType.BYTE));
+        FunctionType toByteArray = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("toByteArray");
+        builder.add(new TMethodCall(toByteArray, byteArray, buffer, toByteArray.getFunctionName(), new int[]{}));
+
         if (enableMAC) {
-            // TODO do something and mac
+            int macLength = builder.allocateRegister(PrimitiveType.INT32);
+            builder.add(new TImmediateLoad(PrimitiveType.INT32, macLength, 8));
+
+            int mac = builder.allocateRegister(new ArrayType(PrimitiveType.BYTE));
+            builder.add(TIntrinsic.createArrayNew(new ArrayType(PrimitiveType.BYTE), mac, macLength));
+
+            builder.add(new TIntrinsic(PrimitiveType.VOID, new Type[]{ new ArrayType(PrimitiveType.BYTE), new ArrayType(PrimitiveType.BYTE) },
+                    Registers.VOID_REG, "compute_mac", new int[]{ byteArray, mac },
+                    true, true, false));
+
+            FunctionType writeByteArray = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_byte_array");
+            builder.add(new TMethodCall(writeByteArray, Registers.VOID_REG, buffer, writeByteArray.getFunctionName(), new int[]{ mac }));
+
+            builder.add(new TMethodCall(toByteArray, byteArray, buffer, toByteArray.getFunctionName(), new int[]{}));
         } else {
             // nothing to do
         }
+
+        builder.add(new TMove(new ArrayType(PrimitiveType.BYTE), Registers.RETURN_REG, byteArray));
+        builder.add(new TReturn());
 
         TypedIR ir = builder.finish();
         if (debug) {
@@ -168,7 +290,7 @@ public class SecurityTransformation {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = new array[len]
-        builder.add(new TIntrinsic(arrayType, new Type[]{PrimitiveType.INT32}, target, "array_new", new int[]{len}));
+        builder.add(TIntrinsic.createArrayNew(arrayType, target, len));
 
         // int i;
         int i = builder.allocateRegister(PrimitiveType.INT32);
@@ -275,6 +397,21 @@ public class SecurityTransformation {
         int thisReg = thisSym.getRegister();
         int data = dataSym.getRegister();
 
+        if (enableMAC) {
+            int macLength = builder.allocateRegister(PrimitiveType.INT32);
+            builder.add(new TImmediateLoad(PrimitiveType.INT32, macLength, 8));
+
+            int dataLength = builder.allocateRegister(PrimitiveType.INT32);
+            builder.add(TIntrinsic.createArrayLength((ArrayType)dataSym.getType(), dataLength, dataSym.getRegister()));
+            builder.add(new TBinaryArithOp(PrimitiveType.INT32, dataLength, dataLength, macLength, BinaryOperation.SUB));
+
+            builder.add(new TIntrinsic(PrimitiveType.VOID, new Type[]{ new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32, PrimitiveType.INT32 },
+                    Registers.VOID_REG, "verify_mac", new int[]{ data, dataLength, macLength },
+                    false, true, true));
+        } else {
+            // nothing to do
+        }
+
         // pos = 0
         int pos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, pos, 0));
@@ -291,12 +428,6 @@ public class SecurityTransformation {
         // this is lying a little bit because __idx is not a field of recordType,
         // but as long as the validate pass doesn't check for that we're good
         builder.add(new TFieldStore(PrimitiveType.INT32, recordType, thisReg, "__idx", idx));
-
-        if (enableMAC) {
-            // TODO do something and verify the mac
-        } else {
-            // nothing to do
-        }
 
         if (enableEncryption) {
             // TODO do something and decrypt

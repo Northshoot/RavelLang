@@ -302,10 +302,66 @@ public class TypeResolvePass implements InstructionVisitor {
             ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
+    private void handleArrayLength(FieldLoad instr) {
+        Type ownerType = getRegisterType(instr.source);
+        Type resultType = PrimitiveType.INT32;
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of field load " + ownerType.getName() + "." + instr.field + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        ir.add(TIntrinsic.createArrayLength((ArrayType)ownerType, target, instr.source));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
+    }
+
+    private void handleStringLength(FieldLoad instr) {
+        Type ownerType = getRegisterType(instr.source);
+        Type resultType = PrimitiveType.INT32;
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of field load " + ownerType.getName() + "." + instr.field + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        ir.add(TIntrinsic.createStringLength(target, instr.source));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
+    }
+
     @Override
     public void visit(FieldLoad instr) {
         Type ownerType = getRegisterType(instr.source);
         if (!(ownerType instanceof CompoundType)) {
+            if (instr.field.equals("length")) {
+                if (ownerType instanceof ArrayType) {
+                    handleArrayLength(instr);
+                    return;
+                } else if (ownerType == PrimitiveType.STR) {
+                    handleStringLength(instr);
+                    return;
+                }
+            }
+
             typeError(instr, "cannot read field " + instr.field + " on non compound type " + ownerType.getName());
             return;
         }

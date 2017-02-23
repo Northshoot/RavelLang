@@ -5,10 +5,7 @@ import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 import org.stanford.ravel.compiler.ir.BinaryOperation;
-import org.stanford.ravel.compiler.ir.typed.TBinaryArithOp;
-import org.stanford.ravel.compiler.ir.typed.TComparisonOp;
-import org.stanford.ravel.compiler.ir.typed.TConvert;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
+import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
 import org.stanford.ravel.primitives.*;
@@ -139,6 +136,7 @@ public class JLang extends BaseLanguage {
              * - IDIV for ints is quirked to src1/src2
              *   (otherwise we would output src1//src2 which is not valid Java)
              * - POW is quirked to Math.pow(src1, src2)
+             * - bitwise operators on bytes require a cast to byte because they implicity promote to int
              */
             @Override
             public void visit(TBinaryArithOp arithOp) {
@@ -150,14 +148,33 @@ public class JLang extends BaseLanguage {
                     }
                 } else if (arithOp.op == BinaryOperation.POW) {
                     addLine(arithOp.target, " = java.lang.Math.pow(", arithOp.src1, ", ", arithOp.src2, ")");
+                } else if (arithOp.op.isBitwise() && arithOp.type == PrimitiveType.BYTE) {
+                    addLine(arithOp.target, "= (byte) (", arithOp.src1, " ", arithOp.op, " ", arithOp.src2, ")");
                 } else {
                     super.visit(arithOp);
                 }
             }
 
             /**
-             * Quirk string comparisons to str1.compareTo(str2) op 0
-             * (eg str1.compareTo(str2) > 0)
+             * Quirk certain unary operators:
+             *
+             * - bitwise operators on bytes require a cast to byte because they implicitly promote to int
+             */
+            @Override
+            public void visit(TUnaryArithOp arithOp) {
+                if (arithOp.op.isBitwise() && arithOp.type == PrimitiveType.BYTE) {
+                    addLine(arithOp.target, "= (byte) (", arithOp.op, " ", arithOp.source, ")");
+                } else {
+                    super.visit(arithOp);
+                }
+            }
+
+            /**
+             * Quirk comparisons:
+             *
+             * - string comparisons require a call to str1.compareTo(str2) op 0
+             *   (eg str1.compareTo(str2) > 0
+             *
              */
             @Override
             public void visit(TComparisonOp compOp) {

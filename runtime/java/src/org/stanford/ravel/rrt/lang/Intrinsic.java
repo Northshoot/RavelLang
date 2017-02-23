@@ -3,6 +3,7 @@ package org.stanford.ravel.rrt.lang;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.utils.ByteWork;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -11,6 +12,26 @@ import java.util.Date;
  * Created by gcampagn on 2/21/17.
  */
 public class Intrinsic {
+    public static int array_length(Object[] array) {
+        return array.length;
+    }
+    public static int array_length(byte[] array) {
+        return array.length;
+    }
+    public static int array_length(int[] array) {
+        return array.length;
+    }
+    public static int array_length(double[] array) {
+        return array.length;
+    }
+    public static int array_length(boolean[] array) {
+        return array.length;
+    }
+
+    public static int strlen(String str) {
+        return str.length();
+    }
+
     public static boolean extract_bool(byte[] data, int pos) {
         return ByteWork.convertOneByteToBool(ByteWork.getBytes(data, pos, pos+1));
     }
@@ -37,5 +58,13 @@ public class Intrinsic {
 
     public static String extract_str(byte[] data, int pos, int size) {
         return ByteWork.convertBytesToString(ByteWork.getBytes(data, pos, pos+size));
+    }
+
+    public static void compute_mac(byte[] data, byte[] mac) {
+        // TODO
+        Arrays.fill(mac, (byte) 0);
+    }
+    public static void verify_mac(byte[] data, int off, int maclen) {
+        // TODO
     }
 }

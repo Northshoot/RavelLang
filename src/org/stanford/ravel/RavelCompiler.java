@@ -263,7 +263,7 @@ public class RavelCompiler {
 
                 // transform the IR with security info
                 // FIXME: for now, we always disable encryption and MAC
-                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), true, true);
+                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), true, !options.hasFOption("enable-mac"));
                 securityTransformation.run();
                 if (!success())
                     return;

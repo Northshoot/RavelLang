@@ -16,12 +16,6 @@ public static class Record implements ModelRecord {
     @Override
     public byte[] toBytes() {
         <model.sendCode>
-
-        GrowableByteArray outputStream = new GrowableByteArray();
-        outputStream.write(ByteWork.getByteArray(MODEL_ID));
-        outputStream.write(ByteWork.getByteArray(__idx));
-        <fields:{f|outputStream.write(ByteWork.getByteArray(<f.name>));}; separator="\n">
-        return outputStream.toByteArray();
     }
 
     @Override

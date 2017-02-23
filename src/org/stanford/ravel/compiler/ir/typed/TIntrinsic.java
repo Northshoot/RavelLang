@@ -1,5 +1,7 @@
 package org.stanford.ravel.compiler.ir.typed;
 
+import org.stanford.ravel.compiler.types.ArrayType;
+import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
 /**
@@ -19,6 +21,9 @@ public class TIntrinsic extends TInstruction {
     public final String name;
     public final int[] arguments;
     public int target;
+    private final boolean writesMemory;
+    private final boolean readsMemory;
+    private final boolean affectsControlFlow;
 
     public TIntrinsic(Type returnType, Type[] argumentTypes, int target, String intrinsic, int[] arguments) {
         this.returnType = returnType;
@@ -26,6 +31,32 @@ public class TIntrinsic extends TInstruction {
         this.target = target;
         this.name = intrinsic;
         this.arguments = arguments;
+        writesMemory = false;
+        readsMemory = false;
+        affectsControlFlow = false;
+    }
+
+    public TIntrinsic(Type returnType, Type[] argumentTypes, int target, String intrinsic, int[] arguments, boolean writesMemory, boolean readsMemory, boolean affectsControlFlow) {
+        this.returnType = returnType;
+        this.argumentTypes = argumentTypes;
+        this.target = target;
+        this.name = intrinsic;
+        this.arguments = arguments;
+        this.writesMemory = writesMemory;
+        this.readsMemory = readsMemory;
+        this.affectsControlFlow = affectsControlFlow;
+    }
+
+    public static TIntrinsic createArrayNew(ArrayType arrayType, int target, int length) {
+        return new TIntrinsic(arrayType, new Type[]{PrimitiveType.INT32}, target, "array_new", new int[]{length});
+    }
+
+    public static TIntrinsic createArrayLength(ArrayType arrayType, int target, int array) {
+        return new TIntrinsic(PrimitiveType.INT32, new Type[]{arrayType}, target, "array_length", new int[]{array});
+    }
+
+    public static TIntrinsic createStringLength(int target, int string) {
+        return new TIntrinsic(PrimitiveType.INT32, new Type[]{PrimitiveType.STR}, target, "strlen", new int[]{string});
     }
 
     @Override
@@ -59,12 +90,17 @@ public class TIntrinsic extends TInstruction {
 
     @Override
     public boolean readsMemory() {
-        return false;
+        return readsMemory;
     }
 
     @Override
     public boolean writesMemory() {
-        return false;
+        return writesMemory;
+    }
+
+    @Override
+    public boolean affectsControlFlow() {
+        return affectsControlFlow;
     }
 
     @Override

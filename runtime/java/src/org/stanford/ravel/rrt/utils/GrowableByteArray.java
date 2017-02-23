@@ -1,5 +1,11 @@
 package org.stanford.ravel.rrt.utils;
 
+import org.stanford.ravel.rrt.tiers.Error;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Date;
+
 /**
  * As the name suggests, a byte array that can be written into and
  * automatically grows
@@ -51,5 +57,41 @@ public class GrowableByteArray {
         byte[] array = new byte[length];
         System.arraycopy(storage, 0, array, 0, length);
         return array;
+    }
+
+
+    // The API called by Ravel code
+    public static GrowableByteArray create() {
+        return new GrowableByteArray();
+    }
+
+    public void write_int32(int v) {
+        write(ByteWork.getByteArray(v));
+    }
+    public void write_uint16(int v) {
+        ByteBuffer buffer = ByteBuffer.allocate(2);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.putShort((short)v);
+    }
+    public void write_error_msg(Error error) {
+        write_int32(error.ordinal());
+    }
+    public void write_str(String str) {
+        write(ByteWork.getByteArray(str));
+    }
+    public void write_byte(byte v) {
+        write(new byte[]{v});
+    }
+    public void write_timestamp(Date v) {
+        write(ByteWork.getByteArray(v));
+    }
+    public void write_double(double v) {
+        write(ByteWork.getByteArray(v));
+    }
+    public void write_bool(boolean b) {
+        write_byte((byte) (b ? 1 : 0));
+    }
+    public void write_byte_array(byte[] array) {
+        write(array);
     }
 }
