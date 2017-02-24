@@ -1,0 +1,52 @@
+streaming model Random(size : int32):
+    properties:
+        durable = False
+        reliable = False
+        records = size
+        flow = EmbeddedSpace -> GatewaySpace
+
+    schema:
+        value : int32
+        value1 : int32
+
+
+controller EController(random: Random):
+
+    event system.started():
+        rec = random.create()
+        rec.value = 42
+        random.save(rec)
+        system.print("started")
+
+    event random.departed():
+        # do something here
+
+controller CController(random: Random):
+
+    event system.started():
+        system.print("started")
+
+    event random.arrived():
+        # do something here
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    models:
+        random = Random(size=5)
+
+    controllers:
+        rndcnt_1 = EController(random = models.random)
+
+space GatewaySpace:
+    platform:
+        language = CLang
+        system = Posix.v2008
+
+    models:
+        random = Random(size=5)
+
+    controllers:
+        rndcnt_1 = CController(random = models.random)

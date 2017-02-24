@@ -1,7 +1,9 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.ir.typed.TypedIR;
+import org.stanford.ravel.compiler.symbol.FieldSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
-import org.stanford.ravel.primitives.Fields.Field;
+import org.stanford.ravel.compiler.types.ModelType;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -9,228 +11,175 @@ import java.util.logging.Logger;
 /**
  * Created by lauril on 7/21/16.
  */
-public class Model extends Primitive {
+public class Model extends ConfigurableComponent {
+    public final static int DEFAULT_MODEL_SIZE = 10;
+
+    private static int idCounter = 1;
+
     public enum Type {
         LOCAL, STREAMING, REPLICATED, INVALID;
     }
 
     private static Logger LOGGER = Logger.getLogger(Model.class.getName());
-    private String mComment = "Default comments";
 
     private final ModelSymbol symbol;
     private final Type mModelType;
+    private final int id;
 
-    private final Map<String, Field> mFields = new LinkedHashMap<>();
-    private final Map<String, Variable> mPropertiesMap = new LinkedHashMap<>();
+    private final Map<String, ModelField> mFields = new HashMap<>();
+    private final List<ModelField> mFieldList = new ArrayList<>();
+    private final Set<Flow> mFlows = new HashSet<>();
+    private final Set<Space> mWriters = new HashSet<>();
+    private final Set<Space> mReaders = new HashSet<>();
 
-    /**
-     * the provided api
-     */
-    private final String mArrived="arrived";
-    private final String mDeparted="departed";
-    private final String mCreate="create";
-    private final String mSaveDone="save";
-    private final String mBufferSaveDone="bufferSave";
-    private final String mFull="full";
-    private final String mDelete="delete";
-    private final String mGet="get";
-    private final String mFirst="first";
-    private final String mLast="last";
-    private final String mDestroy="destroy";
-    private final Map<String, String> mEvents = new LinkedHashMap<>();
+    private TypedIR sendCode;
+    private TypedIR receiveCode;
 
-    //TODO: implement builder pattern
     public Model(String name, ModelSymbol symbol) {
-        super(name,name+"Model");
+        super(name);
 
         this.symbol = symbol;
         this.mModelType = symbol.getModelType();
 
-        //TODO: implement real error handling
-        if (mModelType == Type.INVALID) {
-            LOGGER.severe("Invalid model type!");
-        }
+        if (mModelType == Type.INVALID)
+            throw new IllegalArgumentException("Invalid model type");
+
+        this.id = idCounter++;
+
+        // set defaults
+        setConstantProperty("records", DEFAULT_MODEL_SIZE);
+        setConstantProperty("reliable", false);
+        setConstantProperty("durable", false);
     }
 
-    public InstantiatedModel instantiate(Space space, Map<String, Object> parameters) {
-        InstantiatedModel instantiated = new InstantiatedModel(space, this);
-        instantiated.setManyParam(parameters);
-        // TODO: check types of parameters
-        // TODO: check that all parameters are set
-        return instantiated;
+    public Object getSize() {
+        return getProperty("records");
+    }
+    public Object getReliable() {
+        return getProperty("reliable");
+    }
+    public Object getDurable() {
+        return getProperty("durable");
     }
 
-    public org.stanford.ravel.compiler.types.Type getType() {
+    public ModelSymbol getSymbol() {
+        return symbol;
+    }
+
+    public ConcreteModel instantiate(Space space) {
+        return new ConcreteModel(space, this);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public ModelType getType() {
         return symbol.getDefinedType();
-    }
-
-    public String getModelName(){
-        return mName;
-    }
-    /**
-     * Model API functions bellow
-     */
-
-    //internal to system
-
-    //get buffer initialization
-    public String getInitFunction(){
-        return getCName()+"__innit";
-    }
-
-    public List<String> getEvents(){
-        List<String> lst = new ArrayList<>();
-        lst.addAll(mEvents.values());
-        return lst;
-    }
-    //destroy buffer
-    public String getDestroyFunction(){
-        return getCName() +"__destroy";
-    }
-    //create
-    public String getCreateFunction(){
-        return getCName() + "__create";
-    }
-
-    //save
-    public String getSaveFunction(){
-        return getCName()+"__save";
-    }
-
-
-    //delete
-    public String getDeleteFunction(){
-        return getCName()+"__delete";
-    }
-    //queries
-    //get with position id
-    public String getRecordPosition(){
-        return getCName()+"__get";
-    }
-
-    //get first
-    public String getFirstRecord(){
-        return getCName()+"__get_first";
-    }
-    //get last
-    public String getLastRecord(){
-        return getCName()+"__get_last";
-    }
-    /**
-     * Model Events
-     * we add controller name to distinguish the subscribers
-     *
-     */
-    //record arrived to the tier
-    public String getArrivedEvent(){
-        return mEvents.get(mArrived);
-    }
-
-    //record departed from the tier
-    public String getDepartedEvent(){
-        return mEvents.get(mDeparted);
-    }
-    //save done
-    public String getSaveDoneEvent(){
-        return mEvents.get(mSaveDone);
-    }
-
-    public String getBufferSaveDoneEvent(){
-        return mEvents.get(mBufferSaveDone);
-    }
-    //buffer is full event
-    public String getFullEvent(){
-        return mEvents.get(mFull);
     }
 
     public Type getModelType() {
         return mModelType;
     }
 
-    public List<Field> getFields() {
-        return new ArrayList<>(mFields.values());
+    public Collection<Flow> getFlows() {
+        return Collections.unmodifiableCollection(mFlows);
     }
 
-    public boolean isStreaming(){
-        return getModelType() == Type.STREAMING;
-    }
+    public void addFlow(Flow f) {
+        // local models only have fake flows
+        assert f != null;
+        assert mModelType != Type.LOCAL || f.getSource() == f.getSink();
+        mFlows.add(f);
 
-    public boolean isLocal(){
-        return getModelType() == Type.LOCAL;
-    }
-
-    public boolean isReplicated(){
-        return getModelType() == Type.REPLICATED;
-    }
-
-    /***
-     *
-     * TODO: this all need to move out to translator
-     *
-     *
-     */
-
-    public List<Field> getSchema(){
-        List<Field> f = new ArrayList<>();
-        f.addAll(mFields.values());
-        return f;
-    }
-    public void addField( Field field) {
-        this.mFields.put(field.getName(), field);
-    }
-
-
-
-    public void setProperty(Variable v) {
-        LOGGER.info("Property: " + v);
-        this.mPropertiesMap.put(v.getName(), v);
-    }
-
-    public int getsizeCbuffer(){
-        int total=0;
-        Iterator it = mFields.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            total += ((Field)(pair.getValue())).getByteSize();
+        mWriters.add(f.getSource());
+        for (Space s : f) {
+            if (s == f.getSource())
+                continue;
+            mReaders.add(s);
         }
-        return total;
+    }
+
+    public Collection<Flow> findFlowsForSpace(Space s) {
+        List<Flow> flows = new ArrayList<>();
+        for (Flow f : mFlows) {
+            if (f.involvesSpace(s))
+                flows.add(f);
+        }
+        return Collections.unmodifiableCollection(flows);
+    }
+
+    public Collection<Space> getReaders() {
+        return mReaders;
+    }
+    public Collection<Space> getWriters() {
+        return mWriters;
+    }
+
+    // This is called by the STG templates to generate the Record class
+    public Collection<ModelField> getFields() {
+        return Collections.unmodifiableCollection(mFieldList);
+    }
+    public void addField(FieldSymbol fieldSym) {
+        ModelField newField = new ModelField(fieldSym, this);
+        ModelField previous = this.mFields.put(newField.getName(), newField);
+        assert previous == null;
+        this.mFieldList.add(newField);
+    }
+
+    public ModelField getField(String field) {
+        return mFields.get(field);
     }
 
     @Override
-    public String toString(){
-        String ret = "Concrete Model:" + " type : " + getTypeString() + " name: " + getVerboseName() +
-                " # of Fields " + mFields.size() + "\n\t values: \n" ;
-        Iterator it = mFields.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            ret +="\t\t" + pair.getValue().toString();
-            ret+="\n";
+    public String toString() {
+        String ret = "Concrete Model:" + " type : " + mModelType + " name: " + getName() +
+                " # of Fields " + mFieldList.size() + "\n\t values: \n" ;
+        for (ModelField field : mFieldList) {
+            ret += "\t\t" + field.toString();
+            ret += "\n";
         }
         return ret;
     }
 
-    public String getTypeString(){
-        switch (mModelType){
-            case LOCAL:
-                return "local";
-            case STREAMING:
-                return "streaming";
-            case REPLICATED:
-                return "replicated";
-            default:
-                return "Invalid";
+    public void packFields() {
+        // sort fields so that the smallest goes last
+        //
+        // variable length fields have size -1 so they always sort last
+        this.mFieldList.sort((f1, f2) -> {
+            int sz1 = f1.getType().getSerializedSize();
+            int sz2 = f2.getType().getSerializedSize();
+
+            return sz2 - sz1;
+        });
+
+        int off = 0;
+        List<ModelField> addends = new ArrayList<>();
+        boolean isVariable = false;
+        for (ModelField field : mFieldList) {
+            field.setOffset(new ModelField.FieldOffset(off, addends));
+
+            int size = field.getType().getSerializedSize();
+            assert !isVariable || size < 0;
+            if (size < 0) {
+                isVariable = true;
+                addends.add(field);
+            } else {
+                off += size;
+            }
         }
     }
-    public static Type getType(String name){
-        switch ( name ){
-            case "local":
-                return Type.LOCAL;
-            case "streaming":
-                return Type.STREAMING;
-            case "replicated":
-                return Type.REPLICATED;
-            default:
-                return Type.INVALID;
-        }
+
+    public void setSendCode(TypedIR sendCode) {
+        this.sendCode = sendCode;
+    }
+    public TypedIR getSendCode() {
+        return sendCode;
+    }
+    public void setReceiveCode(TypedIR receiveCode) {
+        this.receiveCode = receiveCode;
+    }
+    public TypedIR getReceiveCode() {
+        return receiveCode;
     }
 }

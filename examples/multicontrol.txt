@@ -1,0 +1,55 @@
+replicated ModelLightState():
+    schema:
+        status : bool
+
+
+controller EmbeddedController(model : ModelLightState):
+    event system.booted():
+        rec = model.create()
+        rec.status = false
+        model.save(rec)
+
+    event model.arrived():
+        set_light(self.record.status)
+
+
+# my proposal
+controller GatewayController(model : ModelLightState):
+
+    event model.arrived():
+        view.update(self.record.device_id, self.record.status)
+
+    def set_one_light(device_id, status)
+        rec = model.find(device_id)
+        rec.status = status
+        model.save(rec)
+
+    def set_all_lights(status):
+        for rec in model.all():
+            rec.status = status
+            model.save(rec)
+
+
+# your proposal
+controller GatewayController(model : ModelLightState):
+    event model.arrived():
+        self.instance_id
+        self.rec
+        view.update(self.record.device_id, self.record.status)
+
+    def set_one_light()
+        rec = model.first()
+        rec.status = status
+        model.save(rec)
+
+    def set_all_lights(status):
+        rec = model.first()
+        rec.status = status
+        model.save(rec)
+
+        #self.getAllInstance()
+
+
+
+controllerTimerCtrl(timer_1 : TimerSource, timer_2 : TimerSource):
+    ....

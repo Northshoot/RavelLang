@@ -1,0 +1,13 @@
+To sync up on build
+
+bash exports
+export NRF52SDK=/Users/lauril/workspace/12-sdk/nRF5_SDK_12.0.0
+export NRF52_SDK_ROOT=/Users/lauril/workspace/12-sdk/nrf5_iot_sdk
+export CONTIKI_ROOT=/Users/lauril/workspace/12-sdk/contiki
+
+
+flash with IoT SDK
+nrfjprog --program /Users/lauril/workspace/12-sdk/nrf5_iot_sdk/components/softdevice/s1xx_iot/s1xx-iot-prototype3_nrf52_softdevice.hex -f nrf52 --chiperase
+
+
+make TARGET=nrf52dk blink.flash

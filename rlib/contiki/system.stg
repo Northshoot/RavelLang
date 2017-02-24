@@ -1,0 +1,77 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+<includes:do_include(); separator="\n">
+
+void clock_delay(unsigned int delay); // Delay the CPU.
+void
+
+CLOCK_SECOND; // The number of ticks per second.
+
+void
+<name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>)
+{
+void clock_init(void); // Initialize the clock module.
+}
+void
+<name; format="function">_finalize(<name> *self)
+{}
+
+clock_time_t
+<name; format="function">_time(<name> *self)
+{
+    return clock_time(); // Get the system time.
+}
+unsigned long
+<name; format="function">_seconds(<name> *self)
+{
+    return clock_seconds(); // Get the system time in seconds.
+}
+void
+<name; format="function">_seconds(<name> *self)
+{
+    clock_delay(self); // Delay the CPU.
+}
+
+void
+<name; format="function">_seconds(<name> *self)
+{
+    clock_wait(int delay); // Delay the CPU for a number of clock ticks.
+}
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    int dummy;
+} <name>;
+
+void <name; format="function">_init(<name> *self<append_parameter_list(interface.baseModel.parameters)>);
+void <name; format="function">_finalize(<name> *self);
+
+int <name; format="function">_next(<name> *self);
+
+<end_extern_c()>
+<end_header("", name)>
+>>
+
+<! clock API !>
+clock() ::<<
+
+>>
+
+<! timer API !>
+timer()::<<
+void timer_set(struct timer *t, clock_time_t interval); // Start the timer.
+void timer_reset(struct timer *t); // Restart the timer from the previous expiration time.
+void timer_restart(struct timer *t); // Restart the timer from current time.
+int timer_expired(struct timer *t); // Check if the timer has expired.
+clock_time_t timer_remaining(struct timer *t); // Get the time until the timer expires.
+>>

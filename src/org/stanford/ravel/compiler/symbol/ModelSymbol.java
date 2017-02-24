@@ -23,7 +23,7 @@ public class ModelSymbol extends ComponentSymbol implements TypeSymbol {
         // this is the "type" of the model in the compiler sense
         // ie, a class type that has static methods create(), save()
         // and fields "record" and "error"
-        mDefinedType = new ModelType(this);
+        mDefinedType = new ModelType(this, mt);
     }
 
     @Override

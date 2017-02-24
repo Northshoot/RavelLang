@@ -22,10 +22,13 @@ public class ControlFlowGraphBuilder {
             currentBlock.addSuccessor(getExit());
             getExit().addPredecessor(currentBlock);
         }
-        cfg.freeze();
+        cfg.buildForwardBackward();
         return cfg;
     }
 
+    public TBlock getEntry() {
+        return cfg.getEntry();
+    }
     public TBlock getExit() {
         return cfg.getExit();
     }

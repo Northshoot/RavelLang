@@ -1,27 +1,21 @@
 package org.stanford.ravel.primitives;
 
-import org.stanford.ravel.translators.xLingual;
-
 /**
  * Created by lauril on 7/21/16.
  */
-public abstract class Primitive extends xLingual {
-
-    private String mComment;
-
-    public Primitive(String name, String internalName){
-        super(name,internalName);
-
-    }
+public abstract class Primitive {
+    private final String name;
 
     public Primitive(String name){
-        super(name);
-
+        this.name = name;
     }
 
-
-    public String getComment() {
-        return mComment;
+    public String getName() {
+        return name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

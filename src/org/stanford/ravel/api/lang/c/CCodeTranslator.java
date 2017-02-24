@@ -1,50 +1,47 @@
 package org.stanford.ravel.api.lang.c;
 
-import org.stanford.ravel.api.lang.BaseTranslator;
+import org.stanford.ravel.api.lang.BaseIRTranslator;
+import org.stanford.ravel.api.lang.LiteralFormatter;
+import org.stanford.ravel.compiler.ir.BinaryOperation;
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
+import org.stringtemplate.v4.AttributeRenderer;
+
+import java.util.Locale;
 
 /**
+ * Convert IR to C code.
+ *
+ * FIXME: should be replaced with string templates
+ *
  * Created by gcampagn on 1/25/17.
  */
-public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
-    private String typeToCType(Type type) {
-        if (type instanceof ArrayType) {
-            return "(" + typeToCType(((ArrayType) type).getElementType()) + ")[]";
-        }
-        if (type instanceof ClassType.InstanceType) {
-            return typeToCType(((ClassType.InstanceType) type).getClassType());
-        }
-        if (type instanceof PrimitiveType) {
-            switch ((PrimitiveType)type) {
-                case VOID:
-                    return "void";
-                case INT32:
-                    return "int32_t";
-                case BOOL:
-                    return "bool";
-                case DOUBLE:
-                    return "double";
-                case STR:
-                case ERROR_MSG:
-                    return "char*";
-                case BYTE:
-                    return "uint8_t";
+public class CCodeTranslator extends BaseIRTranslator {
+    private final AttributeRenderer typeRenderer;
+    private final AttributeRenderer identRenderer;
+    private final LiteralFormatter literalFormatter;
 
-                case ANY:
-                case ERROR:
-                default:
-                    throw new AssertionError();
-            }
-        } else {
-            return type.getName() + "*";
-        }
+    public CCodeTranslator(AttributeRenderer typeRenderer, AttributeRenderer identRenderer, LiteralFormatter literalFormatter) {
+        this.typeRenderer = typeRenderer;
+        this.identRenderer = identRenderer;
+        this.literalFormatter = literalFormatter;
     }
 
+    private String typeToCType(Type type) {
+        return typeRenderer.toString(type, null, Locale.getDefault());
+    }
+
+    private String nameToUnderscore(String name) {
+        return identRenderer.toString(name, "function", Locale.getDefault());
+    }
+
+    // override declare controller scope to add "this->", so that references in the code
+    // are correct always
     @Override
-    public void declareParameter(String name, int reg, Type type) {
-        setRegisterName(reg, name);
-        declareRegister(reg, type);
+    protected void declareControllerScope(VariableSymbol sym) {
+        setRegisterName(sym.getRegister(), "this->" + sym.getName());
     }
 
     @Override
@@ -73,16 +70,6 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
         addCode("}\n");
     }
 
-    private void addLine(Object... elements) {
-        for (Object el : elements) {
-            if (el instanceof Integer)
-                addCode(getRegisterName(((Integer) el)));
-            else
-                addCode(el.toString());
-        }
-        addCode(";\n");
-    }
-
     @Override
     public void visit(TArrayLoad arrayLoad) {
         addLine(arrayLoad.target, " = ", arrayLoad.source, "[", arrayLoad.index, "]");
@@ -95,7 +82,14 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
 
     @Override
     public void visit(TBinaryArithOp arithOp) {
-        addLine(arithOp.target, " = ", arithOp.src1, arithOp.op, arithOp.src2);
+        if (arithOp.op == BinaryOperation.ADD && arithOp.type == PrimitiveType.STR) {
+            // FIXME this should be lowered at the IR level to have the proper check for overflow
+            addLine(arithOp.target, " = malloc(strlen(", arithOp.src1, ") + strlen(", arithOp.src2, ") + 1)");
+            addLine("if (", arithOp.target, " == NULL) abort() /* FIXME */");
+            addLine("stpcpy(stpcpy(", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
+        } else {
+            addLine(arithOp.target, " = ", arithOp.src1, arithOp.op, arithOp.src2);
+        }
     }
 
     @Override
@@ -105,7 +99,11 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
 
     @Override
     public void visit(TComparisonOp compOp) {
-        addLine(compOp.target, " = ", compOp.src1, compOp.op, compOp.src2);
+        if (compOp.type == PrimitiveType.STR) {
+            addLine(compOp.target, " = strcmp(", compOp.src1, ", ", compOp.src2, ") ", compOp.op, "0");
+        } else {
+            addLine(compOp.target, " = ", compOp.src1, compOp.op, compOp.src2);
+        }
     }
 
     @Override
@@ -130,7 +128,7 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
 
     @Override
     public void visit(TImmediateLoad immediateLoad) {
-        addLine(immediateLoad.target, " = ", immediateLoad.value.toString());
+        addLine(immediateLoad.target, " = ", literalFormatter.toLiteral(immediateLoad.value));
     }
 
     @Override
@@ -140,9 +138,15 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
             addCode(getRegisterName(methodCall.target));
             addCode(" = ");
         }
-        addCode(functionType.getOwner().getName());
+        String ownerName = nameToUnderscore(functionType.getOwner().getName());
+        if (functionType.getOwner() instanceof ModelType ||
+                functionType.getOwner() instanceof InterfaceType)
+            ownerName = "ravel_generated_" + ownerName;
+        else
+            ownerName = "ravel_" + ownerName;
+        addCode(ownerName);
         addCode("_");
-        addCode(functionType.getName());
+        addCode(functionType.getFunctionName());
         addCode("(");
         boolean first = true;
         if (!functionType.isStatic()) {
@@ -152,19 +156,10 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
         for (int arg : methodCall.arguments) {
             if (!first)
                 addCode(", ");
+            first = false;
             addCode(getRegisterName(arg));
         }
         addCode(");\n");
-    }
-
-    @Override
-    public void visit(TModelCreateCall modelCreateCall) {
-        // TODO
-    }
-
-    @Override
-    public void visit(TModelRecordLoad modelRecordLoad) {
-        // TODO
     }
 
     @Override
@@ -175,5 +170,73 @@ public class CCodeTranslator extends BaseTranslator implements LoopTreeVisitor {
     @Override
     public void visit(TUnaryArithOp arithOp) {
         addLine(arithOp.target, " = ", arithOp.op, arithOp.source);
+    }
+
+    private String getTypeSize(Type type) {
+        if (type instanceof PrimitiveType) {
+            switch ((PrimitiveType)type) {
+                case VOID:
+                case ANY:
+                case ERROR:
+                    throw new AssertionError();
+
+                case BOOL:
+                    return "sizeof(bool)";
+                case BYTE:
+                    return "sizeof(uint8_t)";
+                case INT32:
+                    return "sizeof(uint32_t)";
+                case DOUBLE:
+                    return "sizeof(double)";
+                case STR:
+                    return "sizeof(char*)";
+                case ERROR_MSG:
+                    return "sizeof(uint32_t)";
+                case TIMESTAMP:
+                    return "sizeof(uint32_t)";
+
+                default:
+                    throw new AssertionError();
+            }
+        } else {
+            return "sizeof(void*)";
+        }
+    }
+
+    @Override
+    public void visit(TIntrinsic intrinsic) {
+        if (intrinsic.returnType != PrimitiveType.VOID) {
+            addCode(getRegisterName(intrinsic.target));
+            addCode(" = ");
+        }
+
+        switch (intrinsic.name) {
+            case "array_new":
+                addLine("calloc(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType)intrinsic.returnType).getElementType()), ")");
+                addLine("if (", intrinsic.target, " == NULL) abort() /* FIXME */");
+                break;
+            case "strlen":
+                addLine("strlen(", intrinsic.arguments[0], ")");
+                break;
+            default:
+                addCode("ravel_intrinsic_" + intrinsic.name + "(");
+                boolean first = true;
+                for (int arg : intrinsic.arguments) {
+                    if (!first)
+                        addCode(", ");
+                    first = false;
+                    addCode(getRegisterName(arg));
+                }
+                addCode(");\n");
+        }
+    }
+
+    @Override
+    public void visit(TReturn returnInstr) {
+        if (getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID) {
+            addLine("return ", Registers.RETURN_REG);
+        } else {
+            addLine("return");
+        }
     }
 }

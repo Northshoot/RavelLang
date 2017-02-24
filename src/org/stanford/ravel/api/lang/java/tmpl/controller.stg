@@ -1,0 +1,22 @@
+import "common.stg"
+
+event_handler(handler) ::=<<
+public void <handler.modelVar.name>_<handler.eventType.eventName>(<handler.arguments:{a|<a.type> <a.name>}; separator=", ">) {
+    <handler.body>}
+>>
+
+file(package,imports,name,parameters,eventHandlers) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class <name> {
+    <parameters:{p|private final <p.type> <p.name>;}; separator="\n">
+
+    public <name>(<parameters:{p|<p.type> <p.name>}; separator=", ">) {
+        <parameters:{p|this.<p.name> = <p.name>;}; separator="\n">
+    }
+
+    <eventHandlers:event_handler(); separator="\n">
+};
+>>

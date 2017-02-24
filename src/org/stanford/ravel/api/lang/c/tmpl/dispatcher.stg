@@ -1,0 +1,111 @@
+import "common.stg"
+
+append_params(comp) ::=<<
+<if(comp.allParameters)>, <comp.allParameters:{p|<p; format="literal">}; separator=", "><endif>
+>>
+
+init_model(comp) ::=<<
+ravel_generated_<comp.component.name; format="function">_init(&self->model_<comp.varName><append_params(comp)>);
+>>
+init_interface(comp) ::=<<
+ravel_generated_<comp.component.name; format="function">_init(&self->iface_<comp.varName>, <comp.instanceId><append_params(comp)>);
+>>
+finalize_component(comp, prefix) ::=<<
+ravel_generated_<comp.component.name; format="function">_finalize(&self-><prefix>_<comp.varName>);
+>>
+
+init_controller(c) ::=<<
+ravel_generated_<c.name; format="function">_init(&self->ctr_<c.varName><if(c.parameterValues)>, <c.parameterValues; separator=", "><endif>);
+>>
+finalize_controller(c) ::=<<
+ravel_generated_<c.name; format="function">_finalize(&self->ctr_<c.varName>);
+>>
+
+set_component_controller(comp, prefix) ::=<<
+<comp.controllerList:{c|ravel_generated_<comp.component.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
+>>
+
+c_file(includes,name,models,interfaces,controllers,space) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+
+void
+ravel_generated_<name; format="function">_init(<name> *self)
+{
+    ravel_system_init(&self->sys_api);
+
+    <models:init_model(); separator="\n">
+    <interfaces:init_interface(); separator="\n">
+    <controllers:init_controller(); separator="\n">
+
+    <models:set_component_controller("model"); separator="\n">
+    <interfaces:set_component_controller("iface"); separator="\n">
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    <models:finalize_component("model"); separator="\n">
+    <interfaces:finalize_component("iface"); separator="\n">
+    <controllers:finalize_controller(); separator="\n">
+
+    ravel_system_finalize(&self->sys_api);
+}
+
+void
+ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver)
+{
+    self->driver = driver;
+}
+
+void
+ravel_generated_<name; format="function">_started(<name> *self)
+{
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "started", [])>
+}
+void
+ravel_generated_<name; format="function">_stopped(<name> *self)
+{
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "stopped", [])>
+}
+void
+ravel_generated_<name; format="function">_restarted(<name> *self)
+{
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "restarted", [])>
+}
+
+>>
+
+h_file(includes,name,models,interfaces,controllers,space) ::=<<
+<begin_header("", name)>
+
+#include \<api/endpoint.h>
+#include \<api/system.h>
+#include \<api/driver.h>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct <name> {
+    RavelDriver *driver;
+
+    <models:{c|<c.component.name> model_<c.varName>;}; separator="\n">
+    <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
+    <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
+
+    SystemAPI sys_api;
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver);
+
+void ravel_generated_<name; format="function">_started(<name> *self);
+void ravel_generated_<name; format="function">_stopped(<name> *self);
+void ravel_generated_<name; format="function">_restarted(<name> *self);
+
+<end_extern_c()>
+<end_header("", name)>
+>>

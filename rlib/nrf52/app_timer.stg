@@ -1,0 +1,143 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+#include \<stdbool.h>
+#include "boards.h"
+#include "nrf_drv_gpiote.h"
+#include "app_error.h"
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
+#define NRF_LOG_MODULE_NAME "TIMER"
+
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+<includes:do_include(); separator="\n">
+
+// General application timer settings.
+#define APP_TIMER_PRESCALER              15
+#define APP_TIMER_OP_QUEUE_SIZE          4
+
+// this can be implemented smarter to avoid generating functions that are not used
+//TODO:  improve template
+
+
+APP_TIMER_DEF(m_<name>_timer_one_shoot);
+APP_TIMER_DEF(m_<name>_timer_periodic);
+
+static uint32_t <name>__err_code = NRF_SUCCESS;
+static bool one_shoot = false;
+
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    //TODO: parse in the application to determine if which timer are used and optimize the code
+    self->__id = instance_id;
+
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+    //create single shoot timer
+    <name>__err_code = app_timer_create(&m_<name>_timer_one_shoot,
+                                    APP_TIMER_MODE_SINGLE_SHOT,
+                                    ravel_generated_<name; format="function">_fired);
+        APP_ERROR_CHECK(<name>__err_code);
+
+     //create periodic timer
+        <name>__err_code = app_timer_create(&m_<name>_timer_periodic,
+                                    APP_TIMER_MODE_REPEATED,
+                                    ravel_generated_<name; format="function">_fired);
+        APP_ERROR_CHECK(<name>__err_code);
+
+    NRF_LOG_INFO("INIT!\r\n");
+
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    //cancel all the timers to exit gracefully
+    if(one_shoot)
+            app_timer_stop(m_<name>_timer_one_shoot);
+     else
+        app_timer_stop(m_<name>_timer_periodic);
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
+{
+    one_shoot = true;
+    <name>__err_code = app_timer_start(m_<name>_timer_one_shoot, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , NULL);
+    APP_ERROR_CHECK(<name>__err_code);
+
+}
+void
+ravel_generated_<name; format="function">_cancel(<name>* self)
+{
+    if(one_shoot)
+        app_timer_stop(m_<name>_timer_one_shoot);
+    else
+        app_timer_stop(m_<name>_timer_periodic);
+}
+void
+ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
+{
+    NRF_LOG_INFO("start_periodic %d\r\n",time);
+    one_shoot = false;
+    <name>__err_code = app_timer_start(m_<name>_timer_periodic, APP_TIMER_TICKS(time, APP_TIMER_PRESCALER) , self);
+    APP_ERROR_CHECK(<name>__err_code);
+}
+
+
+void
+ravel_generated_<name; format="function">_fired( void* data)
+{
+        <name> *self = data;
+        <dispatch_event(interface, "fired",[])>
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+#include "nrf.h"
+#include "nrf_drv_timer.h"
+#include "bsp.h"
+#include "app_error.h"
+
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_cancel(<name>* self);
+void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_fired(void* p_context);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

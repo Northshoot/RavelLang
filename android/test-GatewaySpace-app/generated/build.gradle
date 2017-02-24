@@ -1,0 +1,2 @@
+configurations.create("default")
+artifacts.add("default", file('../../../rout/GatewaySpace/build/outputs/aar/GatewaySpace-debug.aar'))

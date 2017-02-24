@@ -59,4 +59,8 @@ public interface InstructionVisitor {
     default void visit(Continue instr) {
 
     }
+
+    default void visit(Return instr) {
+
+    }
 }

@@ -1,9 +1,8 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.stanford.antlr4.RavelParser;
 import org.stanford.ravel.compiler.ir.Registers;
-import org.stanford.ravel.compiler.ir.untyped.InstructionVisitor;
 import org.stanford.ravel.compiler.types.FunctionType;
+import org.stanford.ravel.compiler.types.ModelType;
 import org.stanford.ravel.compiler.types.Type;
 
 /**
@@ -11,10 +10,10 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TMethodCall extends TInstruction {
     public final FunctionType type;
-    public final int owner;
+    public int owner;
     public final String method;
     public final int[] arguments;
-    public final int target;
+    public int target;
 
     public TMethodCall(FunctionType type, int target, int owner, String method, int[] arguments) {
         this.type = type;
@@ -34,22 +33,22 @@ public class TMethodCall extends TInstruction {
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type.getReturnType();
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return arguments;
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return type.getArgumentTypes();
     }
 
@@ -60,7 +59,26 @@ public class TMethodCall extends TInstruction {
 
     @Override
     public boolean writesMemory() {
-        return true;
+        if (type.getOwner() instanceof ModelType) {
+            switch (method) {
+                case "create":
+                case "get":
+                case "all":
+                case "first":
+                case "last":
+                case "size":
+                    return false;
+
+                case "save":
+                case "clear":
+                    return true;
+
+                default:
+                    throw new AssertionError("Unexpected method " + method + " in model");
+            }
+        } else {
+            return true;
+        }
     }
 
     @Override

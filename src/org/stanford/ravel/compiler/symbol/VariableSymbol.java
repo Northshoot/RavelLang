@@ -5,6 +5,7 @@ import org.stanford.ravel.compiler.types.Type;
 
 public class VariableSymbol extends BaseSymbol implements TypedSymbol {
     private int register = Registers.UNSET_REG;
+    private boolean writable = true;
 
     public VariableSymbol(String name) {
         super(name);
@@ -20,5 +21,12 @@ public class VariableSymbol extends BaseSymbol implements TypedSymbol {
     }
     public int getRegister() {
         return register;
+    }
+
+    public boolean isWritable() {
+        return writable;
+    }
+    public void setWritable(boolean writable) {
+        this.writable = writable;
     }
 }

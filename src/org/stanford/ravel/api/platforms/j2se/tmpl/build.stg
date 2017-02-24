@@ -1,0 +1,30 @@
+delimiters "%", "%"
+
+ant(java_runtime) ::=<<
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="compile" name="semparse">
+  <!-- Set useful variables -->
+  <property name="target" value="1.7"/>
+  <property name="source" value="1.7"/>
+  <property name="root" value="."/>
+  <property name="src" location="${root}/src"/>
+  <property name="classes" location="${root}/classes"/>
+
+  <!-- Compile -->
+  <target name="compile">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${src}" destdir="${classes}" classpath="%java_runtime%" debug="true" includeantruntime="false" source="${source}" target="${target}">
+    </javac>
+    <jar destfile="app.jar" basedir="${classes}" />
+  </target>
+
+  <!-- Clean up -->
+  <target name="clean">
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="${classes}" followsymlinks="false"/>
+      <fileset file="app.jar" followsymlinks="false"/>
+    </delete>
+  </target>
+
+</project>
+>>

@@ -1,0 +1,122 @@
+declaration(reg,type) ::=<<
+<type> <reg.name>;
+
+>>
+
+loop_begin(loop) ::=<<
+while(true) {
+
+>>
+loop_end(loop) ::=<<
+}
+
+>>
+
+if_stmt_begin(if_stmt) ::=<<
+if (<if_stmt.condition.name>) {
+
+>>
+if_stmt_else(if_stmt) ::=<<
+} else {
+
+>>
+if_stmt_endif(if_stmt) ::=<<
+}
+
+>>
+
+break() ::=<<
+break;
+
+>>
+continue() ::=<<
+continue;
+
+>>
+
+immediate_load(imm, literal) ::=<<
+<imm.target.name> = <literal>;
+
+>>
+move(op) ::=<<
+<op.target.name> = <op.source.name>;
+
+>>
+unary_op(op) ::=<<
+<op.target.name> = <op.op><op.source.name>;
+
+>>
+bin_op(op) ::=<<
+<op.target.name> = <op.src1.name> <op.op> <op.src2.name>;
+
+>>
+convert(op) ::=<<
+<op.target.name> = (<op.tgtType>) <op.source.name>;
+
+>>
+
+array_load(load) ::=<<
+<load.target.name> = <load.source.name>[<load.index.name>];
+
+>>
+array_store(store) ::=<<
+<store.object.name>[<store.index.name>] = <store.value.name>;
+
+>>
+
+field_load(load) ::=<<
+<load.target.name> = <load.source.name>.<load.field>;
+
+>>
+field_store(store) ::=<<
+<store.object.name>.<store.field> = <store.value.name>;
+
+>>
+
+void_function_call(call) ::=<<
+<call.type.owner>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+function_call(call) ::=<<
+<call.target.name> = <call.type.owner>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+void_method_call(call) ::=<<
+<call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+method_call(call) ::=<<
+<call.target.name> = <call.owner.name>.<call.method>(<call.arguments:{a|<a.name>}; separator=", ">);
+
+>>
+
+default_intrinsic(instr) ::=<<
+org.stanford.ravel.rrt.lang.Intrinsic.<instr.name>(<instr.arguments:{a|<a.name>}; separator=", ">)
+>>
+
+array_new(instr) ::=<<
+new <instr.returnType.elementType>[<instr.arguments:{a|<a.name>}; separator=", ">]
+>>
+
+intrinsic_map ::=[
+    "array_new": {<array_new(instr)>},
+    default: {<default_intrinsic(instr)>}
+]
+
+void_intrinsic(instr) ::=<<
+<intrinsic_map.(instr.name)>;
+
+>>
+intrinsic(instr) ::=<<
+<instr.target.name> = <intrinsic_map.(instr.name)>;
+
+>>
+
+void_return() ::=<<
+return;
+
+>>
+nonvoid_return() ::=<<
+return __returnValue;
+
+>>

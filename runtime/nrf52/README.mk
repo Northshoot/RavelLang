@@ -1,0 +1,1 @@
+project is managed in CLion

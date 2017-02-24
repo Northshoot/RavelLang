@@ -1,5 +1,8 @@
 package org.stanford.ravel.compiler.ir;
 
+import org.stanford.ravel.compiler.types.PrimitiveType;
+import org.stanford.ravel.compiler.types.Type;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,5 +38,19 @@ public enum UnaryOperation {
 
     static UnaryOperation forSymbol(String symbol) {
         return symbolMap.get(symbol);
+    }
+
+    public boolean isLegalType(Type type) {
+        switch (this) {
+            case NEG:
+            case PLUS:
+                return type == PrimitiveType.INT32 || type == PrimitiveType.DOUBLE;
+            case BNOT:
+                return type == PrimitiveType.INT32 || type == PrimitiveType.BYTE;
+            case NOT:
+                return type == PrimitiveType.BOOL;
+            default:
+                return false;
+        }
     }
 }

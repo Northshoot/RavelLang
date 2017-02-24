@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -10,8 +9,8 @@ import org.stanford.ravel.compiler.types.Type;
 public class TFieldStore extends TInstruction {
     public final Type type;
     public final CompoundType compoundType;
-    public final int object;
-    public final int value;
+    public int object;
+    public int value;
     public final String field;
 
     public TFieldStore(Type type, CompoundType compoundType, int object, String field, int value) {
@@ -27,12 +26,12 @@ public class TFieldStore extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[] { object, value };
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[] { compoundType, type };
     }
 

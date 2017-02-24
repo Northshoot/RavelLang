@@ -1,0 +1,152 @@
+local model Vibration(size):
+    properties:
+        durable=false
+        records=size
+
+    schema:
+        time = TimeStampField(auto_add=True)
+        vibration = IntegerField()
+
+streaming model pPhase(size):
+    properties:
+        reliable=true
+        durable=false
+        records=size
+
+    schema:
+        time = TimeStampField(auto_add=True)
+        prelim_pphase  = IntegerField()
+        signal_sparsity = IntegerField()
+
+streaming model CompressedSample(size):
+    properties:
+        reliable=true
+        durable=false
+        records=size
+
+    schema:
+        sample  = ByteField()
+
+replicated model TransmitCS():
+    properties:
+        reliable=false
+        durable=false
+    schema:
+        tx_cs = BooleanField(default=false)
+
+controller Coordinator(tier):
+    phase_model = tier.models.pPhase
+    cs_model = tier.models.cs
+    tx_cs = tier.models.tx_cs
+    select = tier.compute.select
+
+
+    event phase_model.full(Context ctx):
+        dest = select(phase_model)
+        rec = tx_cs.create()
+        rec.tx_cs = true
+        rec.save(dest)
+
+controller Node(tier):
+    vibration_model = tier.models.vibration
+    phase_model = tier.models.pPhase
+    cs_model = tier.models.cs
+    tx_cs = tier.models.tx_cs
+    p_timer = tier.sources.timer
+    vib_src = tier.sources.vibration
+    pphase_alg = tier.compute.pphase
+    spars = tier.compute.sparsity
+    cmpr = tier.computer.compresive_sampling
+
+    back_off_time = 5000
+    vib_threshold = 1.2
+    time_threshold = 1200
+    last = p_timer.getNow()
+
+    event vib_src.detected(float val):
+        t_diff = p_timer.getNow() - last
+        last = p_timer.getNow()
+        if t_diff > time_threshold:
+            vibration_model.clear()
+        else:
+            if vib_threshold < val:
+                rec = vibration_model.create()
+                rec.vibration = val
+                rec.save()
+
+    event vibration_model.full(Context ctx):
+        rec = phase_model.create()
+        rec.prelim_pphase = pphase_alg(vibration_model)
+        rec.signal_sparsity = spars(vibration_model)
+        rec.save()
+
+    event vibration_model.save_done(Context ctx):
+        p_timer.startPeriodic(back_off_time)
+
+    event p_timer.expired(Context ctx):
+        rec = tx_cs.get()
+        if not rec.tx_cs:
+            vibration_model.clear()
+            phase_model.clear()
+
+    event tx_cs.arrived(Context ctx):
+        rec = tx_cs.get()
+        if rec.tx_cs:
+            rec_cs = cs_model.create()
+            rec_cs.bytes =cmpr(vibration_model)
+            rec_cs.save()
+            rec.tx_cs = false
+        else:
+            vibration_model.clear()
+            phase_model.clear()
+
+    event cs_model.save_done(Context ctx):
+        cs_model.clear()
+
+controller Coordinator(tier):
+    phase_model = tier.models.pPhase
+    cs_model = tier.models.cs
+    tx_cs = tier.models.tx_cs
+    select = tier.compute.select
+
+
+    event phase_model.full(Context ctx):
+        dest = select(phase_model)
+        rec = tx_cs.create()
+        rec.tx_cs = true
+        rec.save(dest)
+
+
+space VibrationSensor:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+        compute = system.alg
+
+    models:
+        vibration = Vibration(size=50)
+        pPhase = pPhase(size=1)
+        cs = CompressedSample(size=10)
+        tx_cs = TransmitCS()
+
+    controllers:
+        node = Node(tier=self)
+
+    sources:
+        vibration = platform.system.vibration
+        timer = platform.system.PeriodicTimer
+
+space CoordinatorNode:
+    platform:
+        language = CLang
+        templates=nrf52
+        system = nrf52Platform.v12
+
+    models:
+        pPhase = pPhase(size=10)
+        cs = CompressedSample(size=10)
+        tx_cs = TransmitCS()
+
+    controllers:
+        node = Coordinator(tier=self)

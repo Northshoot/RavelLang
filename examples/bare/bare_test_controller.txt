@@ -1,69 +1,177 @@
-streaming model Random(size):
+replicated model Random(size : int32):
     properties:
         durable = False
         reliable = False
-        #records = size
-        records = 10
+        records = size
+        flow = EmbeddedSpace, GatewaySpace
 
     schema:
         # comment here
-        value = IntegerField()
+        value : int32
+        array_value : byte[]
+        str_value : str
+        str2_value : str
+        err_value : error_msg
+
+interface TimerSource():
+    implementation:
+        java = "rlib/java/timer.stg"
+        c = "rlib/c/timer.stg"
+
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+
+    event fired()
+
+interface RandomSource():
+    implementation:
+        java = "rlib/java/random.stg"
+        c = "rlib/c/random.stg"
+
+    def next(): int32
 
 
-controller RandomControllerEmbedded(random: Random):
+#view RandomCounter(timer: TimerSource):
+#    counter: int32
+#    time: timestamp
+
+#    def update(rec: Random.Record):
+#        time = timer.getNow()
+#        counter += 1
+#        value = rec.value
+
+
+controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
+    event timer.fired():
+        rec = random.create()
+        rec.value = rnd.next()
+        rec.str_value = "lol"
+        rec.str2_value = "lol2"
+        ctx = random.save(rec)
+
+        if ctx.error:
+            timer.cancel()
+
+        z = 7
+        y : bool
+        if z > 0:
+            y = True
+        else:
+            y = False
+        if False:
+            system.print("yes")
+        if rec.value > 0:
+            z = y
+        else:
+            z = y
+        if z > 0:
+            system.print("lol")
+        #view.update(rec)
+
+        rec2 = random.create()
+        rec2.value = rec.value
+
+        for r in random.all():
+            system.print("one record")
+
+    event timer2.fired():
+        system.print("timer2")
+
+    event system.started():
+        timer.start_periodic(5000)
+
+local model Sum():
+    properties:
+        records = 1
+        reliable = False
+        durable = False
+    schema:
+        value : int32
+
+controller CController(random: Random, sum : Sum):
     event random.arrived():
-        #s1 : str = "\"foo\""
-        #s2 = s1 + "lol"
-        #x : int32 = 7
-        #y = x + 5
-        #z = (x + 5 >= 0) or True
-        #q : int32
-        #if z:
-        #    q = self.record.value
-        #else:
-        #    q = self.record.value - 1
-        #self.record.value /= q + self.record.value
-        #rec2 = self.create()
-        #rec2.value = 42
+        rec = self.record
+        x  = 7
+        s : str
+        if rec.err_value:
+            s = rec.str_value
+        else:
+            s = rec.str2_value
+        system.print(s)
 
-        #rec3 = random.create()
-        #rec3.value = 1000
-        #while rec3.value > 5:
-        #    while x + y > q:
-        #        x -= 1
-        #    rec3.value -= 5
+        sum_record : Sum.Record
+        if sum.size() == 0:
+            sum_record = sum.create()
+            sum_record.value = rec.value
+        else:
+            sum_record = sum.get(0)
+            sum_record.value = rec.value + sum_record.value
+        sum.save(sum_record)
 
-        #while x > 0 or y < 0:
-        #    if s1 == "bar":
-        #        x += 1
-        #    else:
-        #        x -= 1
-        #    y -= 1
+        # FIXME this does not work because it cannot optimize
+        #if sum_record.value > 5 and False:
+        if sum_record.value > 5:
+            if False:
+                system.print("big")
 
-        x : int32
-        y : int32
-        while True:
-            x = 1
-            if y == 1:
-                x = 2
-                break
-            x = 4
-        x = 5
+
+#interface Database<T>(model: T):
+#    implementation:
+#        python = "rlib/py/django.stg"
+
+#    def save(r : T.Record): Random.Context
+
+#controller CloudController(random: Random, db1: Database<Random>, db2: Database<Random2>):
+#    event random.arrived():
+#        rec = self.record
+#        if rec.value >= 0:
+#            db.save(rec)
+#        if rec.origin == GatewaySpace:
+#            #
+
+space CloudSpace:
+    platform:
+        language = python.v36
+        system = Django.v10
+
+    models:
+        random = Random(size=1)
+
+    interfaces:
+        #database =
+
+    controllers:
+        #rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, rnd = interfaces.rng_1)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    models:
+        random = Random(size=5)
+
+    interfaces:
+        timer_1 = TimerSource()
+        timer_2 = TimerSource()
+        rng_1 = RandomSource()
+
+    controllers:
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
+        # swap the timers now
+        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
 
 
 space EmbeddedSpace:
     platform:
-        language = JLang
-        templates = nrf52
-        system = Android.v22
+        language = CLang
+        system = Posix.v2008
 
     models:
-        random = Random(size=10)
-        #frequency = Frequency(size=1)
-        #boor_error = BootError()
+        random = Random(size=5)
+        sum = Sum()
 
     controllers:
-        rndcnt = RandomControllerEmbedded(random = models.random)
-
-    sources:
-        random = platform.system.random
+        ccntrl = CController(random = models.random, sum = models.sum)

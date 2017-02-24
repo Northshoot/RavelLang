@@ -1,4 +1,95 @@
-import "class.stg"
-file(package,className) ::=<<
-<class(package,className,"Model")>
+import "common.stg"
+
+record_class(model, fields) ::=<<
+public static class Record implements ModelRecord {
+    private int __idx = -1;
+
+    <fields:{f|public <f.type> <f.name>;}; separator="\n">
+
+    public Record() {
+    }
+
+    public Record(byte[] data) {
+        <model.receiveCode>
+    }
+
+    @Override
+    public byte[] toBytes() {
+        <model.sendCode>
+    }
+
+    @Override
+    public void index(int i) {
+        __idx = i;
+    }
+
+    @Override
+    public int index() {
+        return __idx;
+    }
+};
+>>
+
+file(package,imports,name,base,model,set_endpoints) ::=<<
+package <package>;
+
+import java.util.Arrays;
+
+import org.stanford.ravel.rrt.model.<base>;
+import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.utils.ByteWork;
+import org.stanford.ravel.rrt.utils.GrowableByteArray;
+import org.stanford.ravel.rrt.Context;
+
+<imports:do_import()>
+
+public class <name> extends <base>\<<name>.Record> {
+    <record_class(model, model.baseModel.fields)>
+
+    public static final int MODEL_ID = <model.baseModel.id>;
+
+    <model.controllerList:{c|private <c.name> ctr_<c.varName>;}; separator="\n">
+
+    public <name>(AppDispatcher dispatcher<append_parameter_list(model.baseModel.parameters)>) {
+        super(dispatcher, <model.baseModel.size; format="literal">);
+    }
+
+    // Setter methods for AppDispatcher
+    public void addAllEndpoints() {
+        <if(set_endpoints)><if(model.streamingSinks)>addEndpoints(Arrays.asList(<model.streamingSinks:{s|"<s.name>"}; separator="\n">));<endif><endif>
+    }
+    <model.controllerList:set_controller_method(); separator="\n">
+
+    // Event listener dispatch
+    @Override
+    protected void notifyFull(Context\<Record> ctx) {
+        <dispatch_event_single_instance(model, "full", ["ctx"])>
+    }
+    @Override
+    protected void notifyArrived(Context\<Record> ctx) {
+        <dispatch_event_single_instance(model, "arrived", ["ctx"])>
+    }
+    @Override
+    protected void notifyDeparted(Context\<Record> ctx) {
+        <dispatch_event_single_instance(model, "departed", ["ctx"])>
+    }
+    @Override
+    protected void notifySaveDone(Context\<Record> ctx) {
+        <dispatch_event_single_instance(model, "save_done", ["ctx"])>
+    }
+
+    // Record creation functions
+    @Override
+    protected Record unmarshall(byte[] data) {
+        return new Record(data);
+    }
+    public Record create() {
+        return new Record();
+    }
+
+    // Adjust the type of all() to what the controllers expect
+    public Record[] all() {
+        return super.all(new Record[]{});
+    }
+};
 >>

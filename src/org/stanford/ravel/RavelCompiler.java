@@ -1,23 +1,34 @@
 package org.stanford.ravel;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.stanford.ravel.compiler.*;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
+import org.stanford.ravel.analysis.FlowAnalysis;
+import org.stanford.ravel.analysis.ModelOperationAnalysis;
+import org.stanford.ravel.analysis.ModelOwnershipAnalysis;
+import org.stanford.ravel.analysis.ModelWritingAnalysis;
+import org.stanford.ravel.analysis.security.SecurityAnalysis;
+import org.stanford.ravel.analysis.security.SecurityTransformation;
+import org.stanford.ravel.api.InvalidOptionException;
+import org.stanford.ravel.compiler.CompileError;
+import org.stanford.ravel.compiler.DefPhase;
+import org.stanford.ravel.compiler.SourceLocation;
+import org.stanford.ravel.compiler.ValidateScope;
 import org.stanford.ravel.compiler.scope.GlobalScope;
-import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.symbol.ControllerSymbol;
+import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
+import org.stanford.ravel.compiler.symbol.ModelSymbol;
+import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Controller;
-import org.stanford.ravel.primitives.Event;
+import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,12 +42,18 @@ public class RavelCompiler {
 
     private long start;
     private boolean hadErrors = false;
+    private final RavelOptionParser options = new RavelOptionParser();
     private final List<CompileError> errors = new ArrayList<>();
+    private ControllerCompiler controllerCompiler;
+    private ModelCompiler modelCompiler;
 
     public boolean success() {
         return !hadErrors;
     }
 
+    public void emitInfo(SourceLocation loc, String message) {
+        errors.add(new CompileError(loc, CompileError.Severity.INFO, message));
+    }
     public void emitError(SourceLocation loc, String message) {
         errors.add(new CompileError(loc, CompileError.Severity.ERROR, message));
         hadErrors = true;
@@ -98,7 +115,7 @@ public class RavelCompiler {
     }
 
     private GlobalScope defPhase(ParseTree tree) {
-        DefPhase listener = new DefPhase(this);
+        DefPhase listener = new DefPhase(this, options.hasFOption("dump-scope-tree"));
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
@@ -106,34 +123,32 @@ public class RavelCompiler {
     }
 
     private void compileModels(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ModelIR mir = new ModelIR(this, app);
         for (ModelSymbol m : scope.getModels()) {
-            mir.addModel(m);
+            app.addModel(m.getName(), modelCompiler.compile(m));
         }
     }
 
-    private void compileControllers(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ControllerEventCompiler compiler = new ControllerEventCompiler(this);
-
-        for (ControllerSymbol c : scope.getControllers()) {
-            Controller controller = new Controller(c.getName());
-
-            for (VariableSymbol varSym : c.getParameters()) {
-                controller.addParameter(varSym.getName(), varSym.getType());
-            }
-
-            for (EventSymbol eventSym : c.getEvents()) {
-                VariableSymbol modelVar = (VariableSymbol) c.resolve(eventSym.getModelVarName());
-
-                TypedIR ir = compiler.compileEvent((RavelParser.EventScopeContext) eventSym.getDefNode());
-                if (ir != null) {
-                    Event event = new Event(modelVar, eventSym.getEvent(), ir);
-                    controller.addEvent(event);
-                }
-            }
-
-            app.addController(c.getName(), controller);
+    private void compileInterfaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        InterfaceCompiler compiler = new InterfaceCompiler(this);
+        for (InterfaceSymbol isym : scope.getInterfaces()) {
+            app.addInterface(isym.getName(), compiler.compileInterface(isym));
         }
+    }
+
+    private void compileControllersPreAnalysis(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        for (ControllerSymbol c : scope.getControllers()) {
+            app.addController(c.getName(), controllerCompiler.preAnalysis(c));
+        }
+    }
+
+    private void compileControllersPostAnalysis(RavelApplication app) throws FatalCompilerErrorException {
+        for (Controller c : app.getControllers())
+            controllerCompiler.postAnalysis(c);
+    }
+
+    private void compileModelsPostAnalysis(RavelApplication app) throws FatalCompilerErrorException {
+        for (Model model : app.getModels())
+            modelCompiler.postAnalysis(model);
     }
 
     private void compileSpaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
@@ -148,77 +163,131 @@ public class RavelCompiler {
         }
     }
 
-    private void generateCode(RavelApplication app, String buildPath) {
-        PlatformBuilder builder = new PlatformBuilder(app, buildPath);
+    private void generateCode(RavelApplication app) throws InvalidOptionException,FatalCompilerErrorException {
+        PlatformBuilder builder = new PlatformBuilder(app);
+        builder.applyOptions(options);
         builder.buildAll();
         builder.render();
     }
 
-    private void run(String inputFile) {
-        logBuildStart();
-
+    private void run(String[] args) {
         try {
-            String mBuildPath = null;
-            InputStream is = System.in;
-
-            ParseTree tree;
-
-            try {
-                if (inputFile != null) {
-                    is = new FileInputStream(inputFile);
-                    mBuildPath = Paths.get(inputFile).toAbsolutePath().getParent().toString();
-                    mBuildPath += "/rout/";
-                } else {
-                    mBuildPath = "./rout/";
-                }
-                System.err.println("Build path " + mBuildPath);
-
-                tree = parse(is);
-            } catch(IOException e) {
-                System.err.println("Failed to read input file: " + e.getLocalizedMessage());
+            options.parse(args);
+            if (options.isHelp()) {
+                options.help();
                 return;
             }
-            if (!success())
+            if (options.isVersion()) {
+                options.version();
                 return;
+            }
 
-            // define (hoist) the models and controllers
-            GlobalScope globalScope = defPhase(tree);
-            if (!success())
-                return;
-            ValidateScope.validate(globalScope);
+            logBuildStart();
+            System.err.println("Build path " + options.getBuildPath());
 
-            RavelApplication app = new RavelApplication();
+            try {
+                ParseTree tree;
 
-            // typecheck the models, assign types to the
-            compileModels(globalScope, app);
-            if (!success())
-                return;
+                try {
+                    InputStream is = new FileInputStream(options.getInputPath());
+                    tree = parse(is);
+                } catch (IOException e) {
+                    System.err.println("Failed to read input file: " + e.getLocalizedMessage());
+                    return;
+                }
+                if (!success())
+                    return;
 
-            // compile the controllers to IR
-            compileControllers(globalScope, app);
-            if (!success())
-                return;
+                // define (hoist) the models and controllers
+                GlobalScope globalScope = defPhase(tree);
+                if (!success())
+                    return;
+                ValidateScope.validate(globalScope);
 
-            // link controllers, models and platforms
-            compileSpaces(globalScope, app);
-            if (!success())
-                return;
+                RavelApplication app = new RavelApplication();
 
-            LOGGER.info("Internal representation is created!");
+                // typecheck the models, assign types to the fields
+                modelCompiler = new ModelCompiler(this, options.hasFOption("dump-models"));
+                compileModels(globalScope, app);
+                if (!success())
+                    return;
 
-            generateCode(app, mBuildPath);
-        } catch (FatalCompilerErrorException e) {
-            // do nothing, this exception is just a quick way to interrupt compilation
-            // if something really bad happens
-        } finally {
-            logBuildEnd();
+                // typecheck the interfaces, find implementations
+                compileInterfaces(globalScope, app);
+                if (!success())
+                    return;
+
+                // compile the controllers to IR
+                controllerCompiler = new ControllerCompiler(this, options.hasFOption("dump-ir"));
+                compileControllersPreAnalysis(globalScope, app);
+                if (!success())
+                    return;
+
+                // link controllers, models and platforms
+                compileSpaces(globalScope, app);
+                if (!success())
+                    return;
+
+                // determine who is writing where
+                ModelWritingAnalysis writingAnalysis = new ModelWritingAnalysis(this, app);
+                writingAnalysis.run();
+                if (!success())
+                    return;
+
+                // analyze flows
+                FlowAnalysis flowAnalysis = new FlowAnalysis(this, app);
+                flowAnalysis.run();
+                if (!success())
+                    return;
+
+                // analyze record creation and map variables to fields
+                ModelOwnershipAnalysis ownershipAnalysis = new ModelOwnershipAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
+                ownershipAnalysis.run();
+                if (!success())
+                    return;
+
+                // analyze operations computed on fields
+                ModelOperationAnalysis operationAnalysis = new ModelOperationAnalysis(this, app, options.hasFOption("dump-operation-analysis"));
+                operationAnalysis.run();
+                if (!success())
+                    return;
+
+                // assign security primitives to each space
+                SecurityAnalysis securityAnalysis = new SecurityAnalysis(this, app, options.hasFOption("debug-security-analysis"));
+                securityAnalysis.run();
+                if (!success())
+                    return;
+
+                // transform the IR with security info
+                // FIXME: for now, we always disable encryption and MAC
+                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), true, !options.hasFOption("enable-mac"));
+                securityTransformation.run();
+                if (!success())
+                    return;
+
+                // lower IR and prepare for code generation
+                compileControllersPostAnalysis(app);
+                compileModelsPostAnalysis(app);
+
+                LOGGER.info("Internal representation is created!");
+
+                generateCode(app);
+            } catch (FatalCompilerErrorException e) {
+                // do nothing, this exception is just a quick way to interrupt compilation
+                // if something really bad happens
+            } finally {
+                logBuildEnd();
+            }
+        } catch(InvalidOptionException e) {
+            System.err.println(e.getMessage());
+            System.err.println();
+            options.help();
         }
     }
 
     public static void main(String[] args) {
         RavelCompiler driver = new RavelCompiler();
-
-        driver.run(args.length > 0 ? args[0] : null);
+        driver.run(args);
     }
 
 }

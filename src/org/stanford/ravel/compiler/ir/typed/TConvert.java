@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
+import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
 /**
@@ -8,8 +9,8 @@ import org.stanford.ravel.compiler.types.Type;
 public class TConvert extends TInstruction {
     public final Type srcType;
     public final Type tgtType;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
 
     public TConvert(Type tgtType, Type srcType, int target, int source) {
         if (tgtType.equals(srcType))
@@ -25,32 +26,32 @@ public class TConvert extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ source };
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{ srcType };
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return tgtType;
     }
 
     @Override
-    boolean writesMemory() {
+    public boolean writesMemory() {
         return false;
     }
 
     @Override
-    boolean readsMemory() {
+    public boolean readsMemory() {
         return false;
     }
 
@@ -58,4 +59,53 @@ public class TConvert extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    // NOTE: TConvert for now is only used for implicit conversions
+    // because there are no cast operators in the language
+    // If a cast operator is included then this needs to be extended
+    @Override
+    public Object evaluate(Object[] args) {
+        if (tgtType.equalsExceptQualifiers(srcType))
+            return args[0];
+        if (!(tgtType instanceof PrimitiveType))
+            return null;
+
+        switch ((PrimitiveType)tgtType) {
+            case ANY:
+                return null;
+
+            case BOOL:
+                if (srcType == PrimitiveType.ERROR_MSG)
+                    return null;
+                assert srcType == PrimitiveType.BOOL;
+                return (boolean)args[0];
+            case BYTE:
+                if (srcType == PrimitiveType.BOOL)
+                    return (byte)(((boolean)args[0]) ? 1 : 0);
+                else if (srcType == PrimitiveType.BYTE)
+                    return (byte)args[0];
+                else
+                    throw new AssertionError();
+            case INT32:
+                if (srcType == PrimitiveType.BOOL)
+                    return ((boolean)args[0]) ? 1 : 0;
+                else if (srcType == PrimitiveType.BYTE)
+                    return (int)(byte)args[0];
+                else if (srcType == PrimitiveType.INT32)
+                    return (int)args[0];
+                else
+                    throw new AssertionError();
+            case DOUBLE:
+                if (srcType == PrimitiveType.BOOL)
+                    return ((boolean)args[0]) ? 1.0 : 0.0;
+                else if (srcType == PrimitiveType.INT32)
+                    return (double)(int)args[0];
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (double)args[0];
+                else
+                    throw new AssertionError();
+        }
+        return null;
+    }
+
 }

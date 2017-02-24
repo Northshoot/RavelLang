@@ -3,7 +3,6 @@ package org.stanford.ravel.compiler.ir;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.antlr4.RavelBaseVisitor;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.untyped.*;
@@ -23,16 +22,17 @@ import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
 /**
  * Created by gcampagn on 1/20/17.
  */
-public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
-    private final UntypedIR ir = new UntypedIR();
+class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
+    private final UntypedIR ir;
     private final List<Block> blockStack = new ArrayList<>();
 
-    private final ControllerEventCompiler compiler;
+    private final CompileToIRPass compiler;
     private Scope currentScope;
     private int currentReg = VOID_REG;
 
-    public AstToUntypedIRVisitor(ControllerEventCompiler compiler) {
+    AstToUntypedIRVisitor(CompileToIRPass compiler, int firstGpRegister) {
         this.compiler = compiler;
+        ir = new UntypedIR(firstGpRegister);
         blockStack.add(ir.getRoot());
     }
 
@@ -69,8 +69,10 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override
     public Integer visitBlock(RavelParser.BlockContext ctx) {
+        Scope parentScope = currentScope;
         currentScope = ctx.scope;
         visitChildren(ctx);
+        currentScope = parentScope;
         return VOID_REG;
     }
 
@@ -101,6 +103,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 Symbol var = currentScope.resolve(varName);
                 if (var == null || !(var instanceof VariableSymbol)) {
                     compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+                    varReg = ERROR_REG;
+                } else if (!((VariableSymbol) var).isWritable()) {
+                    compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
                     varReg = ERROR_REG;
                 } else {
                     varReg = ensureVarRegister((VariableSymbol) var);
@@ -152,6 +157,9 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
                 Symbol var = currentScope.resolve(varName);
                 if (var == null || !(var instanceof VariableSymbol)) {
                     compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+                    varReg = ERROR_REG;
+                } else if (!((VariableSymbol) var).isWritable()) {
+                    compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
                     varReg = ERROR_REG;
                 } else {
                     varReg = ensureVarRegister((VariableSymbol)var);
@@ -264,6 +272,7 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
             VariableSymbol replacement = new VariableSymbol(name);
             replacement.setType(PrimitiveType.ERROR);
+            replacement.setWritable(true);
             currentScope.define(replacement);
             return replacement;
         } else {
@@ -471,6 +480,11 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
     @Override public Integer visitAnd_exp(RavelParser.And_expContext ctx) {
         if (ctx.and_exp() != null) {
+            // We need to lower "a and b" to
+            // r = a
+            // if r then:
+            //   r = b
+            // (which shortcuts side effects when computing the b part)
             int reg = visit(ctx.and_exp());
             Block iftrue = pushBlock();
             int reg2 = visit(ctx.not_exp());
@@ -497,13 +511,102 @@ public class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         }
     }
 
-    @Override public Integer visitBreak_stmt(RavelParser.Break_stmtContext ctx) {
+    @Override
+    public Integer visitBreak_stmt(RavelParser.Break_stmtContext ctx) {
         addCurrent(new Break(ctx));
         return VOID_REG;
     }
 
-    @Override public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
+    @Override
+    public Integer visitContinue_stmt(RavelParser.Continue_stmtContext ctx) {
         addCurrent(new Continue(ctx));
         return VOID_REG;
+    }
+
+    @Override
+    public Integer visitReturn_stmt(RavelParser.Return_stmtContext ctx) {
+        if (ctx.expression() != null) {
+            int reg = visit(ctx.expression());
+            addCurrent(new Move(ctx, Registers.RETURN_REG, reg));
+        }
+        addCurrent(new Return(ctx));
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitForStatement(RavelParser.ForStatementContext ctx) {
+        Scope parentScope = currentScope;
+        currentScope = ctx.scope;
+
+        RavelParser.Ident_declContext decl = ctx.forControl().ident_decl();
+        RavelParser.ExpressionContext expr = ctx.forControl().expression();
+
+        String varName = decl.Identifier().getText();
+        int varReg;
+
+        Symbol var = currentScope.resolve(varName);
+        if (var == null || !(var instanceof VariableSymbol)) {
+            compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+            varReg = ERROR_REG;
+        } else if (!((VariableSymbol) var).isWritable()) {
+            compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
+            varReg = ERROR_REG;
+        } else {
+            varReg = ensureVarRegister((VariableSymbol) var);
+        }
+
+        // Lower to
+        // array = ...
+        // for (int i = 0; i < array.length; i++) {
+        //  var = array[i];
+        //  ...
+        // }
+        //
+        // and then to
+        // int i = 0;
+        // while (i < array.length) {
+        //   var = array[i];
+        //   ...
+        //   i++;
+        // }
+
+        int arrayReg = visit(expr);
+        int indexReg = ir.allocateRegister();
+
+        // int i = 0;
+        addCurrent(new ImmediateLoad(decl, indexReg, 0));
+
+        // array lengths are constant so we compute them outside the loop
+        int lengthReg = ir.allocateRegister();
+        addCurrent(new FieldLoad(expr, lengthReg, arrayReg, "length"));
+
+        // load 1 into a register, for later use
+        int immediateOne = ir.allocateRegister();
+        addCurrent(new ImmediateLoad(decl, immediateOne, 1));
+
+        // while (...
+        Block head = pushBlock();
+        int cond = ir.allocateRegister();
+        // i < array.length
+        addCurrent(new ComparisonOp(decl, cond, indexReg, lengthReg, ComparisonOperation.LT));
+        popBlock();
+        // ) {
+        Block body = pushBlock();
+        // var = array[i];
+        addCurrent(new ArrayLoad(decl, varReg, arrayReg, indexReg));
+        // ...
+        this.visit(ctx.block_stmt());
+        // i++
+        addCurrent(new BinaryArithOp(decl, indexReg, indexReg, immediateOne, BinaryOperation.ADD));
+        popBlock();
+        // }
+        addCurrent(new WhileLoop(ctx, cond, head, body));
+
+        currentScope = parentScope;
+        return VOID_REG;
+    }
+
+    public void declare(VariableSymbol var) {
+        ensureVarRegister(var);
     }
 }

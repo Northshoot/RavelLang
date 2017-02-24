@@ -1,92 +1,146 @@
 package org.stanford.ravel.primitives;
 
-import java.text.SimpleDateFormat;
+import org.stanford.ravel.analysis.security.Key;
+import org.stanford.ravel.analysis.security.SecurityPrimitive;
+import org.stanford.ravel.compiler.symbol.SpaceSymbol;
+import org.stanford.ravel.compiler.symbol.Symbol;
+
 import java.util.*;
 
 /**
  * Created by lauril on 7/29/16.
  */
 public class Space extends Primitive {
-    private String mTransmitFunction;
-    private final Map<String, InstantiatedModel> mModels = new LinkedHashMap<>();
-    private final Map<String, InstantiatedController> mControllers = new LinkedHashMap<>();
-    private final Map<String, View> mViews = new LinkedHashMap<>();
-    private final Map<String, Sink> mSink = new LinkedHashMap<>();
-    private final Map<String, Source> mSource = new LinkedHashMap<>();
+    private final Set<ConcreteModel> mModels = new HashSet<>();
+    private final Map<String, ConcreteModelInstance> mModelInstances = new HashMap<>();
+    private final Set<ConcreteController> mControllers = new HashSet<>();
+    private final Map<String, ConcreteControllerInstance> mControllerInstances = new HashMap<>();
+    private final Map<String, View> mViews = new HashMap<>();
+    private final Set<ConcreteInterface> mInterfaces = new HashSet<>();
+    private final Map<String, ConcreteInterfaceInstance> mInterfaceInstances = new HashMap<>();
+    private final SpaceSymbol mSymbol;
+    private final SystemAPIInstance mSystemAPI = new SystemAPIInstance(new SystemAPI(this, this), "system");
+
     private Platform mPlatform;
 
-    public Space(String name) {
-        super(name);
+    public Space(SpaceSymbol symbol) {
+        super(symbol.getName());
+        mSymbol = symbol;
     }
 
     /** add components to the particular space */
-    public void add(String ref, InstantiatedModel m) { this.mModels.put(ref, m); }
-    public void add(String ref, InstantiatedController c) { this.mControllers.put(ref, c); }
     public void add(String ref, View v) { this.mViews.put(ref,  v); }
-    public void add(String ref, Sink s) { this.mSink.put(ref,  s); }
-    public void add(String ref, Source v) { this.mSource.put(ref,  v); }
 
-
-    public String getTransmitFunction(){
-        return "random_char_update";
+    public void add(String ref, ConcreteModelInstance m) {
+        this.mModels.add(m.getComponent());
+        this.mModelInstances.put(ref, m);
+    }
+    public void add(String ref, ConcreteControllerInstance c) {
+        this.mControllers.add(c.getComponent());
+        this.mControllerInstances.put(ref, c);
+    }
+    public void add(String ref, ConcreteInterfaceInstance s) {
+        this.mInterfaces.add(s.getComponent());
+        this.mInterfaceInstances.put(ref, s);
     }
 
-    public String getService(){
-        return "ravel_service";
-    }
-
-    public InstantiatedModel resolveModel(String name){
-        if(name.startsWith("tier.models.")){
-            String modelName = name.replace("tier.models.","");
-            if(mModels.containsKey(modelName))
-                return mModels.get(modelName);
-            else
-                throw new RuntimeException("Cannot resolve model: " + modelName + " in " + mName + " space.");
-        } else {
-            throw new RuntimeException("Cannot resolve path " + name);
+    private ConcreteModel findModel(Model m) {
+        for (ConcreteModel im : mModels) {
+            if (im.getBaseModel() == m)
+                return im;
         }
+        return null;
     }
-    public List<InstantiatedModel> getModels() {
-        List<InstantiatedModel> lst = new ArrayList<>();
-        lst.addAll(mModels.values());
-        return lst;
+    public ConcreteInterface findInterface(Interface iface) {
+        for (ConcreteInterface iiface : mInterfaces) {
+            if (iiface.getBaseInterface() == iface)
+                return iiface;
+        }
+        return null;
+    }
+    public ConcreteController findController(Controller ctr) {
+        for (ConcreteController ictr : mControllers) {
+            if (ictr.getController() == ctr)
+                return ictr;
+        }
+        return null;
     }
 
-    public List<InstantiatedController> getControllers() {
-        List<InstantiatedController> lst = new ArrayList<>();
-        lst.addAll(mControllers.values());
-        return lst;
+    public boolean hasModel(Model m) {
+        return findModel(m) != null;
     }
+    public boolean hasInterface(Interface iface) {
+        return findInterface(iface) != null;
+    }
+
+    public Collection<ConcreteModel> getModels() {
+        return Collections.unmodifiableCollection(mModels);
+    }
+    public ConcreteModelInstance getModel(String modelName) {
+        return mModelInstances.get(modelName);
+    }
+    public Collection<ConcreteModelInstance> getModelInstances() {
+        return Collections.unmodifiableCollection(mModelInstances.values());
+    }
+
+    public Collection<ConcreteInterface> getInterfaces() {
+        return Collections.unmodifiableCollection(mInterfaces);
+    }
+    public ConcreteInterfaceInstance getInterface(String sourceName) {
+        return mInterfaceInstances.get(sourceName);
+    }
+
+    public Collection<ConcreteInterfaceInstance> getInterfaceInstances() {
+        return Collections.unmodifiableCollection(mInterfaceInstances.values());
+    }
+
+    public Collection<ConcreteController> getControllers() {
+        return Collections.unmodifiableCollection(mControllers);
+    }
+    public Collection<ConcreteControllerInstance> getControllerInstances() {
+        return Collections.unmodifiableCollection(mControllerInstances.values());
+    }
+
+    public SystemAPIInstance getSystemAPI() {
+        return mSystemAPI;
+    }
+
+    public void freezeAll() {
+        // freeze the components
+        mSystemAPI.getComponent().freeze();
+        for (ConcreteModel im : mModels)
+            im.freeze();
+        for (ConcreteInterface is : mInterfaces)
+            is.freeze();
+
+        // freeze the instances
+        for (ConcreteInterfaceInstance inst : mInterfaceInstances.values())
+            inst.freeze();
+        for (ConcreteModelInstance inst : mModelInstances.values())
+            inst.freeze();
+        for (ConcreteControllerInstance inst : mControllerInstances.values())
+            inst.freeze();
+    }
+
     public void setPlatform(Platform build) {
         mPlatform = build;
     }
-
-    public void addSource(Source s){
-        this.mSource.put(s.getSinkIdentifier(), s);
-    }
-
-    public Source getSource(String name){
-        return mSource.get(name);
-    }
-    public List<Source> getSources(){
-        List<Source> lst = new ArrayList<>();
-        lst.addAll(mSource.values());
-        return lst;
-    }
-
     public Platform getPlatform() {
         return mPlatform;
     }
 
-    /**
-     * get time current
-     * TODO: should be moved to a builder class that is passed to the template with all the preferences
-     * @return
-     */
-    public String getTimeDate(){
-        Date t = Calendar.getInstance().getTime();
-        return new SimpleDateFormat("HH:mm:ss MM/dd/yyyy").format(t).toString();
+    public Symbol getSymbol() {
+        return mSymbol;
     }
 
+    @Override
+    public String toString() {
+        return "Space " + getName();
+    }
 
+    public void addSecurityOperation(ModelField field, Space target, Key key, SecurityPrimitive primitive, boolean isInbound) {
+        ConcreteModel im = findModel(field.getModel());
+        assert im != null;
+        im.addSecurityOperation(field, target, key, primitive, isInbound);
+    }
 }

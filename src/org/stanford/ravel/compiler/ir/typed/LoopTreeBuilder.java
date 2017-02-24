@@ -1,7 +1,5 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import org.antlr.v4.codegen.model.Loop;
-
 /**
  * Created by gcampagn on 1/25/17.
  */
@@ -42,7 +40,7 @@ public class LoopTreeBuilder {
             throw new IllegalStateException("invalid pop");
     }
 
-    public void ifStatement(int cond, TBlock iftrueBlock, TBlock iffalseBlock) {
+    public void ifStatement(TIfStatement cond, TBlock iftrueBlock, TBlock iffalseBlock) {
         LoopTreeNode iftrue = new LoopTreeNode.BasicBlock(iftrueBlock);
         LoopTreeNode iffalse = new LoopTreeNode.BasicBlock(iffalseBlock);
 

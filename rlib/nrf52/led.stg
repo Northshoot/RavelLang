@@ -1,0 +1,78 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+>>
+
+extra_src(path) ::=<<
+/drivers_nrf/timer/nrf_drv_timer.c
+/libraries/util/sdk_errors.c
+>>
+
+c_file(includes,name,interface) ::=<<
+
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+#include "boards.h"
+#define NRF_LOG_MODULE_NAME "LED"
+
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    bsp_board_leds_init();
+    self->led_id = <interface.configuration.led_id>;
+    NRF_LOG_INFO("INIT!\r\n");
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+//nothing to do
+}
+
+void
+ravel_generated_<name; format="function">_on(<name> *self)
+{
+    bsp_board_led_on(self->led_id);
+}
+void
+ravel_generated_<name; format="function">_off(<name> *self)
+{
+    bsp_board_led_off(self->led_id);
+}
+void
+ravel_generated_<name; format="function">_toggle(<name> *self)
+{
+    bsp_board_led_invert(self->led_id);
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int led_id;
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_on(<name> *self);
+void ravel_generated_<name; format="function">_off(<name> *self);
+void ravel_generated_<name; format="function">_toggle(<name> *self);
+<end_extern_c()>
+<end_header("", name)>
+>>

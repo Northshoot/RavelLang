@@ -9,7 +9,7 @@ public class TBlock implements Iterable<TInstruction> {
     private final int id;
     private final Set<TBlock> predecessors = new HashSet<>();
     private final Set<TBlock> successors = new HashSet<>();
-    private final List<TInstruction> instructions = new ArrayList<>();
+    private final List<TInstruction> instructions = new LinkedList<>();
     private int sequenceId;
 
     TBlock(int id) {
@@ -31,17 +31,17 @@ public class TBlock implements Iterable<TInstruction> {
         return this.sequenceId > other.sequenceId;
     }
 
-    void addPredecessor(TBlock other) {
+    public void addPredecessor(TBlock other) {
         this.predecessors.add(other);
     }
-    void addSuccessor(TBlock other) {
+    public void addSuccessor(TBlock other) {
         this.successors.add(other);
     }
 
-    Set<TBlock> getSuccessors() {
+    public Set<TBlock> getSuccessors() {
         return successors;
     }
-    Set<TBlock> getPredecessors() {
+    public Set<TBlock> getPredecessors() {
         return predecessors;
     }
 
@@ -49,6 +49,9 @@ public class TBlock implements Iterable<TInstruction> {
         return instructions.isEmpty();
     }
 
+    public void prepend(TInstruction instr) {
+        instructions.add(0, instr);
+    }
     public void add(TInstruction instr) {
         instructions.add(instr);
     }
@@ -85,9 +88,24 @@ public class TBlock implements Iterable<TInstruction> {
         return instructions.iterator();
     }
 
+    public ListIterator<TInstruction> listIterator() {
+        return instructions.listIterator();
+    }
+
+    public ListIterator<TInstruction> listIteratorAtLast() {
+        return instructions.listIterator(instructions.size());
+    }
+
     TInstruction getLastInstruction() {
         if (instructions.isEmpty())
             return null;
         return instructions.get(instructions.size()-1);
+    }
+
+    public void destroy() {
+        for (TBlock pred : predecessors)
+            pred.successors.remove(this);
+        for (TBlock succ : successors)
+            succ.predecessors.remove(this);
     }
 }

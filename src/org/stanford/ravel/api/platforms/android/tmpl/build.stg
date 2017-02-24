@@ -1,0 +1,69 @@
+manifest(package, name) ::=<<
+\<?xml version="1.0" encoding="utf-8"?>
+\<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="<package>">
+
+    \<application>
+        \<service
+            android:name=".<name>"
+            android:enabled="true"
+            android:exported="true">\</service>
+    \</application>
+\</manifest>
+>>
+
+gradle_runtime_ref(android_runtime) ::=<<
+configurations.create("default")
+artifacts.add("default", file('<android_runtime>'))
+>>
+
+gradle(sdk_version, java_runtime, android_runtime) ::=<<
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.2'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "24.0.1"
+
+    defaultConfig {
+        minSdkVersion <sdk_version>
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':runtime')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:25.0.1'
+}
+>>
+
+gradle_settings() ::=<<
+include ':runtime'
+>>

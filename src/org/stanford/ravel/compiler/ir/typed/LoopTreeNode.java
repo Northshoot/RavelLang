@@ -1,8 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * A version of the ControlFlowGraph that preserves the structure of the code
@@ -37,6 +35,11 @@ public abstract class LoopTreeNode {
         @Override
         public String toString() {
             return block.toString();
+        }
+
+        @Override
+        public ListIterator<LoopTreeNode> listIterator() {
+            return Collections.emptyListIterator();
         }
     }
 
@@ -78,14 +81,31 @@ public abstract class LoopTreeNode {
                 builder.append(node.toString());
             return builder.toString();
         }
+
+        @Override
+        public ListIterator<LoopTreeNode> listIterator() {
+            return children.listIterator();
+        }
+
+        public boolean isEmpty() {
+            return children.isEmpty();
+        }
+
+        public int size() {
+            return children.size();
+        }
+
+        public LoopTreeNode get(int i) {
+            return children.get(i);
+        }
     }
 
     public static class IfStatement extends LoopTreeNode {
-        private final int cond;
+        private final TIfStatement cond;
         private LoopTreeNode iftrue;
         private LoopTreeNode iffalse;
 
-        IfStatement(int cond, LoopTreeNode iftrue, LoopTreeNode iffalse) {
+        IfStatement(TIfStatement cond, LoopTreeNode iftrue, LoopTreeNode iffalse) {
             this.cond = cond;
             this.iftrue = iftrue;
             this.iffalse = iffalse;
@@ -94,6 +114,10 @@ public abstract class LoopTreeNode {
         }
 
         public int getCondition() {
+            return cond.cond;
+        }
+
+        public TIfStatement getIfInstruction() {
             return cond;
         }
 
@@ -127,7 +151,12 @@ public abstract class LoopTreeNode {
 
         @Override
         public String toString() {
-            return "if " + cond + " {\n" + iftrue + "} else {" + iffalse + "}\n";
+            return "if " + cond.cond + " {\n" + iftrue + "} else {\n" + iffalse + "}\n";
+        }
+
+        @Override
+        public ListIterator<LoopTreeNode> listIterator() {
+            return Arrays.asList(iftrue, iffalse).listIterator();
         }
     }
 
@@ -162,6 +191,11 @@ public abstract class LoopTreeNode {
         public String toString() {
             return "loop {\n" + body + "}\n";
         }
+
+        @Override
+        public ListIterator<LoopTreeNode> listIterator() {
+            return Collections.singletonList(body).listIterator();
+        }
     }
 
     public abstract void accept(LoopTreeVisitor visitor);
@@ -175,4 +209,6 @@ public abstract class LoopTreeNode {
     }
 
     public abstract void replaceChild(LoopTreeNode oldChild, LoopTreeNode newChild);
+
+    public abstract ListIterator<LoopTreeNode> listIterator();
 }

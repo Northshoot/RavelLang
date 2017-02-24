@@ -1,0 +1,134 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+#include "nrf.h"
+#include "nrf_drv_timer.h"
+#include "bsp.h"
+#include "app_error.h"
+#include "config/sdk_config.h"
+
+<includes:do_include(); separator="\n">
+
+
+
+// this can be implemented smarter to avoid generating functions that are not used
+//TODO:  improve template
+
+static const nrf_drv_timer_t <name>__TIMER = NRF_DRV_TIMER_INSTANCE(0);
+static nrf_drv_timer_config_t <name>__timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+static uint32_t <name>__err_code = NRF_SUCCESS;
+static bool one_shoot = false;
+static <name>* instance;
+
+void timer_start(<name>* self, uint32_t time)
+{
+    uint32_t time_tics = nrf_drv_timer_ms_to_ticks(&<name>__TIMER, time);
+    nrf_drv_timer_extended_compare(
+             &<name>__TIMER, NRF_TIMER_CC_CHANNEL0, time_tics, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+    nrf_drv_timer_enable(&<name>__TIMER);
+}
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>)
+{
+    <name>__err_code = nrf_drv_timer_init(&<name>__TIMER, &<name>__timer_cfg, ravel_generated_<name; format="function">_fired);
+    APP_ERROR_CHECK(<name>__err_code);
+    instance = self;
+    self->__id = instance_id;
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    //nothing to do
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
+{
+    one_shoot = true;
+    timer_start(self, time);
+}
+void
+ravel_generated_<name; format="function">_cancel(<name>* self)
+{
+    nrf_drv_timer_clear(&<name>__TIMER);
+}
+void
+ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
+{
+    one_shoot = false;
+    timer_start(self, time);
+
+}
+
+
+void
+ravel_generated_<name; format="function">_fired(nrf_timer_event_t event_type, void* p_context)
+{
+        <name>* self = instance;
+
+        switch (event_type)
+        {
+            case NRF_TIMER_EVENT_COMPARE0:
+                <dispatch_event(interface, "fired", []); separator="\n">
+                break;
+
+            default:
+                //Do nothing.
+                break;
+        }
+         //TODO: fix it, bohooo solution
+        if (one_shoot) ravel_generated_<name; format="function">_cancel(instance);
+
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+#include "nrf.h"
+#include "nrf_drv_timer.h"
+#include "bsp.h"
+#include "app_error.h"
+
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseModel.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_cancel(<name>* self);
+void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_fired(nrf_timer_event_t event_type, void* p_context);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

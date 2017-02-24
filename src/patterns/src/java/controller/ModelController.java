@@ -1,10 +1,9 @@
 package patterns.src.java.controller;
 
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.TimerSource;
 import patterns.src.java.model.Model;
-import patterns.src.java.rrt.Context;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by lauril on 1/23/17.
@@ -16,106 +15,87 @@ public class ModelController {
     private Model mModel;
 
     //AUTOGEN: sources
+    private TimerSource timer;
 
     //AUTOGEN: sinks
 
-    //AUTOGEN: systems components
-    Timer controller_timer_1;
-
-    //AUTOGEN: timer tasks
-    ControllerNameTimerNameTask timerTask;
-    boolean controller_timer_1_running=false;
+    //AUTOGEN: global vars
+    private boolean running;
 
     public boolean start = false;
-    public ModelController(Model model){
+    public ModelController(Model model, TimerSource timersource){
 
         //AUTOGEN: bind models
         this.mModel = model;
-        //AUTOGEN: set controller to the model for callbacks
-        mModel.setController(this);
 
         //AUTOGEN:create timers
-        //We set DThread to true.
-        //A daemon thread will execute only as long as the rest of the program continues to execute.
+        // initialize timer from AppDispatcher
+        this.timer = timersource;
     }
 
+    private void pprint(String s){
+        System.out.println("[" + this.mName +"]>" + s);
+    }
     public void setName(String name){
         this.mName = name;
     }
 
-    //TEMP: start the timer
-    public void start_timer(){
-        controller_timer_1_running = true;
-        controller_timer_1.scheduleAtFixedRate(timerTask,0,1000);
-    }
-
-    public void ControllerNameTimerNameTask_call_back(){
+    public void timer_1_fired() {
         //create a record and save it.
-        Model.Record rec = mModel.create();
-        rec.field1 = 1;
+        Model.Record rec = Model.create();
+        rec.field1 = 1444444;
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;
         rec.field4 = rec.field3 / 2;
+        System.out.println("MCTRL: " + rec);
         Context ctx = mModel.save(rec);
 
-        System.out.println(ctx.mError);
+        pprint("model_save(): " + ctx.error);
     }
 
-    public void arrived(Context ctx){
-        System.out.println(ctx);
+    public void Model_arrived(Context<Model.Record> ctx){
+        //TODO: add to the queue
+        pprint("RX " + ctx);
     }
 
-    public void departed(Context ctx){
-        if(!controller_timer_1_running) start_timer();
-        System.out.println(ctx);
-
-    }
-
-    public void full(Context ctx){
-        controller_timer_1.cancel();
-        controller_timer_1_running = false;
-        System.out.println(ctx);
+    public void Model_departed(Context<Model.Record> ctx){
+        if(!running) timer.start_periodic(100);
+        pprint("Model departed: " + ctx);
 
     }
 
-    public void save_done(Context ctx){
-        System.out.println(ctx);
+    public void Model_full(Context<Model.Record> ctx){
+        if(mName.equals("Embedded")) {
+            timer.cancel();
+            running = false;
+        }
+
+        pprint("Model_full: " + ctx);
+
+    }
+
+    public void Model_save_done(Context<Model.Record> ctx){
+        pprint("Model_save_done:" + ctx);
     }
 
     /**
      * AUTOGEN methods that controller subscribes in Ravel
      */
     public void system_started() {
-        controller_timer_1 = new Timer("timer_name_"+this.mName, false);
-        timerTask = new ControllerNameTimerNameTask(this);
         //TODO: test only in simulation
-        System.out.println("Controller {" + this.mName +"} started: " + start);
-        if(start) {
-            start_timer();
+        if(mName.equals("Embedded")) {
+            timer.start_periodic(2000);
+            running = true;
         }
+
+        pprint("system started: " + start);
+    }
+
+    public void system_stopped(){
+
     }
 
     public String getName() {
         return mName;
-    }
-
-    /**
-     * all timer tasks are generated as inner controller classes extending TimerTask
-     * TODO: evaluate performance
-     */
-
-    class ControllerNameTimerNameTask extends TimerTask{
-
-        private int counter = 0;
-        ModelController mcrt;
-
-        public ControllerNameTimerNameTask(ModelController mcrt){
-            //We set up controller for callbacks
-            this.mcrt = mcrt;
-        }
-        public void run(){
-            mcrt.ControllerNameTimerNameTask_call_back();
-        }
-
     }
 }

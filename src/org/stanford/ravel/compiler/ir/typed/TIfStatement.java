@@ -7,7 +7,7 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class TIfStatement extends TInstruction {
-    public final int cond;
+    public int cond;
     public final TBlock iftrue;
     public final TBlock iffalse;
 
@@ -22,13 +22,17 @@ public class TIfStatement extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ cond };
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{PrimitiveType.BOOL};
+    }
+
+    public boolean affectsControlFlow() {
+        return true;
     }
 
     @Override

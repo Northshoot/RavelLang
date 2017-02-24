@@ -1,7 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
 import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.CompoundType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -11,9 +10,9 @@ import org.stanford.ravel.compiler.types.Type;
 public class TArrayStore extends TInstruction {
     public final Type type;
     public final ArrayType arrayType;
-    public final int object;
-    public final int index;
-    public final int value;
+    public int object;
+    public int index;
+    public int value;
 
     public TArrayStore(Type type, ArrayType arrayType, int object, int index, int value) {
         this.type = type;
@@ -28,12 +27,12 @@ public class TArrayStore extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[] { object, index, value };
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[] { arrayType, PrimitiveType.INT32, type };
     }
 

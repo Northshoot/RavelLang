@@ -1,6 +1,7 @@
 package org.stanford.ravel;
 
-import org.stanford.ravel.RavelApplication;
+import org.stanford.ravel.api.InvalidOptionException;
+import org.stanford.ravel.api.OptionParser;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.platforms.ConcretePlatform;
@@ -8,41 +9,65 @@ import org.stanford.ravel.primitives.Platform;
 import org.stanford.ravel.primitives.Space;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Created by lauril on 10/6/16.
  */
-public class PlatformBuilder {
+class PlatformBuilder {
+    private static Logger LOGGER = Logger.getLogger(PlatformBuilder.class.getName());
     private final RavelApplication rApp;
-    private final String path;
     private final List<FileObject> mFiles; //collect all the files to generate
 
-    PlatformBuilder(RavelApplication rApp, String buildPath) {
+    private String path;
+
+    PlatformBuilder(RavelApplication rApp) {
         this.rApp = rApp;
-        this.path = buildPath;
         mFiles = new ArrayList<>();
     }
 
-    public void buildAll(){
+    void applyOptions(RavelOptionParser options) throws InvalidOptionException {
+        path = options.getBuildPath();
+
+        Set<OptionParser> parsers = new HashSet<>();
+        for (Space s : rApp.getSpaces()) {
+            Platform platform = s.getPlatform();
+            ConcreteLanguage lang = platform.getConcreteLanguage();
+            ConcretePlatform plat = platform.getConcretePlatform();
+            parsers.add(lang.getOptions());
+            parsers.add(plat.getOptions());
+        }
+
+        for (OptionParser op : parsers) {
+            options.applyXOptions(op);
+        }
+    }
+
+    void buildAll() {
         for(Space s : rApp.getSpaces()){
             buildSpace(s);
         }
     }
 
     private void buildSpace(Space s) {
-        System.out.println("Building Space: \n" + s.getName());
-
         Platform platform = s.getPlatform();
         ConcreteLanguage lang = platform.getConcreteLanguage();
         ConcretePlatform concretePlatform = platform.getConcretePlatform();
 
-        String path = this.path + s.mName;
-        mFiles.addAll(lang.build(s, path));
-        mFiles.addAll(concretePlatform.build(s, path));
+        String path = this.path + s.getName();
+        List<FileObject> spaceFiles = new ArrayList<>();
+        spaceFiles.addAll(lang.build(s));
+        spaceFiles.addAll(concretePlatform.build(s));
+        spaceFiles.addAll(concretePlatform.createBuildSystem(s, spaceFiles));
+        for (FileObject fo : spaceFiles)
+            fo.setBasePath(path);
+        mFiles.addAll(spaceFiles);
     }
 
-    public void render() {
+    void render() {
         for (FileObject fo : mFiles) {
             fo.toFile();
         }

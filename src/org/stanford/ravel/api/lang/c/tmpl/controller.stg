@@ -1,0 +1,60 @@
+import "common.stg"
+
+define_event_handler(handler, controller_name) ::=<<
+void
+ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<handler.eventType.eventName>(<controller_name>* this<! this is not a keyword in C, so we can use it !><append_parameter_list(handler.arguments)>)
+{
+    <handler.body>}
+>>
+
+c_file(includes,name,parameters,eventHandlers) ::=<<
+<begin_source(name)>
+
+#include "api/context.h"
+#include "api/system.h"
+<includes:do_include(); separator="\n">
+
+void
+ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>)
+{
+    <parameters:{p|self-><p.name> = <p.name>;}; separator="\n">
+}
+
+void
+ravel_generated_<name; format="function">_finalize(<name>* self)
+{
+    /* Free any allocated resources here */
+}
+
+<eventHandlers:define_event_handler(name); separator="\n\n">
+>>
+
+declare_event_handler(handler, controller_name) ::=<<
+void ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<handler.eventType.eventName>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
+>>
+
+h_file(includes,name,parameters,eventHandlers) ::=<<
+<begin_header("CONTROLLER", name)>
+
+#include \<api/context.h>
+#include \<api/system.h>
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+struct s_<name> {
+    <parameters:{p|<p.type> <p.name>;}; separator="\n">
+};
+
+void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name>* self);
+
+<eventHandlers:declare_event_handler(name); separator="\n">
+
+<end_extern_c()>
+<end_header("CONTROLLER", name)>
+>>

@@ -1,10 +1,8 @@
 package org.stanford.ravel.primitives;
 
-import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.ConcreteLanguage;
 import org.stanford.ravel.api.platforms.ConcretePlatform;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -41,8 +39,12 @@ public class Platform {
 
         mLanguage = (ConcreteLanguage) Class.forName("org.stanford.ravel.api.lang." + mLang).newInstance();
         mPlatform = (ConcretePlatform) Class.forName("org.stanford.ravel.api.platforms." + platform).newInstance();
+        if (!mPlatform.allowsLanguage(mLanguage)) {
+            // FIXME emit a better error
+            throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());
+        }
         if (pAPI.length > 1)
-            mPlatform.setAPILevel(pAPI[1]);
+            mPlatform.setAPILevel(Integer.valueOf(pAPI[1].substring(1)));
 
         //TODO: resolve existence of the references to sinks and sources
     }
@@ -66,10 +68,6 @@ public class Platform {
         }
         public Builder system(String sys) {
             this.system = sys;
-            return this;
-        }
-        public Builder template(String template) {
-            // FIXME
             return this;
         }
     }

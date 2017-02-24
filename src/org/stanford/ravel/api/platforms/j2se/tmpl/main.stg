@@ -1,0 +1,47 @@
+file(package) ::=<<
+package <package>;
+
+import org.stanford.ravel.rrt.tiers.JavaDriver;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.utils.EndpointListReader;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
+
+import <package>.AppDispatcher;
+
+class Application {
+    public static void main(String[] args) {
+        if (args.length \< 1) {
+            System.err.println("Expected endpoint configuration file as first argument.");
+            return;
+        }
+
+        AppDispatcher dispatcher = new AppDispatcher();
+        JavaDriver driver = new JavaDriver(dispatcher);
+        dispatcher.setDriver(driver);
+
+        String configFileName = args[0];
+        try (EndpointListReader reader = new EndpointListReader(new FileInputStream(configFileName))) {
+            Endpoint ep = reader.next();
+            while (ep != null) {
+                Error err = driver.registerEndpoint(ep);
+                if (err != Error.SUCCESS) {
+                    System.err.println("Failed to register endpoint " + ep.getName() + ": " + err);
+                    // die immediately if endpoint registration failed (it means we could not
+                    // bind the right ports)
+                    return;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load config file: " + e.getMessage());
+        }
+
+        driver.appDispatcherReady();
+    }
+}
+>>

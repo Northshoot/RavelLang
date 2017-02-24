@@ -1,0 +1,67 @@
+file(package, name) ::=<<
+package <package>;
+
+import java.util.Collections;
+import java.util.Map;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.util.Log;
+
+import org.stanford.ravel.rrt.android.AndroidDriver;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+
+import <package>.AppDispatcher;
+
+public class <name> extends Service {
+    public static final String LOG_TAG = "ravel";
+
+    private AppDispatcher dispatcher;
+
+    public <name>() {}
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (dispatcher != null)
+            return START_STICKY;
+
+        Log.i(LOG_TAG, "Starting service");
+        try {
+            startThread();
+
+            Log.i(LOG_TAG, "Started service");
+            return START_STICKY;
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "Exception while creating the app dispatcher", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void startThread() {
+        dispatcher = new AppDispatcher();
+        AndroidDriver driver = new AndroidDriver(dispatcher);
+        dispatcher.setDriver(driver);
+
+        // FIXME load the list of endpoints and register them with the driver
+
+        driver.appDispatcherReady();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(LOG_TAG, "Destroying service");
+        if (dispatcher != null) {
+            dispatcher.stop();
+            dispatcher = null;
+        }
+        Log.i(LOG_TAG, "Destroyed service");
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+}
+>>

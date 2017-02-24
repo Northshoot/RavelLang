@@ -1,20 +1,11 @@
 package org.stanford.ravel.compiler.ir;
 
-import org.stanford.ravel.compiler.ControllerEventCompiler;
 import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ir.typed.*;
 import org.stanford.ravel.compiler.ir.untyped.*;
-import org.stanford.ravel.compiler.ir.untyped.BinaryArithOp;
-import org.stanford.ravel.compiler.ir.untyped.IfStatement;
-import org.stanford.ravel.compiler.ir.untyped.ImmediateLoad;
-import org.stanford.ravel.compiler.ir.untyped.Instruction;
-import org.stanford.ravel.compiler.ir.untyped.Move;
-import org.stanford.ravel.compiler.ir.untyped.UnaryArithOp;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.*;
-
-import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
 
 /**
  * Converts tree-like UntypedIR to TypedIR, checking the type of
@@ -23,35 +14,44 @@ import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
  * Created by gcampagn on 1/23/17.
  */
 public class TypeResolvePass implements InstructionVisitor {
-    private final ControllerEventCompiler compiler;
-    private final ControlFlowGraphBuilder cfgBuilder = new ControlFlowGraphBuilder();
-    private final LoopTreeBuilder loopTreeBuilder = new LoopTreeBuilder();
+    private final CompileToIRPass compiler;
 
-    private TypedIR ir = new TypedIR();
-    private int nextRegister = UNSET_REG;
+    private final TypedIRBuilder ir = new TypedIRBuilder();
+    private final ControlFlowGraphBuilder cfgBuilder = ir.getControlFlowGraphBuilder();
+    private final LoopTreeBuilder loopTreeBuilder = ir.getLoopTreeBuilder();
     private TBlock currentLoopHead = null;
     private TBlock currentLoopContinuation = null;
 
-    public TypeResolvePass(ControllerEventCompiler compiler) {
+    public TypeResolvePass(CompileToIRPass compiler) {
         this.compiler = compiler;
     }
 
-    public void declare(VariableSymbol sym) {
+    public void declareParameter(VariableSymbol sym, boolean isClassScope) {
+        assert sym.getRegister() != Registers.UNSET_REG;
+        assert sym.getType() != PrimitiveType.ANY;
+        ir.declareParameter(sym, isClassScope);
+    }
+
+    public void declareTemporary(VariableSymbol sym) {
         Type type = sym.getType();
         if (type == PrimitiveType.ANY)
             return;
         if (sym.getRegister() == Registers.UNSET_REG)
             return;
+        if (type instanceof ClassType)
+            type = ((ClassType) type).getInstanceType();
         setRegisterType(sym.getRegister(), type);
     }
 
     public TypedIR run(UntypedIR ir) {
-        this.nextRegister = ir.numUsedRegisters();
+        this.ir.setNextRegister(ir.numUsedRegisters());
         ir.getRoot().accept(this);
-        this.ir.finish(cfgBuilder, loopTreeBuilder);
-        return this.ir;
+        return this.ir.finish();
     }
 
+    void setReturnType(Type type) {
+        setRegisterType(Registers.RETURN_REG, type);
+    }
     private void setRegisterType(int reg, Type type) {
         ir.setRegisterType(reg, type);
     }
@@ -59,9 +59,7 @@ public class TypeResolvePass implements InstructionVisitor {
         return ir.getRegisterType(reg);
     }
     private int allocateRegister(Type type) {
-        int reg = nextRegister++;
-        setRegisterType(reg, type);
-        return reg;
+        return ir.allocateRegister(type);
     }
 
     private void typeError(Instruction instr, String message) {
@@ -82,7 +80,7 @@ public class TypeResolvePass implements InstructionVisitor {
             index = instr.index;
         } else if (PrimitiveType.INT32.isAssignable(indexType)) {
             index = allocateRegister(PrimitiveType.INT32);
-            cfgBuilder.addInstruction(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
+            ir.add(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
         } else {
             typeError(instr, "array index must be an integer, not " + indexType.getName());
             index = Registers.ERROR_REG;
@@ -104,9 +102,9 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TArrayLoad(resultType, (ArrayType)ownerType, target, instr.source, index));
+        ir.add(new TArrayLoad(resultType, (ArrayType)ownerType, target, instr.source, index));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
@@ -123,7 +121,7 @@ public class TypeResolvePass implements InstructionVisitor {
             index = instr.index;
         } else if (PrimitiveType.INT32.isAssignable(indexType)) {
             index = allocateRegister(PrimitiveType.INT32);
-            cfgBuilder.addInstruction(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
+            ir.add(new TConvert(PrimitiveType.INT32, indexType, index, instr.index));
         } else {
             typeError(instr, "array index must be an integer, not " + indexType.getName());
             index = Registers.ERROR_REG;
@@ -143,16 +141,16 @@ public class TypeResolvePass implements InstructionVisitor {
             value = instr.value;
         } else if (targetType.isAssignable(sourceType)) {
             value = allocateRegister(targetType);
-            cfgBuilder.addInstruction(new TConvert(targetType, sourceType, value, instr.value));
+            ir.add(new TConvert(targetType, sourceType, value, instr.value));
         } else {
             typeError(instr, "cannot assign expression of type " + sourceType.getName() + " to an element of array of type " + arrayType.getName());
             value = Registers.ERROR_REG;
         }
-        cfgBuilder.addInstruction(new TArrayStore(targetType, arrayType, instr.object, index, value));
+        ir.add(new TArrayStore(targetType, arrayType, instr.object, index, value));
     }
 
     private Type promote(Type t1, Type t2) {
-        // convert bool -> int -> double
+        // convert bool -> byte -> int -> double
         if (t1.equals(t2))
             return t1;
         if (t1.isAssignable(t2))
@@ -163,7 +161,7 @@ public class TypeResolvePass implements InstructionVisitor {
         return PrimitiveType.ERROR;
     }
 
-    private Type adjustTypeForBinaryOp(BinaryOperation op, Type resultType) {
+    private static Type adjustTypeForBinaryOp(BinaryOperation op, Type resultType) {
         if (resultType == PrimitiveType.ERROR)
             return resultType;
         if (!(resultType instanceof PrimitiveType))
@@ -172,18 +170,26 @@ public class TypeResolvePass implements InstructionVisitor {
         if (op.isBitwise()) {
             if (resultType == PrimitiveType.INT32)
                 return resultType;
+            if (resultType == PrimitiveType.BYTE)
+                return resultType;
             if (resultType == PrimitiveType.BOOL)
                 return PrimitiveType.INT32;
             return PrimitiveType.ERROR;
         }
         if (op.isNumeric()) {
-            if (resultType == PrimitiveType.BOOL)
-                return PrimitiveType.INT32;
+            if (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE) {
+                if (op == BinaryOperation.POW || op == BinaryOperation.DIV)
+                    return PrimitiveType.DOUBLE;
+                else
+                    return PrimitiveType.INT32;
+            }
             if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE)
                 return PrimitiveType.ERROR;
+            if (op == BinaryOperation.POW || op == BinaryOperation.DIV)
+                return PrimitiveType.DOUBLE;
             return resultType;
         }
-        if (op == BinaryOperation.ADD && resultType == PrimitiveType.BOOL)
+        if (op == BinaryOperation.ADD && (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE))
             return PrimitiveType.INT32;
 
         return resultType;
@@ -203,14 +209,14 @@ public class TypeResolvePass implements InstructionVisitor {
         int src1;
         if (!resultType.equals(srcType1)) {
             src1 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(resultType, srcType1, src1, instr.src1));
+            ir.add(new TConvert(resultType, srcType1, src1, instr.src1));
         } else {
             src1 = instr.src1;
         }
         int src2;
         if (!resultType.equals(srcType2)) {
             src2 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(resultType, srcType2, src2, instr.src2));
+            ir.add(new TConvert(resultType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
         }
@@ -229,9 +235,25 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TBinaryArithOp(resultType, target, src1, src2, instr.op));
+        ir.add(new TBinaryArithOp(resultType, target, src1, src2, instr.op));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
+    }
+
+    private static Type adjustTypeForComparisonOp(ComparisonOperation op, Type resultType) {
+        if (resultType == PrimitiveType.ERROR)
+            return resultType;
+        if (op == ComparisonOperation.EQUAL || op == ComparisonOperation.NOTEQUAL)
+            return resultType;
+        if (!(resultType instanceof PrimitiveType))
+            return PrimitiveType.ERROR;
+
+        if (resultType == PrimitiveType.BOOL)
+            return PrimitiveType.INT32;
+        if (resultType == PrimitiveType.BYTE || resultType == PrimitiveType.INT32 || resultType == PrimitiveType.DOUBLE
+                || resultType == PrimitiveType.STR)
+            return resultType;
+        return PrimitiveType.ERROR;
     }
 
     @Override
@@ -240,6 +262,7 @@ public class TypeResolvePass implements InstructionVisitor {
         Type srcType2 = getRegisterType(instr.src2);
 
         Type opType = promote(srcType1, srcType2);
+        opType = adjustTypeForComparisonOp(instr.op, opType);
         Type resultType = PrimitiveType.BOOL;
         if (opType == PrimitiveType.ERROR) {
             typeError(instr, "invalid operand types " + srcType1.getName() + " and " + srcType2.getName() + " for comparison " + instr.op);
@@ -248,14 +271,14 @@ public class TypeResolvePass implements InstructionVisitor {
         int src1;
         if (!opType.equals(srcType1)) {
             src1 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(opType, srcType1, src1, instr.src1));
+            ir.add(new TConvert(opType, srcType1, src1, instr.src1));
         } else {
             src1 = instr.src1;
         }
         int src2;
         if (!opType.equals(srcType2)) {
             src2 = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(opType, srcType1, src2, instr.src2));
+            ir.add(new TConvert(opType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
         }
@@ -274,15 +297,71 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TComparisonOp(opType, target, src1, src2, instr.op));
+        ir.add(new TComparisonOp(opType, target, src1, src2, instr.op));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
+    }
+
+    private void handleArrayLength(FieldLoad instr) {
+        Type ownerType = getRegisterType(instr.source);
+        Type resultType = PrimitiveType.INT32;
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of field load " + ownerType.getName() + "." + instr.field + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        ir.add(TIntrinsic.createArrayLength((ArrayType)ownerType, target, instr.source));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
+    }
+
+    private void handleStringLength(FieldLoad instr) {
+        Type ownerType = getRegisterType(instr.source);
+        Type resultType = PrimitiveType.INT32;
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, resultType);
+        } else if (targetType.equals(resultType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(resultType)) {
+            target = allocateRegister(resultType);
+        } else {
+            typeError(instr, "cannot assign result of field load " + ownerType.getName() + "." + instr.field + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        ir.add(TIntrinsic.createStringLength(target, instr.source));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
     public void visit(FieldLoad instr) {
         Type ownerType = getRegisterType(instr.source);
         if (!(ownerType instanceof CompoundType)) {
+            if (instr.field.equals("length")) {
+                if (ownerType instanceof ArrayType) {
+                    handleArrayLength(instr);
+                    return;
+                } else if (ownerType == PrimitiveType.STR) {
+                    handleStringLength(instr);
+                    return;
+                }
+            }
+
             typeError(instr, "cannot read field " + instr.field + " on non compound type " + ownerType.getName());
             return;
         }
@@ -312,9 +391,9 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TFieldLoad(resultType, compoundType, target, instr.source, instr.field));
+        ir.add(new TFieldLoad(resultType, compoundType, target, instr.source, instr.field));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
@@ -347,12 +426,12 @@ public class TypeResolvePass implements InstructionVisitor {
             value = instr.value;
         } else if (targetType.isAssignable(sourceType)) {
             value = allocateRegister(targetType);
-            cfgBuilder.addInstruction(new TConvert(targetType, sourceType, value, instr.value));
+            ir.add(new TConvert(targetType, sourceType, value, instr.value));
         } else {
             typeError(instr, "cannot assign expression of type " + sourceType.getName() + " to a field " + ownerType.getName() + "." + instr.field + " of type " + targetType.getName());
             value = Registers.ERROR_REG;
         }
-        cfgBuilder.addInstruction(new TFieldStore(targetType, compoundType, instr.object, instr.field, value));
+        ir.add(new TFieldStore(targetType, compoundType, instr.object, instr.field, value));
     }
 
     @Override
@@ -389,7 +468,7 @@ public class TypeResolvePass implements InstructionVisitor {
                     arguments[i] = Registers.ERROR_REG;
                 } else if (!formalType.equals(argType)) {
                     arguments[i] = allocateRegister(formalType);
-                    cfgBuilder.addInstruction(new TConvert(formalType, argType, arguments[i], arg));
+                    ir.add(new TConvert(formalType, argType, arguments[i], arg));
                 }
             }
         }
@@ -399,8 +478,12 @@ public class TypeResolvePass implements InstructionVisitor {
         int target;
         Type targetType = getRegisterType(instr.target);
         if (targetType == PrimitiveType.ANY) {
-            target = instr.target;
-            setRegisterType(target, resultType);
+            setRegisterType(instr.target, resultType);
+            if (resultType != PrimitiveType.VOID)
+                target = instr.target;
+            else
+                target = Registers.VOID_REG;
+            targetType = resultType;
         } else if (targetType.equals(resultType)) {
             target = instr.target;
         } else if (targetType.isAssignable(resultType)) {
@@ -410,9 +493,14 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TMethodCall(functionType, target, instr.owner, instr.method, arguments));
-        if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+        if (resultType == PrimitiveType.VOID) {
+            assert targetType == resultType || target == Registers.ERROR_REG;
+            target = Registers.VOID_REG;
+        }
+
+        ir.add(new TMethodCall(functionType, target, instr.owner, instr.method, arguments));
+        if (target != instr.target && target != Registers.ERROR_REG && target != Registers.VOID_REG)
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
@@ -424,7 +512,7 @@ public class TypeResolvePass implements InstructionVisitor {
             cond = instr.cond;
         } else if (PrimitiveType.BOOL.isAssignable(condType)) {
             cond = allocateRegister(PrimitiveType.BOOL);
-            cfgBuilder.addInstruction(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
+            ir.add(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
         } else {
             typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
             cond = Registers.ERROR_REG;
@@ -434,9 +522,10 @@ public class TypeResolvePass implements InstructionVisitor {
         TBlock iftrue = cfgBuilder.newBlock();
         TBlock iffalse = cfgBuilder.newBlock();
 
-        cfgBuilder.addInstruction(new TIfStatement(cond, iftrue, iffalse));
+        TIfStatement ifStatement = new TIfStatement(cond, iftrue, iffalse);
+        ir.add(ifStatement);
 
-        loopTreeBuilder.ifStatement(cond, iftrue, iffalse);
+        loopTreeBuilder.ifStatement(ifStatement, iftrue, iffalse);
 
         // continue in a new block
         TBlock continuation = cfgBuilder.newBlock();
@@ -478,9 +567,9 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TImmediateLoad(literalType, target, instr.value));
+        ir.add(new TImmediateLoad(literalType, target, instr.value));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, literalType, instr.target, target));
+            ir.add(new TConvert(targetType, literalType, instr.target, target));
     }
 
     @Override
@@ -503,12 +592,12 @@ public class TypeResolvePass implements InstructionVisitor {
         }
 
         if (convert)
-            cfgBuilder.addInstruction(new TConvert(targetType, sourceType, instr.target, instr.source));
+            ir.add(new TConvert(targetType, sourceType, instr.target, instr.source));
         else
-            cfgBuilder.addInstruction(new TMove(targetType, instr.target, instr.source));
+            ir.add(new TMove(targetType, instr.target, instr.source));
     }
 
-    private Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
+    private static Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
         if (resultType == PrimitiveType.ERROR)
             return resultType;
         if (!(resultType instanceof PrimitiveType))
@@ -517,17 +606,21 @@ public class TypeResolvePass implements InstructionVisitor {
         if (op.isBitwise()) {
             if (resultType == PrimitiveType.INT32)
                 return resultType;
+            if (resultType == PrimitiveType.BYTE)
+                return resultType;
             if (resultType == PrimitiveType.BOOL)
                 return PrimitiveType.INT32;
             return PrimitiveType.ERROR;
         }
         if (op.isNumeric()) {
-            if (resultType == PrimitiveType.BOOL)
+            if (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE)
                 return PrimitiveType.INT32;
             if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE)
                 return PrimitiveType.ERROR;
             return resultType;
         }
+        if (op == UnaryOperation.NOT)
+            return PrimitiveType.BOOL;
 
         return resultType;
     }
@@ -544,7 +637,7 @@ public class TypeResolvePass implements InstructionVisitor {
         int src;
         if (!resultType.equals(srcType)) {
             src = allocateRegister(resultType);
-            cfgBuilder.addInstruction(new TConvert(resultType, srcType, src, instr.source));
+            ir.add(new TConvert(resultType, srcType, src, instr.source));
         } else {
             src = instr.source;
         }
@@ -563,9 +656,9 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        cfgBuilder.addInstruction(new TUnaryArithOp(resultType, target, src, instr.op));
+        ir.add(new TUnaryArithOp(resultType, target, src, instr.op));
         if (target != instr.target && target != Registers.ERROR_REG)
-            cfgBuilder.addInstruction(new TConvert(targetType, resultType, instr.target, target));
+            ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
 
     @Override
@@ -593,7 +686,7 @@ public class TypeResolvePass implements InstructionVisitor {
             cond = instr.cond;
         } else if (PrimitiveType.BOOL.isAssignable(condType)) {
             cond = allocateRegister(PrimitiveType.BOOL);
-            cfgBuilder.addInstruction(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
+            ir.add(new TConvert(PrimitiveType.BOOL, condType, cond, instr.cond));
         } else {
             typeError(instr, "condition in if statement must be a boolean (found " + condType.getName() + ")");
             cond = Registers.ERROR_REG;
@@ -615,15 +708,16 @@ public class TypeResolvePass implements InstructionVisitor {
 
         cfgBuilder.addSuccessor(empty);
         cfgBuilder.addSuccessor(breakBlock);
-        cfgBuilder.addInstruction(new TIfStatement(cond, empty, breakBlock));
+        TIfStatement ifStatement = new TIfStatement(cond, empty, breakBlock);
+        ir.add(ifStatement);
 
-        loopTreeBuilder.ifStatement(cond, empty, breakBlock);
+        loopTreeBuilder.ifStatement(ifStatement, empty, breakBlock);
         cfgBuilder.pushBlock(empty);
         cfgBuilder.addSuccessor(loopBody);
         cfgBuilder.popBlock();
         loopTreeBuilder.elseStatement(cond);
         cfgBuilder.pushBlock(breakBlock);
-        cfgBuilder.addInstruction(new TBreak());
+        ir.add(new TBreak());
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
         loopTreeBuilder.endIfStatement(cond);
@@ -649,7 +743,7 @@ public class TypeResolvePass implements InstructionVisitor {
             return;
         }
 
-        cfgBuilder.addInstruction(new TBreak());
+        ir.add(new TBreak());
 
         // code after break will be dead, but we need a block to appease CfgBuilder
         TBlock afterBreak = cfgBuilder.newBlock();
@@ -666,7 +760,7 @@ public class TypeResolvePass implements InstructionVisitor {
             return;
         }
 
-        cfgBuilder.addInstruction(new TContinue());
+        ir.add(new TContinue());
 
         // see comment in visit(Break)
         TBlock afterContinue = cfgBuilder.newBlock();

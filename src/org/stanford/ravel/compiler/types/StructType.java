@@ -18,9 +18,13 @@ public class StructType implements CompoundType {
     public StructType(String name) {
         this(name, true);
     }
-    private StructType(String name, boolean mutable) {
+    StructType(String name, boolean mutable) {
         this.name = name;
         this.mutable = mutable;
+    }
+
+    StructType constructImmutable() {
+        return new StructType(name, false);
     }
 
     public StructType makeImmutable() {
@@ -30,7 +34,7 @@ public class StructType implements CompoundType {
         if (immutableVersion != null)
             return immutableVersion;
 
-        immutableVersion = new StructType(name, false);
+        immutableVersion = constructImmutable();
         immutableVersion.memberNames.addAll(memberNames);
         immutableVersion.memberTypes.putAll(memberTypes);
         return immutableVersion;
@@ -41,6 +45,9 @@ public class StructType implements CompoundType {
             throw new IllegalArgumentException("Duplicate field " + name + " in struct " + this.name);
         memberNames.add(name);
         memberTypes.put(name, type);
+
+        if (immutableVersion != null)
+            immutableVersion.addField(name, type);
     }
 
     @Override
@@ -60,6 +67,43 @@ public class StructType implements CompoundType {
 
     @Override
     public String getName() {
-        return name;
+        return (mutable ? "" : "const ") + name;
+    }
+
+    @Override
+    public boolean isAssignable(Type type) {
+        if (!mutable && type instanceof StructType && this == ((StructType) type).immutableVersion) {
+            return true;
+        } else {
+            return CompoundType.super.isAssignable(type);
+        }
+    }
+
+    @Override
+    public boolean equalsExceptQualifiers(Type type) {
+        if (type == null)
+            return false;
+        if (type.getClass() != this.getClass())
+            return false;
+
+        StructType otherStruct = (StructType)type;
+        if (this == otherStruct.immutableVersion || this.immutableVersion == otherStruct)
+            return true;
+
+        return this == otherStruct;
+    }
+
+    @Override
+    public int getSerializedSize() {
+        int size = 0;
+
+        for (Map.Entry<String, Type> entry : memberTypes.entrySet()) {
+            int entrySize = entry.getValue().getSerializedSize();
+            if (entrySize < 0)
+                return -1;
+            size += entrySize;
+        }
+
+        return size;
     }
 }

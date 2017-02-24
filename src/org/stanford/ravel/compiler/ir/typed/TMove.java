@@ -7,8 +7,8 @@ import org.stanford.ravel.compiler.types.Type;
  */
 public class TMove extends TInstruction {
     public final Type type;
-    public final int target;
-    public final int source;
+    public int target;
+    public int source;
 
     public TMove(Type type, int target, int source) {
         this.type = type;
@@ -21,22 +21,22 @@ public class TMove extends TInstruction {
     }
 
     @Override
-    int[] getSources() {
+    public int[] getSources() {
         return new int[]{ source };
     }
 
     @Override
-    int getSink() {
+    public int getSink() {
         return target;
     }
 
     @Override
-    Type[] getSourceTypes() {
+    public Type[] getSourceTypes() {
         return new Type[]{ type };
     }
 
     @Override
-    Type getSinkType() {
+    public Type getSinkType() {
         return type;
     }
 
@@ -44,4 +44,10 @@ public class TMove extends TInstruction {
     public void accept(TInstructionVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public Object evaluate(Object[] args) {
+        return args[0];
+    }
+
 }
