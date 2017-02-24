@@ -84,4 +84,16 @@ public class ArrayType implements Type {
         ArrayType otherArray = (ArrayType)type;
         return elementType.equalsExceptQualifiers(otherArray.elementType);
     }
+
+    @Override
+    public int getSerializedSize() {
+        if (bound != UNBOUNDED) {
+            int elementSize = elementType.getSerializedSize();
+            if (elementSize < 0)
+                return -1;
+            return 2 + bound * elementSize;
+        }
+
+        return -1;
+    }
 }

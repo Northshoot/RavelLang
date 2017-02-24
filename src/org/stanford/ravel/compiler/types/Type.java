@@ -38,4 +38,8 @@ public interface Type {
     default Type getNestedType(String subTypeName) {
         return null;
     }
+
+    default int getSerializedSize() {
+        return -1;
+    }
 }

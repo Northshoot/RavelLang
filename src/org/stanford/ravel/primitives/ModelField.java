@@ -14,9 +14,44 @@ import java.util.*;
  * Created by gcampagn on 2/9/17.
  */
 public class ModelField {
+    public static class FieldOffset {
+        private final int base;
+        private final List<ModelField> addends = new ArrayList<>();
+
+        public FieldOffset(int base) {
+            this.base = base;
+        }
+        public FieldOffset(int base, Collection<ModelField> previous) {
+            this.base = base;
+            addends.addAll(previous);
+        }
+
+        @Override
+        public String toString() {
+            return base + " + " + addends;
+        }
+
+        public boolean isConstant() {
+            return addends.isEmpty();
+        }
+        public int getOffset() {
+            if (isConstant())
+                return base;
+            else
+                return -1;
+        }
+        public int getBase() {
+            return base;
+        }
+        public List<ModelField> getAddends() {
+            return Collections.unmodifiableList(addends);
+        }
+    }
+
     private final FieldSymbol symbol;
     private final Model model;
     private final Map<Space, Map<Space, Operation>> operations = new HashMap<>();
+    private FieldOffset offset;
 
     public ModelField(FieldSymbol symbol, Model model) {
         this.symbol = symbol;
@@ -51,5 +86,13 @@ public class ModelField {
     }
     public Map<Space, Operation> getOperations(Space operator) {
         return operations.getOrDefault(operator, Collections.emptyMap());
+    }
+
+    void setOffset(FieldOffset offset) {
+        this.offset = offset;
+    }
+
+    public FieldOffset getOffset() {
+        return offset;
     }
 }
