@@ -45,10 +45,7 @@ ravel_system_timer_handler(void *context)
 RAVEL_DRIVER_ERROR init_timer_module()
 {
     uint32_t err_code=0;
-    NRF_LOG_INFO("init_timer_module!\r\n");
-
     APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-
     err_code = app_timer_create(&m_ravel_system_timer_id,
                                 APP_TIMER_MODE_SINGLE_SHOT,
                                 ravel_system_timer_handler);
@@ -86,15 +83,11 @@ fire_timers(uint32_t now)
 {
     uint16_t num;
     uint32_t err_code;
-
     for (num = 0; num < sys_number_of_timer; num++) {
         DriverTimer *timer = m_timers[num];
-
         if (timer->__is_running) {
             uint32_t elapsed = now - timer->t0;
-            NRF_LOG_INFO("fire_timers T[%d] E[%d] dt[%d]\r\n", timer->__id, elapsed,timer->dt);
             if (elapsed >= timer->dt) {
-                NRF_LOG_INFO("fire_timers E[%d]\r\n", elapsed);
                 if (timer->__is_one_shoot)
                     timer->__is_running = false;
                 else // Update timer for next event
@@ -112,6 +105,7 @@ fire_timers(uint32_t now)
 }
 /**
  * Internal function that loops through a set of timer
+ * ideas a reused form TinyOS virtual timer
  */
 void update_timers_state(void *p_event_data, uint16_t event_size)
 {
@@ -136,26 +130,21 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
         {
             uint32_t elapsed = now - timer->t0;
             int32_t remaining = timer->dt - elapsed;
-            NRF_LOG_INFO(">>>>>R[%d] <= MIN_R[%d]\r\n", remaining, min_remaining);
             if (remaining < min_remaining)
             {
                 min_remaining = remaining;
                 min_remaining_isset = true;
             }
-            NRF_LOG_INFO("<<<<<R[%d] <= MIN_R[%d]\r\n", remaining, min_remaining);
         }
     }
-
 
     if (min_remaining_isset)
     {
         if (min_remaining <= 0)
         {
-            NRF_LOG_INFO("min_remaining <= 0\r\n");
             fire_timers(now);
         }
         else {
-            NRF_LOG_INFO("SET TIMER %d\r\n", min_remaining);
             err_code = app_timer_start(m_ravel_system_timer_id,min_remaining, NULL);
             APP_ERROR_CHECK(err_code);
         }
@@ -177,16 +166,16 @@ start_timer(DriverTimer *timer, uint32_t t0, uint32_t time)
     timer->dt = APP_TIMER_TICKS(time, APP_TIMER_PRESCALER);
     err_code = app_sched_event_put(NULL, 0,update_timers_state);
     APP_ERROR_CHECK(err_code);
-    NRF_LOG_INFO("started t0[%d] dt[%d]\r\n", timer->t0, timer->dt);
     return SUCCESS;
 }
 
-RAVEL_DRIVER_ERROR timer_start_periodic(DriverTimer *timer,uint32_t time){
-    NRF_LOG_INFO("periodic::: %d\r\n", time);
+RAVEL_DRIVER_ERROR
+timer_start_periodic(DriverTimer *timer,uint32_t time){
     timer->__is_running = true;
     return start_timer(timer, counter_get(), time);
 }
-RAVEL_DRIVER_ERROR timer_start_single_shoot(DriverTimer *timer,uint32_t time){
+RAVEL_DRIVER_ERROR
+timer_start_single_shoot(DriverTimer *timer,uint32_t time){
     timer->__is_one_shoot = true;
 
     return start_timer(timer, counter_get(), time);
@@ -194,11 +183,13 @@ RAVEL_DRIVER_ERROR timer_start_single_shoot(DriverTimer *timer,uint32_t time){
 }
 
 
-RAVEL_DRIVER_ERROR timer_cancel(DriverTimer *timer){
+RAVEL_DRIVER_ERROR
+timer_cancel(DriverTimer *timer){
     timer->__is_running = false;
     return SUCCESS;
 }
-RAVEL_DRIVER_ERROR timer_cancel_all(void){
+RAVEL_DRIVER_ERROR
+timer_cancel_all(void){
     uint32_t err_code = app_timer_stop(m_ravel_system_timer_id);
     APP_ERROR_CHECK(err_code);
 
