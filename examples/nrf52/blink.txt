@@ -1,6 +1,6 @@
 interface Timer():
     implementation:
-        c = "rlib/nrf52/app_timer.stg"
+        c = "rlib/nrf52/app_timer_sys.stg"
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
@@ -19,16 +19,19 @@ interface Led(led_num: int32):
     def off()
     def toggle()
 
-controller EController(timer : Timer, led_0 : Led,led_1 : Led):
+
+
+controller EController(timer : Timer, led_0 : Led,led_1 : Led,led_2 : Led):
 
     event system.started():
         timer.start_periodic(1000)
-        led_1.toggle()
+        led_2.toggle()
 
 
     event timer.fired():
         led_0.toggle()
         led_1.toggle()
+        led_2.toggle()
 
 
 space EmbeddedSpace:
@@ -40,6 +43,7 @@ space EmbeddedSpace:
         timer = Timer()
         led0 = Led(led_num = 0)
         led1 = Led(led_num = 1)
+        led2 = Led(led_num = 2)
 
     controllers:
-        main_ctrl = EController(timer = interfaces.timer,  led_0 = interfaces.led0, led_1 = interfaces.led1)
+        main_ctrl = EController(timer = interfaces.timer,  led_0 = interfaces.led0, led_1 = interfaces.led1, led_2 = interfaces.led2)

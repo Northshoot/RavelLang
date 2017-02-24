@@ -19,9 +19,7 @@
 
 #define MAX_TIMERS 4
 #define APP_TIMER_ENABLED 1
-// General application timer settings.
-#define APP_TIMER_PRESCALER              15
-#define APP_TIMER_OP_QUEUE_SIZE          4
+
 
 
 
@@ -31,6 +29,7 @@
 extern "C" {
 #endif
 
+typedef void (*fired_callback)(void *data);
 //timer structure
 typedef struct {
     int __id;
@@ -39,11 +38,11 @@ typedef struct {
     bool __is_one_shoot;
     bool __is_running;
     bool __reserved;
+    fired_callback call_back;
 } DriverTimer;
 
-typedef void (*timer_fired_event_handlers)(int timer_id, void * cntx);
 
-DriverTimer m_timers[MAX_TIMERS];
+DriverTimer* m_timers[MAX_TIMERS];
 
 /**
  * innitialize timer module
@@ -57,7 +56,7 @@ RAVEL_DRIVER_ERROR init_module();
  * @return
  */
 RAVEL_DRIVER_ERROR init_timer_module();
-RAVEL_DRIVER_ERROR create_new_timer(DriverTimer *timer, int id);
+RAVEL_DRIVER_ERROR create_new_timer(DriverTimer *timer, int timer_id, fired_callback callback);
 RAVEL_DRIVER_ERROR timer_start_periodic(DriverTimer *timer,uint32_t time);
 RAVEL_DRIVER_ERROR timer_start_single_shoot(DriverTimer *timer, uint32_t time);
 RAVEL_DRIVER_ERROR timer_cancel(DriverTimer *timer);

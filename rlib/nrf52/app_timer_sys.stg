@@ -17,14 +17,16 @@ c_file(includes,name,interface) ::=<<
 
 <includes:do_include(); separator="\n">
 
-
+#define MAX_APP_TIMERS 10
+<name>* m_app_timers[MAX_APP_TIMERS];
 
 void
 ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
 {
     //TODO: parse in the application to determine if which timer are used and optimize the code
+    m_app_timers[self->__id] = self;
     self->__id = instance_id;
-    create_new_timer(&self->__timer, self->__id);
+    create_new_timer(&self->__timer, self->__id, ravel_generated_<name; format="function">_fired);
     NRF_LOG_INFO("INIT!\r\n");
 
 }
@@ -58,7 +60,8 @@ ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t 
 void
 ravel_generated_<name; format="function">_fired( void* data)
 {
-        <name> *self = data;
+        DriverTimer *dt = data;
+        Timer *self = m_app_timers[dt->__id];
         <dispatch_event(interface, "fired",[])>
 }
 >>

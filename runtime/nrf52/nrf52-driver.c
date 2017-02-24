@@ -47,10 +47,9 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
 {
     /* TODO: init any internal systems */
 
-    //init_timer_module();
-
     NRF_LOG_INFO("INIT!\r\n");
-
+    APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+    init_timer_module();
     self->base.dispatcher = dispatcher;
 
 
@@ -71,12 +70,14 @@ void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // TODO
+    uint32_t now = app_timer_cnt_get();
+    NRF_LOG_INFO("NOW: %d\r\n", now);
     // Main loop.
     NRF_LOG_INFO("LOOP\r\n");
     while (true)
     {
         app_sched_execute();
-        sd_app_evt_wait();
+
     }
 }
 
