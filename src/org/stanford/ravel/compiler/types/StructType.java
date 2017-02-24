@@ -92,4 +92,18 @@ public class StructType implements CompoundType {
 
         return this == otherStruct;
     }
+
+    @Override
+    public int getSerializedSize() {
+        int size = 0;
+
+        for (Map.Entry<String, Type> entry : memberTypes.entrySet()) {
+            int entrySize = entry.getValue().getSerializedSize();
+            if (entrySize < 0)
+                return -1;
+            size += entrySize;
+        }
+
+        return size;
+    }
 }

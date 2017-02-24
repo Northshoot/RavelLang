@@ -3,7 +3,6 @@ package org.stanford.ravel.primitives;
 import org.stanford.ravel.analysis.security.Key;
 import org.stanford.ravel.analysis.security.SecurityOperation;
 import org.stanford.ravel.analysis.security.SecurityPrimitive;
-import org.stanford.ravel.compiler.ir.typed.TypedIR;
 
 import java.util.*;
 
@@ -19,9 +18,6 @@ public class ConcreteModel extends BaseEventComponent {
     private final List<SecurityOperation> mInboundSecurityOps = new ArrayList<>();
     // a list of security operations that need to be applied to each outgoing record
     private final List<SecurityOperation> mOutboundSecurityOps = new ArrayList<>();
-
-    private TypedIR sendCode;
-    private TypedIR receiveCode;
 
     ConcreteModel(Space space, Model model) {
         super(space, model);
@@ -81,18 +77,5 @@ public class ConcreteModel extends BaseEventComponent {
 
     public List<SecurityOperation> getSecurityOperations(boolean isInbound) {
         return Collections.unmodifiableList((isInbound ? mInboundSecurityOps : mOutboundSecurityOps));
-    }
-
-    public void setSendCode(TypedIR sendCode) {
-        this.sendCode = sendCode;
-    }
-    public TypedIR getSendCode() {
-        return sendCode;
-    }
-    public void setReceiveCode(TypedIR receiveCode) {
-        this.receiveCode = receiveCode;
-    }
-    public TypedIR getReceiveCode() {
-        return receiveCode;
     }
 }

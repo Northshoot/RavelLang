@@ -5,7 +5,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stanford.antlr4.RavelLexer;
 import org.stanford.antlr4.RavelParser;
-import org.stanford.ravel.analysis.*;
+import org.stanford.ravel.analysis.FlowAnalysis;
+import org.stanford.ravel.analysis.ModelOperationAnalysis;
+import org.stanford.ravel.analysis.ModelOwnershipAnalysis;
+import org.stanford.ravel.analysis.ModelWritingAnalysis;
 import org.stanford.ravel.analysis.security.SecurityAnalysis;
 import org.stanford.ravel.analysis.security.SecurityTransformation;
 import org.stanford.ravel.api.InvalidOptionException;
@@ -13,15 +16,14 @@ import org.stanford.ravel.compiler.CompileError;
 import org.stanford.ravel.compiler.DefPhase;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ValidateScope;
-import org.stanford.ravel.compiler.ir.LowerIRPass;
 import org.stanford.ravel.compiler.scope.GlobalScope;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
 import org.stanford.ravel.compiler.symbol.ModelSymbol;
 import org.stanford.ravel.compiler.symbol.SpaceSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
-import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Controller;
+import org.stanford.ravel.primitives.Model;
 import org.stanford.ravel.primitives.Space;
 
 import java.io.FileInputStream;
@@ -43,6 +45,7 @@ public class RavelCompiler {
     private final RavelOptionParser options = new RavelOptionParser();
     private final List<CompileError> errors = new ArrayList<>();
     private ControllerCompiler controllerCompiler;
+    private ModelCompiler modelCompiler;
 
     public boolean success() {
         return !hadErrors;
@@ -120,9 +123,8 @@ public class RavelCompiler {
     }
 
     private void compileModels(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        ModelCompiler compiler = new ModelCompiler(this, options.hasFOption("dump-models"));
         for (ModelSymbol m : scope.getModels()) {
-            app.addModel(m.getName(), compiler.compile(m));
+            app.addModel(m.getName(), modelCompiler.compile(m));
         }
     }
 
@@ -145,14 +147,8 @@ public class RavelCompiler {
     }
 
     private void compileModelsPostAnalysis(RavelApplication app) throws FatalCompilerErrorException {
-        LowerIRPass pass = new LowerIRPass(this, options.hasFOption("dump-ir"));
-
-        for (Space s : app.getSpaces()) {
-            for (ConcreteModel model : s.getModels()) {
-                pass.run(model.getReceiveCode());
-                pass.run(model.getSendCode());
-            }
-        }
+        for (Model model : app.getModels())
+            modelCompiler.postAnalysis(model);
     }
 
     private void compileSpaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
@@ -211,6 +207,7 @@ public class RavelCompiler {
                 RavelApplication app = new RavelApplication();
 
                 // typecheck the models, assign types to the fields
+                modelCompiler = new ModelCompiler(this, options.hasFOption("dump-models"));
                 compileModels(globalScope, app);
                 if (!success())
                     return;
