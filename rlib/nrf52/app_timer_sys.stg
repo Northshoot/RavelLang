@@ -47,16 +47,18 @@ ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t 
 void
 ravel_generated_<name; format="function">_cancel(<name>* self)
 {
+
     timer_cancel(&self->__timer);
 }
 void
 ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
 {
-    NRF_LOG_INFO("start_periodic %d\r\n",time);
     timer_start_periodic(&self->__timer, time);
 }
 
-
+bool ravel_generated_<name; format="function">_is_one_shoot(<name>* self){
+        return self->__timer.__is_one_shoot;
+}
 void
 ravel_generated_<name; format="function">_fired( void* data)
 {
@@ -88,6 +90,7 @@ void ravel_generated_<name; format="function">_finalize(<name> *self);
 void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
 void ravel_generated_<name; format="function">_cancel(<name>* self);
 void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+bool ravel_generated_<name; format="function">_is_one_shoot(<name>* self);
 void ravel_generated_<name; format="function">_fired(void* p_context);
 
 <interface.controllerList:declare_set_controller_method(name); separator="\n">

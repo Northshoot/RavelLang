@@ -4,7 +4,7 @@ interface Timer():
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
-
+    def is_one_shoot() : bool
     event fired()
 
 interface Led(led_num: int32):
@@ -21,21 +21,27 @@ interface Led(led_num: int32):
 
 
 
-controller EController(timer : Timer, timer1 : Timer, led_0 : Led, led_1 : Led):
+controller EController(timer : Timer, timer1 : Timer, timer2 : Timer,timer3 : Timer,led_0 : Led, led_1 : Led, led_2 : Led, led_3 : Led ):
 
     event system.started():
-        timer.start_periodic(1000)
-        timer1.start_periodic(500)
+        timer.start_periodic(300)
+        timer1.start_periodic(700)
+        timer2.start_periodic(1100)
+        timer3.start_periodic(1700)
 
 
 
     event timer.fired():
-        led_1.toggle()
-
-    event timer1.fired():
         led_0.toggle()
 
+    event timer1.fired():
+        led_1.toggle()
 
+    event timer2.fired():
+        led_2.toggle()
+
+    event timer3.fired():
+        led_3.toggle()
 
 space EmbeddedSpace:
     platform:
@@ -45,9 +51,20 @@ space EmbeddedSpace:
     interfaces:
         timer = Timer()
         timer1 = Timer()
+        timer2 = Timer()
+        timer3 = Timer()
         led0 = Led(led_num = 0)
         led1 = Led(led_num = 1)
+        led2 = Led(led_num = 2)
+        led3 = Led(led_num = 3)
 
 
     controllers:
-        main_ctrl = EController(timer = interfaces.timer,  timer1= interfaces.timer1, led_0 = interfaces.led0, led_1 = interfaces.led1)
+        main_ctrl = EController(timer = interfaces.timer,
+                                timer1= interfaces.timer1,
+                                timer2= interfaces.timer2,
+                                timer3= interfaces.timer3,
+                                led_0 = interfaces.led0,
+                                led_1 = interfaces.led1,
+                                led_2 = interfaces.led2,
+                                led_3 = interfaces.led3 )
