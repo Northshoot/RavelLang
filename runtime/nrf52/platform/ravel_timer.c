@@ -62,17 +62,18 @@ RAVEL_DRIVER_ERROR init_timer_module()
 
 
 RAVEL_DRIVER_ERROR
-create_new_timer(DriverTimer *timer, int timer_id, fired_callback callback)
+create_new_timer(DriverTimer *dtimer, int timer_id, fired_callback callback, void *timer)
 {
     if( sys_number_of_timer == MAX_TIMERS )
         return NO_MEMORY;
 
-    timer->__id = timer_id;
-    timer->call_back = callback;
-    timer->__is_one_shoot = false;
-    timer->__is_running = false;
-    timer->__reserved  = false;
-    m_timers[sys_number_of_timer] =  timer;
+    dtimer->__id = timer_id;
+    dtimer->call_back = callback;
+    dtimer->__is_one_shoot = false;
+    dtimer->__is_running = false;
+    dtimer->__reserved  = false;
+    dtimer->__timer = timer;
+    m_timers[sys_number_of_timer] =  dtimer;
     sys_number_of_timer++;
     return SUCCESS;
 }
@@ -101,7 +102,7 @@ fire_timers(uint32_t now)
 
                 //call back to the timer subscriber
                 NRF_LOG_INFO("CALL_BACK\r\n");
-                timer->call_back(timer);
+                timer->call_back(timer->__timer);
                 break;
             }
         }
@@ -135,12 +136,13 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
         {
             uint32_t elapsed = now - timer->t0;
             int32_t remaining = timer->dt - elapsed;
-            NRF_LOG_INFO("R[%d] <= MIN_R[%d]\r\n", remaining, min_remaining);
+            NRF_LOG_INFO(">>>>>R[%d] <= MIN_R[%d]\r\n", remaining, min_remaining);
             if (remaining < min_remaining)
             {
                 min_remaining = remaining;
                 min_remaining_isset = true;
             }
+            NRF_LOG_INFO("<<<<<R[%d] <= MIN_R[%d]\r\n", remaining, min_remaining);
         }
     }
 
@@ -153,6 +155,7 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
             fire_timers(now);
         }
         else {
+            NRF_LOG_INFO("SET TIMER %d\r\n", min_remaining);
             err_code = app_timer_start(m_ravel_system_timer_id,min_remaining, NULL);
             APP_ERROR_CHECK(err_code);
         }

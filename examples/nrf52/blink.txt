@@ -21,17 +21,20 @@ interface Led(led_num: int32):
 
 
 
-controller EController(timer : Timer, led_0 : Led,led_1 : Led,led_2 : Led):
+controller EController(timer : Timer, timer1 : Timer, led_0 : Led, led_1 : Led):
 
     event system.started():
         timer.start_periodic(1000)
-        led_2.toggle()
+        timer1.start_periodic(500)
+
 
 
     event timer.fired():
-        led_0.toggle()
         led_1.toggle()
-        led_2.toggle()
+
+    event timer1.fired():
+        led_0.toggle()
+
 
 
 space EmbeddedSpace:
@@ -41,9 +44,10 @@ space EmbeddedSpace:
 
     interfaces:
         timer = Timer()
+        timer1 = Timer()
         led0 = Led(led_num = 0)
         led1 = Led(led_num = 1)
-        led2 = Led(led_num = 2)
+
 
     controllers:
-        main_ctrl = EController(timer = interfaces.timer,  led_0 = interfaces.led0, led_1 = interfaces.led1, led_2 = interfaces.led2)
+        main_ctrl = EController(timer = interfaces.timer,  timer1= interfaces.timer1, led_0 = interfaces.led0, led_1 = interfaces.led1)

@@ -39,6 +39,7 @@ typedef struct {
     bool __is_running;
     bool __reserved;
     fired_callback call_back;
+    void *__timer;
 } DriverTimer;
 
 
@@ -56,7 +57,7 @@ RAVEL_DRIVER_ERROR init_module();
  * @return
  */
 RAVEL_DRIVER_ERROR init_timer_module();
-RAVEL_DRIVER_ERROR create_new_timer(DriverTimer *timer, int timer_id, fired_callback callback);
+RAVEL_DRIVER_ERROR create_new_timer(DriverTimer *timer, int timer_id, fired_callback callback, void *timer_ptr);
 RAVEL_DRIVER_ERROR timer_start_periodic(DriverTimer *timer,uint32_t time);
 RAVEL_DRIVER_ERROR timer_start_single_shoot(DriverTimer *timer, uint32_t time);
 RAVEL_DRIVER_ERROR timer_cancel(DriverTimer *timer);

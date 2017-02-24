@@ -55,6 +55,8 @@ public class Nrf52 extends BaseCPlatform {
         //TODO: add to interface
         //define = {val: key}
         nc.TIMER_ENABLED = 0;
+        nc.RTC2_ENABLED =1 ;
+        nc.RTC_ENABLED =1 ;
         nc.NRF_LOG_ENABLED =1;
         nc.NRF_LOG_USES_COLORS =1;
         nc.NRF_LOG_COLOR_DEFAULT = 3;
