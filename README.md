@@ -193,5 +193,29 @@ interface Led(led_num: int32):
 ### Writing Platform Runtime ###
 
 ### Writing Driver ###
+
+# Future Work #
+
+    Set timeout / number of retries on model.save
+    In order delivery
+    Replicated models versioned
+    Transactions
+    Consistence and conflict resolution protocols
+    Mechanism for time resolution between real time and the counter in embedded device
+    Add Ravel to Cooja, or re-invent Symphony with NS-3
+
+## Needed components ##
+    Keydistribution, security primitives
+    OS drivers - Contiki/RTOS
+    Database query
+    Cassandra as a high-scale database
+    Kafka for data pacturing and messaging
+    Storm for streaming data distribution
+    Spark for in-memory data processing
+    https://www.heroku.com/
+    
+    
+
+ 
  
  
