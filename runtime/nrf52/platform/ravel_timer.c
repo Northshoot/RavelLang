@@ -19,12 +19,13 @@
 /**
  * Generic module providing abstract timer interface
  * We perform internal virtualizaton of the timers rather than use NRF
- * The reason is control of the amount of timmers that are out there
+ * The reason is control of the amount of timers that are out there
  * in the system
  * Ported to NRF52
+ *
+ * TODO: a compensation is needed for how many ticks it takes to execute timer
  */
 
-#define DEBUG
 // General application timer settings.
 #define APP_TIMER_PRESCALER              15
 #define APP_TIMER_OP_QUEUE_SIZE          4
@@ -93,9 +94,7 @@ fire_timers(uint32_t now)
                     timer->__is_running = false;
                 else // Update timer for next event
                     timer->t0 += timer->dt;
-
                 //call back to the timer subscriber
-
                 timer->call_back(timer->__timer);
                 break;
             }
@@ -121,13 +120,10 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
     uint16_t num;
 
     uint32_t err_code;
+    //first time it is not running, so better not to stop
     if (timer_running) {
         app_timer_stop(m_ravel_system_timer_id);
-        NRF_LOG_INFO("app_timer_stop %d\r\n", err_code);
         APP_ERROR_CHECK(err_code);
-
-    } else {
-        NRF_LOG_INFO("timer not running\r\n");
     }
 
     for (num=0; num<sys_number_of_timer; num++)
@@ -148,20 +144,17 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
 
     if (min_remaining_isset)
     {
+        //With many timers this need to be compensated or timer end up in fatal state
+        //TODO: investigate the reason
         if (min_remaining <= 10)
         {
             fire_timers(now);
         }
         else {
-
             uint32_t err_code;
             if (!timer_running) {
-                NRF_LOG_INFO("min_remaining %d\r\n", min_remaining);
                 err_code = app_timer_start(m_ravel_system_timer_id,min_remaining, NULL);
-                NRF_LOG_INFO("invalid state %d\r\n", err_code);
                 APP_ERROR_CHECK(err_code);
-            } else {
-                NRF_LOG_INFO("timer was running\r\n");
             }
 
         }
