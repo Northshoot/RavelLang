@@ -1,8 +1,8 @@
 package org.stanford.ravel.api.lang;
 
 import org.apache.commons.lang3.StringUtils;
-import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
+import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.c.CCodeTranslator;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
@@ -15,7 +15,10 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;

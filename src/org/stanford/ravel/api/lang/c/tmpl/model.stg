@@ -10,15 +10,16 @@ static void dispatch_<event>(<model.name> *self, Context *ctx)
 c_file(includes,name,base,model) ::=<<
 <begin_source(name)>
 
-#include "api/context.h"
-#include "api/packet.h"
-#include "api/endpoint.h"
-#include "api/base_model.h"
+#include \<api/context.h>
+#include \<api/packet.h>
+#include \<api/endpoint.h>
+#include \<api/base_model.h>
+#include \<api/intrinsics.h>
+#include \<api/growable_byte_array.h>
+
 <includes:do_include(); separator="\n">
 
 #define MODEL_ID   <model.baseModel.id>
-
-#define ravel_base_model(m) (&(m)->__base.base)
 
 void
 ravel_generated_<model.name; format="function">_record_init(<model.name>_Record *this)
@@ -29,13 +30,13 @@ ravel_generated_<model.name; format="function">_record_init(<model.name>_Record 
 void
 ravel_generated_<model.name; format="function">_record_init_from_network(<model.name>_Record *this, uint8_t *data)
 {
-    <model.receiveCode>
+    <model.baseModel.receiveCode>
 }
 
 uint8_t *
 ravel_generated_<model.name; format="function">_record_get_bytes(<model.name>_Record *this)
 {
-    <model.sendCode>
+    <model.baseModel.sendCode>
 }
 
 void
@@ -49,7 +50,28 @@ ravel_generated_<model.name; format="function">_record_finalize(<model.name>_Rec
 <define_dispatch_func(model, "departed", model.controllerMap.departed)>
 <define_dispatch_func(model, "save_done", model.controllerMap.save_done)>
 
+static <model.name>_Record *
+ravel_generated_<model.name; format="function">_real_unmarshall(<model.name> *self, uint8_t* data, size_t length)
+{
+    <model.name>_Record *record = ravel_base_model_allocate(ravel_base_model(self));
+    if (record == NULL)
+        return NULL;
+
+    /* FIXME pass length down */
+    ravel_generated_<model.name; format="function">_record_init_from_network(record, data);
+
+    return record;
+}
+
+static uint8_t *
+ravel_generated_<model.name; format="function">_real_marshall(<model.name> *self, <model.name>_Record *record)
+{
+    return ravel_generated_<model.name; format="function">_record_get_bytes(record);
+}
+
 static const RavelModelVTable vtable = {
+    .marshall = (uint8_t* (*)(void*, void*)) ravel_generated_<model.name; format="function">_real_marshall,
+    .unmarshall = (void*(*)(void*, uint8_t*, size_t)) ravel_generated_<model.name; format="function">_real_unmarshall,
     .dispatch_full = (void(*)(void*, Context*)) dispatch_full,
     .dispatch_arrived = (void(*)(void*, Context*)) dispatch_arrived,
     .dispatch_departed = (void(*)(void*, Context*)) dispatch_departed,
@@ -57,9 +79,9 @@ static const RavelModelVTable vtable = {
 };
 
 void
-ravel_generated_<model.name; format="function">_init(<model.name> *self<append_parameter_list(model.baseModel.parameters)>)
+ravel_generated_<model.name; format="function">_init(<model.name> *self, struct AppDispatcher *dispatcher<append_parameter_list(model.baseModel.parameters)>)
 {
-    <base; format="function">_init(&self->__base, <model.baseModel.size>, sizeof(<model.name>_Record));
+    <base; format="function">_init(&self->__base, dispatcher, <model.baseModel.size>, sizeof(<model.name>_Record));
     ravel_base_model(self)->vtable = &vtable;
 }
 
@@ -74,7 +96,13 @@ ravel_generated_<model.name; format="function">_finalize(<model.name> *self)
 <model.name>_Record *
 ravel_generated_<model.name; format="function">_create(<model.name> *self)
 {
-    return ravel_base_model_create(ravel_base_model(self));
+    <model.name>_Record *record = ravel_base_model_allocate(ravel_base_model(self));
+    if (record == NULL)
+        return NULL;
+
+    ravel_generated_<model.name; format="function">_record_init(record);
+
+    return record;
 }
 Context *
 ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record)
@@ -82,10 +110,19 @@ ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.
     return <base; format="function">_save(&self->__base, record);
 }
 
+void
+ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *self)
+{
+    static const char * endpoints[] = { <model.streamingSinks:{s|"<s.name>"}; separator=","><if(model.streamingSinks)>, <endif>NULL };
+    return <base; format="function">_add_endpoints(&self->__base, endpoints);
+}
+
 >>
 
 declare_record_class(model_name, model_fields) ::=<<
 typedef struct {
+    int __idx;
+
     <model_fields:{f|<f.type> <f.name>;}; separator="\n">
 } <model_name>_Record;
 
@@ -105,6 +142,7 @@ h_file(includes,name,base,model) ::=<<
 
 /* Forward declare our model class before we include the controller headers */
 typedef struct s_<name> <name>;
+struct AppDispatcher;
 
 <includes:do_include(); separator="\n">
 
@@ -115,25 +153,41 @@ typedef struct s_<name> <name>;
 struct s_<name> {
     <base> __base;
 
-    <model.controllerList:{c|<c.name> *ctr_<c.varName>;}; separator="\n">
+    <model.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
 };
 
-void ravel_generated_<model.name; format="function">_init(<model.name> *self<append_parameter_list(model.baseModel.parameters)>);
+void ravel_generated_<model.name; format="function">_init(<model.name> *self, struct AppDispatcher *dispatcher<append_parameter_list(model.baseModel.parameters)>);
 void ravel_generated_<model.name; format="function">_finalize(<model.name> *self);
 
 /* The Top API, used by the Controller */
 <model.name>_Record *ravel_generated_<model.name; format="function">_create(<model.name> *self);
 Context *ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record);
 
+static inline <model.name>_Record * const * ravel_generated_<model.name; format="function">_all(<model.name> *self)
+{
+    return (<model.name>_Record * const *)ravel_base_model_all(ravel_base_model(self));
+}
+static inline <model.name>_Record *ravel_generated_<model.name; format="function">_get(<model.name> *self, int idx)
+{
+    return ravel_base_model_get(ravel_base_model(self), idx);
+}
+static inline <model.name>_Record *ravel_generated_<model.name; format="function">_first(<model.name> *self)
+{
+    return ravel_base_model_first(ravel_base_model(self));
+}
+static inline <model.name>_Record *ravel_generated_<model.name; format="function">_last(<model.name> *self)
+{
+    return ravel_base_model_last(ravel_base_model(self));
+}
+static inline int ravel_generated_<model.name; format="function">_size(<model.name> *self)
+{
+    return ravel_base_model_size(ravel_base_model(self));
+}
+
 /* The Init API, used by the Dispatcher */
 <model.controllerList:declare_set_controller_method(model.name); separator="\n">
 
-/* The Bottom API, also used by the Dispatcher */
-void ravel_generated_<model.name; format="function">_record_arrived(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
-void ravel_generated_<model.name; format="function">_record_departed(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
-void ravel_generated_<model.name; format="function">_record_saved_durably(<model.name> *self, RavelPacket *record);
-void ravel_generated_<model.name; format="function">_record_saved_endpoint(<model.name> *self, RavelPacket *record, RavelEndpoint endpoint);
-void ravel_generated_<model.name; format="function">_endpoint_connected(<model.name> *self, RavelEndpoint *endpoint);
+void ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *self);
 
 <end_extern_c()>
 <end_header("MODEL", name)>

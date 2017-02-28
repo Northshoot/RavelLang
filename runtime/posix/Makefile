@@ -4,7 +4,9 @@ C_RUNTIME_SOURCES = \
     ravel-context.c \
     ravel-ringbuf.c \
     ravel-base-model.c \
-    ravel-system-api.c
+    ravel-base-dispatcher.c \
+    ravel-system-api.c \
+    ravel-packet.c
 
 PLATFORM_RUNTIME_SOURCES = \
     ravel-driver.c

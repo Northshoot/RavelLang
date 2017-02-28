@@ -51,6 +51,8 @@ uint32_t err_code;
     //set driver
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
 
+  ravel_generated_app_dispatcher_add_all_endpoints(&dispatcher);
+
   //system ready
   ravel_nrf52_driver_app_dispatcher_ready(&driver);
 
