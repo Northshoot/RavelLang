@@ -113,4 +113,12 @@ public class TypedIR {
     public Collection<VariableSymbol> getClassScopeVariables() {
         return Collections.unmodifiableCollection(classVariables);
     }
+
+    public void retainVariables(Collection<Integer> used) {
+        registerTypes.keySet().retainAll(used);
+    }
+
+    public boolean isParameter(int reg) {
+        return parameters.contains(reg);
+    }
 }

@@ -60,11 +60,28 @@ public class Intrinsic {
         return ByteWork.convertBytesToString(ByteWork.getBytes(data, pos, pos+size));
     }
 
-    public static void compute_mac(byte[] data, byte[] mac) {
+    public static void apply_mac(byte[] data, int endofdata, int writeOffset, byte[] key) {
         // TODO
-        Arrays.fill(mac, (byte) 0);
+        Arrays.fill(data, 0, endofdata, (byte)0);
     }
-    public static void verify_mac(byte[] data, int off, int maclen) {
+    public static void verify_mac(byte[] data, int endofdata, int macoffset, byte[] key) {
         // TODO
+    }
+
+    public static void encrypt(byte[] data, int offset, int length, byte[] key) {
+        // TODO
+    }
+
+    public static void decrypt(byte[] data, int offset, int length, byte[] key) {
+        // TODO
+    }
+
+    public static byte[] load_key(int keyId) {
+        // TODO
+        return null;
+    }
+
+    public static void array_copy(byte[] tgt, byte[] source, int tgtOffset, int srcOffset, int size) {
+        System.arraycopy(source, srcOffset, tgt, tgtOffset, size);
     }
 }

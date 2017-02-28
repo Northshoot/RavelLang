@@ -2,8 +2,10 @@
 package patterns.src.java.model;
 
 //AUTOGEN imports
+
 import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.model.StreamingModel;
+import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.utils.GrowableByteArray;
 import patterns.src.java.app.AppDispatcher;
@@ -93,8 +95,13 @@ public class Model extends StreamingModel<Model.Record> {
 
 
     @Override
-    protected Record unmarshall(byte[] data) {
+    protected Record unmarshall(byte[] data, Endpoint ep) {
         return new Record(data);
+    }
+
+    @Override
+    protected byte[] marshall(Record record, Endpoint ep) {
+        return record.toBytes();
     }
 
     public static Record create() {

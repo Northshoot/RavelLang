@@ -172,6 +172,8 @@ public class RavelCompiler {
 
     private void run(String[] args) {
         try {
+            options.defaultOn("encrypt");
+            options.defaultOn("mac");
             options.parse(args);
             if (options.isHelp()) {
                 options.help();
@@ -253,14 +255,13 @@ public class RavelCompiler {
                     return;
 
                 // assign security primitives to each space
-                SecurityAnalysis securityAnalysis = new SecurityAnalysis(this, app, options.hasFOption("debug-security-analysis"));
+                SecurityAnalysis securityAnalysis = new SecurityAnalysis(this, app, options.hasFOption("debug-security-analysis"), !options.hasFOption("field-level-encryption"), options.hasFOption("homomorphic-encryption"));
                 securityAnalysis.run();
                 if (!success())
                     return;
 
                 // transform the IR with security info
-                // FIXME: for now, we always disable encryption and MAC
-                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), true, !options.hasFOption("enable-mac"));
+                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), options.hasFOption("encrypt"), options.hasFOption("mac"), !options.hasFOption("field-level-encryption"));
                 securityTransformation.run();
                 if (!success())
                     return;

@@ -115,7 +115,7 @@ Construct a new empty `Record` object. Memory for this record is owned by the mo
 
 NOTE: there is no vtable slot for this method in C, because the runtime should never need to call it.
 
-- `abstract unmarshall(&self, data : &[u8], length : usize) : &Record`
+- `abstract unmarshall(&self, data : &[u8], length : usize, Endpoint endpoint) : &Record`
 
 Construct a new `Record` object from `data` bytes coming from the network.
 

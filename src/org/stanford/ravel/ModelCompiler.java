@@ -145,16 +145,8 @@ public class ModelCompiler {
         builder.setRegisterType(Registers.RETURN_REG, new ArrayType(PrimitiveType.BYTE));
 
         // create a buffer to write into
-        int buffer = builder.allocateRegister(IntrinsicTypes.GROWABLE_BYTE_ARRAY);
+        int buffer = builder.allocateRegister(IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType());
         builder.add(new TMethodCall((FunctionType)IntrinsicTypes.GROWABLE_BYTE_ARRAY.getMemberType("create"), buffer, Registers.VOID_REG, "create", new int[]{}));
-
-        // write the model ID
-        int modelId = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, modelId, model.getId()));
-        addWritePrimitive(builder, buffer, modelId, PrimitiveType.INT32);
-
-        // write the record ID
-        addWritePrimitive(builder, buffer, idxSym.getRegister(), PrimitiveType.INT32);
 
         // write each field sequentially
         for (ModelField field : model.getFields()) {
@@ -172,14 +164,14 @@ public class ModelCompiler {
 
         TypedIR ir = builder.finish();
         if (debug) {
-            System.out.println("Encrypt IR for " + model);
+            System.out.println("Serialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
         ValidateIR.validate(ir);
         OptimizePass opt = new OptimizePass(ir, false);
         opt.run();
         if (debug) {
-            System.out.println("Optimized encrypt IR for " + model);
+            System.out.println("Optimized serialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
 
@@ -344,18 +336,11 @@ public class ModelCompiler {
         int pos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, pos, 0));
 
-        // skip model id:
-        // pos += 4
-        int four = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, four, 4));
-        builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, four, BinaryOperation.ADD));
-
-        // extract the record id
-        int idx = builder.allocateRegister(PrimitiveType.INT32);
-        buildExtractPrimitive(builder, PrimitiveType.INT32, idx, data, pos);
-        // this is lying a little bit because __idx is not a field of recordType,
-        // but as long as the validate pass doesn't check for that we're good
-        builder.add(new TFieldStore(PrimitiveType.INT32, recordType, thisReg, "__idx", idx));
+        // skip model id and record id:
+        // pos += 8
+        int eight = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, eight, 8));
+        builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, eight, BinaryOperation.ADD));
 
         for (ModelField field : model.getFields()) {
             Type fieldType = field.getType();
@@ -367,14 +352,14 @@ public class ModelCompiler {
 
         TypedIR ir = builder.finish();
         if (debug) {
-            System.out.println("Deserialize IR for " + model);
+            System.out.println("Deserialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
         ValidateIR.validate(ir);
         OptimizePass opt = new OptimizePass(ir, false);
         opt.run();
         if (debug) {
-            System.out.println("Optimized deserialize IR for " + model);
+            System.out.println("Optimized deserialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
 

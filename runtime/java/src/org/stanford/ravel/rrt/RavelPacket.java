@@ -1,6 +1,5 @@
 package org.stanford.ravel.rrt;
 
-import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.utils.GrowableByteArray;
 
@@ -38,20 +37,27 @@ public class RavelPacket {
     private boolean last = false;
     private boolean ack = false;
 
-    private RavelPacket(byte[] data) {
+    private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
-        this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
-        this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
+        if (isNetwork) {
+            this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
+            this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
 
-        this.flags =  ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
-        this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
-        this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
-        this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
+            this.flags = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
+            this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
+            this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
+            this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
 
-        this.record_end = data.length;
-        this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
-        this.model_id = getModelIdFromRecord(this.record_data);
-        this.record_id = getRecordIdFromRecord(this.record_data);
+            this.record_end = data.length;
+            this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
+            this.model_id = getModelIdFromRecord(this.record_data);
+            this.record_id = getRecordIdFromRecord(this.record_data);
+        } else {
+            this.record_data = data;
+            this.record_end = record_data.length + RESERVED;
+            this.model_id = getModelIdFromRecord(this.record_data);
+            this.record_id = getRecordIdFromRecord(this.record_data);
+        }
     }
 
     private RavelPacket(int recordSize, int modelId, int recordId) {
@@ -63,13 +69,6 @@ public class RavelPacket {
         this.record_id = recordId;
     }
 
-    private RavelPacket(ModelRecord record) {
-        this.record_data = record.toBytes();
-        this.record_end = record_data.length + RESERVED;
-        this.model_id = getModelIdFromRecord(this.record_data);
-        this.record_id = getRecordIdFromRecord(this.record_data);
-    }
-
     private RavelPacket(int modelId, int recordId) {
         this.record_end = 8 + RESERVED;
         this.record_data = new byte[8];
@@ -79,8 +78,8 @@ public class RavelPacket {
         this.record_id = recordId;
     }
 
-    public static RavelPacket fromRecord(ModelRecord record) {
-        return new RavelPacket(record);
+    public static RavelPacket fromRecord(byte[] recordData) {
+        return new RavelPacket(recordData, false);
     }
 
     public static RavelPacket makeAck(int modelId, int recordId) {
@@ -95,7 +94,7 @@ public class RavelPacket {
     }
 
     public static RavelPacket fromNetwork(byte[] data) {
-        return new RavelPacket(data);
+        return new RavelPacket(data, true);
     }
 
     private void setAck() {

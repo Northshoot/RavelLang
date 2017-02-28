@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
+import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
@@ -57,6 +58,10 @@ public class TIntrinsic extends TInstruction {
 
     public static TIntrinsic createStringLength(int target, int string) {
         return new TIntrinsic(PrimitiveType.INT32, new Type[]{PrimitiveType.STR}, target, "strlen", new int[]{string});
+    }
+
+    public static TInstruction createArrayCopy(ArrayType arrayType, int target, int source, int tgtOffset, int srcOffset, int srcLength) {
+        return new TIntrinsic(PrimitiveType.VOID, new Type[]{arrayType, arrayType, PrimitiveType.INT32, PrimitiveType.INT32, PrimitiveType.INT32}, Registers.VOID_REG, "array_copy", new int[]{target, source, tgtOffset, srcOffset, srcLength}, true, true, false);
     }
 
     @Override

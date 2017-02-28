@@ -18,9 +18,18 @@ public class IntrinsicTypes {
             addMethod("write_byte_array", new Type[]{new ArrayType(PrimitiveType.BYTE)}, PrimitiveType.VOID);
 
             addMethod("toByteArray", new Type[]{}, new ArrayType(PrimitiveType.BYTE));
-            addStaticMethod("create", new Type[]{}, this);
+            addStaticMethod("create", new Type[]{}, getInstanceType());
+        }
+    }
+
+    private static class Endpoint extends ClassType {
+        public Endpoint() {
+            super("Endpoint");
+
+            addMethod("getName", new Type[]{}, PrimitiveType.STR);
         }
     }
 
     public static final ClassType GROWABLE_BYTE_ARRAY = new GrowableByteArray();
+    public static final ClassType ENDPOINT = new Endpoint();
 }

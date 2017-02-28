@@ -138,9 +138,9 @@ public class Space extends Primitive {
         return "Space " + getName();
     }
 
-    public void addSecurityOperation(ModelField field, Space target, Key key, SecurityPrimitive primitive, boolean isInbound) {
+    public void addSecurityOperation(ModelField field, Space target, Flow flow, Key key, SecurityPrimitive primitive, int offset) {
         ConcreteModel im = findModel(field.getModel());
         assert im != null;
-        im.addSecurityOperation(field, target, key, primitive, isInbound);
+        im.addSecurityOperation(field, target, flow, key, primitive, offset);
     }
 }

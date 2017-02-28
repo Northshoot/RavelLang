@@ -89,5 +89,9 @@ public class OptimizePass {
             System.out.println("Final Loop Tree");
             System.out.println(ir.getLoopTree());
         }
+
+        // remove unused variables
+        UnusedVariableRemovalPass variableRemovalPass = new UnusedVariableRemovalPass(ir);
+        variableRemovalPass.run();
     }
 }

@@ -45,7 +45,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     protected abstract void notifySaveDone(Context<RecordType> ctx);
 
     // the generated methods for marshalling/unmarshalling
-    protected abstract RecordType unmarshall(byte[] data);
+    protected abstract byte[] marshall(RecordType record, Endpoint endpoint);
+    protected abstract RecordType unmarshall(byte[] data, Endpoint endpoint);
 
     void markRecordAtRest(int record) {
         stateArray[record].inRest = true;
@@ -111,8 +112,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     Context<RecordType> sendRecord(RecordType record, Collection<String> endpointNames) {
-        RavelPacket pkt = RavelPacket.fromRecord(record);
-
         Collection<Endpoint> endpoints = new ArrayList<>();
         for (String name : endpointNames)
             endpoints.addAll(mDispatcher.getEndpointsByName(name));
@@ -120,6 +119,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         Error error = Error.SUCCESS;
         requireRecordAcks(record.index(), endpoints.size());
         for (Endpoint e : endpoints) {
+            RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
+
             Error error2 = sendOneRecord(pkt, e);
             if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                 error = error2;
@@ -150,7 +151,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
         // Let the controllers and local model deal with it first...
         Context<RecordType> ctx = new Context<>(this);
-        RecordType record = unmarshall(pkt.getRecordData());
+        RecordType record = unmarshall(pkt.getRecordData(), endpoint);
         addRecord(record);
         ctx.record = record;
         //notify all subscribers
@@ -175,7 +176,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         //normal data
         pprint("record_departed");
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.getRecordData());
+        ctx.record = get(pkt.record_id);
         //notify all subscribers
         notifyDeparted(ctx);
     }
@@ -184,7 +185,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     public void record_saved_durably(RavelPacket pkt) {
         //TODO: only true do remote and durable
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.getRecordData());
+        ctx.record = get(pkt.record_id);
 
         // mark saved durably
         // notify all subscribers
@@ -194,7 +195,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     @Override
     public void record_saved_endpoint(RavelPacket pkt, Endpoint endpoint) {
         Context<RecordType> ctx = new Context<>(this);
-        ctx.record = unmarshall(pkt.getRecordData());
+        ctx.record = get(pkt.record_id);
 
         //notify all subscribers
         notifySaveDone(ctx);

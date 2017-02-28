@@ -11,23 +11,40 @@ import java.util.Set;
  */ // A Key is represented a set of spaces that have some shared secret
 public class Key {
     /**
-     * The identifier of the key, which is used to discriminate which
+     * The discriminator of the key, which is used to discriminate which
      * key should be used to decrypt/verify mac when a packet is received
      * <p>
      * This is usually the name of the originating space, but it need not
      * be.
      */
-    public final Object keyId;
+    public final Object keyDiscriminator;
     public final KeyType type;
     /**
      * The set of spaces who have access to this key
      */
     public final Set<Space> spaces = new HashSet<>();
 
-    Key(Collection<Space> spaces, Object keyId, KeyType type) {
+    /**
+     * The identifier of the key, which is a short integer used to build key
+     * tables and load keys at runtimes.
+     *
+     * This MUST NOT be considered in equals and hashCode, or the way
+     * we deduplicate keys will fail.
+     */
+    private int keyId;
+
+    Key(Collection<Space> spaces, Object keyDiscriminator, KeyType type) {
         this.spaces.addAll(spaces);
-        this.keyId = keyId;
+        this.keyDiscriminator = keyDiscriminator;
         this.type = type;
+    }
+
+    void setKeyId(int keyId) {
+        this.keyId = keyId;
+    }
+
+    public int getKeyId() {
+        return keyId;
     }
 
     @Override
@@ -37,12 +54,12 @@ public class Key {
 
         Key key = (Key) o;
 
-        return keyId.equals(key.keyId) && type == key.type && spaces.equals(key.spaces);
+        return keyDiscriminator.equals(key.keyDiscriminator) && type == key.type && spaces.equals(key.spaces);
     }
 
     @Override
     public int hashCode() {
-        int result = keyId.hashCode();
+        int result = keyDiscriminator.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + spaces.hashCode();
         return result;
@@ -50,6 +67,6 @@ public class Key {
 
     @Override
     public String toString() {
-        return "Key " + keyId + " (" + type.toString() + ") " + spaces;
+        return "Key " + keyDiscriminator + " (" + type.toString() + ") " + spaces;
     }
 }

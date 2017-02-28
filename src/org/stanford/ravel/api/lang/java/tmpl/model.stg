@@ -6,16 +6,17 @@ public static class Record implements ModelRecord {
 
     <fields:{f|public <f.type> <f.name>;}; separator="\n">
 
-    public Record() {
+    Record() {
     }
 
-    public Record(byte[] data) {
-        <model.receiveCode>
+    Record(byte[] data, int __idx) {
+        this.__idx = __idx;
+
+        <model.baseModel.receiveCode>
     }
 
-    @Override
-    public byte[] toBytes() {
-        <model.sendCode>
+    byte[] toBytes() {
+        <model.baseModel.sendCode>
     }
 
     @Override
@@ -37,6 +38,7 @@ import java.util.Arrays;
 
 import org.stanford.ravel.rrt.model.<base>;
 import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.utils.GrowableByteArray;
 import org.stanford.ravel.rrt.Context;
@@ -78,10 +80,20 @@ public class <name> extends <base>\<<name>.Record> {
         <dispatch_event_single_instance(model, "save_done", ["ctx"])>
     }
 
-    // Record creation functions
+    // Record creation and marshalling functions
     @Override
-    protected Record unmarshall(byte[] data) {
-        return new Record(data);
+    protected Record unmarshall(byte[] data, Endpoint endpoint) {
+        byte[] decrypted;
+        int length = data.length;
+        int recordId = org.stanford.ravel.rrt.lang.Intrinsic.extract_int32(data, 4);
+        <model.decryptCode>
+        return new Record(decrypted, recordId);
+    }
+    @Override
+    protected byte[] marshall(Record record, Endpoint endpoint) {
+        byte[] data = record.toBytes();
+        <model.encryptCode>
+        return __returnValue;
     }
     public Record create() {
         return new Record();

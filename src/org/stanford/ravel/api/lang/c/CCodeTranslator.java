@@ -132,7 +132,7 @@ public class CCodeTranslator extends BaseIRTranslator {
     @Override
     public void visit(TComparisonOp compOp) {
         if (compOp.type == PrimitiveType.STR) {
-            addLine(compOp.target, " = strcmp(", compOp.src1, ", ", compOp.src2, ") ", compOp.op, "0");
+            addLine(compOp.target, " = strcmp(", compOp.src1, ", ", compOp.src2, ") ", compOp.op, " 0");
         } else {
             addLine(compOp.target, " = ", compOp.src1, compOp.op, compOp.src2);
         }
@@ -250,6 +250,11 @@ public class CCodeTranslator extends BaseIRTranslator {
 
                 // FIXME add cleanup
                 break;
+
+            case "array_copy":
+                addLine("memcpy(", intrinsic.arguments[0], " + ", intrinsic.arguments[2], ", ", intrinsic.arguments[1], " + ", intrinsic.arguments[3], ", ", intrinsic.arguments[4], " * ", getTypeSize(((ArrayType)intrinsic.argumentTypes[1]).getElementType()), ")");
+                break;
+
             case "strlen":
                 addLine("strlen(", intrinsic.arguments[0], ")");
                 break;

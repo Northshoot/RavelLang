@@ -2,7 +2,7 @@ delimiters "%", "%"
 
 ant(java_runtime) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="compile" name="semparse">
+<project default="compile" name="ravel">
   <!-- Set useful variables -->
   <property name="target" value="1.7"/>
   <property name="source" value="1.7"/>

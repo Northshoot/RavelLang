@@ -38,7 +38,7 @@ public class CLang extends BaseLanguage {
             if (type instanceof PrimitiveType) {
                 switch ((PrimitiveType) type) {
                     case STR:
-                        return "char *";
+                        return "const char *";
                     case ERROR_MSG:
                         return "int";
                     case TIMESTAMP:
