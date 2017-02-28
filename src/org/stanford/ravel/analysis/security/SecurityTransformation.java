@@ -8,6 +8,7 @@ import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.IntrinsicTypes;
 import org.stanford.ravel.compiler.types.PrimitiveType;
+import org.stanford.ravel.compiler.types.SystemType;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Space;
@@ -47,6 +48,12 @@ public class SecurityTransformation {
         // this code ends up in "marshall" method of Model
         // declare "record" of record type, "data" of byte array type, and "endpoint" of Endpoint type
         int firstReg = Registers.FIRST_GP_REG;
+
+        VariableSymbol dispatcherSym = new VariableSymbol("dispatcher");
+        dispatcherSym.setRegister(firstReg++);
+        dispatcherSym.setType(SystemType.INSTANCE.getInstanceType());
+        dispatcherSym.setWritable(false);
+        builder.declareParameter(dispatcherSym, true);
 
         VariableSymbol recordSym = new VariableSymbol("record");
         recordSym.setRegister(firstReg++);
@@ -157,7 +164,7 @@ public class SecurityTransformation {
 
             // do the actual encryption
             for (SecurityOperation op : encryptions)
-                applyOneEncryption(builder, op, buffer, encryptedStart, encryptedSize, endpointname);
+                applyOneEncryption(builder, op, dispatcherSym.getRegister(), buffer, encryptedStart, encryptedSize, endpointname);
         }
 
         int endOfData = builder.allocateRegister(PrimitiveType.INT32);
@@ -165,7 +172,7 @@ public class SecurityTransformation {
 
         if (doMAC) {
             for (SecurityOperation op : macs) {
-                applyOneMac(builder, op, buffer, endOfData, endpointname);
+                applyOneMac(builder, op, dispatcherSym.getRegister(), buffer, endOfData, endpointname);
             }
         }
 
@@ -190,7 +197,7 @@ public class SecurityTransformation {
         return ir;
     }
 
-    private void applyOneEncryption(TypedIRBuilder builder, SecurityOperation op, int buffer, int offset, int encryptedSize, int endpointname) {
+    private void applyOneEncryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int offset, int encryptedSize, int endpointname) {
         // the overall code looks something like
         //
         // if (endpoint.getName() == "...") {
@@ -226,7 +233,7 @@ public class SecurityTransformation {
         cfgBuilder.addSuccessor(iffalse);
         cfgBuilder.pushBlock(iftrue);
 
-        doApplyOneEncryption(builder, op, buffer, offset, encryptedSize);
+        doApplyOneEncryption(builder, op, dispatcher, buffer, offset, encryptedSize);
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -242,19 +249,19 @@ public class SecurityTransformation {
         cfgBuilder.replaceBlock(continuation);
     }
 
-    private void doApplyOneEncryption(TypedIRBuilder builder, SecurityOperation op, int buffer, int offset, int encryptedSize) {
+    private void doApplyOneEncryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int offset, int encryptedSize) {
         ArrayType byteArray = new ArrayType(PrimitiveType.BYTE);
 
         int key = builder.allocateRegister(IntrinsicTypes.KEY);
         int keyId = builder.allocateRegister(PrimitiveType.INT32);
 
         builder.add(new TImmediateLoad(PrimitiveType.INT32, keyId, op.getKey().getKeyId()));
-        builder.add(IntrinsicFactory.createLoadKey(key, keyId));
+        builder.add(IntrinsicFactory.createLoadKey(key, dispatcher, keyId));
 
         builder.add(IntrinsicFactory.createEncrypt(buffer, offset, encryptedSize, key));
     }
 
-    private void applyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int buffer, int bufferStart, int bufferEnd, int endpointname) {
+    private void applyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int bufferStart, int bufferEnd, int endpointname) {
         // the overall code looks something like
         //
         // if (endpoint.getName() == "...") {
@@ -290,7 +297,7 @@ public class SecurityTransformation {
         cfgBuilder.addSuccessor(iffalse);
         cfgBuilder.pushBlock(iftrue);
 
-        doApplyOneDecryption(builder, op, buffer, bufferStart, bufferEnd);
+        doApplyOneDecryption(builder, op, dispatcher, buffer, bufferStart, bufferEnd);
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -306,14 +313,14 @@ public class SecurityTransformation {
         cfgBuilder.replaceBlock(continuation);
     }
 
-    private void doApplyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int buffer, int bufferStart, int bufferEnd) {
+    private void doApplyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int bufferStart, int bufferEnd) {
         ArrayType byteArray = new ArrayType(PrimitiveType.BYTE);
 
         int key = builder.allocateRegister(IntrinsicTypes.KEY);
         int keyId = builder.allocateRegister(PrimitiveType.INT32);
 
         builder.add(new TImmediateLoad(PrimitiveType.INT32, keyId, op.getKey().getKeyId()));
-        builder.add(IntrinsicFactory.createLoadKey(key, keyId));
+        builder.add(IntrinsicFactory.createLoadKey(key, dispatcher, keyId));
 
         int encryptedSize = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, bufferEnd, bufferStart, BinaryOperation.SUB));
@@ -378,7 +385,7 @@ public class SecurityTransformation {
         builder.add(new TImmediateLoad(PrimitiveType.INT32, maclength, macSize * numMACs));
     }
 
-    private void applyOneMac(TypedIRBuilder builder, SecurityOperation op, int buffer, int endOfData, int endpointname) {
+    private void applyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int endOfData, int endpointname) {
         // the overall code looks something like
         //
         // if (endpoint.getName() == "...") {
@@ -415,7 +422,7 @@ public class SecurityTransformation {
         cfgBuilder.addSuccessor(iffalse);
         cfgBuilder.pushBlock(iftrue);
 
-        doApplyOneMac(builder, op, buffer, endOfData);
+        doApplyOneMac(builder, op, dispatcher, buffer, endOfData);
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -431,14 +438,14 @@ public class SecurityTransformation {
         cfgBuilder.replaceBlock(continuation);
     }
 
-    private void doApplyOneMac(TypedIRBuilder builder, SecurityOperation op, int buffer, int endOfData) {
+    private void doApplyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int endOfData) {
         ArrayType byteArray = new ArrayType(PrimitiveType.BYTE);
 
         int key = builder.allocateRegister(IntrinsicTypes.KEY);
         int keyId = builder.allocateRegister(PrimitiveType.INT32);
 
         builder.add(new TImmediateLoad(PrimitiveType.INT32, keyId, op.getKey().getKeyId()));
-        builder.add(IntrinsicFactory.createLoadKey(key, keyId));
+        builder.add(IntrinsicFactory.createLoadKey(key, dispatcher, keyId));
 
         int macSize = mechanism.getMACSize();
         int ourMAC = op.getOffset();
@@ -460,6 +467,12 @@ public class SecurityTransformation {
         // this code ends up in "unmarshall" method of Model
         // declare the return value of byte array type, "data" of byte array type, and "endpoint" of Endpoint type
         int firstReg = Registers.FIRST_GP_REG;
+
+        VariableSymbol dispatcherSym = new VariableSymbol("dispatcher");
+        dispatcherSym.setRegister(firstReg++);
+        dispatcherSym.setType(SystemType.INSTANCE.getInstanceType());
+        dispatcherSym.setWritable(false);
+        builder.declareParameter(dispatcherSym, true);
 
         VariableSymbol dataSym = new VariableSymbol("data");
         dataSym.setRegister(firstReg++);
@@ -503,7 +516,7 @@ public class SecurityTransformation {
 
         if (doMAC) {
             for (SecurityOperation op : macs) {
-                verifyOneMac(builder, op, dataSym.getRegister(), endOfData, endpointname);
+                verifyOneMac(builder, op, dispatcherSym.getRegister(), dataSym.getRegister(), endOfData, endpointname);
             }
         }
 
@@ -524,7 +537,7 @@ public class SecurityTransformation {
 
         if (doEncrypt) {
             for (SecurityOperation op : decryptions) {
-                applyOneDecryption(builder, op, decrypted, zero, encryptedSize, endpointname);
+                applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname);
             }
         }
 
@@ -547,7 +560,7 @@ public class SecurityTransformation {
         return ir;
     }
 
-    private void verifyOneMac(TypedIRBuilder builder, SecurityOperation op, int data, int endOfData, int endpointname) {
+    private void verifyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int data, int endOfData, int endpointname) {
         // the overall code looks something like
         //
         // if (endpoint.getName() == "...") {
@@ -583,7 +596,7 @@ public class SecurityTransformation {
         cfgBuilder.addSuccessor(iffalse);
         cfgBuilder.pushBlock(iftrue);
 
-        doVerifyOneMac(builder, op, data, endOfData);
+        doVerifyOneMac(builder, op, dispatcher, data, endOfData);
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -599,14 +612,14 @@ public class SecurityTransformation {
         cfgBuilder.replaceBlock(continuation);
     }
 
-    private void doVerifyOneMac(TypedIRBuilder builder, SecurityOperation op, int data, int endOfData) {
+    private void doVerifyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int data, int endOfData) {
         ArrayType byteArray = new ArrayType(PrimitiveType.BYTE);
 
         int key = builder.allocateRegister(IntrinsicTypes.KEY);
         int keyId = builder.allocateRegister(PrimitiveType.INT32);
 
         builder.add(new TImmediateLoad(PrimitiveType.INT32, keyId, op.getKey().getKeyId()));
-        builder.add(IntrinsicFactory.createLoadKey(key, keyId));
+        builder.add(IntrinsicFactory.createLoadKey(key, dispatcher, keyId));
 
         int packetLength = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TMove(PrimitiveType.INT32, packetLength, endOfData));

@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt.lang;
 
+import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.SecurityMechanism;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
@@ -7,7 +8,6 @@ import org.stanford.ravel.rrt.utils.ByteWork;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Date;
@@ -166,9 +166,11 @@ public class Intrinsic {
         }
     }
 
-    private static final byte[] key = new byte[]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-    public static Key load_key(int keyId) {
-        return new SecretKeySpec(key, SecurityMechanism.KEY_ALGORITHM);
+    public static Key load_key(DispatcherAPI dispatcher, int keyId) {
+        Key key = dispatcher.getKeyProvider().loadKey(keyId);
+        if (key == null)
+            throw new SecurityException("Invalid key identifier " + keyId);
+        return key;
     }
 
     public static void array_copy(byte[] tgt, byte[] source, int tgtOffset, int srcOffset, int size) {

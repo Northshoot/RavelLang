@@ -1,10 +1,7 @@
 package org.stanford.ravel.compiler.ir.typed;
 
 import org.stanford.ravel.compiler.ir.Registers;
-import org.stanford.ravel.compiler.types.ArrayType;
-import org.stanford.ravel.compiler.types.IntrinsicTypes;
-import org.stanford.ravel.compiler.types.PrimitiveType;
-import org.stanford.ravel.compiler.types.Type;
+import org.stanford.ravel.compiler.types.*;
 
 /**
  * Created by gcampagn on 2/28/17.
@@ -50,8 +47,8 @@ public class IntrinsicFactory {
         return new TIntrinsic(PrimitiveType.VOID, new Type[]{arrayType, arrayType, PrimitiveType.INT32, PrimitiveType.INT32, PrimitiveType.INT32}, Registers.VOID_REG, "array_copy", new int[]{target, source, tgtOffset, srcOffset, srcLength}, true, true, false);
     }
 
-    public static TIntrinsic createLoadKey(int target, int keyId) {
-        return new TIntrinsic(IntrinsicTypes.KEY, new Type[]{PrimitiveType.INT32}, target, "load_key", new int[]{keyId}, false, false, false);
+    public static TIntrinsic createLoadKey(int target, int system, int keyId) {
+        return new TIntrinsic(IntrinsicTypes.KEY, new Type[]{SystemType.INSTANCE.getInstanceType(), PrimitiveType.INT32}, target, "load_key", new int[]{system, keyId}, false, false, false);
     }
 
     public static TIntrinsic createEncrypt(int buffer, int offset, int length, int key) {

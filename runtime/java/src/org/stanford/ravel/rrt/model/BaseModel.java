@@ -23,7 +23,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         int acks = 0;
     }
 
-    private final DispatcherAPI mDispatcher;
+    // This is accessed by the generated code, so it must be protected
+    protected final DispatcherAPI dispatcher;
     private final RecordState[] stateArray;
     private final ArrayList<RecordType> mRecords = new ArrayList<>();
     private int currentPos = 0;
@@ -32,7 +33,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     BaseModel(DispatcherAPI dispatcher, int size) {
         mModelSize = size;
         mRecords.ensureCapacity(size);
-        mDispatcher = dispatcher;
+        this.dispatcher = dispatcher;
         stateArray = new RecordState[size];
         for (int i = 0; i < stateArray.length; i++)
             stateArray[i] = new RecordState();
@@ -88,7 +89,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     private void queueFullEvent() {
-        mDispatcher.queueEvent(new RunnableEvent() {
+        dispatcher.queueEvent(new RunnableEvent() {
             @Override
             public void run() {
                 Context<RecordType> ctx = new Context<>(BaseModel.this, Error.OUT_OF_STORAGE);
@@ -108,13 +109,13 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     Error sendOneRecord(RavelPacket pkt, Endpoint e) {
-        return mDispatcher.model__sendData(pkt, e);
+        return dispatcher.model__sendData(pkt, e);
     }
 
     Context<RecordType> sendRecord(RecordType record, Collection<String> endpointNames) {
         Collection<Endpoint> endpoints = new ArrayList<>();
         for (String name : endpointNames)
-            endpoints.addAll(mDispatcher.getEndpointsByName(name));
+            endpoints.addAll(dispatcher.getEndpointsByName(name));
 
         Error error = Error.SUCCESS;
         requireRecordAcks(record.index(), endpoints.size());
@@ -170,7 +171,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         // then send an ack back to the endpoint where this came from
         //
         // FIXME: combine ack with packet in the opposite direction?
-        mDispatcher.model__sendData(RavelPacket.makeAck(pkt.model_id, pkt.record_id), endpoint);
+        dispatcher.model__sendData(RavelPacket.makeAck(pkt.model_id, pkt.record_id), endpoint);
     }
 
     /**

@@ -84,10 +84,11 @@ public class SecurityAnalysis {
             System.out.println("Security Analysis");
             dumpSecurityAnalysis();
         }
-    }
 
-    private void simplifyRecordLevel() {
-
+        System.out.println("Keys");
+        for (Key key : allKeys.keySet()) {
+            System.out.println(key);
+        }
     }
 
     private void dumpSecurityAnalysis() {

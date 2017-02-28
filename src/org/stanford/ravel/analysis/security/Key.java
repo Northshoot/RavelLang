@@ -67,6 +67,6 @@ public class Key {
 
     @Override
     public String toString() {
-        return "Key " + keyDiscriminator + " (" + type.toString() + ") " + spaces;
+        return "Key " + keyId + " (" + keyDiscriminator + ", " + type.toString() + ") " + spaces;
     }
 }
