@@ -42,10 +42,22 @@ interface RandomSource():
 #        value = rec.value
 
 
-controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
+local model Counter():
+    properties:
+        records = 1
+    schema:
+        v : int32
+
+controller RandomControllerEmbedded(random: Random, cnt : Counter, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
     event timer.fired():
         rec = random.create()
-        rec.value = rnd.next()
+
+        cntrec = cnt.get(0)
+        #rec.value = rnd.next()
+        rec.value = cntrec.v
+        cntrec.v += 1
+        cnt.save(cntrec)
+
         rec.str_value = "lol"
         rec.str2_value = "lol2"
         ctx = random.save(rec)
@@ -79,6 +91,9 @@ controller RandomControllerEmbedded(random: Random, timer: TimerSource, timer2: 
         system.print("timer2")
 
     event system.started():
+        rec = cnt.create()
+        rec.v = 0
+        cnt.save(rec)
         timer.start_periodic(5000)
 
 local model Sum():
@@ -152,6 +167,7 @@ space GatewaySpace:
 
     models:
         random = Random(size=5)
+        cnt = Counter()
 
     interfaces:
         timer_1 = TimerSource()
@@ -159,15 +175,17 @@ space GatewaySpace:
         rng_1 = RandomSource()
 
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, cnt = models.cnt, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
         # swap the timers now
-        rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
+        #rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
 
 
 space EmbeddedSpace:
     platform:
-        language = CLang
-        system = Posix.v2008
+        #language = CLang
+        #system = Posix.v2008
+        language = JLang
+        system = J2SE.v18
 
     models:
         random = Random(size=5)

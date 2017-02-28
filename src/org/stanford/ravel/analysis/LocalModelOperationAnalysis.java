@@ -86,7 +86,10 @@ public class LocalModelOperationAnalysis {
                     int record = instr.getSources()[0];
                     for (String fieldName : recordType.getMemberList()) {
                         for (ModelTag modelTag : event.getVariableModelTags(record)) {
-                            meetOperation(new FieldTag(modelTag.model, modelTag.creator, fieldName), Operation.MOVE);
+                            assert modelTag.model != null;
+                            if (modelTag.model.getType().getRecordType().equalsExceptQualifiers(recordType)) {
+                                meetOperation(new FieldTag(modelTag.model, modelTag.creator, fieldName), Operation.MOVE);
+                            }
                         }
                     }
                     break;

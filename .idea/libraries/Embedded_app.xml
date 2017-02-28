@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Embedded app">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/rout/EmbeddedSpace/app.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

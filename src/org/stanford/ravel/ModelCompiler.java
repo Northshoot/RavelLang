@@ -38,7 +38,7 @@ public class ModelCompiler {
 
     private void addWriteArray(TypedIRBuilder builder, int buffer, int value, ArrayType arrayType) {
         int len = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(TIntrinsic.createArrayLength(arrayType, len, value));
+        builder.add(IntrinsicFactory.createArrayLength(arrayType, len, value));
 
         FunctionType writeLength = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_uint16");
         builder.add(new TMethodCall(writeLength, Registers.VOID_REG, buffer, writeLength.getFunctionName(), new int[]{len}));
@@ -186,7 +186,7 @@ public class ModelCompiler {
             assert size > 0;
 
             // target = extract_<type>(data, pos)
-            builder.add(new TIntrinsic(type, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, target, "extract_" + type.getName().toLowerCase(), new int[]{data, pos}));
+            builder.add(IntrinsicFactory.createExtractPrimitive(type, target, data, pos));
 
             // size = ...
             // pos = pos + size
@@ -199,7 +199,7 @@ public class ModelCompiler {
     private void buildExtractString(TypedIRBuilder builder, int target, int data, int pos) {
         int sizeReg = builder.allocateRegister(PrimitiveType.INT32);
         // size = extract_uint16(data, pos)
-        builder.add(new TIntrinsic(PrimitiveType.INT32, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, sizeReg, "extract_uint16", new int[]{data, pos}));
+        builder.add(IntrinsicFactory.createExtractUInt16(sizeReg, data, pos));
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -207,7 +207,7 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = extract_str(data, pos, size)
-        builder.add(new TIntrinsic(PrimitiveType.STR, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32, PrimitiveType.INT32}, target, "extract_str", new int[]{data, pos, sizeReg}));
+        builder.add(IntrinsicFactory.createExtractString(target, data, pos, sizeReg));
 
         // pos = pos + size
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, sizeReg, BinaryOperation.ADD));
@@ -217,7 +217,7 @@ public class ModelCompiler {
         // int len;
         int len = builder.allocateRegister(PrimitiveType.INT32);
         // len = extract_uint16(data, pos)
-        builder.add(new TIntrinsic(PrimitiveType.INT32, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, len, "extract_uint16", new int[]{data, pos}));
+        builder.add(IntrinsicFactory.createExtractUInt16(len, data, pos));
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -225,7 +225,7 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = new array[len]
-        builder.add(TIntrinsic.createArrayNew(arrayType, target, len));
+        builder.add(IntrinsicFactory.createArrayNew(arrayType, target, len));
 
         // int i;
         int i = builder.allocateRegister(PrimitiveType.INT32);
@@ -335,12 +335,6 @@ public class ModelCompiler {
         // pos = 0
         int pos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, pos, 0));
-
-        // skip model id and record id:
-        // pos += 8
-        int eight = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, eight, 8));
-        builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, eight, BinaryOperation.ADD));
 
         for (ModelField field : model.getFields()) {
             Type fieldType = field.getType();

@@ -193,6 +193,7 @@ public class LocalOwnershipTaggingPass {
 
     private void tagField(int var, ModelType model, String field) {
         LocalFieldTag tag = new LocalFieldTag(model, field);
+        assert model.getRecordType().getMemberType(field) != null;
 
         Set<LocalFieldTag> existing = fieldTags.get(var);
         if (existing == null) {
@@ -311,7 +312,9 @@ public class LocalOwnershipTaggingPass {
                 CompoundType compound = ((TFieldLoad) instr).compoundType;
                 if (compound instanceof ModelType.RecordType) {
                     for (LocalModelTag modelTag : modelTags.get(((TFieldLoad) instr).source)) {
-                        tagField(instr.getSink(), modelTag.model, ((TFieldLoad) instr).field);
+                        if (modelTag.model.equalsExceptQualifiers(((ModelType.RecordType) compound).getModel())) {
+                            tagField(instr.getSink(), modelTag.model, ((TFieldLoad) instr).field);
+                        }
                     }
                 }
             } else if (instr instanceof TFieldStore) {
@@ -342,9 +345,11 @@ public class LocalOwnershipTaggingPass {
                 CompoundType compound = ((TFieldStore) instr).compoundType;
                 if (compound instanceof ModelType.RecordType) {
                     for (LocalModelTag modelTag : modelTags.getOrDefault(((TFieldStore) instr).value,Collections.emptySet())) {
-                        tagField(instr.getSink(), modelTag.model, ((TFieldStore) instr).field);
-                        for (int alias : ir.getAliases(instr.getSink())) {
-                            tagField(alias, modelTag.model, ((TFieldStore) instr).field);
+                        if (modelTag.model.equalsExceptQualifiers(((ModelType.RecordType) compound).getModel())) {
+                            tagField(instr.getSink(), modelTag.model, ((TFieldStore) instr).field);
+                            for (int alias : ir.getAliases(instr.getSink())) {
+                                tagField(alias, modelTag.model, ((TFieldStore) instr).field);
+                            }
                         }
                     }
                 }

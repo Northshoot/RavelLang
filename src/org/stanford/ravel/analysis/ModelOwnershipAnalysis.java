@@ -114,6 +114,7 @@ public class ModelOwnershipAnalysis {
         handler.addVariableModelTag(variable, new ModelTag());
     }
     private void tagOneVariableFieldTag(LinkedEvent handler, int variable, Model model, Space space, String field) {
+        assert model.getField(field) != null;
         handler.addVariableFieldTag(variable, new FieldTag(model, space, field));
     }
     private void tagOneVariableFieldTagLocal(LinkedEvent handler, int variable) {

@@ -36,11 +36,13 @@ class Application {
                     // bind the right ports)
                     return;
                 }
+                ep = reader.next();
             }
         } catch (IOException e) {
             System.err.println("Failed to load config file: " + e.getMessage());
         }
 
+        dispatcher.addAllEndpoints();
         driver.appDispatcherReady();
     }
 }

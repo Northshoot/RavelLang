@@ -119,11 +119,16 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         Error error = Error.SUCCESS;
         requireRecordAcks(record.index(), endpoints.size());
         for (Endpoint e : endpoints) {
-            RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
+            try {
+                RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
 
-            Error error2 = sendOneRecord(pkt, e);
-            if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
-                error = error2;
+                Error error2 = sendOneRecord(pkt, e);
+                if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
+                    error = error2;
+            } catch(SecurityException securityException) {
+                if (error == Error.SUCCESS)
+                    error = Error.SECURITY_ERROR;
+            }
         }
         if (error != Error.IN_TRANSIT && error != Error.SUCCESS)
             return new Context<>(this, error);
@@ -151,9 +156,14 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
         // Let the controllers and local model deal with it first...
         Context<RecordType> ctx = new Context<>(this);
-        RecordType record = unmarshall(pkt.getRecordData(), endpoint);
-        addRecord(record);
-        ctx.record = record;
+        try {
+            RecordType record = unmarshall(pkt.getRecordData(), endpoint);
+            addRecord(record);
+            ctx.record = record;
+        } catch(SecurityException e) {
+            return;
+        }
+
         //notify all subscribers
         notifyArrived(ctx);
 
@@ -252,5 +262,10 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     public void clear() {
         mRecords.clear();
         currentPos = 0;
+    }
+
+    @Override
+    public int size() {
+        return currentPos;
     }
 }

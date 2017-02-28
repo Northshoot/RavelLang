@@ -32,4 +32,5 @@ public class IntrinsicTypes {
 
     public static final ClassType GROWABLE_BYTE_ARRAY = new GrowableByteArray();
     public static final ClassType ENDPOINT = new Endpoint();
+    public static final Type KEY = new ClassType("Key");
 }

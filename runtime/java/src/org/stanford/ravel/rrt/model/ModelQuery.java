@@ -47,4 +47,11 @@ public interface ModelQuery<RecordType> {
      * Clears local model storage
      */
     void clear();
+
+    /**
+     * Returns the number of records in this model
+     *
+     * @return the model size
+     */
+    int size();
 }
