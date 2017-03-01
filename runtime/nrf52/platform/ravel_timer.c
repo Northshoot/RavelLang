@@ -19,11 +19,12 @@
 /**
  * Generic module providing abstract timer interface
  * We perform internal virtualizaton of the timers rather than use NRF
- * The reason is control of the amount of timmers that are out there
+ * The reason is control of the amount of timers that are out there
  * in the system
  * Ported to NRF52
+ *
+ * TODO: a compensation is needed for how many ticks it takes to execute timer
  */
-
 
 // General application timer settings.
 #define APP_TIMER_PRESCALER              15
@@ -32,6 +33,7 @@
 APP_TIMER_DEF(m_ravel_system_timer_id);
 
 static uint32_t sys_number_of_timer = 0;
+static bool timer_running = false;
 
 void update_timers_state(void *p_event_data, uint16_t event_size);
 void  fire_timers(uint32_t now);
@@ -92,9 +94,7 @@ fire_timers(uint32_t now)
                     timer->__is_running = false;
                 else // Update timer for next event
                     timer->t0 += timer->dt;
-
                 //call back to the timer subscriber
-                NRF_LOG_INFO("CALL_BACK\r\n");
                 timer->call_back(timer->__timer);
                 break;
             }
@@ -119,8 +119,12 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
     bool min_remaining_isset = false;
     uint16_t num;
 
-    uint32_t err_code = app_timer_stop(m_ravel_system_timer_id);
-    APP_ERROR_CHECK(err_code);
+    uint32_t err_code;
+    //first time it is not running, so better not to stop
+    if (timer_running) {
+        app_timer_stop(m_ravel_system_timer_id);
+        APP_ERROR_CHECK(err_code);
+    }
 
     for (num=0; num<sys_number_of_timer; num++)
     {
@@ -140,13 +144,19 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
 
     if (min_remaining_isset)
     {
-        if (min_remaining <= 0)
+        //With many timers this need to be compensated or timer end up in fatal state
+        //TODO: investigate the reason
+        if (min_remaining <= 10)
         {
             fire_timers(now);
         }
         else {
-            err_code = app_timer_start(m_ravel_system_timer_id,min_remaining, NULL);
-            APP_ERROR_CHECK(err_code);
+            uint32_t err_code;
+            if (!timer_running) {
+                err_code = app_timer_start(m_ravel_system_timer_id,min_remaining, NULL);
+                APP_ERROR_CHECK(err_code);
+            }
+
         }
     }
 

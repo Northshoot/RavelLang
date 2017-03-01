@@ -12,7 +12,6 @@
 #include "app_timer.h"
 #include "nrf_drv_clock.h"
 
-
 /* local includes */
 #include "platform/ble_core.h"
 #include "platform/network.h"
@@ -28,12 +27,10 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
-
 #define SCHED_MAX_EVENT_DATA_SIZE       sizeof(ravel_schedule_event_cntx)
 #define SCHED_QUEUE_SIZE                20
 
 extern void ravel_generated_app_dispatcher_started(struct AppDispatcher*);
-
 
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
     NRF_LOG_INFO("assert_nrf_callback!\r\n");
@@ -41,9 +38,8 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
 }
 
 
-
 void
-ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
+ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name)
 {
     /* TODO: init any internal systems */
 
@@ -51,10 +47,8 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, AppDispatcher *dispatcher)
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
     init_timer_module();
     self->base.dispatcher = dispatcher;
-
-
-
 }
+
 
 void
 ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
@@ -62,8 +56,6 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
     /* Free any context resource here */
     NRF_LOG_INFO("FINALIZE!\r\n");
 }
-
-
 
 
 void
@@ -77,7 +69,6 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
     while (true)
     {
         app_sched_execute();
-
     }
 }
 

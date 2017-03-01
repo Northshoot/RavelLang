@@ -117,15 +117,6 @@ local model Measurement():
         voltage : int32
 
 
-local model EncryptedBlob(size : int32):
-    properties:
-        durable = True
-        records = size
-
-    schema:
-        measurement : byte[]
-
-
 # FIXME?
 streaming model MeasurementPacket(size : int32):
     properties:
@@ -183,9 +174,7 @@ controller MeasurementController(temp : TemperatureSource,
                                  fft : FFT,
                                  measurement_model : Measurement,
                                  measurement_pkt : MeasurementPacket,
-                                 eBlob : EncryptedBlob,
-                                 adc_model : ADCModel,
-                                 ocb : OCBEncryption):
+                                 adc_model : ADCModel):
     #ocb= tier.platform.encryption.ocb
 
     event system.started():

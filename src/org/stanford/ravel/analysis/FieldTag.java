@@ -33,6 +33,8 @@ public class FieldTag {
     }
 
     public FieldTag(Model model, Space creator, String field) {
+        assert model.getField(field) != null;
+
         isEmpty = false;
         this.model = model;
         this.creator = creator;

@@ -114,6 +114,7 @@ public class ModelOwnershipAnalysis {
         handler.addVariableModelTag(variable, new ModelTag());
     }
     private void tagOneVariableFieldTag(LinkedEvent handler, int variable, Model model, Space space, String field) {
+        assert model.getField(field) != null;
         handler.addVariableFieldTag(variable, new FieldTag(model, space, field));
     }
     private void tagOneVariableFieldTagLocal(LinkedEvent handler, int variable) {
@@ -125,17 +126,23 @@ public class ModelOwnershipAnalysis {
             for (ConcreteController ic : s.getControllers()) {
                 for (LinkedEvent event : ic) {
                     ModelEvent modelEvent;
+                    Model eventModel;
                     EventHandler handler = event.getHandler();
-                    if (handler.getEventType().getOwner() instanceof ModelType)
+                    if (handler.getEventType().getOwner() instanceof ModelType) {
+                        eventModel = ((ConcreteModel) event.getComponent()).getBaseModel();
                         modelEvent = ModelEvent.valueOf(handler.getEventName());
-                    else
+                    } else {
+                        eventModel = null;
                         modelEvent = null;
+                    }
 
                     LocalOwnershipTaggingPass pass = new LocalOwnershipTaggingPass(handler.getBody(), modelEvent);
                     pass.run();
 
                     Map<Integer, Set<LocalOwnershipTaggingPass.LocalModelTag>> allModelTags = pass.getModelTags();
                     Map<Integer, Set<LocalOwnershipTaggingPass.LocalFieldTag>> allFieldTags = pass.getFieldTags();
+
+
 
                     for (int var : event.getHandler().getVariables()) {
                         if (allModelTags.containsKey(var)) {
@@ -154,6 +161,7 @@ public class ModelOwnershipAnalysis {
 
                                     case REMOTE:
                                         // variable is a record created by a different space
+                                        assert m == eventModel;
                                         assert m.getReaders().contains(s);
                                         for (Space writer : m.getWriters()) {
                                             if (writer != s) {
@@ -197,10 +205,30 @@ public class ModelOwnershipAnalysis {
                                 Model m = app.getModel(tag.model.getName());
                                 assert m != null;
 
-                                for (ModelTag modelTag : event.getVariableModelTags(var)) {
-                                    if (modelTag.model != m)
-                                        continue;
-                                    tagOneVariableFieldTag(event, var, modelTag.model, modelTag.creator, tag.field);
+                                switch (tag.creator) {
+                                    case CREATED:
+                                        // the value assigned to this field was created from this space
+                                        tagOneVariableFieldTag(event, var, m, s, tag.field);
+                                        break;
+                                    case REMOTE:
+                                        // the value assigned to this field was created in a different space
+                                        assert eventModel != null;
+                                        assert eventModel.getReaders().contains(s);
+                                        for (Space writer : eventModel.getWriters()) {
+                                            if (writer != s) {
+                                                tagOneVariableFieldTag(event, var, m, writer, tag.field);
+                                            }
+                                        }
+                                        break;
+                                    case STORED:
+                                        if (m.getModelType() == Model.Type.LOCAL) {
+                                            tagOneVariableFieldTag(event, var, m, s, tag.field);
+                                        } else {
+                                            for (Space writer : m.getWriters()) {
+                                                tagOneVariableFieldTag(event, var, m, writer, tag.field);
+                                            }
+                                        }
+                                        break;
                                 }
                             }
                         } else {

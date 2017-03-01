@@ -69,6 +69,8 @@ public class JLang extends BaseLanguage {
                 return RUNTIME_PKG + ".Context<" + toNativeType(((ModelType.ContextType) type).getOwner()) + ".Record>";
             } else if (type instanceof SystemType) {
                 return RUNTIME_PKG + ".DispatcherAPI";
+            } else if (type == IntrinsicTypes.KEY) {
+                return "java.security.Key";
             } else {
                 return type.getName();
             }
@@ -113,7 +115,7 @@ public class JLang extends BaseLanguage {
         // quirks for Java implemented as a nested class
         irTranslator = new STIRTranslator(irGroup, JLITERAL) {
             /**
-             * Quirk the conversion of ERROR_MSG to bool
+             * Quirk the conversion of ERROR_MSG and pointers to bool
              *
              * (True iff error != SUCCESS)
              *
@@ -121,9 +123,13 @@ public class JLang extends BaseLanguage {
              */
             @Override
             public void visit(TConvert convert) {
-                if (convert.srcType == PrimitiveType.ERROR_MSG &&
-                        convert.tgtType == PrimitiveType.BOOL) {
-                    addLine(convert.target, " = ", convert.source,  " != ", RUNTIME_PKG + ".tiers.Error.SUCCESS");
+                if (convert.tgtType == PrimitiveType.BOOL) {
+                    if (convert.srcType == PrimitiveType.ERROR_MSG)
+                        addLine(convert.target, " = ", convert.source,  " != null && ", convert.source, " != ", RUNTIME_PKG + ".tiers.Error.SUCCESS");
+                    else if (!(convert.srcType instanceof PrimitiveType))
+                        addLine(convert.target, " = ", convert.source, " != null");
+                    else
+                        super.visit(convert);
                 } else {
                     super.visit(convert);
                 }

@@ -51,6 +51,7 @@ import org.stanford.ravel.rrt.SinkAPI;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.KeyProvider;
 
 <imports:do_import()>
 
@@ -59,11 +60,19 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     <interfaces:interface_field(); separator="\n">
     <controllers:controller_field(); separator="\n">
 
+    private final KeyProvider keyProvider;
     private DriverAPI driver;
 
-    public AppDispatcher() {
+    public AppDispatcher(KeyProvider keyProvider) {
+        this.keyProvider = keyProvider;
+
         <models:set_component_controller("model"); separator="\n">
         <interfaces:set_component_controller("iface"); separator="\n">
+    }
+
+    @Override
+    public KeyProvider getKeyProvider() {
+        return keyProvider;
     }
 
     void setDriver(DriverAPI driver) {

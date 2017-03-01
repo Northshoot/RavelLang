@@ -12,15 +12,15 @@
 
 typedef struct {
     int dummy;
-} SystemAPI;
+} RavelSystemAPI;
 
-static inline void ravel_system_init(SystemAPI *self)
+static inline void ravel_system_init(RavelSystemAPI *self)
 {}
 
-static inline void ravel_system_finalize(SystemAPI *self)
+static inline void ravel_system_finalize(RavelSystemAPI *self)
 {}
 
-void ravel_system_print(SystemAPI *self, const char *msg);
+void ravel_system_print(RavelSystemAPI *self, const char *msg);
 
 #endif /* API_SYSTEM_H */
 

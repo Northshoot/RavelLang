@@ -15,6 +15,8 @@ public class Flow implements Iterable<Space> {
     private final List<Space> spaces;
     private final Model model;
 
+    private int numMACs;
+
     public Flow(List<Space> spaces, Model model) {
         super();
         assert spaces.size() >= 2;
@@ -77,5 +79,27 @@ public class Flow implements Iterable<Space> {
         int result = spaces.hashCode();
         result = 31 * result + model.hashCode();
         return result;
+    }
+
+    /**
+     * Set the number of macs that should be applied to records that are following
+     * this flow.
+     *
+     * @param numMACs A number between 0 and the number of spaces in this flow minus 1
+     */
+    public void setNumMACs(int numMACs) {
+        assert numMACs <= spaces.size()-1;
+
+        this.numMACs = numMACs;
+    }
+
+    /**
+     * Retrive the number of macs that should be applied to records that are following
+     * this flow.
+     *
+     * @return numMACs A number between 0 and the number of spaces in this flow minus 1
+     */
+    public int getNumMACs() {
+        return numMACs;
     }
 }

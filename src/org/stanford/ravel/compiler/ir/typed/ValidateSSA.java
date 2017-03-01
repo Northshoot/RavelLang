@@ -41,6 +41,9 @@ public class ValidateSSA {
                                 break;
                             }
                         }
+                        if (ir.isParameter(sources[i])) {
+                            found = true;
+                        }
                         assert found;
 
                         // the source definition might be later in the code

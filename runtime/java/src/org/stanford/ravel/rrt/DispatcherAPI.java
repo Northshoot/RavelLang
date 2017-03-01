@@ -29,4 +29,6 @@ public interface DispatcherAPI extends SystemEventAPI {
     Error model__sendData(RavelPacket data, Endpoint endpoint);
 
     void queueEvent(Event event);
+
+    KeyProvider getKeyProvider();
 }

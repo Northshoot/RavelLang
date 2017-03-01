@@ -162,8 +162,8 @@ interface Led(led_num: int32):
 
 The corresponding 
 
-<pre><code>
-</code></pre><pre><code>
+</pre>
+</code>
 
 
 #### Example Led ####

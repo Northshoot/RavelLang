@@ -5,6 +5,8 @@ import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.utils.EndpointListReader;
+import org.stanford.ravel.rrt.KeyProvider;
+import org.stanford.ravel.rrt.utils.FileSystemKeyProvider;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,7 +23,16 @@ class Application {
             return;
         }
 
-        AppDispatcher dispatcher = new AppDispatcher();
+        FileSystemKeyProvider keyProvider = new FileSystemKeyProvider();
+        if (args.length >= 2) {
+            try (FileInputStream keyFile = new FileInputStream(args[1])) {
+                keyProvider.load(keyFile);
+            } catch (IOException e) {
+                System.err.println("Failed to load key provider file: " + e.getMessage());
+            }
+        }
+
+        AppDispatcher dispatcher = new AppDispatcher(keyProvider);
         JavaDriver driver = new JavaDriver(dispatcher);
         dispatcher.setDriver(driver);
 
@@ -36,11 +47,13 @@ class Application {
                     // bind the right ports)
                     return;
                 }
+                ep = reader.next();
             }
         } catch (IOException e) {
-            System.err.println("Failed to load config file: " + e.getMessage());
+            System.err.println("Failed to load endpoint configuration file: " + e.getMessage());
         }
 
+        dispatcher.addAllEndpoints();
         driver.appDispatcherReady();
     }
 }

@@ -17,11 +17,10 @@
  */
 //TODO: should configurable on the application level
 
+//How many timers can we virtualize?
+//TODO: dynamic timer allocation
 #define MAX_TIMERS 4
 #define APP_TIMER_ENABLED 1
-
-
-
 
 
 
@@ -42,7 +41,7 @@ typedef struct {
     void *__timer;
 } DriverTimer;
 
-
+//TODO: could be optimized with a linked list
 DriverTimer* m_timers[MAX_TIMERS];
 
 /**

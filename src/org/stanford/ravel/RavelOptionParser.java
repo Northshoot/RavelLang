@@ -50,6 +50,10 @@ class RavelOptionParser {
         return foptions.contains(opt);
     }
 
+    public void defaultOn(String opt) {
+        foptions.add(opt);
+    }
+
     public String getInputPath() {
         return inputPath;
     }
@@ -61,12 +65,16 @@ class RavelOptionParser {
     public void help() {
         System.err.println("Usage: java org.stanford.ravel.RavelCompiler INPUT_FILE");
         System.err.println("Options:");
-        System.err.println(" -o DIR            : write outputs in DIR (defaults to the parent directory of INPUT_FILE)");
-        System.err.println(" -Xgroup:opt=value : set custom backend options (eg generated Java package name)");
-        System.err.println(" -fdump-scope-tree : dump scope tree on standard output (for debugging)");
-        System.err.println(" -fdump-ir         : dump IR on standard output (for debugging)");
-        System.err.println(" --help            : show this help");
-        System.err.println(" --version         : show version");
+        System.err.println(" -o DIR                    : write outputs in DIR (defaults to the parent directory of INPUT_FILE)");
+        System.err.println(" -Xgroup:opt=value        : set custom backend options (eg generated Java package name)");
+        System.err.println(" -fdump-scope-tree        : dump scope tree on standard output (for debugging)");
+        System.err.println(" -fdump-ir                : dump IR on standard output (for debugging)");
+        System.err.println(" -fno-encrypt             : disable record encryption");
+        System.err.println(" -fno-mac                 : disable record MAC");
+        System.err.println(" -ffield-level-encryption : use field-level encryption instead of record-level");
+        System.err.println(" -fhomomorphic-encryption : enable homomorphic encryption (requires -ffield-level-encryption)");
+        System.err.println(" --help                   : show this help");
+        System.err.println(" --version                : show version");
     }
 
     public void version() {
@@ -93,7 +101,10 @@ class RavelOptionParser {
                         throw new InvalidOptionException("Invalid option format for " + arg);
                     }
                 } else if (arg.startsWith("-f")) {
-                    foptions.add(arg.substring(2));
+                    if (arg.startsWith("-fno-"))
+                        foptions.remove(arg.substring(4));
+                    else
+                        foptions.add(arg.substring(2));
                 } else if (arg.equals("--help")) {
                     help = true;
                 } else if (arg.equals("--version")) {
