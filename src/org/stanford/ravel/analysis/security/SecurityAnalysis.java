@@ -186,8 +186,12 @@ public class SecurityAnalysis {
                             anyMAC = true;
                             addSpaceToMac(field, space);
 
-                            // additionally, we should tag that the creator of this value is encrypting it
-                            addSpaceToEncryption(field, creator);
+                            if (recordLevelEncryption) {
+                                anyEncrypt = true;
+                            } else {
+                                // additionally, we should tag that the creator of this value is encrypting it
+                                addSpaceToEncryption(field, creator);
+                            }
                         } else if (op != Operation.NONE) {
                             anyMAC = true;
                             if (enableHomomorphic) {
@@ -241,10 +245,14 @@ public class SecurityAnalysis {
                     prim = SecurityLevel.meet(prim, SecurityLevel.NONE);
                     break;
                 case MOVE:
-                    // if we move the value around (and the move was not copy-propagated
-                    // or dead-code eliminated) that means we're changing model or
-                    // saving locally, which means we should at least verify the mac
-                    prim = SecurityLevel.meet(prim, SecurityLevel.VERIFY_MAC);
+                    if (recordLevelEncryption) {
+                        prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
+                    } else {
+                        // if we move the value around (and the move was not copy-propagated
+                        // or dead-code eliminated) that means we're changing model or
+                        // saving locally, which means we should at least verify the mac
+                        prim = SecurityLevel.meet(prim, SecurityLevel.VERIFY_MAC);
+                    }
                     break;
 
                 case IADD:

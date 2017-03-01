@@ -3,7 +3,6 @@ streaming model Ping():
         records = 5
         flow = EmbeddedSpace -> GatewaySpace
     schema:
-        __iv : byte []
         value : int32
 
 local model Reference():
@@ -17,7 +16,6 @@ streaming model Pong():
         records = 5
         flow = GatewaySpace -> EmbeddedSpace
     schema:
-        __iv : byte []
         value : int32
         blob : str
 
@@ -61,11 +59,9 @@ controller PongController(ping : Ping, pong : Pong, random : RandomSource):
         system.print("ping received")
         pingrec = self.record
         pongrec = pong.create()
-        _iv = pingrec.__iv
         x = pingrec.value
 
         if random.next() > 42:
-            pongrec.__iv = _iv
             pongrec.value = x
             pong.save(pongrec)
 
