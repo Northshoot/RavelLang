@@ -17,6 +17,7 @@
 #include "system.h"
 #include "base_dispatcher.h"
 #include "endpoint.h"
+#include "crypto.h"
 
 #define ravel_container_of(ptr, type, member) ({             \
      const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
@@ -86,9 +87,9 @@ static inline const char *ravel_intrinsic_endpoint_get_name(RavelEndpoint *endpo
     return ravel_endpoint_get_name(endpoint);
 }
 
-bool ravel_intrinsic_verify_mac(uint8_t *data, int32_t endofdata, int32_t macoffset, RavelKey *key);
-void ravel_intrinsic_apply_mac(uint8_t *data, int32_t endofdata, int32_t writeOffset, RavelKey *key);
-void ravel_intrinsic_encrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key);
-void ravel_intrinsic_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key);
+#define ravel_intrinsic_verify_mac ravel_crypto_verify_mac
+#define ravel_intrinsic_apply_mac ravel_crypto_apply_mac
+#define ravel_intrinsic_encrypt ravel_crypto_encrypt
+#define ravel_intrinsic_decrypt ravel_crypto_decrypt
 
 #endif /* API_INTRINSIC_H */

@@ -8,7 +8,7 @@
 #include <api/system.h>
 
 void
-ravel_system_print(SystemAPI *self, const char *msg)
+ravel_system_print(RavelSystemAPI *self, const char *msg)
 {
     fprintf(stderr, "%s\n", msg);
 }
