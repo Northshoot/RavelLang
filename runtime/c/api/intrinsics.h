@@ -56,6 +56,10 @@ static inline void ravel_intrinsic_write_int32(uint8_t *array, int32_t pos, int3
     array[pos+3] = value;
 }
 
+static inline void ravel_intrinsic_write_byte(uint8_t *array, int32_t pos, uint8_t value) {
+    array[pos] = value;
+}
+
 static inline char *ravel_intrinsic_extract_str(uint8_t *array, int32_t pos, int32_t length) {
     char *buffer = malloc(length+1);
     if (buffer == NULL)

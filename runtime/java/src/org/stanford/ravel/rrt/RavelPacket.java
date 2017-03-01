@@ -3,15 +3,13 @@ package org.stanford.ravel.rrt;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.utils.GrowableByteArray;
 
-import java.nio.ByteBuffer;
-
 /**
  * Created by lauril on 1/25/17.
  */
 public class RavelPacket {
-    private final static int SRC = 4; // 32 bits for source
-    private final static int DST = 8; // 32 bits for destination
-    private final static int RESERVED = 12; // reserved for byte mapping
+    private final static int SRC = 1; // 8 bits for source
+    private final static int DST = 2; // 8 bits for destination
+    private final static int RESERVED = 3; // reserved for byte mapping
 
     public static class Flags {
         public static final int FLAG_PARTIAL = 1;
@@ -28,8 +26,8 @@ public class RavelPacket {
     public final int record_id;
     private final byte[] record_data;
     private final int record_end;
-    public int dst=-1;
-    public int src=-1;
+    public byte dst=-1;
+    public byte src=-1;
 
     //TODO: add packetization
     private int flags = 0;
@@ -40,10 +38,9 @@ public class RavelPacket {
     private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
         if (isNetwork) {
-            this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0, SRC));
-            this.dst = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, SRC, DST));
-
-            this.flags = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, DST, RESERVED));
+            this.src = data[0];
+            this.dst = data[1];
+            this.flags = data[2];
             this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
             this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
             this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
@@ -103,14 +100,10 @@ public class RavelPacket {
     }
 
     private static int getModelIdFromRecord(byte[] data) {
-        ByteBuffer buffer = ByteBuffer.wrap(
-                ByteWork.getBytes(data, 0, 4));
-        return buffer.getInt();
+        return data[0];
     }
     private static int getRecordIdFromRecord(byte[] data) {
-        ByteBuffer buffer = ByteBuffer.wrap(
-                ByteWork.getBytes(data, 4, 8));
-        return buffer.getInt();
+        return data[1];
     }
 
     public byte[] getRecordData() {
@@ -126,9 +119,9 @@ public class RavelPacket {
 
     public byte[] toBytes() {
         GrowableByteArray outputStream = new GrowableByteArray();
-        outputStream.write(ByteWork.getByteArray(src));
-        outputStream.write(ByteWork.getByteArray(dst));
-        outputStream.write(ByteWork.getByteArray(this.flags));
+        outputStream.write_byte(src);
+        outputStream.write_byte(dst);
+        outputStream.write_byte((byte)this.flags);
         outputStream.write(record_data, 0, record_data.length);
         return outputStream.toByteArray();
     }

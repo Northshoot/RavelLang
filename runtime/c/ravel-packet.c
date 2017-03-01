@@ -9,10 +9,10 @@
 #include <api/packet.h>
 #include <api/intrinsics.h>
 
-#define SRC 0 // 32 bits for source
-#define DST 4 // 32 bits for destination
-#define FLAGS 8 // 32 bits for flags
-#define RESERVED 12 // reserved for byte mapping
+#define SRC 0 // 8 bits for source
+#define DST 1 // 8 bits for destination
+#define FLAGS 2 // 8 bits for flags
+#define RESERVED 3 // reserved for byte mapping
 
 #define FLAG_PARTIAL 1
 #define FLAG_LAST 2
@@ -58,8 +58,8 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
         memcpy(self->record_data, data, length);
     self->packet_length = self->record_length + RESERVED;
 
-    self->model_id = ravel_intrinsic_extract_int32(self->record_data, 0);
-    self->record_id = ravel_intrinsic_extract_int32(self->record_data, 4);
+    self->model_id = ravel_intrinsic_extract_byte(self->record_data, 0);
+    self->record_id = ravel_intrinsic_extract_byte(self->record_data, 1);
     self->is_ack = false;
 }
 
@@ -73,37 +73,24 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
     self->packet_length = length;
     memcpy(self->packet_data, data, length);
 
-    self->model_id = ravel_intrinsic_extract_int32(self->record_data, 0);
-    self->record_id = ravel_intrinsic_extract_int32(self->record_data, 4);
-    self->is_ack = (*(uint32_t*)(self->packet_data + FLAGS)) & FLAG_ACK;
-}
-
-static inline void write_int32(uint8_t *buffer, int32_t value)
-{
-    // Big Endian!!
-
-    buffer[0] = value >> 24;
-    buffer[1] = value >> 16;
-    buffer[2] = value >> 8;
-    buffer[3] = value;
+    self->model_id = ravel_intrinsic_extract_byte(self->record_data, 0);
+    self->record_id = ravel_intrinsic_extract_byte(self->record_data, 1);
+    self->is_ack = self->packet_data[FLAGS] & FLAG_ACK;
 }
 
 void
 ravel_packet_init_ack (RavelPacket *self, int model_id, int record_id)
 {
-    uint32_t flags;
-
     self->packet_data = calloc(8 + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
-    self->record_length = 8;
-    self->packet_length = 8 + RESERVED;
+    self->record_length = 2;
+    self->packet_length = 2 + RESERVED;
 
-    write_int32(self->record_data, model_id);
-    write_int32(self->record_data + 4, record_id);
+    self->record_data[0] = model_id;
+    self->record_data[1] = record_id;
 
-    flags = FLAG_ACK;
-    write_int32(self->packet_data + FLAGS, flags);
+    self->packet_data[FLAGS] = FLAG_ACK;
 
     self->model_id = model_id;
     self->record_id = record_id;

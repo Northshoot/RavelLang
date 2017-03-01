@@ -58,7 +58,7 @@ ravel_generated_<model.name; format="function">_real_unmarshall(<model.name> *th
     if (record == NULL)
         return NULL;
 
-    record->__idx = ravel_intrinsic_extract_int32(data, 4);
+    record->__idx = ravel_intrinsic_extract_byte(data, 1);
 
     {
         <model.decryptCode>
@@ -135,7 +135,7 @@ ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *
 
 declare_record_class(model_name, model_fields) ::=<<
 typedef struct {
-    int __idx;
+    uint8_t __idx;
 
     <model_fields:{f|<f.type> <f.name>;}; separator="\n">
 } <model_name>_Record;

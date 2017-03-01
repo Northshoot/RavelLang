@@ -12,7 +12,7 @@ public class IntrinsicFactory {
     private IntrinsicFactory() {}
 
     public static TIntrinsic createWritePrimitive(PrimitiveType prim, int buffer, int offset, int value) {
-        return new TIntrinsic(PrimitiveType.VOID, new Type[]{ byteArray, PrimitiveType.INT32, PrimitiveType.INT32 }, Registers.VOID_REG, "write_" + prim.getName().toLowerCase(), new int[]{ buffer, offset, value }, true, false, false);
+        return new TIntrinsic(PrimitiveType.VOID, new Type[]{ byteArray, PrimitiveType.INT32, prim }, Registers.VOID_REG, "write_" + prim.getName().toLowerCase(), new int[]{ buffer, offset, value }, true, false, false);
     }
 
     public static TIntrinsic createExtractPrimitive(PrimitiveType prim, int target, int buffer, int offset) {

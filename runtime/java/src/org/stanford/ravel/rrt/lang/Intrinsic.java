@@ -85,6 +85,10 @@ public class Intrinsic {
         System.arraycopy(bytes, 0, data, pos, bytes.length);
     }
 
+    public static void write_byte(byte[] data, int pos, byte value) {
+        data[pos] = value;
+    }
+
     public static void apply_mac(byte[] data, int endofdata, int writeOffset, Key key) {
         Crypto.apply_mac(data, endofdata, writeOffset, key);
     }

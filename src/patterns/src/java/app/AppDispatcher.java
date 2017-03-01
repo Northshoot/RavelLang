@@ -120,8 +120,8 @@ public class AppDispatcher  extends AbstractDispatcher {
                 dst = 11111111;
                 break;
         }
-        pkt.src = src;
-        pkt.dst = dst;
+        pkt.src = (byte)src;
+        pkt.dst = (byte)dst;
         pprint("pkt to send: " + pkt);
 
         return mDriver.sendData(pkt, endpoint);

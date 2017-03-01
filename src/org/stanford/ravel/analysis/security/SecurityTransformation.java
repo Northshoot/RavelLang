@@ -104,8 +104,6 @@ public class SecurityTransformation {
         builder.add(new TMove(PrimitiveType.INT32, encryptedSize, dataSize));
 
         int ivSize = builder.allocateRegister(PrimitiveType.INT32);
-        int reservedSize = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, reservedSize, 8));
 
         if (doEncrypt) {
             if (mechanism.mustAlignToBlockSize()) {
@@ -134,23 +132,26 @@ public class SecurityTransformation {
             builder.add(new TImmediateLoad(PrimitiveType.INT32, ivSize, 0));
         }
 
+        int reservedSize = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, reservedSize, 2));
+
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, bufferSize, encryptedSize, maclength, BinaryOperation.ADD));
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, bufferSize, bufferSize, reservedSize, BinaryOperation.ADD));
         builder.add(IntrinsicFactory.createArrayNew(byteArray, buffer, bufferSize));
 
         // write the model ID
-        int modelId = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, modelId, im.getBaseModel().getId()));
+        int modelId = builder.allocateRegister(PrimitiveType.BYTE);
+        builder.add(new TImmediateLoad(PrimitiveType.BYTE, modelId, (byte)im.getBaseModel().getId()));
         int zero = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, zero, 0));
-        builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.INT32, buffer, zero, modelId));
+        builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.BYTE, buffer, zero, modelId));
 
         // write the record ID
-        int recordId = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TFieldLoad(PrimitiveType.INT32, im.getBaseModel().getType().getRecordType(), recordId, recordSym.getRegister(), "__idx"));
-        int four = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, four, 4));
-        builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.INT32, buffer, four, recordId));
+        int recordId = builder.allocateRegister(PrimitiveType.BYTE);
+        builder.add(new TFieldLoad(PrimitiveType.BYTE, im.getBaseModel().getType().getRecordType(), recordId, recordSym.getRegister(), "__idx"));
+        int recordIdPos = builder.allocateRegister(PrimitiveType.INT32);
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, recordIdPos, 1));
+        builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.BYTE, buffer, recordIdPos, recordId));
 
         int encryptedStart = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TMove(PrimitiveType.INT32, encryptedStart, reservedSize));
@@ -523,9 +524,8 @@ public class SecurityTransformation {
         }
 
         // skip the model ID and record ID
-
         int encryptedStart = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, encryptedStart, 8));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, encryptedStart, 2));
 
         int decrypted = decryptedSym.getRegister();
         int encryptedSize = builder.allocateRegister(PrimitiveType.INT32);

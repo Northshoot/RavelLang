@@ -2,16 +2,15 @@ import "common.stg"
 
 record_class(model, fields) ::=<<
 public static class Record implements ModelRecord {
-    private int __idx = -1;
+    private byte __idx = -1;
 
     <fields:{f|public <f.type> <f.name>;}; separator="\n">
 
     Record() {
     }
 
-    Record(byte[] data, int __idx) {
-        this.__idx = __idx;
-
+    Record(byte[] data) {
+        this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_byte(data, 1);
         <model.baseModel.receiveCode>
     }
 
@@ -21,7 +20,7 @@ public static class Record implements ModelRecord {
 
     @Override
     public void index(int i) {
-        __idx = i;
+        __idx =(byte) i;
     }
 
     @Override
@@ -85,9 +84,8 @@ public class <name> extends <base>\<<name>.Record> {
     protected Record unmarshall(byte[] data, Endpoint endpoint) {
         byte[] decrypted;
         int length = data.length;
-        int recordId = org.stanford.ravel.rrt.lang.Intrinsic.extract_int32(data, 4);
         <model.decryptCode>
-        return new Record(decrypted, recordId);
+        return new Record(decrypted);
     }
     @Override
     protected byte[] marshall(Record record, Endpoint endpoint) {
