@@ -10,14 +10,18 @@ package org.stanford.ravel.rrt;
 public class SecurityMechanism {
     public static final String MAC_ALGORITHM = "HmacSHA256";
     public static final String KEY_ALGORITHM = "AES";
-    public static final String ENCRYPTION_ALGORITHM = "AES/CBC/NoPadding";
+    public static final String ENCRYPTION_ALGORITHM = "AES/CTR/NoPadding";
 
     public int getEncryptionIVSize() {
-        return 16;
+        return 8;
     }
 
     public int getEncryptionBlockSize() {
         return 16;
+    }
+
+    public boolean mustAlignToBlockSize() {
+        return false;
     }
 
     public int getEncryptionKeySize() {

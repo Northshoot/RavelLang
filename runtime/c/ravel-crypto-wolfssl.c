@@ -12,11 +12,13 @@
 #include <api/crypto.h>
 
 #include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
+#define WOLFSSL_AES_COUNTER
+#define WOLFSSL_AES_DIRECT
 #include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/hmac.h>
 
-#define IV_SIZE 16
+#define IV_SIZE 8
+#define FULL_IV_SIZE 16
 #define CIPHER_BLOCK_SIZE 16
 #define MAC_SIZE 16
 #define FULL_MAC_SIZE 32
@@ -65,16 +67,19 @@ ravel_crypto_encrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *ke
     Aes aes;
     int res;
     uint8_t *encrypted;
+    uint8_t iv[FULL_IV_SIZE];
 
-    assert((length - IV_SIZE) % CIPHER_BLOCK_SIZE == 0);
+    //assert((length - IV_SIZE) % CIPHER_BLOCK_SIZE == 0);
     encrypted = malloc(length - IV_SIZE);
     if (encrypted == NULL) abort();
 
-    res = wc_AesSetKey(&aes, key->buffer, key->length, data + offset, AES_ENCRYPTION);
+    memcpy(iv, data + offset, IV_SIZE);
+    memset(iv + IV_SIZE, 0, FULL_IV_SIZE - IV_SIZE);
+
+    res = wc_AesSetKey(&aes, key->buffer, key->length, iv, AES_ENCRYPTION);
     assert (res == 0);
 
-    res = wc_AesCbcEncrypt(&aes, encrypted, data + offset + IV_SIZE, length - IV_SIZE);
-    assert (res == 0);
+    wc_AesCtrEncrypt(&aes, encrypted, data + offset + IV_SIZE, length - IV_SIZE);
     memcpy(data + offset + IV_SIZE, encrypted, length - IV_SIZE);
     free(encrypted);
 }
@@ -85,16 +90,21 @@ ravel_crypto_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *ke
     Aes aes;
     int res;
     uint8_t *decrypted;
+    uint8_t iv[FULL_IV_SIZE];
 
-    assert((length - IV_SIZE) % CIPHER_BLOCK_SIZE == 0);
+    //assert((length - IV_SIZE) % CIPHER_BLOCK_SIZE == 0);
     decrypted = malloc(length - IV_SIZE);
     if (decrypted == NULL) abort();
 
-    res = wc_AesSetKey(&aes, key->buffer, key->length, data + offset, AES_DECRYPTION);
+    memcpy(iv, data + offset, IV_SIZE);
+    memset(iv + IV_SIZE, 0, FULL_IV_SIZE - IV_SIZE);
+
+    res = wc_AesSetKey(&aes, key->buffer, key->length, iv, AES_ENCRYPTION);
     assert (res == 0);
 
-    res = wc_AesCbcDecrypt(&aes, decrypted, data + offset + IV_SIZE, length - IV_SIZE);
-    assert (res == 0);
+    // Note that in counter mode, the same function is used for encryption AND decryption!
+    // (the xors cancel out)
+    wc_AesCtrEncrypt(&aes, decrypted, data + offset + IV_SIZE, length - IV_SIZE);
     memcpy(data + offset, decrypted, length - IV_SIZE);
     free(decrypted);
 }

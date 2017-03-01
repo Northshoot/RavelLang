@@ -108,22 +108,24 @@ public class SecurityTransformation {
         builder.add(new TImmediateLoad(PrimitiveType.INT32, reservedSize, 8));
 
         if (doEncrypt) {
-            // round data to a multiple of block size
-            // From Hacker's delight
-            // dataSize = (dataSize + blockSize - 1) & -blockSize
+            if (mechanism.mustAlignToBlockSize()) {
+                // round data to a multiple of block size
+                // From Hacker's delight
+                // dataSize = (dataSize + blockSize - 1) & -blockSize
 
-            int blockSize = builder.allocateRegister(PrimitiveType.INT32);
-            builder.add(new TImmediateLoad(PrimitiveType.INT32, blockSize, mechanism.getEncryptionBlockSize()));
+                int blockSize = builder.allocateRegister(PrimitiveType.INT32);
+                builder.add(new TImmediateLoad(PrimitiveType.INT32, blockSize, mechanism.getEncryptionBlockSize()));
 
-            int one = builder.allocateRegister(PrimitiveType.INT32);
-            builder.add(new TImmediateLoad(PrimitiveType.INT32, one, 1));
+                int one = builder.allocateRegister(PrimitiveType.INT32);
+                builder.add(new TImmediateLoad(PrimitiveType.INT32, one, 1));
 
-            int negBlockSize = builder.allocateRegister(PrimitiveType.INT32);
-            builder.add(new TUnaryArithOp(PrimitiveType.INT32, negBlockSize, blockSize, UnaryOperation.NEG));
+                int negBlockSize = builder.allocateRegister(PrimitiveType.INT32);
+                builder.add(new TUnaryArithOp(PrimitiveType.INT32, negBlockSize, blockSize, UnaryOperation.NEG));
 
-            builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, blockSize, BinaryOperation.ADD));
-            builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, one, BinaryOperation.SUB));
-            builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, negBlockSize, BinaryOperation.AND));
+                builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, blockSize, BinaryOperation.ADD));
+                builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, one, BinaryOperation.SUB));
+                builder.add(new TBinaryArithOp(PrimitiveType.INT32, encryptedSize, encryptedSize, negBlockSize, BinaryOperation.AND));
+            }
 
             // finally add the IV size
             builder.add(new TImmediateLoad(PrimitiveType.INT32, ivSize, mechanism.getEncryptionIVSize()));
