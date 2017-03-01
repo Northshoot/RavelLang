@@ -144,7 +144,7 @@ typedef struct <name> {
     <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
 
-    SystemAPI sys_api;
+    RavelSystemAPI sys_api;
 } <name>;
 
 void ravel_generated_<name; format="function">_init(<name> *self);

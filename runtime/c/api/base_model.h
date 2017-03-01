@@ -22,8 +22,8 @@ typedef struct {
 } RavelRecordState;
 
 typedef struct {
-    uint8_t *(*marshall)(void *self, void *record);
-    void *(*unmarshall)(void *self, uint8_t* data, size_t length);
+    uint8_t *(*marshall)(void *self, void *record, RavelEndpoint*);
+    void *(*unmarshall)(void *self, uint8_t* data, size_t length, RavelEndpoint*);
     void (*dispatch_arrived)(void *self, Context *ctx);
     void (*dispatch_departed)(void *self, Context *ctx);
     void (*dispatch_full)(void *self, Context *ctx);

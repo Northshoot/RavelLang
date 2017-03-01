@@ -60,6 +60,12 @@ public class CLang extends BaseLanguage {
                     default:
                         throw new AssertionError();
                 }
+            } else if (type == SystemType.INSTANCE.getInstanceType() || type == SystemType.INSTANCE) {
+                return "RavelSystemAPI*";
+            } else if (type == IntrinsicTypes.KEY) {
+                return "RavelKey*";
+            } else if (type == IntrinsicTypes.ENDPOINT.getInstanceType()) {
+                return "RavelEndpoint*";
             } else if (type instanceof ArrayType) {
                 return toNativeType(((ArrayType) type).getElementType()) + "*";
             } else if (type instanceof ClassType.InstanceType) {
@@ -68,7 +74,7 @@ public class CLang extends BaseLanguage {
                 return ((ModelType.RecordType) type).getModel().getName() + "_Record*";
             } else if (type instanceof ModelType.ContextType) {
                 return "Context*";
-            } else {
+            } else  {
                 // everything else ought to be a pointer
                 return type.getName() + "*";
             }

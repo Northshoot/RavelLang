@@ -42,8 +42,13 @@ public class CCodeTranslator extends BaseIRTranslator {
     @Override
     public void translate(TypedIR ir) {
         super.translate(ir);
+        flushCleanup(true);
+    }
+
+    private void flushCleanup(boolean clear) {
         addCode(cleanup.toString());
-        cleanup.setLength(0);
+        if (clear)
+            cleanup.setLength(0);
     }
 
     // Quirk getRegisterName so we can stack allocate GrowableByteArray
@@ -51,7 +56,7 @@ public class CCodeTranslator extends BaseIRTranslator {
         String name = super.getRegisterName(reg);
 
         Type type = getRegisterType(reg);
-        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY)
+        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType())
             return "&" + name;
         else
             return name;
@@ -66,12 +71,12 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void declareRegister(int reg, Type type) {
-        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY) {
-            addCode("GrowableByteArray ");
+        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType()) {
+            addCode("RavelGrowableByteArray ");
             addCode(super.getRegisterName(reg));
             addCode(";\n");
 
-            cleanup.append("growable_byte_array_finalize(");
+            cleanup.append("ravel_growable_byte_array_finalize(");
             cleanup.append(getRegisterName(reg));
             cleanup.append(");\n");
         } else {
@@ -118,7 +123,9 @@ public class CCodeTranslator extends BaseIRTranslator {
             addLine("if (", arithOp.target, " == NULL) abort() /* FIXME */");
             addLine("stpcpy(stpcpy(", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
 
-            // FIXME add cleanup
+            cleanup.append("free((char*)");
+            cleanup.append(getRegisterName(arithOp.target));
+            cleanup.append(");\n");
         } else {
             addLine(arithOp.target, " = ", arithOp.src1, arithOp.op, arithOp.src2);
         }
@@ -155,7 +162,11 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TFieldStore fieldStore) {
-        addLine(fieldStore.object, "->", fieldStore.field, " = ", fieldStore.value);
+        if (fieldStore.type == PrimitiveType.STR) {
+            addLine(fieldStore.object, "->", fieldStore.field, " = strdup(", fieldStore.value, ")");
+        } else {
+            addLine(fieldStore.object, "->", fieldStore.field, " = ", fieldStore.value);
+        }
     }
 
     @Override
@@ -236,43 +247,77 @@ public class CCodeTranslator extends BaseIRTranslator {
         }
     }
 
+    private void emitIntrinsicCall(TIntrinsic intrinsic) {
+        addCode("ravel_intrinsic_" + intrinsic.name + "(");
+        boolean first = true;
+        for (int arg : intrinsic.arguments) {
+            if (!first)
+                addCode(", ");
+            first = false;
+            addCode(getRegisterName(arg));
+        }
+        addCode(")");
+    }
+
     @Override
     public void visit(TIntrinsic intrinsic) {
-        if (intrinsic.returnType != PrimitiveType.VOID) {
+        if (intrinsic.name.equals("verify_mac")) {
+            // verify mac is special because in C we define as returning bool, whereas in the IR it's defined
+            // as throwing an exception
+            addCode("if(!");
+            emitIntrinsicCall(intrinsic);
+            addCode(") {\n");
+            flushCleanup(false);
+            addCode("return NULL;\n");
+            addCode("}\n");
+            return;
+        }
+
+        if (intrinsic.target != Registers.VOID_REG) {
             addCode(getRegisterName(intrinsic.target));
             addCode(" = ");
         }
 
         switch (intrinsic.name) {
             case "array_new":
-                addLine("ravel_array_new(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType)intrinsic.returnType).getElementType()), ")");
+                addLine("ravel_array_new(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType) intrinsic.returnType).getElementType()), ")");
                 addLine("if (", intrinsic.target, " == NULL) abort() /* FIXME */");
 
                 // FIXME add cleanup
                 break;
 
             case "array_copy":
-                addLine("memcpy(", intrinsic.arguments[0], " + ", intrinsic.arguments[2], ", ", intrinsic.arguments[1], " + ", intrinsic.arguments[3], ", ", intrinsic.arguments[4], " * ", getTypeSize(((ArrayType)intrinsic.argumentTypes[1]).getElementType()), ")");
+                addLine("memmove(", intrinsic.arguments[0], " + ", intrinsic.arguments[2], ", ", intrinsic.arguments[1], " + ", intrinsic.arguments[3], ", ", intrinsic.arguments[4], " * ", getTypeSize(((ArrayType) intrinsic.argumentTypes[1]).getElementType()), ")");
                 break;
 
             case "strlen":
                 addLine("strlen(", intrinsic.arguments[0], ")");
                 break;
             default:
-                addCode("ravel_intrinsic_" + intrinsic.name + "(");
-                boolean first = true;
-                for (int arg : intrinsic.arguments) {
-                    if (!first)
-                        addCode(", ");
-                    first = false;
-                    addCode(getRegisterName(arg));
-                }
-                addCode(");\n");
+                emitIntrinsicCall(intrinsic);
+                addCode(";\n");
+        }
+
+        if (intrinsic.name.equals("extract_str")) {
+            cleanup.append("free((char*)");
+            cleanup.append(getRegisterName(intrinsic.target));
+            cleanup.append(");\n");
+        }
+
+        if (intrinsic.name.equals("load_key") && intrinsic.getSink() != Registers.VOID_REG) {
+            addCode("if (!");
+            addCode(getRegisterName(intrinsic.target));
+            addCode(") {\n");
+            flushCleanup(false);
+            addCode("return NULL;\n");
+            addCode("}\n");
         }
     }
 
     @Override
     public void visit(TReturn returnInstr) {
+        flushCleanup(true);
+
         if (getRegisterType(Registers.RETURN_REG) != PrimitiveType.VOID) {
             addLine("return ", Registers.RETURN_REG);
         } else {

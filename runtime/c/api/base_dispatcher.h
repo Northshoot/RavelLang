@@ -13,6 +13,8 @@
 #include "packet.h"
 #include "endpoint.h"
 #include "context.h"
+#include "system.h"
+#include "keys.h"
 
 #include "driver.h"
 
@@ -23,11 +25,17 @@ typedef struct {
 
 typedef struct {
     const RavelDispatcherVTable *vtable;
+    RavelSystemAPI sys_api;
+    RavelKeyProvider key_provider;
     RavelDriver *driver;
 } RavelBaseDispatcher;
 
-static inline void ravel_base_dispatcher_init(RavelBaseDispatcher *self) {}
-static inline void ravel_base_dispatcher_finalize(RavelBaseDispatcher *self) {}
+void ravel_base_dispatcher_init(RavelBaseDispatcher *self);
+void ravel_base_dispatcher_finalize(RavelBaseDispatcher *self);
+
+static inline RavelKeyProvider *ravel_base_dispatcher_get_key_provider(RavelBaseDispatcher *self) {
+    return &self->key_provider;
+}
 
 static inline void ravel_base_dispatcher_set_driver(RavelBaseDispatcher *self, RavelDriver *driver) {
     self->driver = driver;

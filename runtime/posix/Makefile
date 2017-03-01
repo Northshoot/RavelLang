@@ -6,7 +6,8 @@ C_RUNTIME_SOURCES = \
     ravel-base-model.c \
     ravel-base-dispatcher.c \
     ravel-system-api.c \
-    ravel-packet.c
+    ravel-packet.c \
+    ravel-growable-byte-array.c
 
 PLATFORM_RUNTIME_SOURCES = \
     ravel-driver.c

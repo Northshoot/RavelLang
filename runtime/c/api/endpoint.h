@@ -12,4 +12,6 @@ typedef struct {
     int FILLME;
 } RavelEndpoint;
 
+const char *ravel_endpoint_get_name(RavelEndpoint *self);
+
 #endif /* API_PACKET_H */

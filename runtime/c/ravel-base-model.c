@@ -74,7 +74,7 @@ ravel_base_model_record_arrived(RavelBaseModel *self, RavelPacket *pkt, RavelEnd
     // Let the controllers and local model deal with it first...
     ravel_context_finalize(&self->current_ctx);
 
-    record = self->vtable->unmarshall(self, pkt->data, pkt->length);
+    record = self->vtable->unmarshall(self, pkt->record_data, pkt->record_length, endpoint);
     if (record == NULL) {
         /* TODO handle out of memory error */
         return;
@@ -96,15 +96,9 @@ ravel_base_model_record_departed(RavelBaseModel *self, RavelPacket *pkt, RavelEn
         return;
     }
 
-    // FIXME memory management does not seem right here...
-
     ravel_context_finalize(&self->current_ctx);
 
-    record = self->vtable->unmarshall(self, pkt->data, pkt->length);
-    if (record == NULL) {
-        /* TODO handle out of memory error */
-        return;
-    }
+    record = self->record_ptrs[pkt->record_id];
     ravel_context_init_ok(&self->current_ctx, record);
 
     self->vtable->dispatch_departed(self, &self->current_ctx);
@@ -137,18 +131,12 @@ static RavelError
 ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * const *endpoint_names)
 {
     RavelPacket packet;
-    RavelPacket copy;
     uint8_t *byte_array;
     int i, j;
     RavelError error, local_error;
 
     if (endpoint_names[0] == NULL)
         return RAVEL_ERROR_SUCCESS;
-
-    // serialize the record
-    byte_array = self->vtable->marshall(self, record);
-    ravel_packet_init_from_record(&packet, byte_array, ravel_array_length(byte_array));
-    ravel_array_free(byte_array);
 
     error = RAVEL_ERROR_SUCCESS;
     for (i = 0; endpoint_names[i]; i++) {
@@ -158,15 +146,16 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
         for (j = 0; endpoints[j]; j++) {
             RavelEndpoint *endpoint = endpoints[j];
 
-            // make a copy of the packet so we can transfer ownership to the driver
-            ravel_packet_init_copy(&copy, &packet);
-            local_error = ravel_base_dispatcher_send_data((RavelBaseDispatcher*)self->dispatcher, &copy, endpoint);
+            // serialize the record
+            byte_array = self->vtable->marshall(self, record, endpoint);
+            ravel_packet_init_from_record(&packet, byte_array, ravel_array_length(byte_array));
+            ravel_array_free(byte_array);
+
+            local_error = ravel_base_dispatcher_send_data((RavelBaseDispatcher*)self->dispatcher, &packet, endpoint);
             if (local_error != RAVEL_ERROR_SUCCESS)
                 error = local_error;
         }
     }
-
-    ravel_packet_finalize(&packet);
     return error;
 }
 
