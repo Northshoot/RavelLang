@@ -27,7 +27,7 @@ clean:
 	rm -f libravel.a $(OBJS)
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -Wall -Werror=implicit-function-declaration -Werror=return-type -I$(RAVEL_C_RUNTIME_DIR) -I. -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Werror=implicit-function-declaration -Werror=return-type -I$(RAVEL_C_RUNTIME_DIR) -I. -c -o $@ $<
 
 libravel.a: $(OBJS)
 	$(AR) crs -o $@ $^

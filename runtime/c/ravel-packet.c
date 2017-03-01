@@ -27,6 +27,7 @@ ravel_packet_init_empty (RavelPacket *self, size_t record_size, int model_id, in
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
     self->record_length = record_size;
+    self->packet_length = self->record_length + RESERVED;
 
     self->model_id = model_id;
     self->record_id = record_id;
@@ -55,6 +56,7 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
     self->record_length = length;
     if (length > 0)
         memcpy(self->record_data, data, length);
+    self->packet_length = self->record_length + RESERVED;
 
     self->model_id = ravel_intrinsic_extract_int32(self->record_data, 0);
     self->record_id = ravel_intrinsic_extract_int32(self->record_data, 4);
@@ -68,6 +70,7 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
     self->record_length = length - RESERVED;
+    self->packet_length = length;
     memcpy(self->packet_data, data, length);
 
     self->model_id = ravel_intrinsic_extract_int32(self->record_data, 0);
@@ -88,15 +91,19 @@ static inline void write_int32(uint8_t *buffer, int32_t value)
 void
 ravel_packet_init_ack (RavelPacket *self, int model_id, int record_id)
 {
+    uint32_t flags;
+
     self->packet_data = calloc(8 + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
     self->record_length = 8;
+    self->packet_length = 8 + RESERVED;
 
     write_int32(self->record_data, model_id);
     write_int32(self->record_data + 4, record_id);
 
-    *(uint32_t*)(self->packet_data + FLAGS) |= FLAG_ACK;
+    flags = FLAG_ACK;
+    write_int32(self->packet_data + FLAGS, flags);
 
     self->model_id = model_id;
     self->record_id = record_id;

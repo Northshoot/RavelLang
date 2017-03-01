@@ -74,8 +74,6 @@ ravel_generated_<name; format="function">_init(<name> *self)
     ravel_base_dispatcher_init(&self->base);
     self->base.vtable = &vtable;
 
-    ravel_system_init(&self->sys_api);
-
     <models:init_model(); separator="\n">
     <interfaces:init_interface(); separator="\n">
     <controllers:init_controller(); separator="\n">
@@ -89,8 +87,6 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
     <models:finalize_component("model"); separator="\n">
     <interfaces:finalize_component("iface"); separator="\n">
     <controllers:finalize_controller(); separator="\n">
-
-    ravel_system_finalize(&self->sys_api);
 
     ravel_base_dispatcher_finalize(&self->base);
 }
@@ -143,8 +139,6 @@ typedef struct <name> {
     <models:{c|<c.component.name> model_<c.varName>;}; separator="\n">
     <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
-
-    RavelSystemAPI sys_api;
 } <name>;
 
 void ravel_generated_<name; format="function">_init(<name> *self);

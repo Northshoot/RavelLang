@@ -241,7 +241,7 @@ public class CLang extends BaseLanguage {
                 } else if (pvalue instanceof ConcreteInterfaceInstance) {
                     concrete.parameterValues.add("&self->iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
                 } else if (pvalue instanceof SystemAPIInstance) {
-                    concrete.parameterValues.add("&self->sys_api");
+                    concrete.parameterValues.add("&self->base.sys_api");
                 } else {
                     concrete.parameterValues.add(CLITERAL.toLiteral(pvalue));
                 }

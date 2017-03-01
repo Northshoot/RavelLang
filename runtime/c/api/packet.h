@@ -19,6 +19,7 @@ typedef struct {
     uint8_t *packet_data;
     uint8_t *record_data;
     size_t record_length;
+    size_t packet_length;
 } RavelPacket;
 
 void ravel_packet_init_empty (RavelPacket *self, size_t record_size, int model_id, int record_id);

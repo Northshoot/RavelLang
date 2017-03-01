@@ -1,6 +1,6 @@
 compile_c(target) ::=<<
 <target>.o: <target>.c
-<\t>$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -Wall -Wno-unused-variable -Wno-unused-but-set-variable -Werror=implicit-function-declaration -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_POSIX_RUNTIME_DIR) -I. -c -o $@ $\<
+<\t>$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Wno-unused-variable -Wno-unused-but-set-variable -Werror=implicit-function-declaration -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_POSIX_RUNTIME_DIR) -I. -c -o $@ $\<
 >>
 
 static_lib(runtime,target,sources) ::=<<
