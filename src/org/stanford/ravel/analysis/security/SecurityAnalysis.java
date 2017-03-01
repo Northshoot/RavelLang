@@ -26,6 +26,7 @@ public class SecurityAnalysis {
     // for each field, what space can encrypt data to it
     // (over the choices of paths in the program)
     private final Map<ModelField, Set<Space>> encryptionWriters = new HashMap<>();
+
     // for each field, what space can mac data on it
     // (over the choices of paths in the program)
     private final Map<ModelField, Set<Space>> macWriters = new HashMap<>();
@@ -76,12 +77,10 @@ public class SecurityAnalysis {
             progress = false;
             computeEncryptionMacWriters();
         } while(progress);
-
         computeSecurityLevels();
         computeKeys();
 
         if (debug) {
-            System.out.println("Security Analysis");
             dumpSecurityAnalysis();
         }
 
@@ -92,6 +91,9 @@ public class SecurityAnalysis {
     }
 
     private void dumpSecurityAnalysis() {
+        System.out.println("Security Analysis");
+
+        System.out.println("Models");
         for (Model m : app.getModels()) {
             for (ModelField field : m.getFields()) {
                 System.out.println(field + ":");
@@ -100,6 +102,16 @@ public class SecurityAnalysis {
                 System.out.println("security primitives: " + securityPrimitives.getOrDefault(field, Collections.emptyMap()));
                 System.out.println("encryption keys: " + encryptionKeys.getOrDefault(field, Collections.emptySet()));
                 System.out.println("mac keys: " + macKeys.getOrDefault(field, Collections.emptySet()));
+            }
+        }
+
+        System.out.println("Spaces");
+        for (Space s : app.getSpaces()) {
+            for (ConcreteModel im : s.getModels()) {
+                System.out.println(im + " encrypts: " + im.getSecurityOperations(SecurityPrimitive.ENCRYPT));
+                System.out.println(im + " decrypts: " + im.getSecurityOperations(SecurityPrimitive.DECRYPT));
+                System.out.println(im + " applies mac: " + im.getSecurityOperations(SecurityPrimitive.APPLY_MAC));
+                System.out.println(im + " verifies mac: " + im.getSecurityOperations(SecurityPrimitive.VERIFY_MAC));
             }
         }
     }
@@ -148,8 +160,6 @@ public class SecurityAnalysis {
                     if (!writesToField(space, field))
                         continue;
 
-                    boolean encrypt = false;
-                    boolean mac = false;
                     // check if this write is actually plaintext and not just
                     // encrypted data
                     for (Map.Entry<Space, Operation> entry : field.getOperations(space).entrySet()) {
@@ -159,34 +169,38 @@ public class SecurityAnalysis {
                         if (creator == space) {
                             // no matter what we do, if we create the value we are dealing with
                             // plaintext
-                            encrypt = true;
-                            mac = true;
+                            anyEncrypt = true;
+                            anyMAC = true;
+                            addSpaceToEncryption(field, space);
+                            addSpaceToMac(field, space);
                         } else if (op == Operation.ANY) {
                             // no matter who created, if we're decrypting the remote value, we have
                             // to reencrypt it
-                            encrypt = true;
-                            mac = true;
-                        } else if (op != Operation.NONE && op != Operation.MOVE) {
+                            anyEncrypt = true;
+                            anyMAC = true;
+                            addSpaceToEncryption(field, space);
+                            addSpaceToMac(field, space);
+                        } else if (op == Operation.MOVE) {
+                            // if we're moving the value around (eg from one model to another)
+                            // we need to put a new mac
+                            anyMAC = true;
+                            addSpaceToMac(field, space);
+
+                            // additionally, we should tag that the creator of this value is encrypting it
+                            addSpaceToEncryption(field, creator);
+                        } else if (op != Operation.NONE) {
+                            anyMAC = true;
                             if (enableHomomorphic) {
                                 // if we're computing on encrypted data, we only need to mac it again
-                                mac = true;
+                                addSpaceToMac(field, space);
+                                addSpaceToEncryption(field, creator);
                             } else {
-                                encrypt = true;
-                                mac = true;
+                                anyEncrypt = true;
+                                addSpaceToMac(field, space);
+                                addSpaceToEncryption(field, space);
                             }
                         }
                     }
-
-                    // if we encrypt, then we must mac as well
-                    assert !encrypt || mac;
-
-                    if (encrypt)
-                        addSpaceToEncryption(field, space);
-                    if (mac)
-                        addSpaceToMac(field, space);
-
-                    anyEncrypt = encrypt;
-                    anyMAC = mac;
                 }
 
                 // if we encrypt, then we must mac as well
@@ -219,57 +233,50 @@ public class SecurityAnalysis {
 
         SecurityLevel prim = SecurityLevel.NONE;
         for (Map.Entry<Space, Operation> entry : operations.entrySet()) {
-            Space creator = entry.getKey();
             Operation op = entry.getValue();
 
-            if (creator == space) {
-                // no matter what we do, if we create the value we are dealing with
-                // plaintext and we have nothing to do
-                prim = SecurityLevel.meet(prim, SecurityLevel.NONE);
-            } else {
-                switch (op) {
-                    case NONE:
-                        // if we do nothing, we do nothing
-                        prim = SecurityLevel.meet(prim, SecurityLevel.NONE);
-                        break;
-                    case MOVE:
-                        // if we move the value around (and the move was not copy-propagated
-                        // or dead-code eliminated) that means we're changing model or
-                        // saving locally, which means we should at least verify the mac
-                        prim = SecurityLevel.meet(prim, SecurityLevel.VERIFY_MAC);
-                        break;
+            switch (op) {
+                case NONE:
+                    // if we do nothing, we do nothing
+                    prim = SecurityLevel.meet(prim, SecurityLevel.NONE);
+                    break;
+                case MOVE:
+                    // if we move the value around (and the move was not copy-propagated
+                    // or dead-code eliminated) that means we're changing model or
+                    // saving locally, which means we should at least verify the mac
+                    prim = SecurityLevel.meet(prim, SecurityLevel.VERIFY_MAC);
+                    break;
 
-                    case IADD:
-                        if (enableHomomorphic) {
-                            // if one space makes all the writes, it's homomorphic addition
-                            // if multiple spaces make the writes, it's multiparty addition
-                            if (nremotewriters <= 1)
-                                prim = SecurityLevel.meet(prim, SecurityLevel.HOMO_ADD);
-                            else
-                                prim = SecurityLevel.meet(prim, SecurityLevel.MULTIPARTY_ADD);
-                        } else {
-                            prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
-                        }
-                        break;
-
-                    case IMUL:
-                        if (enableHomomorphic) {
-                            if (nremotewriters <= 1)
-                                prim = SecurityLevel.meet(prim, SecurityLevel.HOMO_MUL);
-                            else // we don't have multiparty multiplication
-                                prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
-                        } else {
-                            prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
-                        }
-
-                        // we don't deal with these for now...
-                    case CONCAT:
-                    case INDEX_LOAD:
-                    case INDEX_STORE:
-                    case ANY:
+                case IADD:
+                    if (enableHomomorphic) {
+                        // if one space makes all the writes, it's homomorphic addition
+                        // if multiple spaces make the writes, it's multiparty addition
+                        if (nremotewriters <= 1)
+                            prim = SecurityLevel.meet(prim, SecurityLevel.HOMO_ADD);
+                        else
+                            prim = SecurityLevel.meet(prim, SecurityLevel.MULTIPARTY_ADD);
+                    } else {
                         prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
-                        break;
-                }
+                    }
+                    break;
+
+                case IMUL:
+                    if (enableHomomorphic) {
+                        if (nremotewriters <= 1)
+                            prim = SecurityLevel.meet(prim, SecurityLevel.HOMO_MUL);
+                        else // we don't have multiparty multiplication
+                            prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
+                    } else {
+                        prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
+                    }
+
+                    // we don't deal with these for now...
+                case CONCAT:
+                case INDEX_LOAD:
+                case INDEX_STORE:
+                case ANY:
+                    prim = SecurityLevel.meet(prim, SecurityLevel.DECRYPT);
+                    break;
             }
         }
 
@@ -330,18 +337,17 @@ public class SecurityAnalysis {
     }
 
     private void computeEncryptionForField(ModelField field, Flow flow) {
-        Space encryptor = flow.getSource();
-        if (!encryptionWriters.getOrDefault(field, Collections.emptySet()).contains(encryptor))
-            return;
-
-        // the source of this flow writes to this field
-
+        for (Space encryptor : encryptionWriters.getOrDefault(field, Collections.emptySet())) {
+            computeEncryptionForFieldWithEncryptor(field, flow, encryptor);
+        }
+    }
+    private void computeEncryptionForFieldWithEncryptor(ModelField field, Flow flow, Space encryptor) {
         // compute the overall homomorphic operation that will be performed on this
         // field on this flow
         HomomorphicOperation homoOp = HomomorphicOperation.NONE;
 
         for (Space space : flow) {
-            if (space == flow.getSource())
+            if (space == encryptor)
                 continue;
 
             SecurityLevel prim = securityPrimitives.getOrDefault(field, Collections.emptyMap())
@@ -417,9 +423,10 @@ public class SecurityAnalysis {
             Key key = keyGen(decryptors, encryptor.getName(), encryptionKey);
 
             addEncryptionKeyForField(field, key);
-            encryptor.addSecurityOperation(field, flow.getNext(encryptor), flow, key, SecurityPrimitive.ENCRYPT, 0);
+            if (flow.getSource() == encryptor)
+                encryptor.addSecurityOperation(field, flow.getNext(encryptor), flow, key, SecurityPrimitive.ENCRYPT, 0);
             for (Space decryptor : decryptors) {
-                if (decryptor == encryptor)
+                if (decryptor == flow.getSource())
                     continue;
                 decryptor.addSecurityOperation(field, flow.getPrevious(decryptor), flow, key, SecurityPrimitive.DECRYPT, 0);
             }
@@ -431,8 +438,11 @@ public class SecurityAnalysis {
             addEncryptionKeyForField(field, publicKey);
             addEncryptionKeyForField(field, secretKey);
 
-            encryptor.addSecurityOperation(field, flow.getNext(encryptor), flow, publicKey, SecurityPrimitive.ENCRYPT, 0);
+            if (flow.getSource() == encryptor)
+                encryptor.addSecurityOperation(field, flow.getNext(encryptor), flow, publicKey, SecurityPrimitive.ENCRYPT, 0);
             for (Space decryptor : decryptors) {
+                if (decryptor == flow.getSource())
+                    continue;
                 decryptor.addSecurityOperation(field, flow.getPrevious(decryptor), flow, secretKey, SecurityPrimitive.DECRYPT, 0);
             }
         }

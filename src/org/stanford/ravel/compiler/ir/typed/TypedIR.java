@@ -81,6 +81,7 @@ public class TypedIR {
     }
 
     public Set<Integer> getAliases(int var) {
+        assert Registers.isNormal(var);
         return aliases.getOrDefault(var, Collections.emptySet());
     }
 

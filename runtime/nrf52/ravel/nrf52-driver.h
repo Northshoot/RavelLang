@@ -9,6 +9,8 @@
 
 #include "api/driver.h"
 #include "ravel/module.h"
+#include "api/base_dispatcher.h"
+
 typedef struct {
     RAVEL_MODULE __module;
 
@@ -20,7 +22,7 @@ typedef struct {
 
 struct AppDispatcher;
 
-void ravel_nrf52_driver_init(RavelNrf52Driver *self, struct AppDispatcher *dispatcher);
+void ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name);
 
 void ravel_nrf52_driver_finalize(RavelNrf52Driver *self);
 

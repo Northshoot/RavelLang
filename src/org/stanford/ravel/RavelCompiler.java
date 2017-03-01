@@ -261,7 +261,7 @@ public class RavelCompiler {
                     return;
 
                 // transform the IR with security info
-                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("debug-security-analysis"), options.hasFOption("encrypt"), options.hasFOption("mac"), !options.hasFOption("field-level-encryption"));
+                SecurityTransformation securityTransformation = new SecurityTransformation(this, app, options.hasFOption("dump-encrypt-ir"), options.hasFOption("encrypt"), options.hasFOption("mac"), !options.hasFOption("field-level-encryption"));
                 securityTransformation.run();
                 if (!success())
                     return;

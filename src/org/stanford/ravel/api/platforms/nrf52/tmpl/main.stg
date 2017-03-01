@@ -18,37 +18,31 @@ file(name) ::=<<
 
 /*---------------------------------------------------------------------------*/
 
-
 AppDispatcher dispatcher;
 RavelNrf52Driver driver;
 
 /*---------------------------------------------------------------------------*/
 
-
-
-
 int main(void) {
-uint32_t err_code;
+  uint32_t err_code;
+  nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
 
-
-    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
-
-    // Initialize the SoftDevice handler module.
-    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
-    // Initialize.
-    err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-     NRF_LOG_DEBUG("Main Starting\n");
-     NRF_LOG_FLUSH();
+  // Initialize the SoftDevice handler module.
+  SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+  // Initialize.
+  err_code = NRF_LOG_INIT(NULL);
+  APP_ERROR_CHECK(err_code);
+  NRF_LOG_DEBUG("Main Starting\n");
+  NRF_LOG_FLUSH();
 
 //system flow:
-    //init driver
-    ravel_nrf52_driver_init(&driver, &dispatcher);
-
-    //init dispatcher
+  //init dispatcher
   ravel_generated_app_dispatcher_init(&dispatcher);
 
-    //set driver
+  //init driver
+  ravel_nrf52_driver_init(&driver, &dispatcher.base, "<name>");
+
+  //set driver
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
 
   ravel_generated_app_dispatcher_add_all_endpoints(&dispatcher);
@@ -56,7 +50,7 @@ uint32_t err_code;
   //system ready
   ravel_nrf52_driver_app_dispatcher_ready(&driver);
 
-   //enter main loop
+  //enter main loop
   ravel_nrf52__driver_main_loop(&driver);
 
   ravel_nrf52_driver_finalize(&driver);

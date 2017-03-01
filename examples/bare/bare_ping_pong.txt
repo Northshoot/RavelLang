@@ -1,0 +1,104 @@
+streaming model Ping():
+    properties:
+        records = 5
+        flow = EmbeddedSpace -> GatewaySpace
+    schema:
+        __iv : byte []
+        value : int32
+
+local model Reference():
+    properties:
+        records = 1
+    schema:
+        value : int32
+
+streaming model Pong():
+    properties:
+        records = 5
+        flow = GatewaySpace -> EmbeddedSpace
+    schema:
+        __iv : byte []
+        value : int32
+        blob : str
+
+
+controller PingController(ref : Reference, ping : Ping, pong : Pong):
+    event system.started():
+        system.print("system started")
+        refrec = ref.create()
+        refrec.value = 0
+        ref.save(refrec)
+        pingrec = ping.create()
+        pingrec.value = refrec.value
+        ping.save(pingrec)
+
+    event pong.arrived():
+        system.print("pong received")
+        pongrec = self.record
+        refrec = ref.get(0)
+        if pongrec.value != refrec.value:
+            system.print("uh oh! the values don't match")
+        else:
+            system.print("pong ok")
+
+        system.print("sending ping")
+        refrec.value += 1
+        ref.save(refrec)
+        pingrec = ping.create()
+        pingrec.value = refrec.value
+        ping.save(pingrec)
+
+
+interface RandomSource():
+    implementation:
+        java = "rlib/java/random.stg"
+        c = "rlib/c/random.stg"
+
+    def next(): int32
+
+controller PongController(ping : Ping, pong : Pong, random : RandomSource):
+    event ping.arrived():
+        system.print("ping received")
+        pingrec = self.record
+        pongrec = pong.create()
+        _iv = pingrec.__iv
+        x = pingrec.value
+
+        if random.next() > 42:
+            pongrec.__iv = _iv
+            pongrec.value = x
+            pong.save(pongrec)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = J2SE.v18
+        #language = CLang
+        #system = Posix.v2008
+
+    models:
+        ping = Ping()
+        pong = Pong()
+
+    interfaces:
+        rnd = RandomSource()
+
+    controllers:
+        pong_cnt = PongController(ping = models.ping, pong = models.pong, random = interfaces.rnd)
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Posix.v2008
+        #language = JLang
+        #system = J2SE.v18
+
+    models:
+        ref = Reference()
+        ping = Ping()
+        pong = Pong()
+
+    controllers:
+        ping_cnt = PingController(ref = models.ref, ping = models.ping, pong = models.pong)
