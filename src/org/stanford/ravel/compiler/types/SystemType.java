@@ -1,6 +1,5 @@
 package org.stanford.ravel.compiler.types;
 
-import org.stanford.ravel.primitives.Primitive;
 import org.stanford.ravel.primitives.SystemEvent;
 
 /**
@@ -10,7 +9,7 @@ import org.stanford.ravel.primitives.SystemEvent;
  * Created by gcampagn on 1/31/17.
  */
 public class SystemType extends ClassType {
-    public SystemType() {
+    private SystemType() {
         super("SystemAPI");
 
         for (SystemEvent event : SystemEvent.values()) {
@@ -19,4 +18,6 @@ public class SystemType extends ClassType {
 
         addMethod("print", new Type[]{PrimitiveType.STR}, PrimitiveType.VOID);
     }
+
+    public static final SystemType INSTANCE = new SystemType();
 }

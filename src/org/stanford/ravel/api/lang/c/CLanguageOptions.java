@@ -2,7 +2,6 @@ package org.stanford.ravel.api.lang.c;
 
 import org.stanford.ravel.api.InvalidOptionException;
 import org.stanford.ravel.api.lang.LanguageOptions;
-import org.stanford.ravel.api.lang.java.JavaLanguageOptions;
 
 /**
  * Created by gcampagn on 1/31/17.
@@ -16,8 +15,7 @@ public class CLanguageOptions extends LanguageOptions {
         return instance;
     }
 
-    //TODO: needs to by dynamic configured
-    private String runtimePath = "/runtime/c";
+    private String runtimePath = "./runtime/c";
 
     public String getRuntimePath() {
         return runtimePath;

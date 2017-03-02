@@ -72,12 +72,18 @@ public class GrowableByteArray {
         ByteBuffer buffer = ByteBuffer.allocate(2);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putShort((short)v);
+        write(buffer.array());
     }
     public void write_error_msg(Error error) {
+        if (error == null)
+            error = Error.SUCCESS;
         write_int32(error.ordinal());
     }
     public void write_str(String str) {
-        write(ByteWork.getByteArray(str));
+        if (str == null)
+            write_uint16(0);
+        else
+            write(ByteWork.getByteArray(str));
     }
     public void write_byte(byte v) {
         write(new byte[]{v});

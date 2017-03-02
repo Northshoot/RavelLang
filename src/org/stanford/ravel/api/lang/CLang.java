@@ -1,8 +1,8 @@
 package org.stanford.ravel.api.lang;
 
 import org.apache.commons.lang3.StringUtils;
-import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.OptionParser;
+import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
 import org.stanford.ravel.api.lang.c.CCodeTranslator;
 import org.stanford.ravel.api.lang.c.CLanguageOptions;
@@ -15,7 +15,10 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -35,7 +38,7 @@ public class CLang extends BaseLanguage {
             if (type instanceof PrimitiveType) {
                 switch ((PrimitiveType) type) {
                     case STR:
-                        return "char *";
+                        return "const char *";
                     case ERROR_MSG:
                         return "int";
                     case TIMESTAMP:
@@ -57,6 +60,12 @@ public class CLang extends BaseLanguage {
                     default:
                         throw new AssertionError();
                 }
+            } else if (type == SystemType.INSTANCE.getInstanceType() || type == SystemType.INSTANCE) {
+                return "RavelSystemAPI*";
+            } else if (type == IntrinsicTypes.KEY) {
+                return "RavelKey*";
+            } else if (type == IntrinsicTypes.ENDPOINT.getInstanceType()) {
+                return "RavelEndpoint*";
             } else if (type instanceof ArrayType) {
                 return toNativeType(((ArrayType) type).getElementType()) + "*";
             } else if (type instanceof ClassType.InstanceType) {
@@ -65,7 +74,7 @@ public class CLang extends BaseLanguage {
                 return ((ModelType.RecordType) type).getModel().getName() + "_Record*";
             } else if (type instanceof ModelType.ContextType) {
                 return "Context*";
-            } else {
+            } else  {
                 // everything else ought to be a pointer
                 return type.getName() + "*";
             }
@@ -232,7 +241,7 @@ public class CLang extends BaseLanguage {
                 } else if (pvalue instanceof ConcreteInterfaceInstance) {
                     concrete.parameterValues.add("&self->iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
                 } else if (pvalue instanceof SystemAPIInstance) {
-                    concrete.parameterValues.add("&self->sys_api");
+                    concrete.parameterValues.add("&self->base.sys_api");
                 } else {
                     concrete.parameterValues.add(CLITERAL.toLiteral(pvalue));
                 }

@@ -5,7 +5,7 @@ append_params(comp) ::=<<
 >>
 
 init_model(comp) ::=<<
-ravel_generated_<comp.component.name; format="function">_init(&self->model_<comp.varName><append_params(comp)>);
+ravel_generated_<comp.component.name; format="function">_init(&self->model_<comp.varName>, self<append_params(comp)>);
 >>
 init_interface(comp) ::=<<
 ravel_generated_<comp.component.name; format="function">_init(&self->iface_<comp.varName>, <comp.instanceId><append_params(comp)>);
@@ -25,15 +25,54 @@ set_component_controller(comp, prefix) ::=<<
 <comp.controllerList:{c|ravel_generated_<comp.component.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
 >>
 
+model_case_event(model, event) ::=<<
+case <model.component.baseModel.id>:
+    ravel_base_model_<event>(ravel_base_model(&self->model_<model.varName>), packet, endpoint);
+    break;
+>>
+model_case_event_error(model, event) ::=<<
+case <model.component.baseModel.id>:
+    ravel_base_model_<event>(ravel_base_model(&self->model_<model.varName>), packet, endpoint, error);
+    break;
+>>
+
 c_file(includes,name,models,interfaces,controllers,space) ::=<<
 <begin_source(name)>
 
 <includes:do_include(); separator="\n">
 
+static void
+data_received(<name> *self, RavelPacket *packet, RavelEndpoint *endpoint)
+{
+    switch (packet->model_id) {
+        <models:model_case_event("record_arrived"); separator="\n">
+    }
+}
+
+static void
+send_done(<name> *self, RavelError error, RavelPacket *packet, RavelEndpoint *endpoint)
+{
+    if (error == RAVEL_ERROR_SUCCESS) {
+        switch (packet->model_id) {
+            <models:model_case_event("record_departed"); separator="\n">
+        }
+    } else {
+        switch (packet->model_id) {
+            <models:model_case_event_error("record_failed_to_send"); separator="\n">
+        }
+    }
+}
+
+static const RavelDispatcherVTable vtable = {
+    .data_received = (void(*)(void*, RavelPacket *, RavelEndpoint *)) data_received,
+    .send_done = (void(*)(void*, RavelError, RavelPacket *, RavelEndpoint *)) send_done,
+};
+
 void
 ravel_generated_<name; format="function">_init(<name> *self)
 {
-    ravel_system_init(&self->sys_api);
+    ravel_base_dispatcher_init(&self->base);
+    self->base.vtable = &vtable;
 
     <models:init_model(); separator="\n">
     <interfaces:init_interface(); separator="\n">
@@ -49,13 +88,19 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
     <interfaces:finalize_component("iface"); separator="\n">
     <controllers:finalize_controller(); separator="\n">
 
-    ravel_system_finalize(&self->sys_api);
+    ravel_base_dispatcher_finalize(&self->base);
 }
 
 void
 ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver)
 {
-    self->driver = driver;
+    ravel_base_dispatcher_set_driver(&self->base, driver);
+}
+
+void
+ravel_generated_<name; format="function">_add_all_endpoints(<name> *self)
+{
+    <models:{m|ravel_generated_<m.component.name; format="function">_add_all_endpoints(&self->model_<m.varName>);}; separator="\n">
 }
 
 void
@@ -82,25 +127,25 @@ h_file(includes,name,models,interfaces,controllers,space) ::=<<
 #include \<api/endpoint.h>
 #include \<api/system.h>
 #include \<api/driver.h>
+#include \<api/base_dispatcher.h>
 
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
 
 typedef struct <name> {
-    RavelDriver *driver;
+    RavelBaseDispatcher base;
 
     <models:{c|<c.component.name> model_<c.varName>;}; separator="\n">
     <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
-
-    SystemAPI sys_api;
 } <name>;
 
 void ravel_generated_<name; format="function">_init(<name> *self);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver);
+void ravel_generated_<name; format="function">_add_all_endpoints(<name> *self);
 
 void ravel_generated_<name; format="function">_started(<name> *self);
 void ravel_generated_<name; format="function">_stopped(<name> *self);

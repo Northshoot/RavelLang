@@ -26,6 +26,7 @@ PROCESS_THREAD(<name>_process, ev, data)
   ravel_generated_app_dispatcher_init(&dispatcher);
   ravel_contiki_driver_init(&driver, &dispatcher);
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
+  ravel_generated_app_dispatcher_add_all_endpoints(&dispatcher);
   ravel_contiki_driver_app_dispatcher_ready(&driver);
 
   while (1) {

@@ -9,7 +9,11 @@
 #include <stddef.h>
 
 typedef struct {
-    int FILLME;
+    const char *name;
 } RavelEndpoint;
+
+static inline const char *ravel_endpoint_get_name(RavelEndpoint *self) {
+    return self->name;
+}
 
 #endif /* API_PACKET_H */

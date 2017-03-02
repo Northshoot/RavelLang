@@ -1,6 +1,7 @@
 package patterns.src.java.app;
 
 import org.stanford.ravel.rrt.AbstractDispatcher;
+import org.stanford.ravel.rrt.KeyProvider;
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.events.NetworkEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
@@ -13,6 +14,7 @@ import patterns.src.java.sources.TimerSource1;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -118,8 +120,8 @@ public class AppDispatcher  extends AbstractDispatcher {
                 dst = 11111111;
                 break;
         }
-        pkt.src = src;
-        pkt.dst = dst;
+        pkt.src = (byte)src;
+        pkt.dst = (byte)dst;
         pprint("pkt to send: " + pkt);
 
         return mDriver.sendData(pkt, endpoint);
@@ -209,5 +211,13 @@ public class AppDispatcher  extends AbstractDispatcher {
 
     }
 
-
+    @Override
+    public KeyProvider getKeyProvider() {
+        return new KeyProvider() {
+            @Override
+            public Key loadKey(int keyId) {
+                return null;
+            }
+        };
+    }
 }

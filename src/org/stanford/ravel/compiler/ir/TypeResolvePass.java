@@ -320,7 +320,7 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        ir.add(TIntrinsic.createArrayLength((ArrayType)ownerType, target, instr.source));
+        ir.add(IntrinsicFactory.createArrayLength((ArrayType)ownerType, target, instr.source));
         if (target != instr.target && target != Registers.ERROR_REG)
             ir.add(new TConvert(targetType, resultType, instr.target, target));
     }
@@ -343,7 +343,7 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        ir.add(TIntrinsic.createStringLength(target, instr.source));
+        ir.add(IntrinsicFactory.createStringLength(target, instr.source));
         if (target != instr.target && target != Registers.ERROR_REG)
             ir.add(new TConvert(targetType, resultType, instr.target, target));
     }

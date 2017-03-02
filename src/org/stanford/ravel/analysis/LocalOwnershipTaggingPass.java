@@ -65,9 +65,7 @@ public class LocalOwnershipTaggingPass {
             if (o == null || getClass() != o.getClass()) return false;
 
             LocalModelTag modelTag = (LocalModelTag) o;
-
-            if (!model.equals(modelTag.model)) return false;
-            return creator == modelTag.creator;
+            return model.equals(modelTag.model) && creator == modelTag.creator;
         }
 
         @Override
@@ -85,11 +83,13 @@ public class LocalOwnershipTaggingPass {
 
     public static class LocalFieldTag {
         public final ModelType model;
+        public final Creator creator;
         public final String field;
 
-        public LocalFieldTag(ModelType model, String field) {
+        public LocalFieldTag(ModelType model, Creator creator, String field) {
             this.model = model;
             this.field = field;
+            this.creator = creator;
         }
 
         @Override
@@ -97,15 +97,14 @@ public class LocalOwnershipTaggingPass {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            LocalFieldTag fieldTag = (LocalFieldTag) o;
-
-            if (!model.equals(fieldTag.model)) return false;
-            return field.equals(fieldTag.field);
+            LocalFieldTag that = (LocalFieldTag) o;
+            return model.equals(that.model) && creator == that.creator && field.equals(that.field);
         }
 
         @Override
         public int hashCode() {
             int result = model.hashCode();
+            result = 31 * result + creator.hashCode();
             result = 31 * result + field.hashCode();
             return result;
         }
@@ -191,8 +190,11 @@ public class LocalOwnershipTaggingPass {
         }
     }
 
-    private void tagField(int var, ModelType model, String field) {
-        LocalFieldTag tag = new LocalFieldTag(model, field);
+    private void tagField(int var, ModelType model, Creator creator, String field) {
+        assert Registers.isNormal(var);
+
+        LocalFieldTag tag = new LocalFieldTag(model, creator, field);
+        assert model.getRecordType().getMemberType(field) != null;
 
         Set<LocalFieldTag> existing = fieldTags.get(var);
         if (existing == null) {
@@ -206,6 +208,8 @@ public class LocalOwnershipTaggingPass {
     }
 
     private void tagAllFields(int var, Set<LocalFieldTag> tags) {
+        assert Registers.isNormal(var);
+
         if (tags == null)
             return;
 
@@ -303,15 +307,11 @@ public class LocalOwnershipTaggingPass {
 
                 // Additionally, when reading the field of a record, it creates a brand new field tag for that
                 // concrete field
-                //
-                // This means that, if a record is read from one model and passed to another, it will be tagged
-                // as the field of both
-                //
-                // FIXME: I'm not quite sure that's correct
                 CompoundType compound = ((TFieldLoad) instr).compoundType;
                 if (compound instanceof ModelType.RecordType) {
-                    for (LocalModelTag modelTag : modelTags.get(((TFieldLoad) instr).source)) {
-                        tagField(instr.getSink(), modelTag.model, ((TFieldLoad) instr).field);
+                    ModelType model = ((ModelType.RecordType) compound).getModel();
+                    for (LocalModelTag modelTag : modelTags.getOrDefault(((TFieldLoad) instr).source, Collections.emptySet())) {
+                        tagField(instr.getSink(), model, modelTag.creator, ((TFieldLoad) instr).field);
                     }
                 }
             } else if (instr instanceof TFieldStore) {
@@ -340,17 +340,25 @@ public class LocalOwnershipTaggingPass {
                 // r2.foo based on how v came to be)
 
                 CompoundType compound = ((TFieldStore) instr).compoundType;
+
+                int object = ((TFieldStore) instr).object;
+                int value = ((TFieldStore) instr).value;
                 if (compound instanceof ModelType.RecordType) {
-                    for (LocalModelTag modelTag : modelTags.getOrDefault(((TFieldStore) instr).value,Collections.emptySet())) {
-                        tagField(instr.getSink(), modelTag.model, ((TFieldStore) instr).field);
-                        for (int alias : ir.getAliases(instr.getSink())) {
-                            tagField(alias, modelTag.model, ((TFieldStore) instr).field);
+                    ModelType model = ((ModelType.RecordType) compound).getModel();
+                    for (LocalModelTag modelTag : modelTags.getOrDefault(value, Collections.emptySet())) {
+                        tagField(object, model, modelTag.creator, ((TFieldStore) instr).field);
+                        for (int alias : ir.getAliases(object)) {
+                            tagField(alias, model, modelTag.creator, ((TFieldStore) instr).field);
                         }
                     }
                 }
 
-                tagAllModels(((TFieldStore) instr).object, modelTags.get(((TFieldStore) instr).value));
-                tagAllFields(((TFieldStore) instr).object, fieldTags.get(((TFieldStore) instr).value));
+                tagAllModels(object, modelTags.get(value));
+                tagAllFields(object, fieldTags.get(value));
+                for (int alias : ir.getAliases(object)) {
+                    tagAllModels(alias, modelTags.get(value));
+                    tagAllFields(alias, fieldTags.get(value));
+                }
             } else if (instr instanceof TArrayStore) {
                 // an array store is like a field store, except the field is an index
                 // but we don't care about the index, we care about the object and the value

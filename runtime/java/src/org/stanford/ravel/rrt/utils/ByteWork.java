@@ -116,6 +116,29 @@ public class ByteWork {
         return new String(hexChars);
     }
 
+    private static int charToNibble(char c) {
+        if (c >= 'A' && c <= 'F')
+            return (c - 'A');
+        if (c >= 'a' && c <= 'f')
+            return (c - 'a');
+        if (c >= '0' && c <= '9')
+            return (c - '0');
+        throw new NumberFormatException("Invalid character " + c);
+    }
+
+    public static byte[] bytesFromHex(CharSequence sequence) {
+        byte[] bytes = new byte[sequence.length()/2];
+
+        for (int i = 0; i < bytes.length; i++) {
+            char c1 = sequence.charAt(2 * i);
+            char c2 = sequence.charAt(2 * i + 1);
+
+            bytes[i] = (byte)(charToNibble(c1) << 4 | charToNibble(c2));
+        }
+
+        return bytes;
+    }
+
     public static byte[] getLengthByteArray(int length) {
         byte[] buffer = new byte[2];
         // careful, this little endian, because it matches convertTwoUnsignedBytesToInt

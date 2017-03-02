@@ -38,7 +38,7 @@ public class ModelCompiler {
 
     private void addWriteArray(TypedIRBuilder builder, int buffer, int value, ArrayType arrayType) {
         int len = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(TIntrinsic.createArrayLength(arrayType, len, value));
+        builder.add(IntrinsicFactory.createArrayLength(arrayType, len, value));
 
         FunctionType writeLength = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_uint16");
         builder.add(new TMethodCall(writeLength, Registers.VOID_REG, buffer, writeLength.getFunctionName(), new int[]{len}));
@@ -145,16 +145,8 @@ public class ModelCompiler {
         builder.setRegisterType(Registers.RETURN_REG, new ArrayType(PrimitiveType.BYTE));
 
         // create a buffer to write into
-        int buffer = builder.allocateRegister(IntrinsicTypes.GROWABLE_BYTE_ARRAY);
+        int buffer = builder.allocateRegister(IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType());
         builder.add(new TMethodCall((FunctionType)IntrinsicTypes.GROWABLE_BYTE_ARRAY.getMemberType("create"), buffer, Registers.VOID_REG, "create", new int[]{}));
-
-        // write the model ID
-        int modelId = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, modelId, model.getId()));
-        addWritePrimitive(builder, buffer, modelId, PrimitiveType.INT32);
-
-        // write the record ID
-        addWritePrimitive(builder, buffer, idxSym.getRegister(), PrimitiveType.INT32);
 
         // write each field sequentially
         for (ModelField field : model.getFields()) {
@@ -172,14 +164,14 @@ public class ModelCompiler {
 
         TypedIR ir = builder.finish();
         if (debug) {
-            System.out.println("Encrypt IR for " + model);
+            System.out.println("Serialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
         ValidateIR.validate(ir);
         OptimizePass opt = new OptimizePass(ir, false);
         opt.run();
         if (debug) {
-            System.out.println("Optimized encrypt IR for " + model);
+            System.out.println("Optimized serialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
 
@@ -194,7 +186,7 @@ public class ModelCompiler {
             assert size > 0;
 
             // target = extract_<type>(data, pos)
-            builder.add(new TIntrinsic(type, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, target, "extract_" + type.getName().toLowerCase(), new int[]{data, pos}));
+            builder.add(IntrinsicFactory.createExtractPrimitive(type, target, data, pos));
 
             // size = ...
             // pos = pos + size
@@ -207,7 +199,7 @@ public class ModelCompiler {
     private void buildExtractString(TypedIRBuilder builder, int target, int data, int pos) {
         int sizeReg = builder.allocateRegister(PrimitiveType.INT32);
         // size = extract_uint16(data, pos)
-        builder.add(new TIntrinsic(PrimitiveType.INT32, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, sizeReg, "extract_uint16", new int[]{data, pos}));
+        builder.add(IntrinsicFactory.createExtractUInt16(sizeReg, data, pos));
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -215,7 +207,7 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = extract_str(data, pos, size)
-        builder.add(new TIntrinsic(PrimitiveType.STR, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32, PrimitiveType.INT32}, target, "extract_str", new int[]{data, pos, sizeReg}));
+        builder.add(IntrinsicFactory.createExtractString(target, data, pos, sizeReg));
 
         // pos = pos + size
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, sizeReg, BinaryOperation.ADD));
@@ -225,7 +217,7 @@ public class ModelCompiler {
         // int len;
         int len = builder.allocateRegister(PrimitiveType.INT32);
         // len = extract_uint16(data, pos)
-        builder.add(new TIntrinsic(PrimitiveType.INT32, new Type[]{new ArrayType(PrimitiveType.BYTE), PrimitiveType.INT32}, len, "extract_uint16", new int[]{data, pos}));
+        builder.add(IntrinsicFactory.createExtractUInt16(len, data, pos));
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -233,7 +225,7 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = new array[len]
-        builder.add(TIntrinsic.createArrayNew(arrayType, target, len));
+        builder.add(IntrinsicFactory.createArrayNew(arrayType, target, len));
 
         // int i;
         int i = builder.allocateRegister(PrimitiveType.INT32);
@@ -344,19 +336,6 @@ public class ModelCompiler {
         int pos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, pos, 0));
 
-        // skip model id:
-        // pos += 4
-        int four = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, four, 4));
-        builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, four, BinaryOperation.ADD));
-
-        // extract the record id
-        int idx = builder.allocateRegister(PrimitiveType.INT32);
-        buildExtractPrimitive(builder, PrimitiveType.INT32, idx, data, pos);
-        // this is lying a little bit because __idx is not a field of recordType,
-        // but as long as the validate pass doesn't check for that we're good
-        builder.add(new TFieldStore(PrimitiveType.INT32, recordType, thisReg, "__idx", idx));
-
         for (ModelField field : model.getFields()) {
             Type fieldType = field.getType();
 
@@ -367,14 +346,14 @@ public class ModelCompiler {
 
         TypedIR ir = builder.finish();
         if (debug) {
-            System.out.println("Deserialize IR for " + model);
+            System.out.println("Deserialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
         ValidateIR.validate(ir);
         OptimizePass opt = new OptimizePass(ir, false);
         opt.run();
         if (debug) {
-            System.out.println("Optimized deserialize IR for " + model);
+            System.out.println("Optimized deserialization IR for " + model);
             System.out.println(ir.getLoopTree());
         }
 

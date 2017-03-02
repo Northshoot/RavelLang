@@ -84,10 +84,16 @@ public class LocalModelOperationAnalysis {
                     // save is just a fancy move, but we're moving all fields
                     ModelType.RecordType recordType = (ModelType.RecordType)instr.getSourceTypes()[0];
                     int record = instr.getSources()[0];
-                    for (String fieldName : recordType.getMemberList()) {
+                    /*for (String fieldName : recordType.getMemberList()) {
                         for (ModelTag modelTag : event.getVariableModelTags(record)) {
-                            meetOperation(new FieldTag(modelTag.model, modelTag.creator, fieldName), Operation.MOVE);
+                            assert modelTag.model != null;
+                            if (modelTag.model.getType().getRecordType().equalsExceptQualifiers(recordType)) {
+                                meetOperation(new FieldTag(modelTag.model, modelTag.creator, fieldName), Operation.MOVE);
+                            }
                         }
+                    }*/
+                    for (FieldTag fieldTag : event.getVariableFieldTags(record)) {
+                        meetOperation(fieldTag, Operation.MOVE);
                     }
                     break;
 

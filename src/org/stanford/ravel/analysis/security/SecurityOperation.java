@@ -1,5 +1,6 @@
 package org.stanford.ravel.analysis.security;
 
+import org.stanford.ravel.primitives.Flow;
 import org.stanford.ravel.primitives.ModelField;
 import org.stanford.ravel.primitives.Space;
 
@@ -17,11 +18,15 @@ public class SecurityOperation {
     private final Set<ModelField> fields = new HashSet<>();
     private final SecurityPrimitive primitive;
     private final Space target;
+    private final Flow flow;
+    private final int offset;
 
-    public SecurityOperation(Key key, SecurityPrimitive primitive, Space target) {
+    public SecurityOperation(Key key, SecurityPrimitive primitive, Space target, Flow flow, int offset) {
         this.key = key;
         this.primitive = primitive;
         this.target = target;
+        this.flow = flow;
+        this.offset = offset;
     }
 
     @Override
@@ -33,12 +38,20 @@ public class SecurityOperation {
         return key;
     }
 
+    public Flow getFlow() {
+        return flow;
+    }
+
     public SecurityPrimitive getPrimitive() {
         return primitive;
     }
 
     public Space getTarget() {
         return target;
+    }
+
+    public int getOffset() {
+        return offset;
     }
 
     public void addField(ModelField field) {
