@@ -32,6 +32,14 @@ public class JLang extends BaseLanguage {
     private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/lang/java/tmpl";
     private final static String RUNTIME_PKG = "org.stanford.ravel.rrt";
 
+    private static boolean typeIsIteratorInstance(Type type) {
+        if (!(type instanceof ClassType.InstanceType))
+            return false;
+
+        ClassType owner = ((ClassType.InstanceType) type).getClassType();
+        return owner instanceof ModelType.IteratorType;
+    }
+
     private static final AttributeRenderer JTYPES = new AttributeRenderer() {
         private String toNativeType(Type type) {
             if (type instanceof PrimitiveType) {
@@ -61,6 +69,10 @@ public class JLang extends BaseLanguage {
                 }
             } else if (type instanceof ArrayType) {
                 return toNativeType(((ArrayType) type).getElementType()) + "[]";
+            } else if (typeIsIteratorInstance(type)) {
+                ClassType classType = ((ClassType.InstanceType)type).getClassType();
+                ModelType modelType = ((ModelType.IteratorType)classType).getOwner();
+                return "java.util.Iterator<" + modelType.getName() + ".Record>";
             } else if (type instanceof ClassType.InstanceType) {
                 return ((ClassType.InstanceType) type).getClassType().getName();
             } else if (type instanceof ModelType.RecordType) {

@@ -95,5 +95,6 @@ static inline const char *ravel_intrinsic_endpoint_get_name(RavelEndpoint *endpo
 #define ravel_intrinsic_apply_mac ravel_crypto_apply_mac
 #define ravel_intrinsic_encrypt ravel_crypto_encrypt
 #define ravel_intrinsic_decrypt ravel_crypto_decrypt
+#define ravel_intrinsic_array_fill_random ravel_crypto_array_fill_random
 
 #endif /* API_INTRINSIC_H */

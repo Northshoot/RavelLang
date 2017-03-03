@@ -238,7 +238,7 @@ public class LocalOwnershipTaggingPass {
                             tagModel(instr.getSink(), (ModelType) type.getOwner(), Creator.CREATED);
                             break;
 
-                        case "all":
+                        case "iterator":
                         case "first":
                         case "last":
                         case "get":
@@ -290,6 +290,11 @@ public class LocalOwnershipTaggingPass {
                     // and local information. If the input values are not remote model values, the output values
                     // will not be remote model values.
                     // 1) is not implemented yet, so we only care about 2) for now.
+                    //
+                    // 3) the function is a call to a model iterator
+                    // we have tagged the iterator with the right model/field tags, so we're good
+                    // to just propagate them
+                    
                     if (instr.getSink() != Registers.VOID_REG) {
                         for (int source : instr.getSources()) {
                             tagAllModels(instr.getSink(), modelTags.get(source));

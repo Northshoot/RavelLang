@@ -30,6 +30,9 @@ controller PingController(ref : Reference, ping : Ping, pong : Pong):
         pingrec.value = refrec.value
         ping.save(pingrec)
 
+        for refrec in ref:
+            system.print("one record")
+
     event pong.arrived():
         system.print("pong received")
         pongrec = self.record
@@ -68,10 +71,10 @@ controller PongController(ping : Ping, pong : Pong, random : RandomSource):
 
 space GatewaySpace:
     platform:
-        language = JLang
-        system = J2SE.v18
-        #language = CLang
-        #system = Posix.v2008
+        #language = JLang
+        #system = J2SE.v18
+        language = CLang
+        system = Posix.v2008
 
     models:
         ping = Ping()

@@ -21,5 +21,7 @@ typedef struct {
 RavelEndpoint * const * ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name);
 
 RavelError ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint);
+void       ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet);
+void       ravel_driver_queue_callback(RavelDriver *driver, void(*callback)(void*, void*), void *ptr1, void *ptr2);
 
 #endif /* API_BASE_DRIVER_H */

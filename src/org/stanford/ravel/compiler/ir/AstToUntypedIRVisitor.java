@@ -556,48 +556,30 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         }
 
         // Lower to
-        // array = ...
-        // for (int i = 0; i < array.length; i++) {
-        //  var = array[i];
+        // iterator = ... .iterator();
+        // while (iterator.hasNext()) {
+        //  var = iterator.next();
         //  ...
         // }
-        //
-        // and then to
-        // int i = 0;
-        // while (i < array.length) {
-        //   var = array[i];
-        //   ...
-        //   i++;
-        // }
 
-        int arrayReg = visit(expr);
-        int indexReg = ir.allocateRegister();
+        int iterableReg = visit(expr);
+        int iteratorReg = ir.allocateRegister();
 
-        // int i = 0;
-        addCurrent(new ImmediateLoad(decl, indexReg, 0));
-
-        // array lengths are constant so we compute them outside the loop
-        int lengthReg = ir.allocateRegister();
-        addCurrent(new FieldLoad(expr, lengthReg, arrayReg, "length"));
-
-        // load 1 into a register, for later use
-        int immediateOne = ir.allocateRegister();
-        addCurrent(new ImmediateLoad(decl, immediateOne, 1));
+        // iterator = iterable .iterator()
+        addCurrent(new MethodCall(ctx.forControl(), iteratorReg, iterableReg, "iterator", new int[]{}));
 
         // while (...
         Block head = pushBlock();
         int cond = ir.allocateRegister();
-        // i < array.length
-        addCurrent(new ComparisonOp(decl, cond, indexReg, lengthReg, ComparisonOperation.LT));
+        // cond = iterator.hasNext()
+        addCurrent(new MethodCall(ctx.forControl(), cond, iteratorReg, "hasNext", new int[]{}));
         popBlock();
         // ) {
         Block body = pushBlock();
-        // var = array[i];
-        addCurrent(new ArrayLoad(decl, varReg, arrayReg, indexReg));
+        // var = iterator.next();
+        addCurrent(new MethodCall(ctx.forControl(), varReg, iteratorReg, "next", new int[]{}));
         // ...
         this.visit(ctx.block_stmt());
-        // i++
-        addCurrent(new BinaryArithOp(decl, indexReg, indexReg, immediateOne, BinaryOperation.ADD));
         popBlock();
         // }
         addCurrent(new WhileLoop(ctx, cond, head, body));

@@ -155,7 +155,6 @@ public class AliasAnalysis {
                             // brand new record, aliases nothing
                             break;
 
-                        case "all":
                         case "get":
                         case "first":
                         case "last":
@@ -168,12 +167,27 @@ public class AliasAnalysis {
                             localWrittenRecords.computeIfAbsent(modelType, (key) -> new HashSet<>()).add(instr.getSources()[0]);
                             break;
 
+                        case "iterator":
                         case "size":
                             // no pointers, no alias
                             break;
 
                         default:
                             throw new AssertionError("Invalid model function " + type.getFunctionName());
+                    }
+                } else if (type.getOwner() instanceof ModelType.IteratorType) {
+                    switch (type.getFunctionName()) {
+                        case "hasNext":
+                            // no pointers, no alias
+                            break;
+
+                        case "next":
+                            // aliases any read record and any written record up to here
+                            aliasReadModel(localWrittenRecords, localReadRecords, localMayAlias, ((ModelType.IteratorType)type.getOwner()).getOwner(), instr.getSink());
+                            break;
+
+                        default:
+                            throw new AssertionError("Invalid model iterator " + type.getFunctionName());
                     }
                 } else {
                     int[] sources = instr.getSources();
@@ -241,6 +255,8 @@ public class AliasAnalysis {
                         handleMove(localMayAlias, phi.target, source);
                     }
                 }
+            } else if (instr instanceof TIntrinsic) {
+                assert !(instr.getSinkType() instanceof ModelType.RecordType);
             } else {
                 // no other instruction can involve records
                 for (Type srcType : instr.getSourceTypes())

@@ -38,6 +38,7 @@ public class ModelType extends ClassType {
     private final RecordType recordType;
     private final RecordType immutableRecordType;
     private final ContextType ctxType;
+    private final IteratorType iteratorType;
 
     public ModelType(ModelSymbol symbol, Model.Type modelType) {
         super(symbol.getName());
@@ -45,11 +46,6 @@ public class ModelType extends ClassType {
         recordType = new RecordType(symbol.getName() + ".Record");
         immutableRecordType = (RecordType) recordType.makeImmutable();
         ctxType = new ContextType();
-
-        // If you add new functions here, you must update LocalOwnershipTaggingPass
-        // to handle them correctly
-        this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
-        this.addMethod("create", new Type[0], recordType);
 
         Type queryRecordType;
         switch (modelType) {
@@ -65,12 +61,20 @@ public class ModelType extends ClassType {
             default:
                 throw new AssertionError();
         }
+        iteratorType = new IteratorType(symbol.getName() + ".Iterator", queryRecordType);
+
+        // If you add new functions here, you must update LocalOwnershipTaggingPass
+        // to handle them correctly
+        this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
+        this.addMethod("delete", new Type[]{immutableRecordType}, PrimitiveType.VOID);
+        this.addMethod("create", new Type[0], recordType);
         this.addMethod("first", new Type[0], queryRecordType);
         this.addMethod("last", new Type[0], queryRecordType);
         this.addMethod("get", new Type[]{PrimitiveType.INT32}, queryRecordType);
-        this.addMethod("all", new Type[0], new ArrayType(queryRecordType).makeImmutable());
+        //this.addMethod("all", new Type[0], new ArrayType(queryRecordType).makeImmutable());
         this.addMethod("clear", new Type[0], PrimitiveType.VOID);
         this.addMethod("size", new Type[0], PrimitiveType.INT32);
+        this.addMethod("iterator", new Type[0], iteratorType.getInstanceType());
 
         for (ModelEvent e : ModelEvent.values()) {
             this.addEvent(e.name(), new Type[]{ctxType}, true);
@@ -102,6 +106,8 @@ public class ModelType extends ClassType {
         public ModelType getOwner() {
             return ModelType.this;
         }
+
+        private ContextType() {}
 
         @Override
         public Collection<String> getMemberList() {
@@ -135,6 +141,19 @@ public class ModelType extends ClassType {
         @Override
         public String getName() {
             return ModelType.this.getName() + ".Context";
+        }
+    }
+
+    public class IteratorType extends ClassType {
+        private IteratorType(String name, Type queryRecordType) {
+            super(name);
+
+            this.addMethod("hasNext", new Type[]{}, PrimitiveType.BOOL);
+            this.addMethod("next", new Type[]{}, queryRecordType);
+        }
+
+        public ModelType getOwner() {
+            return ModelType.this;
         }
     }
 }

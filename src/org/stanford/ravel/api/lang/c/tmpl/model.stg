@@ -4,6 +4,8 @@ define_dispatch_func(model, event, controllers) ::=<<
 static void dispatch_<event>(<model.name> *self, Context *ctx)
 {
     <dispatch_event_single_instance(model, event, ["ctx"])>
+
+    ravel_base_model_reset_alloc(ravel_base_model(self));
 }
 >>
 
@@ -24,7 +26,7 @@ c_file(includes,name,base,model) ::=<<
 void
 ravel_generated_<model.name; format="function">_record_init(<model.name>_Record *this)
 {
-    /* TODO Clear the record */
+    memset(this, 0, sizeof(<model.name>_Record));
 }
 
 static void
@@ -51,14 +53,10 @@ ravel_generated_<model.name; format="function">_record_finalize(<model.name>_Rec
 <define_dispatch_func(model, "save_done", model.controllerMap.save_done)>
 
 static <model.name>_Record *
-ravel_generated_<model.name; format="function">_real_unmarshall(<model.name> *this, uint8_t* data, size_t length, RavelEndpoint *endpoint)
+ravel_generated_<model.name; format="function">_real_unmarshall(<model.name> *this, <model.name>_Record * record, uint8_t* data, size_t length, RavelEndpoint *endpoint)
 {
     uint8_t *decrypted;
-    <model.name>_Record *record = ravel_base_model_allocate(ravel_base_model(this));
-    if (record == NULL)
-        return NULL;
-
-    record->__idx = ravel_intrinsic_extract_byte(data, 1);
+    record->__base.record_id = ravel_intrinsic_extract_byte(data, 1);
 
     {
         <model.decryptCode>
@@ -75,16 +73,26 @@ ravel_generated_<model.name; format="function">_real_marshall(<model.name> *this
     uint8_t *data;
 
     data = ravel_generated_<model.name; format="function">_record_get_bytes(record);
-    <model.encryptCode>
 
-    // FIXME this should be generated
-    ravel_array_free(data);
-    return __returnValue;
+    if (endpoint != NULL) {
+        <model.encryptCode>
+        ravel_array_free(data);
+        return __returnValue;
+    } else {
+        return data;
+    }
+}
+
+static void
+record_finalize(<model.name> *this, <model.name>_Record *record)
+{
+    ravel_generated_<model.name; format="function">_record_finalize(record);
 }
 
 static const RavelModelVTable vtable = {
     .marshall = (uint8_t* (*)(void*, void*, RavelEndpoint*)) ravel_generated_<model.name; format="function">_real_marshall,
-    .unmarshall = (void*(*)(void*, uint8_t*, size_t, RavelEndpoint*)) ravel_generated_<model.name; format="function">_real_unmarshall,
+    .unmarshall = (void*(*)(void*, void*, uint8_t*, size_t, RavelEndpoint*)) ravel_generated_<model.name; format="function">_real_unmarshall,
+    .record_finalize = (void(*)(void*, void*)) record_finalize,
     .dispatch_full = (void(*)(void*, Context*)) dispatch_full,
     .dispatch_arrived = (void(*)(void*, Context*)) dispatch_arrived,
     .dispatch_departed = (void(*)(void*, Context*)) dispatch_departed,
@@ -94,7 +102,7 @@ static const RavelModelVTable vtable = {
 void
 ravel_generated_<model.name; format="function">_init(<model.name> *self, struct AppDispatcher *dispatcher<append_parameter_list(model.baseModel.parameters)>)
 {
-    <base; format="function">_init(&self->__base, dispatcher, <model.baseModel.size>, sizeof(<model.name>_Record));
+    <base; format="function">_init(&self->__base, &dispatcher->base, <model.baseModel.size>, sizeof(<model.name>_Record), <model.baseModel.reliable>, <model.baseModel.durable>);
     ravel_base_model(self)->vtable = &vtable;
     self->dispatcher = &dispatcher->base.sys_api;
 }
@@ -123,6 +131,11 @@ ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.
 {
     return <base; format="function">_save(&self->__base, record);
 }
+void
+ravel_generated_<model.name; format="function">_delete(<model.name> *self, <model.name>_Record *record)
+{
+    return <base; format="function">_delete(&self->__base, record);
+}
 
 void
 ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *self)
@@ -135,7 +148,7 @@ ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *
 
 declare_record_class(model_name, model_fields) ::=<<
 typedef struct {
-    uint8_t __idx;
+    RavelRecord __base;
 
     <model_fields:{f|<f.type> <f.name>;}; separator="\n">
 } <model_name>_Record;
@@ -176,11 +189,8 @@ void ravel_generated_<model.name; format="function">_finalize(<model.name> *self
 /* The Top API, used by the Controller */
 <model.name>_Record *ravel_generated_<model.name; format="function">_create(<model.name> *self);
 Context *ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record);
+void ravel_generated_<model.name; format="function">_delete(<model.name> *self, <model.name>_Record *record);
 
-static inline <model.name>_Record * const * ravel_generated_<model.name; format="function">_all(<model.name> *self)
-{
-    return (<model.name>_Record * const *)ravel_base_model_all(ravel_base_model(self));
-}
 static inline <model.name>_Record *ravel_generated_<model.name; format="function">_get(<model.name> *self, int idx)
 {
     return ravel_base_model_get(ravel_base_model(self), idx);
@@ -196,6 +206,18 @@ static inline <model.name>_Record *ravel_generated_<model.name; format="function
 static inline int ravel_generated_<model.name; format="function">_size(<model.name> *self)
 {
     return ravel_base_model_size(ravel_base_model(self));
+}
+static inline RavelIterator ravel_generated_<model.name; format="function">_iterator(<model.name> *self)
+{
+    return ravel_base_model_iterator(ravel_base_model(self));
+}
+static inline bool ravel_generated_<model.name; format="function">_iterator_has_next(RavelIterator *iter)
+{
+    return ravel_base_model_iterator_has_next(iter);
+}
+static inline <model.name>_Record *ravel_generated_<model.name; format="function">_iterator_next(RavelIterator *iter)
+{
+    return ravel_base_model_iterator_next(iter);
 }
 
 /* The Init API, used by the Dispatcher */

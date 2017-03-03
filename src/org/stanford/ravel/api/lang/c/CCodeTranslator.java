@@ -51,12 +51,21 @@ public class CCodeTranslator extends BaseIRTranslator {
             cleanup.setLength(0);
     }
 
+    private static boolean typeIsIteratorInstance(Type type) {
+        if (!(type instanceof ClassType.InstanceType))
+            return false;
+
+        ClassType owner = ((ClassType.InstanceType) type).getClassType();
+        return owner instanceof ModelType.IteratorType;
+    }
+
     // Quirk getRegisterName so we can stack allocate GrowableByteArray
     protected String getRegisterName(int reg) {
         String name = super.getRegisterName(reg);
 
         Type type = getRegisterType(reg);
-        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType())
+        if (type == IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType() ||
+                typeIsIteratorInstance(type))
             return "&" + name;
         else
             return name;
@@ -79,6 +88,10 @@ public class CCodeTranslator extends BaseIRTranslator {
             cleanup.append("ravel_growable_byte_array_finalize(");
             cleanup.append(getRegisterName(reg));
             cleanup.append(");\n");
+        } else if (typeIsIteratorInstance(type)) {
+            addCode("RavelIterator ");
+            addCode(super.getRegisterName(reg));
+            addCode(";\n");
         } else {
             addCode(typeToCType(type));
             addCode(" ");
@@ -184,7 +197,8 @@ public class CCodeTranslator extends BaseIRTranslator {
         }
         String ownerName = nameToUnderscore(functionType.getOwner().getName());
         if (functionType.getOwner() instanceof ModelType ||
-                functionType.getOwner() instanceof InterfaceType)
+                functionType.getOwner() instanceof InterfaceType ||
+                functionType.getOwner() instanceof ModelType.IteratorType)
             ownerName = "ravel_generated_" + ownerName;
         else
             ownerName = "ravel_" + ownerName;
@@ -293,6 +307,11 @@ public class CCodeTranslator extends BaseIRTranslator {
             case "strlen":
                 addLine("strlen(", intrinsic.arguments[0], ")");
                 break;
+
+            case "read_record_id":
+                addLine("(", intrinsic.arguments[0], ")->__base.record_id");
+                break;
+
             default:
                 emitIntrinsicCall(intrinsic);
                 addCode(";\n");

@@ -1,10 +1,7 @@
 package org.stanford.ravel.compiler.ir.untyped;
 
-import org.stanford.antlr4.RavelParser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.stanford.ravel.compiler.ir.Registers;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by gcampagn on 1/20/17.
@@ -15,7 +12,7 @@ public class MethodCall extends Instruction {
     public final int[] arguments;
     public final int target;
 
-    public MethodCall(RavelParser.Method_callContext definer, int target, int owner, String method, int[] arguments) {
+    public MethodCall(ParserRuleContext definer, int target, int owner, String method, int[] arguments) {
         super(definer);
         this.target = target;
         this.owner = owner;

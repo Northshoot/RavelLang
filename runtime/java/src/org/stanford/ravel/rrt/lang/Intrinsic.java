@@ -2,6 +2,7 @@ package org.stanford.ravel.rrt.lang;
 
 import org.stanford.ravel.rrt.Crypto;
 import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.model.ModelRecord;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.utils.ByteWork;
@@ -18,6 +19,10 @@ import java.util.Date;
 public class Intrinsic {
     public static String endpoint_get_name(Endpoint ep) {
         return ep.getName();
+    }
+
+    public static byte read_record_id(ModelRecord record) {
+        return (byte)record.index();
     }
 
     public static int array_length(Object[] array) {

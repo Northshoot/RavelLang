@@ -12,5 +12,6 @@ bool ravel_crypto_verify_mac(uint8_t *data, int32_t endofdata, int32_t macoffset
 void ravel_crypto_apply_mac(uint8_t *data, int32_t endofdata, int32_t writeOffset, RavelKey *key);
 void ravel_crypto_encrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key);
 void ravel_crypto_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key);
+void ravel_crypto_array_fill_random(uint8_t *array, int32_t offset, int32_t length);
 
 #endif /* API_CRYPTO_H */

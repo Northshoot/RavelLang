@@ -1,6 +1,7 @@
 compile_c(target) ::=<<
 <target>.o: <target>.c
-<\t>$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Wno-unused-variable -Wno-unused-but-set-variable -Werror=implicit-function-declaration -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_POSIX_RUNTIME_DIR) -I. -c -o $@ $\<
+<\t>mkdir -p .deps
+<\t>$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Wno-unused-variable -Wno-unused-but-set-variable -Werror=implicit-function-declaration -I$(RAVEL_C_RUNTIME_DIR) -I$(RAVEL_POSIX_RUNTIME_DIR) -I. -MT $@ -MD -MP -MF .deps/$(notdir $@).d -c -o $@ $\<
 >>
 
 static_lib(runtime,target,sources) ::=<<
@@ -28,10 +29,13 @@ all: <target>
 
 clean:
 <\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
+<\t>rm -fr .deps
 
 <sources:compile_c(); separator="\n">
 <compile_c(main)>
 
-<target>: <sources:{s|<s>.o}; separator=" "> <main>.o
+<target>: <sources:{s|<s>.o}; separator=" "> <main>.o $(RAVEL_POSIX_RUNTIME_DIR)/libravel.a
 <\t>gcc $(LDFLAGS) -o $@ $^ -L$(RAVEL_POSIX_RUNTIME_DIR) -lravel $(WOLFSSL_LIBS)
+
+-include .deps/*.d
 >>

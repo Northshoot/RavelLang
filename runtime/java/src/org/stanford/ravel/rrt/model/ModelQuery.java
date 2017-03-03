@@ -1,12 +1,14 @@
 package org.stanford.ravel.rrt.model;
 
+import java.util.Iterator;
+
 /**
  * The interface to query the model, exposed to Ravel on the model object
  * (not yet actually, but maybe in the future)
  *
  * Created by lauril on 1/23/17.
  */
-public interface ModelQuery<RecordType> {
+public interface ModelQuery<RecordType> extends Iterable<RecordType> {
 
     /**
      * Queries local model storage
@@ -42,6 +44,7 @@ public interface ModelQuery<RecordType> {
      * @return pointers to all records
      */
     RecordType[] all(RecordType[] unused);
+    Iterator<RecordType> iterator();
 
     /**
      * Clears local model storage

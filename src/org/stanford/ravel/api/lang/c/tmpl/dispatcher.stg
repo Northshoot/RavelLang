@@ -25,14 +25,9 @@ set_component_controller(comp, prefix) ::=<<
 <comp.controllerList:{c|ravel_generated_<comp.component.name; format="function">_set_controller_<c.varName>(&self-><prefix>_<comp.varName>, &self->ctr_<c.varName>);}; separator="\n">
 >>
 
-model_case_event(model, event) ::=<<
+model_case_event(model, event, args) ::=<<
 case <model.component.baseModel.id>:
-    ravel_base_model_<event>(ravel_base_model(&self->model_<model.varName>), packet, endpoint);
-    break;
->>
-model_case_event_error(model, event) ::=<<
-case <model.component.baseModel.id>:
-    ravel_base_model_<event>(ravel_base_model(&self->model_<model.varName>), packet, endpoint, error);
+    ravel_<model.component.baseModel.modelType; format="function">_model_<event>(&self->model_<model.varName>.__base, <args>);
     break;
 >>
 
@@ -45,7 +40,15 @@ static void
 data_received(<name> *self, RavelPacket *packet, RavelEndpoint *endpoint)
 {
     switch (packet->model_id) {
-        <models:model_case_event("record_arrived"); separator="\n">
+        <models:model_case_event("record_arrived", "packet, endpoint"); separator="\n">
+    }
+}
+
+static void
+saved_durably(<name> *self, RavelPacket *packet, RavelError error)
+{
+    switch (packet->model_id) {
+        <models:model_case_event("record_saved_durably", "packet, error"); separator="\n">
     }
 }
 
@@ -54,11 +57,11 @@ send_done(<name> *self, RavelError error, RavelPacket *packet, RavelEndpoint *en
 {
     if (error == RAVEL_ERROR_SUCCESS) {
         switch (packet->model_id) {
-            <models:model_case_event("record_departed"); separator="\n">
+            <models:model_case_event("record_departed", "packet, endpoint"); separator="\n">
         }
     } else {
         switch (packet->model_id) {
-            <models:model_case_event_error("record_failed_to_send"); separator="\n">
+            <models:model_case_event("record_failed_to_send", "packet, endpoint, error"); separator="\n">
         }
     }
 }
@@ -66,6 +69,7 @@ send_done(<name> *self, RavelError error, RavelPacket *packet, RavelEndpoint *en
 static const RavelDispatcherVTable vtable = {
     .data_received = (void(*)(void*, RavelPacket *, RavelEndpoint *)) data_received,
     .send_done = (void(*)(void*, RavelError, RavelPacket *, RavelEndpoint *)) send_done,
+    .saved_durably = (void(*)(void*, RavelPacket *, RavelError)) saved_durably,
 };
 
 void

@@ -108,3 +108,9 @@ ravel_crypto_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *ke
     memcpy(data + offset, decrypted, length - IV_SIZE);
     free(decrypted);
 }
+
+void
+ravel_crypto_array_fill_random(uint8_t *data, int32_t offset, int32_t length)
+{
+    // TODO
+}

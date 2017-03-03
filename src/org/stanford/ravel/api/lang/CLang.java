@@ -89,13 +89,20 @@ public class CLang extends BaseLanguage {
         private String getUnderscoreName(String name) {
             if (name.endsWith("API"))
                 name = name.substring(0, name.length()-3);
+            name = name.replace(".", "");
             return StringUtils.join(name.split("(?=\\p{Upper})"),"_").toLowerCase();
         }
 
-
         @Override
         public String toString(Object o, String s, Locale locale) {
-            String name = (String)o;
+            String name;
+
+            if (o instanceof String)
+                name = (String)o;
+            else if (o instanceof Enum<?>)
+                name = ((Enum<?>) o).name().toLowerCase();
+            else
+                name = o.toString();
             if (s == null)
                 return name;
 
@@ -123,6 +130,7 @@ public class CLang extends BaseLanguage {
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
         dispatcherGroup.registerRenderer(Type.class, CTYPES);
         dispatcherGroup.registerRenderer(String.class, CIDENT);
+        dispatcherGroup.registerRenderer(Model.Type.class, CIDENT);
 
         //irGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/ir.stg");
         //irGroup.registerRenderer(Type.class, CTYPES);
@@ -132,6 +140,7 @@ public class CLang extends BaseLanguage {
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");
         controllerGroup.registerRenderer(Type.class, CTYPES);
         controllerGroup.registerRenderer(String.class, CIDENT);
+        controllerGroup.registerRenderer(Model.Type.class, CIDENT);
         controllerGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
             TypedIR ir = (TypedIR)o;
             irTranslator.translate(ir);
@@ -141,6 +150,7 @@ public class CLang extends BaseLanguage {
         modelGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/model.stg");
         modelGroup.registerRenderer(Type.class, CTYPES);
         modelGroup.registerRenderer(String.class, CIDENT);
+        modelGroup.registerRenderer(Model.Type.class, CIDENT);
         modelGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
             TypedIR ir = (TypedIR)o;
             irTranslator.translate(ir);

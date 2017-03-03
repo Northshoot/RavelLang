@@ -44,12 +44,27 @@ public class TMethodCall extends TInstruction {
 
     @Override
     public int[] getSources() {
-        return arguments;
+        if (owner != Registers.VOID_REG) {
+            int[] sources = new int[arguments.length + 1];
+            sources[0] = owner;
+            System.arraycopy(arguments, 0, sources, 1, arguments.length);
+            return sources;
+        } else {
+            return arguments;
+        }
     }
 
     @Override
     public Type[] getSourceTypes() {
-        return type.getArgumentTypes();
+        if (owner != Registers.VOID_REG) {
+            Type[] argumentTypes = type.getArgumentTypes();
+            Type[] sourceTypes = new Type[argumentTypes.length + 1];
+            sourceTypes[0] = type.getOwner().getInstanceType();
+            System.arraycopy(argumentTypes, 0, sourceTypes, 1, argumentTypes.length);
+            return sourceTypes;
+        } else {
+            return type.getArgumentTypes();
+        }
     }
 
     @Override
@@ -63,7 +78,7 @@ public class TMethodCall extends TInstruction {
             switch (method) {
                 case "create":
                 case "get":
-                case "all":
+                case "iterator":
                 case "first":
                 case "last":
                 case "size":
@@ -76,6 +91,8 @@ public class TMethodCall extends TInstruction {
                 default:
                     throw new AssertionError("Unexpected method " + method + " in model");
             }
+        } else if (type.getOwner() instanceof ModelType.IteratorType) {
+            return false;
         } else {
             return true;
         }

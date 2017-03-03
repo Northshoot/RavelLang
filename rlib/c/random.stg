@@ -5,15 +5,8 @@ c_file(includes,name,interface) ::=<<
 
 <includes:do_include(); separator="\n">
 
-void
-<name; format="function">_init(<name> *self<append_parameter_list(interface.baseInterface.parameters)>)
-{}
-void
-<name; format="function">_finalize(<name> *self)
-{}
-
 int
-<name; format="function">_next(<name> *self)
+ravel_generated_<name; format="function">_next(<name> *self)
 {
     return rand();
 }
@@ -31,10 +24,10 @@ typedef struct {
     int dummy;
 } <name>;
 
-void <name; format="function">_init(<name> *self<append_parameter_list(interface.baseInterface.parameters)>);
-void <name; format="function">_finalize(<name> *self);
+static inline void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>) {}
+static inline void ravel_generated_<name; format="function">_finalize(<name> *self) {}
 
-int <name; format="function">_next(<name> *self);
+int ravel_generated_<name; format="function">_next(<name> *self);
 
 <end_extern_c()>
 <end_header("", name)>

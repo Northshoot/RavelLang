@@ -90,8 +90,13 @@ public class <name> extends <base>\<<name>.Record> {
     @Override
     protected byte[] marshall(Record record, Endpoint endpoint) {
         byte[] data = record.toBytes();
-        <model.encryptCode>
-        return __returnValue;
+
+        if (endpoint != null) {
+            <model.encryptCode>
+            return __returnValue;
+        } else {
+            return data;
+        }
     }
     public Record create() {
         return new Record();

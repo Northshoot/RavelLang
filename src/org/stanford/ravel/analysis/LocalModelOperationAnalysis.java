@@ -66,24 +66,24 @@ public class LocalModelOperationAnalysis {
 
             switch (type.getFunctionName()) {
                 case "create":
-                case "all":
+                case "iterator":
                 case "first":
                 case "last":
                 case "clear":
                 case "size":
-                    assert instr.getSources().length == 0;
+                    assert instr.getSources().length == 1;
                     // all these have no sources, so no operations to meet
                     break;
 
                 case "get":
                     // the argument to get is an index, which must be fully decrypted
-                    meetOperation(instr.getSources()[0], Operation.ANY);
+                    meetOperation(instr.getSources()[1], Operation.ANY);
                     break;
 
                 case "save":
                     // save is just a fancy move, but we're moving all fields
-                    ModelType.RecordType recordType = (ModelType.RecordType)instr.getSourceTypes()[0];
-                    int record = instr.getSources()[0];
+                    ModelType.RecordType recordType = (ModelType.RecordType) instr.getSourceTypes()[1];
+                    int record = instr.getSources()[1];
                     /*for (String fieldName : recordType.getMemberList()) {
                         for (ModelTag modelTag : event.getVariableModelTags(record)) {
                             assert modelTag.model != null;
@@ -99,6 +99,14 @@ public class LocalModelOperationAnalysis {
 
                 default:
                     throw new AssertionError("Unexpected model function " + type.getFunctionName());
+            }
+        } else if (type.getOwner() instanceof ModelType.IteratorType) {
+            switch (type.getFunctionName()) {
+                case "hasNext":
+                case "next":
+                    assert instr.getSources().length == 1;
+                    // all these have no sources, so no operations to meet
+                    break;
             }
         } else {
             // interface function, here be dragons, anything can happen

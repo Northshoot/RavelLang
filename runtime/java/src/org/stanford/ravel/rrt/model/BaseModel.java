@@ -9,6 +9,7 @@ import org.stanford.ravel.rrt.tiers.Error;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -257,6 +258,11 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     @Override
     public RecordType[] all(RecordType[] unused) {
         return mRecords.toArray(unused);
+    }
+
+    @Override
+    public Iterator<RecordType> iterator() {
+        return mRecords.iterator();
     }
 
     @Override

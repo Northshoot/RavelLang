@@ -25,9 +25,13 @@ WOLFSSL_CFLAGS := $(shell pkg-config --cflags wolfssl)
 
 clean:
 	rm -f libravel.a $(OBJS)
+	rm -fr .deps
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Werror=implicit-function-declaration -Werror=return-type -I$(RAVEL_C_RUNTIME_DIR) -I. -c -o $@ $<
+	mkdir -p .deps
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Werror=implicit-function-declaration -Werror=return-type -I$(RAVEL_C_RUNTIME_DIR) -I. -MT $@ -MD -MP -MF .deps/$(notdir $@).d -c -o $@ $<
 
 libravel.a: $(OBJS)
 	$(AR) crs -o $@ $^
+
+-include .deps/*.d

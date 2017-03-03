@@ -148,7 +148,7 @@ public class SecurityTransformation {
 
         // write the record ID
         int recordId = builder.allocateRegister(PrimitiveType.BYTE);
-        builder.add(new TFieldLoad(PrimitiveType.BYTE, im.getBaseModel().getType().getRecordType(), recordId, recordSym.getRegister(), "__idx"));
+        builder.add(IntrinsicFactory.createReadRecordId(im.getBaseModel().getType().getRecordType(), recordId, recordSym.getRegister()));
         int recordIdPos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, recordIdPos, 1));
         builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.BYTE, buffer, recordIdPos, recordId));

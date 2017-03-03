@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include <api/base_dispatcher.h>
+#include "api/base_dispatcher.h"
 
 void
 ravel_base_dispatcher_init(RavelBaseDispatcher *self)
