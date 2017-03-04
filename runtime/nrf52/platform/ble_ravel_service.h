@@ -22,7 +22,7 @@ extern "C" {
 typedef struct ble_rad_s ble_rad_t;
 
 /**@brief callback to rad service handler */
-typedef void (*ble_rad_data_handler_t) (ble_rad_t * p_rad, uint8_t * p_data, uint16_t length);
+typedef void (*ble_rad_data_handler_t) (uint8_t * p_data, uint16_t length);
 
 
 typedef struct
@@ -67,7 +67,7 @@ uint32_t ble_rad_init();
  * @param[in] p_rad       Ravel Data Service structure.
  * @param[in] p_ble_evt   Event received from the SoftDevice.
  */
-void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt);
+void ble_rad_on_ble_evt(ble_evt_t * p_ble_evt);
 
 /**@brief Function for sending a string to the peer.
  *
@@ -80,7 +80,7 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt);
  *
  * @retval NRF_SUCCESS If the string was sent successfully. Otherwise, an error code is returned.
  */
-uint32_t ble_rad_data_send(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length);
+uint32_t ble_rad_data_send(uint8_t * p_data, uint16_t length);
 
 
 #ifdef __cplusplus

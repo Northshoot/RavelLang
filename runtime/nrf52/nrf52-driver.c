@@ -47,7 +47,6 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
     init_timer_module();
     self->base.dispatcher = dispatcher;
-
     ble_stack_init();
 }
 

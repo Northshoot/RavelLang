@@ -78,28 +78,10 @@
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
-#define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 
 static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
-
-
-/**@brief Function for assert macro callback.
- *
- * @details This function will be called in case of an assert in the SoftDevice.
- *
- * @warning This handler is an example only and does not fit a final product. You need to analyse
- *          how your product is supposed to react in case of Assert.
- * @warning On assert from the SoftDevice, the system can only recover on reset.
- *
- * @param[in] line_num    Line number of the failing ASSERT call.
- * @param[in] p_file_name File name of the failing ASSERT call.
- */
-void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
-{
-    app_error_handler(DEAD_BEEF, line_num, p_file_name);
-}
 
 
 /**@brief Function for the GAP initialization.
@@ -329,11 +311,11 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
  */
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
+    NRF_LOG_DEBUG("ble_evt_dispatch %d\r\n", counter_get());
     ble_conn_params_on_ble_evt(p_ble_evt);
-//    ble_nus_on_ble_evt(&m_nus, p_ble_evt);
+    ble_rad_on_ble_evt(p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
- //   bsp_btn_ble_on_ble_evt(p_ble_evt);
 
 }
 
@@ -345,7 +327,7 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
  void ble_stack_init(void)
 {
     uint32_t err_code;
-
+    NRF_LOG_DEBUG("ble_stack_init %d\r\n", counter_get());
     ble_enable_params_t ble_enable_params;
     err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
                                                     PERIPHERAL_LINK_COUNT,
@@ -377,7 +359,7 @@ static void advertising_init(void)
     ble_advdata_t          advdata;
     ble_advdata_t          scanrsp;
     ble_adv_modes_config_t options;
-    NRF_LOG_DEBUG("advertising_start %d", counter_get());
+    NRF_LOG_DEBUG("advertising_start %d\r\n", counter_get());
     // Build advertising data struct to pass into @ref ble_advertising_init.
     memset(&advdata, 0, sizeof(advdata));
     advdata.name_type          = BLE_ADVDATA_FULL_NAME;
@@ -400,7 +382,7 @@ static void advertising_init(void)
  void ble_start()
 {
     uint32_t err_code;
-
+    NRF_LOG_DEBUG("ble_start%d\r\n", counter_get());
     gap_params_init();
     services_init();
     advertising_init();
