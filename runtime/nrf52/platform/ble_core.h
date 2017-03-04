@@ -2,10 +2,9 @@
 #define BLE_CORE_H
 
 
-void ble_start(void);
-void ble_disable(void);
-void ble_stack_init(void);
-void gap_params_init(void);
+ void ble_start(void);
+ void ble_stack_init(void);
+
 
 
 //extern const char device_name[];

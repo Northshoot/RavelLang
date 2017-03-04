@@ -19,9 +19,13 @@
 #include "endpoint.h"
 #include "crypto.h"
 
+/*
 #define ravel_container_of(ptr, type, member) ({             \
      const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
      (type *)( (char *)__mptr - offsetof(type,member) );})
+*/
+#define ravel_container_of(ptr, type, member) \
+  ((type *)((char *)(ptr) - (unsigned long)(&((type *)0)->member)))
 
 static inline int32_t ravel_intrinsic_array_length(void *array) {
     return (int32_t)ravel_array_length(array);

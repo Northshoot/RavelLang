@@ -4,8 +4,7 @@
  */
 
 #include <stdio.h>
-
-#include <api/system.h>
+#include "api/system.h"
 
 void
 ravel_system_print(RavelSystemAPI *self, const char *msg)

@@ -84,11 +84,12 @@ uint32_t queue_enqueue(const data_packet_t *packet, uint32_t write_loc) {
     }
 
     /* get the identifier for the next block that can be written to */
-    err_code = pstorage_block_identifier_get(
-        &m_storage_handle,
-        m_storage_write_index % BLOCK_COUNT_RND,
-        &block_handle
-    );
+    err_code = 0;
+//    pstorage_block_identifier_get(
+//        &m_storage_handle,
+//        m_storage_write_index % BLOCK_COUNT_RND,
+//        &block_handle
+//    );
     APP_ERROR_CHECK(err_code);
 
     /* store the new packet at this block */
@@ -122,8 +123,8 @@ void queue_dequeue_n(uint32_t read_loc) {
 }
 
 uint32_t queue_read_n(data_packet_t *packet, uint32_t n) {
-    uint32_t err_code;
-    pstorage_handle_t block_handle;
+    uint32_t err_code=0;
+    //pstorage_handle_t block_handle;
 
     /* the flash data needs to be at least word aligned */
     //uint8_t flash_data[BLOCK_SIZE] __attribute__((aligned(4)));
@@ -137,22 +138,23 @@ uint32_t queue_read_n(data_packet_t *packet, uint32_t n) {
     }
 
     /* get the identifier for the block in question */
-    err_code = pstorage_block_identifier_get(
-        &m_storage_handle,
-        n % BLOCK_COUNT_RND,
-        &block_handle
-    );
+    err_code = 0;
+//    pstorage_block_identifier_get(
+//        &m_storage_handle,
+//        n % BLOCK_COUNT_RND,
+//        &block_handle
+//    );
     APP_ERROR_CHECK(err_code);
 
     /* read the packet from this block */
     //LOG("Queue reading %u %u",block_handle.module_id,block_handle.block_id);
-    m_pstorage_load_complete = false;
-    err_code = pstorage_load(
-        (uint8_t *)packet,
-        &block_handle,
-        BLOCK_SIZE,
-        0
-    );
+//    m_pstorage_load_complete = false;
+//    err_code = pstorage_load(
+//        (uint8_t *)packet,
+//        &block_handle,
+//        BLOCK_SIZE,
+//        0
+//    );
 
     APP_ERROR_CHECK(err_code);
 

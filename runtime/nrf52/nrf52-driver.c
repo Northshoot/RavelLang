@@ -47,6 +47,8 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
     init_timer_module();
     self->base.dispatcher = dispatcher;
+
+    ble_stack_init();
 }
 
 
@@ -61,11 +63,9 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
-    // TODO
-    uint32_t now = app_timer_cnt_get();
-    NRF_LOG_INFO("NOW: %d\r\n", now);
     // Main loop.
     NRF_LOG_INFO("LOOP\r\n");
+    ble_start();
     while (true)
     {
         app_sched_execute();

@@ -5,8 +5,8 @@ PLATFORM_RUNTIME_SOURCES   += $(RAVEL_PLATFORM_RUNTIME_DIR)/nrf52-driver.c
 RPI := $(RAVEL_PLATFORM_RUNTIME_DIR)/platform
 
 PROJECT_SOURCEFILES := $(C_RUNTIME_SOURCES) $(PLATFORM_RUNTIME_SOURCES)
-
-PROJECTDIRS += $(RAVEL_C_RUNTIME_DIR) $(RAVEL_PLATFORM_RUNTIME_DIR) $(RPI)
+WOLFSECURE := /Users/lauril/workspace/01-ravel/RavelLang/runtime/libs/wolfssl-3.10.0
+PROJECTDIRS += $(RAVEL_C_RUNTIME_DIR) $(RAVEL_PLATFORM_RUNTIME_DIR) $(RPI) $(WOLFSECURE)
 
 
 
@@ -213,6 +213,7 @@ CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin --short-enums
+CFLAGS += -std=gnu11
 
 # C++ flags common to all targets
 CXXFLAGS += \

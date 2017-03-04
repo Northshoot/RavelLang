@@ -1,7 +1,7 @@
 application(runtime,plat_runtime,path,target,sources, linker_script, main) ::=<<
 <! NRF52 make file !>
 APP_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-RAVEL_C_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang<runtime>
+RAVEL_C_RUNTIME_DIR = <runtime>
 RAVEL_PLATFORM_RUNTIME_DIR = <plat_runtime>
 NRF52 = <path>
 
