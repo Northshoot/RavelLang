@@ -193,10 +193,10 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
-            NRF_LOG_DEBUG("on_adv_evt::BLE_ADV_EVT_FAST %d", counter_get());
+            NRF_LOG_DEBUG("on_adv_evt::BLE_ADV_EVT_FAST %d\r\n", counter_get());
             break;
         case BLE_ADV_EVT_IDLE:
-            NRF_LOG_DEBUG("on_adv_evt::BLE_ADV_EVT_IDLE %d", counter_get());
+            NRF_LOG_DEBUG("on_adv_evt::BLE_ADV_EVT_IDLE %d\r\n", counter_get());
             break;
         default:
             break;
@@ -211,7 +211,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 static void on_ble_evt(ble_evt_t * p_ble_evt)
 {
     uint32_t err_code;
-    NRF_LOG_DEBUG("on_ble_evt %d", counter_get());
+    NRF_LOG_DEBUG("on_ble_evt %d\r\n", counter_get());
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:

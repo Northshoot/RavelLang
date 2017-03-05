@@ -19,7 +19,9 @@
 #define BLE_RAD_MAX_RX_CHAR_LEN        BLE_RAD_MAX_DATA_LEN        /**< Maximum length of the RX Characteristic (in bytes). */
 #define BLE_RAD_MAX_TX_CHAR_LEN        BLE_RAD_MAX_DATA_LEN        /**< Maximum length of the TX Characteristic (in bytes). */
 
-#define RAD_BASE_UUID                  {{0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x00, 0x00, 0x40, 0x6E}} /**< Used vendor specific UUID. */
+/**< Used vendor specific UUID. */
+#define RAD_BASE_UUID                  {{0x01, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}
+
 
 static ble_rad_t  m_rad; //Ravel Data Service structure.
 
