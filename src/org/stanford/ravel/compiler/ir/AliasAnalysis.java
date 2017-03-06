@@ -172,6 +172,10 @@ public class AliasAnalysis {
                             // no pointers, no alias
                             break;
 
+                        case "delete":
+                            // does not return a pointer, so no new alias
+                            break;
+
                         default:
                             throw new AssertionError("Invalid model function " + type.getFunctionName());
                     }

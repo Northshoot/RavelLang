@@ -97,6 +97,10 @@ public class LocalModelOperationAnalysis {
                     }
                     break;
 
+                case "delete":
+                    // delete does nothing and deletes local storage (which can be encrypted for all we care)
+                    break;
+
                 default:
                     throw new AssertionError("Unexpected model function " + type.getFunctionName());
             }

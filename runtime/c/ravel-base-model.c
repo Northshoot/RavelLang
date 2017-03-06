@@ -509,6 +509,10 @@ ravel_streaming_model_save(RavelStreamingModel *self, void *record)
     ctx = ravel_base_model_save(&self->base, record);
     if (ctx->error == RAVEL_ERROR_SUCCESS) {
         RavelError send_error = ravel_base_model_send_record(&self->base, record, self->endpoints);
+        int record_pos = record_pos_from_record (&self->base, record);
+
+        // clear the save flag because we won't send a save done until much later
+        self->base.state[record_pos].in_save = false;
 
         ravel_context_finalize(&self->base.current_ctx);
         ravel_context_init_error(&self->base.current_ctx, send_error);
@@ -593,6 +597,9 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         record_pos = record_pos_from_record (&self->base, record);
         ctx = ravel_base_model_handle_record (&self->base, record, pkt, endpoint);
         if (ctx->error == RAVEL_ERROR_SUCCESS) {
+            // clear the save flag
+            self->base.state[record_pos].in_save = false;
+
             self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
         } else if (ctx->error == RAVEL_ERROR_IN_TRANSIT) {
             // saving, wait until done saving to tell the app

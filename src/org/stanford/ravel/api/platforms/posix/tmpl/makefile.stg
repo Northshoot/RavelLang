@@ -28,7 +28,7 @@ VPATH = ./app_files
 all: <target>
 
 clean:
-<\t>rm -f <target> <sources:{s|<s>.o}; separator=" ">
+<\t>rm -f <target> <sources:{s|<s>.o}; separator=" "> <main>.o
 <\t>rm -fr .deps
 
 <sources:compile_c(); separator="\n">

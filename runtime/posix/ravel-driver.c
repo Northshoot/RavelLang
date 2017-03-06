@@ -150,6 +150,8 @@ ravel_posix_driver_init(RavelPosixDriver *self, RavelBaseDispatcher *dispatcher,
     memset(self->poll_fds, 0, sizeof(self->poll_fds));
     memset(self->watched_fds, 0, sizeof(self->watched_fds));
     self->nfds = 0;
+    memset(self->callbacks, 0, sizeof(self->callbacks));
+    self->ncallbacks = 0;
 
     if (argc > 1)
         load_endpoint_table (self, argv[1]);
@@ -228,8 +230,8 @@ insert_endpoint_in_table(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
     return false;
 }
 
-static RavelPosixEndpoint *
-add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen)
+static void
+add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen, RavelPosixEndpoint *endpoint)
 {
     if (self->nfds == RAVEL_MAX_ENDPOINTS)
         abort();
@@ -242,15 +244,11 @@ add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen)
         self->watched_fds[self->nfds].is_listen = true;
         self->watched_fds[self->nfds].endpoint = NULL;
     } else {
-        RavelPosixEndpoint *endpoint = calloc(1, sizeof(RavelPosixEndpoint));
-        if (endpoint == NULL) abort();
-
         self->watched_fds[self->nfds].is_listen = false;
         self->watched_fds[self->nfds].endpoint = endpoint;
     }
 
     self->nfds++;
-    return self->watched_fds[self->nfds-1].endpoint;
 }
 
 static void start_local_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
@@ -272,7 +270,7 @@ static void start_local_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *end
     ok = listen(sock, 10);
     assert (ok >= 0);
 
-    add_poll_fd(self, sock, POLLIN, true);
+    add_poll_fd(self, sock, POLLIN, true, NULL);
 }
 
 void
@@ -339,7 +337,9 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
 
     assert (address_len == sizeof(address));
 
-    endpoint = add_poll_fd(self, fd, POLLIN, false);
+    endpoint = calloc(1, sizeof(RavelPosixEndpoint));
+    if (endpoint == NULL) abort();
+    add_poll_fd(self, fd, POLLIN, false, endpoint);
     name_buffer = read_loop(fd, &name_len);
 
     name = malloc(name_len + 1);
@@ -432,38 +432,99 @@ ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
 }
 
 static RavelError
-send_data(int fd, RavelPacket *packet)
+write_loop(int fd, size_t length, uint8_t* buffer)
 {
     uint8_t packet_length[2];
     ssize_t ok;
     size_t done;
-    RavelError err = RAVEL_ERROR_NETWORK_ERROR;
 
-    assert (packet->packet_length <= 65536);
-    packet_length[0] = packet->packet_length;
-    packet_length[1] = packet->packet_length >> 8;
+    assert (length <= 65536);
+    packet_length[0] = length;
+    packet_length[1] = length >> 8;
+
     ok = write(fd, packet_length, 2);
     if (ok < 0)
-        goto out;
+        return RAVEL_ERROR_NETWORK_ERROR;
     if (ok == 1) {
         ok = write(fd, packet_length+1, 1);
         if (ok < 0)
-            goto out;
+            return RAVEL_ERROR_NETWORK_ERROR;
     }
 
     done = 0;
-    while (done < packet->packet_length) {
-        ok = write(fd, packet->packet_data + done, packet->packet_length - done);
+    while (done < length) {
+        ok = write(fd, buffer + done, length - done);
         if (ok < 0)
-            goto out;
+            return RAVEL_ERROR_NETWORK_ERROR;
         done += ok;
     }
 
-    err = RAVEL_ERROR_SUCCESS;
+    return RAVEL_ERROR_SUCCESS;
+}
 
-out:
-    ravel_packet_finalize(packet);
-    return err;
+typedef struct
+{
+    RavelPacket packet;
+    RavelError error;
+    RavelEndpoint *endpoint;
+} SendDoneClosure;
+
+static void send_done_callback(void *ptr1, void *ptr2)
+{
+    RavelPosixDriver *self = ptr1;
+    SendDoneClosure *closure = ptr2;
+
+    ravel_base_dispatcher_send_done(self->base.dispatcher, closure->error, &closure->packet, closure->endpoint);
+
+    ravel_packet_finalize(&closure->packet);
+    free(closure);
+}
+
+static RavelError
+send_data(RavelPosixDriver *self, int fd, RavelPacket *packet, RavelEndpoint *endpoint)
+{
+    SendDoneClosure *closure;
+
+    closure = calloc (1, sizeof(SendDoneClosure));
+    if (closure == NULL)
+        return RAVEL_ERROR_OUT_OF_STORAGE;
+
+    closure->packet = *packet;
+    closure->endpoint = endpoint;
+    closure->error = write_loop(fd, packet->packet_length, packet->packet_data);
+    ravel_driver_queue_callback (&self->base, send_done_callback, self, closure);
+
+    return RAVEL_ERROR_IN_TRANSIT;
+}
+
+static int
+start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
+{
+    int fd;
+    int ok;
+    struct sockaddr_in address;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+        return fd;
+
+    address.sin_family = AF_INET;
+    address.sin_port = htons(endpoint->port);
+    address.sin_addr.s_addr = endpoint->address;
+
+    ok = connect(fd, (struct sockaddr*)&address, sizeof(address));
+    if (ok < 0) {
+        close(fd);
+        return -1;
+    }
+
+    if (write_loop(fd, strlen(self->app_name), (uint8_t*)self->app_name) != RAVEL_ERROR_SUCCESS) {
+        close(fd);
+        return -1;
+    }
+
+    add_poll_fd(self, fd, POLLIN, false, endpoint);
+    return fd;
 }
 
 RavelError
@@ -471,12 +532,19 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
 {
     RavelPosixDriver *self = ravel_container_of(driver, RavelPosixDriver, base);
     size_t i;
+    int fd;
+
+    assert (!((RavelPosixEndpoint*)endpoint)->is_local);
 
     for (i = 0; i < self->nfds; i++) {
         if (self->watched_fds[i].endpoint == (RavelPosixEndpoint*)endpoint) {
-            return send_data(self->poll_fds[i].fd, packet);
+            return send_data(self, self->poll_fds[i].fd, packet, endpoint);
         }
     }
+
+    fd = start_remote_endpoint(self, (RavelPosixEndpoint*)endpoint);
+    if (fd >= 0)
+        return send_data(self, self->poll_fds[i].fd, packet, endpoint);
 
     ravel_packet_finalize(packet);
     return RAVEL_ERROR_ENDPOINT_UNREACHABLE;
@@ -493,9 +561,31 @@ void ravel_driver_queue_callback(RavelDriver *driver, void (*fn)(void*,void*), v
     self->ncallbacks++;
 }
 
+typedef struct
+{
+    RavelPacket packet;
+    RavelError error;
+} SavedDurablyClosure;
+
+static void saved_durably_callback(void *ptr1, void *ptr2)
+{
+    RavelPosixDriver *self = ptr1;
+    SavedDurablyClosure *closure = ptr2;
+
+    ravel_base_dispatcher_saved_durably (self->base.dispatcher, &closure->packet, closure->error);
+
+    ravel_packet_finalize(&closure->packet);
+    free(closure);
+}
+
 void ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
 {
-    // TODO
+    SavedDurablyClosure *closure;
 
-    ravel_packet_finalize(packet);
+    closure = calloc (1, sizeof(SavedDurablyClosure));
+    if (closure == NULL) abort();
+
+    closure->packet = *packet;
+    closure->error = RAVEL_ERROR_SUCCESS;
+    ravel_driver_queue_callback (driver, saved_durably_callback, driver, closure);
 }

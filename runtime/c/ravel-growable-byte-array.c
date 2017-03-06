@@ -106,7 +106,14 @@ ravel_growable_byte_array_write_error_msg(RavelGrowableByteArray *self, RavelErr
 void
 ravel_growable_byte_array_write_str(RavelGrowableByteArray *self, const char * str)
 {
-    size_t len = strlen(str);
+    size_t len;
+
+    if (str == NULL) {
+        ravel_growable_byte_array_write_uint16(self, 0);
+        return;
+    }
+
+    len = strlen(str);
     assert (len < 65536);
 
     ravel_growable_byte_array_write_uint16(self, len);

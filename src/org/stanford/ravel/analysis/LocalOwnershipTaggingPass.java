@@ -260,6 +260,7 @@ public class LocalOwnershipTaggingPass {
                             break;
 
                         case "clear":
+                        case "delete":
                             assert instr.getSink() == Registers.VOID_REG;
                             break;
 

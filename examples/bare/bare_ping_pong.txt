@@ -41,10 +41,12 @@ controller PingController(ref : Reference, ping : Ping, pong : Pong):
             system.print("uh oh! the values don't match")
         else:
             system.print("pong ok")
+        pong.delete(self.record)
 
         system.print("sending ping")
         refrec.value += 1
         ref.save(refrec)
+        ping.delete(ping.first())
         pingrec = ping.create()
         pingrec.value = refrec.value
         ping.save(pingrec)
@@ -57,16 +59,17 @@ interface RandomSource():
 
     def next(): int32
 
-controller PongController(ping : Ping, pong : Pong, random : RandomSource):
+controller PongController(ping : Ping, pong : Pong):
     event ping.arrived():
         system.print("ping received")
         pingrec = self.record
         pongrec = pong.create()
         x = pingrec.value
 
-        if random.next() > 42:
-            pongrec.value = x
-            pong.save(pongrec)
+        pongrec.value = x
+        pong.save(pongrec)
+        ping.delete(self.record)
+        pong.delete(pong.first())
 
 
 space GatewaySpace:
@@ -81,10 +84,10 @@ space GatewaySpace:
         pong = Pong()
 
     interfaces:
-        rnd = RandomSource()
+        #rnd = RandomSource()
 
     controllers:
-        pong_cnt = PongController(ping = models.ping, pong = models.pong, random = interfaces.rnd)
+        pong_cnt = PongController(ping = models.ping, pong = models.pong)
 
 
 space EmbeddedSpace:

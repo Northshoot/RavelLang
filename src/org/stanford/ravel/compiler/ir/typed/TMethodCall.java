@@ -86,13 +86,23 @@ public class TMethodCall extends TInstruction {
 
                 case "save":
                 case "clear":
+                case "delete":
                     return true;
 
                 default:
                     throw new AssertionError("Unexpected method " + method + " in model");
             }
         } else if (type.getOwner() instanceof ModelType.IteratorType) {
-            return false;
+            switch (method) {
+                case "hasNext":
+                    return false;
+
+                case "next":
+                    return true;
+
+                default:
+                    throw new AssertionError("Unexpected method " + method + " in iterator");
+            }
         } else {
             return true;
         }
