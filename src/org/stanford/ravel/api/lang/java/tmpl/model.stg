@@ -9,7 +9,7 @@ public static class Record implements ModelRecord {
     Record() {
     }
 
-    Record(byte[] data) {
+    Record(byte[] data, boolean is_encrypted) {
         this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_byte(data, 1);
         <model.baseModel.receiveCode>
     }
@@ -84,8 +84,9 @@ public class <name> extends <base>\<<name>.Record> {
     protected Record unmarshall(byte[] data, Endpoint endpoint) {
         byte[] decrypted;
         int length = data.length;
+        boolean is_encrypted;
         <model.decryptCode>
-        return new Record(decrypted);
+        return new Record(decrypted, is_encrypted);
     }
     @Override
     protected byte[] marshall(Record record, Endpoint endpoint) {

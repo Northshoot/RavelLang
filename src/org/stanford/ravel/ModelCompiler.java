@@ -178,9 +178,9 @@ public class ModelCompiler {
         return ir;
     }
 
-    private void buildExtractPrimitive(TypedIRBuilder builder, PrimitiveType type, int target, int data, int pos) {
+    private void buildExtractPrimitive(TypedIRBuilder builder, PrimitiveType type, int target, int data, int pos, int isEncrypted) {
         if (type == PrimitiveType.STR) {
-            buildExtractString(builder, target, data, pos);
+            buildExtractString(builder, target, data, pos, isEncrypted);
         } else {
             int size = type.getSerializedSize();
             assert size > 0;
@@ -196,10 +196,50 @@ public class ModelCompiler {
         }
     }
 
-    private void buildExtractString(TypedIRBuilder builder, int target, int data, int pos) {
+    private void buildExtractString(TypedIRBuilder builder, int target, int data, int pos, int isEncrypted) {
         int sizeReg = builder.allocateRegister(PrimitiveType.INT32);
+
+        // if (is_encrypted) {
+        // size = 0
+        // } else {
         // size = extract_uint16(data, pos)
+        //
+
+        ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
+        LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
+
+        // build the iftrue part
+        TBlock iftrue = cfgBuilder.newBlock();
+        TBlock iffalse = cfgBuilder.newBlock();
+
+        TIfStatement ifStatement = new TIfStatement(isEncrypted, iftrue, iffalse);
+        builder.add(ifStatement);
+
+        loopTreeBuilder.ifStatement(ifStatement, iftrue, iffalse);
+
+        // continue in a new block
+        TBlock continuation = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(iftrue);
+        cfgBuilder.addSuccessor(iffalse);
+        cfgBuilder.pushBlock(iftrue);
+
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, sizeReg, 0));
+
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+
+        loopTreeBuilder.elseStatement(isEncrypted);
+        cfgBuilder.pushBlock(iffalse);
+
         builder.add(IntrinsicFactory.createExtractUInt16(sizeReg, data, pos));
+
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+
+        loopTreeBuilder.endIfStatement(isEncrypted);
+        loopTreeBuilder.addBasicBlock(continuation);
+        cfgBuilder.replaceBlock(continuation);
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -213,11 +253,51 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, sizeReg, BinaryOperation.ADD));
     }
 
-    private void buildExtractArray(TypedIRBuilder builder, ArrayType arrayType, int target, int data, int pos) {
+    private void buildExtractArray(TypedIRBuilder builder, ArrayType arrayType, int target, int data, int pos, int isEncrypted) {
         // int len;
         int len = builder.allocateRegister(PrimitiveType.INT32);
+
+        // if (is_encrypted) {
+        // len = 0
+        // } else {
         // len = extract_uint16(data, pos)
+        //
+
+        ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
+        LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
+
+        // build the iftrue part
+        TBlock iftrue = cfgBuilder.newBlock();
+        TBlock iffalse = cfgBuilder.newBlock();
+
+        TIfStatement ifStatement = new TIfStatement(isEncrypted, iftrue, iffalse);
+        builder.add(ifStatement);
+
+        loopTreeBuilder.ifStatement(ifStatement, iftrue, iffalse);
+
+        // continue in a new block
+        TBlock continuation = cfgBuilder.newBlock();
+
+        cfgBuilder.addSuccessor(iftrue);
+        cfgBuilder.addSuccessor(iffalse);
+        cfgBuilder.pushBlock(iftrue);
+
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, len, 0));
+
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+
+        loopTreeBuilder.elseStatement(isEncrypted);
+        cfgBuilder.pushBlock(iffalse);
+
         builder.add(IntrinsicFactory.createExtractUInt16(len, data, pos));
+
+        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.popBlock();
+
+        loopTreeBuilder.endIfStatement(isEncrypted);
+        loopTreeBuilder.addBasicBlock(continuation);
+        cfgBuilder.replaceBlock(continuation);
 
         // pos = pos + 2
         int twoReg = builder.allocateRegister(PrimitiveType.INT32);
@@ -232,12 +312,9 @@ public class ModelCompiler {
         // i = 0;
         builder.add(new TImmediateLoad(PrimitiveType.INT32, i, 0));
 
-        ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
-        LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
-
         // while(true) {
         TBlock loopHead = cfgBuilder.newBlock();
-        TBlock continuation = cfgBuilder.newBlock();
+        TBlock loopContinuation = cfgBuilder.newBlock();
 
         loopTreeBuilder.beginLoop(loopHead);
         cfgBuilder.addSuccessor(loopHead);
@@ -257,17 +334,17 @@ public class ModelCompiler {
 
         cfgBuilder.addSuccessor(empty);
         cfgBuilder.addSuccessor(breakBlock);
-        TIfStatement ifStatement = new TIfStatement(cond, empty, breakBlock);
-        builder.add(ifStatement);
+        TIfStatement loopIfStatement = new TIfStatement(cond, empty, breakBlock);
+        builder.add(loopIfStatement);
 
-        loopTreeBuilder.ifStatement(ifStatement, empty, breakBlock);
+        loopTreeBuilder.ifStatement(loopIfStatement, empty, breakBlock);
         cfgBuilder.pushBlock(empty);
         cfgBuilder.addSuccessor(loopBody);
         cfgBuilder.popBlock();
         loopTreeBuilder.elseStatement(cond);
         cfgBuilder.pushBlock(breakBlock);
         builder.add(new TBreak());
-        cfgBuilder.addSuccessor(continuation);
+        cfgBuilder.addSuccessor(loopContinuation);
         cfgBuilder.popBlock();
         loopTreeBuilder.endIfStatement(cond);
 
@@ -276,7 +353,7 @@ public class ModelCompiler {
 
         // elem = ...
         int elem = builder.allocateRegister(arrayType.getElementType());
-        buildExtract(builder, arrayType.getElementType(), elem, data, pos);
+        buildExtract(builder, arrayType.getElementType(), elem, data, pos, isEncrypted);
 
         // target[i] = elem
         builder.add(new TArrayStore(arrayType.getElementType(), arrayType, target, i, elem));
@@ -290,15 +367,15 @@ public class ModelCompiler {
         cfgBuilder.addSuccessor(loopHead);
         cfgBuilder.popBlock();
         loopTreeBuilder.endLoop();
-        loopTreeBuilder.addBasicBlock(continuation);
-        cfgBuilder.replaceBlock(continuation);
+        loopTreeBuilder.addBasicBlock(loopContinuation);
+        cfgBuilder.replaceBlock(loopContinuation);
     }
 
-    private void buildExtract(TypedIRBuilder builder, Type type, int target, int data, int pos) {
+    private void buildExtract(TypedIRBuilder builder, Type type, int target, int data, int pos, int isEncrypted) {
         if (type instanceof PrimitiveType)
-            buildExtractPrimitive(builder, (PrimitiveType)type, target, data, pos);
+            buildExtractPrimitive(builder, (PrimitiveType)type, target, data, pos, isEncrypted);
         else if (type instanceof ArrayType)
-            buildExtractArray(builder, (ArrayType)type, target, data, pos);
+            buildExtractArray(builder, (ArrayType)type, target, data, pos, isEncrypted);
         else
             throw new AssertionError("Unsupported field type " + type.getName());
     }
@@ -326,6 +403,12 @@ public class ModelCompiler {
         dataSym.setRegister(firstReg++);
         builder.declareParameter(dataSym, false);
 
+        VariableSymbol isEncryptedSym = new VariableSymbol("is_encrypted");
+        isEncryptedSym.setType(PrimitiveType.BOOL);
+        isEncryptedSym.setWritable(false);
+        isEncryptedSym.setRegister(firstReg++);
+        builder.declareParameter(isEncryptedSym, false);
+
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, PrimitiveType.VOID);
 
@@ -340,7 +423,7 @@ public class ModelCompiler {
             Type fieldType = field.getType();
 
             int value = builder.allocateRegister(fieldType);
-            buildExtract(builder, fieldType, value, data, pos);
+            buildExtract(builder, fieldType, value, data, pos, isEncryptedSym.getRegister());
             builder.add(new TFieldStore(fieldType, recordType, thisReg, field.getName(), value));
         }
 

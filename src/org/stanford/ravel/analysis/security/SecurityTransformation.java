@@ -264,7 +264,7 @@ public class SecurityTransformation {
         builder.add(IntrinsicFactory.createEncrypt(buffer, offset, encryptedSize, key));
     }
 
-    private void applyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int bufferStart, int bufferEnd, int endpointname) {
+    private void applyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int bufferStart, int bufferEnd, int endpointname, int isEncrypted) {
         // the overall code looks something like
         //
         // if (endpoint.getName() == "...") {
@@ -301,6 +301,7 @@ public class SecurityTransformation {
         cfgBuilder.pushBlock(iftrue);
 
         doApplyOneDecryption(builder, op, dispatcher, buffer, bufferStart, bufferEnd);
+        builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, false));
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -514,10 +515,7 @@ public class SecurityTransformation {
         List<SecurityOperation> macs = im.getSecurityOperations(SecurityPrimitive.VERIFY_MAC);
         List<SecurityOperation> decryptions = im.getSecurityOperations(SecurityPrimitive.DECRYPT);
 
-        boolean doMAC = enableMAC && macs.size() > 0;
-        boolean doEncrypt = enableEncryption && decryptions.size() > 0;
-
-        if (doMAC) {
+        if (enableMAC) {
             for (SecurityOperation op : macs) {
                 verifyOneMac(builder, op, dispatcherSym.getRegister(), dataSym.getRegister(), endOfData, endpointname);
             }
@@ -537,11 +535,18 @@ public class SecurityTransformation {
         builder.add(new TImmediateLoad(PrimitiveType.INT32, zero, 0));
         builder.add(IntrinsicFactory.createArrayCopy(byteArray, decrypted, dataSym.getRegister(), zero, encryptedStart, encryptedSize));
 
-        if (doEncrypt) {
+        int isEncrypted = builder.allocateRegister(PrimitiveType.BOOL);
+
+        if (enableEncryption) {
+            builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, true));
             for (SecurityOperation op : decryptions) {
-                applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname);
+                applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
             }
+        } else {
+            builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, false));
         }
+
+        builder.add(IntrinsicFactory.createOutputSet(PrimitiveType.BOOL, "is_encrypted", isEncrypted));
 
         TypedIR ir = builder.finish();
         if (debug) {

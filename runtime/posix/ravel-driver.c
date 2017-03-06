@@ -175,7 +175,7 @@ ravel_posix_driver_finalize(RavelPosixDriver *self)
     for (i = 0; i < RAVEL_ENDPOINT_TABLE_SIZE; i++) {
         RavelPosixEndpoint **endpoints = self->endpoint_table[i];
 
-        for (j = 0; endpoints[j]; j++)
+        for (j = 0; endpoints && endpoints[j]; j++)
             posix_endpoint_free(endpoints[j]);
 
         free(endpoints);

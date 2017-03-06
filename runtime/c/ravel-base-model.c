@@ -235,7 +235,7 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
     error = RAVEL_ERROR_SUCCESS;
     for (i = 0; endpoint_names[i]; i++) {
         const char *endpoint_name = endpoint_names[i];
-        RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name((RavelBaseDispatcher*)self->dispatcher, endpoint_name);
+        RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name(self->dispatcher, endpoint_name);
 
         for (j = 0; endpoints[j]; j++) {
             RavelEndpoint *endpoint = endpoints[j];
@@ -508,7 +508,7 @@ ravel_streaming_model_save(RavelStreamingModel *self, void *record)
 
     ctx = ravel_base_model_save(&self->base, record);
     if (ctx->error == RAVEL_ERROR_SUCCESS) {
-        RavelError send_error = ravel_base_model_send_record(&self->base, record, self->endpoints);
+        RavelError send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints);
         int record_pos = record_pos_from_record (&self->base, record);
 
         // clear the save flag because we won't send a save done until much later
@@ -535,6 +535,63 @@ ravel_streaming_model_delete(RavelStreamingModel *self, void *record)
     }
 }
 
+static RavelError
+ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const char * const *endpoint_names, void *record)
+{
+    int i, j;
+    RavelError error, local_error;
+
+    error = RAVEL_ERROR_SUCCESS;
+    for (i = 0; endpoint_names[i]; i++) {
+        const char *endpoint_name = endpoint_names[i];
+        RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name(self->dispatcher, endpoint_name);
+
+        for (j = 0; endpoints[j]; j++) {
+            RavelEndpoint *endpoint = endpoints[j];
+            RavelPacket copy;
+
+            ravel_packet_init_copy(&copy, pkt);
+
+            if (record != NULL) {
+                int record_pos = record_pos_from_record (self, record);
+                self->state[record_pos].in_transit ++;
+
+                if (self->reliable)
+                    self->state[record_pos].expected_acks ++;
+            }
+
+            local_error = ravel_base_dispatcher_send_data (self->dispatcher, &copy, endpoint);
+            if (local_error != RAVEL_ERROR_SUCCESS)
+                error = local_error;
+        }
+    }
+    return error;
+}
+
+static RavelError
+ravel_streaming_model_forward(RavelStreamingModel *self, RavelPacket *pkt, void *record)
+{
+    const char * const *endpoint_names;
+
+    if (pkt->is_save_done)
+        endpoint_names = self->source_endpoints;
+    else
+        endpoint_names = self->sink_endpoints;
+
+    if (endpoint_names[0] == NULL) {
+        if (!pkt->is_save_done) {
+            RavelPacket save_done;
+
+            ravel_packet_init_save_done (&save_done, pkt->model_id, pkt->record_id);
+            return ravel_base_model_forward_packet (&self->base, &save_done, self->source_endpoints, NULL);
+        } else {
+            return RAVEL_ERROR_SUCCESS;
+        }
+    }
+
+    return ravel_base_model_forward_packet(&self->base, pkt, endpoint_names, record);
+}
+
 void
 ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, RavelPacket *pkt, RavelError error)
 {
@@ -549,8 +606,10 @@ ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, RavelPacke
     if (self->base.state[record_pos].is_arrived) {
         ravel_context_init_ok (&self->base.current_ctx, record);
         self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
+
+        ravel_streaming_model_forward(self, pkt, record);
     } else {
-        ravel_base_model_send_record(&self->base, record, self->endpoints);
+        ravel_base_model_send_record(&self->base, record, self->sink_endpoints);
         // ignore errors
         // if we're reliable, we'll retry with a timeout
     }
@@ -571,6 +630,17 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
                 self->base.vtable->dispatch_departed(self, &self->base.current_ctx);
             }
         }
+    } else if (pkt->is_save_done) {
+        // forward the save done no matter what
+        ravel_streaming_model_forward(self, pkt, NULL);
+
+        int record_pos = find_record_with_id(&self->base, pkt->record_id);
+
+        if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
+            return;
+
+        ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+        self->base.vtable->dispatch_save_done(self, &self->base.current_ctx);
     } else {
         RavelPacket ack;
         int record_pos;
@@ -594,13 +664,16 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
             // FIXME what to do here?
             return;
         }
-        record_pos = record_pos_from_record (&self->base, record);
-        ctx = ravel_base_model_handle_record (&self->base, record, pkt, endpoint);
+
+        record_pos = record_pos_from_record(&self->base, record);
+        ctx = ravel_base_model_handle_record(&self->base, record, pkt, endpoint);
         if (ctx->error == RAVEL_ERROR_SUCCESS) {
             // clear the save flag
             self->base.state[record_pos].in_save = false;
 
             self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
+
+            ravel_streaming_model_forward(self, pkt, record);
         } else if (ctx->error == RAVEL_ERROR_IN_TRANSIT) {
             // saving, wait until done saving to tell the app
             assert (self->base.state[record_pos].is_valid);
@@ -619,7 +692,7 @@ ravel_streaming_model_record_departed(RavelStreamingModel *self, RavelPacket *pk
     int record_pos;
     void *record;
 
-    if (pkt->is_ack) {
+    if (pkt->is_ack || pkt->is_save_done) {
         return;
     }
 
@@ -654,6 +727,13 @@ ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPack
         RavelPacket new_ack;
         ravel_packet_init_ack(&new_ack, pkt->model_id, pkt->record_id);
         ravel_base_dispatcher_send_data(self->base.dispatcher, &new_ack, endpoint);
+        return;
+    }
+    if (pkt->is_save_done) {
+        // unconditionally try to retransmit the save done
+        RavelPacket new_save_done;
+        ravel_packet_init_save_done(&new_save_done, pkt->model_id, pkt->record_id);
+        ravel_base_dispatcher_send_data(self->base.dispatcher, &new_save_done, endpoint);
         return;
     }
 

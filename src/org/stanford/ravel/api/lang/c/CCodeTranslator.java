@@ -218,6 +218,16 @@ public class CCodeTranslator extends BaseIRTranslator {
             addCode(getRegisterName(arg));
         }
         addCode(");\n");
+
+        if (functionType.getOwner() instanceof ModelType &&
+                functionType.getFunctionName().equals("create")) {
+            addCode("if (!");
+            addCode(getRegisterName(methodCall.target));
+            addCode(") {\n");
+            flushCleanup(false);
+            addCode("return;\n");
+            addCode("}\n");
+        }
     }
 
     @Override
@@ -275,6 +285,11 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TIntrinsic intrinsic) {
+        if (intrinsic.name.startsWith("output_set_")) {
+            addLine(intrinsic.name.substring("output_set_".length()), " = ", intrinsic.arguments[0]);
+            return;
+        }
+
         if (intrinsic.name.equals("verify_mac")) {
             // verify mac is special because in C we define as returning bool, whereas in the IR it's defined
             // as throwing an exception

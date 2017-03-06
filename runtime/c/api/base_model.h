@@ -158,13 +158,17 @@ void ravel_local_model_record_saved_durably(RavelLocalModel *self, RavelPacket *
 Context *ravel_local_model_save(RavelLocalModel *self, void *record);
 void ravel_local_model_delete(RavelLocalModel *self, void *record);
 
-static inline void ravel_local_model_add_endpoints(RavelLocalModel *self, const char * const * endpoints) {
+static inline void ravel_local_model_add_sink_endpoints(RavelLocalModel *self, const char * const * endpoints) {
+    assert(endpoints[0] == NULL);
+}
+static inline void ravel_local_model_add_source_endpoints(RavelLocalModel *self, const char * const * endpoints) {
     assert(endpoints[0] == NULL);
 }
 
 typedef struct {
     RavelBaseModel base;
-    const char * const *endpoints;
+    const char * const *sink_endpoints;
+    const char * const *source_endpoints;
 } RavelStreamingModel;
 
 void ravel_streaming_model_init(RavelStreamingModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
@@ -177,13 +181,16 @@ void ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, Ravel
 Context *ravel_streaming_model_save(RavelStreamingModel *self, void *record);
 void ravel_streaming_model_delete(RavelStreamingModel *self, void *record);
 
-static inline void ravel_streaming_model_add_endpoints(RavelStreamingModel *self, const char * const * endpoints) {
-    self->endpoints = endpoints;
+static inline void ravel_streaming_model_add_sink_endpoints(RavelStreamingModel *self, const char * const * endpoints) {
+    self->sink_endpoints = endpoints;
+}
+static inline void ravel_streaming_model_add_source_endpoints(RavelStreamingModel *self, const char * const * endpoints) {
+    self->source_endpoints = endpoints;
 }
 
 typedef struct {
     RavelBaseModel base;
-    const char * const *endpoints;
+    const char * const *sink_endpoints;
 } RavelReplicatedModel;
 
 void ravel_replicated_model_init(RavelReplicatedModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
@@ -196,8 +203,11 @@ void ravel_replicated_model_record_saved_durably(RavelStreamingModel *self, Rave
 Context *ravel_replicated_model_save(RavelReplicatedModel *self, void *record);
 void ravel_replicated_model_delete(RavelReplicatedModel *self, void *record);
 
-static inline void ravel_replicated_model_add_endpoints(RavelReplicatedModel *self, const char * const * endpoints) {
-    self->endpoints = endpoints;
+static inline void ravel_replicated_model_add_sink_endpoints(RavelReplicatedModel *self, const char * const * endpoints) {
+    self->sink_endpoints = endpoints;
+}
+static inline void ravel_replicated_model_add_source_endpoints(RavelReplicatedModel *self, const char * const * endpoints) {
+    // ignore
 }
 
 #endif /* API_BASE_MODEL_H */

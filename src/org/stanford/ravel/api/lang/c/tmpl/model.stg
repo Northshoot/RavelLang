@@ -18,6 +18,7 @@ c_file(includes,name,base,model) ::=<<
 #include \<api/base_model.h>
 #include \<api/intrinsics.h>
 #include \<api/growable_byte_array.h>
+#include \<api/system.h>
 
 <includes:do_include(); separator="\n">
 
@@ -30,7 +31,7 @@ ravel_generated_<model.name; format="function">_record_init(<model.name>_Record 
 }
 
 static void
-ravel_generated_<model.name; format="function">_record_init_from_network(<model.name>_Record *this, uint8_t *data)
+ravel_generated_<model.name; format="function">_record_init_from_network(<model.name>_Record *this, uint8_t *data, bool is_encrypted)
 {
     <model.baseModel.receiveCode>
 }
@@ -57,10 +58,11 @@ ravel_generated_<model.name; format="function">_real_unmarshall(<model.name> *th
 {
     uint8_t *decrypted;
     record->__base.record_id = ravel_intrinsic_extract_byte(data, 1);
+    bool is_encrypted;
 
     {
         <model.decryptCode>
-        ravel_generated_<model.name; format="function">_record_init_from_network(record, decrypted);
+        ravel_generated_<model.name; format="function">_record_init_from_network(record, decrypted, is_encrypted);
         ravel_array_free(decrypted);
     }
 
@@ -119,8 +121,10 @@ ravel_generated_<model.name; format="function">_finalize(<model.name> *self)
 ravel_generated_<model.name; format="function">_create(<model.name> *self)
 {
     <model.name>_Record *record = ravel_base_model_allocate(ravel_base_model(self));
-    if (record == NULL)
+    if (record == NULL) {
+        ravel_system_print(self->dispatcher, "allocation failure in <model.name>");
         return NULL;
+    }
 
     ravel_generated_<model.name; format="function">_record_init(record);
 
@@ -140,8 +144,10 @@ ravel_generated_<model.name; format="function">_delete(<model.name> *self, <mode
 void
 ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *self)
 {
-    static const char * endpoints[] = { <model.streamingSinks:{s|"<s.name>"}; separator=","><if(model.streamingSinks)>, <endif>NULL };
-    return <base; format="function">_add_endpoints(&self->__base, endpoints);
+    static const char * sink_endpoints[] = { <model.streamingSinks:{s|"<s.name>"}; separator=","><if(model.streamingSinks)>, <endif>NULL };
+    static const char * source_endpoints[] = { <model.streamingSources:{s|"<s.name>"}; separator=","><if(model.streamingSources)>, <endif>NULL };
+    <base; format="function">_add_sink_endpoints(&self->__base, sink_endpoints);
+    <base; format="function">_add_source_endpoints(&self->__base, source_endpoints);
 }
 
 >>

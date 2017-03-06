@@ -11,6 +11,10 @@ public class IntrinsicFactory {
 
     private IntrinsicFactory() {}
 
+    public static TIntrinsic createOutputSet(Type type, String tgt, int value) {
+        return new TIntrinsic(PrimitiveType.VOID, new Type[]{ type }, Registers.VOID_REG, "output_set_" + tgt, new int[]{ value }, true, false, false);
+    }
+
     public static TIntrinsic createReadRecordId(ModelType.RecordType recordType, int target, int record) {
         return new TIntrinsic(PrimitiveType.BYTE, new Type[]{ recordType }, target, "read_record_id", new int[]{ record }, false, false, false);
     }
