@@ -382,6 +382,11 @@ ravel_posix_driver_main_loop(RavelPosixDriver *self)
         return;
 
     while (true) {
+        for (i = 0; i < self->ncallbacks; i++) {
+            self->callbacks[i].fn(self->callbacks[i].ptr1, self->callbacks[i].ptr2);
+        }
+        self->ncallbacks = 0;
+
         int ok = poll(self->poll_fds, self->nfds, -1);
         assert (ok >= 0);
 
@@ -432,28 +437,33 @@ send_data(int fd, RavelPacket *packet)
     uint8_t packet_length[2];
     ssize_t ok;
     size_t done;
+    RavelError err = RAVEL_ERROR_NETWORK_ERROR;
 
     assert (packet->packet_length <= 65536);
     packet_length[0] = packet->packet_length;
     packet_length[1] = packet->packet_length >> 8;
     ok = write(fd, packet_length, 2);
     if (ok < 0)
-        return RAVEL_ERROR_NETWORK_ERROR;
+        goto out;
     if (ok == 1) {
         ok = write(fd, packet_length+1, 1);
         if (ok < 0)
-            return RAVEL_ERROR_NETWORK_ERROR;
+            goto out;
     }
 
     done = 0;
     while (done < packet->packet_length) {
         ok = write(fd, packet->packet_data + done, packet->packet_length - done);
         if (ok < 0)
-            return RAVEL_ERROR_NETWORK_ERROR;
+            goto out;
         done += ok;
     }
 
-    return RAVEL_ERROR_SUCCESS;
+    err = RAVEL_ERROR_SUCCESS;
+
+out:
+    ravel_packet_finalize(packet);
+    return err;
 }
 
 RavelError
@@ -468,5 +478,24 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         }
     }
 
+    ravel_packet_finalize(packet);
     return RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+}
+
+void ravel_driver_queue_callback(RavelDriver *driver, void (*fn)(void*,void*), void* ptr1, void* ptr2)
+{
+    RavelPosixDriver *self = ravel_container_of(driver, RavelPosixDriver, base);
+
+    if (self->ncallbacks == RAVEL_MAX_CALLBACKS) abort();
+    self->callbacks[self->ncallbacks].fn = fn;
+    self->callbacks[self->ncallbacks].ptr1 = ptr1;
+    self->callbacks[self->ncallbacks].ptr2 = ptr2;
+    self->ncallbacks++;
+}
+
+void ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
+{
+    // TODO
+
+    ravel_packet_finalize(packet);
 }

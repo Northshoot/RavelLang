@@ -32,6 +32,14 @@ typedef struct {
 } RavelWatchedFd;
 
 typedef struct {
+    void (*fn)(void *ptr1, void *ptr2);
+    void *ptr1;
+    void *ptr2;
+} RavelPosixCallback;
+
+#define RAVEL_MAX_CALLBACKS 5
+
+typedef struct {
     RavelDriver base;
 
     const char *app_name;
@@ -40,6 +48,9 @@ typedef struct {
     struct pollfd poll_fds[RAVEL_MAX_ENDPOINTS];
     RavelWatchedFd watched_fds[RAVEL_MAX_ENDPOINTS];
     int nfds;
+
+    RavelPosixCallback callbacks[RAVEL_MAX_CALLBACKS];
+    int ncallbacks;
 } RavelPosixDriver;
 
 struct AppDispatcher;
