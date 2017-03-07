@@ -27,7 +27,7 @@ int main(void) {
   // Initialize.
   err_code = NRF_LOG_INIT(NULL);
   APP_ERROR_CHECK(err_code);
-  NRF_LOG_DEBUG("Main Starting\n");
+  NRF_LOG_DEBUG("Main Starting: <name>\n");
   NRF_LOG_FLUSH();
 
 //system flow:

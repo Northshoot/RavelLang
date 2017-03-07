@@ -1,9 +1,10 @@
 #ifndef BLE_CORE_H
 #define BLE_CORE_H
+#include "base_dispatcher.h"
 
+ void nrf52_r_core_ble_start(void);
 
- void ble_start(void);
- void ble_stack_init(void);
+ void nrf52_r_core_ble_stack_init(void);
 
 
 

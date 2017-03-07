@@ -10,7 +10,7 @@
  *
  */
 #include "sdk_common.h"
-#include "nrf52_ble_ravel_service.h"
+#include "nrf52_ble_rad.h"
 #include "ble_srv_common.h"
 #define NRF_LOG_MODULE_NAME "R_SRV"
 #include "nrf_log.h"
@@ -22,7 +22,13 @@
 #define BLE_RAD_MAX_RX_CHAR_LEN        BLE_RAD_MAX_DATA_LEN        /**< Maximum length of the RX Characteristic (in bytes). */
 #define BLE_RAD_MAX_TX_CHAR_LEN        BLE_RAD_MAX_DATA_LEN        /**< Maximum length of the TX Characteristic (in bytes). */
 
-#define RAD_BASE_UUID                  {{0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x00, 0x00, 0x40, 0x6E}} /**< Used vendor specific UUID. */
+#define RAD_BASE_UUID                  {{0x01, 0x02, 0x03, 0x024, 0x05, 0x06, 0x07, 0x08, 0x09, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3}}
+
+/***
+ *
+ * Service function for interactions
+ */
+
 
 /**@brief Function for handling the @ref BLE_GAP_EVT_CONNECTED event from the S110 SoftDevice.
  *
@@ -32,6 +38,7 @@
 static void on_connect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("on_connect\r\n");
+    //TODO: signal upwards
     p_rad->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 }
 
@@ -45,6 +52,7 @@ static void on_disconnect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("on_disconnect\r\n");
     UNUSED_PARAMETER(p_ble_evt);
+    //TODO: signal upwards
     p_rad->conn_handle = BLE_CONN_HANDLE_INVALID;
 }
 
@@ -56,7 +64,7 @@ static void on_disconnect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
  */
 static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
-    NRF_LOG_DEBUG("on_writet\r\n");
+    NRF_LOG_DEBUG("on write\r\n");
     ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
     if (
@@ -67,10 +75,12 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     {
         if (ble_srv_is_notification_enabled(p_evt_write->data))
         {
+            NRF_LOG_DEBUG("notification enabled\r\n");
             p_rad->is_notification_enabled = true;
         }
         else
         {
+            NRF_LOG_DEBUG("notification disabled\r\n");
             p_rad->is_notification_enabled = false;
         }
     }
@@ -80,6 +90,8 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
              (p_rad->data_handler != NULL)
             )
     {
+        NRF_LOG_DEBUG("data received\r\n");
+        //TODO: signal upwards
         p_rad->data_handler(p_rad, p_evt_write->data, p_evt_write->len);
     }
     else
@@ -87,6 +99,12 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         // Do Nothing. This event is not relevant for this service.
     }
 }
+
+
+/***
+ *
+ * Service function for starting up
+ */
 
 
 /**@brief Function for adding RX characteristic.
@@ -204,7 +222,7 @@ static uint32_t tx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init
 
 void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
-NRF_LOG_DEBUG("on_ble_eventt\r\n");
+    NRF_LOG_DEBUG("on_ble_eventt\r\n");
     if ((p_rad == NULL) || (p_ble_evt == NULL))
     {
         return;
@@ -229,7 +247,6 @@ NRF_LOG_DEBUG("on_ble_eventt\r\n");
             break;
     }
 }
-
 
 uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
 {

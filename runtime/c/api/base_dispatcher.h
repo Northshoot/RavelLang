@@ -23,6 +23,25 @@ typedef struct {
     void (*send_done)(void *self, RavelError error, RavelPacket *data, RavelEndpoint *endpoint);
 } RavelDispatcherVTable;
 
+//Ravel Dispatcher Network Callbacks
+/**@brief Ravel Dispatcher receive event. */
+typedef void (*net_data_rx_t) (RavelBaseDispatcher *self, RavelPacket *pkt, RavelEndpoint *endpoint);
+/**@brief Ravel Dispatcher send_done event. */
+typedef void (*net_data_send_done_t) (RavelBaseDispatcher *self, RavelError error, RavelPacket *pkt, RavelEndpoint *endpoint);
+
+/**@brief Ravel Dispatcher connected. */
+typedef void (*net_connected_t) (void);
+/**@brief Ravel Dispatcher disconnected event. */
+typedef void (*net_disconnected_t) (void);
+
+
+typedef struct {
+    net_data_rx_t           data_rx;
+    net_data_send_done_t    send_done;
+    net_connected_t         connected;
+    net_disconnected_t      disconnected;
+}RDNetC;
+
 typedef struct {
     const RavelDispatcherVTable *vtable;
     RavelSystemAPI sys_api;

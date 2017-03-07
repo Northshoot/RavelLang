@@ -9,7 +9,6 @@
 #include "ble_advdata.h"
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
-#include "nrf_ble_gatt.h"
 #include "ble_types.h"
 #include "softdevice_handler.h"
 #include "app_timer.h"
@@ -29,7 +28,7 @@
 #include "nrf_sdm.h"
 
 
-#include "nrf52_ble_ravel_service.h"
+#include "nrf52_ble_rad.h"
 
 
 
@@ -61,8 +60,6 @@
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
-#define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 
 static ble_rad_t                        m_rad;                                      /**< Structure to identify the Nordic UART Service. */
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
@@ -83,7 +80,7 @@ static void gap_params_init(void)
     ble_gap_conn_sec_mode_t sec_mode;
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
-
+    NRF_LOG_DEBUG("gap_params_init\r\n");
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *) DEVICE_NAME,
                                           strlen(DEVICE_NAME));
@@ -101,21 +98,11 @@ static void gap_params_init(void)
 }
 
 
-/**@brief Function for handling the data from the Nordic UART Service.
- *
- * @details This function will process the data received from the Nordic UART BLE Service and send
- *          it to the UART module.
- *
- * @param[in] p_rad    Nordic UART Service structure.
- * @param[in] p_data   Data to be send to UART module.
- * @param[in] length   Length of the data.
- */
-/**@snippet [Handling the data received over BLE] */
 static void rad_data_handler(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
 {
     NRF_LOG_DEBUG("data RX\r\n");
 }
-/**@snippet [Handling the data received over BLE] */
+
 
 
 /**@brief Function for initializing services that will be used by the application.
@@ -124,6 +111,7 @@ static void services_init(void)
 {
     uint32_t       err_code;
     ble_rad_init_t rad_init;
+    NRF_LOG_DEBUG("services_init\r\n");
 
     memset(&rad_init, 0, sizeof(rad_init));
 
@@ -148,7 +136,7 @@ static void services_init(void)
 static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
 {
     uint32_t err_code;
-
+    NRF_LOG_DEBUG("conn_params_error_handler\r\n");
     if (p_evt->evt_type == BLE_CONN_PARAMS_EVT_FAILED)
     {
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_CONN_INTERVAL_UNACCEPTABLE);
@@ -163,6 +151,7 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
  */
 static void conn_params_error_handler(uint32_t nrf_error)
 {
+    NRF_LOG_ERROR("conn_params_error_handlerD\r\n");
     APP_ERROR_HANDLER(nrf_error);
 }
 
@@ -174,6 +163,7 @@ static void conn_params_init(void)
     uint32_t               err_code;
     ble_conn_params_init_t cp_init;
 
+    NRF_LOG_DEBUG("conn_params_init\r\n");
     memset(&cp_init, 0, sizeof(cp_init));
 
     cp_init.p_conn_params                  = NULL;
@@ -194,7 +184,7 @@ static void conn_params_init(void)
  *
  * @note This function will not return.
  */
-  void sleep_mode_enter(void)
+void sleep_mode_enter(void)
 {
     uint32_t err_code;
     err_code = sd_power_system_off();
@@ -210,20 +200,19 @@ static void conn_params_init(void)
  */
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
-    uint32_t err_code;
+    //uint32_t err_code ;
     NRF_LOG_DEBUG("on_adv_evt %d\r\n", ble_adv_evt);
-//    switch (ble_adv_evt)
-//    {
-//        case BLE_ADV_EVT_FAST:
-//            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-//            APP_ERROR_CHECK(err_code);
-//            break;
-//        case BLE_ADV_EVT_IDLE:
-//            sleep_mode_enter();
-//            break;
-//        default:
-//            break;
-//    }
+    switch (ble_adv_evt)
+    {
+        case BLE_ADV_EVT_FAST:
+            NRF_LOG_DEBUG("BLE_ADV_EVT_FAST %d\r\n", ble_adv_evt);
+            break;
+        case BLE_ADV_EVT_IDLE:
+            NRF_LOG_DEBUG("BLE_ADV_EVT_IDLE %d\r\n", ble_adv_evt);
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -249,17 +238,20 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             // Pairing not supported
+            NRF_LOG_DEBUG("BLE_GAP_EVT_SEC_PARAMS_REQUEST\r\n");
             err_code = sd_ble_gap_sec_params_reply(m_conn_handle, BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP, NULL, NULL);
             APP_ERROR_CHECK(err_code);
             break; // BLE_GAP_EVT_SEC_PARAMS_REQUEST
 
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+        NRF_LOG_DEBUG("BLE_GATTS_EVT_SYS_ATTR_MISSING\r\n");
             // No system attributes have been stored.
             err_code = sd_ble_gatts_sys_attr_set(m_conn_handle, NULL, 0, 0);
             APP_ERROR_CHECK(err_code);
             break; // BLE_GATTS_EVT_SYS_ATTR_MISSING
 
         case BLE_GATTC_EVT_TIMEOUT:
+        NRF_LOG_DEBUG("BLE_GATTC_EVT_TIMEOUT\r\n");
             // Disconnect on GATT Client timeout event.
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
@@ -267,6 +259,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GATTC_EVT_TIMEOUT
 
         case BLE_GATTS_EVT_TIMEOUT:
+        NRF_LOG_DEBUG("BLE_GATTS_EVT_TIMEOUT\r\n");
             // Disconnect on GATT Server timeout event.
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
@@ -274,6 +267,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GATTS_EVT_TIMEOUT
 
         case BLE_EVT_USER_MEM_REQUEST:
+        NRF_LOG_DEBUG("BLE_EVT_USER_MEM_REQUEST\r\n");
             err_code = sd_ble_user_mem_reply(p_ble_evt->evt.gattc_evt.conn_handle, NULL);
             APP_ERROR_CHECK(err_code);
             break; // BLE_EVT_USER_MEM_REQUEST
@@ -282,7 +276,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
         {
             ble_gatts_evt_rw_authorize_request_t  req;
             ble_gatts_rw_authorize_reply_params_t auth_reply;
-
+            NRF_LOG_DEBUG("BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST\r\n");
             req = p_ble_evt->evt.gatts_evt.params.authorize_request;
 
             if (req.type != BLE_GATTS_AUTHORIZE_TYPE_INVALID)
@@ -309,6 +303,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 
 #if (NRF_SD_BLE_API_VERSION == 3)
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
+            NRF_LOG_DEBUG("BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST\r\n");
             err_code = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle,
                                                        NRF_BLE_MAX_MTU_SIZE);
             APP_ERROR_CHECK(err_code);
@@ -332,12 +327,11 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
  */
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
+    NRF_LOG_DEBUG("ble_evt_dispatch\r\n");
     ble_conn_params_on_ble_evt(p_ble_evt);
     ble_rad_on_ble_evt(&m_rad, p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
-
-
 }
 
 
@@ -349,11 +343,7 @@ static void ble_stack_init(void)
 {
     uint32_t err_code;
 
-//    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
-//
-//    // Initialize SoftDevice.
-//    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
-
+    NRF_LOG_DEBUG("ble_stack_init\r\n");
     ble_enable_params_t ble_enable_params;
     err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
                                                     PERIPHERAL_LINK_COUNT,
@@ -389,6 +379,7 @@ static void advertising_init(void)
     ble_advdata_t          scanrsp;
     ble_adv_modes_config_t options;
 
+    NRF_LOG_DEBUG("advertising_init\r\n");
     // Build advertising data struct to pass into @ref ble_advertising_init.
     memset(&advdata, 0, sizeof(advdata));
     advdata.name_type          = BLE_ADVDATA_FULL_NAME;
@@ -409,9 +400,15 @@ static void advertising_init(void)
 }
 
 
-void ble_init()
+void nrf52_r_core_ble_stack_init()
 {
-NRF_LOG_DEBUG("ble init\r\n");
+    NRF_LOG_DEBUG("nrf52_r_core_ble_stack_init\r\n");
+    //test if softdevice is enabled
+    if(! softdevice_handler_is_enabled() )
+    {
+        NRF_LOG_ERROR("SD is not enabled! Can not proceed")
+        return;
+    }
     ble_stack_init();
     gap_params_init();
     services_init();
@@ -419,10 +416,10 @@ NRF_LOG_DEBUG("ble init\r\n");
     conn_params_init();
 }
 
-void ble_start()
+void nrf52_r_core_ble_start()
 {
     uint32_t err_code;
-    NRF_LOG_DEBUG("ble start\r\n");
+    NRF_LOG_DEBUG("nrf52_r_core_ble_start\r\n");
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 }
