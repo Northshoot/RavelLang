@@ -98,10 +98,10 @@ controller EavesDropController(ping : Ping, pong : Pong):
 
 space GatewaySpace:
     platform:
-        #language = JLang
-        #system = J2SE.v18
-        language = CLang
-        system = Posix.v2008
+        language = JLang
+        system = J2SE.v18
+        #language = CLang
+        #system = Posix.v2008
 
     models:
         ping = Ping()
@@ -113,10 +113,10 @@ space GatewaySpace:
 
 space CloudSpace:
     platform:
-        #language = JLang
-        #system = J2SE.v18
-        language = CLang
-        system = Posix.v2008
+        language = JLang
+        system = J2SE.v18
+        #language = CLang
+        #system = Posix.v2008
 
     models:
         ping = Ping()
@@ -131,10 +131,10 @@ space CloudSpace:
 
 space EmbeddedSpace:
     platform:
-        language = CLang
-        system = Posix.v2008
-        #language = JLang
-        #system = J2SE.v18
+        #language = CLang
+        #system = Posix.v2008
+        language = JLang
+        system = J2SE.v18
 
     models:
         ref = Reference()

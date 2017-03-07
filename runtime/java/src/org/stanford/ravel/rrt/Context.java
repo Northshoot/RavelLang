@@ -14,27 +14,32 @@ import java.util.Date;
 public class Context<RecordType extends ModelRecord> {
     // These fields are accessed directly by Ravel-generated controller code
     // so they must not be renamed
-    public RecordType record;
-    public Error error;
+    public final RecordType record;
+    public final Error error;
     public final ModelCommandAPI model;
 
     // These fields are private and for future use
     private Date createTime;
 
     public Context(ModelCommandAPI<RecordType> model, RecordType record){
-        this(model);
+        createTime = new Date();
+        this.model = model;
         this.record = record;
+        this.error = Error.SUCCESS;
     }
 
-    public Context(ModelCommandAPI<RecordType> model, Error error) {
-        this(model);
+    public Context(ModelCommandAPI<RecordType> model, RecordType record, Error error) {
+        createTime = new Date();
+        this.model = model;
+        this.record = record;
         this.error = error;
     }
 
-    public Context(ModelCommandAPI<RecordType> model) {
+    public Context(ModelCommandAPI<RecordType> model, Error error) {
         createTime = new Date();
         this.model = model;
-        this.error = Error.SUCCESS;
+        this.record = null;
+        this.error = error;
     }
 
     public boolean hasError() {

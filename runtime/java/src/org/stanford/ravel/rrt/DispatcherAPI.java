@@ -20,6 +20,8 @@ public interface DispatcherAPI extends SystemEventAPI {
 
     void driver__sendDone(Error networkError, RavelPacket data, Endpoint endpoint);
 
+    void driver__savedDurably(RavelPacket data, Error error);
+
     /***********************************************************************/
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
@@ -27,6 +29,7 @@ public interface DispatcherAPI extends SystemEventAPI {
     Collection<Endpoint> getEndpointsByName(String name);
 
     Error model__sendData(RavelPacket data, Endpoint endpoint);
+    void model__saveDurably(RavelPacket data);
 
     void queueEvent(Event event);
 

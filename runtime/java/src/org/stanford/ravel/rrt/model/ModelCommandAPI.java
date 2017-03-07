@@ -17,9 +17,7 @@ public interface ModelCommandAPI<RecordType extends ModelRecord> {
     Context<RecordType> save(RecordType record);
 
     /**
-     * Returns deleted record
-     * @param recordPos
-     * @return context with deleted record
+     * Removes a record from storage
      */
-    Context<RecordType> delete(int recordPos);
+    void delete(RecordType record);
 }

@@ -42,7 +42,7 @@ public class ModelController {
 
     public void timer_1_fired() {
         //create a record and save it.
-        Model.Record rec = Model.create();
+        Model.Record rec = mModel.create();
         rec.field1 = 1444444;
         rec.field2 = rec.field1 + 2;
         rec.field3 = rec.field2 * 3;

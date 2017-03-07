@@ -46,8 +46,10 @@ public class RavelSocketProtocol {
         byte[] bytes = pkt.toBytes();
         int length = bytes.length;
 
-        out.write(ByteWork.getLengthByteArray(length));
-        out.write(bytes);
+        synchronized (out) {
+            out.write(ByteWork.getLengthByteArray(length));
+            out.write(bytes);
+        }
     }
 
     public static void writeIdentity(OutputStream out, String identity) throws IOException {

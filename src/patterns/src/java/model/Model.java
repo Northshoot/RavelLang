@@ -41,7 +41,7 @@ public class Model extends StreamingModel<Model.Record> {
     public final static int RECORD_SIZE = 6*4;
 
     public Model(AppDispatcher appDispatcher) {
-        super(appDispatcher, MODEL_SIZE);
+        super(appDispatcher, MODEL_SIZE, false, false);
     }
 
     void pprint(String s){
@@ -95,8 +95,9 @@ public class Model extends StreamingModel<Model.Record> {
 
 
     @Override
-    protected Record unmarshall(byte[] data, Endpoint ep) {
-        return new Record(data);
+    protected Record unmarshall(Record record, byte[] data, Endpoint ep) {
+        record.initFromNetwork(data);
+        return record;
     }
 
     @Override
@@ -104,7 +105,8 @@ public class Model extends StreamingModel<Model.Record> {
         return record.toBytes();
     }
 
-    public static Record create() {
+    @Override
+    public Record create() {
         return new Record();
     }
 
@@ -116,7 +118,7 @@ public class Model extends StreamingModel<Model.Record> {
         public int field3;
         public int field4;
 
-        public Record(byte[] data){
+        public void initFromNetwork(byte[] data){
             //make record out of byte[]
             //AUTOGEN
 

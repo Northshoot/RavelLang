@@ -9,7 +9,7 @@ public static class Record implements ModelRecord {
     Record() {
     }
 
-    Record(byte[] data, boolean is_encrypted) {
+    void initFromNetwork(byte[] data, boolean is_encrypted) {
         this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_byte(data, 1);
         <model.baseModel.receiveCode>
     }
@@ -52,12 +52,13 @@ public class <name> extends <base>\<<name>.Record> {
     <model.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
 
     public <name>(AppDispatcher dispatcher<append_parameter_list(model.baseModel.parameters)>) {
-        super(dispatcher, <model.baseModel.size; format="literal">);
+        super(dispatcher, <model.baseModel.size; format="literal">, <model.baseModel.reliable>, <model.baseModel.durable>);
     }
 
     // Setter methods for AppDispatcher
     public void addAllEndpoints() {
-        <if(set_endpoints)><if(model.streamingSinks)>addEndpoints(Arrays.asList(<model.streamingSinks:{s|"<s.name>"}; separator="\n">));<endif><endif>
+        <if(model.streamingSinks)>addSinkEndpoints(Arrays.asList(<model.streamingSinks:{s|"<s.name>"}; separator="\n">));<endif>
+        <if(model.streamingSources)>addSourceEndpoints(Arrays.asList(<model.streamingSources:{s|"<s.name>"}; separator="\n">));<endif>
     }
     <model.controllerList:set_controller_method(); separator="\n">
 
@@ -81,12 +82,13 @@ public class <name> extends <base>\<<name>.Record> {
 
     // Record creation and marshalling functions
     @Override
-    protected Record unmarshall(byte[] data, Endpoint endpoint) {
+    protected Record unmarshall(Record record, byte[] data, Endpoint endpoint) {
         byte[] decrypted;
         int length = data.length;
         boolean is_encrypted;
         <model.decryptCode>
-        return new Record(decrypted, is_encrypted);
+        record.initFromNetwork(decrypted, is_encrypted);
+        return record;
     }
     @Override
     protected byte[] marshall(Record record, Endpoint endpoint) {
@@ -99,6 +101,7 @@ public class <name> extends <base>\<<name>.Record> {
             return data;
         }
     }
+    @Override
     public Record create() {
         return new Record();
     }

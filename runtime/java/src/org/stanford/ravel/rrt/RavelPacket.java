@@ -15,6 +15,7 @@ public class RavelPacket {
         public static final int FLAG_PARTIAL = 1;
         public static final int FLAG_LAST = 2;
         public static final int FLAG_ACK = 4;
+        public static final int FLAG_SAVE_DONE = 8;
     }
 
     /**
@@ -34,6 +35,7 @@ public class RavelPacket {
     private boolean partial = false;
     private boolean last = false;
     private boolean ack = false;
+    private boolean save_done = false;
 
     private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
@@ -44,6 +46,7 @@ public class RavelPacket {
             this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
             this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
             this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
+            this.save_done = (this.flags & Flags.FLAG_SAVE_DONE) == Flags.FLAG_SAVE_DONE;
 
             this.record_end = data.length;
             this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
@@ -60,17 +63,17 @@ public class RavelPacket {
     private RavelPacket(int recordSize, int modelId, int recordId) {
         this.record_end = recordSize + RESERVED;
         this.record_data = new byte[recordSize];
-        System.arraycopy(ByteWork.getByteArray(modelId), 0, this.record_data, 0, 4);
-        System.arraycopy(ByteWork.getByteArray(recordId), 0, this.record_data, 4, 4);
+        this.record_data[0] = (byte)modelId;
+        this.record_data[1] = (byte)recordId;
         this.model_id = modelId;
         this.record_id = recordId;
     }
 
     private RavelPacket(int modelId, int recordId) {
-        this.record_end = 8 + RESERVED;
-        this.record_data = new byte[8];
-        System.arraycopy(ByteWork.getByteArray(modelId), 0, this.record_data, 0, 4);
-        System.arraycopy(ByteWork.getByteArray(recordId), 0, this.record_data, 4, 4);
+        this.record_end = 2 + RESERVED;
+        this.record_data = new byte[2];
+        this.record_data[0] = (byte)modelId;
+        this.record_data[1] = (byte)recordId;
         this.model_id = modelId;
         this.record_id = recordId;
     }
@@ -82,6 +85,12 @@ public class RavelPacket {
     public static RavelPacket makeAck(int modelId, int recordId) {
         RavelPacket pkt = new RavelPacket(modelId, recordId);
         pkt.setAck();
+        return pkt;
+    }
+
+    public static RavelPacket makeSaveDone(int modelId, int recordId) {
+        RavelPacket pkt = new RavelPacket(modelId, recordId);
+        pkt.setSaveDone();
         return pkt;
     }
 
@@ -97,6 +106,11 @@ public class RavelPacket {
     private void setAck() {
         flags |= Flags.FLAG_ACK;
         ack = true;
+    }
+
+    private void setSaveDone() {
+        flags |= Flags.FLAG_SAVE_DONE;
+        save_done = true;
     }
 
     private static int getModelIdFromRecord(byte[] data) {
@@ -134,6 +148,9 @@ public class RavelPacket {
     }
     public boolean isAck() {
         return ack;
+    }
+    public boolean isSaveDone() {
+        return save_done;
     }
 
     @Override

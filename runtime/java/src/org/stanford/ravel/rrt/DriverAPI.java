@@ -12,10 +12,7 @@ public interface DriverAPI {
     void appDispatcherReady();
 
     Error sendData(RavelPacket pkt, Endpoint ep);
-
-    /**
-     * Get system timer
-     */
+    void saveDurably(RavelPacket pkt);
 
 
     /**

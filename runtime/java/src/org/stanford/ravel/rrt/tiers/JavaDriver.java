@@ -176,4 +176,10 @@ public class JavaDriver implements DriverAPI {
     public void appDispatcherReady() {
         appDispatcher.started();
     }
+
+    @Override
+    public void saveDurably(RavelPacket packet) {
+        // TODO
+        appDispatcher.driver__savedDurably(packet, Error.SUCCESS);
+    }
 }

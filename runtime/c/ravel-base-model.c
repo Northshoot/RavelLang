@@ -295,6 +295,15 @@ save_done_next_loop(void *ptr1, void *ptr2)
     }
 }
 
+static void
+full_callback(void *ptr1, void *ptr2)
+{
+    RavelBaseModel *self = ptr1;
+
+    ravel_context_init_error(&self->current_ctx, RAVEL_ERROR_OUT_OF_STORAGE);
+    self->vtable->dispatch_full(self, &self->current_ctx);
+}
+
 static Context *
 ravel_base_model_save(RavelBaseModel *self, void *record)
 {
@@ -309,6 +318,10 @@ ravel_base_model_save(RavelBaseModel *self, void *record)
         dl_append_tail(&self->valid_records, record);
         self->state[record_pos].is_valid = true;
         self->num_valid_records ++;
+
+        if (self->num_valid_records == self->num_records) {
+            ravel_base_dispatcher_queue_callback(self->dispatcher, full_callback, self, NULL);
+        }
     }
 
     self->state[record_pos].in_save = true;
@@ -604,6 +617,7 @@ ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, RavelPacke
 
     record_pos = record_pos_from_record (&self->base, record);
     if (self->base.state[record_pos].is_arrived) {
+        self->base.state[record_pos].is_arrived = false;
         ravel_context_init_ok (&self->base.current_ctx, record);
         self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
 
@@ -722,18 +736,11 @@ ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPack
     int record_pos;
     void *record;
 
-    if (pkt->is_ack) {
-        // unconditionally try to retransmit the ack
-        RavelPacket new_ack;
-        ravel_packet_init_ack(&new_ack, pkt->model_id, pkt->record_id);
-        ravel_base_dispatcher_send_data(self->base.dispatcher, &new_ack, endpoint);
-        return;
-    }
-    if (pkt->is_save_done) {
-        // unconditionally try to retransmit the save done
-        RavelPacket new_save_done;
-        ravel_packet_init_save_done(&new_save_done, pkt->model_id, pkt->record_id);
-        ravel_base_dispatcher_send_data(self->base.dispatcher, &new_save_done, endpoint);
+    if (pkt->is_ack || pkt->is_save_done) {
+        // unconditionally try to retransmit
+        RavelPacket copy;
+        ravel_packet_init_copy(&copy, pkt);
+        ravel_base_dispatcher_send_data(self->base.dispatcher, &copy, endpoint);
         return;
     }
 
@@ -751,7 +758,7 @@ ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPack
     } else {
         // balance the retransmission increasing the counter
         if (self->base.reliable)
-            self->base.state[record_pos].expected_acks++;
+            self->base.state[record_pos].expected_acks--;
 
         // try resending
         ravel_base_model_send_record_endpoint(&self->base, record, endpoint);

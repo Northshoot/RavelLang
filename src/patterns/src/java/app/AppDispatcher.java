@@ -80,11 +80,11 @@ public class AppDispatcher  extends AbstractDispatcher {
         switch (mName){
             case "Embedded":
                 // embedded sends to gateway
-                model_id_1.addEndpoints(Collections.singletonList("Gateway"));
+                model_id_1.addSinkEndpoints(Collections.singletonList("Gateway"));
                 break;
             case "Gateway":
                 // gateway sends to cloud
-                model_id_1.addEndpoints(Collections.singletonList("Cloud"));
+                model_id_1.addSinkEndpoints(Collections.singletonList("Cloud"));
                 break;
             case "Cloud":
                 // cloud does not send anywhere
@@ -127,6 +127,11 @@ public class AppDispatcher  extends AbstractDispatcher {
         return mDriver.sendData(pkt, endpoint);
     }
 
+    @Override
+    public void model__saveDurably(RavelPacket data) {
+        mDriver.saveDurably(data);
+    }
+
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/
@@ -157,6 +162,16 @@ public class AppDispatcher  extends AbstractDispatcher {
         switch (rp.model_id){
             case Model.MODEL_ID:
                 model_id_1.recordFailedToSend(rp, endpoint, error);
+        }
+    }
+
+    @Override
+    protected void models__notifySavedDurably(NetworkEvent event) {
+        RavelPacket rp = event.data;
+        Error error = event.error;
+        switch (rp.model_id){
+            case Model.MODEL_ID:
+                model_id_1.recordSavedDurably(rp, error);
         }
     }
 

@@ -48,6 +48,8 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
 
     protected abstract void models__notifyFailedToSend(NetworkEvent event);
 
+    protected abstract void models__notifySavedDurably(NetworkEvent event);
+
     /******************* ******* event queue ***************************/
     private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<>(5);
 
@@ -67,6 +69,9 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
                 break;
             case MODELS__NOTIFY_RECORD_FAILED_TO_SEND:
                 models__notifyFailedToSend((NetworkEvent)e);
+                break;
+            case DRIVER__SAVED_DURABLY:
+                models__notifySavedDurably((NetworkEvent)e);
                 break;
 
             case GENERIC__RUNNABLE:
@@ -120,6 +125,12 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
         }
         NetworkEvent ne = new NetworkEvent(data, endpoint, networkError,
                 networkError == Error.SUCCESS ? Event.Type.MODELS__NOTIFY_RECORD_DEPARTED : Event.Type.MODELS__NOTIFY_RECORD_FAILED_TO_SEND);
+        queueEvent(ne);
+    }
+
+    @Override
+    public void driver__savedDurably(RavelPacket data, Error error) {
+        NetworkEvent ne = new NetworkEvent(data, null, error, Event.Type.DRIVER__SAVED_DURABLY);
         queueEvent(ne);
     }
 }

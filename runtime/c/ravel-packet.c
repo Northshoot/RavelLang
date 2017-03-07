@@ -88,7 +88,7 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
 static void
 ravel_packet_init_control (RavelPacket *self, int model_id, int record_id, int flags)
 {
-    self->packet_data = calloc(8 + RESERVED, 1);
+    self->packet_data = calloc(2 + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
     self->record_length = 2;

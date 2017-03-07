@@ -84,7 +84,7 @@ controller RandomControllerEmbedded(random: Random, cnt : Counter, timer: TimerS
         rec2 = random.create()
         rec2.value = rec.value
 
-        for r in random.all():
+        for r in random:
             system.print("one record")
 
     event timer2.fired():

@@ -18,10 +18,6 @@ public interface ModelBottomAPI {
 
     void recordFailedToSend(RavelPacket record, Endpoint endpoint, Error error);
 
-    void record_saved_durably(RavelPacket record);
-
-    void record_saved_endpoint(RavelPacket record, Endpoint endpoint);
-
-    void endpoint_connected(Endpoint endpoint);
+    void recordSavedDurably(RavelPacket record, Error error);
 
 }

@@ -61,6 +61,8 @@ class RavelSocketClient implements RavelSocket {
 
                 System.err.println("IOException on client socket to " + remote.getAddress() + ":" + remote.getPort());
                 e.printStackTrace(System.err);
+                closeSocket();
+                return;
             }
         }
     }
