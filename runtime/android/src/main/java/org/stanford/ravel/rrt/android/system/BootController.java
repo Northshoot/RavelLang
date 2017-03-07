@@ -14,7 +14,7 @@ public class BootController extends BroadcastReceiver {
         Log.d("BootController", "On boot receive");
         if(intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED))
         {
-            Intent serviceIntent = new Intent(context, RavelController.class);
+            Intent serviceIntent = new Intent(context, AndroidRRT.class);
             context.startService(serviceIntent);
         }
     }

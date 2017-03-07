@@ -181,7 +181,7 @@ ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
 }
 
 Context *
-ravel_streaming_model_send(RavelStreamingModel *self, void *record)
+ravel_streaming_model_save(RavelStreamingModel *self, void *record)
 {
     RavelError send_error = ravel_base_model_send_record(&self->base, record, self->endpoints);
 

@@ -29,7 +29,7 @@ public class RavelGattAtrributes {
      * Overview: https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
      * Details: https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=244369&_ga=1.56233835.1589973911.1454522943
      */
-    public static String BLE_DIS = "DeviceInformationService"; // belongs to the EMBEDDED_MODEL
+    public static String BLE_DIS = "DeviceInformationService";
     public static final String BLE_DIS_FIRMWARE_REVISON = "00002a26-0000-1000-8000-00805f9b34fb";
     public static final UUID BLE_DIS_FIRMWARE_REVISON_UUID = UUID.fromString(BLE_DIS_FIRMWARE_REVISON);
 
@@ -46,36 +46,17 @@ public class RavelGattAtrributes {
     public static final UUID BLE_TX_POWER_LEVEL_UUID = UUID.fromString(BLE_TX_POWER_LEVEL);
     //
     //ravel model service uuid's
-    public static final String RAVEL_EMBEDDED_MODEL = "EmbeddedModel";
-    public static final String RAVEL_EMBEDDED_MODEL_ID = "00006000-1000-1000-8000-00805f9b34fb";
-    public static final UUID RAVEL_EMBEDDED_MODEL_UUID = UUID.fromString(RAVEL_EMBEDDED_MODEL_ID);
+    public static final String RAVEL_DATA_MODEL = "DataModel";
+    public static final String RAVEL_DATA_MODEL_ID = "00000002-0000-0000-000f-0e0d0c0b0a01";
+    public static final UUID RAVEL_DATA_MODEL_UUID = UUID.fromString(RAVEL_DATA_MODEL_ID);
 
-    public static final String RAVEL_GATEWAY_MODEL = "GatewayModel";
-    public static final String RAVEL_GATEWAY_MODEL_ID = "00006000-2000-1000-8000-00805f9b34fb";
-    public static final UUID RAVEL_GATEWAY_MODEL_UUID = UUID.fromString(RAVEL_GATEWAY_MODEL_ID);
+    public static final String RAVEL_DATA_MODEL_WRITE = "DataModelWrite";
+    public static final String RAVEL_DATA_MODEL_WRITE_CHAR = "00000003-0000-0000-000f-0e0d0c0b0a01";
+    public static final UUID RAVEL_DATA_MODEL_WRITE_CHAR_UUID = UUID.fromString(RAVEL_DATA_MODEL_WRITE_CHAR);
 
-    public static final String RAVEL_CLOUD_MODEL = "CloudModel";
-    public static final String RAVEL_CLOUD_MODEL_ID = "00006000-3000-1000-8000-00805f9b34fb";
-    public static final UUID RAVEL_CLOUD_MODEL_UUID = UUID.fromString(RAVEL_CLOUD_MODEL_ID);
-
-    public static final String RAVEL_USER_MODEL = "UserModel";
-    public static final String RAVEL_USER_MODEL_ID = "00006000-4000-1000-8000-00805f9b34fb";
-    public static final UUID RAVEL_USER_MODEL_UUID = UUID.fromString(RAVEL_USER_MODEL_ID);
-
-    public static final String RAVEL_SECURITY_MODEL = "SecurityModel";
-    public static final String RAVEL_SECURITY_MODEL_ID = "00006000-5000-1000-8000-00805f9b34fb";
-    public static final UUID RAVEL_SECURITY_MODEL_UUID = UUID.fromString(RAVEL_SECURITY_MODEL_ID);
-
-
-
-
-    /**
-     * User Defined Models
-     */
-    public static final String LED_MODEL = "LedModel";
-    public static final String LED_MODEL_ID = "00005010-0000-1000-8000-00805f9b34fb";
-    public static final UUID LED_MODEL_MODEL_UUID = UUID.fromString(LED_MODEL_ID);
-    public static final UUID LED_STATUS__CHAR_UUID = UUID.fromString("00005001-0000-1000-8000-00805f9b34fb");
+    public static final String RAVEL_DATA_MODEL_READ = "DataModelRead";
+    public static final String RAVEL_DATA_MODEL_READ_CHAR = "00000004-0000-0000-000f-0e0d0c0b0a01";
+    public static final UUID RAVEL_DATA_MODEL_READ_CHAR_UUID = UUID.fromString(RAVEL_DATA_MODEL_READ_CHAR);
 
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
     public static final UUID CLIENT_CHARACTERISTIC_CONFIG_UUID = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG);
@@ -89,16 +70,9 @@ public class RavelGattAtrributes {
         // Ravel Services.
         nameToUUID.put( BLE_DIS_FIRMWARE_REVISON_UUID, BLE_DIS);
         nameToUUID.put( BLE_TX_POWER_UUID, BLE_TPS);
-        nameToUUID.put( RAVEL_EMBEDDED_MODEL_UUID, RAVEL_EMBEDDED_MODEL);
-        nameToUUID.put( RAVEL_GATEWAY_MODEL_UUID, RAVEL_GATEWAY_MODEL);
-        nameToUUID.put( RAVEL_CLOUD_MODEL_UUID, RAVEL_CLOUD_MODEL);
-        nameToUUID.put( RAVEL_USER_MODEL_UUID, RAVEL_USER_MODEL);
-        nameToUUID.put( RAVEL_SECURITY_MODEL_UUID, RAVEL_SECURITY_MODEL);
-
-        /**
-         * User Defined Models
-         */
-        nameToUUID.put(LED_MODEL_MODEL_UUID,LED_MODEL);
+        nameToUUID.put( RAVEL_DATA_MODEL_UUID, RAVEL_DATA_MODEL);
+        nameToUUID.put( RAVEL_DATA_MODEL_WRITE_CHAR_UUID, RAVEL_DATA_MODEL_WRITE);
+        nameToUUID.put( RAVEL_DATA_MODEL_READ_CHAR_UUID, RAVEL_DATA_MODEL_READ);
     }
 
 

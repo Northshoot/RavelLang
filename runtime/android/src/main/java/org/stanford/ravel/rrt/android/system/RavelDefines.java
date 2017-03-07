@@ -1,6 +1,7 @@
 package org.stanford.ravel.rrt.android.system;
 
-import edu.stanford.ravel.utils.PhoneID;
+
+import org.stanford.ravel.rrt.android.utils.PhoneID;
 
 /**
  * Created by lauril on 10/30/15.

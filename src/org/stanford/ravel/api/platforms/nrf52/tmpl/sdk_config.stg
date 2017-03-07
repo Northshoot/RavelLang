@@ -30,6 +30,19 @@ sdk_config(config)::=<<
 #define BLE_RACP_ENABLED <config.BLE_RACP_ENABLED>
 #endif
 
+// <e> NRF_BLE_GATT_ENABLED - nrf_ble_gatt - GATT module
+//==========================================================
+#ifndef NRF_BLE_GATT_ENABLED
+#define NRF_BLE_GATT_ENABLED 1
+#endif
+#if  NRF_BLE_GATT_ENABLED
+// <o> NRF_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size that is passed to the @ref sd_ble_enable function.
+#ifndef NRF_BLE_GATT_MAX_MTU_SIZE
+#define NRF_BLE_GATT_MAX_MTU_SIZE 158
+#endif
+
+#endif //NRF_BLE_GATT_ENABLED
+
 // \<q\> NRF_BLE_QWR_ENABLED  - nrf_ble_qwr - Queued writes support module (prepare/execute write)
 
 

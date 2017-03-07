@@ -13,20 +13,40 @@
 #include "nrf_drv_clock.h"
 
 /* local includes */
-#include "platform/ble_core.h"
-#include "platform/network.h"
-#include "platform/flash.h"
-#include "platform/config.h"
-#include "platform/log.h"
+#include "platform/nrf52_ble_core.h"
+#include "platform/nrf52_network.h"
+#include "platform/nrf52_flash.h"
+#include "platform/nrf52_config.h"
+#include "platform/nrf52_log.h"
 #include "boards.h"
 #include "AppDispatcher.h"
-#include "ravel_timer.h"
+#include "nrf52_ravel_timer.h"
 #include "ravel/nrf52-driver.h"
-#define NRF_LOG_MODULE_NAME "Driver"
+//Implement global driver API
+#include "driver.h"
+#include "context.h"
 
+#define NRF_LOG_MODULE_NAME "DRV"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
+#define DEAD_BEEF                       0xDEADBEEF
+
+/**** ****/
+RavelEndpoint * const *
+ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name){
+    return NULL;
+}
+
+RavelError
+ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint)
+{
+    NRF_LOG_INFO("ravel_driver_send_data!\r\n");
+    return RAVEL_ERROR_SUCCESS;
+}
+
+
+/**** NRF 52 specific implementations ****/
 #define SCHED_MAX_EVENT_DATA_SIZE       sizeof(ravel_schedule_event_cntx)
 #define SCHED_QUEUE_SIZE                20
 
@@ -42,12 +62,18 @@ void
 ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name)
 {
     /* TODO: init any internal systems */
-
     NRF_LOG_INFO("INIT!\r\n");
+    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+
+    // Initialize the SoftDevice handler module.
+    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-    init_timer_module();
     self->base.dispatcher = dispatcher;
-    ble_stack_init();
+    init_timer_module();
+
+
+
 }
 
 
@@ -63,8 +89,10 @@ void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // Main loop.
-    NRF_LOG_INFO("LOOP\r\n");
+
     ble_start();
+    NRF_LOG_INFO("LOOP\r\n");
+    //
     while (true)
     {
         app_sched_execute();
@@ -74,7 +102,7 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 void
 ravel_nrf_driver_dispatch_event(RavelNrf52Driver *selft)
 {
-    /* TODO */
+    NRF_LOG_INFO("driver dispatch evt\r\n");
 }
 
 void
