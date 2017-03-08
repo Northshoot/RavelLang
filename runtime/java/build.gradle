@@ -1,16 +1,21 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+apply plugin: 'java'
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
+version = '0.9'
+sourceCompatibility = 1.7
 
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Ravel Java Runtime',
+                'Implementation-Version': version
     }
 }
 
-allprojects {
-    repositories {
-        jcenter()
-    }
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+
 }

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/secureiot/ravellang/runtime/java/build/libs/java-0.9.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="01a0273889787c2411402e9c1228d16ecfe5c33d">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/java-0.9_bc2b67c4b0f479bb8c9eee60ee36cc3e42f0b94c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/3b94f45db357c8411a4add7e913e3fe287cf4d43/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="fa0446a14ed5dd3725047d6399ffea771a564b30">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_dcbf3e6ef29a13e5d9fdb69c0c2c523764963913.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/4c459766e1013b6b68d421d264873cd792964257/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="e820b7be8c035dd522da4bc822e8a76c8e27921a">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_8ffe8418b67ac59076052e03bd82add08c5e8a93.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/5fb21b977f8cfeebf4eaa368fe63424a07813850/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="67eb33110dbacb46a48175b08ae0c96761d2c17d">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_57111cd930e3d527ff2febfdf4b7e1d1f2865a80.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/3.6.0/69edde9fc4b01c9fd51d25b83428837478c27254/okhttp-3.6.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="69edde9fc4b01c9fd51d25b83428837478c27254">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/okhttp-3.6.0_c08f8b456defc0d60e2604212ef853ba6cdfaf29.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/8a582a2b8a89721ad534175b6e9967dd1487932e/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="bf1073962bb0f6d4485522b9e3a02a7d2c79d125">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_088e029b779c4eeedf654e5928973cb88030dcd4.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/265df27a59e9973cdc179d6e73072c7102a165a7/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="810f41e5b7fd99f196ebeabe865ba2c54e7e76dc">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_7e9d7dfc14792d44e520a0dc7c792f7794dbf884.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/70d7cf7aa42b12efc69e7c3a08eea1f9f11e4bde/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="702d339bc0a81d21354cd7e2cf2b67225fa4a16c">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_9c449c9fda2df22581d84fbc5af8a4e03952c1c1.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/bdc865a32149d1a7e7265b9c82b9a27f545ac223/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="ee394a892dd21c03a528139c1e8d4e0e1264ac84">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_cf57dde8f540826e2d9a93f4d73f316c08ecbd89.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.gradle/caches/modules-2/files-2.1/com.squareup.retrofit2/retrofit/2.2.0/41e67dba73c3347e4503761642c39d0e06ca1f2/retrofit-2.2.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="041e67dba73c3347e4503761642c39d0e06ca1f2">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/retrofit-2.2.0_e194f3b6c70139fdbb88ce668122c693704e263b.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/2bea6d2831c83b988e1fb46a493cc9dd0e992629/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="cb454b52545859ed2f24a6c01366805b0fa04b22">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_7d9ab79911ff9f4b8616bd83d819ae3910be1432.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/Android/Sdk/extras/android/m2repository/com/android/support/support-annotations/25.2.0/support-annotations-25.2.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="4a5a82a027706397fff621b22fd6fa796e91d7c5">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/support-annotations-25.2.0_0a26dd3bf7eb127554f7b12c49eacba52702d2cc.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio/1.11.0/840897fcd7223a8143f1d9b6f69714e7be34fd50/okio-1.11.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="840897fcd7223a8143f1d9b6f69714e7be34fd50">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/okio-1.11.0_8076086a63739fbaac111f01368d0ae7b531c4f2.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/3bbb4a278a9bbb1748597b1b3b5ef008f87c1251/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_64b2c66ce7f63595fed95659c69955386063ee14.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/home/gcampagn/.android/build-cache/c0d8b1f3d117086507652e83efc4e9c313d74b21/output/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="8fe8a8f77d651982ce5e18f6187dc4daf914ac57">
+        <dex dex="/home/gcampagn/secureiot/ravellang/runtime/android/build/intermediates/pre-dexed/debug/classes_3e41c5fe37c3abd274ba691d6307df071399c9e4.jar" />
+    </item>
+
+</items>
