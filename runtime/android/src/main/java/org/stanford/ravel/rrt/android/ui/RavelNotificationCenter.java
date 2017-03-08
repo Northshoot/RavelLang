@@ -8,9 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
-import org.stanford.ledcontrol.R;
+import org.stanford.ravel.rrt.R;
 import org.stanford.ravel.rrt.android.system.RavelDefines;
-import org.stanford.ravel.user.MainActivity;
 
 
 /**
@@ -81,13 +80,6 @@ public class RavelNotificationCenter{
 
     public void cancel() {
         mNM.cancel(NOTIFICATION);
-    }
-    /**
-     * Show a notification while this service is running.
-     */
-    public void showNotification() {
-        if(mContext == null) return;
-        showNotification(R.string.local_service_started, MainActivity.class);
     }
 
     public void setConnectionIcon(int connection){

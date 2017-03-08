@@ -54,7 +54,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.stanford.ledcontrol.R;
+import org.stanford.ravel.rrt.R;
 import org.stanford.ravel.rrt.android.ble.BleDefines;
 import org.stanford.ravel.rrt.android.system.RavelDefines;
 
