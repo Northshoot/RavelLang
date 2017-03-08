@@ -1,2 +1,4 @@
 libravel.a
 *.o
+cmake-build-debug
+

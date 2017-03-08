@@ -1,4 +1,0 @@
-Implementation of Ravel in Java runtime.
-The underlying driver is implemented for subsystems such as Android or full java
-
-
