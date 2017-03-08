@@ -132,6 +132,10 @@ public class AppDispatcher  extends AbstractDispatcher {
         mDriver.saveDurably(data);
     }
 
+    public void model__deleteFromStorage(int modelId, int recordId) {
+        mDriver.deleteFromDurableStorage(modelId, recordId);
+    }
+
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/
@@ -172,6 +176,15 @@ public class AppDispatcher  extends AbstractDispatcher {
         switch (rp.model_id){
             case Model.MODEL_ID:
                 model_id_1.recordSavedDurably(rp, error);
+        }
+    }
+
+    @Override
+    protected void models__notifyLoadFromStorage(NetworkEvent event) {
+        RavelPacket rp = event.data;
+        switch (rp.model_id){
+            case Model.MODEL_ID:
+                model_id_1.recordLoaded(rp);
         }
     }
 

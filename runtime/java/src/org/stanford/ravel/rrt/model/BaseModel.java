@@ -19,14 +19,14 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     private static class RecordState {
         int expected_acks = 0;
         int in_transit = 0;
-        boolean in_save = false;
+        int in_save = 0;
         boolean is_valid = false;
         boolean is_arrived = false;
 
         void reset() {
             expected_acks = 0;
             in_transit = 0;
-            in_save = false;
+            in_save = 0;
             is_valid = false;
             is_arrived = false;
         }
@@ -74,8 +74,16 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     protected abstract byte[] marshall(RecordType record, Endpoint endpoint);
     protected abstract RecordType unmarshall(RecordType record, byte[] data, Endpoint endpoint);
 
-    void markInSave(int recordPos, boolean in_save) {
-        state[recordPos].in_save = in_save;
+    @Override
+    public void recordLoaded(RavelPacket pkt) {
+        RecordType record = create();
+        record = unmarshall(record, pkt.getRecordData(), null);
+        doSave(record, false);
+    }
+
+    void markSaved(int recordPos) {
+        assert state[recordPos].in_save > 0;
+        state[recordPos].in_save--;
     }
     boolean isArrived(int recordPos) {
         return state[recordPos].is_arrived;
@@ -105,6 +113,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             @Override
             public void run() {
                 Context<RecordType> ctx = new Context<>(BaseModel.this, record);
+                int recordPos = recordPosFromRecord(record);
+                assert recordPos >= 0;
+                markSaved(recordPos);
                 notifySaveDone(ctx);
             }
         });
@@ -127,7 +138,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return mRecords.get(recordPos);
     }
 
-    int tryAddRecord(RecordType record) {
+    private int tryAddRecord(RecordType record) {
         for (int i = 0; i < mRecords.size(); i++) {
             if (mRecords.get(i) == null) {
                 mRecords.set(i, record);
@@ -140,7 +151,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return mRecords.size()-1;
     }
 
-    Context<RecordType> doSave(RecordType record) {
+    Context<RecordType> doSave(RecordType record, boolean saveDurably) {
         int recordPos = recordPosFromRecord(record);
 
         if (recordPos < 0) {
@@ -158,7 +169,10 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             mValidRecords.add(record);
         }
 
-        state[recordPos].in_save = true;
+        if (!saveDurably)
+            return new Context<>(this, record);
+
+        state[recordPos].in_save++;
 
         if (isDurable()) {
             RavelPacket pkt;
@@ -184,7 +198,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         } else {
             state[recordPos].is_valid = false;
             mValidRecords.remove(record);
-            if (state[recordPos].in_save || state[recordPos].in_transit > 0 ||
+            if (state[recordPos].in_save > 0 || state[recordPos].in_transit > 0 ||
                     state[recordPos].expected_acks > 0) {
                 // we cannot delete right away
                 return true;
@@ -230,8 +244,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             return null;
         RecordType record = mRecords.get(recordPos);
 
-        assert state[recordPos].in_save;
-        state[recordPos].in_save = false;
+        markSaved(recordPos);
 
         if (state[recordPos].is_valid) {
             return record;
@@ -249,7 +262,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     Context<RecordType> handleRecord(RecordType record, RavelPacket pkt, Endpoint endpoint) {
         try {
             record = unmarshall(record, pkt.getRecordData(), endpoint);
-            return doSave(record);
+            return doSave(record, true);
         } catch(SecurityException e) {
             return new Context<>(this, Error.SECURITY_ERROR);
         }

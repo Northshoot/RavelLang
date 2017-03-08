@@ -50,6 +50,8 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
 
     protected abstract void models__notifySavedDurably(NetworkEvent event);
 
+    protected abstract void models__notifyLoadFromStorage(NetworkEvent event);
+
     /******************* ******* event queue ***************************/
     private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<>(5);
 
@@ -132,5 +134,12 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     public void driver__savedDurably(RavelPacket data, Error error) {
         NetworkEvent ne = new NetworkEvent(data, null, error, Event.Type.DRIVER__SAVED_DURABLY);
         queueEvent(ne);
+    }
+
+    @Override
+    public void driver__loadFromStorage(RavelPacket data) {
+        NetworkEvent ne = new NetworkEvent(data, null, null, Event.Type.DRIVER__LOAD_FROM_STORAGE);
+        // don't queue the event, run it right away, so the models are fully loaded before system started
+        models__notifyLoadFromStorage(ne);
     }
 }

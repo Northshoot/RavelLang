@@ -34,5 +34,6 @@
     </orderEntry>
     <orderEntry type="module" module-name="java-runtime" />
     <orderEntry type="library" name="org.antlr:antlr4:4.6" level="project" />
+    <orderEntry type="library" name="app" level="project" />
   </component>
 </module>

@@ -4,6 +4,7 @@ import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.DriverAPI;
 import org.stanford.ravel.rrt.RavelPacket;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -21,10 +22,30 @@ public class JavaDriver implements DriverAPI {
 
     private final Executor threadPool;
     private final Map<TcpEndpoint, RavelSocket> socketClients = new HashMap<>();
+    private final JavaDurableStorage storage;
 
     public JavaDriver(DispatcherAPI appDispatcher) {
         threadPool = Executors.newCachedThreadPool();
         this.appDispatcher = appDispatcher;
+
+        storage = createStorage();
+    }
+
+    protected JavaDurableStorage createStorage() {
+        return new JavaDurableStorage(new File("./storage"));
+    }
+
+    public void loadDurableStorage() {
+        try {
+            storage.load(new JavaDurableStorage.Loader() {
+                @Override
+                public void handleRecord(int modelId, int recordId, byte[] data) {
+                    appDispatcher.driver__loadFromStorage(RavelPacket.fromRecord(data));
+                }
+            });
+        } catch(IOException e) {
+            throw new RuntimeException("IO exception loading durable storage", e);
+        }
     }
 
     private RavelSocket getSocket(TcpEndpoint endpoint) throws RavelIOException {
@@ -178,8 +199,31 @@ public class JavaDriver implements DriverAPI {
     }
 
     @Override
-    public void saveDurably(RavelPacket packet) {
-        // TODO
-        appDispatcher.driver__savedDurably(packet, Error.SUCCESS);
+    public void saveDurably(final RavelPacket packet) {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    storage.save(packet);
+                    appDispatcher.driver__savedDurably(packet, Error.SUCCESS);
+                } catch(IOException e) {
+                    appDispatcher.driver__savedDurably(packet, Error.WRITE_ERROR);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void deleteFromDurableStorage(final int modelId, final int recordId) {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    storage.delete(modelId, recordId);
+                } catch(IOException e) {
+                    System.err.println("Failed to delete record " + modelId + "-" + recordId + " from storage.");
+                }
+            }
+        });
     }
 }

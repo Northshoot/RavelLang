@@ -35,14 +35,14 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     @Override
     public Context<RecordType> save(RecordType record) {
         // save locally first
-        Context<RecordType> local = doSave(record);
+        Context<RecordType> local = doSave(record, true);
         if (local.error == Error.SUCCESS) {
             int recordPos = recordPosFromRecord(record);
 
             Error sendError = sendRecord(recordPos, record, mSinkEndpoints);
 
             // clear the save flag because we won't send a save done until later
-            markInSave(recordPos, false);
+            markSaved(recordPos);
 
             return new Context<>(this, record, sendError);
         } else {
@@ -112,7 +112,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
 
             if (ctx.error == Error.SUCCESS) {
                 recordPos = recordPosFromRecord(record);
-                markInSave(recordPos, false);
+                markSaved(recordPos);
 
                 notifyArrived(ctx);
                 forward(pkt, record);

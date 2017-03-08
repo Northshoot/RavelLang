@@ -116,6 +116,13 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         }
     }
 
+    protected void models__notifyLoadFromStorage(NetworkEvent event){
+        RavelPacket rp = event.data;
+        switch (rp.model_id) {
+            <models:model_case_event("recordLoaded", "rp"); separator="\n">
+        }
+    }
+
     protected void models__notifyFailedToSend(NetworkEvent event){
         RavelPacket rp = event.data;
         Endpoint endpoint = event.endpoint;
@@ -134,6 +141,10 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
 
     public void model__saveDurably(RavelPacket data) {
         driver.saveDurably(data);
+    }
+
+    public void model__deleteFromStorage(int modelId, int recordId) {
+        driver.deleteFromDurableStorage(modelId, recordId);
     }
 
     /***********************************************************************/

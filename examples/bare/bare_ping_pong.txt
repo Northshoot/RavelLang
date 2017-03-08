@@ -8,6 +8,7 @@ streaming model Ping():
 local model Reference():
     properties:
         records = 1
+        durable = True
     schema:
         value : int32
 
@@ -23,9 +24,13 @@ streaming model Pong():
 controller PingController(ref : Reference, ping : Ping, pong : Pong):
     event system.started():
         system.print("system started")
-        refrec = ref.create()
-        refrec.value = 0
-        ref.save(refrec)
+        refrec : Reference.Record
+        if ref.size() == 1:
+            refrec = ref.get(0)
+        else:
+            refrec = ref.create()
+            refrec.value = 0
+            ref.save(refrec)
         pingrec = ping.create()
         pingrec.value = refrec.value
         ping.save(pingrec)

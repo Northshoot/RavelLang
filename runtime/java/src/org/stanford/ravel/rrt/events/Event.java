@@ -10,6 +10,7 @@ public abstract class Event {
 
         DRIVER__DATA_RECEIVED, // NetworkEvent
         DRIVER__SAVED_DURABLY, // NetworkEvent
+        DRIVER__LOAD_FROM_STORAGE, // NetworkEvent
         MODELS__NOTIFY_RECORD_DEPARTED, // NetworkEvent
         MODELS__NOTIFY_RECORD_FAILED_TO_SEND, // NetworkEvent
 

@@ -98,7 +98,11 @@ public class <name> extends <base>\<<name>.Record> {
             <model.encryptCode>
             return __returnValue;
         } else {
-            return data;
+            byte[] packet = new byte[data.length + 2];
+            System.arraycopy(data, 0, packet, 2, data.length);
+            packet[0] = (byte)MODEL_ID;
+            packet[1] = (byte)record.index();
+            return packet;
         }
     }
     @Override

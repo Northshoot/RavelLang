@@ -11,9 +11,11 @@ import java.util.Collection;
 public interface DriverAPI {
     void appDispatcherReady();
 
+    void loadDurableStorage();
+
     Error sendData(RavelPacket pkt, Endpoint ep);
     void saveDurably(RavelPacket pkt);
-
+    void deleteFromDurableStorage(int modelId, int recordId);
 
     /**
      * Get all the known connected endpoints with

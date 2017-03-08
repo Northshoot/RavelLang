@@ -16,7 +16,7 @@ public abstract class LocalModel<RecordType extends ModelRecord> extends BaseMod
 
     @Override
     public Context<RecordType> save(RecordType record) {
-        Context<RecordType> ctx = doSave(record);
+        Context<RecordType> ctx = doSave(record, true);
         if (ctx.error == Error.SUCCESS)
             queueSaveDone(record);
         return ctx;

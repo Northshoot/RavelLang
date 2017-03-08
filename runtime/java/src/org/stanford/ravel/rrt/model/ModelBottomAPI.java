@@ -20,4 +20,5 @@ public interface ModelBottomAPI {
 
     void recordSavedDurably(RavelPacket record, Error error);
 
+    void recordLoaded(RavelPacket record);
 }

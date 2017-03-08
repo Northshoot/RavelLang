@@ -1,18 +1,23 @@
 package org.stanford.ravel.rrt.android;
 
+import android.content.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
-import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.*;
 import org.stanford.ravel.rrt.tiers.Error;
-import org.stanford.ravel.rrt.tiers.JavaDriver;
-import org.stanford.ravel.rrt.tiers.RavelIOException;
 
 /**
  * Created by gcampagn on 2/6/17.
  */
 public class AndroidDriver extends JavaDriver {
-    public AndroidDriver(DispatcherAPI dispatcher) {
+    private final Context ctx;
+    public AndroidDriver(DispatcherAPI dispatcher, Context ctx) {
         super(dispatcher);
+        this.ctx = ctx;
+    }
+
+    protected JavaDurableStorage createStorage() {
+        return new JavaDurableStorage(ctx.getDir("storage", Context.MODE_PRIVATE));
     }
 
     @Override
