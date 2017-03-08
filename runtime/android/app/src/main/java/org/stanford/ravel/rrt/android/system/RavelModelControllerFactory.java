@@ -3,13 +3,14 @@ package org.stanford.ravel.rrt.android.system;
 import android.content.Context;
 import android.util.Log;
 
+import org.stanford.ravel.rrt.android.base.controller.RavelAbstractModelController;
+import org.stanford.ravel.rrt.android.ble.RavelGattAtrributes;
+import org.stanford.ravel.rrt.android.utils.NoSuchModelException;
+
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import edu.stanford.ravel.base.controller.RavelAbstractModelController;
-import edu.stanford.ravel.defines.RavelGattAtrributes;
-import edu.stanford.ravel.utils.NoSuchModelException;
 
 /**
  * This class only create all the models in the ravel framework
@@ -62,10 +63,7 @@ public class RavelModelControllerFactory {
 //        mModelMap.put(RavelGattAtrributes.RAVEL_USER_MODEL, UserModel.INSTANCE);
 //        mModelMap.put(RavelGattAtrributes.RAVEL_SECURITY_MODEL, SecurityModel.INSTANCE);
 
-        /**
-         * bellow is generated used created models
-         */
-        mModelMap.put(RavelGattAtrributes.LED_MODEL, new LedStatusController(context));
+
 
     }
 

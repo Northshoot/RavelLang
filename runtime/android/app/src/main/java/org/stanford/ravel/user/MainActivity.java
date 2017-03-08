@@ -1,6 +1,5 @@
-package org.stanford.ravel.rrt.android.user;
+package org.stanford.ravel.user;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -8,10 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,12 +17,16 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.stanford.ledcontrol.R;
+import org.stanford.ravel.rrt.android.ble.BleDefines;
 import org.stanford.ravel.rrt.android.system.RavelDefines;
 
 
 public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener{
 
     public static final String TAG = "Blink";
+
 //    private BleService mService = null;
 //    private BluetoothDevice mDevice = null;
 //    private BluetoothAdapter mBtAdapter = null;
@@ -43,18 +44,18 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-//        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-//        if (mBtAdapter == null) {
-//            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-//            finish();
-//            return;
-//        }
-        togle_switch = (Switch) findViewById(R.id.togle_switch);
-        togle_switch.setOnCheckedChangeListener(this);
-        btnConnectDisconnect=(Button) findViewById(R.id.btn_select);
-        service_init();
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.activity_main);
+////        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+////        if (mBtAdapter == null) {
+////            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+////            finish();
+////            return;
+////        }
+//        togle_switch = (Switch) findViewById(R.id.togle_switch);
+//        togle_switch.setOnCheckedChangeListener(this);
+//        btnConnectDisconnect=(Button) findViewById(R.id.btn_select);
+//        service_init();
 
 
 //        Intent newIntent = new Intent(MainActivity.this, DeviceListActivity.class);
@@ -68,23 +69,23 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 //        LocalBroadcastManager.getInstance(this).registerReceiver(gcmBroadcastReceiver, makeGCMIntentFilter());
 //        ledStatusModel.setField_iot_device(ID);
         //work around for SDK 23
-        if (android.os.Build.VERSION.SDK_INT >= 23) {
-            Log.d(TAG, "Found SDK 23, requesting permission");
-            // Here, thisActivity is the current activity
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                } else {
-
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                            RavelDefines.PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
-                }
-            }
-        }
+//        if (android.os.Build.VERSION.SDK_INT >= 23) {
+//            Log.d(TAG, "Found SDK 23, requesting permission");
+//            // Here, thisActivity is the current activity
+//            if (ContextCompat.checkSelfPermission(this,
+//                    Manifest.permission.ACCESS_COARSE_LOCATION)
+//                    != PackageManager.PERMISSION_GRANTED) {
+//                // Should we show an explanation?
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+//                        Manifest.permission.ACCESS_COARSE_LOCATION)) {
+//                } else {
+//
+//                    ActivityCompat.requestPermissions(this,
+//                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+//                            RavelDefines.PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+//                }
+//            }
+//        }
 
 
     }
@@ -115,9 +116,9 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
 
     private void service_init() {
-        mRavelServiceIntent = new Intent(getApplicationContext(), RavelController.class);
-        startService(mRavelServiceIntent);
-        registerReceiver();
+//        mRavelServiceIntent = new Intent(getApplicationContext(), RavelController.class);
+//        startService(mRavelServiceIntent);
+//        registerReceiver();
 
     }
 
@@ -125,11 +126,11 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: " + intent.getAction());
-            if( intent.getAction().equals(BleDefines.ACTION_GATT_CONNECTED)){
-                ((TextView)findViewById(R.id.deviceName)).setText(intent.getStringExtra("DEVICE_ADDRESS"));
-            } else if (intent.getAction().equals(RavelController.BROADCAST_ACTION)){
-                setToggle();
-            }
+//            if( intent.getAction().equals(BleDefines.ACTION_GATT_CONNECTED)){
+//                ((TextView)findViewById(R.id.deviceName)).setText(intent.getStringExtra("DEVICE_ADDRESS"));
+//            } else if (intent.getAction().equals(RavelController.BROADCAST_ACTION)){
+//                setToggle();
+//            }
 
 
 
@@ -138,9 +139,9 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 
     private void registerReceiver(){
         IntentFilter filter = new IntentFilter();
-        filter.addAction(RavelController.BROADCAST_ACTION);
-        filter.addAction(BleDefines.ACTION_GATT_CONNECTED);
-        registerReceiver(mRaveConrollerReceiver, filter);
+//        filter.addAction(RavelController.BROADCAST_ACTION);
+//        filter.addAction(BleDefines.ACTION_GATT_CONNECTED);
+//        registerReceiver(mRaveConrollerReceiver, filter);
     }
 
     @Override
@@ -281,4 +282,8 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+    }
 }

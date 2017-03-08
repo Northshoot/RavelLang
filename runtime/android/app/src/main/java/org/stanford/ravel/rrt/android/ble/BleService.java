@@ -21,8 +21,6 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
-import edu.stanford.ravel.defines.BleDefines;
-import edu.stanford.ravel.defines.RavelErrorCodes;
 
 
 /**
@@ -299,31 +297,31 @@ public class BleService extends Service {
      * @param characteristic_UUID
      */
     public void writeCharacteristic(byte[] value, UUID service_UUID, UUID characteristic_UUID){
-        if( mBluetoothGatt != null) {
-            BluetoothGattService service = mBluetoothGatt.getService(service_UUID);
-            if (service == null){
-                Log.e(TAG, RavelErrorCodes.NO_SUCH_SERVICE);
-                broadcastUpdate(RavelErrorCodes.NO_SUCH_SERVICE);
-                return;
-            }
-            BluetoothGattCharacteristic writeChar = service.getCharacteristic(characteristic_UUID);
-            if (service == null) {
-                Log.e(TAG, RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
-                broadcastUpdate(RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
-                return;
-            }
-                writeChar.setValue(value);
-                boolean status = mBluetoothGatt.writeCharacteristic(writeChar);
-                if (!status) {
-                    Log.e(TAG, RavelErrorCodes.WRITE_CHARACTERISTIC_ERROR);
-                    broadcastUpdate(RavelErrorCodes.WRITE_CHARACTERISTIC_ERROR);
-                    return;
-                }
-
-            Log.d(TAG,"writeCharacteristic Success");
-        } else {
-            Log.d(TAG,"BLE Disconnected");
-        }
+//        if( mBluetoothGatt != null) {
+//            BluetoothGattService service = mBluetoothGatt.getService(service_UUID);
+//            if (service == null){
+//                Log.e(TAG, RavelErrorCodes.NO_SUCH_SERVICE);
+//                broadcastUpdate(RavelErrorCodes.NO_SUCH_SERVICE);
+//                return;
+//            }
+//            BluetoothGattCharacteristic writeChar = service.getCharacteristic(characteristic_UUID);
+//            if (service == null) {
+//                Log.e(TAG, RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
+//                broadcastUpdate(RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
+//                return;
+//            }
+//                writeChar.setValue(value);
+//                boolean status = mBluetoothGatt.writeCharacteristic(writeChar);
+//                if (!status) {
+//                    Log.e(TAG, RavelErrorCodes.WRITE_CHARACTERISTIC_ERROR);
+//                    broadcastUpdate(RavelErrorCodes.WRITE_CHARACTERISTIC_ERROR);
+//                    return;
+//                }
+//
+//            Log.d(TAG,"writeCharacteristic Success");
+//        } else {
+//            Log.d(TAG,"BLE Disconnected");
+//        }
     }
 
     

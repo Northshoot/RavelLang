@@ -3,9 +3,9 @@ package org.stanford.ravel.rrt.android;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.tiers.Endpoint;
-import org.stanford.ravel.rrt.tiers.Error;
 import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.RavelIOException;
+import org.stanford.ravel.rrt.tiers.Error;
 
 /**
  * Created by gcampagn on 2/6/17.

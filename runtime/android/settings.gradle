@@ -1,1 +1,3 @@
 include ':app'
+include ':java-rrt'
+project(':java-rrt').projectDir=new File('../java/java-rrt')

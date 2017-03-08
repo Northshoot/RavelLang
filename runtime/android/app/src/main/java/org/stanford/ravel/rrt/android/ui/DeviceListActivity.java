@@ -54,14 +54,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.stanford.ledcontrol.R;
+import org.stanford.ravel.rrt.android.ble.BleDefines;
+import org.stanford.ravel.rrt.android.system.RavelDefines;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.ledcontrol.R;
-import edu.stanford.ravel.defines.BleDefines;
-import edu.stanford.ravel.defines.RavelDefines;
+
 
 
 public class DeviceListActivity extends Activity {

@@ -16,51 +16,27 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+import org.stanford.ravel.rrt.android.base.RavelAbstractModel;
+import org.stanford.ravel.rrt.android.base.controller.RavelAbstractModelController;
+import org.stanford.ravel.rrt.android.base.controller.RavelControllerInterface;
+import org.stanford.ravel.rrt.android.ble.BleDefines;
+import org.stanford.ravel.rrt.android.ui.RavelNotificationCenter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import edu.stanford.ledcontrol.R;
-import edu.stanford.ledcontrol.model.LedStatusRepresentation;
-import edu.stanford.ravel.base.controller.RavelAbstractModelController;
-import edu.stanford.ravel.base.controller.RavelControllerInterface;
-import edu.stanford.ravel.defines.BleDefines;
-import edu.stanford.ravel.defines.RavelDefines;
-import edu.stanford.ravel.defines.RavelErrorCodes;
-import edu.stanford.ravel.defines.RavelGattAtrributes;
-import edu.stanford.ravel.model.RavelAbstractModel;
-import edu.stanford.ravel.model.RemoteServerResponse;
-import edu.stanford.ravel.model.db.RavelDatabaseHelper;
-import edu.stanford.ravel.service.RegistrationService;
-import edu.stanford.ravel.ui.DeviceListActivity;
-import edu.stanford.ravel.ui.RavelNotificationCenter;
-import edu.stanford.ravel.utils.NoSuchModelException;
-import org.stanford.ravel.rrt.android.http.RemoteServerController;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 /**
  * Created by lauril on 1/21/16.
@@ -122,37 +98,37 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
          */
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    mBLEConnectionState = BLE_STATE_CONNECTED;
-                    rncenter.setConnectionIcon(RavelDefines.CONNECTION_M);
-                    try {
-                        RavelAbstractModelController modelController = modelFactory.getModelControllerByUUID(RavelGattAtrributes.LED_MODEL_MODEL_UUID);
-                        modelController.setDevice(gatt.getDevice().getAddress());
-                    } catch (NoSuchModelException e){
-                        Log.e(TAG, e.getMessage());
-                    }
-                    broadcastUpdate(BleDefines.ACTION_GATT_CONNECTED, gatt.getDevice().getAddress());
-                    EMBEDDED_CONNECTED = true;
-                    Log.i(TAG, "Connected to GATT server.");
-                    //Scan for services
-                    if ( gatt.discoverServices() ) {
-                        Log.i(TAG, "Service Discovery started.");
-                    }
-                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    mBLEConnectionState = BLE_STATE_DISCONNECTED;
-                    broadcastUpdate(BleDefines.ACTION_GATT_DISCONNECTED);
-                    //start scanning after predefined period
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            scanLeDevice();
-                        }
-                    }, BleDefines.BLE_RECONNECT_TIME);
-                    Log.i(TAG, "Device disconnected.");
-                } else {
-                    Log.e(TAG, "Should not be in this state: " + String.valueOf(status) +
-                            " for the gatt " + gatt.toString());
-                }
+//                if (newState == BluetoothProfile.STATE_CONNECTED) {
+//                    mBLEConnectionState = BLE_STATE_CONNECTED;
+//                    rncenter.setConnectionIcon(RavelDefines.CONNECTION_M);
+//                    try {
+//                        RavelAbstractModelController modelController = modelFactory.getModelControllerByUUID(RavelGattAtrributes.LED_MODEL_MODEL_UUID);
+//                        modelController.setDevice(gatt.getDevice().getAddress());
+//                    } catch (NoSuchModelException e){
+//                        Log.e(TAG, e.getMessage());
+//                    }
+//                    broadcastUpdate(BleDefines.ACTION_GATT_CONNECTED, gatt.getDevice().getAddress());
+//                    EMBEDDED_CONNECTED = true;
+//                    Log.i(TAG, "Connected to GATT server.");
+//                    //Scan for services
+//                    if ( gatt.discoverServices() ) {
+//                        Log.i(TAG, "Service Discovery started.");
+//                    }
+//                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+//                    mBLEConnectionState = BLE_STATE_DISCONNECTED;
+//                    broadcastUpdate(BleDefines.ACTION_GATT_DISCONNECTED);
+//                    //start scanning after predefined period
+//                    mHandler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            scanLeDevice();
+//                        }
+//                    }, BleDefines.BLE_RECONNECT_TIME);
+//                    Log.i(TAG, "Device disconnected.");
+//                } else {
+//                    Log.e(TAG, "Should not be in this state: " + String.valueOf(status) +
+//                            " for the gatt " + gatt.toString());
+//                }
         }
 
         /**
@@ -244,15 +220,15 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //read data
-            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
-            try {
-                RavelAbstractModelController model = modelFactory.getModelControllerByUUID(characteristic.getService().getUuid());
-                //write to model
-
-            model.dataReceivedEmbedded(characteristic.getValue(), gatt.getDevice().getAddress());
-            } catch (NoSuchModelException e) {
-                Log.e(TAG, "NoSuchModelException!");
-            }
+//            Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
+//            try {
+//                //RavelAbstractModelController model = modelFactory.getModelControllerByUUID(characteristic.getService().getUuid());
+//                //write to model
+//
+//            model.dataReceivedEmbedded(characteristic.getValue(), gatt.getDevice().getAddress());
+//            } catch (NoSuchModelException e) {
+//                Log.e(TAG, "NoSuchModelException!");
+//            }
 
         }
 
@@ -352,33 +328,33 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
         Log.d(TAG, "Checking BLE services");
         String error = null;
         RavelAbstractModelController service_model;
-        try {
-            //get all models by service, enable all notify characteristics
-            for (BluetoothGattService bleS : mBluetoohServiceList) {
-                service_model = modelFactory.getModelControllerByUUID(bleS.getUuid());
-                if (service_model != null){
-                    Log.d(TAG, service_model.toString());
-                }
-                //We only check for ravel models
-                if(service_model instanceof RavelAbstractModelController){
-                    for (UUID notf : service_model.getNotifications()) {
-                        Log.d(TAG, "Enabling service: " + notf.toString());
-                        enableNotification(notf, bleS.getUuid());
-                    }
-                    Log.d(TAG, bleS.getUuid().toString());
-                } else {
-                    Log.e(TAG, "no compatible models were found");
-                }
-            }
-        } catch (NoSuchModelException e) {
-            error = "connected to the device but no model found";
-        } catch (Exception e) {
-            error = e.getMessage();
-        } finally {
-            if(error != null) {
-                Log.e(TAG, error);
-            }
-        }
+//        try {
+//            //get all models by service, enable all notify characteristics
+//            for (BluetoothGattService bleS : mBluetoohServiceList) {
+//                service_model = modelFactory.getModelControllerByUUID(bleS.getUuid());
+//                if (service_model != null){
+//                    Log.d(TAG, service_model.toString());
+//                }
+//                //We only check for ravel models
+//                if(service_model instanceof RavelAbstractModelController){
+//                    for (UUID notf : service_model.getNotifications()) {
+//                        Log.d(TAG, "Enabling service: " + notf.toString());
+//                        enableNotification(notf, bleS.getUuid());
+//                    }
+//                    Log.d(TAG, bleS.getUuid().toString());
+//                } else {
+//                    Log.e(TAG, "no compatible models were found");
+//                }
+//            }
+//        } catch (NoSuchModelException e) {
+//            error = "connected to the device but no model found";
+//        } catch (Exception e) {
+//            error = e.getMessage();
+//        } finally {
+//            if(error != null) {
+//                Log.e(TAG, error);
+//            }
+//        }
     }
 
 
@@ -391,9 +367,9 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
         mBluetoothGatt.setCharacteristicNotification(characteristic, true);
         //TODO: not sure this is the right way
         //https://devzone.nordicsemi.com/question/55669/enabling-multiple-notifications-characteristic/
-        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BleDefines.CLIENT_CHARACTERISTIC_CONFIG);
-        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        mBluetoothGatt.writeDescriptor(descriptor);
+       // BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BleDefines.CLIENT_CHARACTERISTIC_CONFIG);
+        //descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        //mBluetoothGatt.writeDescriptor(descriptor);
     }
 
 
@@ -416,10 +392,10 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
         //create BLE manager
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            this.onDestroy();
-        }
+//        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+//            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+//            this.onDestroy();
+//        }
         deviceList = new ArrayList<>();
         if ( initialize() ) {
             mBLEConnectionState = BLE_STATE_INITIALIZED;
@@ -433,48 +409,16 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
          */
         //start GCM service
         // we can not extend two classes
-
-        // Start IntentService to register this application with GCM.
-        Intent intent = new Intent(this, RegistrationService.class);
-        startService(intent);
-
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(RavelDefines.SENT_TOKEN_TO_SERVER, false);
-                if (sentToken) {
-                    Log.d(TAG, "Device registered");
-
-                } else {
-                    Log.d(TAG, "Device registration error");
-                }
-            }
-        };
-        IntentFilter registerIntentFilter = new IntentFilter();
-        registerIntentFilter.addAction(RavelDefines.REGISTRATION_COMPLETE);
-        this.registerReceiver(mRegistrationBroadcastReceiver, registerIntentFilter);
-
-        this.registerReceiver(gcmBroadcastReceiver, makeGCMIntentFilter());
-
-        /** END GCM */
-        rncenter.showNotification();
     }
 
 
-    private void deleteDB() {
-       this.deleteDatabase(RavelDatabaseHelper.DATABASE_FILE_NAME);
-    }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
         //TODO: stop deleting
-        deleteDB();
+
         return START_STICKY;
     }
 
@@ -570,7 +514,7 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
             connect(deviceList.get(0).getAddress());
         } else {
             //we need to start an activity for intent and grab the address of the device
-            rncenter.showNotification(R.string.more_than_one_device, DeviceListActivity.class);
+           // rncenter.showNotification(R.string.more_than_one_device, DeviceListActivity.class);
 
         }
 
@@ -597,24 +541,24 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
-        if (mBluetoothManager == null && mBLEConnectionState == BLE_STATE_DISCONNECTED) {
-            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-            if (mBluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
-                Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        } else {
-            Log.e(TAG, "Trying to initialize manager in state: " + String.valueOf(mBLEConnectionState)
-            + " with manager " + mBluetoothManager.toString());
-        }
-
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            return false;
-        }
+//        if (mBluetoothManager == null && mBLEConnectionState == BLE_STATE_DISCONNECTED) {
+//            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+//            if (mBluetoothManager == null) {
+//                Log.e(TAG, "Unable to initialize BluetoothManager.");
+//                Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        } else {
+//            Log.e(TAG, "Trying to initialize manager in state: " + String.valueOf(mBLEConnectionState)
+//            + " with manager " + mBluetoothManager.toString());
+//        }
+//
+//        mBluetoothAdapter = mBluetoothManager.getAdapter();
+//        if (mBluetoothAdapter == null) {
+//            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+//            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
 
         return true;
     }
@@ -634,7 +578,6 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
 
         try {
             this.unregisterReceiver(mRegistrationBroadcastReceiver);
-            this.unregisterReceiver(gcmBroadcastReceiver);
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());
         }
@@ -729,33 +672,34 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
 //        message.setAsynchronous(true);
 //        message.arg1 = RavelDefines.WRITE_SUCCESS;
 //        handler.sendMessage(message);
-        try {
-            Call<RemoteServerResponse.RemoteResult> call = RemoteServerController.getServer().add_status(
-                    (LedStatusRepresentation) model);
-            call.enqueue(
-                    new Callback<RemoteServerResponse.RemoteResult>() {
-
-
-                        @Override
-                        public void onResponse(Response<RemoteServerResponse.RemoteResult> response, Retrofit retrofit) {
-                            Log.d(TAG, "Response " + response.body().getStatus());
-                            //TODO: mark ACK
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            Log.d(TAG, "Failure");
-                            Log.e(TAG, t.getMessage());
-                        }
-                    }
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "response error");
-            e.printStackTrace();
-
-        }
+//        try {
+//            Call<RemoteServerResponse.RemoteResult> call = RemoteServerController.getServer().add_status(
+//                    (LedStatusRepresentation) model);
+//            call.enqueue(
+//                    new Callback<RemoteServerResponse.RemoteResult>() {
+//
+//
+//                        @Override
+//                        public void onResponse(Response<RemoteServerResponse.RemoteResult> response, Retrofit retrofit) {
+//                            Log.d(TAG, "Response " + response.body().getStatus());
+//                            //TODO: mark ACK
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Throwable t) {
+//                            Log.d(TAG, "Failure");
+//                            Log.e(TAG, t.getMessage());
+//                        }
+//                    }
+//            );
+//        } catch (Exception e) {
+//            Log.e(TAG, "response error");
+//            e.printStackTrace();
+//
+//        }
         return true;
     }
+
 
     /**
      * Generic method that writes to the model instance on the embedded device
@@ -824,52 +768,25 @@ public class AndroidRRT extends Service implements RavelControllerInterface {
      * the Google Play Store or enable it in the device's system settings.
      */
     private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            //TODO: deal with the user ui,
-            //TODO: need to create a fragment for this
-//            if (apiAvailability.isUserResolvableError(resultCode)) {
-//                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-//                        .show();
-//            } else {
-//                Log.i(TAG, "This device is not supported.");
-//
-//            }
-            return false;
-        }
+//        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+//        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+//        if (resultCode != ConnectionResult.SUCCESS) {
+//            //TODO: deal with the user ui,
+//            //TODO: need to create a fragment for this
+////            if (apiAvailability.isUserResolvableError(resultCode)) {
+////                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+////                        .show();
+////            } else {
+////                Log.i(TAG, "This device is not supported.");
+////
+////            }
+//            return false;
+//        }
         return true;
     }
 
-    private static IntentFilter makeGCMIntentFilter(){
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(RavelDefines.CLOUD_DATA);
-        return intentFilter;
-
-    }
 
 
-    private final BroadcastReceiver gcmBroadcastReceiver = new BroadcastReceiver() {
 
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, " gcmBroadcastReceiver " + intent.getAction());
-            String action = intent.getAction();
-            final Intent mIntent = intent;
-            if (action.equals(RavelDefines.CLOUD_DATA)) {
-                String msg = intent.getStringExtra(RavelDefines.CLOUD_DATA);
-                Log.d(TAG, "Got msg: " + msg);
-                //TODO: update model and call sync on model
-                try {
-                    RavelAbstractModelController model = modelFactory.getModelControllerByUUID(RavelGattAtrributes.LED_MODEL_MODEL_UUID);
-                    //write to model
-
-                    ((LedStatusController)model).dataReceivedCloud(msg);
-                } catch (NoSuchModelException e) {
-                    Log.e(TAG, "NoSuchModelException!");
-                }
-
-            }
-        }
-    };
 
 }

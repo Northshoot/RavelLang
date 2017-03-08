@@ -8,9 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
-import edu.stanford.ledcontrol.MainActivity;
-import edu.stanford.ledcontrol.R;
-import edu.stanford.ravel.defines.RavelDefines;
+import org.stanford.ledcontrol.R;
+import org.stanford.ravel.rrt.android.system.RavelDefines;
+import org.stanford.ravel.user.MainActivity;
+
 
 /**
  * Created by lauril on 2/8/16.
