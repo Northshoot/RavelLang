@@ -10,5 +10,7 @@ typedef uint8_t rf_ctrf_flags;
 typedef struct {
     uint8_t indx; /* packet index */
     rf_ctrf_flags ctrf_flags; /* masked control field flags */
-} rf_ctrf;
+    uint8_t *data;
+}__attribute__((packed)) data_packet_t;
+
 #endif //NRF52_RAVEL_FRAME_H

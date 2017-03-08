@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "nrf52_network.h"
+#include "nrf52_ravel_frame.h"
 
 uint32_t queue_init(uint32_t,uint32_t);
 uint32_t queue_enqueue(const data_packet_t *packet,uint32_t);

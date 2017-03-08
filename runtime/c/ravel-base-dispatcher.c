@@ -10,8 +10,10 @@
 void
 ravel_base_dispatcher_init(RavelBaseDispatcher *self)
 {
+
     ravel_key_provider_init(&self->key_provider);
     ravel_system_init(&self->sys_api);
+
 }
 
 void

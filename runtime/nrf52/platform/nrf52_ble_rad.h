@@ -31,11 +31,12 @@
 
 #ifndef BLE_RAD_H__
 #define BLE_RAD_H__
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "ble.h"
 #include "ble_srv_common.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "nrf52_network.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,6 +75,7 @@ struct ble_rad_s
     uint16_t                 conn_handle;             /**< Handle of the current connection (as provided by the SoftDevice). BLE_CONN_HANDLE_INVALID if not in a connection. */
     bool                     is_notification_enabled; /**< Variable to indicate if the peer has enabled notification of the RX characteristic.*/
     ble_rad_data_handler_t   data_handler;            /**< Event handler to be called for handling received data. */
+    NetworkClb               *network;                  /**< Functional structure for event handling. */
 };
 
 /**@brief Function for initializing the Ravel Data Service.
@@ -102,16 +104,16 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt);
 
 /**@brief Function for sending a string to the peer.
  *
- * @details This function sends the input string as an RX characteristic notification to the
+ * @details This function sends the input byte as an RX characteristic notification to the
  *          peer.
  *
  * @param[in] p_rad       Pointer to the Ravel Data Service structure.
- * @param[in] p_string    String to be sent.
- * @param[in] length      Length of the string.
+ * @param[in] p_string    Data to be sent.
+ * @param[in] length      Length of the Data.
  *
  * @retval NRF_SUCCESS If the string was sent successfully. Otherwise, an error code is returned.
  */
-uint32_t ble_rad_string_send(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length);
+uint32_t ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length);
 
 
 #ifdef __cplusplus

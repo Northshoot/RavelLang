@@ -86,7 +86,7 @@ void flash_init(void) {
         flash_write(SEQNO_CODE,buffer);
     }
 
-    network_init(ACKNO_CODE,SEQNO_CODE,old_data);
+    //network_init(ACKNO_CODE,SEQNO_CODE,old_data);
     APP_ERROR_CHECK(err_code);
 
 }

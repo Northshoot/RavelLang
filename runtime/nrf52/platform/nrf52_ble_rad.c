@@ -24,6 +24,12 @@
 
 #define RAD_BASE_UUID                  {{0x01, 0x02, 0x03, 0x024, 0x05, 0x06, 0x07, 0x08, 0x09, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3, 0xA3}}
 
+#define CALL_UP_SEND_DONE(P_STRUCT) (P_STRUCT->network)->send_done()
+#define CALL_UP_CONNECTED(P_STRUCT) (P_STRUCT->network)->connected()
+#define CALL_UP_DISCONNECTED(P_STRUCT) (P_STRUCT->network)->disconnected()
+#define CALL_UP_NOTIFY(P_STRUCT) (P_STRUCT->network)->notify()
+#define CALL_UP_SEND_DONE(P_STRUCT) (P_STRUCT->network)->send_done()
+#define CALL_UP_RX(P_STRUCT, P_DATA, LEN) (P_STRUCT->network)->on_write(P_DATA, LEN)
 /***
  *
  * Service function for interactions
@@ -40,6 +46,7 @@ static void on_connect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     NRF_LOG_DEBUG("on_connect\r\n");
     //TODO: signal upwards
     p_rad->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+    CALL_UP_CONNECTED(p_rad);
 }
 
 
@@ -54,6 +61,7 @@ static void on_disconnect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     UNUSED_PARAMETER(p_ble_evt);
     //TODO: signal upwards
     p_rad->conn_handle = BLE_CONN_HANDLE_INVALID;
+    CALL_UP_DISCONNECTED(p_rad);
 }
 
 
@@ -77,11 +85,13 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         {
             NRF_LOG_DEBUG("notification enabled\r\n");
             p_rad->is_notification_enabled = true;
+            CALL_UP_NOTIFY(p_rad);
         }
         else
         {
             NRF_LOG_DEBUG("notification disabled\r\n");
             p_rad->is_notification_enabled = false;
+            CALL_UP_NOTIFY(p_rad);
         }
     }
     else if (
@@ -91,8 +101,7 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
             )
     {
         NRF_LOG_DEBUG("data received\r\n");
-        //TODO: signal upwards
-        p_rad->data_handler(p_rad, p_evt_write->data, p_evt_write->len);
+        CALL_UP_RX( p_rad, p_evt_write->data, p_evt_write->len);
     }
     else
     {
@@ -222,7 +231,7 @@ static uint32_t tx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init
 
 void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
-    NRF_LOG_DEBUG("on_ble_eventt\r\n");
+    NRF_LOG_DEBUG("on_ble_event %u \r\n", p_ble_evt->header.evt_id);
     if ((p_rad == NULL) || (p_ble_evt == NULL))
     {
         return;
@@ -241,7 +250,11 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         case BLE_GATTS_EVT_WRITE:
             on_write(p_rad, p_ble_evt);
             break;
-
+        case BLE_EVT_TX_COMPLETE:
+            NRF_LOG_DEBUG("TX_COMPLETE \r\n");
+            CALL_UP_SEND_DONE(p_rad);
+//            err_code = app_sched_event_put(NULL, 0, update_timers_state);
+//                APP_ERROR_CHECK(err_code);
         default:
             // No implementation needed.
             break;
@@ -289,7 +302,7 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
 }
 
 
-uint32_t ble_rad_string_send(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
+uint32_t ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 {
     ble_gatts_hvx_params_t hvx_params;
     NRF_LOG_DEBUG("send string\r\n");

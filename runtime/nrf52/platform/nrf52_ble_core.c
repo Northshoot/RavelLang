@@ -68,6 +68,17 @@ static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_RAD_SERVICE, 
 
 
 
+static void rad_data_handler(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
+{
+    NRF_LOG_DEBUG("data RX\r\n");
+}
+
+uint32_t nrf52_send_data(uint8_t * p_data, uint16_t length)
+{
+    //TODO: there is currently no dispatching between services
+    //The call is synchronous
+    return ble_rad_send_data(&m_rad, p_data, length);
+}
 /**@brief Function for the GAP initialization.
  *
  * @details This function will set up all the necessary GAP (Generic Access Profile) parameters of
@@ -98,16 +109,12 @@ static void gap_params_init(void)
 }
 
 
-static void rad_data_handler(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
-{
-    NRF_LOG_DEBUG("data RX\r\n");
-}
 
 
 
 /**@brief Function for initializing services that will be used by the application.
  */
-static void services_init(void)
+static void services_init(NetworkClb *network)
 {
     uint32_t       err_code;
     ble_rad_init_t rad_init;
@@ -116,6 +123,7 @@ static void services_init(void)
     memset(&rad_init, 0, sizeof(rad_init));
 
     rad_init.data_handler = rad_data_handler;
+    m_rad.network = network;
 
     err_code = ble_rad_init(&m_rad, &rad_init);
     APP_ERROR_CHECK(err_code);
@@ -400,7 +408,7 @@ static void advertising_init(void)
 }
 
 
-void nrf52_r_core_ble_stack_init()
+void nrf52_r_core_ble_stack_init(NetworkClb *network)
 {
     NRF_LOG_DEBUG("nrf52_r_core_ble_stack_init\r\n");
     //test if softdevice is enabled
@@ -409,9 +417,11 @@ void nrf52_r_core_ble_stack_init()
         NRF_LOG_ERROR("SD is not enabled! Can not proceed")
         return;
     }
+
     ble_stack_init();
     gap_params_init();
-    services_init();
+    //TODO: set network callbacks
+    services_init(network);
     advertising_init();
     conn_params_init();
 }

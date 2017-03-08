@@ -11,14 +11,21 @@
 #include "ravel/module.h"
 #include "api/base_dispatcher.h"
 
+
+
+typedef struct  Nrf52Driver RavelNrf52Driver;
+#include "nrf52_network.h"
+
 typedef struct {
     RAVEL_MODULE __module;
 
 } ravel_schedule_event_cntx;
 
-typedef struct {
+
+struct Nrf52Driver{
     RavelDriver base;
-} RavelNrf52Driver;
+    NetworkClb network;
+} ;
 
 struct AppDispatcher;
 
