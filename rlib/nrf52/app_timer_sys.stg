@@ -75,7 +75,7 @@ h_file(includes,name,interface) ::=<<
 typedef struct s_<name> <name>;
 
 <includes:do_include(); separator="\n">
-#include "ravel_timer.h"
+#include "nrf52_ravel_timer.h"
 <begin_extern_c()>
 
 typedef struct s_<name> {

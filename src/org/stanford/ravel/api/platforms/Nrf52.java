@@ -53,10 +53,15 @@ public class Nrf52 extends BaseCPlatform {
         
         NrfConfig nc = new NrfConfig();
         //TODO: add to interface
+        //NOT used right now
         //define = {val: key}
         nc.TIMER_ENABLED = 0;
         nc.RTC2_ENABLED =1 ;
         nc.RTC_ENABLED =1 ;
+        nc.CLOCK_ENABLED =1;
+        nc.CLOCK_CONFIG_XTAL_FREQ =1;
+        nc.CLOCK_CONFIG_LF_SRC =1;
+        nc.GPIOTE_ENABLED =1;
         nc.NRF_LOG_ENABLED =1;
         nc.NRF_LOG_USES_COLORS =1;
         nc.NRF_LOG_COLOR_DEFAULT = 3;

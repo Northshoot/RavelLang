@@ -47,7 +47,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="edu.stanford.ledcontrol.MainActivity"
+            android:name="edu.stanford."
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

@@ -14,7 +14,6 @@ file(name) ::=<<
 #define NRF_LOG_MODULE_NAME "MAIN"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-#include "softdevice_handler.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -25,14 +24,10 @@ RavelNrf52Driver driver;
 
 int main(void) {
   uint32_t err_code;
-  nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
-
-  // Initialize the SoftDevice handler module.
-  SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
   // Initialize.
   err_code = NRF_LOG_INIT(NULL);
   APP_ERROR_CHECK(err_code);
-  NRF_LOG_DEBUG("Main Starting\n");
+  NRF_LOG_DEBUG("Main Starting: <name>\n");
   NRF_LOG_FLUSH();
 
 //system flow:

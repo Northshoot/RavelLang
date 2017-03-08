@@ -16,6 +16,7 @@
 
 typedef struct {
     void *dispatcher;
+
 } RavelDriver;
 
 RavelEndpoint * const * ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name);

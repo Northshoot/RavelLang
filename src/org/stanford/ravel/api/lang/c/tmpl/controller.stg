@@ -10,9 +10,9 @@ ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<ha
 c_file(includes,name,parameters,eventHandlers) ::=<<
 <begin_source(name)>
 
-#include \<api/context.h>
-#include \<api/system.h>
-#include \<api/intrinsics.h>
+#include "api/context.h"
+#include "api/system.h"
+#include "api/intrinsics.h"
 
 <includes:do_include(); separator="\n">
 
