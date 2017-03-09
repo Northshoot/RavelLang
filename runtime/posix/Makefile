@@ -5,13 +5,13 @@ C_RUNTIME_SOURCES = \
     ravel-ringbuf.c \
     ravel-base-model.c \
     ravel-base-dispatcher.c \
-    ravel-system-api.c \
     ravel-packet.c \
     ravel-growable-byte-array.c \
     ravel-array.c \
     ravel-key-provider.c
 
 PLATFORM_RUNTIME_SOURCES = \
+    ravel-system-api.c \
     ravel-driver.c \
     ravel-crypto-wolfssl.c
 

@@ -14,8 +14,10 @@
 #include "packet.h"
 #include "context.h"
 
+struct RavelBaseDispatcher;
+
 typedef struct {
-    void *dispatcher;
+    struct RavelBaseDispatcher *dispatcher;
 
 } RavelDriver;
 

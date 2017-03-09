@@ -351,6 +351,7 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
     endpoint->base.name = name;
     endpoint->port = ntohs(address.sin_port);
     endpoint->address = address.sin_addr.s_addr;
+    endpoint->connected = true;
 
     insert_endpoint_in_table (self, endpoint);
 }
@@ -523,6 +524,7 @@ start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
         return -1;
     }
 
+    endpoint->connected = true;
     add_poll_fd(self, fd, POLLIN, false, endpoint);
     return fd;
 }

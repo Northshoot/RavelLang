@@ -51,6 +51,10 @@ typedef struct {
     // true if this record arrived and we
     // haven't told the controller yet
     bool is_arrived;
+
+    // true if this record was sent but we never called
+    // departed because we never got a successfull send_done()
+    bool is_transmit_failed;
 } RavelRecordState;
 
 typedef struct {
@@ -145,6 +149,7 @@ typedef struct {
 void ravel_local_model_init(RavelLocalModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_local_model_finalize(RavelLocalModel *self);
 
+static inline void ravel_local_model_endpoint_connected(RavelLocalModel *self, RavelEndpoint   *endpoint) {}
 static inline void ravel_local_model_record_arrived(RavelLocalModel *self, RavelPacket *packet, RavelEndpoint *endpoint) {
     __builtin_unreachable();
 }
@@ -174,6 +179,7 @@ typedef struct {
 void ravel_streaming_model_init(RavelStreamingModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_streaming_model_finalize(RavelStreamingModel *self);
 
+void ravel_streaming_model_endpoint_connected(RavelStreamingModel *self, RavelEndpoint *endpoint);
 void ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_streaming_model_record_departed(RavelStreamingModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPacket *packet, RavelEndpoint *endpoint, RavelError error);
@@ -196,6 +202,7 @@ typedef struct {
 void ravel_replicated_model_init(RavelReplicatedModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_replicated_model_finalize(RavelReplicatedModel *self);
 
+void ravel_replicated_model_endpoint_connected(RavelReplicatedModel *self, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_arrived(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_departed(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_failed_to_send(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint, RavelError error);

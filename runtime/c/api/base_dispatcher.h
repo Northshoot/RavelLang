@@ -24,6 +24,7 @@ typedef struct {
     void (*data_received)(void *self, RavelPacket *pkt, RavelEndpoint *endpoint);
     void (*send_done)(void *self, RavelError error, RavelPacket *pkt, RavelEndpoint *endpoint);
     void (*saved_durably)(void *self, RavelPacket *pkt, RavelError error);
+    void (*endpoint_connected)(void *self, RavelEndpoint *endpoint);
 } RavelDispatcherVTable;
 
 typedef struct RavelBaseDispatcher {
@@ -61,6 +62,11 @@ static inline void ravel_base_dispatcher_send_done(RavelBaseDispatcher *self, Ra
 static inline void ravel_base_dispatcher_saved_durably(RavelBaseDispatcher *self, RavelPacket *pkt, RavelError error)
 {
     self->vtable->saved_durably(self, pkt, error);
+}
+
+static inline void ravel_base_dispatcher_endpoint_connected(RavelBaseDispatcher *self, RavelEndpoint *endpoint)
+{
+    self->vtable->endpoint_connected(self, endpoint);
 }
 
 static inline RavelEndpoint * const * ravel_base_dispatcher_get_endpoints_by_name(RavelBaseDispatcher *self, const char *name)

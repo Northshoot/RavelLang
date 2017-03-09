@@ -21,6 +21,7 @@
 #include "nrf_soc.h"
 
 static nrf52_endpoint endpoint_space;
+extern RavelNrf52Driver driver;
 
 static bool m_connected = false;
 static bool m_notify_enabled = false;
@@ -85,12 +86,15 @@ network_on_write(const uint8_t *data, uint16_t len)
     //TODO: remove string out of e-space
     //TODO: check that it is the expected packet or hell will break loose
     //FIXME
-    uint8_t *space_name = malloc(len+1);
+    char *space_name = malloc(len+1);
     memcpy(space_name, data, len);
     space_name[len] = 0;
+
+    if (endpoint_space.m_ravel_endpoint.name)
+        free((char*)endpoint_space.m_ravel_endpoint.name);
     endpoint_space.m_ravel_endpoint.name = space_name;
     endpoint_space.m_tx_uuid = BLE_UUID_RAD_TX_CHARACTERISTIC;
-    NRF_LOG_DEBUG("network_on_write %s\r\n", space_name);
+    NRF_LOG_DEBUG("network_on_write %s\r\n", (uint32_t)space_name);
 }
 
 void
@@ -117,12 +121,14 @@ void
 network_on_notify(void)
 {
     m_notify_enabled = !m_notify_enabled;
+    endpoint_space.m_ravel_endpoint.connected = m_notify_enabled;
 
     if (m_notify_enabled)
-        ravel_driver_set_endpoint(&endpoint_space);
+        ravel_nrf52_driver_set_endpoint(&driver, &endpoint_space);
     else {
-        free(endpoint_space.m_ravel_endpoint.name);
-        ravel_driver_set_endpoint(NULL);
+        free((char*)endpoint_space.m_ravel_endpoint.name);
+        endpoint_space.m_ravel_endpoint.name = NULL;
+        ravel_nrf52_driver_set_endpoint(&driver, NULL);
     }
 
     //TODO: create an endpoint

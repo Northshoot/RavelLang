@@ -31,6 +31,10 @@ case <model.component.baseModel.id>:
     break;
 >>
 
+model_endpoint_connected(model) ::=<<
+ravel_<model.component.baseModel.modelType; format="function">_model_endpoint_connected(&self->model_<model.varName>.__base, endpoint);
+>>
+
 c_file(includes,name,models,interfaces,controllers,space) ::=<<
 <begin_source(name)>
 
@@ -66,10 +70,17 @@ send_done(<name> *self, RavelError error, RavelPacket *packet, RavelEndpoint *en
     }
 }
 
+static void
+endpoint_connected(<name> *self, RavelEndpoint *endpoint)
+{
+    <models:model_endpoint_connected(); separator="\n">
+}
+
 static const RavelDispatcherVTable vtable = {
     .data_received = (void(*)(void*, RavelPacket *, RavelEndpoint *)) data_received,
     .send_done = (void(*)(void*, RavelError, RavelPacket *, RavelEndpoint *)) send_done,
     .saved_durably = (void(*)(void*, RavelPacket *, RavelError)) saved_durably,
+    .endpoint_connected = (void(*)(void*, RavelEndpoint*)) endpoint_connected,
 };
 
 void

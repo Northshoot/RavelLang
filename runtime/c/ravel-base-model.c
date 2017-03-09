@@ -207,15 +207,6 @@ ravel_base_model_size(RavelBaseModel *self)
     return (int32_t)self->num_valid_records;
 }
 
-//TODO: listen for connection
-static bool m_connected = false;
-void
-connection_endpoint(bool connection)
-{
-    m_connected = connection;
-}
-//TODO: restart sending when connection is available
-
 static RavelError
 ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
                                       void               *record,
@@ -224,20 +215,31 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     RavelPacket packet;
     uint8_t *byte_array;
     int record_pos = record_pos_from_record (self, record);
+    RavelError local_error;
 
     // serialize the record
     byte_array = self->vtable->marshall(self, record, endpoint);
-    if (byte_array == NULL)
-        return RAVEL_ERROR_OUT_OF_STORAGE;
-
-    self->state[record_pos].in_transit++;
-    if (self->reliable)
-        self->state[record_pos].expected_acks++;
+    if (byte_array == NULL) {
+        local_error = RAVEL_ERROR_OUT_OF_STORAGE;
+        goto out;
+    }
 
     ravel_packet_init_from_record(&packet, byte_array, ravel_array_length(byte_array));
     ravel_array_free(byte_array);
 
-    return ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
+    if (!endpoint->connected) {
+        local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+    } else {
+        local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
+    }
+
+out:
+    if (local_error != RAVEL_ERROR_SUCCESS && local_error != RAVEL_ERROR_IN_TRANSIT)
+        self->state[record_pos].is_transmit_failed = true;
+    else
+        self->state[record_pos].in_transit++;
+
+    return local_error;
 }
 
 static RavelError
@@ -257,6 +259,9 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
 
         for (j = 0; endpoints[j]; j++) {
             RavelEndpoint *endpoint = endpoints[j];
+
+            if (self->reliable)
+                self->state[record_pos_from_record (self, record)].expected_acks++;
 
             local_error = ravel_base_model_send_record_endpoint(self, record, endpoint);
             if (local_error != RAVEL_ERROR_SUCCESS)
@@ -514,6 +519,12 @@ ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
     return &self->base.current_ctx;
 }
 
+void
+ravel_replicated_model_endpoint_connected(RavelReplicatedModel *self, RavelEndpoint *endpoint)
+{
+    // TODO implement
+}
+
 
 void
 ravel_streaming_model_init(RavelStreamingModel *self,
@@ -580,18 +591,30 @@ ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const ch
         for (j = 0; endpoints[j]; j++) {
             RavelEndpoint *endpoint = endpoints[j];
             RavelPacket copy;
+            int record_pos;
 
             ravel_packet_init_copy(&copy, pkt);
 
             if (record != NULL) {
-                int record_pos = record_pos_from_record (self, record);
-                self->state[record_pos].in_transit ++;
+                record_pos = record_pos_from_record (self, record);
 
                 if (self->reliable)
                     self->state[record_pos].expected_acks ++;
             }
 
-            local_error = ravel_base_dispatcher_send_data (self->dispatcher, &copy, endpoint);
+            if (!endpoint->connected) {
+                local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+            } else {
+                local_error = ravel_base_dispatcher_send_data (self->dispatcher, &copy, endpoint);
+            }
+
+            if (record != NULL) {
+                if (local_error != RAVEL_ERROR_SUCCESS && local_error != RAVEL_ERROR_IN_TRANSIT)
+                    self->state[record_pos].is_transmit_failed = true;
+                else
+                    self->state[record_pos].in_transit++;
+            }
+
             if (local_error != RAVEL_ERROR_SUCCESS)
                 error = local_error;
         }
@@ -739,11 +762,15 @@ ravel_streaming_model_record_departed(RavelStreamingModel *self, RavelPacket *pk
         if (!self->base.state[record_pos].is_valid) {
             // record was deleted after sending
             ravel_record_free(&self->base, record, false);
-        } else if (self->base.reliable) {
-            // do nothing and wait for the acks
         } else {
-            ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
-            self->base.vtable->dispatch_departed(self, &self->base.current_ctx);
+            self->base.state[record_pos].is_transmit_failed = false;
+
+            if (self->base.reliable) {
+                // do nothing and wait for the acks
+            } else {
+                ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+                self->base.vtable->dispatch_departed(self, &self->base.current_ctx);
+            }
         }
     }
 }
@@ -783,3 +810,17 @@ ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPack
     }
 }
 
+void
+ravel_streaming_model_endpoint_connected(RavelStreamingModel *self, RavelEndpoint *endpoint)
+{
+    size_t i;
+
+    assert (endpoint->connected);
+
+    for (i = 0; i < self->base.num_records; i++) {
+        if (self->base.state[i].is_valid && self->base.state[i].is_transmit_failed) {
+            assert(self->base.state[i].is_allocated);
+            ravel_base_model_send_record_endpoint (&self->base, record_at(&self->base, i), endpoint);
+        }
+    }
+}

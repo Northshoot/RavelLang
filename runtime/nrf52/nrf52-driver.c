@@ -49,12 +49,14 @@ ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
 }
 
 void
-ravel_driver_set_endpoint(nrf52_endpoint *endpoint)
+ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoint)
 {
-    if (endpoint != NULL)
+    if (endpoint != NULL) {
         endpoints[0] = &endpoint->m_ravel_endpoint;
-    else
+        ravel_base_dispatcher_endpoint_connected(driver->base.dispatcher, endpoints[0]);
+    } else {
         endpoints[0] = NULL;
+    }
 }
 
 RavelError
@@ -141,7 +143,7 @@ ravel_nrf_driver_dispatch_event(RavelNrf52Driver *selft)
 void
 ravel_nrf52_driver_app_dispatcher_ready(RavelNrf52Driver *self)
 {
-    ravel_generated_app_dispatcher_started(self->base.dispatcher);
+    ravel_generated_app_dispatcher_started((struct AppDispatcher*)self->base.dispatcher);
 }
 
 static void callback_event_handler(void *p_event_data, uint16_t event_size)
