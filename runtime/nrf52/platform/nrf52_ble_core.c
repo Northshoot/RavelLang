@@ -216,7 +216,9 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
             NRF_LOG_DEBUG("BLE_ADV_EVT_FAST %d\r\n", ble_adv_evt);
             break;
         case BLE_ADV_EVT_IDLE:
-            NRF_LOG_DEBUG("BLE_ADV_EVT_IDLE %d\r\n", ble_adv_evt);
+            NRF_LOG_DEBUG("BLE_ADV_EVT_IDLE %d\r\n");
+            NRF_LOG_DEBUG("Restarting %d\r\n");
+            nrf_52_ble_advertising_start();
             break;
         default:
             break;
@@ -426,12 +428,18 @@ void nrf52_r_core_ble_stack_init(NetworkClb *network)
     conn_params_init();
 }
 
-void nrf52_r_core_ble_start()
+void nrf_52_ble_advertising_start()
 {
     uint32_t err_code;
-    NRF_LOG_DEBUG("nrf52_r_core_ble_start\r\n");
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
+}
+void nrf52_r_core_ble_start()
+{
+
+    NRF_LOG_DEBUG("nrf52_r_core_ble_start\r\n");
+    nrf_52_ble_advertising_start();
+
 }
 
 
