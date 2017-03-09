@@ -15,6 +15,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
+
+
+
         // start the service if not already
         startService(new Intent(this, GatewaySpace.class));
     }

@@ -25,13 +25,17 @@ public class JavaDriver implements DriverAPI {
     private final JavaDurableStorage storage;
 
     public JavaDriver(DispatcherAPI appDispatcher) {
+        this(appDispatcher, createStorage());
+    }
+
+    protected JavaDriver(DispatcherAPI appDispatcher, JavaDurableStorage storage) {
         threadPool = Executors.newCachedThreadPool();
         this.appDispatcher = appDispatcher;
 
-        storage = createStorage();
+        this.storage = storage;
     }
 
-    protected JavaDurableStorage createStorage() {
+    private static JavaDurableStorage createStorage() {
         return new JavaDurableStorage(new File("./storage"));
     }
 

@@ -3,6 +3,9 @@ package org.stanford.ravel.rrt.android;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.stanford.ravel.rrt.DispatcherAPI;
@@ -37,15 +40,19 @@ public class AndroidDriver extends JavaDriver {
     //Connection states
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
     public boolean GATEWAY_CONNECTED = false; // indicates open gateway application
-    public boolean CLOUD_CONNECTED = false; // indicates if cloud is connected
 
     private Intent mRavelServiceIntent;
 
-    private BroadcastReceiver mRaveConrollerReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            handleBleMessage(intent);
+        }
+    };
 
-            switch (intent.getAction()){
+    private void handleBleMessage(Intent msg){
+            Bundle data = msg.getExtras();
+            switch (data.getInt(BleDefines.COMMAND,0)) {
 
                 case BleDefines.ACTION_GATT_CONNECTED:
                     Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
@@ -64,20 +71,16 @@ public class AndroidDriver extends JavaDriver {
                     break;
 
                 default:
-                    Log.e(TAG, "Unknown type of intent " + intent.getAction());
+                    Log.e(TAG, "Unknown type of intent " + msg.getAction());
             }
+    }
 
-
-
-
-        }
-    };
     public AndroidDriver(DispatcherAPI dispatcher, Context ctx) {
-        super(dispatcher);
+        super(dispatcher, createStorage(ctx));
         this.ctx = ctx;
     }
 
-    protected JavaDurableStorage createStorage() {
+    private static JavaDurableStorage createStorage(Context ctx) {
         return new JavaDurableStorage(ctx.getDir("storage", Context.MODE_PRIVATE));
     }
 
@@ -142,6 +145,8 @@ public class AndroidDriver extends JavaDriver {
         mRavelServiceIntent = new Intent(ctx.getApplicationContext(), RavelBleService.class);
         //register receiver
         ctx.startService(mRavelServiceIntent);
+        LocalBroadcastManager.getInstance(ctx).registerReceiver((mRaveBleMessageReceiver), new IntentFilter(BleDefines.INTENT_BLE_FILTER));
+
 
     }
 }

@@ -20,21 +20,19 @@ public class BleDefines {
      * BLE intent action filters
      */
 
-    public final static String ACTION_GATT_CONNECTED =
-            "edu.stanford.randroid.ble.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "edu.stanford.randroid.ble.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "edu.stanford.randroid.ble.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "edu.stanford.randroid.ble.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.nordicsemi.nrfUART.EXTRA_DATA";
-    public final static String DEVICE_DOES_NOT_SUPPORT_RAD =
-            "edu.stanford.randroid.ble.DEVICE_DOES_NOT_SUPPORT_UART";
+    public final static int ACTION_GATT_CONNECTED =81;
+    public final static int ACTION_GATT_DISCONNECTED =82;
+    public final static int ACTION_GATT_SERVICES_DISCOVERED =83;
+    public final static int ACTION_DATA_AVAILABLE =84;
 
+    public final static int DEVICE_DOES_NOT_SUPPORT_RAD =85;
 
+    public static final String INTENT_BLE_FILTER =
+            "org.stanford.ravel.rrt.android.ble.RavelBelService.BLE_ACTION";
 
-    public static final  UUID CLIENT_CHARACTERISTIC_CONFIG =
+    public final static String EXTRA_DATA = "DATA";
+    public final static String COMMAND = "COMMAND";
+
+    public static final UUID CLIENT_CHARACTERISTIC_CONFIG =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 }

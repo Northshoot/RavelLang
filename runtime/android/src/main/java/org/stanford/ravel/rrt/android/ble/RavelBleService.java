@@ -107,9 +107,7 @@ public class RavelBleService extends Service {
                 //TODO: fix multiple device handling
                 mBLEConnectionState = BLE_STATE_DISCONNECTED;
                 EMBEDDED_CONNECTED = false;
-                final Intent intent = new Intent();
-                intent.setAction(BleDefines.ACTION_GATT_DISCONNECTED);
-                sendBroadcast(intent);
+                broadcastUpdate(BleDefines.ACTION_GATT_DISCONNECTED, gatt.getDevice().getAddress());
                 //start scanning after predefined period
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -604,11 +602,11 @@ public class RavelBleService extends Service {
         Log.d(TAG, "dump");
     }
 
-    private void broadcastUpdate(final String action, final String extra){
+    private void broadcastUpdate(final int action, final String extra){
         Log.d(TAG,"Sending broadcast: " + action +  " extra " + extra);
-        final Intent intent = new Intent();
-        intent.setAction(BleDefines.ACTION_GATT_CONNECTED);
-        intent.putExtra("DEVICE_ADDRESS", extra);
+        final Intent intent = new Intent(BleDefines.INTENT_BLE_FILTER);
+        intent.putExtra(BleDefines.COMMAND, action);
+        intent.putExtra(BleDefines.EXTRA_DATA, extra);
         sendBroadcast(intent);
     }
 
