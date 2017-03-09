@@ -44,7 +44,8 @@ controller GCtrl(counter: Counter):
 
     event counter.arrived():
         rec = self.record
-        rec.counter
+        if rec.counter > 7:
+            system.print("more than 7")
 
 space EmbeddedSpace:
     platform:

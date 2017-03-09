@@ -351,10 +351,19 @@ public class LocalOwnershipTaggingPass {
                 int value = ((TFieldStore) instr).value;
                 if (compound instanceof ModelType.RecordType) {
                     ModelType model = ((ModelType.RecordType) compound).getModel();
-                    for (LocalModelTag modelTag : modelTags.getOrDefault(value, Collections.emptySet())) {
-                        tagField(object, model, modelTag.creator, ((TFieldStore) instr).field);
+
+                    Collection<LocalModelTag> valueModelTags = modelTags.get(value);
+                    if (valueModelTags == null || valueModelTags.isEmpty()) {
+                        tagField(object, model, Creator.CREATED, ((TFieldStore) instr).field);
                         for (int alias : ir.getAliases(object)) {
-                            tagField(alias, model, modelTag.creator, ((TFieldStore) instr).field);
+                            tagField(alias, model, Creator.CREATED, ((TFieldStore) instr).field);
+                        }
+                    } else {
+                        for (LocalModelTag modelTag : valueModelTags){
+                            tagField(object, model, modelTag.creator, ((TFieldStore) instr).field);
+                            for (int alias : ir.getAliases(object)) {
+                                tagField(alias, model, modelTag.creator, ((TFieldStore) instr).field);
+                            }
                         }
                     }
                 }

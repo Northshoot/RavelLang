@@ -20,42 +20,18 @@
 
 struct RavelBaseModel;
 
-//Forward declaration
-typedef  struct RavelBaseDispatcher_s RavelBaseDispatcher;
-
 typedef struct {
     void (*data_received)(void *self, RavelPacket *pkt, RavelEndpoint *endpoint);
     void (*send_done)(void *self, RavelError error, RavelPacket *pkt, RavelEndpoint *endpoint);
     void (*saved_durably)(void *self, RavelPacket *pkt, RavelError error);
 } RavelDispatcherVTable;
 
-typedef struct RavelBaseDispatcher_s {
-//
-////Ravel Dispatcher Network Callbacks
-///**@brief Ravel Dispatcher receive event. */
-//typedef void (*net_data_rx_t) (RavelBaseDispatcher *self, RavelPacket *pkt, RavelEndpoint *endpoint);
-///**@brief Ravel Dispatcher send_done event. */
-//typedef void (*net_data_send_done_t) (RavelBaseDispatcher *self, RavelError error, RavelPacket *pkt, RavelEndpoint *endpoint);
-//
-///**@brief Ravel Dispatcher connected. */
-//typedef void (*net_connected_t) (void);
-///**@brief Ravel Dispatcher disconnected event. */
-//typedef void (*net_disconnected_t) (void);
-
-
-//typedef struct {
-//    net_data_rx_t           data_rx;
-//    net_data_send_done_t    send_done;
-//    net_connected_t         connected;
-//    net_disconnected_t      disconnected;
-//}RDNetC;
-
+typedef struct RavelBaseDispatcher {
     const RavelDispatcherVTable *vtable;
-//    const RDNetC *net_clb;
     RavelSystemAPI sys_api;
     RavelKeyProvider key_provider;
     RavelDriver *driver;
-} ;
+} RavelBaseDispatcher;
 
 void ravel_base_dispatcher_init(RavelBaseDispatcher *self);
 void ravel_base_dispatcher_finalize(RavelBaseDispatcher *self);

@@ -19,11 +19,6 @@
 #include "endpoint.h"
 #include "crypto.h"
 
-/*
-#define ravel_container_of(ptr, type, member) ({             \
-     const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-     (type *)( (char *)__mptr - offsetof(type,member) );})
-*/
 #define ravel_container_of(ptr, type, member) \
   ((type *)((char *)(ptr) - (unsigned long)(&((type *)0)->member)))
 
