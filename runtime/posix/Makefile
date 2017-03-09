@@ -9,11 +9,11 @@ C_RUNTIME_SOURCES = \
     ravel-packet.c \
     ravel-growable-byte-array.c \
     ravel-array.c \
-    ravel-key-provider.c \
-    ravel-crypto-wolfssl.c
+    ravel-key-provider.c
 
 PLATFORM_RUNTIME_SOURCES = \
-    ravel-driver.c
+    ravel-driver.c \
+    ravel-crypto-wolfssl.c
 
 RAVEL_C_RUNTIME_DIR = ../c/
 

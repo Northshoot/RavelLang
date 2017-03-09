@@ -7,13 +7,11 @@
 #include "nrf52_sensor.h"
 #include "nrf52_queue.h"
 #include "nrf52_config.h"
-#include "nrf52_hmac-sha1.h"
 #include "nrf52_link_constants.c"
 #define NRF_LOG_MODULE_NAME "NET"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
-#include "nrf52_encryption.h"
 #include "nrf52_ble_core.h"
 #include "nrf52_log.h"
 #include "nrf52_flash.h"

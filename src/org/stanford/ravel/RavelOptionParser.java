@@ -35,7 +35,7 @@ class RavelOptionParser {
     private boolean help;
     private boolean version;
 
-    private static final Pattern X_FORMAT = Pattern.compile("-X([a-z]+):([a-z]+)=(.+)");
+    private static final Pattern X_FORMAT = Pattern.compile("-X([a-z][a-z0-9]*):([a-z][a-z0-9]*)=(.+)");
     private final List<Option> Xoptions = new ArrayList<>();
     private final Set<String> foptions = new HashSet<>();
 

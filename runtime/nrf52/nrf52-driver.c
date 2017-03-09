@@ -22,10 +22,12 @@
 #include "AppDispatcher.h"
 #include "nrf52_ravel_timer.h"
 #include "ravel/nrf52-driver.h"
+
 //Implement global driver API
 #include "driver.h"
 #include "context.h"
 #include "packet.h"
+#include "intrinsics.h"
 
 #define NRF_LOG_MODULE_NAME "DRV"
 #include "nrf_log.h"
@@ -46,6 +48,12 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
 {
     network_send(packet, endpoint);
     return RAVEL_ERROR_IN_TRANSIT;
+}
+
+void
+ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
+{
+    // TODO implement
 }
 
 
@@ -120,4 +128,23 @@ void
 ravel_nrf52_driver_app_dispatcher_ready(RavelNrf52Driver *self)
 {
     ravel_generated_app_dispatcher_started(self->base.dispatcher);
+}
+
+static void callback_event_handler(void *p_event_data, uint16_t event_size)
+{
+    void **data = p_event_data;
+
+    void (*callback)(void*,void*) = (void(*)(void*,void*))data[0];
+    void *ptr1 = data[1];
+    void *ptr2 = data[2];
+
+    callback(ptr1, ptr2);
+}
+
+void
+ravel_driver_queue_callback(RavelDriver *driver, void (*callback)(void*,void*), void *ptr1, void *ptr2)
+{
+    void *data[3] = { callback, ptr1, ptr2 };
+
+    app_sched_event_put(data, 3 * sizeof(void*), callback_event_handler);
 }
