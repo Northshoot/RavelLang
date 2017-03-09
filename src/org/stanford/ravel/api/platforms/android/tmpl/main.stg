@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.stanford.ravel.rrt.android.AndroidDriver;
 import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.utils.FileSystemKeyProvider;
 
 import <package>.AppDispatcher;
 
@@ -39,8 +40,9 @@ public class <name> extends Service {
     }
 
     private void startThread() {
-        dispatcher = new AppDispatcher();
-        AndroidDriver driver = new AndroidDriver(dispatcher);
+        FileSystemKeyProvider keyProvider = new FileSystemKeyProvider();
+        dispatcher = new AppDispatcher(keyProvider);
+        AndroidDriver driver = new AndroidDriver(dispatcher, this);
         dispatcher.setDriver(driver);
 
         // FIXME load the list of endpoints and register them with the driver

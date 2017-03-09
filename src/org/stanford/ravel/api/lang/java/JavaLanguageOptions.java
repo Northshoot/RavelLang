@@ -18,7 +18,7 @@ public class JavaLanguageOptions extends LanguageOptions {
     }
 
     private String packageName = "org.stanford.ravel.generated";
-    private String runtimePath = "./runtime/java/runtime.jar";
+    private String runtimePath = "./runtime/java/build/libs/java-0.9.jar";
 
     public String getPackageName() {
         return packageName;

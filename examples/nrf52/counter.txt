@@ -67,7 +67,8 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        system = J2SE.v18
+        #system = J2SE.v18
+        system = Android.v19
 
     models:
         cnt = Counter()

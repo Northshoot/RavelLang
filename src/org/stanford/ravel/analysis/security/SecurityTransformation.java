@@ -12,7 +12,6 @@ import org.stanford.ravel.compiler.types.SystemType;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.ConcreteModel;
 import org.stanford.ravel.primitives.Space;
-import org.stanford.ravel.rrt.SecurityMechanism;
 
 import java.util.List;
 
