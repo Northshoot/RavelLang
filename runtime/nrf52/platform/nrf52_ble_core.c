@@ -22,6 +22,7 @@
 
 #include "nrf_delay.h"
 #include "boards.h"
+
 #define NRF_LOG_MODULE_NAME "BLE"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -199,7 +200,13 @@ void sleep_mode_enter(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
+void nrf_52_ble_advertising_start()
+{
+    uint32_t err_code;
+    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+    APP_ERROR_CHECK(err_code);
+    NRF_LOG_DEBUG("nrf_52_ble_advertising_start\r\n");
+}
 /**@brief Function for handling advertising events.
  *
  * @details This function will be called for advertising events which are passed to the application.
@@ -428,12 +435,7 @@ void nrf52_r_core_ble_stack_init(NetworkClb *network)
     conn_params_init();
 }
 
-void nrf_52_ble_advertising_start()
-{
-    uint32_t err_code;
-    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
-    APP_ERROR_CHECK(err_code);
-}
+
 void nrf52_r_core_ble_start()
 {
 

@@ -102,7 +102,7 @@ class RavelOptionParser {
                     }
                 } else if (arg.startsWith("-f")) {
                     if (arg.startsWith("-fno-"))
-                        foptions.remove(arg.substring(4));
+                        foptions.remove(arg.substring(5));
                     else
                         foptions.add(arg.substring(2));
                 } else if (arg.equals("--help")) {

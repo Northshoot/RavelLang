@@ -15,6 +15,7 @@
 
 typedef struct  Nrf52Driver RavelNrf52Driver;
 #include "nrf52_network.h"
+#include "nrf52_ravel_endpoint.h"
 
 typedef struct {
     RAVEL_MODULE __module;
@@ -28,6 +29,8 @@ struct Nrf52Driver{
 } ;
 
 struct AppDispatcher;
+
+void ravel_driver_set_endpoint(nrf52_endpoint *endpoint);
 
 void ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name);
 

@@ -3,7 +3,6 @@ application(runtime,plat_runtime,path,target,sources, linker_script, main) ::=<<
 APP_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 RAVEL_C_RUNTIME_DIR = <runtime>
 RAVEL_PLATFORM_RUNTIME_DIR = <plat_runtime>
-NRF52SDK = <path>
 
 NRF52_PROJECT = <target>
 

@@ -10,6 +10,7 @@
 #include "api/base_model.h"
 #include "api/array.h"
 #include "api/base_dispatcher.h"
+#include "api/system.h"
 
 static void dl_init(DoubleLinkedList *list)
 {
@@ -75,6 +76,10 @@ ravel_base_model_init(RavelBaseModel *self,
     self->reliable = reliable;
     self->durable = durable;
     self->record_size = record_size;
+
+    ravel_system_print_number(NULL, "record_size", record_size);
+    ravel_system_print_number(NULL, "num_records", num_records);
+
     self->num_records = num_records;
     self->state = calloc(num_records, sizeof(RavelRecordState));
     if (self->state == NULL) abort();
@@ -148,9 +153,13 @@ ravel_base_model_finalize(RavelBaseModel *self)
 void *
 ravel_base_model_allocate(RavelBaseModel *self)
 {
+    static int counter = 0;
+
     void *record;
     if (self->free_list.next == NULL)
         return NULL;
+
+    ravel_system_print_number(NULL, "allocated record num", counter++);
 
     record = self->free_list.next;
     dl_remove(&self->free_list, record);
@@ -197,6 +206,15 @@ ravel_base_model_size(RavelBaseModel *self)
 {
     return (int32_t)self->num_valid_records;
 }
+
+//TODO: listen for connection
+static bool m_connected = false;
+void
+connection_endpoint(bool connection)
+{
+    m_connected = connection;
+}
+//TODO: restart sending when connection is available
 
 static RavelError
 ravel_base_model_send_record_endpoint(RavelBaseModel     *self,

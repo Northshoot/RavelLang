@@ -43,6 +43,8 @@ extern "C" {
 #endif
 
 #define BLE_UUID_RAD_SERVICE 0x0001                      /**< The UUID of the Ravel Data Service. */
+#define BLE_UUID_RAD_TX_CHARACTERISTIC 0x0002                      /**< The UUID of the TX Characteristic. */
+#define BLE_UUID_RAD_RX_CHARACTERISTIC 0x0003                      /**< The UUID of the RX Characteristic. */
 #define BLE_RAD_MAX_DATA_LEN (GATT_MTU_SIZE_DEFAULT - 3) /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Ravel Data service module. */
 
 /* Forward declaration of the ble_rad_t type. */

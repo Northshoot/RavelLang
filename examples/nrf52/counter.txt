@@ -37,8 +37,14 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
         rec = counter.create()
         rec.counter = 1
         counter.save(rec)
-
         led_0.toggle()
+
+    event counter.full():
+        system.print("model is full")
+        timer.cancel()
+
+    event counter.departed():
+        timer.start_periodic(1000)
 
 controller GCtrl(counter: Counter):
 

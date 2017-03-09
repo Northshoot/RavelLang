@@ -37,7 +37,6 @@ static inline int32_t ravel_intrinsic_extract_uint16(uint8_t *array, int32_t pos
 
 static inline int32_t ravel_intrinsic_extract_int32(uint8_t *array, int32_t pos) {
     // Big endian!!
-
     uint8_t one = array[pos];
     uint8_t two = array[pos+1];
     uint8_t three = array[pos+2];

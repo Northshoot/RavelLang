@@ -11,7 +11,7 @@ public class NrfPlatformOptions extends PlatformOptions {
 
     private NrfPlatformOptions() {
         //TODO: make dynamic loading from the app config file
-        super( "runtime/nrf52",  "/Users/lauril/workspace/12-sdk/nRF5_SDK_12.0.0/");
+        super( "runtime/nrf52",  "$(NRF52SDK)");
     }
 
     public static NrfPlatformOptions getInstance() {

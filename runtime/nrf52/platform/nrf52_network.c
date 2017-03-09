@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "nrf_error.h"
 
 #include "nrf52_network.h"
@@ -8,14 +8,19 @@
 #include "nrf52_queue.h"
 #include "nrf52_config.h"
 #include "nrf52_link_constants.c"
+#include "nrf52_ravel_endpoint.h"
+#include "ravel/nrf52-driver.h"
+
 #define NRF_LOG_MODULE_NAME "NET"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-
+#include "nrf52_ble_rad.h"
 #include "nrf52_ble_core.h"
 #include "nrf52_log.h"
 #include "nrf52_flash.h"
 #include "nrf_soc.h"
+
+static nrf52_endpoint endpoint_space;
 
 static bool m_connected = false;
 static bool m_notify_enabled = false;
@@ -72,7 +77,20 @@ static uint32_t m_total = 0;
 void
 network_on_write(const uint8_t *data, uint16_t len)
 {
-    NRF_LOG_DEBUG("network_on_write %d\r\n", len);
+    //TODO: VERIFY
+    //as part of bootstrapping the connected device should write its space name
+    // we should get uuid from the device connection
+    //both create an physical endpoint
+    //NOTE: for now we just operate on the space name and ignore the uuid
+    //TODO: remove string out of e-space
+    //TODO: check that it is the expected packet or hell will break loose
+    //FIXME
+    uint8_t *space_name = malloc(len+1);
+    memcpy(space_name, data, len);
+    space_name[len] = 0;
+    endpoint_space.m_ravel_endpoint.name = space_name;
+    endpoint_space.m_tx_uuid = BLE_UUID_RAD_TX_CHARACTERISTIC;
+    NRF_LOG_DEBUG("network_on_write %s\r\n", space_name);
 }
 
 void
@@ -87,6 +105,7 @@ network_on_send_done()
     m_total++;
     NRF_LOG_DEBUG("send done %u\r\n", m_total);
     //TODO: signal to the dispatcher
+    //driver.dispatcher.ravel_base_dispatcher_send_done(&driver.dispatcher, )
 }
 
 void
@@ -98,8 +117,18 @@ void
 network_on_notify(void)
 {
     m_notify_enabled = !m_notify_enabled;
+
+    if (m_notify_enabled)
+        ravel_driver_set_endpoint(&endpoint_space);
+    else {
+        free(endpoint_space.m_ravel_endpoint.name);
+        ravel_driver_set_endpoint(NULL);
+    }
+
+    //TODO: create an endpoint
     NRF_LOG_DEBUG("network_on_notify \r\n");
 }
+
 void
 network_on_connected(void)
 {
@@ -116,6 +145,7 @@ network_on_disconnected(void)
 void
 network_send(RavelPacket *packet, RavelEndpoint *endpoint)
 {
+    NRF_LOG_DEBUG("packet size  %u\r\n", packet->packet_length);
     if(m_connected && m_notify_enabled)
     {
          nrf52_send_data(packet->packet_data, packet->packet_length);

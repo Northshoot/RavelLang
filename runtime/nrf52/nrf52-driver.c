@@ -22,7 +22,7 @@
 #include "AppDispatcher.h"
 #include "nrf52_ravel_timer.h"
 #include "ravel/nrf52-driver.h"
-
+#include "nrf52_ravel_endpoint.h"
 //Implement global driver API
 #include "driver.h"
 #include "context.h"
@@ -37,10 +37,24 @@
 
 NetworkClb network;
 
+#define MAX_NUMBER_OF_ENDPOINTS 1
+
+static RavelEndpoint *endpoints[2] = { NULL, NULL };
+
 /**** ****/
 RavelEndpoint * const *
-ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name){
-    return NULL;
+ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
+{
+    return endpoints;
+}
+
+void
+ravel_driver_set_endpoint(nrf52_endpoint *endpoint)
+{
+    if (endpoint != NULL)
+        endpoints[0] = &endpoint->m_ravel_endpoint;
+    else
+        endpoints[0] = NULL;
 }
 
 RavelError
