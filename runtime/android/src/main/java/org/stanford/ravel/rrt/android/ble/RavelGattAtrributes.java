@@ -46,16 +46,16 @@ public class RavelGattAtrributes {
     public static final UUID BLE_TX_POWER_LEVEL_UUID = UUID.fromString(BLE_TX_POWER_LEVEL);
     //
     //ravel model service uuid's
-    public static final String RAVEL_DATA_MODEL = "DataModel";
-    public static final String RAVEL_DATA_MODEL_ID = "00000002-0000-0000-000f-0e0d0c0b0a01";
+    public static final String RAVEL_DATA_MODEL = "RavelDataService";
+    public static final String RAVEL_DATA_MODEL_ID = "a3a30001-a3a3-a309-0807-060504030201";
     public static final UUID RAVEL_DATA_MODEL_UUID = UUID.fromString(RAVEL_DATA_MODEL_ID);
 
     public static final String RAVEL_DATA_MODEL_WRITE = "DataModelWrite";
-    public static final String RAVEL_DATA_MODEL_WRITE_CHAR = "00000003-0000-0000-000f-0e0d0c0b0a01";
+    public static final String RAVEL_DATA_MODEL_WRITE_CHAR = "a3a30003-a3a3-a309-0807-060504030201";
     public static final UUID RAVEL_DATA_MODEL_WRITE_CHAR_UUID = UUID.fromString(RAVEL_DATA_MODEL_WRITE_CHAR);
 
     public static final String RAVEL_DATA_MODEL_READ = "DataModelRead";
-    public static final String RAVEL_DATA_MODEL_READ_CHAR = "00000004-0000-0000-000f-0e0d0c0b0a01";
+    public static final String RAVEL_DATA_MODEL_READ_CHAR = "00000002-0000-0000-000f-0e0d0c0b0a01";
     public static final UUID RAVEL_DATA_MODEL_READ_CHAR_UUID = UUID.fromString(RAVEL_DATA_MODEL_READ_CHAR);
 
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";

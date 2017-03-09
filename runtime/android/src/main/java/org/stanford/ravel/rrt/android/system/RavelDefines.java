@@ -8,9 +8,6 @@ import org.stanford.ravel.rrt.android.utils.PhoneID;
  */
 public class RavelDefines {
 
-    public static final String  DEVICE_NAME = "RavelBlink";
-    public static final String REGISTRATION_COMPLETE = "registrationComplete";
-    public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
 
     public final static String PHONE_ID = PhoneID.getUniquePseudoID();
     public static final int CONNECTION_MGC = 21000;
@@ -21,27 +18,13 @@ public class RavelDefines {
     public static final int CONNECTION_G = 21005;
     public static final int CONNECTION_GC = 21006;
 
-
-    public static final int REQUEST_SELECT_DEVICE = 1;
-    public static final int REQUEST_ENABLE_BT = 2;
-    public static final int UART_PROFILE_READY = 10;
-
-    public static final int DEVICE_CONNECTED = 20;
-    public static final int DEVICE_DISCONNECTED = 21;
-    public static final int PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 0;
-
-    public static final int MODEL_UPDATE_FROM_CLOUD = 30;
-    public final static String CLOUD_DATA =
-            "edu.stanford.blink.remote.cloud";
-
-
     public static final String EMBEDDED = "M";
     public static final String GATEWAY = "G";
     public static final String CLOUD = "C";
 
-    public static final String API_URL = "http://192.168.2.71:8080/";
+    public static final int SEND_DONE_SUCCESS = 780001;
+    public static final int SEND_DONE_ERROR = 780002;
 
 
-    public static final int WRITE_SUCCESS = 0 ;
-    public static final int WRITE_ERROR = 1 ;
+
 }

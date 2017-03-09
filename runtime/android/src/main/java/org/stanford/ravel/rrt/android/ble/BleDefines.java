@@ -15,7 +15,7 @@ public class BleDefines {
 
     public final static long SCAN_PERIOD = 1000; //scanning for 10 seconds
     public final static long BLE_RECONNECT_TIME = 10000;
-
+    public final static String SPACE_NAME = "RavelRAD";
     /**
      * BLE intent action filters
      */
@@ -30,7 +30,7 @@ public class BleDefines {
             "edu.stanford.randroid.ble.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.nordicsemi.nrfUART.EXTRA_DATA";
-    public final static String DEVICE_DOES_NOT_SUPPORT_UART =
+    public final static String DEVICE_DOES_NOT_SUPPORT_RAD =
             "edu.stanford.randroid.ble.DEVICE_DOES_NOT_SUPPORT_UART";
 
 

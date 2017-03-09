@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.stanford.ravel.rrt">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.stanford.ravel.rrt">
+    <uses-sdk
+        android:minSdkVersion="23"
+        android:targetSdkVersion="25"
+        tools:targetAPI="23"/>
 
     <uses-feature
             android:name="android.hardware.bluetooth_le"
@@ -29,12 +34,10 @@
     <!-- Create phones unique ID -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <!-- used to star ravel service -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application>
         <service
-                android:name=".android.ble.BleService"
+                android:name=".android.ble.RavelBleService"
                 android:enabled="true" />
     </application>
 </manifest>
