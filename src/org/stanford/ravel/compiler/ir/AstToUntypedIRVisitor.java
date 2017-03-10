@@ -215,7 +215,7 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
                 addCurrent(new FieldStore(ctx, objectReg, fieldName, rvalueReg));
             } else {
-                addCurrent(new ArrayLoad(ctx, arrayReg, indexReg, rvalueReg));
+                addCurrent(new ArrayStore(ctx, arrayReg, indexReg, rvalueReg));
             }
         }
 

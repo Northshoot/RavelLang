@@ -8,7 +8,7 @@ import org.stanford.ravel.compiler.ParserUtils;
  *
  * Created by gcampagn on 1/26/17.
  */
-public class ConstantSymbol extends BaseSymbol {
+public class ConstantSymbol extends VariableSymbol {
     private final Object value;
 
     public ConstantSymbol(String name, Object value) {

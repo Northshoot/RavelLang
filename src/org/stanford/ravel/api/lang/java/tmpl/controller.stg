@@ -5,16 +5,18 @@ public void <handler.modelVar.name>_<handler.eventType.eventName>(<handler.argum
     <handler.body>}
 >>
 
-file(package,imports,name,parameters,eventHandlers) ::=<<
+file(package,imports,name,controller,eventHandlers) ::=<<
 package <package>;
 
 <imports:do_import()>
 
 public class <name> {
-    <parameters:{p|private final <p.type> <p.name>;}; separator="\n">
+    <controller.parameterSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
+    <controller.classScopeVariableSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
 
-    public <name>(<parameters:{p|<p.type> <p.name>}; separator=", ">) {
-        <parameters:{p|this.<p.name> = <p.name>;}; separator="\n">
+    public <name>(<controller.parameterSymbols:{p|<p.type> <p.name>}; separator=", ">) {
+        <controller.parameterSymbols:{p|this.<p.name> = <p.name>;}; separator="\n">
+        <controller.classScopeVariableSymbols:{p|this.<p.name> = <p.value; format="literal">;}; separator="\n">
     }
 
     <eventHandlers:event_handler(); separator="\n">

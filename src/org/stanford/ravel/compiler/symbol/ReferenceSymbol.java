@@ -6,9 +6,9 @@ package org.stanford.ravel.compiler.symbol;
  *
  * Created by lauril on 8/26/16.
  */
-public class ReferenceSymbol extends BaseSymbol {
-
+public class ReferenceSymbol extends VariableSymbol {
     private final String mValue;
+
     public ReferenceSymbol(String name, String val) {
         super(name);
         this.mValue = val;

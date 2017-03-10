@@ -399,8 +399,10 @@ public class LocalOwnershipTaggingPass {
                 //
                 // (it will be a later pass that will determine if decryption/encryption is necessary for these
                 // operations to occur or we can just move the bits around)
-                assert !instr.writesMemory();
-                assert !instr.readsMemory();
+                if (!(instr instanceof TIntrinsic)) {
+                    assert !instr.writesMemory();
+                    assert !instr.readsMemory();
+                }
 
                 if (instr.getSink() != Registers.VOID_REG) {
                     for (int source : instr.getSources()) {

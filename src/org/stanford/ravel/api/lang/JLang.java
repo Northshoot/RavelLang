@@ -202,15 +202,6 @@ public class JLang extends BaseLanguage {
                     super.visit(compOp);
                 }
             }
-
-            @Override
-            public void visit(TIntrinsic intrinsic) {
-                if (intrinsic.name.startsWith("output_set_")) {
-                    addLine(intrinsic.name.substring("output_set_".length()), " = ", intrinsic.arguments[0]);
-                } else {
-                    super.visit(intrinsic);
-                }
-            }
         };
 
         controllerGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/controller.stg");

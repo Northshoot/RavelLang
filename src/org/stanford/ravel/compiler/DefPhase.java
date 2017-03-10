@@ -308,6 +308,56 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
+    public void enterControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx) {
+        String name = ctx.Identifier().getText();
+        Type type;
+        if (ctx.type() != null)
+            type = parseType(ctx.type());
+        else
+            type = null;
+
+        RavelParser.Simple_expressionContext value = ctx.simple_expression();
+        if (value.literal() != null) {
+            Object literal = ParserUtils.literalToValue(value.literal());
+            ConstantSymbol sym = new ConstantSymbol(name, literal);
+            sym.setDefNode(ctx);
+
+            Type constantType = ParserUtils.typeFromLiteral(literal);
+            if (type != null) {
+                if (!type.isAssignable(constantType)) {
+                    emitError(ctx, "variable " + name + " cannot be assigned a value of type " + constantType.getName());
+                }
+                sym.setType(type);
+            } else {
+                sym.setType(constantType);
+            }
+            sym.setWritable(true);
+            currentScope.define(sym);
+        } else {
+            String refName = value.qualified_name().getText();
+            Symbol refSymbol = currentScope.getEnclosingScope().resolve(refName);
+            if (!(refSymbol instanceof VariableSymbol)) {
+                emitError(value.qualified_name(), "undeclared variable " + refName);
+            } else {
+                ReferenceSymbol ref = new ReferenceSymbol(name, refName);
+                ref.setDefNode(ctx);
+
+                Type refType = ((VariableSymbol) refSymbol).getType();
+                if (type != null) {
+                    if (!type.isAssignable(refType)) {
+                        emitError(ctx, "variable " + name + " cannot be assigned a value of type " + refType.getName());
+                    }
+                    ref.setType(type);
+                } else {
+                    ref.setType(refType);
+                }
+                ref.setWritable(true);
+                currentScope.define(ref);
+            }
+        }
+    }
+
+    @Override
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope
@@ -489,6 +539,10 @@ public class DefPhase extends RavelBaseListener {
                 } else {
                     ReferenceSymbol ref = new ReferenceSymbol(name, refName);
                     ref.setDefNode(ctx);
+                    if (refSymbol instanceof VariableSymbol)
+                        ref.setType(((VariableSymbol) refSymbol).getType());
+                    else
+                        ref.setType(PrimitiveType.ANY);
                     currentScope.define(ref);
                 }
             } else {

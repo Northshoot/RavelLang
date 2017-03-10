@@ -44,7 +44,7 @@ public class STControllerTranslator implements ControllerTranslator {
         for (FileConfig fc : controllerFiles) {
             ST tmpl = fc.tmpl;
             tmpl.add("eventHandlers", eventHandlers);
-            tmpl.add("parameters", ctr.getParameterSymbols());
+            tmpl.add("controller", ctr);
             FileObject fo = new FileObject();
             fo.setFileName(fc.fileName);
             fo.setContent(tmpl.render());

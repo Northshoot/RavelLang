@@ -501,6 +501,12 @@ public class SecurityTransformation {
         endpointSym.setWritable(false);
         builder.declareParameter(endpointSym, false);
 
+        VariableSymbol isEncryptedSym = new VariableSymbol("is_encrypted");
+        isEncryptedSym.setRegister(firstReg++);
+        isEncryptedSym.setType(PrimitiveType.BOOL);
+        isEncryptedSym.setWritable(true);
+        builder.declareParameter(isEncryptedSym, false);
+
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, PrimitiveType.VOID);
 
@@ -545,7 +551,7 @@ public class SecurityTransformation {
             builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, false));
         }
 
-        builder.add(IntrinsicFactory.createOutputSet(PrimitiveType.BOOL, "is_encrypted", isEncrypted));
+        builder.add(IntrinsicFactory.createParameterSet(PrimitiveType.BOOL, isEncryptedSym.getRegister(), isEncrypted));
 
         TypedIR ir = builder.finish();
         if (debug) {

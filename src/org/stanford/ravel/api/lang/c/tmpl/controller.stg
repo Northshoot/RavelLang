@@ -7,7 +7,7 @@ ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<ha
     <handler.body>}
 >>
 
-c_file(includes,name,parameters,eventHandlers) ::=<<
+c_file(includes,name,controller,eventHandlers) ::=<<
 <begin_source(name)>
 
 #include "api/context.h"
@@ -17,9 +17,10 @@ c_file(includes,name,parameters,eventHandlers) ::=<<
 <includes:do_include(); separator="\n">
 
 void
-ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>)
+ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(controller.parameterSymbols)>)
 {
-    <parameters:{p|self-><p.name> = <p.name>;}; separator="\n">
+    <controller.parameterSymbols:{p|self-><p.name> = <p.name>;}; separator="\n">
+    <controller.classScopeVariableSymbols:{p|self-><p.name> = <p.value; format="literal">;}; separator="\n">
 }
 
 void
@@ -35,7 +36,7 @@ declare_event_handler(handler, controller_name) ::=<<
 void ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<handler.eventType.eventName>(<controller_name>* __this<append_parameter_list(handler.arguments)>);
 >>
 
-h_file(includes,name,parameters,eventHandlers) ::=<<
+h_file(includes,name,controller,eventHandlers) ::=<<
 <begin_header("CONTROLLER", name)>
 
 #include \<api/context.h>
@@ -49,10 +50,11 @@ typedef struct s_<name> <name>;
 <begin_extern_c()>
 
 struct s_<name> {
-    <parameters:{p|<p.type> <p.name>;}; separator="\n">
+    <controller.parameterSymbols:{p|<p.type> <p.name>;}; separator="\n">
+    <controller.classScopeVariableSymbols:{p|<p.type> <p.name>;}; separator="\n">
 };
 
-void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(parameters)>);
+void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(controller.parameterSymbols)>);
 void ravel_generated_<name; format="function">_finalize(<name>* self);
 
 <eventHandlers:declare_event_handler(name); separator="\n">

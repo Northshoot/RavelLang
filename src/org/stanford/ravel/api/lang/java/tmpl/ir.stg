@@ -97,9 +97,13 @@ org.stanford.ravel.rrt.lang.Intrinsic.<instr.name>(<instr.arguments:{a|<a.name>}
 array_new(instr) ::=<<
 new <instr.returnType.elementType>[<instr.arguments:{a|<a.name>}; separator=", ">]
 >>
+param_set(instr) ::=<<
+<instr.arguments:{a|<a.name>}>
+>>
 
 intrinsic_map ::=[
     "array_new": {<array_new(instr)>},
+    "param_set": {<param_set(instr)>},
     default: {<default_intrinsic(instr)>}
 ]
 

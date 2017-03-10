@@ -285,11 +285,6 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TIntrinsic intrinsic) {
-        if (intrinsic.name.startsWith("output_set_")) {
-            addLine(intrinsic.name.substring("output_set_".length()), " = ", intrinsic.arguments[0]);
-            return;
-        }
-
         if (intrinsic.name.equals("verify_mac")) {
             // verify mac is special because in C we define as returning bool, whereas in the IR it's defined
             // as throwing an exception
@@ -308,6 +303,10 @@ public class CCodeTranslator extends BaseIRTranslator {
         }
 
         switch (intrinsic.name) {
+            case "param_set":
+                addLine(intrinsic.arguments[0]);
+                break;
+
             case "array_new":
                 addLine("ravel_array_new(", intrinsic.arguments[0], ", ", getTypeSize(((ArrayType) intrinsic.returnType).getElementType()), ")");
                 addLine("if (", intrinsic.target, " == NULL) abort() /* FIXME */");

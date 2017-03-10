@@ -316,8 +316,9 @@ controller_scope
     ;
 
 controller_entry
-    : eventdef
-    | NEWLINE
+    : eventdef #EventDefinition
+    | Identifier (':' type)? '=' simple_expression #ControllerVariableDefinition
+    | NEWLINE #ControllerNewline
     ;
 
 /**

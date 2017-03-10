@@ -591,10 +591,20 @@ public class TypeResolvePass implements InstructionVisitor {
             convert = true;
         }
 
-        if (convert)
-            ir.add(new TConvert(targetType, sourceType, instr.target, instr.source));
-        else
-            ir.add(new TMove(targetType, instr.target, instr.source));
+        if (ir.isParameter(instr.target)) {
+            if (convert) {
+                int tmp = ir.allocateRegister(targetType);
+                ir.add(new TConvert(targetType, sourceType, tmp, instr.source));
+                ir.add(IntrinsicFactory.createParameterSet(targetType, instr.target, tmp));
+            } else {
+                ir.add(IntrinsicFactory.createParameterSet(targetType, instr.target, instr.source));
+            }
+        } else {
+            if (convert)
+                ir.add(new TConvert(targetType, sourceType, instr.target, instr.source));
+            else
+                ir.add(new TMove(targetType, instr.target, instr.source));
+        }
     }
 
     private static Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {

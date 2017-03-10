@@ -11,8 +11,8 @@ public class IntrinsicFactory {
 
     private IntrinsicFactory() {}
 
-    public static TIntrinsic createOutputSet(Type type, String tgt, int value) {
-        return new TIntrinsic(PrimitiveType.VOID, new Type[]{ type }, Registers.VOID_REG, "output_set_" + tgt, new int[]{ value }, true, false, false);
+    public static TIntrinsic createParameterSet(Type type, int param, int value) {
+        return new TIntrinsic(type, new Type[]{ type }, param, "param_set", new int[]{ value }, true, false, false);
     }
 
     public static TIntrinsic createReadRecordId(ModelType.RecordType recordType, int target, int record) {

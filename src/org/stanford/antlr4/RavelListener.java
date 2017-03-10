@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -470,15 +470,41 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitController_scope(RavelParser.Controller_scopeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#controller_entry}.
+	 * Enter a parse tree produced by the {@code EventDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree
 	 */
-	void enterController_entry(RavelParser.Controller_entryContext ctx);
+	void enterEventDefinition(RavelParser.EventDefinitionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#controller_entry}.
+	 * Exit a parse tree produced by the {@code EventDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree
 	 */
-	void exitController_entry(RavelParser.Controller_entryContext ctx);
+	void exitEventDefinition(RavelParser.EventDefinitionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ControllerVariableDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void enterControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ControllerVariableDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void exitControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ControllerNewline}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void enterControllerNewline(RavelParser.ControllerNewlineContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ControllerNewline}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void exitControllerNewline(RavelParser.ControllerNewlineContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.

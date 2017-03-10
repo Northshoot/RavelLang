@@ -44,6 +44,7 @@ public class TypedIRBuilder {
     public void declareParameter(VariableSymbol sym, boolean classScope) {
         ir.declareParameter(sym, classScope);
     }
+    public boolean isParameter(int reg) { return ir.isParameter(reg); }
 
     public TypedIR finish() {
         ir.finish(cfgBuilder, loopTreeBuilder);

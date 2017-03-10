@@ -1,4 +1,4 @@
-// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.6
+// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
 package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
@@ -286,11 +286,26 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitController_scope(RavelParser.Controller_scopeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#controller_entry}.
+	 * Visit a parse tree produced by the {@code EventDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitController_entry(RavelParser.Controller_entryContext ctx);
+	T visitEventDefinition(RavelParser.EventDefinitionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ControllerVariableDefinition}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ControllerNewline}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitControllerNewline(RavelParser.ControllerNewlineContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code EventScope}
 	 * labeled alternative in {@link RavelParser#eventdef}.

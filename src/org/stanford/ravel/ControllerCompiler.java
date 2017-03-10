@@ -7,6 +7,7 @@ import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.ir.typed.TypedIR;
 import org.stanford.ravel.compiler.symbol.ControllerSymbol;
 import org.stanford.ravel.compiler.symbol.EventHandlerSymbol;
+import org.stanford.ravel.compiler.symbol.Symbol;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Controller;
@@ -29,12 +30,16 @@ class ControllerCompiler {
         Controller controller = new Controller(c.getName());
 
         controller.addAllParameters(c.getParameters());
+        controller.addAllClassScopeVariables(c.getClassScopeVariables());
         int firstGpRegister = Registers.FIRST_GP_REG;
-        for (VariableSymbol var :  c.getParameters()) {
-            int reg = var.getRegister();
-            if (reg == Registers.UNSET_REG) {
-                reg = firstGpRegister++;
-                var.setRegister(reg);
+        for (Symbol s : c.getSymbols()) {
+            if (s instanceof VariableSymbol) {
+                VariableSymbol var = (VariableSymbol)s;
+                int reg = var.getRegister();
+                if (reg == Registers.UNSET_REG) {
+                    reg = firstGpRegister++;
+                    var.setRegister(reg);
+                }
             }
         }
 

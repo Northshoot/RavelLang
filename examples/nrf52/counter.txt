@@ -28,14 +28,15 @@ streaming model Counter():
         counter : int32
 
 controller EController(timer : Timer, led_0 : Led, counter : Counter):
+    value = 0
 
     event system.started():
         timer.start_periodic(1000)
 
-
     event timer.fired():
         rec = counter.create()
-        rec.counter = 1
+        rec.counter = value
+        value += 1
         counter.save(rec)
         led_0.toggle()
 
@@ -48,8 +49,10 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
         counter.delete(self.record)
 
 controller GCtrl(counter: Counter):
+    value = 0
 
     event counter.arrived():
+        value += 1
         rec = self.record
         if rec.counter > 7:
             system.print("more than 7")
