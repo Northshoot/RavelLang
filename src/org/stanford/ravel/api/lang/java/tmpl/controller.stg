@@ -12,7 +12,7 @@ package <package>;
 
 public class <name> {
     <controller.parameterSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
-    <controller.classScopeVariableSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
+    <controller.classScopeVariableSymbols:{p|private <p.type> <p.name>;}; separator="\n">
 
     public <name>(<controller.parameterSymbols:{p|<p.type> <p.name>}; separator=", ">) {
         <controller.parameterSymbols:{p|this.<p.name> = <p.name>;}; separator="\n">
