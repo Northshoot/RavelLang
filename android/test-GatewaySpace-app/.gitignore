@@ -2,3 +2,4 @@ app/build/
 app/gen/
 build/
 .gradle/
+local.properties
