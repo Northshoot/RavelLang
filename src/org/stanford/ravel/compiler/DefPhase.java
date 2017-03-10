@@ -363,6 +363,70 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
+    public void enterControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx) {
+        String name = ctx.Identifier().getText();
+        Type type = parseType(ctx.type());
+
+        if (!(type instanceof ArrayType) || !(((ArrayType) type).getElementType() instanceof PrimitiveType)) {
+            emitError(ctx, "only arrays of primitive types can be declared as constants");
+            return;
+        }
+        ArrayType arrayType = (ArrayType)type;
+
+        ArrayConstantSymbol sym = new ArrayConstantSymbol(name);
+        sym.setType(new ArrayType(arrayType.getElementType()).makeImmutable());
+        sym.setWritable(false);
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+
+        for (RavelParser.LiteralContext value : ctx.literal()) {
+            Object literal = ParserUtils.literalToValue(value);
+            Type constantType = ParserUtils.typeFromLiteral(literal);
+            if (!type.isAssignable(constantType)) {
+                emitError(ctx, "variable " + name + " cannot be assigned a value of type " + constantType.getName());
+            }
+            sym.addValue(literal);
+        }
+        if (arrayType.isKnownBound()) {
+            int bound = arrayType.getBound();
+            if (bound < ctx.literal().size()) {
+                emitError(ctx, "too many values for array of size " + bound);
+            } else if (bound > ctx.literal().size()) {
+                for (int i = ctx.literal().size(); i < bound; i++) {
+                    switch ((PrimitiveType)(arrayType.getElementType())) {
+                        case VOID:
+                        case ANY:
+                        case ERROR:
+                            break;
+
+                        case BOOL:
+                            sym.addValue(false);
+                            break;
+                        case BYTE:
+                            sym.addValue((byte)0);
+                            break;
+                        case INT32:
+                            sym.addValue(0);
+                            break;
+                        case DOUBLE:
+                            sym.addValue(0.0);
+                            break;
+                        case STR:
+                            sym.addValue("");
+                            break;
+                        case ERROR_MSG:
+                            sym.addValue(0);
+                            break;
+                        case TIMESTAMP:
+                            sym.addValue(0);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope

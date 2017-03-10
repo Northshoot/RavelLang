@@ -301,6 +301,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ControllerArrayConstant}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ControllerNewline}
 	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree

@@ -495,6 +495,18 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ControllerArrayConstant}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void enterControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ControllerArrayConstant}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void exitControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ControllerNewline}
 	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree

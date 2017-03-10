@@ -31,6 +31,7 @@ class ControllerCompiler {
 
         controller.addAllParameters(c.getParameters());
         controller.addAllClassScopeVariables(c.getClassScopeVariables());
+        controller.addAllArrayConstants(c.getArrayConstantVariables());
         int firstGpRegister = Registers.FIRST_GP_REG;
         for (Symbol s : c.getSymbols()) {
             if (s instanceof VariableSymbol) {

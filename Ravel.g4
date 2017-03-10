@@ -319,6 +319,7 @@ controller_scope
 controller_entry
     : eventdef #EventDefinition
     | Identifier (':' type)? '=' simple_expression #ControllerVariableDefinition
+    | Identifier ':' type '=' '[' (literal (',' literal)+)? ']' #ControllerArrayConstant
     | NEWLINE #ControllerNewline
     ;
 

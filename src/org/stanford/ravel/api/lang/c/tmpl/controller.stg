@@ -7,6 +7,10 @@ ravel_generated_<controller_name; format="function">_<handler.modelVar.name>_<ha
     <handler.body>}
 >>
 
+define_array_constant(c) ::=<<
+static <c.type.elementType> static_<c.name>[] = { <c.values:{v|<v; format="literal">}; separator=", "> };
+>>
+
 c_file(includes,name,controller,eventHandlers) ::=<<
 <begin_source(name)>
 
@@ -16,11 +20,14 @@ c_file(includes,name,controller,eventHandlers) ::=<<
 
 <includes:do_include(); separator="\n">
 
+<controller.arrayConstantSymbols:define_array_constant(); separator="\n">
+
 void
 ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(controller.parameterSymbols)>)
 {
     <controller.parameterSymbols:{p|self-><p.name> = <p.name>;}; separator="\n">
     <controller.classScopeVariableSymbols:{p|self-><p.name> = <p.value; format="literal">;}; separator="\n">
+    <controller.arrayConstantSymbols:{p|self-><p.name> = static_<p.name>;}; separator="\n">
 }
 
 void
@@ -52,6 +59,7 @@ typedef struct s_<name> <name>;
 struct s_<name> {
     <controller.parameterSymbols:{p|<p.type> <p.name>;}; separator="\n">
     <controller.classScopeVariableSymbols:{p|<p.type> <p.name>;}; separator="\n">
+    <controller.arrayConstantSymbols:{p|<p.type> <p.name>;}; separator="\n">
 };
 
 void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(controller.parameterSymbols)>);

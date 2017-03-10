@@ -549,6 +549,18 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterControllerNewline(RavelParser.ControllerNewlineContext ctx) { }
 	/**
 	 * {@inheritDoc}

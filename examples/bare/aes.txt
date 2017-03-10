@@ -25,9 +25,11 @@ streaming model Encrypted():
 
 
 controller CounterModeAES(plain : Plaintext, encrypted : Encrypted):
+    table : byte[16] = []
+
     event plain.save_done():
         block : byte[16]
-        block[0] = (byte)0
+        block[0] = table[0]
         # do the encryption
 
         ciphertext = encrypted.create()
@@ -72,10 +74,10 @@ controller GController(plain : Plaintext, encrypted : Encrypted):
 
 space EmbeddedSpace:
     platform:
-        #language = JLang
-        #system = Android.v19
-        language = CLang
-        system = Nrf52.v1
+        language = JLang
+        system = Android.v19
+        #language = CLang
+        #system = Nrf52.v1
 
     interfaces:
         timer = Timer()

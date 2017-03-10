@@ -92,6 +92,13 @@ public class CCodeTranslator extends BaseIRTranslator {
             addCode("RavelIterator ");
             addCode(super.getRegisterName(reg));
             addCode(";\n");
+        } else if (type instanceof ArrayType && ((ArrayType) type).isKnownBound()) {
+            addCode(typeToCType(((ArrayType) type).getElementType()));
+            addCode(" ");
+            addCode(getRegisterName(reg));
+            addCode("[");
+            addCode(Integer.toString(((ArrayType) type).getBound()));
+            addCode("];\n");
         } else {
             addCode(typeToCType(type));
             addCode(" ");
