@@ -142,6 +142,10 @@ int32_t ravel_base_model_size(RavelBaseModel *self);
 
 void    *ravel_base_model_allocate(RavelBaseModel *self);
 
+/**
+ *
+ *
+ */
 typedef struct {
     RavelBaseModel base;
 } RavelLocalModel;

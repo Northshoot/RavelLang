@@ -17,8 +17,9 @@ typedef struct  Nrf52Driver RavelNrf52Driver;
 #include "nrf52_ravel_endpoint.h"
 
 typedef struct {
-    RAVEL_MODULE __module;
-
+    void *data1;
+    void *data2;
+    void (*callback) (void*, void*);
 } ravel_schedule_event_cntx;
 
 

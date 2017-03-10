@@ -45,6 +45,7 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
 
     event counter.departed():
         timer.start_periodic(1000)
+        counter.delete(self.record)
 
 controller GCtrl(counter: Counter):
 

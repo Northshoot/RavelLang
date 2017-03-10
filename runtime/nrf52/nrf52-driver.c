@@ -40,13 +40,14 @@ NetworkClb network;
 #define MAX_NUMBER_OF_ENDPOINTS 1
 
 static RavelEndpoint *endpoints[2] = { NULL, NULL };
-
+static bool m_network_is_busy = false;
 /**** ****/
 RavelEndpoint * const *
 ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
 {
     return endpoints;
 }
+
 
 void
 ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoint)
@@ -66,10 +67,16 @@ RavelEndpoint *endpoint_out;
 RavelError
 ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint)
 {
-    memcpy(&pkt_out, packet, sizeof(RavelPacket));
-    endpoint_out = endpoint;
-    network_send(packet, endpoint);
-    return RAVEL_ERROR_IN_TRANSIT;
+    if (!m_network_is_busy) {
+        memcpy(&pkt_out, packet, sizeof(RavelPacket));
+        endpoint_out = endpoint;
+        m_network_is_busy = true;
+        network_send(packet, endpoint);
+
+        return RAVEL_ERROR_IN_TRANSIT;
+    } else {
+        return  RAVEL_ERROR_BUSY;
+    }
 }
 
 
@@ -77,6 +84,7 @@ void
 ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
 {
     NRF_LOG_DEBUG("SIGNAL_UP_SEND_DONE \r\n");
+    m_network_is_busy = false;
     ravel_base_dispatcher_send_done(self->dispatcher, RAVEL_ERROR_SUCCESS, &pkt_out, endpoint_out);
     ravel_packet_finalize(&pkt_out);
 }
@@ -162,19 +170,15 @@ ravel_nrf52_driver_app_dispatcher_ready(RavelNrf52Driver *self)
 
 static void callback_event_handler(void *p_event_data, uint16_t event_size)
 {
-    void **data = p_event_data;
+    ravel_schedule_event_cntx *data = p_event_data;
 
-    void (*callback)(void*,void*) = (void(*)(void*,void*))data[0];
-    void *ptr1 = data[1];
-    void *ptr2 = data[2];
-
-    callback(ptr1, ptr2);
+    data->callback(data->data1, data->data2);
 }
 
 void
 ravel_driver_queue_callback(RavelDriver *driver, void (*callback)(void*,void*), void *ptr1, void *ptr2)
 {
-    void *data[3] = { callback, ptr1, ptr2 };
-
-    app_sched_event_put(data, 3 * sizeof(void*), callback_event_handler);
+    ravel_schedule_event_cntx data = { ptr1, ptr2, callback };
+    NRF_LOG_DEBUG("queue event\r\n");
+    app_sched_event_put(&data,sizeof(ravel_schedule_event_cntx), callback_event_handler);
 }
