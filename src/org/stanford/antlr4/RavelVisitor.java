@@ -3,6 +3,7 @@ package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -448,6 +449,12 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrimary(RavelParser.PrimaryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#cast_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCast_op(RavelParser.Cast_opContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#access_op}.
 	 * @param ctx the parse tree

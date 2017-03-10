@@ -304,7 +304,7 @@ public class CCodeTranslator extends BaseIRTranslator {
 
         switch (intrinsic.name) {
             case "param_set":
-                addLine(intrinsic.arguments[0]);
+                addLine(intrinsic.arguments[0], " = ", intrinsic.arguments[1]);
                 break;
 
             case "array_new":

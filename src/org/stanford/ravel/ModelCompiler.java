@@ -38,10 +38,15 @@ public class ModelCompiler {
 
     private void addWriteArray(TypedIRBuilder builder, int buffer, int value, ArrayType arrayType) {
         int len = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(IntrinsicFactory.createArrayLength(arrayType, len, value));
 
-        FunctionType writeLength = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_uint16");
-        builder.add(new TMethodCall(writeLength, Registers.VOID_REG, buffer, writeLength.getFunctionName(), new int[]{len}));
+        if (arrayType.isKnownBound()) {
+            builder.add(new TImmediateLoad(PrimitiveType.INT32, len, arrayType.getBound()));
+        } else {
+            builder.add(IntrinsicFactory.createArrayLength(arrayType, len, value));
+
+            FunctionType writeLength = (FunctionType) IntrinsicTypes.GROWABLE_BYTE_ARRAY.getInstanceType().getMemberType("write_uint16");
+            builder.add(new TMethodCall(writeLength, Registers.VOID_REG, buffer, writeLength.getFunctionName(), new int[]{len}));
+        }
 
         // int i;
         int i = builder.allocateRegister(PrimitiveType.INT32);
@@ -186,7 +191,13 @@ public class ModelCompiler {
             assert size > 0;
 
             // target = extract_<type>(data, pos)
-            builder.add(IntrinsicFactory.createExtractPrimitive(type, target, data, pos));
+            if (builder.isParameter(target)) {
+                int tmp = builder.allocateRegister(type);
+                builder.add(IntrinsicFactory.createExtractPrimitive(type, tmp, data, pos));
+                builder.add(IntrinsicFactory.createParameterSet(type, target, tmp));
+            } else {
+                builder.add(IntrinsicFactory.createExtractPrimitive(type, target, data, pos));
+            }
 
             // size = ...
             // pos = pos + size
@@ -247,7 +258,13 @@ public class ModelCompiler {
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
         // target = extract_str(data, pos, size)
-        builder.add(IntrinsicFactory.createExtractString(target, data, pos, sizeReg));
+        if (builder.isParameter(target)) {
+            int tmp = builder.allocateRegister(PrimitiveType.STR);
+            builder.add(IntrinsicFactory.createExtractString(tmp, data, pos, sizeReg));
+            builder.add(IntrinsicFactory.createParameterSet(PrimitiveType.STR, target, tmp));
+        } else {
+            builder.add(IntrinsicFactory.createExtractString(target, data, pos, sizeReg));
+        }
 
         // pos = pos + size
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, sizeReg, BinaryOperation.ADD));
@@ -290,7 +307,11 @@ public class ModelCompiler {
         loopTreeBuilder.elseStatement(isEncrypted);
         cfgBuilder.pushBlock(iffalse);
 
-        builder.add(IntrinsicFactory.createExtractUInt16(len, data, pos));
+        if (arrayType.isKnownBound()) {
+            builder.add(new TImmediateLoad(PrimitiveType.INT32, len, arrayType.getBound()));
+        } else {
+            builder.add(IntrinsicFactory.createExtractUInt16(len, data, pos));
+        }
 
         cfgBuilder.addSuccessor(continuation);
         cfgBuilder.popBlock();
@@ -299,13 +320,21 @@ public class ModelCompiler {
         loopTreeBuilder.addBasicBlock(continuation);
         cfgBuilder.replaceBlock(continuation);
 
-        // pos = pos + 2
-        int twoReg = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, twoReg, 2));
-        builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
+        if (!arrayType.isKnownBound()) {
+            // pos = pos + 2
+            int twoReg = builder.allocateRegister(PrimitiveType.INT32);
+            builder.add(new TImmediateLoad(PrimitiveType.INT32, twoReg, 2));
+            builder.add(new TBinaryArithOp(PrimitiveType.INT32, pos, pos, twoReg, BinaryOperation.ADD));
 
-        // target = new array[len]
-        builder.add(IntrinsicFactory.createArrayNew(arrayType, target, len));
+            // target = new array[len]
+            if (builder.isParameter(target)) {
+                int tmp = builder.allocateRegister(arrayType);
+                builder.add(IntrinsicFactory.createArrayNew(arrayType, tmp, len));
+                builder.add(IntrinsicFactory.createParameterSet(arrayType, target, tmp));
+            } else {
+                builder.add(IntrinsicFactory.createArrayNew(arrayType, target, len));
+            }
+        }
 
         // int i;
         int i = builder.allocateRegister(PrimitiveType.INT32);
@@ -409,6 +438,17 @@ public class ModelCompiler {
         isEncryptedSym.setRegister(firstReg++);
         builder.declareParameter(isEncryptedSym, false);
 
+        Map<String, VariableSymbol> fieldSyms = new HashMap<>();
+
+        for (ModelField field : model.getFields()) {
+            VariableSymbol fieldVarSym = new VariableSymbol(field.getName());
+            fieldVarSym.setType(field.getType());
+            fieldVarSym.setWritable(true);
+            fieldVarSym.setRegister(firstReg++);
+            builder.declareParameter(fieldVarSym, true);
+            fieldSyms.put(field.getName(), fieldVarSym);
+        }
+
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, PrimitiveType.VOID);
 
@@ -422,9 +462,9 @@ public class ModelCompiler {
         for (ModelField field : model.getFields()) {
             Type fieldType = field.getType();
 
-            int value = builder.allocateRegister(fieldType);
+            int value = fieldSyms.get(field.getName()).getRegister();
             buildExtract(builder, fieldType, value, data, pos, isEncryptedSym.getRegister());
-            builder.add(new TFieldStore(fieldType, recordType, thisReg, field.getName(), value));
+            //builder.add(new TFieldStore(fieldType, recordType, thisReg, field.getName(), value));
         }
 
         TypedIR ir = builder.finish();

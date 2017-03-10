@@ -34,6 +34,13 @@ public class LoopTreeBuilder {
         ensureCurrentBlock().addChild(new LoopTreeNode.BasicBlock(block));
     }
 
+    public void addDeadBlock(TBlock block) {
+        LoopTreeNode.Block blockChild = new LoopTreeNode.Block();
+        blockChild.addChild(new LoopTreeNode.BasicBlock(block));
+        blockChild.setParent(ensureCurrentBlock().getParent());
+        current = blockChild;
+    }
+
     private void pop() {
         current = current.getParent();
         if (current == null)

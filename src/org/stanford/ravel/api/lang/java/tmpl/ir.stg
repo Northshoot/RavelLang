@@ -1,5 +1,5 @@
 declaration(reg,type) ::=<<
-<type> <reg.name>;
+<type> <reg.name><if(type.knownBound)>= new <type.elementType>[<type.bound>]<endif>;
 
 >>
 
@@ -98,7 +98,7 @@ array_new(instr) ::=<<
 new <instr.returnType.elementType>[<instr.arguments:{a|<a.name>}; separator=", ">]
 >>
 param_set(instr) ::=<<
-<instr.arguments:{a|<a.name>}>
+<instr.arguments:{a|<a.name>}; separator=" = ">
 >>
 
 intrinsic_map ::=[

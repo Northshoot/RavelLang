@@ -34,6 +34,8 @@ public class ParserUtils {
             return PrimitiveType.DOUBLE;
         if (literal instanceof Integer)
             return PrimitiveType.INT32;
+        if (literal instanceof Byte)
+            return PrimitiveType.BYTE;
         throw new AssertionError("Unexpected literal " + literal);
     }
 

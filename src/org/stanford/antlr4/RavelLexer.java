@@ -3,6 +3,7 @@ package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

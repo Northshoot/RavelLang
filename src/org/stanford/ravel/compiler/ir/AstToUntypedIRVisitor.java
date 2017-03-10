@@ -335,6 +335,13 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
 
         reg = currentReg;
         currentReg = VOID_REG;
+
+        if (ctx.cast_op() != null) {
+            int target = ir.allocateRegister();
+            addCurrent(new ExplicitCast(ctx.cast_op(), target, reg, ctx.cast_op().computedType));
+            reg = target;
+        }
+
         return reg;
     }
 

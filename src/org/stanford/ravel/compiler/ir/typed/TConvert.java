@@ -84,6 +84,10 @@ public class TConvert extends TInstruction {
                     return (byte)(((boolean)args[0]) ? 1 : 0);
                 else if (srcType == PrimitiveType.BYTE)
                     return (byte)args[0];
+                else if (srcType == PrimitiveType.INT32)
+                    return (byte)(int)args[0];
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (byte)(double)args[0];
                 else
                     throw new AssertionError();
             case INT32:
@@ -93,6 +97,8 @@ public class TConvert extends TInstruction {
                     return (int)(byte)args[0];
                 else if (srcType == PrimitiveType.INT32)
                     return (int)args[0];
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (int)(double)args[0];
                 else
                     throw new AssertionError();
             case DOUBLE:

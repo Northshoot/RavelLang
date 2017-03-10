@@ -1,0 +1,102 @@
+interface Timer():
+    implementation:
+        c = "rlib/nrf52/app_timer_sys.stg"
+        java = "rlib/java/timer.stg"
+
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+    event fired()
+
+local model Plaintext():
+    properties:
+        records = 1
+    schema:
+        number : int32
+        data : byte[32]
+
+
+streaming model Encrypted():
+    properties:
+        records = 1
+        flow = EmbeddedSpace -> GatewaySpace
+    schema:
+        data : byte[32]
+
+
+controller CounterModeAES(plain : Plaintext, encrypted : Encrypted):
+    event plain.save_done():
+        block : byte[16]
+        block[0] = (byte)0
+        # do the encryption
+
+        ciphertext = encrypted.create()
+        i = 0
+        while i < 32:
+            ciphertext.data[i] = self.record.data[i]
+            i += 1
+
+        encrypted.save(ciphertext)
+
+
+controller EController(timer : Timer, plain : Plaintext, encrypted : Encrypted):
+    event system.started():
+        plainrec = plain.create()
+        plain.save(plainrec)
+        timer.start_periodic(1000)
+
+    event timer.fired():
+        rec = plain.first()
+        i = 31
+        while i >= 0:
+            rec.data[i] = (byte) (rec.data[i] + 1)
+            if rec.data[i] != 0:
+                break
+            i -= 0
+        plain.save(rec)
+
+    event encrypted.full():
+        system.print("model is full")
+        timer.cancel()
+
+    event encrypted.departed():
+        timer.start_periodic(1000)
+        encrypted.delete(self.record)
+
+
+controller GController(plain : Plaintext, encrypted : Encrypted):
+    event encrypted.arrived():
+        # TODO decrypt
+        encrypted.delete(self.record)
+
+
+space EmbeddedSpace:
+    platform:
+        #language = JLang
+        #system = Android.v19
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+
+    models:
+        plain = Plaintext()
+        encrypted = Encrypted()
+
+    controllers:
+        aes = CounterModeAES(plain = models.plain, encrypted = models.encrypted)
+        ctrl = EController(timer = interfaces.timer, plain = models.plain, encrypted = models.encrypted)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    models:
+        plain = Plaintext()
+        encrypted = Encrypted()
+
+    controllers:
+        ctrl = GController(plain = models.plain, encrypted = models.encrypted)

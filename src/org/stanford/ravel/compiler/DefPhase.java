@@ -153,8 +153,13 @@ public class DefPhase extends RavelBaseListener {
                 baseType = subType;
             }
 
-            for (RavelParser.Array_markerContext array : ctx.array_marker())
-                baseType = new ArrayType(baseType);
+            for (RavelParser.Array_markerContext array : ctx.array_marker()) {
+                if (array.DECIMAL_INTEGER() != null) {
+                    baseType = new ArrayType(baseType, Integer.valueOf(array.DECIMAL_INTEGER().getText()));
+                } else {
+                    baseType = new ArrayType(baseType);
+                }
+            }
 
             return baseType;
         }
@@ -417,14 +422,17 @@ public class DefPhase extends RavelBaseListener {
 
         VariableSymbol var = new VariableSymbol(varName);
         var.setDefNode(ctx);
-        var.setWritable(true);
-
         Type type;
         if (ctx.type() != null) {
             type = parseType(ctx.type());
         } else {
             type = PrimitiveType.ANY;
         }
+
+        if (type instanceof ArrayType && ((ArrayType) type).isKnownBound())
+            var.setWritable(false);
+        else
+            var.setWritable(true);
         var.setType(type);
         currentScope.define(var);
     }
@@ -438,6 +446,11 @@ public class DefPhase extends RavelBaseListener {
         var.setDefNode(ctx);
         var.setWritable(false);
         currentScope.define(var);
+    }
+
+    @Override
+    public void enterCast_op(RavelParser.Cast_opContext ctx) {
+        ctx.computedType = parseType(ctx.type());
     }
 
     @Override

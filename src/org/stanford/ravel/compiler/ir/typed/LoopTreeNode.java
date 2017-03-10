@@ -200,7 +200,7 @@ public abstract class LoopTreeNode {
 
     public abstract void accept(LoopTreeVisitor visitor);
 
-    private void setParent(LoopTreeNode parent) {
+    void setParent(LoopTreeNode parent) {
         this.parent = parent;
     }
 

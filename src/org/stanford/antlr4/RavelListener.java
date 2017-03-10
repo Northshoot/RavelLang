@@ -3,6 +3,7 @@ package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -743,6 +744,16 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrimary(RavelParser.PrimaryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#cast_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterCast_op(RavelParser.Cast_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#cast_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitCast_op(RavelParser.Cast_opContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#access_op}.
 	 * @param ctx the parse tree

@@ -40,7 +40,9 @@ public class TypeResolvePass implements InstructionVisitor {
             return;
         if (type instanceof ClassType)
             type = ((ClassType) type).getInstanceType();
-        setRegisterType(sym.getRegister(), type);
+
+        // go straight to ir.setRegisterType so we don't do the thing with temporaries
+        ir.setRegisterType(sym.getRegister(), type);
     }
 
     public TypedIR run(UntypedIR ir) {
@@ -53,6 +55,13 @@ public class TypeResolvePass implements InstructionVisitor {
         setRegisterType(Registers.RETURN_REG, type);
     }
     private void setRegisterType(int reg, Type type) {
+        if (type instanceof ArrayType) {
+            if (((ArrayType) type).isKnownBound()) {
+                // remove bounds from temporaries, so that we declare them as pointers, not stack allocated
+                type = new ArrayType(((ArrayType) type).getElementType());
+            }
+        }
+
         ir.setRegisterType(reg, type);
     }
     private Type getRegisterType(int reg) {
@@ -270,14 +279,14 @@ public class TypeResolvePass implements InstructionVisitor {
 
         int src1;
         if (!opType.equals(srcType1)) {
-            src1 = allocateRegister(resultType);
+            src1 = allocateRegister(opType);
             ir.add(new TConvert(opType, srcType1, src1, instr.src1));
         } else {
             src1 = instr.src1;
         }
         int src2;
         if (!opType.equals(srcType2)) {
-            src2 = allocateRegister(resultType);
+            src2 = allocateRegister(opType);
             ir.add(new TConvert(opType, srcType2, src2, instr.src2));
         } else {
             src2 = instr.src2;
@@ -593,7 +602,7 @@ public class TypeResolvePass implements InstructionVisitor {
 
         if (ir.isParameter(instr.target)) {
             if (convert) {
-                int tmp = ir.allocateRegister(targetType);
+                int tmp = allocateRegister(targetType);
                 ir.add(new TConvert(targetType, sourceType, tmp, instr.source));
                 ir.add(IntrinsicFactory.createParameterSet(targetType, instr.target, tmp));
             } else {
@@ -605,6 +614,47 @@ public class TypeResolvePass implements InstructionVisitor {
             else
                 ir.add(new TMove(targetType, instr.target, instr.source));
         }
+    }
+
+    @Override
+    public void visit(ExplicitCast instr) {
+        Type sourceType = getRegisterType(instr.source);
+        Type castType = instr.targetType;
+
+        boolean convert;
+        if (castType == PrimitiveType.ANY) {
+            convert = false;
+            castType = sourceType;
+            setRegisterType(instr.target, sourceType);
+        } else if (castType.equals(sourceType)) {
+            convert = false;
+        } else if (castType instanceof PrimitiveType && sourceType instanceof PrimitiveType) {
+            convert = true;
+        } else {
+            typeError(instr, "cannot cast from " + sourceType.getName() + " to " + castType.getName());
+            convert = true;
+        }
+
+        int target;
+        Type targetType = getRegisterType(instr.target);
+        if (targetType == PrimitiveType.ANY) {
+            target = instr.target;
+            setRegisterType(target, castType);
+        } else if (targetType.equals(castType)) {
+            target = instr.target;
+        } else if (targetType.isAssignable(castType)) {
+            target = allocateRegister(castType);
+        } else {
+            typeError(instr, "cannot assign value of type " + castType.getName() + " to a variable of type " + targetType.getName());
+            target = Registers.ERROR_REG;
+        }
+
+        if (convert)
+            ir.add(new TConvert(castType, sourceType, target, instr.source));
+        else
+            ir.add(new TMove(castType, target, instr.source));
+        if (target != instr.target && target != Registers.ERROR_REG)
+            ir.add(new TConvert(targetType, castType, instr.target, target));
     }
 
     private static Type adjustTypeForUnaryOp(UnaryOperation op, Type resultType) {
@@ -759,7 +809,7 @@ public class TypeResolvePass implements InstructionVisitor {
         TBlock afterBreak = cfgBuilder.newBlock();
 
         cfgBuilder.addSuccessor(currentLoopContinuation);
-        loopTreeBuilder.addBasicBlock(afterBreak);
+        loopTreeBuilder.addDeadBlock(afterBreak);
         cfgBuilder.replaceBlock(afterBreak);
     }
 
@@ -775,7 +825,7 @@ public class TypeResolvePass implements InstructionVisitor {
         // see comment in visit(Break)
         TBlock afterContinue = cfgBuilder.newBlock();
         cfgBuilder.addSuccessor(currentLoopHead);
-        loopTreeBuilder.addBasicBlock(afterContinue);
+        loopTreeBuilder.addDeadBlock(afterContinue);
         cfgBuilder.replaceBlock(afterContinue);
     }
 }

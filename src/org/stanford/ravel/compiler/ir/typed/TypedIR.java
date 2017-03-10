@@ -2,6 +2,7 @@ package org.stanford.ravel.compiler.ir.typed;
 
 import org.stanford.ravel.compiler.ir.Registers;
 import org.stanford.ravel.compiler.symbol.VariableSymbol;
+import org.stanford.ravel.compiler.types.ArrayType;
 import org.stanford.ravel.compiler.types.ClassType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
@@ -39,6 +40,7 @@ public class TypedIR {
     void setRegisterType(int reg, Type type) {
         assert Registers.isNormal(reg);
         assert !registerTypes.containsKey(reg);
+
         registerTypes.put(reg, type);
     }
     public Type getRegisterType(int reg) {
@@ -58,6 +60,13 @@ public class TypedIR {
     }
     public int allocateRegister(Type type) {
         assert type != PrimitiveType.VOID;
+
+        if (type instanceof ArrayType) {
+            if (((ArrayType) type).isKnownBound()) {
+                // remove bounds from temporaries, so that we declare them as pointers, not stack allocated
+                type = new ArrayType(((ArrayType) type).getElementType());
+            }
+        }
 
         int reg = nextRegister++;
         setRegisterType(reg, type);

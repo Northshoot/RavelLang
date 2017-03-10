@@ -3,6 +3,7 @@ grammar Ravel;
 @header{
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 }
 tokens { INDENT, DEDENT }
 
@@ -395,7 +396,7 @@ var_decl
 type
     : Identifier ('.' Identifier)* array_marker*;
 
-array_marker: '[' ']' ;
+array_marker: '[' DECIMAL_INTEGER? ']' ;
 
 assignment
     : lvalue assign_op expressionList
@@ -429,7 +430,11 @@ method_call
     : '.' Identifier '(' expressionList? ')' ;
 
 primary
-    : atom access_op*
+    : cast_op? atom access_op*
+    ;
+
+cast_op returns [Type computedType]
+    : '(' type ')'
     ;
 
 access_op

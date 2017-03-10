@@ -63,4 +63,8 @@ public interface InstructionVisitor {
     default void visit(Return instr) {
 
     }
+
+    default void visit(ExplicitCast instr) {
+
+    }
 }

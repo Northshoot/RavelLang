@@ -7,6 +7,7 @@ public static class Record implements ModelRecord {
     <fields:{f|public <f.type> <f.name>;}; separator="\n">
 
     Record() {
+        <fields:{f|<if(f.type.knownBound)><f.name> = new <f.type.elementType>[<f.type.bound>];<endif>}; separator="\n">
     }
 
     void initFromNetwork(byte[] data, boolean is_encrypted) {

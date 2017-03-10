@@ -67,7 +67,11 @@ public class CLang extends BaseLanguage {
             } else if (type == IntrinsicTypes.ENDPOINT.getInstanceType()) {
                 return "RavelEndpoint*";
             } else if (type instanceof ArrayType) {
-                return toNativeType(((ArrayType) type).getElementType()) + "*";
+                ArrayType arrayType = (ArrayType)type;
+                if (arrayType.isKnownBound())
+                    return toNativeType(arrayType.getElementType()) + "[" + arrayType.getBound() + "]";
+                else
+                    return toNativeType(arrayType.getElementType()) + "*";
             } else if (type instanceof ClassType.InstanceType) {
                 return ((ClassType.InstanceType) type).getClassType().getName() + "*";
             } else if (type instanceof ModelType.RecordType) {
