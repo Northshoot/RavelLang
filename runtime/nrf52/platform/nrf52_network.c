@@ -74,11 +74,9 @@ static uint32_t m_total = 0;
 //
 //    return NRF_SUCCESS;
 //}
-
 void
-network_on_write(const uint8_t *data, uint16_t len)
+create_endpoint(const uint8_t *data, uint16_t len)
 {
-    //TODO: VERIFY
     //as part of bootstrapping the connected device should write its space name
     // we should get uuid from the device connection
     //both create an physical endpoint
@@ -94,7 +92,14 @@ network_on_write(const uint8_t *data, uint16_t len)
         free((char*)endpoint_space.m_ravel_endpoint.name);
     endpoint_space.m_ravel_endpoint.name = space_name;
     endpoint_space.m_tx_uuid = BLE_UUID_RAD_TX_CHARACTERISTIC;
-    NRF_LOG_DEBUG("network_on_write %s\r\n", (uint32_t)space_name);
+}
+
+void
+network_on_write(const uint8_t *data, uint16_t len)
+{
+    //TODO: VERIFY the dispatching to the right place
+    create_endpoint( data, len);
+    NRF_LOG_DEBUG("network_on_write\r\n");
 }
 
 void
@@ -108,8 +113,8 @@ network_on_send_done()
 {
     m_total++;
     NRF_LOG_DEBUG("send done %u\r\n", m_total);
-    //TODO: signal to the dispatcher
-    //driver.dispatcher.ravel_base_dispatcher_send_done(&driver.dispatcher, )
+    //TODO: signal to the driver
+    ravel_nrf52_driver_send_done_from_low(&driver);
 }
 
 void
@@ -117,22 +122,29 @@ network_on_indicate(void)
 {
     NRF_LOG_DEBUG("network_on_indicate \r\n");
 }
+
+
 void
 network_on_notify(void)
 {
     m_notify_enabled = !m_notify_enabled;
+
     endpoint_space.m_ravel_endpoint.connected = m_notify_enabled;
 
-    if (m_notify_enabled)
+    if (m_notify_enabled){
+        //FIXME: for convenience of manual testing
+        const uint8_t *name = "local";
+        create_endpoint(name, sizeof(name));
         ravel_nrf52_driver_set_endpoint(&driver, &endpoint_space);
+
+    }
     else {
         free((char*)endpoint_space.m_ravel_endpoint.name);
         endpoint_space.m_ravel_endpoint.name = NULL;
         ravel_nrf52_driver_set_endpoint(&driver, NULL);
     }
 
-    //TODO: create an endpoint
-    NRF_LOG_DEBUG("network_on_notify \r\n");
+
 }
 
 void

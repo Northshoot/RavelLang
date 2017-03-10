@@ -220,6 +220,7 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     // serialize the record
     byte_array = self->vtable->marshall(self, record, endpoint);
     if (byte_array == NULL) {
+        ravel_system_print(NULL, "Failed to send (out of memory)");
         local_error = RAVEL_ERROR_OUT_OF_STORAGE;
         goto out;
     }
@@ -228,8 +229,10 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     ravel_array_free(byte_array);
 
     if (!endpoint->connected) {
+        ravel_system_print(NULL, "Failed to send (not connected)");
         local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
     } else {
+        ravel_system_print(NULL, "Sending data...");
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
     }
 
@@ -816,7 +819,7 @@ ravel_streaming_model_endpoint_connected(RavelStreamingModel *self, RavelEndpoin
     size_t i;
 
     assert (endpoint->connected);
-
+    ravel_system_print(NULL, "strM endpoint connected");
     for (i = 0; i < self->base.num_records; i++) {
         if (self->base.state[i].is_valid && self->base.state[i].is_transmit_failed) {
             assert(self->base.state[i].is_allocated);

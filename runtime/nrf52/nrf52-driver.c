@@ -52,6 +52,7 @@ void
 ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoint)
 {
     if (endpoint != NULL) {
+        NRF_LOG_DEBUG("setting endpoint\r\n");
         endpoints[0] = &endpoint->m_ravel_endpoint;
         ravel_base_dispatcher_endpoint_connected(driver->base.dispatcher, endpoints[0]);
     } else {
@@ -59,13 +60,26 @@ ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoi
     }
 }
 
+RavelPacket pkt_out;
+RavelEndpoint *endpoint_out;
+
 RavelError
 ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint)
 {
+    memcpy(&pkt_out, packet, sizeof(RavelPacket));
+    endpoint_out = endpoint;
     network_send(packet, endpoint);
     return RAVEL_ERROR_IN_TRANSIT;
 }
 
+
+void
+ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
+{
+    NRF_LOG_DEBUG("SIGNAL_UP_SEND_DONE \r\n");
+    ravel_base_dispatcher_send_done(self->dispatcher, RAVEL_ERROR_SUCCESS, &pkt_out, endpoint_out);
+    ravel_packet_finalize(&pkt_out);
+}
 void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
 {
