@@ -77,8 +77,8 @@ ravel_base_model_init(RavelBaseModel *self,
     self->durable = durable;
     self->record_size = record_size;
 
-    ravel_system_print_number(NULL, "record_size", record_size);
-    ravel_system_print_number(NULL, "num_records", num_records);
+    //ravel_system_print_number(NULL, "record_size", record_size);
+    //ravel_system_print_number(NULL, "num_records", num_records);
 
     self->num_records = num_records;
     self->state = calloc(num_records, sizeof(RavelRecordState));
@@ -159,7 +159,7 @@ ravel_base_model_allocate(RavelBaseModel *self)
     if (self->free_list.next == NULL)
         return NULL;
 
-    ravel_system_print_number(NULL, "allocated record num", counter++);
+    //ravel_system_print_number(NULL, "allocated record num", counter++);
 
     record = self->free_list.next;
     dl_remove(&self->free_list, record);
@@ -216,11 +216,11 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     uint8_t *byte_array;
     int record_pos = record_pos_from_record (self, record);
     RavelError local_error;
-    ravel_system_print(NULL, "ravel_base_model_send_record_endpoint");
+    //ravel_system_print(NULL, "ravel_base_model_send_record_endpoint");
     // serialize the record
     byte_array = self->vtable->marshall(self, record, endpoint);
     if (byte_array == NULL) {
-        ravel_system_print(NULL, "Failed to send (out of memory)");
+        //ravel_system_print(NULL, "Failed to send (out of memory)");
         local_error = RAVEL_ERROR_OUT_OF_STORAGE;
         goto out;
     }
@@ -229,10 +229,10 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     ravel_array_free(byte_array);
 
     if (!endpoint->connected) {
-        ravel_system_print(NULL, "Failed to send (not connected)");
+        //ravel_system_print(NULL, "Failed to send (not connected)");
         local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
     } else {
-        ravel_system_print(NULL, "Sending data...");
+        //ravel_system_print(NULL, "Sending data...");
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
     }
 
@@ -242,7 +242,7 @@ out:
         }
     else{
         self->state[record_pos].in_transit++;
-        ravel_system_print_number(NULL, "record market in transit", record_id_from_record(record));
+        //ravel_system_print_number(NULL, "record market in transit", record_id_from_record(record));
         }
 
     return local_error;
@@ -255,8 +255,8 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
     int i, j;
     RavelError error, local_error;
 
-    ravel_system_print(NULL, "send_record");
-    ravel_system_print(NULL, endpoint_names[0]);
+    //ravel_system_print(NULL, "send_record");
+    //ravel_system_print(NULL, endpoint_names[0]);
 
     if (endpoint_names[0] == NULL)
         return RAVEL_ERROR_SUCCESS;
@@ -268,7 +268,7 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
         RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name(self->dispatcher, endpoint_name);
 
         if (endpoints[0] == NULL) {
-            ravel_system_print(NULL, "driver returned no endpoints");
+            //ravel_system_print(NULL, "driver returned no endpoints");
             self->state[record_pos_from_record (self, record)].is_transmit_failed = true;
         }
 
@@ -337,7 +337,7 @@ static void
 full_callback(void *ptr1, void *ptr2)
 {
     RavelBaseModel *self = ptr1;
-ravel_system_print(NULL, "full callback");
+//ravel_system_print(NULL, "full callback");
     ravel_context_init_error(&self->current_ctx, RAVEL_ERROR_OUT_OF_STORAGE);
     self->vtable->dispatch_full(self, &self->current_ctx);
 }
@@ -358,7 +358,7 @@ ravel_base_model_save(RavelBaseModel *self, void *record)
         self->num_valid_records ++;
 
         if (self->num_valid_records == self->num_records) {
-            ravel_system_print(NULL, "model is now full, queuing full event");
+            //ravel_system_print(NULL, "model is now full, queuing full event");
             ravel_base_dispatcher_queue_callback(self->dispatcher, full_callback, self, NULL);
         }
     }
@@ -565,9 +565,9 @@ ravel_streaming_model_save(RavelStreamingModel *self, void *record)
     Context *ctx;
 
     ctx = ravel_base_model_save(&self->base, record);
-    ravel_system_print_number(NULL, "Record save ctx", ctx->error);
+    //ravel_system_print_number(NULL, "Record save ctx", ctx->error);
     if (ctx->error == RAVEL_ERROR_SUCCESS) {
-        ravel_system_print(NULL, "Record saved");
+        //ravel_system_print(NULL, "Record saved");
 
         RavelError send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints);
         int record_pos = record_pos_from_record (&self->base, record);
@@ -770,7 +770,7 @@ ravel_streaming_model_retransmit(RavelStreamingModel *self, RavelEndpoint *endpo
             assert(self->base.state[i].is_allocated);
             ravel_base_model_send_record_endpoint (&self->base, record_at(&self->base, i), endpoint);
         } else {
-        ravel_system_print(NULL, "strM record not valid od sent");
+        //ravel_system_print(NULL, "strM record not valid od sent");
         }
     }
 }
@@ -785,7 +785,7 @@ ravel_streaming_model_record_departed(RavelStreamingModel *self, RavelPacket *pk
         return;
     }
 
-    ravel_system_print_number(NULL, "record departed", pkt->record_id);
+    //ravel_system_print_number(NULL, "record departed", pkt->record_id);
 
     record_pos = find_record_with_id(&self->base, pkt->record_id);
     // we cannot free stuff that is in transit
@@ -828,7 +828,7 @@ ravel_streaming_model_record_failed_to_send(RavelStreamingModel *self, RavelPack
         return;
     }
 
-    ravel_system_print_number(NULL, "record failed to send", pkt->record_id);
+    //ravel_system_print_number(NULL, "record failed to send", pkt->record_id);
 
     record_pos = find_record_with_id(&self->base, pkt->record_id);
     // we cannot free stuff that is in transit
@@ -855,6 +855,6 @@ void
 ravel_streaming_model_endpoint_connected(RavelStreamingModel *self, RavelEndpoint *endpoint)
 {
     assert (endpoint->connected);
-    ravel_system_print(NULL, "strM endpoint connected");
+    //ravel_system_print(NULL, "strM endpoint connected");
     ravel_streaming_model_retransmit(self, endpoint);
 }

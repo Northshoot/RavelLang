@@ -32,6 +32,5 @@ dependencies {
     //    testCompile 'junit:junit:4.12'
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
-
     compile project(':java')
 }

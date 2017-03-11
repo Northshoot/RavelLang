@@ -19,9 +19,9 @@ interface Led(led_num: int32):
     def off()
     def toggle()
 
-streaming model Counter():
+streaming model Counter(size : int32):
     properties:
-        records = 10
+        records = size
         flow = EmbeddedSpace -> GatewaySpace
 
     schema:
@@ -54,8 +54,8 @@ controller GCtrl(counter: Counter):
     event counter.arrived():
         value += 1
         rec = self.record
-        if rec.counter > 7:
-            system.print("more than 7")
+        system.print("Arrived counter")
+
 
 space EmbeddedSpace:
     platform:
@@ -67,7 +67,7 @@ space EmbeddedSpace:
         led0 = Led(led_num = 0)
 
     models:
-        cnt = Counter()
+        cnt = Counter(size=10)
 
     controllers:
         main_ctrl = EController(timer = interfaces.timer,
@@ -82,7 +82,7 @@ space GatewaySpace:
         system = Android.v19
 
     models:
-        cnt = Counter()
+        cnt = Counter(size=1000)
 
     controllers:
         rndcnt_1 = GCtrl(counter = models.cnt)

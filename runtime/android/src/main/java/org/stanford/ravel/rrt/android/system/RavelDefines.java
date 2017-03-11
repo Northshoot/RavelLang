@@ -25,6 +25,15 @@ public class RavelDefines {
     public static final int SEND_DONE_SUCCESS = 780001;
     public static final int SEND_DONE_ERROR = 780002;
 
+    //needed for requesting permissions, used as callbacks
+
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_BLUETOOTH =31003;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_BLUETOOTH_ADMIN=31004;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_INTERNET=31005;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION =31000;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION =31001;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_bluetooth_le =31002;
+    public static final int RAVEL_PERMISSIONS_REQUEST_ACCESS_READ_PHONE_STATE=31006;
 
 
 }

@@ -29,6 +29,9 @@
 #define CALL_UP_NOTIFY(P_STRUCT) (P_STRUCT->network)->notify()
 #define CALL_UP_SEND_DONE(P_STRUCT) (P_STRUCT->network)->send_done()
 #define CALL_UP_RX(P_STRUCT, P_DATA, LEN) (P_STRUCT->network)->on_write(P_DATA, LEN)
+
+
+static uint8_t m_tx_pkt_available=0;
 /***
  *
  * Service function for interactions
@@ -43,6 +46,7 @@
 static void on_connect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("on_connect\r\n");
+
     //TODO: signal upwards
     p_rad->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
     CALL_UP_CONNECTED(p_rad);
@@ -84,6 +88,8 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         {
             NRF_LOG_DEBUG("notification enabled\r\n");
             p_rad->is_notification_enabled = true;
+            sd_ble_tx_packet_count_get(p_rad->conn_handle, &m_tx_pkt_available);
+            NRF_LOG_DEBUG("available tx packets %u\r\n", m_tx_pkt_available);
             CALL_UP_NOTIFY(p_rad);
         }
         else
@@ -300,17 +306,113 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
     return NRF_SUCCESS;
 }
 
+static bool m_fragment_enqueued = false;
 
-uint32_t ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
+uint32_t
+send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 {
     ble_gatts_hvx_params_t hvx_params;
-    NRF_LOG_DEBUG("send string\r\n");
+    NRF_LOG_DEBUG("send data\r\n");
     VERIFY_PARAM_NOT_NULL(p_rad);
 
-    if ((p_rad->conn_handle == BLE_CONN_HANDLE_INVALID) || (!p_rad->is_notification_enabled))
+
+    if (length > BLE_RAD_MAX_DATA_LEN)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
+    memset(&hvx_params, 0, sizeof(hvx_params));
+
+    hvx_params.handle = p_rad->rx_handles.value_handle;
+    hvx_params.p_data = p_string;
+    hvx_params.p_len  = &length;
+    hvx_params.type   = BLE_GATT_HVX_NOTIFICATION;
+
+    return sd_ble_gatts_hvx(p_rad->conn_handle, &hvx_params);
+}
+
+uint32_t
+ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
+{
+   if ((p_rad->conn_handle == BLE_CONN_HANDLE_INVALID) || (!p_rad->is_notification_enabled))
     {
         return NRF_ERROR_INVALID_STATE;
     }
+
+    bool has_fragment = true;
+    m_fragment_enqueued = true;
+   // data pointer is for recursive use so we can traverse the ccn_data
+    char * data_ptr = (char *)p_data;
+
+    // buffer to be sent over bt
+    char * buffer = (char*)malloc(BT_FRAME_LEN);
+    memset(buffer, 0, BT_FRAME_LEN);
+
+
+
+    // Construct the extended bluetooth header for this packet
+    struct ext_bt_header ebth;
+    memcpy(ebth.dest_mac, dest, sizeof(dest));
+
+    get_local_btaddr(ebth.src_mac, 18);
+
+    // set the connection parameters (who to connect to)
+    struct sockaddr_rc addr = { 0 };
+    addr.rc_family = AF_BLUETOOTH;
+    addr.rc_channel = (uint8_t) 1;
+    str2ba(dest, &addr.rc_bdaddr );
+
+
+
+
+    while(has_fragment)
+    {
+        if ( length >= BT_FRAME_LEN - sizeof(struct ext_bt_header) ){
+            m_fragment_enqueued = true;
+            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\n", sizeof(struct ext_bt_header));
+
+            ebth.length = BT_FRAME_LEN -sizeof(struct ext_bt_header);
+            ebth.offset = offset | BT_MF; // set BT_MF flag to 1
+            is_more = 1;
+        } else {
+            NRF_LOG_DEBUG("data < bt frame length\n");
+
+            has_fragment = false;
+
+
+        }
+        // set id
+        ebth.id = id;
+
+        // checksum initially set to 0
+        ebth.checksum = 0;
+
+        // copy extended bluetooth header to buffer
+        memcpy(buffer, &ebth, sizeof(struct ext_bt_header));
+
+        // copy ccnx packet data to buffer
+        memcpy(buffer + sizeof(struct ext_bt_header), data_ptr, ebth.length);
+
+        // send the packet over raw bluetooth
+        send_result = send(s, buffer, sizeof(struct ext_bt_header)+ebth.length, 0);
+
+
+        // updating
+        if (length - ebth.length > 0) {
+
+            length = length - ebth.length;
+            offset = (offset * BT_OFF_BLKSIZE + ebth.length)/BT_OFF_BLKSIZE;
+            memset(buffer, 0, BT_FRAME_LEN);
+            data_ptr = data_ptr + ebth.length;
+
+        }
+
+     }
+
+    NRF_LOG_DEBUG("fragmenting data\r\n");
+
+
+
 
     if (length > BLE_RAD_MAX_DATA_LEN)
     {

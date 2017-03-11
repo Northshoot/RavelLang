@@ -25,19 +25,16 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
-import org.stanford.ravel.rrt.android.system.RavelDefines;
 import org.stanford.ravel.rrt.android.system.RavelErrorCodes;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 
@@ -68,9 +65,6 @@ public class RavelBleService extends Service {
     private static final int BLE_STATE_INITIALIZED = 3;
 
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
-
-
-    private Handler.Callback embedded_callback=null;
 
 
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -181,23 +175,11 @@ public class RavelBleService extends Service {
          * @param status         The result of the write operation
          *                       {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
          */
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             //TODO: notify send_done
-            Message message = new Message();
-            message.setAsynchronous(true);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                //report back to the model the characteristic
-                message.arg1 = RavelDefines.SEND_DONE_SUCCESS;
-                sendCallback(embedded_callback, message);
+            Log.d(TAG, "onCharacteristicWrite: enabling notification " + enableNotification());
 
-            } else {
-                message.arg1 = RavelDefines.SEND_DONE_ERROR;
-                sendCallback(embedded_callback, message);
-                Log.w(TAG, "onCharacteristicWrite error status: " + status);
-            }
-            embedded_callback = null;
         }
 
         /**
@@ -211,8 +193,8 @@ public class RavelBleService extends Service {
             //read data
             Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
             BlePacket ble_pkt = new BlePacket( gatt, characteristic);
-
-
+            //TODO
+            dataReceived(ble_pkt);
 
         }
 
@@ -227,7 +209,7 @@ public class RavelBleService extends Service {
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
+                Log.d(TAG, "Descriptor read success");
             } else {
                 Log.w(TAG, "onDescriptorRead error status: " + status);
             }
@@ -237,7 +219,7 @@ public class RavelBleService extends Service {
          * Callback indicating the result of a descriptor write operation.
          *
          * @param gatt       GATT client invoked {@link BluetoothGatt#writeDescriptor}
-         * @param descriptor Descriptor that was writte to the associated
+         * @param descriptor Descriptor that was write to the associated
          *                   remote device.
          * @param status     The result of the write operation
          *                   {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
@@ -245,11 +227,11 @@ public class RavelBleService extends Service {
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             Log.w(TAG, "onDescriptorWrite error status: " + status);
-//            if (status == BluetoothGatt.GATT_SUCCESS) {
-//                Log.d(TAG, )
-//            } else {
-//
-//            }
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(TAG, "Descriptor success");
+            } else {
+                Log.w(TAG, "Error enabling descriptor");
+            }
         }
 
         /**
@@ -311,15 +293,23 @@ public class RavelBleService extends Service {
     private void checkForServices(List<BluetoothGattService> mBluetoohServiceList) {
         Log.d(TAG, "Checking BLE services");
         String error = null;
+
         try {
             //get all models by service, enable all notify characteristics
             //We only check for ravel models
             //TODO: multiple ravel models
             for (BluetoothGattService bleS : mBluetoohServiceList) {
-                if(bleS.getUuid() == RavelGattAtrributes.RAVEL_DATA_MODEL_UUID) {
-                    enableNotification(RavelGattAtrributes.RAVEL_DATA_MODEL_READ_CHAR_UUID, bleS.getUuid());
+                if(bleS.getUuid().equals(RavelGattAtrributes.RAVEL_DATA_MODEL_UUID)) {
+                    Log.e(TAG, "found service::: " +  bleS.getUuid());
+//                    for(BluetoothGattCharacteristic c : bleS.getCharacteristics()) {
+//                        Log.e(TAG, "char::: " + c.getUuid());
+//                    }
+                    //FIXME: set name properly
+                    String name = "GatewaySpace";
+                    BlePacket pkt = new BlePacket(name.getBytes());
+                    write_to_embedded(pkt);
                 } else {
-                    Log.e(TAG, "no compatible service was found");
+                    //Log.e(TAG, "no compatible service was found " + bleS.getUuid());
                 }
             }
 
@@ -333,26 +323,35 @@ public class RavelBleService extends Service {
     }
 
 
-    public void enableNotification(UUID notification, UUID service) {
-        BluetoothGattCharacteristic charnot = mBluetoothGatt.getService(service).getCharacteristic(notification);
-        if (charnot != null) enableNotification(charnot);
-    }
+    private boolean enableNotification(){
+        if( mBluetoothGatt != null) {
+            BluetoothGattService service = mBluetoothGatt.getService(RavelGattAtrributes.RAVEL_DATA_MODEL_UUID);
+            if (service == null) {
+                //Should not end up here
+                Log.e(TAG, RavelErrorCodes.NO_SUCH_SERVICE);
+                return false;
+            }
 
-    private void enableNotification(BluetoothGattCharacteristic characteristic){
-        mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-        //TODO: not sure this is the right way
-        //https://devzone.nordicsemi.com/question/55669/enabling-multiple-notifications-characteristic/
-        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BleDefines.CLIENT_CHARACTERISTIC_CONFIG);
-        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        mBluetoothGatt.writeDescriptor(descriptor);
+            BluetoothGattCharacteristic charnot = service.getCharacteristic(RavelGattAtrributes.RAVEL_DATA_MODEL_READ_CHAR_UUID);
+            if (charnot != null) {
+                Log.e(TAG, "enabling notification");
+                mBluetoothGatt.setCharacteristicNotification(charnot, true);
+                charnot.getDescriptor(BleDefines.CLIENT_CHARACTERISTIC_CONFIG);
+                BluetoothGattDescriptor descriptor = charnot.getDescriptor(BleDefines.CLIENT_CHARACTERISTIC_CONFIG);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                mBluetoothGatt.writeDescriptor(descriptor);
+                return true;
+            } else {
+                Log.e(TAG, "notification char is null");
+            }
+        }
+        return false;
     }
 
 
     @Override
     public void onCreate() {
-        /**
-         * Create and show notification in icon bar that Ravel is running
-         */
+        super.onCreate();
         mHandler = new Handler(Looper.getMainLooper());
 
         /**
@@ -373,11 +372,6 @@ public class RavelBleService extends Service {
 
         /** END BLE */
 
-        /**
-         * handle GCM
-         */
-        //start GCM service
-        // we can not extend two classes
 
     }
 
@@ -386,7 +380,7 @@ public class RavelBleService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     /**
@@ -457,7 +451,7 @@ public class RavelBleService extends Service {
             new ScanCallback() {
 
                 public void onScanResult(int callbackType, final ScanResult result){
-                    Log.d(TAG, "onScanResult " + result.getDevice() + "" + result.getRssi());
+                    //Log.d(TAG, "onScanResult " + result.getDevice() + "" + result.getRssi());
                     addDevice(result.getDevice(), result.getRssi());
                 }
 
@@ -479,7 +473,6 @@ public class RavelBleService extends Service {
         if(deviceList.size() > 0) {
             for (BluetoothDevice dev :deviceList) {
                 //TODO: create an endpoint
-
                 //connect to the device
                 connect(dev.getAddress());
             }
@@ -610,6 +603,14 @@ public class RavelBleService extends Service {
         sendBroadcast(intent);
     }
 
+    private void dataReceived(final BlePacket pkt){
+        Log.d(TAG,"Sending broadcast with packet ");
+        final Intent intent = new Intent(BleDefines.INTENT_BLE_FILTER);
+        intent.putExtra(BleDefines.COMMAND, BleDefines.ACTION_DATA_AVAILABLE);
+        intent.putExtra(BleDefines.EXTRA_DATA, pkt);
+        sendBroadcast(intent);
+    }
+
 
     /**
      * Generic method that writes to the model instance on the embedded device
@@ -617,20 +618,21 @@ public class RavelBleService extends Service {
      * TODO: extract BLE to a generic method
 
      */
-
-    public boolean write_to_embedded(Handler.Callback callback, BlePacket pkt) {
-        //TODO: write to the characteristic
-        this.embedded_callback = callback;
+    public boolean write_to_embedded( BlePacket pkt) {
+        Log.d(TAG, "Writint go characteristic");
         if( mBluetoothGatt != null) {
-            //TODO: assuming here single device
+
             BluetoothGattService service = mBluetoothGatt.getService(RavelGattAtrributes.RAVEL_DATA_MODEL_UUID);
             if (service == null){
                 //Should not end up here
                 Log.e(TAG, RavelErrorCodes.NO_SUCH_SERVICE);
                 return false;
             }
+            for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
+                        Log.e(TAG, "char::: " + c.getUuid());
+            }
             BluetoothGattCharacteristic writeChar = service.getCharacteristic(RavelGattAtrributes.RAVEL_DATA_MODEL_WRITE_CHAR_UUID);
-            if (service == null) {
+            if (writeChar == null) {
                 //Should not end up here
                 Log.e(TAG, RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
                 return false;
@@ -648,11 +650,6 @@ public class RavelBleService extends Service {
         return true;
     }
 
-
-    private void sendCallback(Handler.Callback callback, Message message){
-        Handler handler = new Handler(callback);
-        handler.sendMessage(message);
-    }
 
 
 

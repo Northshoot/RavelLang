@@ -15,7 +15,7 @@ public class BleDefines {
 
     public final static long SCAN_PERIOD = 1000; //scanning for 10 seconds
     public final static long BLE_RECONNECT_TIME = 10000;
-    public final static String SPACE_NAME = "RavelRAD";
+    public final static String SPACE_NAME = "RavelBLE";
     /**
      * BLE intent action filters
      */

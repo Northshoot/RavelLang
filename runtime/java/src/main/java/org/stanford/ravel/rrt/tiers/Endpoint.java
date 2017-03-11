@@ -28,11 +28,11 @@ public class Endpoint {
         return  name;
     }
 
-    void connected() {
+    public void connected() {
         mConnected = true;
     }
 
-    void disconnected() {
+    public void disconnected() {
         mConnected = false;
     }
 
@@ -48,6 +48,7 @@ public class Endpoint {
         this.local = local;
     }
 
+
     @Override
     public String toString() {
         return "[Type: " + this.type
@@ -61,7 +62,7 @@ public class Endpoint {
             options = Collections.emptyMap();
         switch (uri.getScheme()) {
             case "ble":
-                return new BleEndpoint();
+                return new BleEndpoint(name);
             case "http":
             case "https":
                 return new HttpEndpoint(name, uri, options.get("method"), options.get("user-agent"));

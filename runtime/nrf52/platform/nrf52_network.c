@@ -27,6 +27,7 @@ static bool m_connected = false;
 static bool m_notify_enabled = false;
 static uint32_t m_dropped = 0;
 static uint32_t m_total = 0;
+static bool m_endpoint_is_set = false;
 /* total number of packets seen so far */
 //static uint8_t ackno_code;
 //static uint8_t store_code;
@@ -92,6 +93,7 @@ create_endpoint(const uint8_t *data, uint16_t len)
         free((char*)endpoint_space.m_ravel_endpoint.name);
     endpoint_space.m_ravel_endpoint.name = space_name;
     endpoint_space.m_tx_uuid = BLE_UUID_RAD_TX_CHARACTERISTIC;
+    m_endpoint_is_set = true;
 }
 
 void
@@ -129,20 +131,26 @@ network_on_notify(void)
 {
     m_notify_enabled = !m_notify_enabled;
 
-    endpoint_space.m_ravel_endpoint.connected = m_notify_enabled;
+    if(m_endpoint_is_set)
+    {
+        endpoint_space.m_ravel_endpoint.connected = m_notify_enabled;
 
-    if (m_notify_enabled){
-        //FIXME: for convenience of manual testing
-        const uint8_t *name = "local";
-        create_endpoint(name, sizeof(name));
-        ravel_nrf52_driver_set_endpoint(&driver, &endpoint_space);
+        if (m_notify_enabled)
+        {
+            ravel_nrf52_driver_set_endpoint(&driver, &endpoint_space);
+        }
+        else
+        {
+            free((char*)endpoint_space.m_ravel_endpoint.name);
+            endpoint_space.m_ravel_endpoint.name = NULL;
+            ravel_nrf52_driver_set_endpoint(&driver, NULL);
+            m_endpoint_is_set = false;
+         }
+   } else {
+        NRF_LOG_DEBUG("unauthorized attempt \r\n");
+   }
 
-    }
-    else {
-        free((char*)endpoint_space.m_ravel_endpoint.name);
-        endpoint_space.m_ravel_endpoint.name = NULL;
-        ravel_nrf52_driver_set_endpoint(&driver, NULL);
-    }
+
 
 
 }

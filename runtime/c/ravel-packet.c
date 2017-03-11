@@ -23,7 +23,7 @@
 #define MIN_LENGTH RESERVED
 
 /**
- * Packeet mapping POST fragmentation
+ * Packet mapping POST fragmentation
  */
 void
 ravel_packet_init_empty (RavelPacket *self, size_t record_size, int model_id, int record_id)
