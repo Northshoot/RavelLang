@@ -2,6 +2,8 @@ package org.stanford.ravel.compiler.ir;
 
 import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.ir.typed.*;
+import org.stanford.ravel.compiler.types.ArrayType;
+import org.stanford.ravel.compiler.types.Type;
 
 import java.util.*;
 
@@ -83,6 +85,13 @@ public class ConstantFolding {
         this.ir = ir;
 
         declaredVariables.addAll(ir.getParameters());
+
+        ir.getRegisterTypes().forEach((entry) -> {
+            int reg = entry.getKey();
+            Type type = entry.getValue();
+            if (type instanceof ArrayType && ((ArrayType) type).isKnownBound())
+                declaredVariables.add(reg);
+        });
     }
 
     public boolean run() {

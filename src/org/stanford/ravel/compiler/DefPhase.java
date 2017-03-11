@@ -382,8 +382,11 @@ public class DefPhase extends RavelBaseListener {
         for (RavelParser.LiteralContext value : ctx.literal()) {
             Object literal = ParserUtils.literalToValue(value);
             Type constantType = ParserUtils.typeFromLiteral(literal);
-            if (!type.isAssignable(constantType)) {
-                emitError(ctx, "variable " + name + " cannot be assigned a value of type " + constantType.getName());
+            if (constantType != arrayType.getElementType()) {
+                literal = ParserUtils.convertLiterals(arrayType.getElementType(), constantType, literal);
+                if (literal == null) {
+                    emitError(ctx, "variable " + name + " cannot be assigned a value of type " + constantType.getName());
+                }
             }
             sym.addValue(literal);
         }
@@ -543,6 +546,21 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitForStatement(RavelParser.ForStatementContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterCLikeForStatement(RavelParser.CLikeForStatementContext ctx) {
+        // push a scope for the for control
+        LocalScope ls = new LocalScope("for_stmt_" + nextBlockId++, currentScope);
+        ls.setDefNode(ctx);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitCLikeForStatement(RavelParser.CLikeForStatementContext ctx) {
         popScope();
     }
 

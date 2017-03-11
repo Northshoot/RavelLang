@@ -312,7 +312,7 @@ public class TypeResolvePass implements InstructionVisitor {
     }
 
     private void handleArrayLength(FieldLoad instr) {
-        Type ownerType = getRegisterType(instr.source);
+        ArrayType ownerType = (ArrayType)getRegisterType(instr.source);
         Type resultType = PrimitiveType.INT32;
 
         int target;
@@ -329,7 +329,11 @@ public class TypeResolvePass implements InstructionVisitor {
             target = Registers.ERROR_REG;
         }
 
-        ir.add(IntrinsicFactory.createArrayLength((ArrayType)ownerType, target, instr.source));
+        if (ownerType.isKnownBound()) {
+            ir.add(new TImmediateLoad(PrimitiveType.INT32, target, ownerType.getBound()));
+        } else {
+            ir.add(IntrinsicFactory.createArrayLength((ArrayType) ownerType, target, instr.source));
+        }
         if (target != instr.target && target != Registers.ERROR_REG)
             ir.add(new TConvert(targetType, resultType, instr.target, target));
     }

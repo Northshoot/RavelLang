@@ -1001,6 +1001,18 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitForStatement(RavelParser.ForStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code CLikeForStatement}
+	 * labeled alternative in {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterCLikeForStatement(RavelParser.CLikeForStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CLikeForStatement}
+	 * labeled alternative in {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitCLikeForStatement(RavelParser.CLikeForStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#forControl}.
 	 * @param ctx the parse tree
 	 */

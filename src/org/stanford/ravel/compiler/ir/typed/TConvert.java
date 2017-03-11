@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.ir.typed;
 
+import org.stanford.ravel.compiler.ParserUtils;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -70,48 +71,7 @@ public class TConvert extends TInstruction {
         if (!(tgtType instanceof PrimitiveType))
             return null;
 
-        switch ((PrimitiveType)tgtType) {
-            case ANY:
-                return null;
-
-            case BOOL:
-                if (srcType == PrimitiveType.ERROR_MSG)
-                    return null;
-                assert srcType == PrimitiveType.BOOL;
-                return (boolean)args[0];
-            case BYTE:
-                if (srcType == PrimitiveType.BOOL)
-                    return (byte)(((boolean)args[0]) ? 1 : 0);
-                else if (srcType == PrimitiveType.BYTE)
-                    return (byte)args[0];
-                else if (srcType == PrimitiveType.INT32)
-                    return (byte)(int)args[0];
-                else if (srcType == PrimitiveType.DOUBLE)
-                    return (byte)(double)args[0];
-                else
-                    throw new AssertionError();
-            case INT32:
-                if (srcType == PrimitiveType.BOOL)
-                    return ((boolean)args[0]) ? 1 : 0;
-                else if (srcType == PrimitiveType.BYTE)
-                    return (int)(byte)args[0];
-                else if (srcType == PrimitiveType.INT32)
-                    return (int)args[0];
-                else if (srcType == PrimitiveType.DOUBLE)
-                    return (int)(double)args[0];
-                else
-                    throw new AssertionError();
-            case DOUBLE:
-                if (srcType == PrimitiveType.BOOL)
-                    return ((boolean)args[0]) ? 1.0 : 0.0;
-                else if (srcType == PrimitiveType.INT32)
-                    return (double)(int)args[0];
-                else if (srcType == PrimitiveType.DOUBLE)
-                    return (double)args[0];
-                else
-                    throw new AssertionError();
-        }
-        return null;
+        return ParserUtils.convertLiterals(tgtType, srcType, args[0]);
     }
 
 }

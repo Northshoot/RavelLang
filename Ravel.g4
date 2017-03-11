@@ -372,7 +372,7 @@ lvalue
     ;
 
 assign_op
-    : '=' | '+=' | '-=' | '*=' | '/=' ;
+    : '=' | '+=' | '-=' | '*=' | '/=' | '//=' | '^=' | '<<=' | '>>=' ;
 
 ident_decl
     : Identifier (':' type)?
@@ -534,6 +534,7 @@ while_stmt
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt returns [Scope scope]
     : FOR forControl ':' block_stmt #ForStatement
+    | FOR ident_decl '=' expression 'to' expression ('step' expression)? ':' block_stmt #CLikeForStatement
     ;
 
 forControl

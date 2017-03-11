@@ -14,9 +14,12 @@ public class ValidateIR {
     public static void validate(TypedIR ir) {
         ControlFlowGraph cfg = ir.getControlFlowGraph();
         Set<TBlock> fromCfg = new HashSet<>();
+        Set<TBlock> fromBackwardCfg = new HashSet<>();
 
         for (TBlock block : cfg)
             fromCfg.add(block);
+        cfg.visitBackward(fromBackwardCfg::add);
+        assert fromBackwardCfg.equals(fromCfg);
 
         for (TBlock block : cfg) {
             for (TInstruction instruction : block) {

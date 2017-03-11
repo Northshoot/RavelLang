@@ -603,6 +603,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForStatement(RavelParser.ForStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code CLikeForStatement}
+	 * labeled alternative in {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCLikeForStatement(RavelParser.CLikeForStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#forControl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

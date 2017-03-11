@@ -15,9 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.stanford.ravel.compiler.ir.Registers.ERROR_REG;
-import static org.stanford.ravel.compiler.ir.Registers.UNSET_REG;
-import static org.stanford.ravel.compiler.ir.Registers.VOID_REG;
+import static org.stanford.ravel.compiler.ir.Registers.*;
 
 /**
  * Created by gcampagn on 1/20/17.
@@ -587,6 +585,69 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
         addCurrent(new MethodCall(ctx.forControl(), varReg, iteratorReg, "next", new int[]{}));
         // ...
         this.visit(ctx.block_stmt());
+        popBlock();
+        // }
+        addCurrent(new WhileLoop(ctx, cond, head, body));
+
+        currentScope = parentScope;
+        return VOID_REG;
+    }
+
+    @Override
+    public Integer visitCLikeForStatement(RavelParser.CLikeForStatementContext ctx) {
+        Scope parentScope = currentScope;
+        currentScope = ctx.scope;
+
+        RavelParser.Ident_declContext decl = ctx.ident_decl();
+        RavelParser.ExpressionContext start = ctx.expression().get(0);
+        RavelParser.ExpressionContext end = ctx.expression().get(1);
+
+        String varName = decl.Identifier().getText();
+        int varReg;
+
+        Symbol var = currentScope.resolve(varName);
+        if (var == null || !(var instanceof VariableSymbol)) {
+            compiler.emitError(new SourceLocation(ctx), varName + " is not a variable");
+            varReg = ERROR_REG;
+        } else if (!((VariableSymbol) var).isWritable()) {
+            compiler.emitError(new SourceLocation(ctx), "cannot assign to read only variable " + varName);
+            varReg = ERROR_REG;
+        } else {
+            varReg = ensureVarRegister((VariableSymbol) var);
+        }
+
+        // Lower to
+        // var = ...
+        // while (var < ...) {
+        //  ...
+        //  var += 1
+        // }
+
+        int startReg = visit(start);
+        int endReg = visit(end);
+        int stepReg;
+
+        if (ctx.expression().size() ==3) {
+            stepReg = visit(ctx.expression().get(2));
+        } else {
+            stepReg = ir.allocateRegister();
+            addCurrent(new ImmediateLoad(decl, stepReg, 1));
+        }
+        // iterator = iterable .iterator()
+        addCurrent(new Move(decl, varReg, startReg));
+
+        // while (...
+        Block head = pushBlock();
+        int cond = ir.allocateRegister();
+        // cond = iterator.hasNext()
+        addCurrent(new ComparisonOp(end, cond, varReg, endReg, ComparisonOperation.LT));
+        popBlock();
+        // ) {
+        Block body = pushBlock();
+        // ...
+        this.visit(ctx.block_stmt());
+
+        addCurrent(new BinaryArithOp(decl, varReg, varReg, stepReg, BinaryOperation.ADD));
         popBlock();
         // }
         addCurrent(new WhileLoop(ctx, cond, head, body));
