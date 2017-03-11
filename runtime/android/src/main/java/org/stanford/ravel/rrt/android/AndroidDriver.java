@@ -19,6 +19,7 @@ import org.stanford.ravel.rrt.tiers.JavaDriver;
 import org.stanford.ravel.rrt.tiers.JavaDurableStorage;
 import org.stanford.ravel.rrt.tiers.RavelIOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class AndroidDriver extends JavaDriver {
     // BLE related variables
     private boolean m_connected_ble = false;
     private boolean m_ble_endpoint_started = false;
-
+    private Map<String, ArrayList<BlePacket>> m_frag_map = new HashMap<>();
     //Connection states
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
     public boolean GATEWAY_CONNECTED = false; // indicates open gateway application
@@ -54,7 +55,19 @@ public class AndroidDriver extends JavaDriver {
 
     private Intent mRavelServiceIntent;
 
-    int packet_counter = 0;
+    void packetCompleted(BlePacket pkt){
+        byte [] data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
+        m_frag_map.get(pkt.getAddress()).clear();
+        appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
+    }
+
+    void fragment_arrived(BlePacket pkt) {
+        m_frag_map.get(pkt.getAddress()).add(pkt);
+        if ( pkt.isLast() )
+            packetCompleted(pkt);
+
+    }
+
     private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -76,10 +89,9 @@ public class AndroidDriver extends JavaDriver {
                     bleClients.remove(device_address);
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
-                    Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE " + packet_counter++);
+                    //TODO: assemble fragment
                     BlePacket pkt = (BlePacket) data.getSerializable(BleDefines.EXTRA_DATA);
-                    BleEndpoint ble_p = bleClients.get(pkt.getAddress());
-                    appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(pkt.getData()), ble_p);
+                    fragment_arrived(pkt);
                     break;
                 case BleDefines.ACTION_GATT_SERVICES_DISCOVERED:
                     Log.d(TAG, "onReceive: ACTION_GATT_SERVICES_DISCOVERED");

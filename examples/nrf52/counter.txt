@@ -30,6 +30,11 @@ streaming model Counter(size : int32):
         counter3 : int32
         counter4 : int32
         counter5 : int32
+        counter6 : int32
+        counter7 : int32
+        counter8 : int32
+        counter9 : int32
+
 
 controller EController(timer : Timer, led_0 : Led, counter : Counter):
     value = 0
@@ -51,6 +56,15 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
         value += 1
         rec.counter5 = value
         value += 1
+        rec.counter6 = value
+        value += 1
+        rec.counter7 = value
+        value += 1
+        rec.counter8 = value
+        value += 1
+        rec.counter9 = value
+        value += 1
+
         counter.save(rec)
         led_0.toggle()
 

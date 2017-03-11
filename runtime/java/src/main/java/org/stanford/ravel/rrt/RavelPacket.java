@@ -12,10 +12,10 @@ public class RavelPacket {
     private final static int RESERVED = 3; // reserved for byte mapping
 
     public static class Flags {
-        public static final int FLAG_PARTIAL = 1;
-        public static final int FLAG_LAST = 2;
-        public static final int FLAG_ACK = 4;
-        public static final int FLAG_SAVE_DONE = 8;
+//        public static final int FLAG_PARTIAL = 1;
+//        public static final int FLAG_LAST = 2;
+        public static final int FLAG_ACK = 1;
+        public static final int FLAG_SAVE_DONE = 4;
     }
 
     /**
@@ -30,10 +30,11 @@ public class RavelPacket {
     public byte dst=-1;
     public byte src=-1;
 
-    //TODO: add packetization
+//    //TODO: add packetization
     private int flags = 0;
-    private boolean partial = false;
-    private boolean last = false;
+    //FIXME: moved to the fragmentation network packet is an assembly
+//    private boolean partial = false;
+//    private boolean last = false;
     private boolean ack = false;
     private boolean save_done = false;
 
@@ -43,8 +44,8 @@ public class RavelPacket {
             this.src = data[0];
             this.dst = data[1];
             this.flags = data[2];
-            this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
-            this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
+//            this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
+//            this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
             this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
             this.save_done = (this.flags & Flags.FLAG_SAVE_DONE) == Flags.FLAG_SAVE_DONE;
 
@@ -140,12 +141,12 @@ public class RavelPacket {
         return outputStream.toByteArray();
     }
 
-    public boolean isLast() {
-        return last;
-    }
-    public boolean isPartial() {
-        return partial;
-    }
+//    public boolean isLast() {
+//        return last;
+//    }
+//    public boolean isPartial() {
+//        return partial;
+//    }
     public boolean isAck() {
         return ack;
     }
@@ -156,7 +157,7 @@ public class RavelPacket {
     @Override
     public String toString() {
         return "[SRC: " + this.src + ", DST: " + this.dst
-                + ", PARTIAL: "+ isPartial() + ", LAST: "+ isLast()
+//                + ", PARTIAL: "+ isPartial() + ", LAST: "+ isLast()
                 +", MODEL_ID: " + this.model_id + " rec_idx: " + this.record_id + "]";
     }
 }
