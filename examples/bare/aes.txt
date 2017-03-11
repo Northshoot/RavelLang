@@ -212,8 +212,8 @@ controller CounterModeAES(m_plain : Plaintext, m_key : Key, m_encrypted : Encryp
             
             # increment the IV
             for i = 0 to block_size:
-                iv[block_size-i] = (byte) (iv[block_size-i] + 1)
-                if iv[block_size-i] != 0:
+                iv[block_size-i-1] = (byte) (iv[block_size-i-1] + 1)
+                if iv[block_size-i-1] != 0:
                     break
 
         m_encrypted.save(ciphertextrec)
