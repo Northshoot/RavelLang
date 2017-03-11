@@ -12,7 +12,7 @@ public class IntrinsicFactory {
     private IntrinsicFactory() {}
 
     public static TIntrinsic createParameterSet(Type type, int param, int value) {
-        return new TIntrinsic(type, new Type[]{ type }, param, "param_set", new int[]{ value }, true, false, false);
+        return new TIntrinsic(PrimitiveType.VOID, new Type[]{ type, type }, Registers.VOID_REG, "param_set", new int[]{ param, value }, true, false, false);
     }
 
     public static TIntrinsic createReadRecordId(ModelType.RecordType recordType, int target, int record) {

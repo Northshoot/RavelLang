@@ -5,6 +5,10 @@ public void <handler.modelVar.name>_<handler.eventType.eventName>(<handler.argum
     <handler.body>}
 >>
 
+define_array_constant(c) ::=<<
+private static final <c.type> <c.name> = new <c.type>{ <c.values:{v|<v; format="literal">}; separator=", "> };
+>>
+
 file(package,imports,name,controller,eventHandlers) ::=<<
 package <package>;
 
@@ -13,6 +17,7 @@ package <package>;
 public class <name> {
     <controller.parameterSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
     <controller.classScopeVariableSymbols:{p|private <p.type> <p.name>;}; separator="\n">
+    <controller.arrayConstantSymbols:define_array_constant(); separator="\n">
 
     public <name>(<controller.parameterSymbols:{p|<p.type> <p.name>}; separator=", ">) {
         <controller.parameterSymbols:{p|this.<p.name> = <p.name>;}; separator="\n">

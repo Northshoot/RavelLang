@@ -153,8 +153,13 @@ public class DefPhase extends RavelBaseListener {
                 baseType = subType;
             }
 
-            for (RavelParser.Array_markerContext array : ctx.array_marker())
-                baseType = new ArrayType(baseType);
+            for (RavelParser.Array_markerContext array : ctx.array_marker()) {
+                if (array.DECIMAL_INTEGER() != null) {
+                    baseType = new ArrayType(baseType, Integer.valueOf(array.DECIMAL_INTEGER().getText()));
+                } else {
+                    baseType = new ArrayType(baseType);
+                }
+            }
 
             return baseType;
         }
@@ -358,6 +363,73 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
+    public void enterControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx) {
+        String name = ctx.Identifier().getText();
+        Type type = parseType(ctx.type());
+
+        if (!(type instanceof ArrayType) || !(((ArrayType) type).getElementType() instanceof PrimitiveType)) {
+            emitError(ctx, "only arrays of primitive types can be declared as constants");
+            return;
+        }
+        ArrayType arrayType = (ArrayType)type;
+
+        ArrayConstantSymbol sym = new ArrayConstantSymbol(name);
+        sym.setType(new ArrayType(arrayType.getElementType()).makeImmutable());
+        sym.setWritable(false);
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+
+        for (RavelParser.LiteralContext value : ctx.literal()) {
+            Object literal = ParserUtils.literalToValue(value);
+            Type constantType = ParserUtils.typeFromLiteral(literal);
+            if (constantType != arrayType.getElementType()) {
+                literal = ParserUtils.convertLiterals(arrayType.getElementType(), constantType, literal);
+                if (literal == null) {
+                    emitError(ctx, "variable " + name + " cannot be assigned a value of type " + constantType.getName());
+                }
+            }
+            sym.addValue(literal);
+        }
+        if (arrayType.isKnownBound()) {
+            int bound = arrayType.getBound();
+            if (bound < ctx.literal().size()) {
+                emitError(ctx, "too many values for array of size " + bound);
+            } else if (bound > ctx.literal().size()) {
+                for (int i = ctx.literal().size(); i < bound; i++) {
+                    switch ((PrimitiveType)(arrayType.getElementType())) {
+                        case VOID:
+                        case ANY:
+                        case ERROR:
+                            break;
+
+                        case BOOL:
+                            sym.addValue(false);
+                            break;
+                        case BYTE:
+                            sym.addValue((byte)0);
+                            break;
+                        case INT32:
+                            sym.addValue(0);
+                            break;
+                        case DOUBLE:
+                            sym.addValue(0.0);
+                            break;
+                        case STR:
+                            sym.addValue("");
+                            break;
+                        case ERROR_MSG:
+                            sym.addValue(0);
+                            break;
+                        case TIMESTAMP:
+                            sym.addValue(0);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void enterEventScope(RavelParser.EventScopeContext ctx) {
         //define event scope
         //define parameters in the scope
@@ -417,14 +489,17 @@ public class DefPhase extends RavelBaseListener {
 
         VariableSymbol var = new VariableSymbol(varName);
         var.setDefNode(ctx);
-        var.setWritable(true);
-
         Type type;
         if (ctx.type() != null) {
             type = parseType(ctx.type());
         } else {
             type = PrimitiveType.ANY;
         }
+
+        if (type instanceof ArrayType && ((ArrayType) type).isKnownBound())
+            var.setWritable(false);
+        else
+            var.setWritable(true);
         var.setType(type);
         currentScope.define(var);
     }
@@ -438,6 +513,11 @@ public class DefPhase extends RavelBaseListener {
         var.setDefNode(ctx);
         var.setWritable(false);
         currentScope.define(var);
+    }
+
+    @Override
+    public void enterCast_op(RavelParser.Cast_opContext ctx) {
+        ctx.computedType = parseType(ctx.type());
     }
 
     @Override
@@ -466,6 +546,21 @@ public class DefPhase extends RavelBaseListener {
 
     @Override
     public void exitForStatement(RavelParser.ForStatementContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterCLikeForStatement(RavelParser.CLikeForStatementContext ctx) {
+        // push a scope for the for control
+        LocalScope ls = new LocalScope("for_stmt_" + nextBlockId++, currentScope);
+        ls.setDefNode(ctx);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitCLikeForStatement(RavelParser.CLikeForStatementContext ctx) {
         popScope();
     }
 

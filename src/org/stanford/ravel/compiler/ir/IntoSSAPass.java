@@ -125,6 +125,9 @@ class IntoSSAPass {
         localState.put(phi.variable, new HashSet<>());
         localState.get(phi.variable).add(def);
 
+        for (Definition sourceDef : phi.sources)
+            assert !def.equals(sourceDef);
+
         phiDefinitions.put(phi, def);
     }
 
@@ -155,6 +158,29 @@ class IntoSSAPass {
         phiNodes.computeIfAbsent(block, (key) -> new HashMap<>()).put(var, node);
     }
 
+    private static Set<Definition> computeEffectiveDefinitions(Set<Definition> defs) {
+        if (defs.size() <= 1)
+            return defs;
+
+        Set<Definition> result = new HashSet<>();
+        Set<Definition> subsumed = new HashSet<>();
+
+        for (Definition def : defs) {
+            if (def.instruction == null) {
+                for (Definition phiSource : def.phiNode.sources) {
+                    result.remove(phiSource);
+                    subsumed.add(phiSource);
+                }
+            }
+
+            if (subsumed.contains(def))
+                continue;
+            result.add(def);
+        }
+
+        return result;
+    }
+
     private void visitBlockDataflow(TBlock block) {
         // Compute the state at the start of the block
         Map<Integer, Set<Definition>> localState = new HashMap<>();
@@ -168,7 +194,7 @@ class IntoSSAPass {
         // Compute any new phi nodes that we need
         Set<PhiNode> newPhiNodes = new HashSet<>();
         for (int var : localState.keySet()) {
-            Set<Definition> defs = localState.get(var);
+            Set<Definition> defs = computeEffectiveDefinitions(localState.get(var));
             if (defs.size() > 1) {
                 // mark that this var has a phi node, at some point
                 affectedVars.add(var);
@@ -271,11 +297,14 @@ class IntoSSAPass {
                 assert Registers.isNormal(phiSources[i]);
                 phiBlocks[i] = def.inBlock;
                 assert phiBlocks[i] != null;
+                assert phiSources[i] != phi.getKey();
                 i++;
             }
 
             Definition phiDefinition = phiDefinitions.get(phi.getValue());
             int newReg = getDefinitionRegister(phiDefinition);
+            for (int source : phiSources)
+                assert source != newReg;
             block.prepend(new TPhi(ir.getRegisterType(phi.getKey()), newReg, phiSources, phiBlocks));
             localState.put(phi.getKey(), newReg);
         }

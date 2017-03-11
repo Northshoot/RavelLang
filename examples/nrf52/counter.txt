@@ -4,7 +4,6 @@ interface Timer():
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
-    def is_one_shoot() : bool
     event fired()
 
 interface Led(led_num: int32):

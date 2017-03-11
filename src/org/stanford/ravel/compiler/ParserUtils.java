@@ -10,11 +10,23 @@ import org.stanford.ravel.compiler.types.Type;
 public class ParserUtils {
     private ParserUtils() {}
 
+    private static int parseInt(String str) {
+        str = str.toLowerCase();
+
+        if (str.startsWith("0x"))
+            return Integer.parseInt(str.substring(2), 16);
+        if (str.startsWith("0o"))
+            return Integer.parseInt(str.substring(2), 8);
+        if (str.startsWith("0b"))
+            return Integer.parseInt(str.substring(2), 2);
+        return Integer.parseInt(str);
+    }
+
     public static Object literalToValue(RavelParser.LiteralContext ctx) {
         Object value;
         if (ctx.number() != null) {
             if (ctx.number().integer() != null)
-                value = Integer.parseInt(ctx.number().integer().getText());
+                value = parseInt(ctx.number().integer().getText());
             else
                 value = Double.parseDouble(ctx.number().float_point().getText());
         } else if (ctx.boolean_rule() != null) {
@@ -34,6 +46,8 @@ public class ParserUtils {
             return PrimitiveType.DOUBLE;
         if (literal instanceof Integer)
             return PrimitiveType.INT32;
+        if (literal instanceof Byte)
+            return PrimitiveType.BYTE;
         throw new AssertionError("Unexpected literal " + literal);
     }
 
@@ -72,5 +86,70 @@ public class ParserUtils {
         }
 
         return builder.toString();
+    }
+
+    public static Object convertLiterals(Type tgtType, Type srcType, Object value) {
+        switch ((PrimitiveType)tgtType) {
+            case ANY:
+                return null;
+
+            case BOOL:
+                if (srcType == PrimitiveType.ERROR_MSG)
+                    return null;
+                if (srcType == PrimitiveType.BOOL)
+                    return (boolean)value;
+                else if (srcType == PrimitiveType.BYTE)
+                    return ((byte)value != 0);
+                else if (srcType == PrimitiveType.INT32)
+                    return ((int)value != 0);
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return ((double)value != 0);
+                else if (srcType == PrimitiveType.STR)
+                    return (!((String)value).isEmpty());
+                else
+                    throw new AssertionError();
+            case BYTE:
+                if (srcType == PrimitiveType.BOOL)
+                    return (byte)(((boolean)value) ? 1 : 0);
+                else if (srcType == PrimitiveType.BYTE)
+                    return (byte)value;
+                else if (srcType == PrimitiveType.INT32)
+                    return (byte)(int)value;
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (byte)(double)value;
+                else if (srcType == PrimitiveType.STR)
+                    return Byte.valueOf((String)value);
+                else
+                    throw new AssertionError();
+            case INT32:
+                if (srcType == PrimitiveType.BOOL)
+                    return ((boolean)value) ? 1 : 0;
+                else if (srcType == PrimitiveType.BYTE)
+                    return (int)(byte)value;
+                else if (srcType == PrimitiveType.INT32)
+                    return (int)value;
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (int)(double)value;
+                else if (srcType == PrimitiveType.STR)
+                    return Integer.valueOf((String)value);
+                else
+                    throw new AssertionError();
+            case DOUBLE:
+                if (srcType == PrimitiveType.BOOL)
+                    return ((boolean)value) ? 1.0 : 0.0;
+                else if (srcType == PrimitiveType.INT32)
+                    return (double)(int)value;
+                else if (srcType == PrimitiveType.DOUBLE)
+                    return (double)value;
+                else if (srcType == PrimitiveType.STR)
+                    return Double.valueOf((String)value);
+                else
+                    throw new AssertionError();
+
+            case STR:
+                return value.toString();
+        }
+
+        return null;
     }
 }

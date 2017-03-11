@@ -3,6 +3,7 @@ package org.stanford.antlr4;
 
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -494,6 +495,18 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitControllerVariableDefinition(RavelParser.ControllerVariableDefinitionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ControllerArrayConstant}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void enterControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ControllerArrayConstant}
+	 * labeled alternative in {@link RavelParser#controller_entry}.
+	 * @param ctx the parse tree
+	 */
+	void exitControllerArrayConstant(RavelParser.ControllerArrayConstantContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ControllerNewline}
 	 * labeled alternative in {@link RavelParser#controller_entry}.
 	 * @param ctx the parse tree
@@ -744,6 +757,16 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitPrimary(RavelParser.PrimaryContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link RavelParser#cast_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterCast_op(RavelParser.Cast_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#cast_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitCast_op(RavelParser.Cast_opContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#access_op}.
 	 * @param ctx the parse tree
 	 */
@@ -977,6 +1000,18 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitForStatement(RavelParser.ForStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CLikeForStatement}
+	 * labeled alternative in {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterCLikeForStatement(RavelParser.CLikeForStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CLikeForStatement}
+	 * labeled alternative in {@link RavelParser#for_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitCLikeForStatement(RavelParser.CLikeForStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#forControl}.
 	 * @param ctx the parse tree

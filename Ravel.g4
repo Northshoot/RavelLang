@@ -3,6 +3,7 @@ grammar Ravel;
 @header{
 import org.stanford.ravel.compiler.scope.*;
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.Type;
 }
 tokens { INDENT, DEDENT }
 
@@ -318,6 +319,7 @@ controller_scope
 controller_entry
     : eventdef #EventDefinition
     | Identifier (':' type)? '=' simple_expression #ControllerVariableDefinition
+    | Identifier ':' type '=' '[' (literal (',' literal)+)? ']' #ControllerArrayConstant
     | NEWLINE #ControllerNewline
     ;
 
@@ -370,7 +372,7 @@ lvalue
     ;
 
 assign_op
-    : '=' | '+=' | '-=' | '*=' | '/=' ;
+    : '=' | '+=' | '-=' | '*=' | '/=' | '//=' | '^=' | '<<=' | '>>=' ;
 
 ident_decl
     : Identifier (':' type)?
@@ -395,7 +397,7 @@ var_decl
 type
     : Identifier ('.' Identifier)* array_marker*;
 
-array_marker: '[' ']' ;
+array_marker: '[' DECIMAL_INTEGER? ']' ;
 
 assignment
     : lvalue assign_op expressionList
@@ -429,7 +431,11 @@ method_call
     : '.' Identifier '(' expressionList? ')' ;
 
 primary
-    : atom access_op*
+    : cast_op? atom access_op*
+    ;
+
+cast_op returns [Type computedType]
+    : '(' type ')'
     ;
 
 access_op
@@ -528,6 +534,7 @@ while_stmt
 /// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt returns [Scope scope]
     : FOR forControl ':' block_stmt #ForStatement
+    | FOR ident_decl '=' expression 'to' expression ('step' expression)? ':' block_stmt #CLikeForStatement
     ;
 
 forControl

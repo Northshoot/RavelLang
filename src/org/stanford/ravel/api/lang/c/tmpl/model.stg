@@ -156,7 +156,7 @@ declare_record_class(model_name, model_fields) ::=<<
 typedef struct {
     RavelRecord __base;
 
-    <model_fields:{f|<f.type> <f.name>;}; separator="\n">
+    <model_fields:{f|<if(f.type.knownBound)><f.type.elementType> <f.name>[<f.type.bound>]<else><f.type> <f.name><endif>;}; separator="\n">
 } <model_name>_Record;
 
 void ravel_generated_<model_name; format="function">_record_init(<model_name>_Record *record);

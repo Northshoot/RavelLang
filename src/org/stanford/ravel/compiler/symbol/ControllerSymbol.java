@@ -31,7 +31,7 @@ public class ControllerSymbol extends ComponentSymbol {
 
     public List<VariableSymbol> getParameters(){
         return getSymbols().stream()
-                .filter(s -> s instanceof VariableSymbol && !(s instanceof ConstantSymbol || s instanceof ReferenceSymbol))
+                .filter(s -> s instanceof VariableSymbol && !(s instanceof ConstantSymbol || s instanceof ReferenceSymbol || s instanceof ArrayConstantSymbol))
                 .map(s -> (VariableSymbol) s)
                 .collect(Collectors.toList());
     }
@@ -39,6 +39,13 @@ public class ControllerSymbol extends ComponentSymbol {
     public List<VariableSymbol> getClassScopeVariables() {
         return getSymbols().stream()
                 .filter(s -> s instanceof ConstantSymbol || s instanceof ReferenceSymbol)
+                .map(s -> (VariableSymbol) s)
+                .collect(Collectors.toList());
+    }
+
+    public List<VariableSymbol> getArrayConstantVariables() {
+        return getSymbols().stream()
+                .filter(s -> s instanceof ArrayConstantSymbol)
                 .map(s -> (VariableSymbol) s)
                 .collect(Collectors.toList());
     }

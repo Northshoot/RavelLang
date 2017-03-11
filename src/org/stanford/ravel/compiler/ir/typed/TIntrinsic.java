@@ -86,6 +86,9 @@ public class TIntrinsic extends TInstruction {
     @Override
     public Object evaluate(Object[] args) {
         switch (name) {
+            case "array_length":
+                return ((Object[])args[0]).length;
+
             // do something with well-known intrinsics
 
             default:
