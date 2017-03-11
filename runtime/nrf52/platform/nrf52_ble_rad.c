@@ -1,17 +1,9 @@
-/* Copyright (c) 2012 Nordic Semiconductor. All Rights Reserved.
- *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
- *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
- *
- */
+ #include <stdlib.h>
 #include "sdk_common.h"
 #include "nrf52_ble_rad.h"
 #include "ble_srv_common.h"
+#include "nrf52_ravel_frame.h"
+
 #define NRF_LOG_MODULE_NAME "R_SRV"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -32,6 +24,11 @@
 
 
 static uint8_t m_tx_pkt_available=0;
+//Used for packet fragmentation
+static bool m_fragment_enqueued = false;
+static uint8_t m_enqueued_pkt = 0;
+static uint8_t m_sent_pkt = 0;
+
 /***
  *
  * Service function for interactions
@@ -257,7 +254,11 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
             break;
         case BLE_EVT_TX_COMPLETE:
             NRF_LOG_DEBUG("TX_COMPLETE \r\n");
-            CALL_UP_SEND_DONE(p_rad);
+            m_sent_pkt++;
+            if(m_enqueued_pkt == m_sent_pkt) {
+                m_enqueued_pkt = m_sent_pkt = 0;
+                CALL_UP_SEND_DONE(p_rad);
+            }
 //            err_code = app_sched_event_put(NULL, 0, update_timers_state);
 //                APP_ERROR_CHECK(err_code);
         default:
@@ -306,7 +307,7 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
     return NRF_SUCCESS;
 }
 
-static bool m_fragment_enqueued = false;
+
 
 uint32_t
 send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
@@ -338,94 +339,56 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
     {
         return NRF_ERROR_INVALID_STATE;
     }
-
+    NRF_LOG_DEBUG("fragmenting data\r\n");
     bool has_fragment = true;
     m_fragment_enqueued = true;
    // data pointer is for recursive use so we can traverse the ccn_data
-    char * data_ptr = (char *)p_data;
+    uint8_t * data_ptr = (uint8_t *)p_data;
 
-    // buffer to be sent over bt
-    char * buffer = (char*)malloc(BT_FRAME_LEN);
-    memset(buffer, 0, BT_FRAME_LEN);
+    // buffer to be sent over ble
+    uint8_t * buffer = (uint8_t*)malloc(BLE_RAD_MAX_DATA_LEN);
+    memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
 
-
-
-    // Construct the extended bluetooth header for this packet
-    struct ext_bt_header ebth;
-    memcpy(ebth.dest_mac, dest, sizeof(dest));
-
-    get_local_btaddr(ebth.src_mac, 18);
-
-    // set the connection parameters (who to connect to)
-    struct sockaddr_rc addr = { 0 };
-    addr.rc_family = AF_BLUETOOTH;
-    addr.rc_channel = (uint8_t) 1;
-    str2ba(dest, &addr.rc_bdaddr );
-
-
-
+    // ravel header
+    data_packet_t ravel_pkt;
 
     while(has_fragment)
     {
-        if ( length >= BT_FRAME_LEN - sizeof(struct ext_bt_header) ){
+        if ( length >= BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
             m_fragment_enqueued = true;
-            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\n", sizeof(struct ext_bt_header));
+            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\r\n", sizeof( data_packet_t));
 
-            ebth.length = BT_FRAME_LEN -sizeof(struct ext_bt_header);
-            ebth.offset = offset | BT_MF; // set BT_MF flag to 1
-            is_more = 1;
+            ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
+            //TODO: set flags
+            ravel_pkt.ctrf_flags = 3;
+            has_fragment = true;
         } else {
-            NRF_LOG_DEBUG("data < bt frame length\n");
-
+            NRF_LOG_DEBUG("data < bt frame length\r\n");
             has_fragment = false;
-
-
+            ravel_pkt.ctrf_flags = 0;
         }
         // set id
-        ebth.id = id;
-
-        // checksum initially set to 0
-        ebth.checksum = 0;
-
+        ravel_pkt.indx = m_enqueued_pkt;
         // copy extended bluetooth header to buffer
-        memcpy(buffer, &ebth, sizeof(struct ext_bt_header));
+        memcpy(buffer, &ravel_pkt, sizeof( data_packet_t));
 
         // copy ccnx packet data to buffer
-        memcpy(buffer + sizeof(struct ext_bt_header), data_ptr, ebth.length);
+        memcpy(buffer + sizeof(data_packet_t), p_data, ravel_pkt.length);
 
-        // send the packet over raw bluetooth
-        send_result = send(s, buffer, sizeof(struct ext_bt_header)+ebth.length, 0);
-
-
+        // TODO: enqueue the packet for sending
+       uint32_t send_result = send_fragment(p_rad, buffer, sizeof( data_packet_t)+ravel_pkt.length);
+        NRF_LOG_DEBUG("send_fragment %u\r\n", m_enqueued_pkt);
+        m_enqueued_pkt++;
         // updating
-        if (length - ebth.length > 0) {
-
-            length = length - ebth.length;
-            offset = (offset * BT_OFF_BLKSIZE + ebth.length)/BT_OFF_BLKSIZE;
-            memset(buffer, 0, BT_FRAME_LEN);
-            data_ptr = data_ptr + ebth.length;
-
+        if (length - ravel_pkt.length > 0) {
+            length = length - ravel_pkt.length;
+            memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
+            data_ptr = data_ptr + ravel_pkt.length;
         }
 
      }
+    free(buffer);
+    return 0;
 
-    NRF_LOG_DEBUG("fragmenting data\r\n");
-
-
-
-
-    if (length > BLE_RAD_MAX_DATA_LEN)
-    {
-        return NRF_ERROR_INVALID_PARAM;
-    }
-
-    memset(&hvx_params, 0, sizeof(hvx_params));
-
-    hvx_params.handle = p_rad->rx_handles.value_handle;
-    hvx_params.p_data = p_string;
-    hvx_params.p_len  = &length;
-    hvx_params.type   = BLE_GATT_HVX_NOTIFICATION;
-
-    return sd_ble_gatts_hvx(p_rad->conn_handle, &hvx_params);
 }
 

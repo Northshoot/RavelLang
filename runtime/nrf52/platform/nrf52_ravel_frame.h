@@ -12,8 +12,9 @@ typedef uint8_t rf_ctrf_flags;
 //TODO: need to be made properly
 typedef struct {
     uint8_t indx; /* packet index */
+    //uint8_t protocol; /* kind of protocol for Ravel */
+    uint8_t length;     // 4 bytes
     rf_ctrf_flags ctrf_flags; /* masked control field flags */
-    uint8_t *data;
 }__attribute__((packed)) data_packet_t;
 
 #endif //NRF52_RAVEL_FRAME_H

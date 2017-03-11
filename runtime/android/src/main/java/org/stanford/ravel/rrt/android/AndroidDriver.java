@@ -54,6 +54,7 @@ public class AndroidDriver extends JavaDriver {
 
     private Intent mRavelServiceIntent;
 
+    int packet_counter = 0;
     private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -75,7 +76,7 @@ public class AndroidDriver extends JavaDriver {
                     bleClients.remove(device_address);
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
-                    Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE");
+                    Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE " + packet_counter++);
                     BlePacket pkt = (BlePacket) data.getSerializable(BleDefines.EXTRA_DATA);
                     BleEndpoint ble_p = bleClients.get(pkt.getAddress());
                     appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(pkt.getData()), ble_p);

@@ -24,7 +24,12 @@ streaming model Counter(size : int32):
         flow = EmbeddedSpace -> GatewaySpace
 
     schema:
-        counter : int32
+        counter0 : int32
+        counter1 : int32
+        counter2 : int32
+        counter3 : int32
+        counter4 : int32
+        counter5 : int32
 
 controller EController(timer : Timer, led_0 : Led, counter : Counter):
     value = 0
@@ -34,7 +39,17 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
 
     event timer.fired():
         rec = counter.create()
-        rec.counter = value
+        rec.counter0 = value
+        value += 1
+        rec.counter1 = value
+        value += 1
+        rec.counter2 = value
+        value += 1
+        rec.counter3 = value
+        value += 1
+        rec.counter4 = value
+        value += 1
+        rec.counter5 = value
         value += 1
         counter.save(rec)
         led_0.toggle()
