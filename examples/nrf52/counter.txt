@@ -1,7 +1,7 @@
 interface Timer():
     implementation:
-        #c = "rlib/nrf52/app_timer_sys.stg"
-        c = "rlib/linux/timer.stg"
+        c = "rlib/nrf52/app_timer_sys.stg"
+        #c = "rlib/linux/timer.stg"
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
@@ -96,8 +96,8 @@ controller GCtrl(counter: Counter):
 space EmbeddedSpace:
     platform:
         language = CLang
-        #system = Nrf52.v1
-        system = Posix.v2008
+        system = Nrf52.v1
+        #system = Posix.v2008
 
     interfaces:
         timer = Timer()
@@ -115,8 +115,8 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        system = J2SE.v18
-        #system = Android.v19
+        #system = J2SE.v18
+        system = Android.v19
 
     models:
         cnt = Counter(size=1000)
