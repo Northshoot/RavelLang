@@ -126,6 +126,13 @@ public class JLang extends BaseLanguage {
 
         // quirks for Java implemented as a nested class
         irTranslator = new STIRTranslator(irGroup, JLITERAL) {
+            // override declare controller scope to add "this.", so that references in the code
+            // are correct always
+            @Override
+            protected void declareControllerScope(VariableSymbol sym) {
+                setRegisterName(sym.getRegister(), "this." + sym.getName());
+            }
+
             /**
              * Quirk the conversion of ERROR_MSG and pointers to bool
              *

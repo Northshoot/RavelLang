@@ -132,7 +132,7 @@ public class SecurityTransformation {
         }
 
         int reservedSize = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, reservedSize, 2));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, reservedSize, 3));
 
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, bufferSize, encryptedSize, maclength, BinaryOperation.ADD));
         builder.add(new TBinaryArithOp(PrimitiveType.INT32, bufferSize, bufferSize, reservedSize, BinaryOperation.ADD));
@@ -519,6 +519,7 @@ public class SecurityTransformation {
 
         List<SecurityOperation> macs = im.getSecurityOperations(SecurityPrimitive.VERIFY_MAC);
         List<SecurityOperation> decryptions = im.getSecurityOperations(SecurityPrimitive.DECRYPT);
+        boolean doDecrypt = enableEncryption && decryptions.size() > 0;
 
         if (enableMAC) {
             for (SecurityOperation op : macs) {
@@ -528,7 +529,7 @@ public class SecurityTransformation {
 
         // skip the model ID and record ID
         int encryptedStart = builder.allocateRegister(PrimitiveType.INT32);
-        builder.add(new TImmediateLoad(PrimitiveType.INT32, encryptedStart, 2));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, encryptedStart, 3));
 
         int decrypted = decryptedSym.getRegister();
         int encryptedSize = builder.allocateRegister(PrimitiveType.INT32);
@@ -542,7 +543,7 @@ public class SecurityTransformation {
 
         int isEncrypted = builder.allocateRegister(PrimitiveType.BOOL);
 
-        if (enableEncryption) {
+        if (doDecrypt) {
             builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, true));
             for (SecurityOperation op : decryptions) {
                 applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
