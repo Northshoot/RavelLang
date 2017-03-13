@@ -56,9 +56,9 @@ public class OptimizePass {
             progress = deadControlFlowElimination.run() || progress;
             ValidateIR.validate(ir);
             // run copy propagation (which helps the alias analysis and the dead value elimination)
-            progress = copyPropagation.run() || progress;
-            ValidateIR.validate(ir);
-            ValidateSSA.validate(ir);
+            //progress = copyPropagation.run() || progress;
+            //ValidateIR.validate(ir);
+            //ValidateSSA.validate(ir);
             // run dead value elimination third (which also helps the alias analysis)
             progress = deadValueEliminationPass.run() || progress;
             ValidateIR.validate(ir);

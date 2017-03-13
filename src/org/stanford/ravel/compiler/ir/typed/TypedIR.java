@@ -19,6 +19,7 @@ public class TypedIR {
     private final Set<Integer> parameters = new HashSet<>();
     private final Set<VariableSymbol> classVariables = new HashSet<>();
     private final Set<VariableSymbol> argumentVariables = new HashSet<>();
+    private final Set<VariableSymbol> temporaryVariables = new HashSet<>();
 
     private ControlFlowGraph cfg;
     private LoopTreeNode loopTree;
@@ -113,6 +114,21 @@ public class TypedIR {
         setRegisterType(sym.getRegister(), type);
     }
 
+    void declareTemporary(VariableSymbol sym) {
+        temporaryVariables.add(sym);
+
+        Type type = sym.getType();
+        if (type == PrimitiveType.ANY)
+            return;
+        if (sym.getRegister() == Registers.UNSET_REG)
+            return;
+        if (type instanceof ClassType)
+            type = ((ClassType) type).getInstanceType();
+
+        // go straight to ir.setRegisterType so we don't do the thing with temporaries
+        setRegisterType(sym.getRegister(), type);
+    }
+
     public Collection<Integer> getParameters() {
         return Collections.unmodifiableCollection(parameters);
     }
@@ -122,6 +138,9 @@ public class TypedIR {
     }
     public Collection<VariableSymbol> getClassScopeVariables() {
         return Collections.unmodifiableCollection(classVariables);
+    }
+    public Collection<VariableSymbol> getLocalVariables() {
+        return Collections.unmodifiableCollection(temporaryVariables);
     }
 
     public void retainVariables(Collection<Integer> used) {

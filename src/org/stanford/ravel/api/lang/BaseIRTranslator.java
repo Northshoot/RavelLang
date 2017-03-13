@@ -77,6 +77,13 @@ public abstract class BaseIRTranslator implements IRTranslator, LoopTreeVisitor,
             setRegisterName(Registers.RETURN_REG, "__returnValue");
             declareRegister(Registers.RETURN_REG, ir.getRegisterType(Registers.RETURN_REG));
         }
+        for (VariableSymbol sym : ir.getLocalVariables()) {
+            Type type = ir.getRegisterType(sym.getRegister());
+            if (type == PrimitiveType.ANY)
+                continue;
+            setRegisterName(sym.getRegister(), sym.getName());
+            declareRegister(sym.getRegister(), type);
+        }
 
         // declare all unnamed (temporary, gp) registers
         // (this includes also named variables in the original code,

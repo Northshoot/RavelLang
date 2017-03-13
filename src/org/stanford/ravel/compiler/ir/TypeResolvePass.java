@@ -33,16 +33,7 @@ public class TypeResolvePass implements InstructionVisitor {
     }
 
     public void declareTemporary(VariableSymbol sym) {
-        Type type = sym.getType();
-        if (type == PrimitiveType.ANY)
-            return;
-        if (sym.getRegister() == Registers.UNSET_REG)
-            return;
-        if (type instanceof ClassType)
-            type = ((ClassType) type).getInstanceType();
-
-        // go straight to ir.setRegisterType so we don't do the thing with temporaries
-        ir.setRegisterType(sym.getRegister(), type);
+        ir.declareTemporary(sym);
     }
 
     public TypedIR run(UntypedIR ir) {

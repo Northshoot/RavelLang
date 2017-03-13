@@ -137,11 +137,13 @@ public class JLang extends BaseLanguage {
             public void visit(TConvert convert) {
                 if (convert.tgtType == PrimitiveType.BOOL) {
                     if (convert.srcType == PrimitiveType.ERROR_MSG)
-                        addLine(convert.target, " = ", convert.source,  " != null && ", convert.source, " != ", RUNTIME_PKG + ".tiers.Error.SUCCESS");
+                        addLine(convert.target, " = ", convert.source, " != null && ", convert.source, " != ", RUNTIME_PKG + ".tiers.Error.SUCCESS");
                     else if (!(convert.srcType instanceof PrimitiveType))
                         addLine(convert.target, " = ", convert.source, " != null");
                     else
                         super.visit(convert);
+                } else if (convert.srcType == PrimitiveType.BYTE) {
+                    addLine(convert.target, " = (", JTYPES.toString(convert.tgtType, null, Locale.getDefault()), ") ((int)", convert.source, " & 0xFF)");
                 } else {
                     super.visit(convert);
                 }
