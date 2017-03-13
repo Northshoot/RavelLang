@@ -39,7 +39,7 @@ typedef struct {
     void *ptr2;
 } RavelPosixCallback;
 
-#define RAVEL_MAX_CALLBACKS 5
+#define RAVEL_MAX_CALLBACKS 20
 
 typedef struct {
     RavelDriver base;

@@ -11,7 +11,6 @@ public static class Record implements ModelRecord {
     }
 
     void initFromNetwork(byte[] data, boolean is_encrypted) {
-        this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_uint16(data, 1);
         <model.baseModel.receiveCode>
     }
 
@@ -87,6 +86,7 @@ public class <name> extends <base>\<<name>.Record> {
         byte[] decrypted;
         int length = data.length;
         boolean is_encrypted;
+        record.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_uint16(data, 1);
         <model.decryptCode>
         record.initFromNetwork(decrypted, is_encrypted);
         return record;
