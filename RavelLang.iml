@@ -34,5 +34,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="org.antlr:antlr4:4.6" level="project" />
+    <orderEntry type="library" name="java-0.9" level="project" />
   </component>
 </module>

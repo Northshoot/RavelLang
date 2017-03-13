@@ -143,7 +143,13 @@ public class JLang extends BaseLanguage {
                     else
                         super.visit(convert);
                 } else if (convert.srcType == PrimitiveType.BYTE) {
-                    addLine(convert.target, " = (", JTYPES.toString(convert.tgtType, null, Locale.getDefault()), ") ((int)", convert.source, " & 0xFF)");
+                    if (convert.tgtType == PrimitiveType.STR) {
+                        addLine(convert.target, " = Integer.toString((int)", convert.source, " & 0xFF)");
+                    } else {
+                        addLine(convert.target, " = (", JTYPES.toString(convert.tgtType, null, Locale.getDefault()), ") ((int)", convert.source, " & 0xFF)");
+                    }
+                } else if (convert.tgtType == PrimitiveType.STR) {
+                    addLine(convert.target, " = ", (convert.srcType == PrimitiveType.INT32 ? "Integer" : "Double"), ".toString(", convert.source, ")");
                 } else {
                     super.visit(convert);
                 }

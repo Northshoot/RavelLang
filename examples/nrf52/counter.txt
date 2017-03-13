@@ -1,6 +1,7 @@
 interface Timer():
     implementation:
-        c = "rlib/nrf52/app_timer_sys.stg"
+        #c = "rlib/nrf52/app_timer_sys.stg"
+        c = "rlib/linux/timer.stg"
     def start_one_shot(time : int32)
     def cancel()
     def start_periodic(time: int32)
@@ -36,11 +37,15 @@ streaming model Counter(size : int32):
         counter9 : int32
 
 
-controller EController(timer : Timer, led_0 : Led, counter : Counter):
+controller EController(timer : Timer,
+                       #led_0 : Led,
+                       counter : Counter):
     value = 0
+    timer_on = False
 
     event system.started():
-        timer.start_periodic(1000)
+        timer.start_periodic(100)
+        timer_on = True
 
     event timer.fired():
         rec = counter.create()
@@ -66,14 +71,17 @@ controller EController(timer : Timer, led_0 : Led, counter : Counter):
         value += 1
 
         counter.save(rec)
-        led_0.toggle()
+        #led_0.toggle()
 
     event counter.full():
         system.print("model is full")
         timer.cancel()
+        timer_on = False
 
     event counter.departed():
-        timer.start_periodic(1000)
+        if not timer_on:
+            timer.start_periodic(100)
+            timer_on = True
         counter.delete(self.record)
 
 controller GCtrl(counter: Counter):
@@ -82,32 +90,33 @@ controller GCtrl(counter: Counter):
     event counter.arrived():
         value += 1
         rec = self.record
-        system.print("Arrived counter")
+        system.print("Arrived counter " + (str)value)
 
 
 space EmbeddedSpace:
     platform:
         language = CLang
-        system = Nrf52.v1
+        #system = Nrf52.v1
+        system = Posix.v2008
 
     interfaces:
         timer = Timer()
-        led0 = Led(led_num = 0)
+        #led0 = Led(led_num = 0)
 
     models:
         cnt = Counter(size=10)
 
     controllers:
         main_ctrl = EController(timer = interfaces.timer,
-                                led_0 = interfaces.led0,
+                                #led_0 = interfaces.led0,
                                 counter = models.cnt)
 
 
 space GatewaySpace:
     platform:
         language = JLang
-        #system = J2SE.v18
-        system = Android.v19
+        system = J2SE.v18
+        #system = Android.v19
 
     models:
         cnt = Counter(size=1000)

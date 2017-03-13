@@ -103,8 +103,7 @@ static void
 load_key_table(RavelPosixDriver *self, const char *file_name)
 {
     FILE *fp = fopen(file_name, "r");
-    RavelBaseDispatcher *dispatcher = (RavelBaseDispatcher*) self->base.dispatcher;
-    RavelKeyProvider *key_provider = ravel_base_dispatcher_get_key_provider(dispatcher);
+    RavelKeyProvider *key_provider = &self->base.key_provider;
     uint32_t key_id;
     char *key_type;
     char *key_hex;
@@ -140,9 +139,10 @@ load_key_table(RavelPosixDriver *self, const char *file_name)
 }
 
 void
-ravel_posix_driver_init(RavelPosixDriver *self, RavelBaseDispatcher *dispatcher, const char *app_name, int argc, const char * const * argv)
+ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int argc, const char * const * argv)
 {
-    self->base.dispatcher = dispatcher;
+    ravel_key_provider_init(&self->base.key_provider);
+
     self->app_name = app_name;
 
     memset(self->endpoint_table, 0, sizeof(self->endpoint_table));
@@ -171,6 +171,8 @@ ravel_posix_driver_finalize(RavelPosixDriver *self)
 {
     /* Free any context resource here */
     size_t i, j;
+
+    ravel_key_provider_finalize(&self->base.key_provider);
 
     for (i = 0; i < RAVEL_ENDPOINT_TABLE_SIZE; i++) {
         RavelPosixEndpoint **endpoints = self->endpoint_table[i];
@@ -231,7 +233,7 @@ insert_endpoint_in_table(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
 }
 
 static void
-add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen, RavelPosixEndpoint *endpoint)
+add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen, RavelPosixEndpoint *endpoint, void (*callback)(void*), void *data)
 {
     if (self->nfds == RAVEL_MAX_ENDPOINTS)
         abort();
@@ -240,18 +242,21 @@ add_poll_fd(RavelPosixDriver *self, int fd, int pollflags, bool is_listen, Ravel
     self->poll_fds[self->nfds].events = pollflags;
     self->poll_fds[self->nfds].revents = 0;
 
-    if (is_listen) {
-        self->watched_fds[self->nfds].is_listen = true;
-        self->watched_fds[self->nfds].endpoint = NULL;
-    } else {
-        self->watched_fds[self->nfds].is_listen = false;
-        self->watched_fds[self->nfds].endpoint = endpoint;
-    }
+    self->watched_fds[self->nfds].callback = callback;
+    self->watched_fds[self->nfds].data = data;
+    self->watched_fds[self->nfds].is_listen = is_listen;
+    self->watched_fds[self->nfds].endpoint = endpoint;
 
     self->nfds++;
 }
 
-static void start_local_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
+void
+ravel_posix_driver_add_fd(RavelPosixDriver *self, int fd, void (*callback)(void*), void *data) {
+    add_poll_fd(self, fd, POLLIN, false, NULL, callback, data);
+}
+
+static void
+start_local_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
 {
     int sock;
     struct sockaddr_in address;
@@ -270,8 +275,42 @@ static void start_local_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *end
     ok = listen(sock, 10);
     assert (ok >= 0);
 
-    add_poll_fd(self, sock, POLLIN, true, NULL);
+    add_poll_fd(self, sock, POLLIN, true, NULL, NULL, NULL);
 }
+
+static RavelError write_loop(int fd, size_t length, uint8_t* buffer);
+
+static int
+start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
+{
+    int fd;
+    int ok;
+    struct sockaddr_in address;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+        return fd;
+
+    address.sin_family = AF_INET;
+    address.sin_port = htons(endpoint->port);
+    address.sin_addr.s_addr = endpoint->address;
+
+    ok = connect(fd, (struct sockaddr*)&address, sizeof(address));
+    if (ok < 0) {
+        close(fd);
+        return -1;
+    }
+
+    if (write_loop(fd, strlen(self->app_name), (uint8_t*)self->app_name) != RAVEL_ERROR_SUCCESS) {
+        close(fd);
+        return -1;
+    }
+
+    endpoint->base.connected = true;
+    add_poll_fd(self, fd, POLLIN, false, endpoint, NULL, NULL);
+    return fd;
+}
+
 
 void
 ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
@@ -282,6 +321,8 @@ ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint 
     endpoint->is_local = strcmp(endpoint->base.name, self->app_name) == 0;
     if (endpoint->is_local)
         start_local_endpoint(self, endpoint);
+    else
+        start_remote_endpoint(self, endpoint);
 }
 
 static uint8_t *
@@ -339,7 +380,7 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
 
     endpoint = calloc(1, sizeof(RavelPosixEndpoint));
     if (endpoint == NULL) abort();
-    add_poll_fd(self, fd, POLLIN, false, endpoint);
+    add_poll_fd(self, fd, POLLIN, false, endpoint, NULL, NULL);
     name_buffer = read_loop(fd, &name_len);
 
     name = malloc(name_len + 1);
@@ -351,7 +392,7 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
     endpoint->base.name = name;
     endpoint->port = ntohs(address.sin_port);
     endpoint->address = address.sin_addr.s_addr;
-    endpoint->connected = true;
+    endpoint->base.connected = true;
 
     insert_endpoint_in_table (self, endpoint);
 }
@@ -393,7 +434,9 @@ ravel_posix_driver_main_loop(RavelPosixDriver *self)
 
         for (i = 0; i < self->nfds; i++) {
             if (self->poll_fds[i].revents & POLLIN) {
-                if (self->watched_fds[i].is_listen) {
+                if (self->watched_fds[i].callback) {
+                    self->watched_fds[i].callback(self->watched_fds[i].data);
+                } else if (self->watched_fds[i].is_listen) {
                     handle_new_connection (self, self->poll_fds[i].fd);
                 } else {
                     handle_new_data (self, self->poll_fds[i].fd, self->watched_fds[i].endpoint);
@@ -496,37 +539,6 @@ send_data(RavelPosixDriver *self, int fd, RavelPacket *packet, RavelEndpoint *en
     ravel_driver_queue_callback (&self->base, send_done_callback, self, closure);
 
     return RAVEL_ERROR_IN_TRANSIT;
-}
-
-static int
-start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
-{
-    int fd;
-    int ok;
-    struct sockaddr_in address;
-
-    fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0)
-        return fd;
-
-    address.sin_family = AF_INET;
-    address.sin_port = htons(endpoint->port);
-    address.sin_addr.s_addr = endpoint->address;
-
-    ok = connect(fd, (struct sockaddr*)&address, sizeof(address));
-    if (ok < 0) {
-        close(fd);
-        return -1;
-    }
-
-    if (write_loop(fd, strlen(self->app_name), (uint8_t*)self->app_name) != RAVEL_ERROR_SUCCESS) {
-        close(fd);
-        return -1;
-    }
-
-    endpoint->connected = true;
-    add_poll_fd(self, fd, POLLIN, false, endpoint);
-    return fd;
 }
 
 RavelError

@@ -11,21 +11,24 @@ file(name) ::=<<
 #include \<ravel/posix-driver.h>
 #include \<AppDispatcher.h>
 
+extern RavelPosixDriver ravel_posix_driver;
+
 static AppDispatcher dispatcher;
-static RavelPosixDriver driver;
+RavelPosixDriver ravel_posix_driver;
 
 int
 main(int argc, const char * const * argv)
 {
+    ravel_posix_driver_init(&ravel_posix_driver, "<name>", argc, argv);
     ravel_generated_app_dispatcher_init(&dispatcher);
-    ravel_posix_driver_init(&driver, &dispatcher.base, "<name>", argc, argv);
-    ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);
+    ravel_posix_driver.base.dispatcher = &dispatcher.base;
+    ravel_generated_app_dispatcher_set_driver(&dispatcher, &ravel_posix_driver.base);
     ravel_generated_app_dispatcher_add_all_endpoints(&dispatcher);
-    ravel_posix_driver_app_dispatcher_ready(&driver);
+    ravel_posix_driver_app_dispatcher_ready(&ravel_posix_driver);
 
-    ravel_posix_driver_main_loop(&driver);
+    ravel_posix_driver_main_loop(&ravel_posix_driver);
 
-    ravel_posix_driver_finalize(&driver);
+    ravel_posix_driver_finalize(&ravel_posix_driver);
     ravel_generated_app_dispatcher_finalize(&dispatcher);
     return 0;
 }

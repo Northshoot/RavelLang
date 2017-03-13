@@ -21,8 +21,8 @@ public class Intrinsic {
         return ep.getName();
     }
 
-    public static byte read_record_id(ModelRecord record) {
-        return (byte)record.index();
+    public static int read_record_id(ModelRecord record) {
+        return record.index();
     }
 
     public static int array_length(Object[] array) {
@@ -92,6 +92,11 @@ public class Intrinsic {
 
     public static void write_byte(byte[] data, int pos, byte value) {
         data[pos] = value;
+    }
+
+    public static void write_uint16(byte[] data, int pos, int value) {
+        data[pos] = (byte)(value & 0xFF);
+        data[pos+1] = (byte)((value >> 8) & 0xFF);
     }
 
     public static void apply_mac(byte[] data, int endofdata, int writeOffset, Key key) {

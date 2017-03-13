@@ -29,6 +29,8 @@ typedef struct {
 typedef struct {
     bool is_listen;
     RavelPosixEndpoint *endpoint;
+    void (*callback)(void*);
+    void *data;
 } RavelWatchedFd;
 
 typedef struct {
@@ -55,10 +57,11 @@ typedef struct {
 
 struct AppDispatcher;
 
-void ravel_posix_driver_init(RavelPosixDriver *self, RavelBaseDispatcher *dispatcher, const char *app_name, int argc, const char * const * argv);
+void ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int argc, const char * const * argv);
 void ravel_posix_driver_finalize(RavelPosixDriver *self);
 
 void ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint);
+void ravel_posix_driver_add_fd(RavelPosixDriver *self, int fd, void (*callback)(void*), void *data);
 
 void ravel_posix_driver_main_loop(RavelPosixDriver *self);
 

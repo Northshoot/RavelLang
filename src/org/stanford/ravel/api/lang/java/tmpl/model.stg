@@ -2,7 +2,7 @@ import "common.stg"
 
 record_class(model, fields) ::=<<
 public static class Record implements ModelRecord {
-    private byte __idx = -1;
+    private int __idx = -1;
 
     <fields:{f|public <f.type> <f.name>;}; separator="\n">
 
@@ -11,7 +11,7 @@ public static class Record implements ModelRecord {
     }
 
     void initFromNetwork(byte[] data, boolean is_encrypted) {
-        this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_byte(data, 1);
+        this.__idx = org.stanford.ravel.rrt.lang.Intrinsic.extract_uint16(data, 1);
         <model.baseModel.receiveCode>
     }
 
@@ -21,7 +21,7 @@ public static class Record implements ModelRecord {
 
     @Override
     public void index(int i) {
-        __idx =(byte) i;
+        __idx = i & 0xFFFF;
     }
 
     @Override

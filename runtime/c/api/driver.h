@@ -13,11 +13,13 @@
 #include "endpoint.h"
 #include "packet.h"
 #include "context.h"
+#include "keys.h"
 
 struct RavelBaseDispatcher;
 
 typedef struct {
     struct RavelBaseDispatcher *dispatcher;
+    RavelKeyProvider key_provider;
 
 } RavelDriver;
 

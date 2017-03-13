@@ -24,7 +24,7 @@ typedef struct DoubleLinkedList {
 
 typedef struct {
   DoubleLinkedList list;
-  uint32_t record_id;
+  uint16_t record_id;
 } RavelRecord;
 
 typedef struct {
@@ -100,7 +100,7 @@ typedef struct RavelBaseModel {
     size_t num_records;
 
     size_t num_valid_records;
-    uint32_t next_record_id;
+    uint16_t next_record_id;
 
     Context current_ctx;
 } RavelBaseModel;

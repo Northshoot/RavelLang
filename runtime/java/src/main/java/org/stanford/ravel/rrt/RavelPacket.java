@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt;
 
+import org.stanford.ravel.rrt.lang.Intrinsic;
 import org.stanford.ravel.rrt.utils.ByteWork;
 import org.stanford.ravel.rrt.utils.GrowableByteArray;
 
@@ -65,16 +66,16 @@ public class RavelPacket {
         this.record_end = recordSize + RESERVED;
         this.record_data = new byte[recordSize];
         this.record_data[0] = (byte)modelId;
-        this.record_data[1] = (byte)recordId;
+        Intrinsic.write_uint16(this.record_data, 1, recordId);
         this.model_id = modelId;
         this.record_id = recordId;
     }
 
     private RavelPacket(int modelId, int recordId) {
-        this.record_end = 2 + RESERVED;
-        this.record_data = new byte[2];
+        this.record_end = 3 + RESERVED;
+        this.record_data = new byte[3];
         this.record_data[0] = (byte)modelId;
-        this.record_data[1] = (byte)recordId;
+        Intrinsic.write_uint16(this.record_data, 1, recordId);
         this.model_id = modelId;
         this.record_id = recordId;
     }
@@ -115,10 +116,10 @@ public class RavelPacket {
     }
 
     private static int getModelIdFromRecord(byte[] data) {
-        return data[0];
+        return (int)data[0] & 0xFF;
     }
     private static int getRecordIdFromRecord(byte[] data) {
-        return data[1];
+        return (int)((int)data[1] & 0xFF | (((int)data[2] & 0xFF) << 8));
     }
 
     public byte[] getRecordData() {

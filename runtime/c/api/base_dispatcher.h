@@ -30,7 +30,6 @@ typedef struct {
 typedef struct RavelBaseDispatcher {
     const RavelDispatcherVTable *vtable;
     RavelSystemAPI sys_api;
-    RavelKeyProvider key_provider;
     RavelDriver *driver;
 } RavelBaseDispatcher;
 
@@ -42,7 +41,7 @@ static inline void ravel_base_dispatcher_queue_callback(RavelBaseDispatcher *sel
 }
 
 static inline RavelKeyProvider *ravel_base_dispatcher_get_key_provider(RavelBaseDispatcher *self) {
-    return &self->key_provider;
+    return &self->driver->key_provider;
 }
 
 static inline void ravel_base_dispatcher_set_driver(RavelBaseDispatcher *self, RavelDriver *driver) {

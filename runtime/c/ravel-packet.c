@@ -15,10 +15,8 @@
 #define FLAGS 2 // 8 bits for flags
 #define RESERVED 3 // reserved for byte mapping
 
-#define FLAG_PARTIAL 1
-#define FLAG_LAST 2
-#define FLAG_ACK 4
-#define FLAG_SAVE_DONE 8
+#define FLAG_ACK 1
+#define FLAG_SAVE_DONE 4
 
 #define MIN_LENGTH RESERVED
 
@@ -26,7 +24,7 @@
  * Packet mapping POST fragmentation
  */
 void
-ravel_packet_init_empty (RavelPacket *self, size_t record_size, int model_id, int record_id)
+ravel_packet_init_empty (RavelPacket *self, size_t record_size, uint8_t model_id, uint16_t record_id)
 {
     self->packet_data = calloc(record_size + RESERVED, 1);
     if (self->packet_data == NULL) abort();
@@ -65,7 +63,7 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
     self->packet_length = self->record_length + RESERVED;
 
     self->model_id = ravel_intrinsic_extract_byte(self->record_data, 0);
-    self->record_id = ravel_intrinsic_extract_byte(self->record_data, 1);
+    self->record_id = ravel_intrinsic_extract_uint16(self->record_data, 1);
     self->is_ack = false;
     self->is_save_done = false;
 }
@@ -81,7 +79,7 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
     memcpy(self->packet_data, data, length);
 
     self->model_id = ravel_intrinsic_extract_byte(self->record_data, 0);
-    self->record_id = ravel_intrinsic_extract_byte(self->record_data, 1);
+    self->record_id = ravel_intrinsic_extract_uint16(self->record_data, 1);
     self->is_ack = self->packet_data[FLAGS] & FLAG_ACK;
     self->is_save_done = self->packet_data[FLAGS] & FLAG_SAVE_DONE;
 
@@ -89,16 +87,16 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
 }
 
 static void
-ravel_packet_init_control (RavelPacket *self, int model_id, int record_id, int flags)
+ravel_packet_init_control (RavelPacket *self, uint8_t model_id, uint16_t record_id, int flags)
 {
     self->packet_data = calloc(2 + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
-    self->record_length = 2;
-    self->packet_length = 2 + RESERVED;
+    self->record_length = 3;
+    self->packet_length = 3 + RESERVED;
 
     self->record_data[0] = model_id;
-    self->record_data[1] = record_id;
+    ravel_intrinsic_write_uint16 (self->record_data, 1, record_id);
 
     self->packet_data[FLAGS] = flags;
 
@@ -108,13 +106,13 @@ ravel_packet_init_control (RavelPacket *self, int model_id, int record_id, int f
 }
 
 void
-ravel_packet_init_ack (RavelPacket *self, int model_id, int record_id)
+ravel_packet_init_ack (RavelPacket *self, uint8_t model_id, uint16_t record_id)
 {
     ravel_packet_init_control (self, model_id, record_id, FLAG_ACK);
 }
 
 void
-ravel_packet_init_save_done (RavelPacket *self, int model_id, int record_id)
+ravel_packet_init_save_done (RavelPacket *self, uint8_t model_id, uint16_t record_id)
 {
     ravel_packet_init_control (self, model_id, record_id, FLAG_SAVE_DONE);
 }

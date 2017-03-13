@@ -146,11 +146,11 @@ public class SecurityTransformation {
         builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.BYTE, buffer, zero, modelId));
 
         // write the record ID
-        int recordId = builder.allocateRegister(PrimitiveType.BYTE);
+        int recordId = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(IntrinsicFactory.createReadRecordId(im.getBaseModel().getType().getRecordType(), recordId, recordSym.getRegister()));
         int recordIdPos = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, recordIdPos, 1));
-        builder.add(IntrinsicFactory.createWritePrimitive(PrimitiveType.BYTE, buffer, recordIdPos, recordId));
+        builder.add(IntrinsicFactory.createWriteUInt16(buffer, recordIdPos, recordId));
 
         int encryptedStart = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TMove(PrimitiveType.INT32, encryptedStart, reservedSize));

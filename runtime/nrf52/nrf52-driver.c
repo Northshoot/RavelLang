@@ -126,6 +126,7 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     nrf52_network_init(&self->network);
     nrf52_r_core_ble_stack_init(&self->network);
 
+    ravel_key_provider_init(&self->base.key_provider);
 
 
 }
@@ -136,6 +137,8 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 {
     /* Free any context resource here */
     NRF_LOG_INFO("FINALIZE!\r\n");
+
+    ravel_key_provider_finalize(&self->base.key_provider);
 }
 
 
