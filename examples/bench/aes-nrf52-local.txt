@@ -35,10 +35,10 @@ local model AESOutput():
     schema:
         data : byte[32]
 
-streaming model Encrypted():
+local model Encrypted():
     properties:
-        records = 5
-        flow = EmbeddedSpace -> GatewaySpace
+        records = 10
+        #flow = EmbeddedSpace -> GatewaySpace
     schema:
         data : byte[32]
 
@@ -266,9 +266,6 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
         system.print("model is full")
         timer.cancel()
 
-    event encrypted.departed():
-        timer.start_periodic(1000)
-        encrypted.delete(self.record)
 
 
 controller GController(aes_in : AESInput, aes_out : AESOutput, encrypted : Encrypted, key : Key):
@@ -281,20 +278,6 @@ controller GController(aes_in : AESInput, aes_out : AESOutput, encrypted : Encry
             #keyrec.data[i] = (byte)i
         key.save(keyrec)
 
-    event encrypted.arrived():
-        system.print("record arrived")
-        encrec : AESInput.Record
-        if aes_in.size() > 0:
-            encrec = aes_in.first()
-        else:
-            encrec = aes_in.create()
-        s = ""
-        for i = 0 to 32:
-            encrec.data[i] = self.record.data[i]
-            s += (str)self.record.data[i] + " "
-        system.print(s)
-        aes_in.save(encrec)
-        encrypted.delete(self.record)
 
     event aes_out.save_done():
         system.print("record decrypted")
@@ -329,18 +312,3 @@ space EmbeddedSpace:
         ctrl = EController(timer = interfaces.timer, clock = interfaces.clock, aes_in = models.aes_in, aes_out = models.aes_out, key = models.key, encrypted = models.encrypted)
 
 
-space GatewaySpace:
-    platform:
-        language = JLang
-        system = Android.v19
-        #system = J2SE.v18
-
-    models:
-        aes_in = AESInput()
-        aes_out = AESOutput()
-        encrypted = Encrypted()
-        key = Key()
-
-    controllers:
-        aes = CounterModeAES(m_in = models.aes_in, m_out = models.aes_out, m_key = models.key)
-        ctrl = GController(aes_in = models.aes_in, aes_out = models.aes_out, encrypted = models.encrypted, key = models.key)

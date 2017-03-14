@@ -1,0 +1,66 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+<begin_source(name)>
+#define NRF_LOG_MODULE_NAME "CLOCK:::"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+<includes:do_include(); separator="\n">
+#include "nrf52_counter.h"
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_get_now()
+{
+    uint32_t now = counter_get();
+    NRF_LOG_DEBUG("NOW ticks %u\r\n", now);
+}
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdint.h>
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_get_now();
+
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

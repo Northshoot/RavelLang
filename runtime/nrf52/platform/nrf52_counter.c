@@ -21,7 +21,8 @@
 /* RTC driver instance using RTC2.
  * RTC0 is used by the SoftDevice, and RTC1 by the app_timer library. */
 static const nrf_drv_rtc_t m_rtc = NRF_DRV_RTC_INSTANCE(2);
-
+static bool m_started = false;
+static bool m_init = false;
 
 static void rtc_handler(nrf_drv_rtc_int_type_t int_type)
 {
@@ -44,6 +45,7 @@ void counter_init(void)
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_rtc_tick_disable(&m_rtc);
+    m_init = true;
 }
 
 
@@ -53,6 +55,7 @@ void counter_start(void)
 
     // Power on!
     nrf_drv_rtc_enable(&m_rtc);
+    m_started = true;
 }
 
 
@@ -64,6 +67,11 @@ void counter_stop(void)
 
 uint32_t counter_get(void)
 {
+    if(!m_init)
+        counter_init();
+    if(!m_started)
+        counter_start();
+
     return(nrf_drv_rtc_counter_get(&m_rtc));
 }
 
