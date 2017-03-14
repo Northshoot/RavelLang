@@ -256,6 +256,7 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
         time_to_aes = clock.getNow() - time_to_aes
         system.print_number("AES exec:::", time_to_aes)
         aes_out.delete(self.record)
+        timer.start_periodic(10000)
 
     event timer.fired():
         rec = aes_in.first()
