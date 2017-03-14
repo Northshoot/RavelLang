@@ -169,6 +169,7 @@ public class AliasAnalysis {
 
                         case "iterator":
                         case "size":
+                        case "clear":
                             // no pointers, no alias
                             break;
 

@@ -156,7 +156,11 @@ public class JLang extends BaseLanguage {
                         addLine(convert.target, " = (", JTYPES.toString(convert.tgtType, null, Locale.getDefault()), ") ((int)", convert.source, " & 0xFF)");
                     }
                 } else if (convert.tgtType == PrimitiveType.STR) {
-                    addLine(convert.target, " = ", (convert.srcType == PrimitiveType.INT32 ? "Integer" : "Double"), ".toString(", convert.source, ")");
+                    if (convert.srcType == PrimitiveType.ERROR_MSG) {
+                        addLine(convert.target, " = ", convert.source, " == null ? \"success\" : ", convert.source, ".name().toLowerCase()");
+                    } else {
+                        addLine(convert.target, " = ", (convert.srcType == PrimitiveType.INT32 ? "Integer" : "Double"), ".toString(", convert.source, ")");
+                    }
                 } else {
                     super.visit(convert);
                 }

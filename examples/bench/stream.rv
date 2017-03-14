@@ -1,0 +1,101 @@
+interface Timer():
+    implementation:
+        c = "rlib/nrf52/app_timer_sys.stg"
+        java = "rlib/java/timer.stg"
+
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+    event fired()
+
+streaming model Random(size : int32):
+    properties:
+        durable = False
+        reliable = False
+        records = size
+        flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
+
+    schema:
+        value : int32
+
+interface RandomSource():
+    implementation:
+        java = "rlib/java/random.stg"
+        c = "rlib/c/random.stg"
+
+    def next(): int32
+
+
+controller EmbeddedController(random: Random, timer : Timer, random_src : RandomSource):
+    running = False
+    frequency = 1000
+
+    event system.started():
+        timer.start_periodic(frequency)
+        running = True
+
+    event timer.fired():
+        rand = random.create()
+        rand.value = random_src.next()
+        random.save(rand)
+
+    event random.full():
+        timer.cancel()
+        running = False
+
+    event random.departed():
+        if not running:
+            timer.start_periodic(frequency)
+            running = True
+
+    event random.save_done():
+        random.delete(self.record)
+
+
+controller GatewayController(random: Random):
+    event random.save_done():
+        random.delete(self.record)
+
+
+controller CloudController(random : Random):
+    event random.arrived():
+        system.print("random arrived " + (str)self.record.value)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+        
+    models:
+        random = Random(size=50)
+        
+    controllers:
+        gctrl = GatewayController(random = models.random)
+        
+space CloudSpace:
+    platform:
+        language = JLang
+        system = J2SE.v18
+        
+    models:
+        random = Random(size=1000)
+        
+    controllers:
+        cctrl = CloudController(random = models.random)
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    models:
+        random = Random(size=10)
+
+    interfaces:
+        timer_0 = Timer()
+        rnd = RandomSource()
+
+    controllers:
+        ectrl = EmbeddedController(random = models.random, random_src = interfaces.rnd, timer = interfaces.timer_0)
+

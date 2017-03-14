@@ -63,13 +63,6 @@ controller PingController(ref : Reference, ping : Ping, pong : Pong):
         ping.delete(self.record)
 
 
-interface RandomSource():
-    implementation:
-        java = "rlib/java/random.stg"
-        c = "rlib/c/random.stg"
-
-    def next(): int32
-
 controller PongController(ping : Ping, pong : Pong):
     event ping.arrived():
         system.print("ping received")
@@ -84,6 +77,7 @@ controller PongController(ping : Ping, pong : Pong):
     event pong.departed():
         system.print("pong departed")
         pong.delete(self.record)
+
 
 controller EavesDropController(ping : Ping, pong : Pong):
     event ping.arrived():
@@ -104,9 +98,7 @@ controller EavesDropController(ping : Ping, pong : Pong):
 space GatewaySpace:
     platform:
         language = JLang
-        system = J2SE.v18
-        #language = CLang
-        #system = Posix.v2008
+        system = Android.v19
 
     models:
         ping = Ping()
@@ -120,15 +112,10 @@ space CloudSpace:
     platform:
         language = JLang
         system = J2SE.v18
-        #language = CLang
-        #system = Posix.v2008
 
     models:
         ping = Ping()
         pong = Pong()
-
-    interfaces:
-        #rnd = RandomSource()
 
     controllers:
         pong_cnt = PongController(ping = models.ping, pong = models.pong)
@@ -136,10 +123,8 @@ space CloudSpace:
 
 space EmbeddedSpace:
     platform:
-        #language = CLang
-        #system = Posix.v2008
-        language = JLang
-        system = J2SE.v18
+        language = CLang
+        system = Nrf52.v1
 
     models:
         ref = Reference()
