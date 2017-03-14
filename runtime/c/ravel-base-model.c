@@ -153,8 +153,6 @@ ravel_base_model_finalize(RavelBaseModel *self)
 void *
 ravel_base_model_allocate(RavelBaseModel *self)
 {
-    static int counter = 0;
-
     void *record;
     if (self->free_list.next == NULL)
         return NULL;

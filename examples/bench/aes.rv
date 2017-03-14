@@ -1,7 +1,6 @@
 interface Timer():
     implementation:
-        #c = "rlib/nrf52/app_timer_sys.stg"
-        c = "rlib/linux/timer.stg"
+        c = "rlib/nrf52/app_timer_sys.stg"
         java = "rlib/java/timer.stg"
 
     def start_one_shot(time : int32)
@@ -298,12 +297,8 @@ controller GController(aes_in : AESInput, aes_out : AESOutput, encrypted : Encry
 
 space EmbeddedSpace:
     platform:
-        #language = JLang
-        #system = Android.v19
-        #system = J2SE.v18
         language = CLang
-        #system = Nrf52.v1
-        system = Posix.v2008
+        system = Nrf52.v1
 
     interfaces:
         timer = Timer()
@@ -322,8 +317,7 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        #system = Android.v19
-        system = J2SE.v18
+        system = Android.v19
 
     models:
         aes_in = AESInput()

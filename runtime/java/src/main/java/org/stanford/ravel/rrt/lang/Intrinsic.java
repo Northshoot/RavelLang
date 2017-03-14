@@ -85,6 +85,10 @@ public class Intrinsic {
         return ByteWork.convertBytesToString(ByteWork.getBytes(data, pos, pos+size));
     }
 
+    public static double extract_double(byte[] data, int pos) {
+        return ByteWork.convertEightBytesToDouble(ByteWork.getBytes(data, pos, pos+8));
+    }
+
     public static void write_int32(byte[] data, int pos, int value) {
         byte[] bytes = ByteWork.getByteArray(value);
         System.arraycopy(bytes, 0, data, pos, bytes.length);

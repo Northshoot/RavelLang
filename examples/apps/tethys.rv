@@ -1,0 +1,380 @@
+replicated model AppDevice(size : int32):
+    properties:
+        durable = True
+        records = size
+        reliable = True
+
+    schema:
+        device_id : int32
+        type : str
+        hw_v : double
+        sw_v : double
+        first_boot : bool
+        last_reboot : timestamp
+        error : error_msg
+
+
+streaming model BootError(size : int32):
+    properties:
+        reliable = True
+        durable = True
+        records = size
+        flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
+
+    schema:
+        device_id : int32
+        time : timestamp
+        error : error_msg
+
+
+replicated model AppConfig(size : int32):
+    properties:
+        durable = True
+        reliable = True
+        records = size
+
+    schema:
+        device_id : int32
+        frequency : int32
+
+
+interface TimerSource():
+    implementation:
+        java = "rlib/java/timer.stg"
+        c = "rlib/nrf52/app_timer_sys.stg"
+
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+
+    event fired()
+
+
+controller EmBootstrapController(app_device : AppDevice, boot_error : BootError):
+    event system.started():
+        rec : AppDevice.Record
+        if app_device.size() == 0:
+            rec = app_device.create()
+            rec.device_id = 1
+            rec.hw_v = 0
+            rec.sw_v = 0
+            rec.first_boot = True
+            rec.last_reboot = (timestamp) 0 # FIXME
+        else:
+            rec = app_device.first()
+            rec.first_boot = False
+            rec.last_reboot = (timestamp) 0 # FIXME
+        app_device.save(rec)
+
+    event app_device.save_done():
+        if self.error:
+            rec = boot_error.create()
+            rec.device_id = app_device.first().device_id
+            rec.error = self.error
+            boot_error.save(rec)
+
+
+replicated model GatewayAppConfig(size : int32):
+    properties:
+        durable = True
+        reliable = True
+        records = size
+
+    schema:
+        device_id : int32
+        type : str
+        hw_v : double
+        sw_v : double
+        first_boot : bool
+        last_reboot : timestamp
+        error : error_msg
+
+
+### Application MVC
+local model ADCModel():
+    properties:
+        durable = False
+        records = 250
+
+    schema:
+        adc : int32
+
+
+local model Measurement(size : int32):
+    properties:
+        durable = True
+        records = size
+
+    schema:
+        time : timestamp
+        temperature : int32
+        voltage : int32
+
+
+streaming model MeasurementPacket(num_packets : int32):
+    properties:
+        reliable = True
+        durable = True
+        records = num_packets
+        flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
+
+    schema:
+        device_id : int32
+        time : timestamp[50]
+        temperature : int32[50]
+        voltage : int32[50]
+
+
+controller GatewayController(app_config : GatewayAppConfig, boot_error : BootError, measurement_pkt : MeasurementPacket):
+    event system.started():
+        rec : GatewayAppConfig.Record
+        if app_config.size() == 0:
+            rec = app_config.create()
+            rec.device_id = 1
+            rec.hw_v = 0
+            rec.sw_v = 0
+            rec.first_boot = True
+            rec.last_reboot = (timestamp) 0 # FIXME
+        else:
+            rec = app_config.first()
+            rec.first_boot = False
+            rec.last_reboot = (timestamp) 0 # FIXME
+        app_config.save(rec)
+            
+    event boot_error.save_done():
+        if not self.error:
+            boot_error.delete(self.record)
+
+    event measurement_pkt.save_done():
+        if not self.error:
+            measurement_pkt.delete(self.record) 
+
+
+interface TemperatureSource():
+    implementation:
+        # FIXME
+        #java = "rlib/java/temperature.stg"
+        #c = "rlib/c/temperature.stg"
+
+    def read(): int32
+
+interface VoltageSource():
+    implementation:
+        # FIXME
+        #java = "rlib/java/voltage.stg"
+        #c = "rlib/c/voltage.stg"
+
+    def read(): int32
+
+interface FFT():
+    implementation:
+        c = "rlib/c/fft.stg"
+
+    def run(input : byte[], output : byte[], inverse : bool)
+
+
+controller MeasurementController(temp : TemperatureSource,
+                                 voltage : VoltageSource,
+                                 timer : TimerSource,
+                                 fft : FFT,
+                                 measurement_model : Measurement,
+                                 measurement_pkt : MeasurementPacket,
+                                 adc_model : ADCModel,
+                                 app_config : AppConfig,
+                                 app_device : AppDevice):
+
+    frequency = 10000
+    running = False
+
+    event system.started():
+        timer.start_periodic(frequency)
+        running = True
+
+    event app_config.arrived():
+        frequency = self.record.frequency
+        if running:
+            timer.cancel()
+            timer.start_periodic(frequency)
+
+    event timer.fired():
+        rec = adc_model.create()
+        rec.adc = voltage.read()
+        adc_model.save(rec)
+
+    event adc_model.full():
+        rec = measurement_model.create()
+        
+        rec.time = (timestamp)0 # FIXME
+        rec.voltage = 0 # FIXME
+        rec.temperature = temp.read()
+        measurement_model.save(rec)
+        adc_model.clear()
+
+    event measurement_model.full():
+        pkt = measurement_pkt.create()
+        pkt.device_id = app_device.first().device_id
+        mm = measurement_model
+        for i = 0 to 50:
+            m = mm.get(i)
+            pkt.time[i] = m.time
+            pkt.temperature[i] = m.temperature
+            pkt.voltage[i] = m.voltage
+        measurement_pkt.save(pkt)
+
+    event measurement_pkt.save_done():
+        if not self.error:
+            measurement_pkt.delete(self.record) 
+
+
+local model NumberOfPackets():
+    properties:
+        records = 1
+
+    schema:
+        number_of_packets : int32
+
+
+controller PacketCounter(measurement : MeasurementPacket, number_packets : NumberOfPackets):
+    event system.started():
+        rec = number_packets.create()
+        rec.number_of_packets = 0
+        number_packets.save(rec)
+
+    event measurement.arrived():
+        rec = number_packets.last()
+        rec.number_of_packets += 1
+        number_packets.save(rec)
+
+
+local model DeviceLocationModel(size : int32):
+    properties:
+        durable = True
+        reliable = False
+        records = size
+
+    schema:
+        device_id : int32
+        location_lat : int32
+        location_long : int32
+        street : str
+        house : str
+        zip : str
+        location : str
+        notes : str
+
+
+controller CloudController(device_bootstrap : AppDevice,
+                           embedded_config : AppConfig,
+                           gtw_config : GatewayAppConfig,
+                           measurement_pkt : MeasurementPacket,
+                           measurement : Measurement,
+                           location_model : DeviceLocationModel,
+                           boot_error : BootError):
+    event device_bootstrap.arrived():
+        rec = self.record
+        if rec.first_boot:
+            system.print("device " + ((str)self.record.device_id) + " registered with the system")
+            loc = location_model.create()
+            loc.device_id = self.record.device_id
+            location_model.save(loc)
+            config = embedded_config.create()
+            config.device_id = self.record.device_id
+            config.frequency = 10000
+            embedded_config.save(config)
+                
+    event gtw_config.arrived():
+        rec = self.record
+        if rec.first_boot:
+            system.print("gateway " + ((str)self.record.device_id) + " registered with the system")
+
+    event measurement_pkt.arrived():
+        pkt = self.record
+        for i = 0 to 50:
+            rec = measurement.create()
+            rec.time = pkt.time[i]
+            rec.temperature = pkt.temperature[i]
+            rec.voltage = pkt.voltage[i]
+            measurement.save(rec)
+        measurement_pkt.delete(pkt)
+
+    event boot_error.arrived():
+        system.print("device " + ((str)self.record.device_id) + " had an error: " + (str)self.record.error)
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    models:
+	    device = AppDevice(size=1)
+	    config = AppConfig(size=1)
+	    location = DeviceLocationModel(size=1)
+	    boot_error = BootError(size=30)
+	    
+	    adc_model = ADCModel()
+	    measurement = Measurement(size=50)
+	    measurement_packet = MeasurementPacket(num_packets=500)
+
+    interfaces:
+        timer = TimerSource()
+        temperature = TemperatureSource()
+        voltage = VoltageSource()
+        fft = FFT()
+
+    controllers:
+        boot_ctr = EmBootstrapController(boot_error = models.boot_error, app_device = models.device)
+        measurement_ctr = MeasurementController(measurement_model = models.measurement,
+                                                measurement_pkt = models.measurement_packet,
+                                                adc_model = models.adc_model,
+                                                timer = interfaces.timer,
+                                                temp = interfaces.temperature,
+                                                fft = interfaces.fft,
+                                                voltage = interfaces.voltage,
+                                                app_config = models.config,
+                                                app_device = models.device)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    models:
+        config = GatewayAppConfig(size=1)
+        number_packets = NumberOfPackets()
+
+        boot_error = BootError(size=100)
+        measurement_packet = MeasurementPacket(num_packets=100)
+
+    controllers:
+        gateway = GatewayController(app_config = models.config,
+                                    boot_error = models.boot_error,
+                                    measurement_pkt = models.measurement_packet)
+        packet_counter = PacketCounter(number_packets = models.number_packets,
+                                       measurement = models.measurement_packet)
+
+
+space CloudSpace:
+    platform:
+	    language = JLang
+	    system = J2SE.v18
+
+    models:
+	    device = AppDevice(size=10000)
+	    boot_error = BootError(size=5000)
+	    location_model = DeviceLocationModel(size=10000)
+	    embedded_config = AppConfig(size=10000)
+	    
+	    gtw_config = GatewayAppConfig(size=100)
+	    
+	    measurement = Measurement(size=50000)
+	    measurement_packet = MeasurementPacket(num_packets=100)
+
+    controllers:
+	    bootstrap_ctr = CloudController(measurement_pkt = models.measurement_packet,
+	                                    location_model = models.location_model,
+	                                    device_bootstrap = models.device,
+	                                    gtw_config = models.gtw_config,
+	                                    embedded_config = models.embedded_config,
+	                                    measurement = models.measurement,
+	                                    boot_error = models.boot_error)
