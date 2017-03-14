@@ -922,7 +922,7 @@
  *
  * Enable the checkup functions (*_self_test).
  */
-#define MBEDTLS_SELF_TEST 0
+//#define MBEDTLS_SELF_TEST 0
 
 /**
  * \def MBEDTLS_SHA256_SMALLER

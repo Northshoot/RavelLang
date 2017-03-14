@@ -14,7 +14,7 @@ interface Clock():
     implementation:
         c = "rlib/nrf52/clock.stg"
 
-    def getNow()
+    def getNow() : int32
 
 local model AESInput():
     properties:
@@ -234,6 +234,8 @@ controller CounterModeAES(m_in : AESInput, m_key : Key, m_out : AESOutput):
 controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out : AESOutput, encrypted : Encrypted, key : Key):
     test_key : byte[16] = [0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]
 
+    time_to_aes : int32 = 0
+
     event system.started():
         keyrec = key.create()
         for i = 0 to 16:
@@ -242,16 +244,17 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
         key.save(keyrec)
 
         plainrec = aes_in.create()
-        clock.getNow()
+        time_to_aes = clock.getNow()
         aes_in.save(plainrec)
-        timer.start_periodic(1000)
+
 
     event aes_out.save_done():
         encrec = encrypted.create()
         for i = 0 to 32:
             encrec.data[i] = self.record.data[i]
         encrypted.save(encrec)
-        clock.getNow()
+        time_to_aes = clock.getNow() - time_to_aes
+        system.print_number("AES exec:::", time_to_aes)
         aes_out.delete(self.record)
 
     event timer.fired():
@@ -266,26 +269,6 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
         system.print("model is full")
         timer.cancel()
 
-
-
-controller GController(aes_in : AESInput, aes_out : AESOutput, encrypted : Encrypted, key : Key):
-    test_key : byte[16] = [0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]
-
-    event system.started():
-        keyrec = key.create()
-        for i = 0 to 16:
-            keyrec.data[i] = test_key[i]
-            #keyrec.data[i] = (byte)i
-        key.save(keyrec)
-
-
-    event aes_out.save_done():
-        system.print("record decrypted")
-        s = ""
-        for i = 0 to 32:
-            s += (str)self.record.data[i] + " "
-        system.print(s)
-        aes_out.delete(self.record)
 
 
 space EmbeddedSpace:
@@ -310,5 +293,3 @@ space EmbeddedSpace:
     controllers:
         aes = CounterModeAES(m_in = models.aes_in, m_out = models.aes_out, m_key = models.key)
         ctrl = EController(timer = interfaces.timer, clock = interfaces.clock, aes_in = models.aes_in, aes_out = models.aes_out, key = models.key, encrypted = models.encrypted)
-
-

@@ -17,6 +17,7 @@ public class SystemType extends ClassType {
         }
 
         addMethod("print", new Type[]{PrimitiveType.STR}, PrimitiveType.VOID);
+        addMethod("print_number", new Type[]{PrimitiveType.STR, PrimitiveType.INT32}, PrimitiveType.VOID);
     }
 
     public static final SystemType INSTANCE = new SystemType();

@@ -12,7 +12,7 @@ extra_includes() ::=<<
 c_file(includes,name,interface) ::=<<
 <begin_source(name)>
 <begin_source(name)>
-#define NRF_LOG_MODULE_NAME "CLOCK:::"
+#define NRF_LOG_MODULE_NAME "APP::"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -31,10 +31,9 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
 
 <interface.controllerList:define_set_controller_method(name); separator="\n">
 
-uint32_t ravel_generated_<name; format="function">_get_now()
+uint32_t ravel_generated_<name; format="function">_print<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>
 {
-    uint32_t now = counter_get();
-    return now;
+    NRF_LOG_DEBUG("%u \r\n",<append_parameter_list(interface.baseInterface.parameters);
 }
 >>
 
@@ -55,7 +54,7 @@ typedef struct s_<name> {
 void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
-uint32_t ravel_generated_<name; format="function">_get_now();
+uint32_t ravel_generated_<name; format="function">_print<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters);
 
 
 <interface.controllerList:declare_set_controller_method(name); separator="\n">

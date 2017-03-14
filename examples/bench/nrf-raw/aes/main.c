@@ -3,6 +3,12 @@
 #include "nrf_delay.h"
 #include "boards.h"
 #include "aes.h"
+#include "nrf52_counter.h"
+#include "app_timer.h"
+#include "nrf_soc.h"
+#include "softdevice_handler.h"
+
+
 #define NRF_LOG_MODULE_NAME "AES_TEST"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -61,14 +67,13 @@ static const unsigned char aes_test_ctr_ct[3][48] =
 };
 
 static const int aes_test_ctr_len[3] = { 16, 32, 36 };
+// General application timer settings.
 
-int main(void)
+int
+to_aes_ctr()
 {
-    /* Configure board. */
-    bsp_board_leds_init();
-    bsp_board_led_invert(3);
     int ret = 0, i, j, u, v;
-    int verbose = 1;
+    int verbose = 0;
     unsigned char key[32];
     unsigned char buf[64];
     size_t offset;
@@ -76,87 +81,108 @@ int main(void)
     unsigned char nonce_counter[16];
     unsigned char stream_block[16];
     mbedtls_aes_context ctx;
+
+
+    memset( key, 0, 32 );
+    mbedtls_aes_init( &ctx );
+    /*
+     * CTR mode
+     */
+    for( i = 0; i < 6; i++ )
+    {
+        u = i >> 1;
+        v = i  & 1;
+
+        memcpy( nonce_counter, aes_test_ctr_nonce_counter[u], 16 );
+        memcpy( key, aes_test_ctr_key[u], 16 );
+
+        offset = 0;
+        mbedtls_aes_setkey_enc( &ctx, key, 128 );
+
+        if( v == MBEDTLS_AES_DECRYPT )
+        {
+            len = aes_test_ctr_len[u];
+            memcpy( buf, aes_test_ctr_ct[u], len );
+
+            mbedtls_aes_crypt_ctr( &ctx, len, &offset, nonce_counter, stream_block,
+                           buf, buf );
+
+            if( memcmp( buf, aes_test_ctr_pt[u], len ) != 0 )
+            {
+                if( verbose != 0 )
+                    NRF_LOG_DEBUG( "failed\r\n" );
+
+                ret = 1;
+                goto exit;
+            }
+        }
+        else
+        {
+            len = aes_test_ctr_len[u];
+            memcpy( buf, aes_test_ctr_pt[u], len );
+
+            mbedtls_aes_crypt_ctr( &ctx, len, &offset, nonce_counter, stream_block,
+                           buf, buf );
+
+            if( memcmp( buf, aes_test_ctr_ct[u], len ) != 0 )
+            {
+                if( verbose != 0 )
+                    NRF_LOG_DEBUG( "failed\r\n" );
+
+                ret = 1;
+                goto exit;
+            }
+        }
+
+        if( verbose != 0 )
+            NRF_LOG_DEBUG( "passed\r\n" );
+    }
+
+    if( verbose != 0 )
+        NRF_LOG_DEBUG( "\r\n" );
+    ret = 0;
+
+    exit:
+        mbedtls_aes_free( &ctx );
+    return( ret );
+}
+
+int main(void)
+{
+
+//    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+//
+//    // Initialize the SoftDevice handler module.
+//    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
+//
+//    /* Configure board. */
+//    bsp_board_leds_init();
+//    bsp_board_led_invert(3);
+
   uint32_t err_code;
   // Initialize.
   err_code = NRF_LOG_INIT(NULL);
   APP_ERROR_CHECK(err_code);
-  NRF_LOG_DEBUG("Main Starting: EmbeddedSpace\n");
+  counter_init();
+  counter_start();
+  NRF_LOG_DEBUG("Main Starting: %u \r\n", counter_get());
   NRF_LOG_FLUSH();
 
-    memset( key, 0, 32 );
-    mbedtls_aes_init( &ctx );
 
-    int m_num_tests = 10;
-
-    for(int num_test =0 ; num_test< m_num_tests; num_test++)
-    {
-        //do encryption of counter
-        NRF_LOG_DEBUG("CTR mode : %d\r\n", num_test);
-            /*
-             * CTR mode
-             */
-            for( i = 0; i < 6; i++ )
-            {
-                u = i >> 1;
-                v = i  & 1;
-
-
-
-                memcpy( nonce_counter, aes_test_ctr_nonce_counter[u], 16 );
-                memcpy( key, aes_test_ctr_key[u], 16 );
-
-                offset = 0;
-                mbedtls_aes_setkey_enc( &ctx, key, 128 );
-
-                if( v == MBEDTLS_AES_DECRYPT )
-                {
-                    len = aes_test_ctr_len[u];
-                    memcpy( buf, aes_test_ctr_ct[u], len );
-
-                    mbedtls_aes_crypt_ctr( &ctx, len, &offset, nonce_counter, stream_block,
-                                   buf, buf );
-
-                    if( memcmp( buf, aes_test_ctr_pt[u], len ) != 0 )
-                    {
-                        if( verbose != 0 )
-                            NRF_LOG_DEBUG( "failed\r\n" );
-
-                        ret = 1;
-                        goto exit;
-                    }
-                }
-                else
-                {
-                    len = aes_test_ctr_len[u];
-                    memcpy( buf, aes_test_ctr_pt[u], len );
-
-                    mbedtls_aes_crypt_ctr( &ctx, len, &offset, nonce_counter, stream_block,
-                                   buf, buf );
-
-                    if( memcmp( buf, aes_test_ctr_ct[u], len ) != 0 )
-                    {
-                        if( verbose != 0 )
-                            NRF_LOG_DEBUG( "failed\r\n" );
-
-                        ret = 1;
-                        goto exit;
-                    }
-                }
-
-                if( verbose != 0 )
-                    NRF_LOG_DEBUG( "passed\r\n" );
-            }
-
-            if( verbose != 0 )
-                NRF_LOG_DEBUG( "\r\n" );
-    ret = 0;
-
-exit:
-    mbedtls_aes_free( &ctx );
-
-
-    }
+//    int m_num_tests = 10;
+//
+//    for(int num_test =0 ; num_test< m_num_tests; num_test++)
+//    {
+//        //do encryption of counter
+//        NRF_LOG_DEBUG("get now %u\r\n", counter_get());
+//        to_aes_ctr();
+//        uint32_t t_s = counter_get();
+//        NRF_LOG_DEBUG("CTR mode : %d time\r\n", num_test);
+//
+//     t_s = counter_get() -t_s;
+//     NRF_LOG_DEBUG( "ticks %u\r\n" , t_s);
+//    }
     NRF_LOG_FLUSH();
-    return( ret );
+    return 0;
 
 }

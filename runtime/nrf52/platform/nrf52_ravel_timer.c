@@ -55,7 +55,7 @@ RAVEL_DRIVER_ERROR init_timer_module()
     APP_ERROR_CHECK(err_code);
     counter_init();
     counter_start();
-    NRF_LOG_INFO("INIT!\r\n");
+    NRF_LOG_INFO("INIT! at %u\r\n", counter_get());
     return SUCCESS;
 }
 

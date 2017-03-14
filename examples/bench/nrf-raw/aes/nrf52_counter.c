@@ -16,9 +16,7 @@
 
 #include "nrf52_counter.h"
 #include "nrf_drv_rtc.h"
-#define NRF_LOG_MODULE_NAME "CNTR::"
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
+
 
 /* RTC driver instance using RTC2.
  * RTC0 is used by the SoftDevice, and RTC1 by the app_timer library. */
@@ -46,33 +44,31 @@ void counter_init(void)
     err_code = nrf_drv_rtc_init(&m_rtc, &config, rtc_handler);
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_rtc_tick_disable(&m_rtc);
+    //nrf_drv_rtc_tick_disable(&m_rtc);
     m_init = true;
-    NRF_LOG_DEBUG("Init\r\n");
 }
 
 
 void counter_start(void)
 {
-    if(!m_init)
-        counter_init();
     nrf_drv_rtc_counter_clear(&m_rtc);
+
     // Power on!
     nrf_drv_rtc_enable(&m_rtc);
     m_started = true;
-    NRF_LOG_DEBUG("Start\r\n");
 }
 
 
 void counter_stop(void)
 {
     nrf_drv_rtc_disable(&m_rtc);
-    m_started = false;
 }
 
 
 uint32_t counter_get(void)
 {
+    if(!m_init)
+        counter_init();
     if(!m_started)
         counter_start();
 
