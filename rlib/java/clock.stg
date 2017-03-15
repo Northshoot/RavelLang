@@ -1,0 +1,17 @@
+import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public class <name> {
+
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseModel.parameters)>) {
+    }
+
+    public int getNow() {
+        return (int) System.nanoTime();
+    }
+}
+>>

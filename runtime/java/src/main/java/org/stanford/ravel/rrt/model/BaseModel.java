@@ -116,7 +116,11 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 int recordPos = recordPosFromRecord(record);
                 assert recordPos >= 0;
                 markSaved(recordPos);
-                notifySaveDone(ctx);
+
+                if (isValid(recordPos))
+                    notifySaveDone(ctx);
+                else
+                    freeRecord(recordPos);
             }
         });
     }
@@ -249,7 +253,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         if (state[recordPos].is_valid) {
             return record;
         } else {
-            mRecords.remove(recordPos);
+            freeRecord(recordPos);
             return null;
         }
     }
