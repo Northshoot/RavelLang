@@ -100,9 +100,9 @@ local model ADCModel():
         adc : int32
 
 
-local model Measurement(size : int32):
+local model Measurement(size : int32, durable : bool):
     properties:
-        durable = True
+        durable = durable
         records = size
 
     schema:
@@ -123,7 +123,6 @@ streaming model MeasurementPacket(num_packets : int32):
         time : timestamp[50]
         temperature : int32[50]
         voltage : int32[50]
-
 
 controller GatewayController(app_config : GatewayAppConfig, boot_error : BootError, measurement_pkt : MeasurementPacket):
     event system.started():
@@ -263,13 +262,35 @@ local model DeviceLocationModel(size : int32):
         notes : str
 
 
+interface MeasurementDatabase():
+    configuration:
+        url = "jdbc:mysql://localhost:3306/jooq_test"
+        username = "jooq_test"
+        password = "jooq_test"
+        table_name = "measurement"
+        
+    use:
+        table = Measurement
+    
+    implementation:
+        java = "rlib/java/db.stg"
+    
+    def createTable()
+    def store(record : Measurement.Record)
+
+
 controller CloudController(device_bootstrap : AppDevice,
                            embedded_config : AppConfig,
                            gtw_config : GatewayAppConfig,
                            measurement_pkt : MeasurementPacket,
+                           measurement_db : MeasurementDatabase,
                            measurement : Measurement,
                            location_model : DeviceLocationModel,
                            boot_error : BootError):
+
+    event system.started():
+        measurement_db.createTable()
+
     event device_bootstrap.arrived():
         rec = self.record
         if rec.first_boot:
@@ -294,7 +315,7 @@ controller CloudController(device_bootstrap : AppDevice,
             rec.time = pkt.time[i]
             rec.temperature = pkt.temperature[i]
             rec.voltage = pkt.voltage[i]
-            measurement.save(rec)
+            measurement_db.store(rec)
         measurement_pkt.delete(pkt)
 
     event boot_error.arrived():
@@ -312,7 +333,7 @@ space EmbeddedSpace:
 	    boot_error = BootError(size=30)
 	    
 	    adc_model = ADCModel()
-	    measurement = Measurement(size=50)
+	    measurement = Measurement(size=50, durable=True)
 	    measurement_packet = MeasurementPacket(num_packets=500)
 
     interfaces:
@@ -367,8 +388,11 @@ space CloudSpace:
 	    
 	    gtw_config = GatewayAppConfig(size=100)
 	    
-	    measurement = Measurement(size=50000)
+	    measurement = Measurement(size=1, durable=False)
 	    measurement_packet = MeasurementPacket(num_packets=100)
+	    
+	interfaces:
+	    measurement_db = MeasurementDatabase()
 
     controllers:
 	    bootstrap_ctr = CloudController(measurement_pkt = models.measurement_packet,
@@ -377,4 +401,5 @@ space CloudSpace:
 	                                    gtw_config = models.gtw_config,
 	                                    embedded_config = models.embedded_config,
 	                                    measurement = models.measurement,
+	                                    measurement_db = interfaces.measurement_db,
 	                                    boot_error = models.boot_error)

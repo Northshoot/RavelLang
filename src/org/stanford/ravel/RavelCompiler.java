@@ -129,7 +129,7 @@ public class RavelCompiler {
     }
 
     private void compileInterfaces(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
-        InterfaceCompiler compiler = new InterfaceCompiler(this);
+        InterfaceCompiler compiler = new InterfaceCompiler(app, this);
         for (InterfaceSymbol isym : scope.getInterfaces()) {
             app.addInterface(isym.getName(), compiler.compileInterface(isym));
         }

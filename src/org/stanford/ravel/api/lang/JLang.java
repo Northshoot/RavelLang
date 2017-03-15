@@ -327,6 +327,8 @@ public class JLang extends BaseLanguage {
         ifaceTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
         for (ConcreteControllerInstance ictr : iiface.getControllerList())
             ifaceTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getComponent().getName());
+        for (Model model : iiface.getBaseInterface().getModels().values())
+            ifaceTmpl.add("imports", options.getPackageName() + ".models." + model.getName());
         ifaceTmpl.add("interface", iiface);
 
         return simpleModule(ifaceTmpl, iiface.getName(), packageName);

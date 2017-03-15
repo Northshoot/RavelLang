@@ -13,9 +13,11 @@ import org.stanford.ravel.primitives.Interface;
  * Created by gcampagn on 1/30/17.
  */
 class InterfaceCompiler {
+    private final RavelApplication app;
     private final RavelCompiler driver;
 
-    public InterfaceCompiler(RavelCompiler driver) {
+    public InterfaceCompiler(RavelApplication app, RavelCompiler driver) {
+        this.app = app;
         this.driver = driver;
     }
 
@@ -52,6 +54,14 @@ class InterfaceCompiler {
                     iface.setReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
                 else
                     throw new AssertionError();
+            }
+        }
+
+        Scope uses = symbol.getUsesScope();
+        if (uses != null) {
+            for (Symbol s : uses.getSymbols()) {
+                ReferenceSymbol ref = (ReferenceSymbol)s;
+                iface.dependOnModel(ref.getName(), app.getModel(ref.getValue()));
             }
         }
 

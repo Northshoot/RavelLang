@@ -220,7 +220,7 @@ iface_comp returns [Scope scope]
     ;
 
 iface_body
-    : NEWLINE INDENT config_scope? impl_scope iface_members* DEDENT
+    : NEWLINE INDENT config_scope? uses_scope? impl_scope iface_members* DEDENT
     ;
 
 impl_scope returns [Scope scope]
@@ -229,6 +229,10 @@ impl_scope returns [Scope scope]
 
 config_scope returns [Scope scope]
     : 'configuration:' space_assignments* #ConfigurationScope
+    ;
+
+uses_scope returns [Scope scope]
+    : 'use:' space_assignments* #UsesScope
     ;
 
 iface_members
