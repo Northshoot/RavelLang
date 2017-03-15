@@ -419,16 +419,21 @@ void
 ravel_posix_driver_main_loop(RavelPosixDriver *self)
 {
     int i;
-
-    if (self->nfds == 0)
-        return;
+    RavelPosixCallback callbacks[RAVEL_MAX_CALLBACKS];
+    int ncallbacks;
 
     while (true) {
-        for (i = 0; i < self->ncallbacks; i++) {
-            self->callbacks[i].fn(self->callbacks[i].ptr1, self->callbacks[i].ptr2);
-        }
+        memcpy(callbacks, self->callbacks, sizeof(callbacks));
+        ncallbacks = self->ncallbacks;
         self->ncallbacks = 0;
 
+        for (i = 0; i < ncallbacks; i++) {
+            callbacks[i].fn(callbacks[i].ptr1, callbacks[i].ptr2);
+        }
+        if (self->nfds == 0 && self->ncallbacks == 0)
+            break;
+        if (self->ncallbacks > 0 || self->nfds == 0)
+            continue;
         int ok = poll(self->poll_fds, self->nfds, -1);
         assert (ok >= 0);
 
