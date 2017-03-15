@@ -1,0 +1,36 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+
+#include \<time.h>
+
+<includes:do_include(); separator="\n">
+
+int
+ravel_generated_<name; format="function">_get_now(<name> *self)
+{
+    return clock() * 1000000 / CLOCKS_PER_SEC;
+}
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    int dummy;
+} <name>;
+
+static inline void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>) {}
+static inline void ravel_generated_<name; format="function">_finalize(<name> *self) {}
+
+int ravel_generated_<name; format="function">_get_now(<name> *self);
+
+<end_extern_c()>
+<end_header("", name)>
+>>

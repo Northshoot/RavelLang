@@ -1,18 +1,8 @@
-interface Timer():
-    implementation:
-        #c = "rlib/nrf52/app_timer_sys.stg"
-        #c = "rlib/linux/timer.stg"
-        java = "rlib/java/timer.stg"
-
-    def start_one_shot(time : int32)
-    def cancel()
-    def start_periodic(time: int32)
-    event fired()
-
 interface Clock():
     implementation:
         #c = "rlib/nrf52/clock.stg"
-        java = "rlib/java/clock.stg"
+        #java = "rlib/java/clock.stg"
+        c = "rlib/posix/clock.stg"
 
     def getNow() : int32
 
@@ -231,7 +221,7 @@ controller CounterModeAES(m_in : AESInput, m_key : Key, m_out : AESOutput):
         m_out.save(ciphertextrec)
 
 
-controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out : AESOutput, encrypted : Encrypted, key : Key):
+controller EController(clock: Clock, aes_in : AESInput, aes_out : AESOutput, encrypted : Encrypted, key : Key):
     test_key : byte[16] = [0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]
 
     time_to_aes : int32 = 0
@@ -260,19 +250,6 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
         aes_out.delete(self.record)
 
 
-    #event timer.fired():
-    #    rec : AESInput.Record
-    #    if aes_in.size() == 0:
-    #        rec = aes_in.create()
-    #    else:
-    #        rec = aes_in.first()
-    #        for i = 0 to 32:
-    #            rec.data[31-i] = (byte) (rec.data[31-i] + 1)
-    #            if rec.data[31-i] != 0:
-    #                break
-    #    time_to_aes = clock.getNow()
-    #    aes_in.save(rec)
-
     event encrypted.full():
         #system.print("encrypted.full")
         if round < 1000:
@@ -297,16 +274,15 @@ controller EController(timer : Timer, clock: Clock, aes_in : AESInput, aes_out :
 
 space EmbeddedSpace:
     platform:
-        language = JLang
+        #language = JLang
         #system = Android.v19
-        system = J2SE.v18
-        #language = CLang
+        #system = J2SE.v18
+        language = CLang
         #system = Nrf52.v1
-        #system = Posix.v2008
+        system = Posix.v2008
 
 
     interfaces:
-        timer = Timer()
         clock = Clock()
 
     models:
@@ -317,4 +293,4 @@ space EmbeddedSpace:
 
     controllers:
         aes = CounterModeAES(m_in = models.aes_in, m_out = models.aes_out, m_key = models.key)
-        ctrl = EController(timer = interfaces.timer, clock = interfaces.clock, aes_in = models.aes_in, aes_out = models.aes_out, key = models.key, encrypted = models.encrypted)
+        ctrl = EController( clock = interfaces.clock, aes_in = models.aes_in, aes_out = models.aes_out, key = models.key, encrypted = models.encrypted)

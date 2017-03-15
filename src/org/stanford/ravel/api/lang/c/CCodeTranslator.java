@@ -172,7 +172,18 @@ public class CCodeTranslator extends BaseIRTranslator {
 
     @Override
     public void visit(TConvert convert) {
-        addLine(convert.target, " = (", typeToCType(convert.tgtType), ") ", convert.source);
+        if (convert.tgtType == PrimitiveType.STR) {
+            if (convert.srcType == PrimitiveType.DOUBLE) {
+                addLine("asprintf(&", convert.target, ", \"%g\", ", convert.source, ")");
+            } else {
+                addLine("asprintf(&", convert.target, ", \"%d\", ", convert.source, ")");
+            }
+            cleanup.append("free((char*)");
+            cleanup.append(getRegisterName(convert.target));
+            cleanup.append(");\n");
+        } else {
+            addLine(convert.target, " = (", typeToCType(convert.tgtType), ") ", convert.source);
+        }
     }
 
     @Override
