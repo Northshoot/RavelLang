@@ -71,12 +71,25 @@ void counter_stop(void)
 }
 
 
-uint32_t counter_get(void)
+
+uint32_t __int_counter_get(void)
 {
     if(!m_started)
         counter_start();
 
     return(nrf_drv_rtc_counter_get(&m_rtc));
+}
+
+uint32_t counter_get(void)
+{
+    return( counter_ms() );
+}
+
+
+uint32_t counter_ms(void)
+{
+    return ( __int_counter_getgit add -A() * ( (0 + 1 ) * 1000000 ) / RTC_DEFAULT_CONFIG_FREQUENCY) ;
+
 }
 
 /** @}

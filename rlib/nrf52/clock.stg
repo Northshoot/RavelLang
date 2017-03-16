@@ -36,6 +36,11 @@ uint32_t ravel_generated_<name; format="function">_get_now()
     uint32_t now = counter_get();
     return now;
 }
+
+uint32_t ravel_generated_<name; format="function">_get_ms()
+{
+    return counter_ms;
+}
 >>
 
 h_file(includes,name,interface) ::=<<
@@ -57,7 +62,7 @@ void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 uint32_t ravel_generated_<name; format="function">_get_now();
 
-
+uint32_t ravel_generated_<name; format="function">_get_ms();
 <interface.controllerList:declare_set_controller_method(name); separator="\n">
 
 <end_extern_c()>

@@ -34,6 +34,9 @@ void counter_stop(void);
 /*@brief    Function for retrieving the counter value. */
 uint32_t counter_get(void);
 
+/*@brief    Function for retrieving the counter value in ms. */
+uint32_t counter_ms(void);
+
 #endif // COUNTER_H__
 
 /** @}
