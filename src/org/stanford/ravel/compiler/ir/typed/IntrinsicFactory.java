@@ -79,8 +79,8 @@ public class IntrinsicFactory {
         return new TIntrinsic(PrimitiveType.VOID, new Type[]{byteArray, PrimitiveType.INT32, PrimitiveType.INT32, IntrinsicTypes.KEY}, Registers.VOID_REG, "verify_mac", new int[]{ data, dataSize, offset, key }, false, true, true);
     }
 
-    public static TIntrinsic createEndpointGetName(int target, int endpoint) {
-        return new TIntrinsic(PrimitiveType.STR, new Type[]{IntrinsicTypes.ENDPOINT.getInstanceType()}, target, "endpoint_get_name", new int[]{ endpoint }, false, false, false);
+    public static TIntrinsic createEndpointGetId(int target, int endpoint) {
+        return new TIntrinsic(PrimitiveType.INT32, new Type[]{IntrinsicTypes.ENDPOINT.getInstanceType()}, target, "endpoint_get_id", new int[]{ endpoint }, false, false, false);
 
     }
 }

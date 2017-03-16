@@ -78,14 +78,18 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
     }
 
-    @Override
     public String getAppName() {
         return "<space.name>";
     }
 
     @Override
-    public Collection\<Endpoint> getEndpointsByName(String name) {
-        return driver.getEndpointsByName(name);
+    public int getAppId() {
+        return <space.id>;
+    }
+
+    @Override
+    public Collection\<Endpoint> getEndpointsByName(int id) {
+        return driver.getEndpointsByName(id);
     }
 
     /***********************************************************************/

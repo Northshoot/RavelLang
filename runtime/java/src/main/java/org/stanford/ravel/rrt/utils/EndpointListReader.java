@@ -33,7 +33,7 @@ public class EndpointListReader implements Closeable, AutoCloseable {
                 continue;
             }
 
-            String name = split[0];
+            String id = split[0];
             URI url;
             try {
                 url = new URI(split[1]);
@@ -52,8 +52,8 @@ public class EndpointListReader implements Closeable, AutoCloseable {
             }
 
             try {
-                return Endpoint.fromString(name, url, options);
-            } catch (MalformedURLException e) {
+                return Endpoint.fromString(Integer.parseInt(id), url, options);
+            } catch (MalformedURLException|NumberFormatException e) {
                 System.err.println("Badly formatted line " + line);
                 continue;
             }

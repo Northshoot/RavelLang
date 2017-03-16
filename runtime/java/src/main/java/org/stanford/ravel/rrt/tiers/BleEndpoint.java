@@ -6,7 +6,7 @@ package org.stanford.ravel.rrt.tiers;
  * Created by gcampagn on 2/8/17.
  */
 public class BleEndpoint extends Endpoint {
-    public BleEndpoint(String name) {
-        super(TYPE.BLE, name);
+    public BleEndpoint(int id) {
+        super(TYPE.BLE, id);
     }
 }

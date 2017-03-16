@@ -161,6 +161,11 @@ public class RavelCompiler {
             if (s != null)
                 app.addSpace(spaceSym.getName(), s);
         }
+
+        System.out.println("Spaces/endpoints");
+        for (Space s : app.getSpaces()) {
+            System.out.println(s);
+        }
     }
 
     private void generateCode(RavelApplication app) throws InvalidOptionException,FatalCompilerErrorException {

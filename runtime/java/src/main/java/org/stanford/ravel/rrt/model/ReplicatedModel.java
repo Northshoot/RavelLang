@@ -14,7 +14,7 @@ import java.util.List;
  * Created by gcampagn on 1/30/17.
  */
 public abstract class ReplicatedModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
-    private final List<String> mEndpoints = new ArrayList<>();
+    private final List<Integer> mEndpoints = new ArrayList<>();
 
     protected ReplicatedModel(DispatcherAPI dispatcher, int size, boolean reliable, boolean durable) {
         super(dispatcher, size, reliable, durable);
@@ -24,15 +24,15 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
         System.out.println("[ReplicatedModel::]>" + s);
     }
 
-    public void addSinkEndpoints(Collection<String> e) {
+    public void addSinkEndpoints(Collection<Integer> e) {
         mEndpoints.addAll(e);
     }
-    public void addSourceEndpoints(Collection<String> e) {}
+    public void addSourceEndpoints(Collection<Integer> e) {}
 
     @Override
     public Context<RecordType> save(RecordType record) {
         // TODO
-        return new Context<RecordType>(this, Error.SYSTEM_ERROR);
+        return new Context<>(this, Error.SYSTEM_ERROR);
     }
 
     @Override

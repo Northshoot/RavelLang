@@ -15,14 +15,14 @@ import java.net.Socket;
  * Created by gcampagn on 2/8/17.
  */
 class RavelSocketClient implements RavelSocket {
-    private final String identity;
+    private final int identity;
     private final TcpEndpoint remote;
     private final DispatcherAPI dispatcher;
 
     private Socket socket;
     private Thread listeningThread;
 
-    RavelSocketClient(String identity, TcpEndpoint remote, DispatcherAPI dispatcher) throws RavelIOException {
+    RavelSocketClient(int identity, TcpEndpoint remote, DispatcherAPI dispatcher) throws RavelIOException {
         this.identity = identity;
         this.remote = remote;
         this.dispatcher = dispatcher;

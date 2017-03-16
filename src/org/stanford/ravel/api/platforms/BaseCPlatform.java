@@ -100,6 +100,7 @@ public class BaseCPlatform extends BasePlatform {
     protected CodeModule createLauncher(Space s) {
         ST tmpl = mainGroup.getInstanceOf("file");
         tmpl.add("name", s.getName());
+        tmpl.add("id", s.getId());
 
         FileObject file = new FileObject();
         file.setFileName(s.getName() + ".c");

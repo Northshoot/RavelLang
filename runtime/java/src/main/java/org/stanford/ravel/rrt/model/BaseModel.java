@@ -223,9 +223,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return dispatcher.model__sendData(pkt, e);
     }
 
-    Error sendRecord(int recordPos, RecordType record, Collection<String> endpointNames) {
+    Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames) {
         Collection<Endpoint> endpoints = new ArrayList<>();
-        for (String name : endpointNames)
+        for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
         Error error = Error.SUCCESS;
@@ -272,9 +272,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
     }
 
-    Error forwardPacket(RavelPacket pkt, Collection<String> endpointNames, RecordType record) {
+    Error forwardPacket(RavelPacket pkt, Collection<Integer> endpointNames, RecordType record) {
         Collection<Endpoint> endpoints = new ArrayList<>();
-        for (String name : endpointNames)
+        for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
         int recordPos = -1;

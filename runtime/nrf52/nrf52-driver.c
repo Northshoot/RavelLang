@@ -43,7 +43,7 @@ static RavelEndpoint *endpoints[2] = { NULL, NULL };
 static bool m_network_is_busy = false;
 /**** ****/
 RavelEndpoint * const *
-ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
+ravel_driver_get_endpoints_by_name(RavelDriver *driver, int32_t name)
 {
     return endpoints;
 }
@@ -108,7 +108,7 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name) {
 
 
 void
-ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name)
+ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name, int32_t app_id)
 {
     /* TODO: init any internal systems */
     NRF_LOG_INFO("INIT!\r\n");

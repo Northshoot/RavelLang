@@ -144,8 +144,8 @@ ravel_generated_<model.name; format="function">_delete(<model.name> *self, <mode
 void
 ravel_generated_<model.name; format="function">_add_all_endpoints(<model.name> *self)
 {
-    static const char * sink_endpoints[] = { <model.streamingSinks:{s|"<s.name>"}; separator=","><if(model.streamingSinks)>, <endif>NULL };
-    static const char * source_endpoints[] = { <model.streamingSources:{s|"<s.name>"}; separator=","><if(model.streamingSources)>, <endif>NULL };
+    static const int32_t sink_endpoints[] = { <model.streamingSinks:{s|<s.id>}; separator=","><if(model.streamingSinks)>, <endif>-1 };
+    static const int32_t source_endpoints[] = { <model.streamingSources:{s|<s.id>}; separator=","><if(model.streamingSources)>, <endif>-1 };
     <base; format="function">_add_sink_endpoints(&self->__base, sink_endpoints);
     <base; format="function">_add_source_endpoints(&self->__base, source_endpoints);
 }

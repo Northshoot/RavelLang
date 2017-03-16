@@ -12,6 +12,8 @@ import java.util.Collection;
 public interface DispatcherAPI extends SystemEventAPI {
     String getAppName();
 
+    int getAppId();
+
     /***********************************************************************/
     /*************** AD Commands from driver to AD *************************/
     /***********************************************************************/
@@ -28,7 +30,7 @@ public interface DispatcherAPI extends SystemEventAPI {
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
 
-    Collection<Endpoint> getEndpointsByName(String name);
+    Collection<Endpoint> getEndpointsByName(int id);
 
     Error model__sendData(RavelPacket data, Endpoint endpoint);
     void model__saveDurably(RavelPacket data);

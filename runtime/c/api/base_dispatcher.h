@@ -68,7 +68,7 @@ static inline void ravel_base_dispatcher_endpoint_connected(RavelBaseDispatcher 
     self->vtable->endpoint_connected(self, endpoint);
 }
 
-static inline RavelEndpoint * const * ravel_base_dispatcher_get_endpoints_by_name(RavelBaseDispatcher *self, const char *name)
+static inline RavelEndpoint * const * ravel_base_dispatcher_get_endpoints_by_name(RavelBaseDispatcher *self, int32_t name)
 {
     return ravel_driver_get_endpoints_by_name(self->driver, name);
 }

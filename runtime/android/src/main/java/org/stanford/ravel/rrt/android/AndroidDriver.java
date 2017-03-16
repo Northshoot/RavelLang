@@ -92,7 +92,8 @@ public class AndroidDriver extends JavaDriver {
                 case BleDefines.ACTION_GATT_CONNECTED:
                     Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
                     device_address = intent.getStringExtra(BleDefines.EXTRA_DATA);
-                    BleEndpoint ble_e = new BleEndpoint(device_address);
+                    // FIXME 1 = EmbeddedSpace
+                    BleEndpoint ble_e = new BleEndpoint(1);
                     ble_e.connected();
                     bleClients.put(device_address, ble_e);
                     //add device to the fragment map

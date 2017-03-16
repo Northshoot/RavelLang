@@ -92,8 +92,8 @@ static inline RavelKey *ravel_intrinsic_load_key(RavelSystemAPI *sys_api, int32_
     return key;
 }
 
-static inline const char *ravel_intrinsic_endpoint_get_name(RavelEndpoint *endpoint) {
-    return ravel_endpoint_get_name(endpoint);
+static inline int32_t ravel_intrinsic_endpoint_get_id(RavelEndpoint *endpoint) {
+    return ravel_endpoint_get_id(endpoint);
 }
 
 #define ravel_intrinsic_verify_mac ravel_crypto_verify_mac

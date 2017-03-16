@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
  * Created by lauril on 1/23/17.
  */
 public class JavaDriver implements DriverAPI {
-    private final Map<String, Set<Endpoint>> endpointsMap = new HashMap<>();
+    private final Map<Integer, Set<Endpoint>> endpointsMap = new HashMap<>();
 
     private final DispatcherAPI appDispatcher;
 
@@ -57,7 +57,7 @@ public class JavaDriver implements DriverAPI {
             if (socketClients.containsKey(endpoint))
                 return socketClients.get(endpoint);
 
-            RavelSocketClient client = new RavelSocketClient(appDispatcher.getAppName(), endpoint, appDispatcher);
+            RavelSocketClient client = new RavelSocketClient(appDispatcher.getAppId(), endpoint, appDispatcher);
             socketClients.put(endpoint, client);
             return client;
         }
@@ -122,23 +122,23 @@ public class JavaDriver implements DriverAPI {
         return Error.IN_TRANSIT;
     }
 
-    private Set<Endpoint> getEndpointsSet(String name) {
+    private Set<Endpoint> getEndpointsSet(int id) {
         Set<Endpoint> s;
-        if (!endpointsMap.containsKey(name)) {
+        if (!endpointsMap.containsKey(id)) {
             s = new HashSet<>();
-            endpointsMap.put(name, s);
+            endpointsMap.put(id, s);
         } else {
-            s = endpointsMap.get(name);
+            s = endpointsMap.get(id);
         }
         return s;
     }
 
     @Override
-    public Collection<Endpoint> getEndpointsByName(String name) {
+    public Collection<Endpoint> getEndpointsByName(int id) {
         synchronized (endpointsMap) {
             // Make a copy of the associated endpoint set so that we can pass it outside
             // the synchronized block without fear for concurrent modification
-            return Collections.unmodifiableCollection(new ArrayList<>(getEndpointsSet(name)));
+            return Collections.unmodifiableCollection(new ArrayList<>(getEndpointsSet(id)));
         }
     }
 
@@ -182,8 +182,8 @@ public class JavaDriver implements DriverAPI {
 
     private void internalRegisterEndpoint(Endpoint ep) {
         synchronized (endpointsMap) {
-            getEndpointsSet(ep.getName()).add(ep);
-            ep.setLocal(ep.getName().equals(appDispatcher.getAppName()));
+            getEndpointsSet(ep.getId()).add(ep);
+            ep.setLocal(ep.getId() == appDispatcher.getAppId());
         }
     }
 

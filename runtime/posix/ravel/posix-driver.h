@@ -45,6 +45,7 @@ typedef struct {
     RavelDriver base;
 
     const char *app_name;
+    int32_t app_id;
     RavelPosixEndpoint **endpoint_table[RAVEL_ENDPOINT_TABLE_SIZE];
 
     struct pollfd poll_fds[RAVEL_MAX_ENDPOINTS];
@@ -57,7 +58,7 @@ typedef struct {
 
 struct AppDispatcher;
 
-void ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int argc, const char * const * argv);
+void ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int32_t app_id, int argc, const char * const * argv);
 void ravel_posix_driver_finalize(RavelPosixDriver *self);
 
 void ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint);

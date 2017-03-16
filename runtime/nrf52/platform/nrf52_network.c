@@ -84,14 +84,9 @@ create_endpoint(const uint8_t *data, uint16_t len)
     //NOTE: for now we just operate on the space name and ignore the uuid
     //TODO: remove string out of e-space
     //TODO: check that it is the expected packet or hell will break loose
-    //FIXME
-    char *space_name = malloc(len+1);
-    memcpy(space_name, data, len);
-    space_name[len] = 0;
 
-    if (endpoint_space.m_ravel_endpoint.name)
-        free((char*)endpoint_space.m_ravel_endpoint.name);
-    endpoint_space.m_ravel_endpoint.name = space_name;
+    // FIXME! 2 = GatewaySpace
+    endpoint_space.m_ravel_endpoint.id = 2;
     endpoint_space.m_tx_uuid = BLE_UUID_RAD_TX_CHARACTERISTIC;
     m_endpoint_is_set = true;
 }
@@ -141,8 +136,7 @@ network_on_notify(void)
         }
         else
         {
-            free((char*)endpoint_space.m_ravel_endpoint.name);
-            endpoint_space.m_ravel_endpoint.name = NULL;
+            endpoint_space.m_ravel_endpoint.id = -1;
             ravel_nrf52_driver_set_endpoint(&driver, NULL);
             m_endpoint_is_set = false;
          }

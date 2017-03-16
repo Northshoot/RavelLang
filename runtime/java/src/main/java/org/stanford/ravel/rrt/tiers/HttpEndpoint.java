@@ -12,12 +12,12 @@ public class HttpEndpoint extends Endpoint {
     private final String method;
     private final String user_agent;
 
-    HttpEndpoint(String name, URI url) throws MalformedURLException {
-        this(name, url, null, null);
+    HttpEndpoint(int id, URI url) throws MalformedURLException {
+        this(id, url, null, null);
     }
 
-    HttpEndpoint(String name, URI url, String method, String user_agent) throws MalformedURLException {
-        super(TYPE.HTTP, name);
+    HttpEndpoint(int id, URI url, String method, String user_agent) throws MalformedURLException {
+        super(TYPE.HTTP, id);
         this.url = url.toURL();
         this.method = method != null ? method : "POST";
         this.user_agent = user_agent != null ? user_agent : "Ravel-Java-Client/1.0";

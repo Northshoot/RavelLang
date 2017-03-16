@@ -33,7 +33,7 @@ extern RavelNrf52Driver driver;
 
 void ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoint);
 
-void ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name);
+void ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher, const char *app_name, int32_t app_id);
 
 void ravel_nrf52_driver_finalize(RavelNrf52Driver *self);
 
