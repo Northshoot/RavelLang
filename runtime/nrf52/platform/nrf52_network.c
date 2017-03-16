@@ -116,7 +116,7 @@ network_on_send_done()
     m_total++;
     NRF_LOG_DEBUG("send done %u\r\n", m_total);
     //TODO: signal to the driver
-    ravel_nrf52_driver_send_done_from_low(&driver);
+    ravel_nrf52_driver_send_done_from_low(&driver.base);
 }
 
 void

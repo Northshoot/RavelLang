@@ -1,4 +1,4 @@
- #include <stdlib.h>
+#include <stdlib.h>
 #include "sdk_common.h"
 #include "nrf52_ble_rad.h"
 #include "ble_srv_common.h"

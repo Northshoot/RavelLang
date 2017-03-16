@@ -124,7 +124,7 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
 //    APP_ERROR_CHECK(err_code);
     init_timer_module();
     nrf52_network_init(&self->network);
-    nrf52_r_core_ble_stack_init(&self->network);
+    //nrf52_r_core_ble_stack_init(&self->network);
 
     ravel_key_provider_init(&self->base.key_provider);
 
@@ -148,7 +148,7 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
     // Main loop.
 //    err_code = app_sched_event_put(NULL, 0, init_timer_module);
 //        APP_ERROR_CHECK(err_code);
-     nrf52_r_core_ble_start();
+    // nrf52_r_core_ble_start();
 
 
     NRF_LOG_INFO("LOOP\r\n");
@@ -182,6 +182,5 @@ void
 ravel_driver_queue_callback(RavelDriver *driver, void (*callback)(void*,void*), void *ptr1, void *ptr2)
 {
     ravel_schedule_event_cntx data = { ptr1, ptr2, callback };
-    NRF_LOG_DEBUG("queue event\r\n");
     app_sched_event_put(&data,sizeof(ravel_schedule_event_cntx), callback_event_handler);
 }

@@ -1,8 +1,8 @@
 interface Clock():
     implementation:
-        #c = "rlib/nrf52/clock.stg"
+        c = "rlib/nrf52/clock.stg"
         #java = "rlib/java/clock.stg"
-        c = "rlib/posix/clock.stg"
+        #c = "rlib/posix/clock.stg"
 
     def getNow() : int32
 
@@ -244,8 +244,8 @@ controller EController(clock: Clock, aes_in : AESInput, aes_out : AESOutput, enc
             encrec.data[i] = self.record.data[i]
         encrypted.save(encrec)
         delta = clock.getNow() - time_to_aes
-        #system.print_number("AES exec :::", delta)
-        system.print((str)delta) #java
+        system.print_number("AES exec :::", delta)
+        #system.print((str)delta) #java
         round+=1
         aes_out.delete(self.record)
 
@@ -278,8 +278,8 @@ space EmbeddedSpace:
         #system = Android.v19
         #system = J2SE.v18
         language = CLang
-        #system = Nrf52.v1
-        system = Posix.v2008
+        system = Nrf52.v1
+        #system = Posix.v2008
 
 
     interfaces:
