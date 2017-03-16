@@ -1,0 +1,97 @@
+import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+make_insert_query(table, model) ::=<<
+"insert into <table>(<model.fields:{f|<f.name>}; separator=", ">) values (<model.fields:{f|?}; separator=", ">)"
+>>
+
+type_to_sql_type_dict ::=[
+    "byte": "tinyint",
+    "int": "integer",
+    "boolean": "boolean",
+    "java.lang.String": "varchar(255)",
+    "java.util.Date": "datetime",
+    default: {<type>}
+]
+type_to_sql_type(type) ::=<<
+<type_to_sql_type_dict.(type)>
+>>
+
+type_to_java_sql_type_dict ::=[
+    "int": "Int",
+    "boolean": "Boolean",
+    "java.lang.String": "String",
+    "double": "Double",
+    "byte": "Byte",
+    "java.util.Date": "Timestamp",
+    default: {<type>}
+]
+type_to_java_sql_type(type) ::=<<
+<type_to_java_sql_type_dict.(type)>
+>>
+
+make_create_table_query(table, model) ::=<<
+"create table <table> if not exists (__id integer auto_increment primary_key, <model.fields:{f|<f.name> <type_to_sql_type(f.type)> not null}; separator=", ">) collate = utf8_bin, engine = InnoDB"
+>>
+
+set_field_dict ::=[
+    "java.util.Date": {stmt.setTimestamp(i++, new java.sql.Timestamp(record.<field.name> != null ? record.<field.name>.getTime() : 0));},
+    default: {stmt.set<type_to_java_sql_type(field.type)>(i++, record.<field.name>);}
+]
+
+make_set_field(field) ::=<<
+<set_field_dict.(field.type)>
+>>
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.DriverManager;
+
+<imports:do_import()>
+
+public class <name> {
+    <interface.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
+    private final int __id;
+    private final Connection connection;
+
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
+        __id = instanceId;
+
+        try {
+		    connection = DriverManager.getConnection(<interface.baseInterface.configuration.url; format="literal">, <interface.baseInterface.configuration.username; format="literal">, <interface.baseInterface.configuration.password; format="literal">);
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Setter methods for AppDispatcher
+    <interface.controllerList:set_controller_method(); separator="\n">
+
+    private static final String INSERT_QUERY = <make_insert_query(interface.baseInterface.configuration.table_name, interface.baseInterface.models.table)>;
+    private static final String CREATE_TABLE_QUERY = <make_create_table_query(interface.baseInterface.configuration.table_name, interface.baseInterface.models.table)>;
+
+    public void createTable() {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(CREATE_TABLE_QUERY);
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void store(<interface.baseInterface.models.table.name>.Record record) {
+        try (PreparedStatement stmt  = connection.prepareStatement(INSERT_QUERY)) {
+            int i = 0;
+            <interface.baseInterface.models.table.fields:{f|<make_set_field(f)>}; separator="\n">
+            stmt.executeUpdate();
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+>>

@@ -12,6 +12,7 @@ public class Interface extends ConfigurableComponent {
     private final InterfaceSymbol symbol;
     private final Map<String, String> implementation = new HashMap<>();
     private final List<String> events = new ArrayList<>();
+    private final Map<String, Model> dependentModels = new HashMap<>();
 
     public Interface(String name, InterfaceSymbol symbol) {
         super(name);
@@ -39,5 +40,17 @@ public class Interface extends ConfigurableComponent {
     }
     public void addEvent(String event) {
         events.add(event);
+    }
+
+    public void dependOnModel(String alias, Model model) {
+        assert model != null;
+        dependentModels.put(alias, model);
+    }
+    public Map<String, Model> getModels() {
+        return Collections.unmodifiableMap(dependentModels);
+    }
+
+    public Map<String, Object> getConfiguration() {
+        return getPropertyMap();
     }
 }

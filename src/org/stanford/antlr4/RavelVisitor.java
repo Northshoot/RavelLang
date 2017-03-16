@@ -170,6 +170,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConfigurationScope(RavelParser.ConfigurationScopeContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code UsesScope}
+	 * labeled alternative in {@link RavelParser#uses_scope}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUsesScope(RavelParser.UsesScopeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link RavelParser#iface_members}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -1,7 +1,5 @@
 package org.stanford.ravel.compiler.symbol;
 
-import org.stanford.ravel.compiler.types.EventType;
-import org.stanford.ravel.compiler.types.FunctionType;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.ArrayList;
@@ -24,11 +22,11 @@ public class InterfaceMemberSymbol extends SymbolWithScope {
         this.event = event;
     }
 
-    Type getReturnValue() {
+    public Type getReturnValue() {
         return returnValue;
     }
 
-    Type[] getArguments() {
+    public Type[] getArguments() {
         return arguments.toArray(new Type[0]);
     }
 

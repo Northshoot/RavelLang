@@ -273,6 +273,18 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitConfigurationScope(RavelParser.ConfigurationScopeContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code UsesScope}
+	 * labeled alternative in {@link RavelParser#uses_scope}.
+	 * @param ctx the parse tree
+	 */
+	void enterUsesScope(RavelParser.UsesScopeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UsesScope}
+	 * labeled alternative in {@link RavelParser#uses_scope}.
+	 * @param ctx the parse tree
+	 */
+	void exitUsesScope(RavelParser.UsesScopeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link RavelParser#iface_members}.
 	 * @param ctx the parse tree
 	 */

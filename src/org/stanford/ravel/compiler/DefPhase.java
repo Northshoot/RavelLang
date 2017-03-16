@@ -249,6 +249,20 @@ public class DefPhase extends RavelBaseListener {
     }
 
     @Override
+    public void enterUsesScope(RavelParser.UsesScopeContext ctx) {
+        LocalScope ls = new LocalScope("uses", currentScope);
+        ctx.scope = ls;
+        currentScope.nest(ls);
+        ls.setDefNode(ctx);
+        pushScope(ls);
+    }
+
+    @Override
+    public void exitUsesScope(RavelParser.UsesScopeContext ctx) {
+        popScope();
+    }
+
+    @Override
     public void enterInterfaceDef(RavelParser.InterfaceDefContext ctx) {
         String name = ctx.Identifier().getText();
         Type returnType;
@@ -610,7 +624,9 @@ public class DefPhase extends RavelBaseListener {
                 currentScopeName.equals("configuration");
         boolean allowReference = currentScopeName.equals("properties") ||
                 currentScopeName.equals("configuration") ||
-                currentScopeName.equals("platform");
+                currentScopeName.equals("platform") ||
+                currentScopeName.equals("uses");
+        boolean allowTypeReference = currentScopeName.equals("uses");
         boolean allowUnboundedReference = currentScopeName.equals("platform");
 
         String name = ctx.qualified_name().getText();
@@ -629,7 +645,21 @@ public class DefPhase extends RavelBaseListener {
             if (allowReference) {
                 String refName = value.qualified_name().getText();
                 Symbol refSymbol = currentScope.getEnclosingScope().resolve(refName);
-                if (!allowUnboundedReference && !(refSymbol instanceof VariableSymbol)) {
+                if (allowTypeReference) {
+                    if (!(refSymbol instanceof TypeSymbol)) {
+                        emitError(value.qualified_name(), refName + " does not refer to a valid model");
+                    } else {
+                        Type definedType = ((TypeSymbol) refSymbol).getDefinedType();
+                        if (!(definedType instanceof ModelType)) {
+                            emitError(value.qualified_name(), refName + " does not refer to a valid model");
+                        } else {
+                            ReferenceSymbol ref = new ReferenceSymbol(name, refName);
+                            ref.setDefNode(ctx);
+                            ref.setType(definedType);
+                            currentScope.define(ref);
+                        }
+                    }
+                } else if (!allowUnboundedReference && !(refSymbol instanceof VariableSymbol)) {
                     emitError(value.qualified_name(), "undeclared variable " + refName);
                 } else {
                     ReferenceSymbol ref = new ReferenceSymbol(name, refName);
