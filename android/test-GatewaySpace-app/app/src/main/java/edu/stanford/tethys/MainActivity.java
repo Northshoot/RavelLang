@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
 
 
 
-
+        enable_sdk_23();
         // start the service if not already
         startService(new Intent(this, GatewaySpace.class));
     }
@@ -33,19 +33,15 @@ public class MainActivity extends Activity {
         if (android.os.Build.VERSION.SDK_INT >= 23) {
             Log.d(TAG, "Found SDK 23, requesting permission");
             // Here, thisActivity is the current activity
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)  != PackageManager.PERMISSION_GRANTED) {
                 // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,  Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 } else {
 
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                            1);
+                    ActivityCompat.requestPermissions(this,  new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
                 }
             }
+
         }
     }
 }

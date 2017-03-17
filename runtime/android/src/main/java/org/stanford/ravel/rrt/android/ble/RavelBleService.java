@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 /**
  * Created by lauril on 1/21/16.
  */
@@ -194,6 +193,7 @@ public class RavelBleService extends Service {
             Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
             BlePacket ble_pkt = new BlePacket( gatt, characteristic);
             //TODO
+            Log.d("PKT: ", ble_pkt.toString());
             dataReceived(ble_pkt);
 
         }
@@ -300,7 +300,7 @@ public class RavelBleService extends Service {
             //TODO: multiple ravel models
             for (BluetoothGattService bleS : mBluetoohServiceList) {
                 if(bleS.getUuid().equals(RavelGattAtrributes.RAVEL_DATA_MODEL_UUID)) {
-                    Log.e(TAG, "found service::: " +  bleS.getUuid());
+                    //Log.e(TAG, "found service::: " +  bleS.getUuid());
 //                    for(BluetoothGattCharacteristic c : bleS.getCharacteristics()) {
 //                        Log.e(TAG, "char::: " + c.getUuid());
 //                    }
@@ -352,6 +352,8 @@ public class RavelBleService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
         mHandler = new Handler(Looper.getMainLooper());
 
         /**
@@ -476,11 +478,12 @@ public class RavelBleService extends Service {
                 //connect to the device
                 connect(dev.getAddress());
             }
-            BluetoothDevice bluetoothDevice = deviceList.get(0);
+
         } else {
             //we need to start an activity for intent and grab the address of the device
-            //TODO: should not get here!
             Log.e(TAG, "Empty device list");
+            //TODO: for now agressive re-scan
+            scanLeDevice();
 
         }
 

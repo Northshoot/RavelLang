@@ -19,7 +19,13 @@ public class ByteWork {
         }
         return b;
     }
-
+    public static byte[] getBytesSize(byte[] bytes, int start, int length){
+        byte[] b = new byte[length];
+        for(int i=0; start <= length;i++){
+            b[i]=bytes[start++];
+        }
+        return b;
+    }
     public int unsignedIntFromByteArray(byte[] bytes) {
         int res=0;
         for (int i=0;i<bytes.length;i++){
@@ -41,6 +47,10 @@ public class ByteWork {
         return (bytes[3] << 24) | (bytes[2] & 0xFF) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF);
     }
 
+    public static int convertByteToInt(byte b)
+    {
+        return (new Byte(b)).intValue();
+    }
     /***
      * Convert two unsigned bytes to int Litle Endian!
      * @param bytes

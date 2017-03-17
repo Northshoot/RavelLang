@@ -120,11 +120,9 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
     self->base.dispatcher = dispatcher;
     self->network = network;
-//    err_code = app_sched_event_put(NULL, 0, init_timer_module);
-//    APP_ERROR_CHECK(err_code);
     init_timer_module();
     nrf52_network_init(&self->network);
-    //nrf52_r_core_ble_stack_init(&self->network);
+    nrf52_r_core_ble_stack_init(&self->network);
 
     ravel_key_provider_init(&self->base.key_provider);
 
@@ -146,10 +144,8 @@ void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // Main loop.
-//    err_code = app_sched_event_put(NULL, 0, init_timer_module);
-//        APP_ERROR_CHECK(err_code);
-    // nrf52_r_core_ble_start();
-
+    //Start BLE
+    nrf52_r_core_ble_start();
 
     NRF_LOG_INFO("LOOP\r\n");
     //

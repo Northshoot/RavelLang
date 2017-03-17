@@ -22,7 +22,7 @@
 #define CALL_UP_SEND_DONE(P_STRUCT) (P_STRUCT->network)->send_done()
 #define CALL_UP_RX(P_STRUCT, P_DATA, LEN) (P_STRUCT->network)->on_write(P_DATA, LEN)
 
-
+//m
 static uint8_t m_tx_pkt_available=0;
 //Used for packet fragmentation
 static bool m_fragment_enqueued = false;
@@ -308,12 +308,14 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
 }
 
 
-
+/**
+ * sending of the fragment packets
+ */
 uint32_t
 send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 {
     ble_gatts_hvx_params_t hvx_params;
-    NRF_LOG_DEBUG("send data\r\n");
+    NRF_LOG_DEBUG("send_fragment\r\n");
     VERIFY_PARAM_NOT_NULL(p_rad);
 
 
@@ -332,6 +334,10 @@ send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
     return sd_ble_gatts_hvx(p_rad->conn_handle, &hvx_params);
 }
 
+/**
+ * called to send full packet
+ */
+
 uint32_t
 ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
 {
@@ -339,10 +345,12 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
     {
         return NRF_ERROR_INVALID_STATE;
     }
+
     NRF_LOG_DEBUG("fragmenting data\r\n");
-    bool has_fragment = true;
+    bool has_fragment = true; //we always have at least one fragment
     m_fragment_enqueued = true;
-   // data pointer is for recursive use so we can traverse the ccn_data
+
+   // data pointer is for recursive use so we can traverse the rad_data
     uint8_t * data_ptr = (uint8_t *)p_data;
 
     // buffer to be sent over ble
@@ -359,25 +367,28 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
             NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\r\n", sizeof( data_packet_t));
 
             ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
-            //TODO: set flags
-            ravel_pkt.ctrf_flags = 3;
+            //only one flag TODO: need whole protocol suite
+            ravel_pkt.ctrf_flags = 0;
             has_fragment = true;
         } else {
             NRF_LOG_DEBUG("data < bt frame length\r\n");
+            ravel_pkt.length = length;
             has_fragment = false;
-            ravel_pkt.ctrf_flags = 0;
+            ravel_pkt.ctrf_flags = 1;
         }
-        // set id
+        // set index
         ravel_pkt.indx = m_enqueued_pkt;
         // copy extended bluetooth header to buffer
         memcpy(buffer, &ravel_pkt, sizeof( data_packet_t));
 
-        // copy ccnx packet data to buffer
+        // copy RAD packet data to buffer
         memcpy(buffer + sizeof(data_packet_t), p_data, ravel_pkt.length);
 
         // TODO: enqueue the packet for sending
+        // FIXME: can not handle more than 7 pkt due to out buffer
+        //needs global buffer, that releasing the send through the scheduler
        uint32_t send_result = send_fragment(p_rad, buffer, sizeof( data_packet_t)+ravel_pkt.length);
-        NRF_LOG_DEBUG("send_fragment %u\r\n", m_enqueued_pkt);
+        NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_enqueued_pkt, send_result);
         m_enqueued_pkt++;
         // updating
         if (length - ravel_pkt.length > 0) {

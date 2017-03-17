@@ -11,14 +11,14 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/20/17.
  */
 public class PrimitiveTypeSymbol extends BaseSymbol implements TypeSymbol {
-    private final PrimitiveType type;
+    private final Type type;
 
-    public PrimitiveTypeSymbol(PrimitiveType type) {
+    public PrimitiveTypeSymbol(Type type) {
         super(type.getName());
         this.type = type;
     }
 
-    public PrimitiveType getDefinedType() {
+    public Type getDefinedType() {
         return type;
     }
 }

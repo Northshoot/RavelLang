@@ -88,7 +88,7 @@ uint32_t counter_get(void)
 
 uint32_t counter_ms(void)
 {
-    return ( __int_counter_getgit add -A() * ( (0 + 1 ) * 1000000 ) / RTC_DEFAULT_CONFIG_FREQUENCY) ;
+    return ( __int_counter_get()) ;
 
 }
 

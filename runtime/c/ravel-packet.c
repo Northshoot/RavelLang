@@ -23,20 +23,20 @@
 /**
  * Packet mapping POST fragmentation
  */
-void
-ravel_packet_init_empty (RavelPacket *self, size_t record_size, uint8_t model_id, uint16_t record_id)
-{
-    self->packet_data = calloc(record_size + RESERVED, 1);
-    if (self->packet_data == NULL) abort();
-    self->record_data = self->packet_data + RESERVED;
-    self->record_length = record_size;
-    self->packet_length = self->record_length + RESERVED;
-
-    self->model_id = model_id;
-    self->record_id = record_id;
-    self->is_ack = false;
-    self->is_save_done = false;
-}
+//void
+//ravel_packet_init_empty (RavelPacket *self, size_t record_size, uint8_t model_id, uint16_t record_id)
+//{
+//    self->packet_data = calloc(record_size + RESERVED, 1);
+//    if (self->packet_data == NULL) abort();
+//    self->record_data = self->packet_data + RESERVED;
+//    self->record_length = record_size;
+//    self->packet_length = self->record_length + RESERVED;
+//
+//    self->model_id = model_id;
+//    self->record_id = record_id;
+//    self->is_ack = false;
+//    self->is_save_done = false;
+//}
 
 void
 ravel_packet_init_copy (RavelPacket *self, RavelPacket *from)

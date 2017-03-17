@@ -8,13 +8,13 @@ import org.stanford.ravel.rrt.utils.GrowableByteArray;
  * Created by lauril on 1/25/17.
  */
 public class RavelPacket {
-    private final static int SRC = 1; // 8 bits for source
-    private final static int DST = 2; // 8 bits for destination
+    private final static int SRC = 0; // 8 bits for source
+    private final static int DST = 1; // 8 bits for destination
+    private final static int FLAGS = 2; // 8 bits for flags
+
     private final static int RESERVED = 3; // reserved for byte mapping
 
     public static class Flags {
-//        public static final int FLAG_PARTIAL = 1;
-//        public static final int FLAG_LAST = 2;
         public static final int FLAG_ACK = 1;
         public static final int FLAG_SAVE_DONE = 4;
     }
@@ -31,27 +31,35 @@ public class RavelPacket {
     public byte dst=-1;
     public byte src=-1;
 
+    private static int BYTE_POS_MODEL_ID = 0;
+
 //    //TODO: add packetization
+
+//    Caused by: java.lang.ArrayIndexOutOfBoundsException: length=2; index=2
+//    at org.stanford.ravel.rrt.RavelPacket.getRecordIdFromRecord(RavelPacket.java:122)
+//    at org.stanford.ravel.rrt.RavelPacket.<init>(RavelPacket.java:56)
+//    at org.stanford.ravel.rrt.RavelPacket.fromNetwork(RavelPacket.java:105)
+//    at org.stanford.ravel.rrt.android.AndroidDriver.packetCompleted(AndroidDriver.java:62)
+//    at org.stanford.ravel.rrt.android.AndroidDriver.fragment_arrived(AndroidDriver.java:81)
+//    at org.stanford.ravel.rrt.android.AndroidDriver$1.onReceive(AndroidDriver.java:115)
     private int flags = 0;
-    //FIXME: moved to the fragmentation network packet is an assembly
-//    private boolean partial = false;
-//    private boolean last = false;
     private boolean ack = false;
     private boolean save_done = false;
 
     private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
         if (isNetwork) {
-            this.src = data[0];
-            this.dst = data[1];
-            this.flags = data[2];
-//            this.partial = (this.flags & Flags.FLAG_PARTIAL) == Flags.FLAG_PARTIAL;
-//            this.last = (this.flags & Flags.FLAG_LAST) == Flags.FLAG_LAST;
+            this.src = data[SRC];
+            this.dst = data[DST];
+            this.flags = data[FLAGS];
             this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
             this.save_done = (this.flags & Flags.FLAG_SAVE_DONE) == Flags.FLAG_SAVE_DONE;
 
             this.record_end = data.length;
             this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
+            System.err.println("RavelPacket[" + this.record_data.length +"]");
+            //Record can not be less than model_id, record_id, and a byte
+            if (record_data.length <3) throw new AssertionError("RavelPacket: Expected at least 3 bytes");
             this.model_id = getModelIdFromRecord(this.record_data);
             this.record_id = getRecordIdFromRecord(this.record_data);
         } else {
@@ -116,10 +124,12 @@ public class RavelPacket {
     }
 
     private static int getModelIdFromRecord(byte[] data) {
-        return (int)data[0] & 0xFF;
+        return (int)data[BYTE_POS_MODEL_ID] & 0xFF;
     }
+
     private static int getRecordIdFromRecord(byte[] data) {
-        return (int)((int)data[1] & 0xFF | (((int)data[2] & 0xFF) << 8));
+        if (data.length <3) throw new AssertionError("getRecordIdFromRecord: Expected at least 3 bytes");
+        return (int)((data[2] & 0xFF) << 8 | (data[1] & 0xFF));
     }
 
     public byte[] getRecordData() {
@@ -142,12 +152,6 @@ public class RavelPacket {
         return outputStream.toByteArray();
     }
 
-//    public boolean isLast() {
-//        return last;
-//    }
-//    public boolean isPartial() {
-//        return partial;
-//    }
     public boolean isAck() {
         return ack;
     }
@@ -158,7 +162,6 @@ public class RavelPacket {
     @Override
     public String toString() {
         return "[SRC: " + this.src + ", DST: " + this.dst
-//                + ", PARTIAL: "+ isPartial() + ", LAST: "+ isLast()
                 +", MODEL_ID: " + this.model_id + " rec_idx: " + this.record_id + "]";
     }
 }

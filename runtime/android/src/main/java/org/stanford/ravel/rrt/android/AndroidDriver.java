@@ -21,6 +21,7 @@ import org.stanford.ravel.rrt.tiers.RavelIOException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -35,7 +36,7 @@ public class AndroidDriver extends JavaDriver {
     // BLE related variables
     private boolean m_connected_ble = false;
     private boolean m_ble_endpoint_started = false;
-    private Map<String, ArrayList<BlePacket>> m_frag_map = new HashMap<>();
+    private Map<String, ArrayList<BlePacket>> m_frag_map;
     //Connection states
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
     public boolean GATEWAY_CONNECTED = false; // indicates open gateway application
@@ -61,10 +62,23 @@ public class AndroidDriver extends JavaDriver {
         appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
     }
 
+    int counter = 0;
     void fragment_arrived(BlePacket pkt) {
-        m_frag_map.get(pkt.getAddress()).add(pkt);
+        if(m_frag_map == null)
+            Log.e(TAG, "m_frag_map is null!");
+        if(pkt.getAddress() == null)
+            Log.e(TAG, "Address is null!");
+        else
+            Log.e(TAG, "Address: " + pkt.getAddress());
+
+        ArrayList<BlePacket> blePackets = m_frag_map.get(pkt.getAddress());
+        if(blePackets == null)
+            Log.e(TAG, "blePackets is null!");
+        else
+            blePackets.add(pkt);
         if ( pkt.isLast() )
             packetCompleted(pkt);
+        counter++;
 
     }
 
@@ -81,12 +95,18 @@ public class AndroidDriver extends JavaDriver {
                     BleEndpoint ble_e = new BleEndpoint(device_address);
                     ble_e.connected();
                     bleClients.put(device_address, ble_e);
+                    //add device to the fragment map
+                    m_frag_map.put(device_address, new ArrayList<BlePacket>());
                     EMBEDDED_CONNECTED = true;
                     break;
                 case BleDefines.ACTION_GATT_DISCONNECTED:
                     Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
                     device_address = intent.getStringExtra(BleDefines.EXTRA_DATA);
+                    //Clean up device from
+                    //client lists
                     bleClients.remove(device_address);
+                    //fragment maps
+                    m_frag_map.remove(device_address);
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
                     //TODO: assemble fragment
@@ -176,6 +196,7 @@ public class AndroidDriver extends JavaDriver {
     }
 
     void start_ble_service(){
+        m_frag_map = new LinkedHashMap<>();
         //init ble service
         Log.d(TAG, "Starting BLE service");
         mRavelServiceIntent = new Intent(ctx.getApplicationContext(), RavelBleService.class);

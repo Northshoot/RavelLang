@@ -5,6 +5,11 @@ package org.stanford.ravel.primitives;
  *
  * Created by gcampagn on 1/31/17.
  */
+
+/**
+ * System events are part of the language the template to change is
+ * lang/dispatcher
+ */
 public enum SystemEvent {
     started,
     stopped,

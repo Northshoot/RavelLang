@@ -25,7 +25,7 @@ public class IntrinsicTypes {
     private static class Endpoint extends ClassType {
         public Endpoint() {
             super("Endpoint");
-
+            //Add methods to the endpoint
             addMethod("getName", new Type[]{}, PrimitiveType.STR);
         }
     }

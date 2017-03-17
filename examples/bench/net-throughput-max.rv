@@ -1,0 +1,99 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        java = "rlib/java/clock.stg"
+        #c = "rlib/posix/clock.stg"
+
+    def getNow() : int32
+
+streaming model Ping():
+    properties:
+        records = 100
+        durable = False
+        reliable = False
+        flow = EmbeddedSpace -> GatewaySpace
+    schema:
+        value : int32[5]
+
+
+controller PingController( ping : Ping , clock : Clock):
+    counter : int32 = 0
+    time_save : int32 = 0
+    time_departed : int32 = 0
+    delta : int32 = 0
+
+
+    event system.started():
+        system.print("system started")
+        pingrec = ping.create()
+        #pingrec.value = counter
+        counter += 1
+        time_save = clock.getNow()
+        ping.save(pingrec)
+
+    event ping.departed():
+        system.print_number("ping departed:", counter)
+        time_departed = clock.getNow()
+        delta = time_departed - time_save
+        #this prints on android
+        system.print_number("DEPART PING :::", delta)
+        pingrec = ping.create()
+        #pingrec.value = counter
+        counter += 1
+        time_save = clock.getNow()
+        ping.save(pingrec)
+
+    event ping.save_done():
+        system.print("ping save done")
+
+
+
+controller PingGTW( ping : Ping , clock : Clock):
+    counter : int32 = 0
+
+
+    event system.started():
+        system.print("system started")
+
+
+    event ping.arrived():
+        #we can reuse the same controller on both gateways :)
+        system.print("ping received")
+        pingrec = self.record
+        #counter = pingrec.value
+        ##this prints in java
+        system.print("ping " + (str) counter)
+
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        clock = Clock()
+
+    models:
+        ping = Ping()
+
+    controllers:
+        ping_cnt = PingController( ping = models.ping, clock = interfaces.clock)
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    interfaces:
+        clock = Clock()
+
+    models:
+        ping = Ping()
+
+
+    controllers:
+        ping_cnt = PingGTW( ping = models.ping, clock = interfaces.clock)
+
+

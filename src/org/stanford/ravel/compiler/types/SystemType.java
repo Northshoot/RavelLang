@@ -15,6 +15,8 @@ public class SystemType extends ClassType {
         for (SystemEvent event : SystemEvent.values()) {
             addEvent(event.name(), new Type[]{}, false);
         }
+        addEvent("connected", new Type[]{IntrinsicTypes.ENDPOINT}, false);
+        addEvent("disconnected", new Type[]{IntrinsicTypes.ENDPOINT}, false);
 
         addMethod("print", new Type[]{PrimitiveType.STR}, PrimitiveType.VOID);
         addMethod("print_number", new Type[]{PrimitiveType.STR, PrimitiveType.INT32}, PrimitiveType.VOID);

@@ -13,5 +13,12 @@ public class SystemAPI extends BaseEventComponent {
 
         for (SystemEvent event : SystemEvent.values())
             createEvent(event.name());
+        /**
+         * System events are part of the language the template to change is
+         * lang/dispatcher.stg
+         * manual additions is due to the arguments
+         */
+        createEvent("connected");
+        createEvent("disconnected");
     }
 }

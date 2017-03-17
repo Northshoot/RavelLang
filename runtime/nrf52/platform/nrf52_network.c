@@ -183,6 +183,10 @@ network_send(RavelPacket *packet, RavelEndpoint *endpoint)
 
 }
 
+/**
+ * innitialize the network
+ */
+
 void
 nrf52_network_init(NetworkClb *self)
 {

@@ -134,6 +134,18 @@ ravel_generated_<name; format="function">_restarted(<name> *self)
     <dispatch_event_single_instance_ptr(space.systemAPI.component, "restarted", [])>
 }
 
+void
+ravel_generated_<name; format="function">_connected(<name> *self, RavelEndpoint *endpoint)
+{
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "connected", [])>
+}
+
+void
+ravel_generated_<name; format="function">_disconnected(<name> *self, RavelEndpoint *endpoint)
+{
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "disconnected", [])>
+}
+
 >>
 
 h_file(includes,name,models,interfaces,controllers,space) ::=<<
@@ -165,6 +177,8 @@ void ravel_generated_<name; format="function">_add_all_endpoints(<name> *self);
 void ravel_generated_<name; format="function">_started(<name> *self);
 void ravel_generated_<name; format="function">_stopped(<name> *self);
 void ravel_generated_<name; format="function">_restarted(<name> *self);
+void ravel_generated_<name; format="function">_connected(<name> *self, RavelEndpoint *endpoint);
+void ravel_generated_<name; format="function">_disconnected(<name> *self, RavelEndpoint *endpoint);
 
 <end_extern_c()>
 <end_header("", name)>

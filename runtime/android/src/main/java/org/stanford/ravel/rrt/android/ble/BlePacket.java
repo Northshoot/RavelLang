@@ -2,11 +2,14 @@ package org.stanford.ravel.rrt.android.ble;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.util.Log;
 
 import org.stanford.ravel.rrt.android.utils.ByteWork;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by lauril on 3/8/17.
@@ -19,26 +22,24 @@ public class BlePacket implements Serializable {
     private int flags = 0;
     private int indx=0;
     private int length=0;
-    private boolean partial = false;
     private boolean last = false;
-    public static final int FLAG_PARTIAL = 1;
-    public static final int FLAG_LAST = 2;
+    public static final int FLAG_LAST = 1;
+    private int protocol_offset = 3;
 
     public BlePacket(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
-        this.data = characteristic.getValue();
-        this.address = gatt.getDevice().getAddress();
+        this(characteristic.getValue(), gatt.getDevice().getAddress());
     }
 
     public BlePacket(byte[] data, String device_address){
-        this.indx = ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, 0, 2));
-        this.length = ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, 2, 4));
-        this.flags = ByteWork.convertTwoUnsignedBytesToInt(ByteWork.getBytes(data, 4, 6));
-        this.partial = (this.flags & FLAG_PARTIAL) == FLAG_PARTIAL;
+        this.indx = getIndex(data);
+        this.length = getLength(data);
+        this.flags = getFlags(data);
         this.last = (this.flags & FLAG_LAST) == FLAG_LAST;
-        this.data = ByteWork.getBytes(data, 6, 6+this.length);
+        this.data = ByteWork.getBytesSize(data, protocol_offset, this.length);
         this.address = device_address;
     }
-
+    //This is used to activate notifications
+    //TODO: needs protocol ID and so on
     public BlePacket(byte[] data){
         this.data = data;
     }
@@ -51,14 +52,47 @@ public class BlePacket implements Serializable {
 
     public void setAddress(String a){ address = a; }
 
+    public int getLength()
+    {
+        return this.length;
+    }
     public static byte[] fromArray(ArrayList<BlePacket> m_frag) {
-        byte[] result = m_frag.get(0).getData();
+        int total_lengh = 0;
+        for(BlePacket blePacket: m_frag){
+            total_lengh+=blePacket.getLength();
+        }
+        //results
+        byte[] result = new byte[total_lengh];
+        //special case for zero
+        byte[] zero = m_frag.get(0).getData();
+        System.arraycopy(zero, 0, result, 0, zero.length);
         for(int i = 1 ; i < m_frag.size(); i++){
             byte [] a = m_frag.get(i).getData();
-            System.arraycopy(a, 0, result, 0, a.length);
+            System.arraycopy(a, 0, result, m_frag.get(i-1).getData().length, a.length);
         }
-        return result;
+        Log.e("BLE PKT: ", "data.length " + result.length);
+        return  result;
     }
 
 
+    //FIXME: this is hardcoded values
+    private int getIndex(byte[] data)
+    {
+        return  ByteWork.convertByteToInt(ByteWork.getBytes(data, 0, 1)[0]);
+    }
+    private int getLength(byte[] data)
+    {
+        return ByteWork.convertByteToInt(ByteWork.getBytes(data, 1, 2)[0]);
+    }
+    private int getFlags(byte[] data)
+    {
+        return ByteWork.convertByteToInt(ByteWork.getBytes(data, 2, 3)[0]);
+    }
+    @Override
+    public String toString() {
+        return "BLE PKT[{from: "+this.address+
+                ", indx: " + this.indx+
+                ", length: " + this.length+
+                ", last: " + this.last + "]";
+    }
 }

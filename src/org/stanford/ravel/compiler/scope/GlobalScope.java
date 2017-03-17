@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler.scope;
 
 import org.stanford.ravel.compiler.symbol.*;
+import org.stanford.ravel.compiler.types.IntrinsicTypes;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 
 import java.util.Collection;
@@ -25,6 +26,7 @@ public class GlobalScope extends BaseScope {
             if (type.isValid())
                 define(new PrimitiveTypeSymbol(type));
         }
+        define(new PrimitiveTypeSymbol(IntrinsicTypes.ENDPOINT));
 
         // FIXME
         // this effectively allows declaring variables with type ANY
