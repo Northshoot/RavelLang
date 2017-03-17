@@ -52,17 +52,13 @@ public class RavelSocketProtocol {
         }
     }
 
-    public static void writeIdentity(OutputStream out, String identity) throws IOException {
+    public static void writeIdentity(OutputStream out, int identity) throws IOException {
         out.write(ByteWork.getByteArray(identity));
     }
 
-    public static String readIdentity(InputStream in) throws IOException {
-        byte[] small = new byte[2];
-        readLoop(in, small, 0);
-
-        int length = ByteWork.convertTwoUnsignedBytesToInt(small);
-        byte[] full = new byte[length];
-        readLoop(in, full, 0);
-        return ByteWork.convertBytesToString(full);
+    public static int readIdentity(InputStream in) throws IOException {
+        byte[] buf = new byte[4];
+        readLoop(in, buf, 0);
+        return ByteWork.convertFourBytesToInt(buf);
     }
 }

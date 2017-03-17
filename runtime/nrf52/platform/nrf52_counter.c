@@ -1,18 +1,3 @@
-/* Copyright (c) 2016 Nordic Semiconductor. All Rights Reserved.
- *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
- *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
- *
- */
-
-/**@cond To Make Doxygen skip documentation generation for this file.
- * @{
- */
 
 #include "nrf52_counter.h"
 #include "nrf_drv_rtc.h"
@@ -72,7 +57,7 @@ void counter_stop(void)
 
 
 
-uint32_t __int_counter_get(void)
+inline static uint32_t __int_counter_get(void)
 {
     if(!m_started)
         counter_start();
@@ -92,6 +77,3 @@ uint32_t counter_ms(void)
 
 }
 
-/** @}
- *  @endcond
- */

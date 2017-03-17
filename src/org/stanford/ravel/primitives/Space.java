@@ -11,6 +11,8 @@ import java.util.*;
  * Created by lauril on 7/29/16.
  */
 public class Space extends Primitive {
+    private static int idCounter = 1;
+
     private final Set<ConcreteModel> mModels = new HashSet<>();
     private final Map<String, ConcreteModelInstance> mModelInstances = new HashMap<>();
     private final Set<ConcreteController> mControllers = new HashSet<>();
@@ -20,12 +22,19 @@ public class Space extends Primitive {
     private final Map<String, ConcreteInterfaceInstance> mInterfaceInstances = new HashMap<>();
     private final SpaceSymbol mSymbol;
     private final SystemAPIInstance mSystemAPI = new SystemAPIInstance(new SystemAPI(this, this), "system");
+    private final int id;
 
     private Platform mPlatform;
 
     public Space(SpaceSymbol symbol) {
         super(symbol.getName());
+
+        id = idCounter++;
         mSymbol = symbol;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /** add components to the particular space */
@@ -135,7 +144,7 @@ public class Space extends Primitive {
 
     @Override
     public String toString() {
-        return "Space " + getName();
+        return "Space #" + id + ": " + getName();
     }
 
     public void addSecurityOperation(ModelField field, Space target, Flow flow, Key key, SecurityPrimitive primitive, int offset) {

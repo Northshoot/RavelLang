@@ -23,7 +23,7 @@ typedef struct {
 
 } RavelDriver;
 
-RavelEndpoint * const * ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name);
+RavelEndpoint * const * ravel_driver_get_endpoints_by_name(RavelDriver *driver, int32_t name);
 
 RavelError ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint);
 void       ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet);

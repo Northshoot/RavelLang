@@ -1,4 +1,4 @@
-file(name) ::=<<
+file(name, id) ::=<<
 /*
  * You, just keep on being awesome!
  * main.c
@@ -35,7 +35,7 @@ int main(void) {
   ravel_generated_app_dispatcher_init(&dispatcher);
 
   //init driver
-  ravel_nrf52_driver_init(&driver, &dispatcher.base, "<name>");
+  ravel_nrf52_driver_init(&driver, &dispatcher.base, "<name>", <id>);
 
   //set driver
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);

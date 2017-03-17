@@ -12,6 +12,7 @@ interface Timer():
 interface Clock():
     implementation:
         c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
 
     def getNow()
 

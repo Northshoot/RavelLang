@@ -14,17 +14,17 @@ import java.util.List;
  * Created by gcampagn on 1/30/17.
  */
 public abstract class StreamingModel<RecordType extends ModelRecord> extends BaseModel<RecordType> {
-    private final List<String> mSinkEndpoints = new ArrayList<>();
-    private final List<String> mSourceEndpoints = new ArrayList<>();
+    private final List<Integer> mSinkEndpoints = new ArrayList<>();
+    private final List<Integer> mSourceEndpoints = new ArrayList<>();
 
     protected StreamingModel(DispatcherAPI dispatcher, int size, boolean reliable, boolean durable) {
         super(dispatcher, size, reliable, durable);
     }
 
-    public void addSinkEndpoints(Collection<String> e) {
+    public void addSinkEndpoints(Collection<Integer> e) {
         mSinkEndpoints.addAll(e);
     }
-    public void addSourceEndpoints(Collection<String> e) {
+    public void addSourceEndpoints(Collection<Integer> e) {
         mSourceEndpoints.addAll(e);
     }
 
@@ -129,7 +129,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     private Error forward(RavelPacket pkt, RecordType record) {
-        Collection<String> endpointNames;
+        Collection<Integer> endpointNames;
 
         if (pkt.isSaveDone()) {
             endpointNames = mSourceEndpoints;

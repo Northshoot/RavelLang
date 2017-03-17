@@ -247,7 +247,7 @@ out:
 }
 
 static RavelError
-ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * const *endpoint_names)
+ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *endpoint_names)
 {
 
     int i, j;
@@ -256,13 +256,12 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const char * co
     //ravel_system_print(NULL, "send_record");
     //ravel_system_print(NULL, endpoint_names[0]);
 
-    if (endpoint_names[0] == NULL)
+    if (endpoint_names[0] == -1)
         return RAVEL_ERROR_SUCCESS;
 
     error = RAVEL_ERROR_SUCCESS;
-    for (i = 0; endpoint_names[i]; i++) {
-    //TODO: moving endpoint to uuid
-        const char *endpoint_name = endpoint_names[i];
+    for (i = 0; endpoint_names[i] != -1; i++) {
+        int32_t endpoint_name = endpoint_names[i];
         RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name(self->dispatcher, endpoint_name);
 
         if (endpoints[0] == NULL) {
@@ -595,14 +594,14 @@ ravel_streaming_model_delete(RavelStreamingModel *self, void *record)
 }
 
 static RavelError
-ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const char * const *endpoint_names, void *record)
+ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const int32_t *endpoint_names, void *record)
 {
     int i, j;
     RavelError error, local_error;
 
     error = RAVEL_ERROR_SUCCESS;
-    for (i = 0; endpoint_names[i]; i++) {
-        const char *endpoint_name = endpoint_names[i];
+    for (i = 0; endpoint_names[i] != -1; i++) {
+        int32_t endpoint_name = endpoint_names[i];
         RavelEndpoint * const *endpoints = ravel_base_dispatcher_get_endpoints_by_name(self->dispatcher, endpoint_name);
 
         for (j = 0; endpoints[j]; j++) {
@@ -642,14 +641,14 @@ ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const ch
 static RavelError
 ravel_streaming_model_forward(RavelStreamingModel *self, RavelPacket *pkt, void *record)
 {
-    const char * const *endpoint_names;
+    const int32_t *endpoint_names;
 
     if (pkt->is_save_done)
         endpoint_names = self->source_endpoints;
     else
         endpoint_names = self->sink_endpoints;
 
-    if (endpoint_names[0] == NULL) {
+    if (endpoint_names[0] == -1) {
         if (!pkt->is_save_done) {
             RavelPacket save_done;
 

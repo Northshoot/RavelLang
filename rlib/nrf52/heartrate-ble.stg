@@ -1,0 +1,74 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+<begin_source(name)>
+#define NRF_LOG_MODULE_NAME "CLOCK:::"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+<includes:do_include(); separator="\n">
+
+static void do_init(<name> *self) {}
+static void do_connected(<name> *self, bool connected) {
+    // do something
+}
+
+static struct BleInterfaceVtable vtable = {
+    .init = (void(*)(void*))do_init
+    .connected = (void(*)(void*,bool))do_connected
+}
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    self->vtable = &vtable;
+    nrf52_ble_interface_add_handler(self);
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdint.h>
+#include "nrf52_ble_interface.h"
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    struct BleInterfaceVtable *vtable;
+
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+uint32_t ravel_generated_<name; format="function">_get_now();
+
+uint32_t ravel_generated_<name; format="function">_get_ms();
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

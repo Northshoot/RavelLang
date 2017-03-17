@@ -75,9 +75,9 @@ public class SecurityTransformation {
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, byteArray);
 
-        int endpointname = builder.allocateRegister(PrimitiveType.STR);
-        // endpointname = endpoint.getName()
-        builder.add(IntrinsicFactory.createEndpointGetName(endpointname, endpointSym.getRegister()));
+        int endpointname = builder.allocateRegister(PrimitiveType.INT32);
+        // endpointname = endpoint.getId()
+        builder.add(IntrinsicFactory.createEndpointGetId(endpointname, endpointSym.getRegister()));
 
         int maclength = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TImmediateLoad(PrimitiveType.INT32, maclength, 0));
@@ -202,19 +202,19 @@ public class SecurityTransformation {
     private void applyOneEncryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int offset, int encryptedSize, int endpointname) {
         // the overall code looks something like
         //
-        // if (endpoint.getName() == "...") {
+        // if (endpoint.getId() == ...) {
         //   key = ...
         //   encrypt(buffer, key);
         // }
 
-        int comparename = builder.allocateRegister(PrimitiveType.STR);
+        int comparename = builder.allocateRegister(PrimitiveType.INT32);
 
         // comparename = ...
-        builder.add(new TImmediateLoad(PrimitiveType.STR, comparename, op.getTarget().getName()));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, comparename, op.getTarget().getId()));
 
         // comparison = endpointname == comparename
         int comparison = builder.allocateRegister(PrimitiveType.BOOL);
-        builder.add(new TComparisonOp(PrimitiveType.STR, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
+        builder.add(new TComparisonOp(PrimitiveType.INT32, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
 
         ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
         LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
@@ -266,19 +266,19 @@ public class SecurityTransformation {
     private void applyOneDecryption(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int bufferStart, int bufferEnd, int endpointname, int isEncrypted) {
         // the overall code looks something like
         //
-        // if (endpoint.getName() == "...") {
+        // if (endpoint.getId() == ...) {
         //   key = ...
         //   encrypt(buffer, key);
         // }
 
-        int comparename = builder.allocateRegister(PrimitiveType.STR);
+        int comparename = builder.allocateRegister(PrimitiveType.INT32);
 
         // comparename = ...
-        builder.add(new TImmediateLoad(PrimitiveType.STR, comparename, op.getTarget().getName()));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, comparename, op.getTarget().getId()));
 
         // comparison = endpointname == comparename
         int comparison = builder.allocateRegister(PrimitiveType.BOOL);
-        builder.add(new TComparisonOp(PrimitiveType.STR, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
+        builder.add(new TComparisonOp(PrimitiveType.INT32, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
 
         ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
         LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
@@ -333,18 +333,18 @@ public class SecurityTransformation {
     private void prepareOneMac(TypedIRBuilder builder, SecurityOperation op, int maclength, int endpointname) {
         // the overall code looks something like
         //
-        // if (endpoint.getName() == "...") {
+        // if (endpoint.getId() == ...) {
         //   maclength = ...
         // }
 
-        int comparename = builder.allocateRegister(PrimitiveType.STR);
+        int comparename = builder.allocateRegister(PrimitiveType.INT32);
 
         // comparename = ...
-        builder.add(new TImmediateLoad(PrimitiveType.STR, comparename, op.getTarget().getName()));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, comparename, op.getTarget().getId()));
 
         // comparison = endpointname == comparename
         int comparison = builder.allocateRegister(PrimitiveType.BOOL);
-        builder.add(new TComparisonOp(PrimitiveType.STR, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
+        builder.add(new TComparisonOp(PrimitiveType.INT32, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
 
         ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
         LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
@@ -391,20 +391,20 @@ public class SecurityTransformation {
     private void applyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int buffer, int endOfData, int endpointname) {
         // the overall code looks something like
         //
-        // if (endpoint.getName() == "...") {
+        // if (endpoint.getId() == ...) {
         //   key = load_key(...);
         //   macOffset = encryptedSize + ...;
         //   apply_mac(buffer, encryptedSize, macOffset);
         // }
 
-        int comparename = builder.allocateRegister(PrimitiveType.STR);
+        int comparename = builder.allocateRegister(PrimitiveType.INT32);
 
         // comparename = ...
-        builder.add(new TImmediateLoad(PrimitiveType.STR, comparename, op.getTarget().getName()));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, comparename, op.getTarget().getId()));
 
         // comparison = endpointname == comparename
         int comparison = builder.allocateRegister(PrimitiveType.BOOL);
-        builder.add(new TComparisonOp(PrimitiveType.STR, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
+        builder.add(new TComparisonOp(PrimitiveType.INT32, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
 
         ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
         LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();
@@ -510,9 +510,9 @@ public class SecurityTransformation {
         builder.setNextRegister(firstReg);
         builder.setRegisterType(Registers.RETURN_REG, PrimitiveType.VOID);
 
-        int endpointname = builder.allocateRegister(PrimitiveType.STR);
+        int endpointname = builder.allocateRegister(PrimitiveType.INT32);
         // endpointname = endpoint.getName()
-        builder.add(IntrinsicFactory.createEndpointGetName(endpointname, endpointSym.getRegister()));
+        builder.add(IntrinsicFactory.createEndpointGetId(endpointname, endpointSym.getRegister()));
 
         int endOfData = builder.allocateRegister(PrimitiveType.INT32);
         builder.add(new TMove(PrimitiveType.INT32, endOfData, lengthSym.getRegister()));
@@ -576,19 +576,19 @@ public class SecurityTransformation {
     private void verifyOneMac(TypedIRBuilder builder, SecurityOperation op, int dispatcher, int data, int endOfData, int endpointname) {
         // the overall code looks something like
         //
-        // if (endpoint.getName() == "...") {
+        // if (endpoint.getId() == ...) {
         //   key = load_key(...);
         //   verify_mac(data, key);
         // }
 
-        int comparename = builder.allocateRegister(PrimitiveType.STR);
+        int comparename = builder.allocateRegister(PrimitiveType.INT32);
 
         // comparename = ...
-        builder.add(new TImmediateLoad(PrimitiveType.STR, comparename, op.getTarget().getName()));
+        builder.add(new TImmediateLoad(PrimitiveType.INT32, comparename, op.getTarget().getId()));
 
         // comparison = endpointname == comparename
         int comparison = builder.allocateRegister(PrimitiveType.BOOL);
-        builder.add(new TComparisonOp(PrimitiveType.STR, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
+        builder.add(new TComparisonOp(PrimitiveType.INT32, comparison, endpointname, comparename, ComparisonOperation.EQUAL));
 
         ControlFlowGraphBuilder cfgBuilder = builder.getControlFlowGraphBuilder();
         LoopTreeBuilder loopTreeBuilder = builder.getLoopTreeBuilder();

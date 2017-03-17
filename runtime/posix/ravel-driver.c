@@ -24,7 +24,7 @@ static void
 load_endpoint_table(RavelPosixDriver *self, const char *file_name)
 {
     FILE *fp = fopen(file_name, "r");
-    char *name;
+    int32_t id;
     char *url;
     char *port_str;
     unsigned long port;
@@ -36,7 +36,7 @@ load_endpoint_table(RavelPosixDriver *self, const char *file_name)
     }
 
     while (!feof(fp)) {
-        if (fscanf(fp, "%ms %ms ", &name, &url) != 2) {
+        if (fscanf(fp, "%d %ms ", &id, &url) != 2) {
             fprintf(stderr, "Badly formatted line\n");
             continue;
         }
@@ -55,7 +55,7 @@ load_endpoint_table(RavelPosixDriver *self, const char *file_name)
         }
 
         endpoint = calloc(sizeof(RavelPosixEndpoint), 1);
-        endpoint->base.name = name;
+        endpoint->base.id = id;
         endpoint->port = port;
         endpoint->address = inet_addr (url + strlen("tcp://"));
         ravel_posix_driver_register_endpoint (self, endpoint);
@@ -139,11 +139,12 @@ load_key_table(RavelPosixDriver *self, const char *file_name)
 }
 
 void
-ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int argc, const char * const * argv)
+ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int32_t app_id, int argc, const char * const * argv)
 {
     ravel_key_provider_init(&self->base.key_provider);
 
     self->app_name = app_name;
+    self->app_id = app_id;
 
     memset(self->endpoint_table, 0, sizeof(self->endpoint_table));
 
@@ -160,12 +161,6 @@ ravel_posix_driver_init(RavelPosixDriver *self, const char *app_name, int argc, 
         load_key_table (self, argv[2]);
 }
 
-static void posix_endpoint_free(RavelPosixEndpoint *endpoint)
-{
-    free((char*)endpoint->base.name);
-    free(endpoint);
-}
-
 void
 ravel_posix_driver_finalize(RavelPosixDriver *self)
 {
@@ -178,24 +173,10 @@ ravel_posix_driver_finalize(RavelPosixDriver *self)
         RavelPosixEndpoint **endpoints = self->endpoint_table[i];
 
         for (j = 0; endpoints && endpoints[j]; j++)
-            posix_endpoint_free(endpoints[j]);
+            free(endpoints[j]);
 
         free(endpoints);
     }
-}
-
-static size_t
-string_hash(const char *string)
-{
-    const char *p = string;
-    size_t hash = 33;
-
-    while (*p) {
-        hash = hash * 7 + *p;
-        p++;
-    }
-
-    return hash;
 }
 
 static bool
@@ -205,7 +186,7 @@ insert_endpoint_in_table(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
     size_t j = 0;
     size_t hash;
 
-    hash = string_hash(endpoint->base.name);
+    hash = endpoint->base.id;
     for (i = 0; i < RAVEL_ENDPOINT_TABLE_SIZE; i++) {
          RavelPosixEndpoint **endpoints = self->endpoint_table[(hash + i) % RAVEL_ENDPOINT_TABLE_SIZE];
 
@@ -215,7 +196,7 @@ insert_endpoint_in_table(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
 
              endpoints[0] = endpoint;
              return true;
-         } else if (strcmp(endpoints[0]->base.name, endpoint->base.name) == 0) {
+         } else if (endpoints[0]->base.id == endpoint->base.id) {
              for (j = 0; j < RAVEL_MAX_ENDPOINTS; j++) {
                  if (endpoints[j] == NULL) {
                      endpoints[j] = endpoint;
@@ -286,6 +267,9 @@ start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
     int fd;
     int ok;
     struct sockaddr_in address;
+    uint8_t id_buf[4];
+    size_t done;
+    ssize_t written;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0)
@@ -301,9 +285,16 @@ start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
         return -1;
     }
 
-    if (write_loop(fd, strlen(self->app_name), (uint8_t*)self->app_name) != RAVEL_ERROR_SUCCESS) {
-        close(fd);
-        return -1;
+    ravel_intrinsic_write_int32 (id_buf, 0, self->app_id);
+
+    done = 0;
+    while (done < 4) {
+        written = write(fd, id_buf+done, 4-done);
+        if (written < 0) {
+            close(fd);
+            return -1;
+        }
+        done += written;
     }
 
     endpoint->base.connected = true;
@@ -318,7 +309,7 @@ ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint 
     if (!insert_endpoint_in_table(self, endpoint))
         abort();
 
-    endpoint->is_local = strcmp(endpoint->base.name, self->app_name) == 0;
+    endpoint->is_local = endpoint->base.id == self->app_id;
     if (endpoint->is_local)
         start_local_endpoint(self, endpoint);
     else
@@ -366,10 +357,11 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
     int fd;
     struct sockaddr_in address;
     socklen_t address_len;
-    uint8_t *name_buffer;
-    size_t name_len;
-    char *name;
     RavelPosixEndpoint *endpoint;
+    ssize_t ok;
+    uint8_t id_buf[4];
+    int32_t id;
+    size_t done;
 
     address_len = sizeof(address);
     fd = accept(listenfd, (struct sockaddr*)&address, &address_len);
@@ -381,21 +373,25 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
     endpoint = calloc(1, sizeof(RavelPosixEndpoint));
     if (endpoint == NULL) abort();
     add_poll_fd(self, fd, POLLIN, false, endpoint, NULL, NULL);
-    name_buffer = read_loop(fd, &name_len);
 
-    name = malloc(name_len + 1);
-    if (name == NULL) abort();
-    memcpy(name, name_buffer, name_len);
-    name[name_len] = 0;
-    free(name_buffer);
+    done = 0;
+    while (done < 4) {
+        ok = read(fd, id_buf+done, 4-done);
+        if (ok < 0)
+            return;
+        done += ok;
+    }
+    id = ravel_intrinsic_extract_int32 (id_buf, 0);
 
-    endpoint->base.name = name;
+    endpoint->base.id = id;
     endpoint->port = ntohs(address.sin_port);
     endpoint->address = address.sin_addr.s_addr;
     endpoint->base.connected = true;
 
     insert_endpoint_in_table (self, endpoint);
 }
+
+static void forward_packet (RavelPosixDriver *self, RavelPacket *packet);
 
 static void handle_new_data(RavelPosixDriver *self, int fd, RavelPosixEndpoint *endpoint)
 {
@@ -409,6 +405,18 @@ static void handle_new_data(RavelPosixDriver *self, int fd, RavelPosixEndpoint *
 
     ravel_packet_init_from_network(&packet, buffer, length);
     free(buffer);
+
+    if (ravel_packet_get_source (&packet) == self->app_id) {
+        // routing loop or malicious packet, drop
+        ravel_packet_finalize (&packet);
+        return;
+    }
+
+    if (ravel_packet_get_destination (&packet) != self->app_id) {
+        // not for us
+        forward_packet (self, &packet);
+        return;
+    }
 
     ravel_base_dispatcher_data_received(self->base.dispatcher, &packet, &endpoint->base);
 
@@ -454,26 +462,26 @@ ravel_posix_driver_main_loop(RavelPosixDriver *self)
 void
 ravel_posix_driver_app_dispatcher_ready(RavelPosixDriver *self)
 {
-    ravel_generated_app_dispatcher_started(self->base.dispatcher);
+    ravel_generated_app_dispatcher_started((struct AppDispatcher*)self->base.dispatcher);
 }
 
 static RavelEndpoint * const no_endpoints[] = { NULL };
 
 RavelEndpoint * const *
-ravel_driver_get_endpoints_by_name(RavelDriver *driver, const char *name)
+ravel_driver_get_endpoints_by_name(RavelDriver *driver, int32_t name)
 {
     RavelPosixDriver *self = ravel_container_of(driver, RavelPosixDriver, base);
     size_t i = 0;
     size_t hash;
 
-    hash = string_hash(name);
+    hash = name;
     for (i = 0; i < RAVEL_ENDPOINT_TABLE_SIZE; i++) {
         RavelPosixEndpoint **endpoints = self->endpoint_table[(hash + i) % RAVEL_ENDPOINT_TABLE_SIZE];
 
         if (endpoints == NULL)
             return no_endpoints;
 
-        if (strcmp(endpoints[0]->base.name, name) == 0)
+        if (endpoints[0]->base.id == name)
             return (RavelEndpoint * const *)endpoints;
     }
 
@@ -554,6 +562,7 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
     int fd;
 
     assert (!((RavelPosixEndpoint*)endpoint)->is_local);
+    ravel_packet_set_source_destination (packet, self->app_id, endpoint->id);
 
     for (i = 0; i < self->nfds; i++) {
         if (self->watched_fds[i].endpoint == (RavelPosixEndpoint*)endpoint) {
@@ -567,6 +576,40 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
 
     ravel_packet_finalize(packet);
     return RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+}
+
+static void
+forward_packet_to_endpoint (RavelPosixDriver *self,
+                            RavelPacket      *packet,
+                            RavelEndpoint    *endpoint)
+{
+    size_t i;
+    int fd;
+
+    assert (!((RavelPosixEndpoint*)endpoint)->is_local);
+
+    for (i = 0; i < self->nfds; i++) {
+        if (self->watched_fds[i].endpoint == (RavelPosixEndpoint*)endpoint) {
+            write_loop (self->poll_fds[i].fd, packet->packet_length, packet->packet_data);
+            // ignore errors
+        }
+    }
+
+    fd = start_remote_endpoint(self, (RavelPosixEndpoint*)endpoint);
+    if (fd >= 0) {
+        write_loop (fd, packet->packet_length, packet->packet_data);
+        // ignore errors
+    }
+}
+
+static void
+forward_packet (RavelPosixDriver *self, RavelPacket *packet)
+{
+    RavelEndpoint * const *endpoints = ravel_driver_get_endpoints_by_name (&self->base, ravel_packet_get_destination (packet));
+    size_t i;
+
+    for (i = 0; endpoints && endpoints[i]; i++)
+        forward_packet_to_endpoint (self, packet, endpoints[i]);
 }
 
 void ravel_driver_queue_callback(RavelDriver *driver, void (*fn)(void*,void*), void* ptr1, void* ptr2)

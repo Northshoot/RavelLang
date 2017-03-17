@@ -14,8 +14,8 @@ public class TcpEndpoint extends Endpoint {
     private final int port;
     private final String address;
 
-    TcpEndpoint(String name, URI url) {
-        super(TYPE.SOCKET, name);
+    TcpEndpoint(int id, URI url) {
+        super(TYPE.SOCKET, id);
 
         int port = url.getPort();
         if (port < 0)
@@ -24,8 +24,8 @@ public class TcpEndpoint extends Endpoint {
         address = url.getHost();
     }
 
-    TcpEndpoint(String name, InetSocketAddress address) {
-        super(TYPE.SOCKET, name);
+    TcpEndpoint(int id, InetSocketAddress address) {
+        super(TYPE.SOCKET, id);
 
         this.port = address.getPort();
         this.address = address.getHostString();

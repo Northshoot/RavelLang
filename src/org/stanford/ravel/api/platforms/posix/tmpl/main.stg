@@ -1,4 +1,4 @@
-file(name) ::=<<
+file(name, id) ::=<<
 /*
  * You, just keep on being awesome!
  * main.c
@@ -19,7 +19,7 @@ RavelPosixDriver ravel_posix_driver;
 int
 main(int argc, const char * const * argv)
 {
-    ravel_posix_driver_init(&ravel_posix_driver, "<name>", argc, argv);
+    ravel_posix_driver_init(&ravel_posix_driver, "<name>", <id>, argc, argv);
     ravel_generated_app_dispatcher_init(&dispatcher);
     ravel_posix_driver.base.dispatcher = &dispatcher.base;
     ravel_generated_app_dispatcher_set_driver(&dispatcher, &ravel_posix_driver.base);

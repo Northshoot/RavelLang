@@ -26,7 +26,7 @@ public class IntrinsicTypes {
         public Endpoint() {
             super("Endpoint");
             //Add methods to the endpoint
-            addMethod("getName", new Type[]{}, PrimitiveType.STR);
+            addMethod("getId", new Type[]{}, PrimitiveType.INT32);
         }
     }
 

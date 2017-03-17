@@ -19,10 +19,10 @@ public interface DriverAPI {
 
     /**
      * Get all the known connected endpoints with
-     * @param name
+     * @param id
      * @return
      */
-    Collection<Endpoint> getEndpointsByName(String name);
+    Collection<Endpoint> getEndpointsByName(int id);
 
     /**
      * Register a remote endpoint;

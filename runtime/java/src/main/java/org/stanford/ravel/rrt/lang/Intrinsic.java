@@ -17,8 +17,8 @@ import java.util.Date;
  * Created by gcampagn on 2/21/17.
  */
 public class Intrinsic {
-    public static String endpoint_get_name(Endpoint ep) {
-        return ep.getName();
+    public static int endpoint_get_id(Endpoint ep) {
+        return ep.getId();
     }
 
     public static int read_record_id(ModelRecord record) {

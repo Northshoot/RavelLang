@@ -122,3 +122,13 @@ ravel_packet_finalize (RavelPacket *self)
 {
     free (self->packet_data);
 }
+
+void
+ravel_packet_set_source_destination (RavelPacket *self, int32_t source, int32_t destination)
+{
+    assert (source >= 0 && source < 256);
+    assert (destination >= 0 && destination < 256);
+
+    self->packet_data[SRC] = source;
+    self->packet_data[DST] = destination;
+}

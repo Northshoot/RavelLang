@@ -59,7 +59,7 @@ public class AndroidDriver extends JavaDriver {
     void packetCompleted(BlePacket pkt){
         byte [] data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
-        appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
+        packetReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
     }
 
     int counter = 0;
@@ -92,7 +92,8 @@ public class AndroidDriver extends JavaDriver {
                 case BleDefines.ACTION_GATT_CONNECTED:
                     Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
                     device_address = intent.getStringExtra(BleDefines.EXTRA_DATA);
-                    BleEndpoint ble_e = new BleEndpoint(device_address);
+                    // FIXME 1 = EmbeddedSpace
+                    BleEndpoint ble_e = new BleEndpoint(1);
                     ble_e.connected();
                     bleClients.put(device_address, ble_e);
                     //add device to the fragment map
