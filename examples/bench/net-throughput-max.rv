@@ -8,12 +8,12 @@ interface Clock():
 
 streaming model Ping():
     properties:
-        records = 100
+        records = 4
         durable = False
         reliable = False
         flow = EmbeddedSpace -> GatewaySpace
     schema:
-        value : int32[5]
+        value : int32[3]
 
 
 controller PingController( ping : Ping , clock : Clock):

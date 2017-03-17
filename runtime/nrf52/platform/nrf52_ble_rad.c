@@ -259,6 +259,7 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
                 m_enqueued_pkt = m_sent_pkt = 0;
                 CALL_UP_SEND_DONE(p_rad);
             }
+            break;
 //            err_code = app_sched_event_put(NULL, 0, update_timers_state);
 //                APP_ERROR_CHECK(err_code);
         default:
