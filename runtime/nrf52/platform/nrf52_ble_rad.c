@@ -259,7 +259,6 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
                 m_enqueued_pkt = m_sent_pkt = 0;
                 CALL_UP_SEND_DONE(p_rad);
             }
-            break;
 //            err_code = app_sched_event_put(NULL, 0, update_timers_state);
 //                APP_ERROR_CHECK(err_code);
         default:
@@ -387,7 +386,7 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
 
         // TODO: enqueue the packet for sending
         // FIXME: can not handle more than 7 pkt due to out buffer
-        //needs global buffer, that releasing the send through the scheduler
+        //needs global buffer, that releasing the send through the sch
        uint32_t send_result = send_fragment(p_rad, buffer, sizeof( data_packet_t)+ravel_pkt.length);
         NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_enqueued_pkt, send_result);
         m_enqueued_pkt++;

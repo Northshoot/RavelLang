@@ -144,8 +144,9 @@ void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // Main loop.
-    //Start BLE
+    //START BLE
     nrf52_r_core_ble_start();
+
 
     NRF_LOG_INFO("LOOP\r\n");
     //
