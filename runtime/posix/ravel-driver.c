@@ -267,6 +267,9 @@ start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
     int fd;
     int ok;
     struct sockaddr_in address;
+    uint8_t id_buf[4];
+    size_t done;
+    ssize_t written;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0)
@@ -282,9 +285,16 @@ start_remote_endpoint(RavelPosixDriver *self, RavelPosixEndpoint *endpoint)
         return -1;
     }
 
-    if (write_loop(fd, strlen(self->app_name), (uint8_t*)self->app_name) != RAVEL_ERROR_SUCCESS) {
-        close(fd);
-        return -1;
+    ravel_intrinsic_write_int32 (id_buf, 0, self->app_id);
+
+    done = 0;
+    while (done < 4) {
+        written = write(fd, id_buf+done, 4-done);
+        if (written < 0) {
+            close(fd);
+            return -1;
+        }
+        done += written;
     }
 
     endpoint->base.connected = true;
@@ -381,6 +391,8 @@ static void handle_new_connection(RavelPosixDriver *self, int listenfd)
     insert_endpoint_in_table (self, endpoint);
 }
 
+static void forward_packet (RavelPosixDriver *self, RavelPacket *packet);
+
 static void handle_new_data(RavelPosixDriver *self, int fd, RavelPosixEndpoint *endpoint)
 {
     uint8_t *buffer;
@@ -393,6 +405,18 @@ static void handle_new_data(RavelPosixDriver *self, int fd, RavelPosixEndpoint *
 
     ravel_packet_init_from_network(&packet, buffer, length);
     free(buffer);
+
+    if (ravel_packet_get_source (&packet) == self->app_id) {
+        // routing loop or malicious packet, drop
+        ravel_packet_finalize (&packet);
+        return;
+    }
+
+    if (ravel_packet_get_destination (&packet) != self->app_id) {
+        // not for us
+        forward_packet (self, &packet);
+        return;
+    }
 
     ravel_base_dispatcher_data_received(self->base.dispatcher, &packet, &endpoint->base);
 
@@ -538,6 +562,7 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
     int fd;
 
     assert (!((RavelPosixEndpoint*)endpoint)->is_local);
+    ravel_packet_set_source_destination (packet, self->app_id, endpoint->id);
 
     for (i = 0; i < self->nfds; i++) {
         if (self->watched_fds[i].endpoint == (RavelPosixEndpoint*)endpoint) {
@@ -551,6 +576,40 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
 
     ravel_packet_finalize(packet);
     return RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+}
+
+static void
+forward_packet_to_endpoint (RavelPosixDriver *self,
+                            RavelPacket      *packet,
+                            RavelEndpoint    *endpoint)
+{
+    size_t i;
+    int fd;
+
+    assert (!((RavelPosixEndpoint*)endpoint)->is_local);
+
+    for (i = 0; i < self->nfds; i++) {
+        if (self->watched_fds[i].endpoint == (RavelPosixEndpoint*)endpoint) {
+            write_loop (self->poll_fds[i].fd, packet->packet_length, packet->packet_data);
+            // ignore errors
+        }
+    }
+
+    fd = start_remote_endpoint(self, (RavelPosixEndpoint*)endpoint);
+    if (fd >= 0) {
+        write_loop (fd, packet->packet_length, packet->packet_data);
+        // ignore errors
+    }
+}
+
+static void
+forward_packet (RavelPosixDriver *self, RavelPacket *packet)
+{
+    RavelEndpoint * const *endpoints = ravel_driver_get_endpoints_by_name (&self->base, ravel_packet_get_destination (packet));
+    size_t i;
+
+    for (i = 0; endpoints && endpoints[i]; i++)
+        forward_packet_to_endpoint (self, packet, endpoints[i]);
 }
 
 void ravel_driver_queue_callback(RavelDriver *driver, void (*fn)(void*,void*), void* ptr1, void* ptr2)

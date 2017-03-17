@@ -59,7 +59,7 @@ public class AndroidDriver extends JavaDriver {
     void packetCompleted(BlePacket pkt){
         byte [] data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
-        appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
+        packetReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
     }
 
     int counter = 0;

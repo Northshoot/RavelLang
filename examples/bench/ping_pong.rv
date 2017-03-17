@@ -95,10 +95,25 @@ controller EavesDropController(ping : Ping, pong : Pong):
         pong.delete(self.record)
 
 
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+        #system = Posix.v2008
+
+    models:
+        ref = Reference()
+        ping = Ping()
+        pong = Pong()
+
+    controllers:
+        ping_cnt = PingController(ref = models.ref, ping = models.ping, pong = models.pong)
+
 space GatewaySpace:
     platform:
         language = JLang
         system = Android.v19
+        #system = J2SE.v18
 
     models:
         ping = Ping()
@@ -119,17 +134,3 @@ space CloudSpace:
 
     controllers:
         pong_cnt = PongController(ping = models.ping, pong = models.pong)
-
-
-space EmbeddedSpace:
-    platform:
-        language = CLang
-        system = Nrf52.v1
-
-    models:
-        ref = Reference()
-        ping = Ping()
-        pong = Pong()
-
-    controllers:
-        ping_cnt = PingController(ref = models.ref, ping = models.ping, pong = models.pong)

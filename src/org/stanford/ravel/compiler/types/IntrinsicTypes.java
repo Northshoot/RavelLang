@@ -28,7 +28,7 @@ public class IntrinsicTypes {
             //Add methods to the endpoint
             addMethod("getId", new Type[]{}, PrimitiveType.INT32);
         }
-    }   
+    }
 
     public static final ClassType GROWABLE_BYTE_ARRAY = new GrowableByteArray();
     public static final ClassType ENDPOINT = new Endpoint();

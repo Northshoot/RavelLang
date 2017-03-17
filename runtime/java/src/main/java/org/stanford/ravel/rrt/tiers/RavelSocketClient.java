@@ -1,6 +1,5 @@
 package org.stanford.ravel.rrt.tiers;
 
-import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
 
 import java.io.EOFException;
@@ -17,15 +16,15 @@ import java.net.Socket;
 class RavelSocketClient implements RavelSocket {
     private final int identity;
     private final TcpEndpoint remote;
-    private final DispatcherAPI dispatcher;
+    private final JavaDriver driver;
 
     private Socket socket;
     private Thread listeningThread;
 
-    RavelSocketClient(int identity, TcpEndpoint remote, DispatcherAPI dispatcher) throws RavelIOException {
+    RavelSocketClient(int identity, TcpEndpoint remote, JavaDriver driver) throws RavelIOException {
         this.identity = identity;
         this.remote = remote;
-        this.dispatcher = dispatcher;
+        this.driver = driver;
 
         try {
             connect();
@@ -52,7 +51,7 @@ class RavelSocketClient implements RavelSocket {
         while (true) {
             try {
                 RavelPacket pkt = RavelSocketProtocol.readInput(is);
-                dispatcher.driver__dataReceived(pkt, remote);
+                driver.packetReceived(pkt, remote);
             } catch(EOFException e) {
                 closeSocket();
                 return;

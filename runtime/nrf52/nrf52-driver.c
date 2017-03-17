@@ -67,6 +67,8 @@ RavelEndpoint *endpoint_out;
 RavelError
 ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint)
 {
+
+
     if (!m_network_is_busy) {
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;

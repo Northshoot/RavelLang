@@ -1,6 +1,5 @@
 package org.stanford.ravel.rrt.tiers;
 
-import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
 
 import java.io.Closeable;
@@ -76,11 +75,9 @@ public class RavelSocketServer implements Runnable, Closeable {
     private volatile boolean closed = false;
     private final Thread listeningThread;
     private final JavaDriver driver;
-    private final DispatcherAPI dispatcher;
 
-    public RavelSocketServer(TcpEndpoint endpoint, JavaDriver driver, DispatcherAPI dispatcher) throws RavelIOException {
+    public RavelSocketServer(TcpEndpoint endpoint, JavaDriver driver) throws RavelIOException {
         this.driver = driver;
-        this.dispatcher = dispatcher;
 
         try {
             listeningSocket = new ServerSocket();
@@ -110,7 +107,7 @@ public class RavelSocketServer implements Runnable, Closeable {
 
             while (true) {
                 RavelPacket pkt = RavelSocketProtocol.readInput(is);
-                dispatcher.driver__dataReceived(pkt, socket.getEndpoint());
+                driver.packetReceived(pkt, socket.getEndpoint());
             }
         } catch (EOFException e) {
             closeClient(socket);

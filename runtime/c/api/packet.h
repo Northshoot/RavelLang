@@ -32,6 +32,14 @@ void ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t le
 
 void ravel_packet_init_copy (RavelPacket *self, RavelPacket *from);
 
+static inline int32_t ravel_packet_get_source (RavelPacket *self) {
+  return self->packet_data[0];
+}
+static inline int32_t ravel_packet_get_destination (RavelPacket *self) {
+  return self->packet_data[1];
+}
+void ravel_packet_set_source_destination (RavelPacket *self, int32_t source, int32_t destination);
+
 void ravel_packet_finalize (RavelPacket *self);
 
 #endif /* API_PACKET_H */

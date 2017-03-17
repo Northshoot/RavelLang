@@ -57,7 +57,7 @@ public class JavaDriver implements DriverAPI {
             if (socketClients.containsKey(endpoint))
                 return socketClients.get(endpoint);
 
-            RavelSocketClient client = new RavelSocketClient(appDispatcher.getAppId(), endpoint, appDispatcher);
+            RavelSocketClient client = new RavelSocketClient(appDispatcher.getAppId(), endpoint, this);
             socketClients.put(endpoint, client);
             return client;
         }
@@ -85,6 +85,37 @@ public class JavaDriver implements DriverAPI {
         }
     }
 
+    private void forwardPacket(final RavelPacket pkt) {
+        for (final Endpoint ep : getEndpointsByName(pkt.getDestination())) {
+            // careful! this is not sendData because we must not tell the app dispatcher
+            // about this packet, or the models will be very confused
+
+            threadPool.execute(new Runnable() {
+                public void run() {
+                    try {
+                        sendDataThread(pkt, ep);
+                    } catch (RavelIOException e) {
+                        // ignore error
+                    }
+                }
+            });
+        }
+    }
+
+    protected void packetReceived(RavelPacket pkt, Endpoint endpoint) {
+        if (pkt.getSource() == appDispatcher.getAppId()) {
+            // routing loop or malicious packet, drop
+            return;
+        }
+        if (pkt.getDestination() != appDispatcher.getAppId()) {
+            // not for us, forward
+            forwardPacket(pkt);
+            return;
+        }
+
+        appDispatcher.driver__dataReceived(pkt, endpoint);
+    }
+
     protected void sendDataThread(RavelPacket data, Endpoint endpoint) throws RavelIOException {
         switch (endpoint.getType()) {
             case SOCKET:
@@ -103,9 +134,11 @@ public class JavaDriver implements DriverAPI {
     }
 
     @Override
-    public Error sendData(final RavelPacket data, final Endpoint endpoint) {
+    public final Error sendData(final RavelPacket data, final Endpoint endpoint) {
         if (endpoint.isLocal()) // can't send to one self
             return Error.SYSTEM_ERROR;
+
+        data.setSourceDestination(appDispatcher.getAppId(), endpoint.getId());
 
         threadPool.execute(new Runnable() {
             public void run() {
@@ -146,7 +179,7 @@ public class JavaDriver implements DriverAPI {
         try {
             switch (ep.getType()) {
                 case SOCKET:
-                    new RavelSocketServer((TcpEndpoint)ep, this, appDispatcher);
+                    new RavelSocketServer((TcpEndpoint)ep, this);
                     break;
                 default:
                     return Error.ENDPOINT_UNREACHABLE;

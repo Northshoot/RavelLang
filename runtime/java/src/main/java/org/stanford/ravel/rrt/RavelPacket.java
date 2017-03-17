@@ -28,8 +28,8 @@ public class RavelPacket {
     public final int record_id;
     private final byte[] record_data;
     private final int record_end;
-    public byte dst=-1;
-    public byte src=-1;
+    private byte dst = -1;
+    private byte src = -1;
 
     private static int BYTE_POS_MODEL_ID = 0;
 
@@ -42,6 +42,7 @@ public class RavelPacket {
 //    at org.stanford.ravel.rrt.android.AndroidDriver.packetCompleted(AndroidDriver.java:62)
 //    at org.stanford.ravel.rrt.android.AndroidDriver.fragment_arrived(AndroidDriver.java:81)
 //    at org.stanford.ravel.rrt.android.AndroidDriver$1.onReceive(AndroidDriver.java:115)
+
     private int flags = 0;
     private boolean ack = false;
     private boolean save_done = false;
@@ -130,6 +131,23 @@ public class RavelPacket {
     private static int getRecordIdFromRecord(byte[] data) {
         if (data.length <3) throw new AssertionError("getRecordIdFromRecord: Expected at least 3 bytes");
         return (int)((data[2] & 0xFF) << 8 | (data[1] & 0xFF));
+    }
+
+    public void setSourceDestination(int source, int destination) {
+        assert source < 255;
+        assert source >= 0;
+        assert destination < 255;
+        assert destination >= 0;
+        src = (byte)source;
+        dst = (byte)destination;
+    }
+
+    public int getSource() {
+        return (int)src & 0xFF;
+    }
+
+    public int getDestination() {
+        return (int)dst & 0xFF;
     }
 
     public byte[] getRecordData() {

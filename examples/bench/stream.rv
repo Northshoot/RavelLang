@@ -1,6 +1,7 @@
 interface Timer():
     implementation:
         c = "rlib/nrf52/app_timer_sys.stg"
+        #c = "rlib/linux/timer.stg"
         java = "rlib/java/timer.stg"
 
     def start_one_shot(time : int32)
@@ -31,15 +32,18 @@ controller EmbeddedController(random: Random, timer : Timer, random_src : Random
     frequency = 1000
 
     event system.started():
+        system.print("system started")
         timer.start_periodic(frequency)
         running = True
 
     event timer.fired():
+        system.print("timer tick")
         rand = random.create()
         rand.value = random_src.next()
         random.save(rand)
 
     event random.full():
+        system.print("model full")
         timer.cancel()
         running = False
 
@@ -49,6 +53,7 @@ controller EmbeddedController(random: Random, timer : Timer, random_src : Random
             running = True
 
     event random.save_done():
+        system.print("save done")
         random.delete(self.record)
 
 
@@ -62,10 +67,27 @@ controller CloudController(random : Random):
         system.print("random arrived " + (str)self.record.value)
 
 
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+        #system = Posix.v2008
+
+    models:
+        random = Random(size=10)
+
+    interfaces:
+        timer_0 = Timer()
+        rnd = RandomSource()
+
+    controllers:
+        ectrl = EmbeddedController(random = models.random, random_src = interfaces.rnd, timer = interfaces.timer_0)
+
 space GatewaySpace:
     platform:
         language = JLang
         system = Android.v19
+        #system = J2SE.v18
         
     models:
         random = Random(size=50)
@@ -84,18 +106,4 @@ space CloudSpace:
     controllers:
         cctrl = CloudController(random = models.random)
 
-space EmbeddedSpace:
-    platform:
-        language = CLang
-        system = Nrf52.v1
-
-    models:
-        random = Random(size=10)
-
-    interfaces:
-        timer_0 = Timer()
-        rnd = RandomSource()
-
-    controllers:
-        ectrl = EmbeddedController(random = models.random, random_src = interfaces.rnd, timer = interfaces.timer_0)
 
