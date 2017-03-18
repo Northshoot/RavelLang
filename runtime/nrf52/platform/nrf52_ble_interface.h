@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "ble.h"
+#include "ble_srv_common.h"
 
 struct BleInterfaceVtable {
   void (*init)(void *);
-  void (*connected)(void *, bool);
-  void (*notify_enabled)(void *, bool);
-  void (*packet)(void *, uint8_t *, size_t);
+  void (*ble_bas_on_ble_evt)(ble_evt_t * p_ble_evt);
 };
 
 void nrf52_ble_interface_add_handler (void *handler);

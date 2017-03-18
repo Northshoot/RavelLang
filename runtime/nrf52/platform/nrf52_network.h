@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 
-#include "packet.h"
-#include "endpoint.h"
+#include "api/packet.h"
+#include "api/endpoint.h"
 
 
 
@@ -15,7 +15,7 @@ void network_send(RavelPacket *packet, RavelEndpoint *endpoint);
 /* network -> ble */
 void network_on_write(const uint8_t *data, uint16_t len);
 void network_on_read_request(const uint8_t *data, uint16_t len);
-//void network_on_send_done(const uint8_t *data, uint16_t len);
+
 void network_on_send_done();
 void network_on_indicate(void);
 void network_on_notify(void);
@@ -52,35 +52,6 @@ typedef struct {
 } NetworkClb;
 
 void nrf52_network_init(NetworkClb *self);
-
-//
-///*
-// * Packet layouts
-// * Fragmentation happens here,
-// */
-//
-// typedef struct {
-//        uint32_t seqno;
-// } __attribute__((packed)) data_packet_t;}
-////#define APP_CFG_CHAR_READ_SIZE 20
-////typedef union {
-////    struct {
-////        uint32_t seqno;
-////        sensor_encoded_data_t payload;
-////    } s;
-////
-////    uint8_t data[APP_CFG_CHAR_READ_SIZE];
-////} __attribute__((packed)) data_packet_t;
-////
-////#define APP_CFG_CHAR_WRITE_SIZE 20
-////typedef union {
-////    struct {
-////        uint32_t ackno;
-////        uint8_t  mac[APP_CFG_CHAR_WRITE_SIZE - sizeof(uint32_t)];
-////    } s;
-////
-////    uint8_t data[APP_CFG_CHAR_WRITE_SIZE];
-////} __attribute__((packed)) ack_packet_t;
 
 
 

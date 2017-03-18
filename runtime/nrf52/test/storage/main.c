@@ -11,142 +11,231 @@
  */
 
 /** @file
- * @defgroup flashwrite_example_main main.c
- * @{
- * @ingroup flashwrite_example
  *
- * @brief This file contains the source code for a sample application using the Flash Write Application.
- *a
+ * @defgroup ble_sdk_app_proximity_main main.c
+ * @{
+ * @ingroup ble_sdk_app_proximity_eval
+ * @brief Proximity Application main file.
+ *
+ * This file contains is the source code for a sample proximity application using the
+ * Immediate Alert, Link Loss and Tx Power services.
+ *
+ * This application would accept pairing requests from any peer device.
+ *
+ * It demonstrates the use of fast and slow advertising intervals.
  */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include "nrf.h"
-#include "bsp.h"
-#include "app_error.h"
+#include <stdint.h>
+#include <string.h>
+
 #include "nordic_common.h"
-#define NRF_LOG_MODULE_NAME "APP"
+#include "nrf.h"
+#include "nrf_soc.h"
+#include "app_error.h"
+
+#include "softdevice_handler.h"
+#include "app_timer.h"
+#include "app_util.h"
+#define NRF_LOG_MODULE_NAME "FS"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
-/** @brief Function for erasing a page in flash.
- *
- * @param page_address Address of the first word in the page to be erased.
- */
-static void flash_page_erase(uint32_t * page_address)
+#include "fds.h"
+#include "fstorage.h"
+
+
+
+#include "nrf_drv_saadc.h"
+
+
+
+#define APP_TIMER_PRESCALER                 0                                            /**< Value of the RTC1 PRESCALER register. */
+#define APP_TIMER_OP_QUEUE_SIZE             6                                            /**< Size of timer operation queues. */
+
+#define DEAD_BEEF                           0xDEADBEEF                                   /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
+
+
+static volatile uint8_t write_flag=0;
+
+
+
+
+
+
+void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
-    // Turn on flash erase enable and wait until the NVMC is ready:
-    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Een << NVMC_CONFIG_WEN_Pos);
-
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
-
-    // Erase page:
-    NRF_NVMC->ERASEPAGE = (uint32_t)page_address;
-
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
-
-    // Turn off flash erase enable and wait until the NVMC is ready:
-    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos);
-
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
+    app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
 
-/** @brief Function for filling a page in flash with a value.
- *
- * @param[in] address Address of the first word in the page to be filled.
- * @param[in] value Value to be written to flash.
+
+
+
+
+/**@brief Function for the Power manager.
  */
-static void flash_word_write(uint32_t * address, uint32_t value)
+static void power_manage(void)
 {
-    // Turn on flash write enable and wait until the NVMC is ready:
-    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos);
+    uint32_t err_code = sd_app_evt_wait();
 
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
-
-    *address = value;
-
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
-
-    // Turn off flash write enable and wait until the NVMC is ready:
-    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos);
-
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
-    {
-        // Do nothing.
-    }
+    APP_ERROR_CHECK(err_code);
 }
 
 
-/**
- * @brief Function for application main entry.
- */
-int main(void)
+static void my_fds_evt_handler(fds_evt_t const * const p_fds_evt)
 {
-    uint32_t * addr;
-    uint8_t    patwr;
-    uint8_t    patrd;
-    uint8_t    patold;
-    uint32_t   i;
-    uint32_t   pg_size;
-    uint32_t   pg_num;
+    switch (p_fds_evt->id)
+    {
+        case FDS_EVT_INIT:
+            if (p_fds_evt->result != FDS_SUCCESS)
+            {
+                // Initialization failed.
+            }
+            break;
+        case FDS_EVT_WRITE:
+            if (p_fds_evt->result == FDS_SUCCESS)
+            {
+                write_flag=1;
+            }
+            break;
+        default:
+            break;
+    }
+}
 
+static ret_code_t fds_test_write(void)
+{
+#define FILE_ID     0x1111
+#define REC_KEY     0x2222
+    static uint32_t const m_deadbeef[2] = {0xDEADBEEF,0xBAADF00D};
+    fds_record_t        record;
+    fds_record_desc_t   record_desc;
+    fds_record_chunk_t  record_chunk;
+    // Set up data.
+    record_chunk.p_data         = m_deadbeef;
+    record_chunk.length_words   = 2;
+    // Set up record.
+    record.file_id              = FILE_ID;
+    record.key              		= REC_KEY;
+    record.data.p_chunks       = &record_chunk;
+    record.data.num_chunks   = 1;
+
+    ret_code_t ret = fds_record_write(&record_desc, &record);
+    if (ret != FDS_SUCCESS)
+    {
+        return ret;
+    }
+    NRF_LOG_INFO("Writing Record ID = %d \r\n",record_desc.record_id);
+    return NRF_SUCCESS;
+}
+
+static ret_code_t fds_read(void)
+{
+#define FILE_ID     0x1111
+#define REC_KEY     0x2222
+    fds_flash_record_t  flash_record;
+    fds_record_desc_t   record_desc;
+    fds_find_token_t    ftok ={0};//Important, make sure you zero init the ftok token
+    uint32_t *data;
     uint32_t err_code;
 
-    err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-
-    NRF_LOG_INFO("Flashwrite example\r\n");
-    patold  = 0;
-    pg_size = NRF_FICR->CODEPAGESIZE;
-    pg_num  = NRF_FICR->CODESIZE - 1;  // Use last page in flash
-
-    while (true)
+    NRF_LOG_INFO("Start searching... \r\n");
+    // Loop until all records with the given key and file ID have been found.
+    while (fds_record_find(FILE_ID, REC_KEY, &record_desc, &ftok) == FDS_SUCCESS)
     {
-        // Start address:
-        addr = (uint32_t *)(pg_size * pg_num);
-        // Erase page:
-        flash_page_erase(addr);
-        i = 0;
-
-        do
+        err_code = fds_record_open(&record_desc, &flash_record);
+        if ( err_code != FDS_SUCCESS)
         {
-            NRF_LOG_INFO("Enter char to write to flash\r\n");
-            NRF_LOG_FLUSH();
-            // Read char from uart, and write it to flash:
-            patwr = NRF_LOG_GETCHAR();
-
-            if (patold != patwr)
-            {
-                patold = patwr;
-                flash_word_write(addr, (uint32_t)patwr);
-                ++addr;
-                i += sizeof(patwr);
-                NRF_LOG_INFO("'%c' was written to flash\r\n", patwr);
-            }
-            // Read from flash the last written data and send it back:
-            patrd = (uint8_t)*(addr - 1);
-            NRF_LOG_INFO("'%c' was read from flash\r\n\r\n", patrd);
-            NRF_LOG_FLUSH();
+            return err_code;
         }
-        while (i < pg_size);
+
+        NRF_LOG_INFO("Found Record ID = %d\r\n",record_desc.record_id);
+        NRF_LOG_INFO("Data = ");
+        data = (uint32_t *) flash_record.p_data;
+        for (uint8_t i=0;i<flash_record.p_header->tl.length_words;i++)
+        {
+            NRF_LOG_INFO("0x%8x ",data[i]);
+        }
+        NRF_LOG_INFO("\r\n");
+        // Access the record through the flash_record structure.
+        // Close the record when done.
+        err_code = fds_record_close(&record_desc);
+        if (err_code != FDS_SUCCESS)
+        {
+            return err_code;
+        }
     }
+    return NRF_SUCCESS;
+
 }
 
 
-/** @} */
+static ret_code_t fds_test_find_and_delete (void)
+{
+#define FILE_ID     0x1111
+#define REC_KEY     0x2222
+    fds_record_desc_t   record_desc;
+    fds_find_token_t    ftok;
+
+    ftok.page=0;
+    ftok.p_addr=NULL;
+    // Loop and find records with same ID and rec key and mark them as deleted.
+    while (fds_record_find(FILE_ID, REC_KEY, &record_desc, &ftok) == FDS_SUCCESS)
+    {
+        fds_record_delete(&record_desc);
+        NRF_LOG_INFO("Deleted record ID: %d \r\n",record_desc.record_id);
+    }
+    // call the garbage collector to empty them, don't need to do this all the time, this is just for demonstration
+    ret_code_t ret = fds_gc();
+    if (ret != FDS_SUCCESS)
+    {
+        return ret;
+    }
+    return NRF_SUCCESS;
+}
+
+static ret_code_t fds_test_init (void)
+{
+
+    ret_code_t ret = fds_register(my_fds_evt_handler);
+    if (ret != FDS_SUCCESS)
+    {
+        return ret;
+
+    }
+    ret = fds_init();
+    if (ret != FDS_SUCCESS)
+    {
+        return ret;
+    }
+
+    return NRF_SUCCESS;
+
+}
+
+
+int main(void)
+{
+    uint32_t err_code;
+
+    // Initialize.
+    err_code = NRF_LOG_INIT(NULL);
+    APP_ERROR_CHECK(err_code);
+    NRF_LOG_INFO("FLASH TEST\r\n");
+    err_code =fds_test_init();
+    APP_ERROR_CHECK(err_code);
+    err_code = fds_test_find_and_delete();
+    APP_ERROR_CHECK(err_code);
+    err_code =fds_test_write();
+    APP_ERROR_CHECK(err_code);
+    //wait until the write is finished.
+    while (write_flag==0);
+    fds_read();
+
+
+    // Enter main loop.
+    for (;;)
+    {
+        power_manage();
+    }
+}

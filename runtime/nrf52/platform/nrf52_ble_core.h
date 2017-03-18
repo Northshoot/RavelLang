@@ -4,7 +4,7 @@
 #include "nrf52_network.h"
  void nrf52_r_core_ble_start(void);
 
- void nrf52_r_core_ble_stack_init(NetworkClb *network);
+void nrf52_r_core_ble_stack_init(NetworkClb *network)
 
 uint32_t nrf52_send_data(uint8_t * p_data, uint16_t length);
 

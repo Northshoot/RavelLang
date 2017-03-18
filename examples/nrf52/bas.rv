@@ -1,0 +1,50 @@
+interface Bas():
+    implementation:
+        c = "rlib/nrf52/bas-ble.stg"
+
+    def battery_level_update(time : int32)
+    event connected()
+    event disconnected()
+
+interface TimerSource():
+    implementation:
+        c = "rlib/nrf52/app_timer_sys.stg"
+
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+
+    event fired()
+
+controller BatteryController(bas : Bas, timer : TimerSource):
+    bas_val : int32 = 1
+
+    event system.started():
+        system.print("system started")
+
+
+    event bas.connected():
+        bas.battery_level_update(bas_val)
+        bas_val += 1
+        timer.start_periodic(1000)
+
+    event timer.fired():
+        bas.battery_level_update(bas_val)
+        bas_val += 1
+
+    event bas.disconnected():
+        bas_val = 0
+        timer.cancel()
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    interfaces:
+        timer = TimerSource()
+        bas = Bas()
+
+    controllers:
+        bas_ctr = BatteryController(bas = interfaces.bas, timer = interfaces.timer)

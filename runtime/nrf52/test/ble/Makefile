@@ -5,7 +5,7 @@ OUTPUT_DIRECTORY := _build
 SDK_ROOT := $(NRF52SDK)
 PROJ_DIR := $(NRF52_PROJECT)
 
-RAVEL_C_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang/./runtime/c
+RAVEL_C_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang/runtime/c
 RAVEL_PLATFORM_RUNTIME_DIR = /Users/lauril/workspace/01-ravel/RavelLang/runtime/nrf52
 NRF52 = /Users/lauril/workspace/12-sdk/nRF5_SDK_12.2.0
 
@@ -24,6 +24,9 @@ INC_FOLDERS += \
     config/ \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/platform \
     $(SDK_ROOT)/components/libraries/bsp \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel \
+    $(RAVEL_C_RUNTIME_DIR)/api\
+    $(RAVEL_C_RUNTIME_DIR)
 
 # Source files common to all targets
 SRC_FILES += \

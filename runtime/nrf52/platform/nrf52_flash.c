@@ -17,6 +17,34 @@
 #define SEQNO_CODE 1
 #define CONFIG_CODE 2
 
+static void flash_page_erase(uint32_t * page_address)
+{
+    // Turn on flash erase enable and wait until the NVMC is ready:
+    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Een << NVMC_CONFIG_WEN_Pos);
+
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
+    {
+        // Do nothing.
+    }
+
+    // Erase page:
+    NRF_NVMC->ERASEPAGE = (uint32_t)page_address;
+
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
+    {
+        // Do nothing.
+    }
+
+    // Turn off flash erase enable and wait until the NVMC is ready:
+    NRF_NVMC->CONFIG = (NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos);
+
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy)
+    {
+        // Do nothing.
+    }
+}
+
+
 static volatile uint32_t m_pstorage_load_complete;
 static volatile uint32_t m_pstorage_update_complete;
 
@@ -45,6 +73,7 @@ static void pstorage_cb(
 
 static pstorage_handle_t config_block_handle;
 static pstorage_handle_t other_block_handle;
+
 void flash_init(void) {
 
     uint32_t err_code;
