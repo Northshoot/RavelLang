@@ -1,24 +1,20 @@
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-#include "nrf_error.h"
+
 
 #include "nrf52_network.h"
-#include "nrf52_sensor.h"
-#include "nrf52_queue.h"
-#include "nrf52_config.h"
-#include "nrf52_link_constants.c"
+#include "nrf_error.h"
+//#include "nrf52_sensor.h"
+//#include "nrf52_queue.h"
+//#include "nrf52_config.h"
+//#include "nrf52_link_constants.c"
 #include "nrf52_ravel_endpoint.h"
 #include "ravel/nrf52-driver.h"
 
-#define NRF_LOG_MODULE_NAME "NET"
+#define NRF_LOG_MODULE_NAME "NET::"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
+
 #include "nrf52_ble_rad.h"
 #include "nrf52_ble_core.h"
-#include "nrf52_log.h"
-#include "nrf52_flash.h"
-#include "nrf_soc.h"
 
 static nrf52_endpoint endpoint_space;
 extern RavelNrf52Driver driver;
@@ -75,6 +71,8 @@ static bool m_endpoint_is_set = false;
 //
 //    return NRF_SUCCESS;
 //}
+
+//class for handling RAD networking
 void
 create_endpoint(const uint8_t *data, uint16_t len)
 {
@@ -143,10 +141,6 @@ network_on_notify(void)
    } else {
         NRF_LOG_DEBUG("unauthorized attempt \r\n");
    }
-
-
-
-
 }
 
 void
@@ -184,7 +178,7 @@ network_send(RavelPacket *packet, RavelEndpoint *endpoint)
 void
 nrf52_network_init(NetworkClb *self)
 {
-    NRF_LOG_DEBUG("network_init \r\n");
+//    NRF_LOG_DEBUG("network_init \r\n");
     self->on_write = network_on_write;
     self->on_read = network_on_read_request;
     self->send_done = network_on_send_done;
@@ -210,7 +204,6 @@ nrf52_network_init(NetworkClb *self)
 //        queue_init(0,0);
 //    }
 
-//    return;
 }
 
 //#define PLAINTEXT_BUFFER_MAX_LEN 144

@@ -42,6 +42,21 @@
 extern "C" {
 #endif
 
+//Interface to the systems
+
+void ble_rad_init_interface();
+
+void ble_bas_on_ble_evt_interface(ble_evt_t * p_ble_evt);
+
+uint32_t ble_rad_send_data_interface(uint8_t * p_data, uint16_t length);
+
+
+
+//END interface to the system
+
+//Below standard implementation of the BLE BAS service
+
+
 #define BLE_UUID_RAD_SERVICE 0x0001                      /**< The UUID of the Ravel Data Service. */
 #define BLE_UUID_RAD_TX_CHARACTERISTIC 0x0002                      /**< The UUID of the TX Characteristic. */
 #define BLE_UUID_RAD_RX_CHARACTERISTIC 0x0003                      /**< The UUID of the RX Characteristic. */

@@ -4,9 +4,68 @@
 #include "ble_srv_common.h"
 #include "nrf52_ravel_frame.h"
 
-#define NRF_LOG_MODULE_NAME "R_SRV"
+#define NRF_LOG_MODULE_NAME "BLE_RAD"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
+#include "nrf52_ble_interface.h"
+#include "nrf52_ble_rad.h"
+static ble_rad_t                        m_rad;
+
+#define RAD_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN
+
+struct BleInterfaceVtable rad_handler;
+
+ble_uuid_t m_rad_adv_uuids = {BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE};
+
+
+
+
+
+void
+ble_rad_init_interface(NetworkClb *network)
+{
+     uint32_t       err_code;
+     ble_rad_init_t rad_init;
+     NRF_LOG_DEBUG("ble_rad_init_interface\r\n");
+
+     memset(&rad_init, 0, sizeof(rad_init));
+
+     rad_init.data_handler = NULL;
+     m_rad.network = network;
+
+     err_code = ble_rad_init(&m_rad, &rad_init);
+     APP_ERROR_CHECK(err_code);
+}
+
+
+
+
+uint32_t
+ble_rad_send_data_interface(uint8_t * p_data, uint16_t length){
+    return ble_rad_send_data(&m_rad, p_data, length);
+}
+
+void ble_rad_on_ble_evt_interface(ble_evt_t * p_ble_evt)
+{
+    NRF_LOG_DEBUG("ble_rad_on_ble_evt_interfacee\r\n");
+    //pass on the event to the implementation
+    ble_rad_on_ble_evt(&m_rad, p_ble_evt);
+}
+
+
+
+void ble_rad_init_handler()
+{
+    NRF_LOG_DEBUG("ble_rad_init_handler\r\n");
+    //add init call
+    rad_handler.init = ble_rad_init_interface;
+    //add a callback to the ble handler event
+    rad_handler.ble_generic_event = ble_rad_on_ble_evt_interface;
+    //add uuids for service
+    rad_handler.p_adv_uuids = m_rad_adv_uuids;
+    //add this handler
+    nrf52_ble_interface_add_handler(&rad_handler);
+}
 
 
 
@@ -47,6 +106,7 @@ static void on_connect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     //TODO: signal upwards
     p_rad->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
     CALL_UP_CONNECTED(p_rad);
+
 }
 
 
@@ -96,11 +156,7 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
             CALL_UP_NOTIFY(p_rad);
         }
     }
-    else if (
-             (p_evt_write->handle == p_rad->tx_handles.value_handle)
-             &&
-             (p_rad->data_handler != NULL)
-            )
+    else if ( (p_evt_write->handle == p_rad->tx_handles.value_handle) )
     {
         NRF_LOG_DEBUG("data received\r\n");
         CALL_UP_RX( p_rad, p_evt_write->data, p_evt_write->len);
@@ -402,4 +458,3 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
     return 0;
 
 }
-

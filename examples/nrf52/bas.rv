@@ -2,8 +2,10 @@ interface Bas():
     implementation:
         c = "rlib/nrf52/bas-ble.stg"
 
-    def battery_level_update(time : int32)
+    def updateBatteryLevel(level : int32)
+
     event connected()
+
     event disconnected()
 
 interface TimerSource():
@@ -24,12 +26,12 @@ controller BatteryController(bas : Bas, timer : TimerSource):
 
 
     event bas.connected():
-        bas.battery_level_update(bas_val)
+        bas.updateBatteryLevel(bas_val)
         bas_val += 1
         timer.start_periodic(1000)
 
     event timer.fired():
-        bas.battery_level_update(bas_val)
+        bas.updateBatteryLevel(bas_val)
         bas_val += 1
 
     event bas.disconnected():

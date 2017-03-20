@@ -62,7 +62,7 @@ bool ravel_generated_<name; format="function">_is_one_shoot(<name>* self){
 void
 ravel_generated_<name; format="function">_fired( void* data)
 {
-        Timer *self = data;
+        <name> *self = data;
         <dispatch_event(interface, "fired",[])>
 }
 >>

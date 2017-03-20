@@ -28,9 +28,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_sdm.h"
 
-
+#include "nrf52_ble_interface.h"
 #include "nrf52_ble_rad.h"
-
 
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
@@ -62,23 +61,19 @@
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
 
-static ble_rad_t                        m_rad;                                      /**< Structure to identify the Nordic UART Service. */
+                                     /**< Structure to identify the Nordic UART Service. */
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 
-static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
+//static ble_uuid_t                       m_adv_uuids[] ={{BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
+static ble_services_uuids_t m_ble_all_uuids;
 
-
-
-static void rad_data_handler(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
-{
-    NRF_LOG_DEBUG("data RX\r\n");
-}
-
+//This is standard Ravel send mechanisms and hence passed via driver
+//other BLE can be added via interfaces as demoed with BAS service
 uint32_t nrf52_send_data(uint8_t * p_data, uint16_t length)
 {
     //TODO: there is currently no dispatching between services
     //The call is synchronous
-    return ble_rad_send_data(&m_rad, p_data, length);
+    return ble_rad_send_data_interface(p_data, length);
 }
 /**@brief Function for the GAP initialization.
  *
@@ -117,17 +112,8 @@ static void gap_params_init(void)
  */
 static void services_init(NetworkClb *network)
 {
-    uint32_t       err_code;
-    ble_rad_init_t rad_init;
     NRF_LOG_DEBUG("services_init\r\n");
-
-    memset(&rad_init, 0, sizeof(rad_init));
-
-    rad_init.data_handler = rad_data_handler;
-    m_rad.network = network;
-
-    err_code = ble_rad_init(&m_rad, &rad_init);
-    APP_ERROR_CHECK(err_code);
+    nrf52_init_all_ble_services(network);
 }
 
 
@@ -249,7 +235,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GAP_EVT_CONNECTED
 
         case BLE_GAP_EVT_DISCONNECTED:
-           NRF_LOG_DEBUG("GAP_DISCONNECTED\r\n");
+            NRF_LOG_DEBUG("GAP_DISCONNECTED\r\n");
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             break; // BLE_GAP_EVT_DISCONNECTED
 
@@ -261,14 +247,14 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GAP_EVT_SEC_PARAMS_REQUEST
 
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-        NRF_LOG_DEBUG("BLE_GATTS_EVT_SYS_ATTR_MISSING\r\n");
+            NRF_LOG_DEBUG("BLE_GATTS_EVT_SYS_ATTR_MISSING\r\n");
             // No system attributes have been stored.
             err_code = sd_ble_gatts_sys_attr_set(m_conn_handle, NULL, 0, 0);
             APP_ERROR_CHECK(err_code);
             break; // BLE_GATTS_EVT_SYS_ATTR_MISSING
 
         case BLE_GATTC_EVT_TIMEOUT:
-        NRF_LOG_DEBUG("BLE_GATTC_EVT_TIMEOUT\r\n");
+            NRF_LOG_DEBUG("BLE_GATTC_EVT_TIMEOUT\r\n");
             // Disconnect on GATT Client timeout event.
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
@@ -276,7 +262,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GATTC_EVT_TIMEOUT
 
         case BLE_GATTS_EVT_TIMEOUT:
-        NRF_LOG_DEBUG("BLE_GATTS_EVT_TIMEOUT\r\n");
+            NRF_LOG_DEBUG("BLE_GATTS_EVT_TIMEOUT\r\n");
             // Disconnect on GATT Server timeout event.
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
@@ -284,7 +270,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             break; // BLE_GATTS_EVT_TIMEOUT
 
         case BLE_EVT_USER_MEM_REQUEST:
-        NRF_LOG_DEBUG("BLE_EVT_USER_MEM_REQUEST\r\n");
+            NRF_LOG_DEBUG("BLE_EVT_USER_MEM_REQUEST\r\n");
             err_code = sd_ble_user_mem_reply(p_ble_evt->evt.gattc_evt.conn_handle, NULL);
             APP_ERROR_CHECK(err_code);
             break; // BLE_EVT_USER_MEM_REQUEST
@@ -346,7 +332,8 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("ble_evt_dispatch\r\n");
     ble_conn_params_on_ble_evt(p_ble_evt);
-    ble_rad_on_ble_evt(&m_rad, p_ble_evt);
+    //ble_rad_on_ble_evt(&m_rad, p_ble_evt);
+    nrf52_on_ble_generic_event(p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
 }
@@ -387,7 +374,8 @@ static void ble_stack_init(void)
 
 
 
-/**@brief Function for initializing the Advertising functionality.
+/**
+ * @brief Function for initializing the Advertising functionality.
  */
 static void advertising_init(void)
 {
@@ -397,15 +385,23 @@ static void advertising_init(void)
     ble_adv_modes_config_t options;
 
     NRF_LOG_DEBUG("advertising_init\r\n");
-    // Build advertising data struct to pass into @ref ble_advertising_init.
     memset(&advdata, 0, sizeof(advdata));
+
     advdata.name_type          = BLE_ADVDATA_FULL_NAME;
     advdata.include_appearance = false;
     advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
 
     memset(&scanrsp, 0, sizeof(scanrsp));
-    scanrsp.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    scanrsp.uuids_complete.p_uuids  = m_adv_uuids;
+
+
+
+
+    set_adv_uuid(&m_ble_all_uuids);
+
+    NRF_LOG_DEBUG("num of handlers %u\r\n", m_ble_all_uuids.m_ble_services_cnt);
+
+    scanrsp.uuids_complete.uuid_cnt = m_ble_all_uuids.m_ble_services_cnt;
+    scanrsp.uuids_complete.p_uuids  = m_ble_all_uuids.m_adv_uuids;
 
     memset(&options, 0, sizeof(options));
     options.ble_adv_fast_enabled  = true;
@@ -423,12 +419,13 @@ void nrf52_r_core_ble_stack_init(NetworkClb *network)
     //test if softdevice is enabled
     if(! softdevice_handler_is_enabled() )
     {
-        NRF_LOG_ERROR("SD is not enabled! Can not proceed")
+        NRF_LOG_ERROR("SD is not enabled! Can not proceed");
         return;
     }
 
     ble_stack_init();
     gap_params_init();
+    ble_rad_init_interface();
     //TODO: set network callbacks
     services_init(network);
     advertising_init();
@@ -443,5 +440,3 @@ void nrf52_r_core_ble_start()
     nrf_52_ble_advertising_start();
 
 }
-
-

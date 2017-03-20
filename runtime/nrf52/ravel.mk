@@ -1,8 +1,15 @@
 C_RUNTIME_SOURCES  := $(wildcard $(RAVEL_C_RUNTIME_DIR)/*.c)
 
-PLATFORM_RUNTIME_SOURCES   := \
-	$(wildcard $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/*.c) \
-	$(RAVEL_PLATFORM_RUNTIME_DIR)/nrf52-driver.c
+PLATFORM_RUNTIME_SOURCES   += \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ble_core.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ble_rad.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_counter.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_crypto.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_network.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_print.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ravel_timer.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ble_interface.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/nrf52-driver.c
 RPI := $(RAVEL_PLATFORM_RUNTIME_DIR)/platform
 
 PROJECT_SOURCEFILES := $(C_RUNTIME_SOURCES) $(PLATFORM_RUNTIME_SOURCES)

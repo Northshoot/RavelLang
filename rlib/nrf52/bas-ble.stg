@@ -11,30 +11,137 @@ extra_includes() ::=<<
 
 c_file(includes,name,interface) ::=<<
 <begin_source(name)>
-<begin_source(name)>
-#define NRF_LOG_MODULE_NAME "BAS:::"
+#include \<stdint.h>
+#include \<stdbool.h>
+#include \<string.h>
+
+#include "sdk_common.h"
+#include "ble_srv_common.h"
+#include "sdk_common.h"
+#include "app_error.h"
+
+#define NRF_LOG_MODULE_NAME "BLE_BAS"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-#include "sdk_common.h"
-#include "ble_bas.h"
-#include <string.h>
-#include "ble_srv_common.h"
+
+#include "nrf52_ble_interface.h"
 
 
 <includes:do_include(); separator="\n">
 
-#define INVALID_BATTERY_LEVEL 255
-static ble_bas_t m_bas;                                   /**\< Structure used to identify the battery service. */
-ble_bas_init_t bas_init;
 
-/**@brief Function for handling the Connect event.
- *
- * @param[in]   p_bas       Battery Service structure.
- * @param[in]   p_ble_evt   Event received from the BLE stack.
- */
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+static ble_bas_t m_bas;
+
+struct BleInterfaceVtable m_bas_handler;
+static <name> *__self;
+ble_uuid_t m_bas_adv_uuids = {BLE_UUID_BATTERY_SERVICE, BLE_UUID_TYPE_BLE};
+
+
+uint32_t ravel_generated_<name; format="function">_update_battery_level(
+            <name> *self, uint32_t battery_level)
+{
+    uint32_t err_code;
+
+    err_code = ble_bas_battery_level_update(&m_bas, (uint8_t) battery_level);
+    if ((err_code != NRF_SUCCESS) &&
+        (err_code != NRF_ERROR_INVALID_STATE) &&
+        (err_code != BLE_ERROR_NO_TX_PACKETS) &&
+        (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+            )
+    {
+        APP_ERROR_HANDLER(err_code);
+    }
+    return err_code;
+}
+
+//Forward declaration
+void ble_bas_on_ble_evt_interface(ble_evt_t * p_ble_evt);
+void ble_bas_init_interface(NetworkClb *network);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    NRF_LOG_DEBUG("ble_bas_init_handle\r\n");
+    //add init call
+    m_bas_handler.init = ble_bas_init_interface;
+    //add a callback to the ble handler event
+    m_bas_handler.ble_generic_event = ble_bas_on_ble_evt_interface;
+    //add uuids for service
+    m_bas_handler.p_adv_uuids = m_bas_adv_uuids;
+    //Make self
+    self->__id = instance_id;
+    self->vtable = &m_bas_handler;
+    __self = self;
+    //add this handler
+    nrf52_ble_interface_add_handler(&m_bas_handler);
+}
+
+void
+ravel_generated_<name; format="function">_connected( void* data)
+{
+        <name> *self = data;
+        <dispatch_event(interface, "connected",[])>
+}
+void
+ravel_generated_<name; format="function">_disconnected( void* data)
+{
+        <name> *self = data;
+      <dispatch_event(interface, "disconnected",[])>
+}
+
+void ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+//TODO: clean up
+}
+
+void ble_bas_init_interface(NetworkClb *network)
+{
+    uint32_t       err_code;
+    ble_bas_init_t bas_init;
+    NRF_LOG_DEBUG("ble_bas_init_interface\r\n");
+    //suppressing warnings
+    UNUSED_PARAMETER(network);
+    // Initialize Battery Service.
+    //prepare the settings
+    memset(&bas_init, 0, sizeof(bas_init));
+
+    // Here the sec level for the Battery Service can be changed/increased.
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bas_init.battery_level_char_attr_md.write_perm);
+
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_report_read_perm);
+
+    bas_init.evt_handler          = NULL;
+    bas_init.support_notification = true;
+    bas_init.p_report_ref         = NULL;
+    bas_init.initial_batt_level   = 100; // battery is full
+
+    //initialize the implementation
+    err_code = ble_bas_init(&m_bas, &bas_init);
+    APP_ERROR_CHECK(err_code);
+}
+
+
+
+void ble_bas_on_ble_evt_interface(ble_evt_t * p_ble_evt)
+{
+    NRF_LOG_DEBUG("ble_bas_on_ble_evt_interface\r\n");
+    //pass on the event to the implementation
+    ble_bas_on_ble_evt(&m_bas, p_ble_evt);
+}
+
+//END interface
+#define INVALID_BATTERY_LEVEL 255
+
+
+
 static void on_connect(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
 {
     p_bas->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+    ravel_generated_<name; format="function">_connected(__self);
 }
 
 
@@ -47,6 +154,7 @@ static void on_disconnect(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
 {
     UNUSED_PARAMETER(p_ble_evt);
     p_bas->conn_handle = BLE_CONN_HANDLE_INVALID;
+    ravel_generated_<name; format="function">_disconnected(__self);
 }
 
 
@@ -114,6 +222,8 @@ void ble_bas_on_ble_evt(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
             break;
     }
 }
+
+
 /**@brief Function for adding the Battery Level characteristic.
  *
  * @param[in]   p_bas        Battery Service structure.
@@ -228,42 +338,8 @@ static uint32_t battery_level_char_add(ble_bas_t * p_bas, const ble_bas_init_t *
 }
 
 
-static void do_init(<name> *self) {}
-
-static void do_connected(<name> *self, bool connected) {
-    // do something
-}
-
-static struct BleInterfaceVtable vtable = {
-    .init = (void(*)(void*))do_init
-    .connected = (void(*)(void*,bool))do_connected
-}
-
-void
-ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+uint32_t ble_bas_init(ble_bas_t * p_bas, const ble_bas_init_t * p_bas_init)
 {
-    self->vtable = &vtable;
-    nrf52_ble_interface_add_handler(self);
-
-    // Initialize Battery Service.
-    memset(&bas_init, 0, sizeof(bas_init));
-
-    // Here the sec level for the Battery Service can be changed/increased.
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.cccd_write_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bas_init.battery_level_char_attr_md.write_perm);
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_report_read_perm);
-
-    bas_init.evt_handler          = NULL;
-    bas_init.support_notification = true;
-    bas_init.p_report_ref         = NULL;
-    bas_init.initial_batt_level   = 100;
-
-    err_code = ble_bas_init(&m_bas, &bas_init);
-    APP_ERROR_CHECK(err_code);
-
-
     if (p_bas == NULL || p_bas_init == NULL)
     {
         return NRF_ERROR_NULL;
@@ -290,14 +366,11 @@ ravel_generated_<name; format="function">_init(<name> *self, int instance_id<app
     // Add battery level characteristic
     return battery_level_char_add(p_bas, p_bas_init);
 }
-void
-ravel_generated_<name; format="function">_finalize(<name> *self)
+
+
+uint32_t ble_bas_battery_level_update(ble_bas_t * p_bas, uint8_t battery_level)
 {
-}
-uint32_t
-ravel_generated_<name; format="function">_battery_level_update((<name> *self, uint8_t battery_level)
-{
-    if (self->p_bas == NULL)
+    if (p_bas == NULL)
     {
         return NRF_ERROR_NULL;
     }
@@ -352,8 +425,6 @@ ravel_generated_<name; format="function">_battery_level_update((<name> *self, ui
     return err_code;
 }
 
-<interface.controllerList:define_set_controller_method(name); separator="\n">
-
 >>
 
 h_file(includes,name,interface) ::=<<
@@ -373,11 +444,28 @@ typedef struct s_<name> <name>;
 <begin_extern_c()>
 
 typedef struct s_<name> {
+    int __id; //mandatory system ID
     struct BleInterfaceVtable *vtable;
-
     <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
 } <name>;
 
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+uint32_t ravel_generated_<name; format="function">_update_battery_level(<name> *self, uint32_t battery_level);
+
+void ravel_generated_<name; format="function">_connected(void *);
+void ravel_generated_<name; format="function">_disconnected(void *);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+//**@brief Battery Service event type. */
+typedef enum
+{
+    BLE_BAS_EVT_NOTIFICATION_ENABLED,                             /**\< Battery value notification enabled event. */
+    BLE_BAS_EVT_NOTIFICATION_DISABLED                             /**\< Battery value notification disabled event. */
+} ble_bas_evt_type_t;
 
 /**@brief Battery Service event. */
 typedef struct
@@ -403,7 +491,7 @@ typedef struct
     ble_gap_conn_sec_mode_t       battery_level_report_read_perm; /**\< Initial security level for battery report read attribute */
 } ble_bas_init_t;
 
-
+/**@brief Battery Service structure. This contains various status information for the service. */
 struct ble_bas_s
 {
     ble_bas_evt_handler_t         evt_handler;                    /**\< Event handler to be called for handling events in the Battery Service. */
@@ -415,14 +503,46 @@ struct ble_bas_s
     bool                          is_notification_supported;      /**\< TRUE if notification of Battery Level is supported. */
 };
 
+/**@brief Function for initializing the Battery Service.
+ *
+ * @param[out]  p_bas       Battery Service structure. This structure will have to be supplied by
+ *                          the application. It will be initialized by this function, and will later
+ *                          be used to identify this particular service instance.
+ * @param[in]   p_bas_init  Information needed to initialize the service.
+ *
+ * @return      NRF_SUCCESS on successful initialization of service, otherwise an error code.
+ */
+uint32_t ble_bas_init(ble_bas_t * p_bas, const ble_bas_init_t * p_bas_init);
 
-void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
-void ravel_generated_<name; format="function">_finalize(<name> *self);
+/**@brief Function for handling the Application's BLE Stack events.
+ *
+ * @details Handles all events from the BLE stack of interest to the Battery Service.
+ *
+ * @note For the requirements in the BAS specification to be fulfilled,
+ *       ble_bas_battery_level_update() must be called upon reconnection if the
+ *       battery level has changed while the service has been disconnected from a bonded
+ *       client.
+ *
+ * @param[in]   p_bas      Battery Service structure.
+ * @param[in]   p_ble_evt  Event received from the BLE stack.
+ */
+void ble_bas_on_ble_evt(ble_bas_t * p_bas, ble_evt_t * p_ble_evt);
 
-uint32_t ravel_generated_<name; format="function">_battery_level_update(<name> *self, uint8_t battery_level);
-
-uint32_t ravel_generated_<name; format="function">ble_bas_on_ble_evt(<name> *self, ble_evt_t * p_ble_evt);
-<interface.controllerList:declare_set_controller_method(name); separator="\n">
+/**@brief Function for updating the battery level.
+ *
+ * @details The application calls this function after having performed a battery measurement. If
+ *          notification has been enabled, the battery level characteristic is sent to the client.
+ *
+ * @note For the requirements in the BAS specification to be fulfilled,
+ *       this function must be called upon reconnection if the battery level has changed
+ *       while the service has been disconnected from a bonded client.
+ *
+ * @param[in]   p_bas          Battery Service structure.
+ * @param[in]   battery_level  New battery measurement value (in percent of full capacity).
+ *
+ * @return      NRF_SUCCESS on success, otherwise an error code.
+ */
+uint32_t ble_bas_battery_level_update(ble_bas_t * p_bas, uint8_t battery_level);
 
 <end_extern_c()>
 <end_header("", name)>
