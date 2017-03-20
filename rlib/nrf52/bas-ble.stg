@@ -30,7 +30,6 @@ c_file(includes,name,interface) ::=<<
 <includes:do_include(); separator="\n">
 
 
-
 <interface.controllerList:define_set_controller_method(name); separator="\n">
 static ble_bas_t m_bas;
 

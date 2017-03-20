@@ -28,7 +28,7 @@
  */
 
 // General application timer settings.
-#define APP_TIMER_PRESCALER              15
+#define APP_TIMER_PRESCALER              0
 #define APP_TIMER_OP_QUEUE_SIZE          4
 
 APP_TIMER_DEF(m_ravel_system_timer_id);
