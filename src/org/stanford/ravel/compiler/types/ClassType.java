@@ -36,6 +36,14 @@ public class ClassType implements CompoundType {
         public ClassType getClassType() {
             return ClassType.this;
         }
+
+        @Override
+        public boolean isAssignable(Type type) {
+            if (type == NullType.NULL_TYPE)
+                return true;
+            else
+                return CompoundType.super.isAssignable(type);
+        }
     }
 
     private final Map<String, Type> staticMembers = new HashMap<>();

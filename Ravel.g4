@@ -642,6 +642,7 @@ literal
     : number
     | boolean_rule
     | STRING_LITERAL
+    | NONE
     ;
 
 /// string     ::=  "'" stringitem* "'" | '"' stringitem* '"'

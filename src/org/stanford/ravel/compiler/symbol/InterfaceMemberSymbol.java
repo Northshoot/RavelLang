@@ -1,5 +1,6 @@
 package org.stanford.ravel.compiler.symbol;
 
+import org.stanford.ravel.compiler.types.ClassType;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.ArrayList;
@@ -39,6 +40,9 @@ public class InterfaceMemberSymbol extends SymbolWithScope {
         super.define(sym);
 
         assert sym instanceof VariableSymbol;
-        arguments.add(((VariableSymbol) sym).getType());
+        Type definedType = ((VariableSymbol) sym).getType();
+        if (definedType instanceof ClassType)
+            definedType = ((ClassType) definedType).getInstanceType();
+        arguments.add(definedType);
     }
 }

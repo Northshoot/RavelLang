@@ -1,6 +1,7 @@
 package org.stanford.ravel.compiler;
 
 import org.stanford.antlr4.RavelParser;
+import org.stanford.ravel.compiler.types.NullType;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 import org.stanford.ravel.compiler.types.Type;
 
@@ -8,6 +9,7 @@ import org.stanford.ravel.compiler.types.Type;
  * Created by gcampagn on 1/23/17.
  */
 public class ParserUtils {
+
     private ParserUtils() {}
 
     private static int parseInt(String str) {
@@ -24,7 +26,9 @@ public class ParserUtils {
 
     public static Object literalToValue(RavelParser.LiteralContext ctx) {
         Object value;
-        if (ctx.number() != null) {
+        if (ctx.NONE() != null) {
+            return NullType.NULL;
+        } else if (ctx.number() != null) {
             if (ctx.number().integer() != null)
                 value = parseInt(ctx.number().integer().getText());
             else
@@ -38,6 +42,8 @@ public class ParserUtils {
     }
 
     public static Type typeFromLiteral(Object literal) {
+        if (literal == NullType.NULL)
+            return NullType.NULL_TYPE;
         if (literal instanceof Boolean)
             return PrimitiveType.BOOL;
         if (literal instanceof String)

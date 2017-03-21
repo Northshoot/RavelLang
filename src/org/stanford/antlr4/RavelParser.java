@@ -835,6 +835,7 @@ public class RavelParser extends Parser {
 			switch (_input.LA(1)) {
 			case TRUE:
 			case FALSE:
+			case NONE:
 			case STRING_LITERAL:
 			case DECIMAL_INTEGER:
 			case OCT_INTEGER:
@@ -3215,7 +3216,7 @@ public class RavelParser extends Parser {
 				setState(491);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << NONE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER))) != 0)) {
 					{
 					setState(484);
 					literal();
@@ -3402,7 +3403,7 @@ public class RavelParser extends Parser {
 				setState(511); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << RETURN) | (1L << TRUE) | (1L << FALSE) | (1L << IF) | (1L << FOR) | (1L << WHILE) | (1L << NOT) | (1L << DELETE) | (1L << PASS) | (1L << CONTINUE) | (1L << BREAK) | (1L << NEWLINE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << RETURN) | (1L << TRUE) | (1L << FALSE) | (1L << IF) | (1L << FOR) | (1L << WHILE) | (1L << NOT) | (1L << DELETE) | (1L << PASS) | (1L << CONTINUE) | (1L << BREAK) | (1L << NONE) | (1L << NEWLINE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0) );
 			setState(513);
 			match(DEDENT);
 			}
@@ -4582,6 +4583,7 @@ public class RavelParser extends Parser {
 				break;
 			case TRUE:
 			case FALSE:
+			case NONE:
 			case STRING_LITERAL:
 			case DECIMAL_INTEGER:
 			case OCT_INTEGER:
@@ -4651,7 +4653,7 @@ public class RavelParser extends Parser {
 			setState(638);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0)) {
 				{
 				setState(634);
 				expressionList();
@@ -4723,7 +4725,7 @@ public class RavelParser extends Parser {
 			setState(646);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << NOT) | (1L << NONE) | (1L << STRING_LITERAL) | (1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER) | (1L << FLOAT_NUMBER) | (1L << OPEN_PAREN) | (1L << OPEN_BRACK))) != 0) || ((((_la - 68)) & ~0x3f) == 0 && ((1L << (_la - 68)) & ((1L << (ADD - 68)) | (1L << (MINUS - 68)) | (1L << (NOT_OP - 68)) | (1L << (Identifier - 68)))) != 0)) {
 				{
 				setState(645);
 				expressionList();
@@ -5183,6 +5185,7 @@ public class RavelParser extends Parser {
 			switch (_input.LA(1)) {
 			case TRUE:
 			case FALSE:
+			case NONE:
 			case STRING_LITERAL:
 			case DECIMAL_INTEGER:
 			case OCT_INTEGER:
@@ -6045,6 +6048,7 @@ public class RavelParser extends Parser {
 			switch (_input.LA(1)) {
 			case TRUE:
 			case FALSE:
+			case NONE:
 			case STRING_LITERAL:
 			case DECIMAL_INTEGER:
 			case OCT_INTEGER:
@@ -6787,6 +6791,7 @@ public class RavelParser extends Parser {
 			return getRuleContext(Boolean_ruleContext.class,0);
 		}
 		public TerminalNode STRING_LITERAL() { return getToken(RavelParser.STRING_LITERAL, 0); }
+		public TerminalNode NONE() { return getToken(RavelParser.NONE, 0); }
 		public LiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6810,7 +6815,7 @@ public class RavelParser extends Parser {
 		LiteralContext _localctx = new LiteralContext(_ctx, getState());
 		enterRule(_localctx, 188, RULE_literal);
 		try {
-			setState(869);
+			setState(870);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case DECIMAL_INTEGER:
@@ -6837,6 +6842,13 @@ public class RavelParser extends Parser {
 				{
 				setState(868);
 				match(STRING_LITERAL);
+				}
+				break;
+			case NONE:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(869);
+				match(NONE);
 				}
 				break;
 			default:
@@ -6884,7 +6896,7 @@ public class RavelParser extends Parser {
 		NumberContext _localctx = new NumberContext(_ctx, getState());
 		enterRule(_localctx, 190, RULE_number);
 		try {
-			setState(873);
+			setState(874);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case DECIMAL_INTEGER:
@@ -6893,14 +6905,14 @@ public class RavelParser extends Parser {
 			case BIN_INTEGER:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(871);
+				setState(872);
 				integer();
 				}
 				break;
 			case FLOAT_NUMBER:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(872);
+				setState(873);
 				float_point();
 				}
 				break;
@@ -6950,7 +6962,7 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(875);
+			setState(876);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << DECIMAL_INTEGER) | (1L << OCT_INTEGER) | (1L << HEX_INTEGER) | (1L << BIN_INTEGER))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -7000,7 +7012,7 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(877);
+			setState(878);
 			match(FLOAT_NUMBER);
 			}
 		}
@@ -7044,7 +7056,7 @@ public class RavelParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(879);
+			setState(880);
 			_la = _input.LA(1);
 			if ( !(_la==TRUE || _la==FALSE) ) {
 			_errHandler.recoverInline(this);
@@ -7146,7 +7158,7 @@ public class RavelParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3g\u0374\4\2\t\2\4"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3g\u0375\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -7202,14 +7214,14 @@ public class RavelParser extends Parser {
 		"\3[\3[\3[\3[\3[\3[\5[\u0339\n[\3[\3[\3[\5[\u033e\n[\3\\\3\\\3\\\3\\\3"+
 		"]\3]\3]\3]\3]\3]\3]\3]\3]\7]\u034d\n]\f]\16]\u0350\13]\3]\3]\3]\5]\u0355"+
 		"\n]\3^\3^\3^\7^\u035a\n^\f^\16^\u035d\13^\3_\3_\5_\u0361\n_\3_\3_\3`\3"+
-		"`\3`\5`\u0368\n`\3a\3a\5a\u036c\na\3b\3b\3c\3c\3d\3d\3d\2\n\u0096\u009a"+
+		"`\3`\3`\5`\u0369\n`\3a\3a\5a\u036d\na\3b\3b\3c\3c\3d\3d\3d\2\n\u0096\u009a"+
 		"\u009e\u00a0\u00a2\u00a4\u00ac\u00aee\2\4\6\b\n\f\16\20\22\24\26\30\32"+
 		"\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\u0080"+
 		"\u0082\u0084\u0086\u0088\u008a\u008c\u008e\u0090\u0092\u0094\u0096\u0098"+
 		"\u009a\u009c\u009e\u00a0\u00a2\u00a4\u00a6\u00a8\u00aa\u00ac\u00ae\u00b0"+
 		"\u00b2\u00b4\u00b6\u00b8\u00ba\u00bc\u00be\u00c0\u00c2\u00c4\u00c6\2\13"+
 		"\3\2\23\25\7\2>>VXZZ^`bb\4\2FGKK\4\2\67\67HJ\3\2FG\3\2DE\3\2NS\3\2/\62"+
-		"\3\2\34\35\u0376\2\u00cc\3\2\2\2\4\u00d5\3\2\2\2\6\u00d7\3\2\2\2\b\u00dc"+
+		"\3\2\34\35\u0378\2\u00cc\3\2\2\2\4\u00d5\3\2\2\2\6\u00d7\3\2\2\2\b\u00dc"+
 		"\3\2\2\2\n\u00ea\3\2\2\2\f\u00ec\3\2\2\2\16\u00ef\3\2\2\2\20\u00fa\3\2"+
 		"\2\2\22\u00fc\3\2\2\2\24\u0102\3\2\2\2\26\u0104\3\2\2\2\30\u0107\3\2\2"+
 		"\2\32\u0112\3\2\2\2\34\u0114\3\2\2\2\36\u011f\3\2\2\2 \u0127\3\2\2\2\""+
@@ -7232,8 +7244,8 @@ public class RavelParser extends Parser {
 		"\2\2\u00aa\u030c\3\2\2\2\u00ac\u030e\3\2\2\2\u00ae\u0319\3\2\2\2\u00b0"+
 		"\u0324\3\2\2\2\u00b2\u0326\3\2\2\2\u00b4\u033d\3\2\2\2\u00b6\u033f\3\2"+
 		"\2\2\u00b8\u0343\3\2\2\2\u00ba\u0356\3\2\2\2\u00bc\u035e\3\2\2\2\u00be"+
-		"\u0367\3\2\2\2\u00c0\u036b\3\2\2\2\u00c2\u036d\3\2\2\2\u00c4\u036f\3\2"+
-		"\2\2\u00c6\u0371\3\2\2\2\u00c8\u00cb\7-\2\2\u00c9\u00cb\5\4\3\2\u00ca"+
+		"\u0368\3\2\2\2\u00c0\u036c\3\2\2\2\u00c2\u036e\3\2\2\2\u00c4\u0370\3\2"+
+		"\2\2\u00c6\u0372\3\2\2\2\u00c8\u00cb\7-\2\2\u00c9\u00cb\5\4\3\2\u00ca"+
 		"\u00c8\3\2\2\2\u00ca\u00c9\3\2\2\2\u00cb\u00ce\3\2\2\2\u00cc\u00ca\3\2"+
 		"\2\2\u00cc\u00cd\3\2\2\2\u00cd\u00cf\3\2\2\2\u00ce\u00cc\3\2\2\2\u00cf"+
 		"\u00d0\7\2\2\3\u00d0\3\3\2\2\2\u00d1\u00d6\5:\36\2\u00d2\u00d6\5R*\2\u00d3"+
@@ -7446,18 +7458,19 @@ public class RavelParser extends Parser {
 		"\u0359\3\2\2\2\u035b\u035c\3\2\2\2\u035c\u00bb\3\2\2\2\u035d\u035b\3\2"+
 		"\2\2\u035e\u0360\78\2\2\u035f\u0361\5p9\2\u0360\u035f\3\2\2\2\u0360\u0361"+
 		"\3\2\2\2\u0361\u0362\3\2\2\2\u0362\u0363\79\2\2\u0363\u00bd\3\2\2\2\u0364"+
-		"\u0368\5\u00c0a\2\u0365\u0368\5\u00c6d\2\u0366\u0368\7.\2\2\u0367\u0364"+
-		"\3\2\2\2\u0367\u0365\3\2\2\2\u0367\u0366\3\2\2\2\u0368\u00bf\3\2\2\2\u0369"+
-		"\u036c\5\u00c2b\2\u036a\u036c\5\u00c4c\2\u036b\u0369\3\2\2\2\u036b\u036a"+
-		"\3\2\2\2\u036c\u00c1\3\2\2\2\u036d\u036e\t\t\2\2\u036e\u00c3\3\2\2\2\u036f"+
-		"\u0370\7\63\2\2\u0370\u00c5\3\2\2\2\u0371\u0372\t\n\2\2\u0372\u00c7\3"+
-		"\2\2\2O\u00ca\u00cc\u00d5\u00e1\u00ea\u00f4\u00fa\u0102\u010c\u0112\u0119"+
-		"\u011d\u0124\u013e\u0141\u0147\u0150\u0157\u015e\u0164\u016a\u016f\u0175"+
-		"\u0187\u018e\u0198\u019f\u01a8\u01b1\u01b3\u01bd\u01c3\u01d4\u01dd\u01eb"+
-		"\u01ed\u01f2\u0201\u0211\u021c\u0223\u022b\u0232\u023e\u0244\u024b\u0251"+
-		"\u0256\u0268\u026f\u0279\u027e\u0280\u0288\u028d\u0293\u029d\u02a9\u02b1"+
-		"\u02be\u02cc\u02da\u02e5\u02f0\u02fb\u0306\u030c\u0316\u0321\u0338\u033d"+
-		"\u034e\u0354\u035b\u0360\u0367\u036b";
+		"\u0369\5\u00c0a\2\u0365\u0369\5\u00c6d\2\u0366\u0369\7.\2\2\u0367\u0369"+
+		"\7,\2\2\u0368\u0364\3\2\2\2\u0368\u0365\3\2\2\2\u0368\u0366\3\2\2\2\u0368"+
+		"\u0367\3\2\2\2\u0369\u00bf\3\2\2\2\u036a\u036d\5\u00c2b\2\u036b\u036d"+
+		"\5\u00c4c\2\u036c\u036a\3\2\2\2\u036c\u036b\3\2\2\2\u036d\u00c1\3\2\2"+
+		"\2\u036e\u036f\t\t\2\2\u036f\u00c3\3\2\2\2\u0370\u0371\7\63\2\2\u0371"+
+		"\u00c5\3\2\2\2\u0372\u0373\t\n\2\2\u0373\u00c7\3\2\2\2O\u00ca\u00cc\u00d5"+
+		"\u00e1\u00ea\u00f4\u00fa\u0102\u010c\u0112\u0119\u011d\u0124\u013e\u0141"+
+		"\u0147\u0150\u0157\u015e\u0164\u016a\u016f\u0175\u0187\u018e\u0198\u019f"+
+		"\u01a8\u01b1\u01b3\u01bd\u01c3\u01d4\u01dd\u01eb\u01ed\u01f2\u0201\u0211"+
+		"\u021c\u0223\u022b\u0232\u023e\u0244\u024b\u0251\u0256\u0268\u026f\u0279"+
+		"\u027e\u0280\u0288\u028d\u0293\u029d\u02a9\u02b1\u02be\u02cc\u02da\u02e5"+
+		"\u02f0\u02fb\u0306\u030c\u0316\u0321\u0338\u033d\u034e\u0354\u035b\u0360"+
+		"\u0368\u036c";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
