@@ -272,6 +272,8 @@ public class DefPhase extends RavelBaseListener {
         } else {
             returnType = PrimitiveType.VOID;
         }
+        if (returnType instanceof ClassType)
+            returnType = ((ClassType) returnType).getInstanceType();
 
         InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, returnType, false);
         ctx.symbol = sym;

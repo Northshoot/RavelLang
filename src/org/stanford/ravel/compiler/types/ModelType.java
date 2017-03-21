@@ -65,7 +65,10 @@ public class ModelType extends ClassType {
 
         // If you add new functions here, you must update LocalOwnershipTaggingPass
         // to handle them correctly
-        this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
+        if (modelType == Model.Type.REPLICATED)
+            this.addMethod("save", new Type[]{immutableRecordType, IntrinsicTypes.ENDPOINT.getInstanceType()}, ctxType);
+        else
+            this.addMethod("save", new Type[]{immutableRecordType}, ctxType);
         this.addMethod("delete", new Type[]{immutableRecordType}, PrimitiveType.VOID);
         this.addMethod("create", new Type[0], recordType);
         this.addMethod("first", new Type[0], queryRecordType);
@@ -121,6 +124,8 @@ public class ModelType extends ClassType {
                     return PrimitiveType.ERROR_MSG;
                 case "record":
                     return immutableRecordType;
+                case "endpoint":
+                    return IntrinsicTypes.ENDPOINT.getInstanceType();
                 default:
                     return null;
             }

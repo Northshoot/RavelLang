@@ -7,6 +7,7 @@
 #define API_CONTEXT_H
 
 #include <stddef.h>
+#include "endpoint.h"
 
 typedef enum {
     RAVEL_ERROR_SUCCESS,
@@ -23,8 +24,9 @@ typedef enum {
 } RavelError;
 
 typedef struct {
-    void       *record;
-    RavelError  error;
+    void          *record;
+    RavelError     error;
+    RavelEndpoint *endpoint;
 } Context;
 
 typedef struct {

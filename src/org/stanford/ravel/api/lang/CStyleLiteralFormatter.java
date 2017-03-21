@@ -1,5 +1,7 @@
 package org.stanford.ravel.api.lang;
 
+import org.stanford.ravel.compiler.types.NullType;
+
 /**
  * A literal formatter for languages that follow Java/C style
  * syntax conventions
@@ -57,6 +59,8 @@ public class CStyleLiteralFormatter implements LiteralFormatter {
 
     @Override
     public String toLiteral(Object o) {
+        if (o == NullType.NULL)
+            return "null";
         if (o instanceof String)
             return stringEscape((String)o);
         else // Boolean, Integer, Double, Reference

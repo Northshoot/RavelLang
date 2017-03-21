@@ -64,7 +64,7 @@ controller EmBootstrapController(app_device : AppDevice, boot_error : BootError)
             rec = app_device.first()
             rec.first_boot = False
             rec.last_reboot = (timestamp) 0 # FIXME
-        app_device.save(rec)
+        app_device.save(rec, None)
 
     event app_device.save_done():
         if self.error:
@@ -138,7 +138,7 @@ controller GatewayController(app_config : GatewayAppConfig, boot_error : BootErr
             rec = app_config.first()
             rec.first_boot = False
             rec.last_reboot = (timestamp) 0 # FIXME
-        app_config.save(rec)
+        app_config.save(rec, None)
             
     event boot_error.save_done():
         if not self.error:
@@ -301,7 +301,7 @@ controller CloudController(device_bootstrap : AppDevice,
             config = embedded_config.create()
             config.device_id = self.record.device_id
             config.frequency = 10000
-            embedded_config.save(config)
+            embedded_config.save(config, self.endpoint)
                 
     event gtw_config.arrived():
         rec = self.record
