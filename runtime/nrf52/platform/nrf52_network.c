@@ -74,7 +74,7 @@ static void packetRxCompleted()
 static void fragment_rx(data_packet_t *m_pkt)
 {
     //TODO: we handle/assume one packet a time
-    if(!m_receiving && m_pkt->indx == 0){
+    if(!m_receiving && (m_pkt->indx == 0)){
         //first fragment
         //FIXME: MAX length set here :S
         pkt_buffer = malloc(BLE_RAD_MAX_DATA_LEN*10);
@@ -85,7 +85,7 @@ static void fragment_rx(data_packet_t *m_pkt)
     //append to the packet buffer
     memcpy( pkt_buffer + m_pkt->indx, m_pkt, pkt_length);
     NRF_LOG_DEBUG("fragment_rx indx: %u \r\n", m_pkt->indx);
-    if( m_pkt->ctrf_flags = 1) {
+    if( m_pkt->ctrf_flags == 1) {
         //finalize the data and send it off
         packetRxCompleted();
     }
@@ -98,7 +98,7 @@ network_on_write(const uint8_t *data, uint16_t len)
     //TODO: VERIFY the dispatching to the right place
     data_packet_t m_pkt;
     memcpy(&m_pkt, data, len);
-    if(m_pkt.ctrf_flags == SET_ENDPOINT){
+    if( m_pkt.ctrf_flags == SET_ENDPOINT ){
         create_endpoint( data, len);
     } else {
         //TODO: defragment it and pass it up

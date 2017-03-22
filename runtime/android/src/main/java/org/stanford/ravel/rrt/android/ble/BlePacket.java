@@ -18,8 +18,9 @@ import java.util.ArrayList;
 public class BlePacket implements Serializable {
 
     private final static int INDEX = 0;
-    private final static int LENGTH = 0;
-    private final static int FLAGS = 0;
+    private final static int LENGTH = 1;
+    private final static int FLAGS = 2;
+    private final static int protocol_offset = 3;
 
     private String address;
     private byte[] data;
@@ -28,12 +29,13 @@ public class BlePacket implements Serializable {
     private int length=0;
     private boolean last = false;
     public static final int FLAG_LAST = 1;
-    private int protocol_offset = 3;
+
 
     public BlePacket(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
         this(characteristic.getValue(), gatt.getDevice().getAddress());
     }
 
+    private final static String TAG = BlePacket.class.getSimpleName();
     public BlePacket(byte[] data, String device_address){
         this.indx = getIndex(data);
         this.length = getLength(data);
@@ -128,23 +130,19 @@ public class BlePacket implements Serializable {
     }
 
     public static byte[] toPacketByteArray(BlePacket blePacket){
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Log.d(TAG, "converting to bytes");
+        int total_pkt_lenght = blePacket.length+3;
+        assert(total_pkt_lenght <=20);
+        byte[] pkt = new byte[blePacket.length+3];
 
-        byte[]    indx = new byte[1];
-        indx[0] = (byte) blePacket.indx;
-        bos.write(indx, INDEX, 1 );
+        pkt[INDEX] = (byte) blePacket.indx;
+        pkt[LENGTH] = (byte) blePacket.length;
+        pkt[FLAGS] = (byte) blePacket.flags;
 
-        byte[]    length = new byte[1];
-        length[0] = (byte) blePacket.length;
-        bos.write(length, LENGTH, 1 );
 
-        byte[]    flags   = new byte[1];
-        flags[0] = (byte) blePacket.flags;
-        bos.write(length, FLAGS, 1 );
-
-        byte[]  data    = blePacket.getData();
-        bos.write(data, LENGTH+1, data.length);
-        return bos.toByteArray();
+        System.arraycopy( blePacket.getData(), 0, pkt, protocol_offset, blePacket.getData().length );
+        Log.d(TAG, "Converting pkt to byte[" + pkt.length + "]");
+        return pkt;
     }
     //FIXME: this is hardcoded values
     private int getIndex(byte[] data)

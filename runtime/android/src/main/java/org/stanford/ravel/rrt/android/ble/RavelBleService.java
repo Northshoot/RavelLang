@@ -34,6 +34,7 @@ import org.stanford.ravel.rrt.android.system.RavelErrorCodes;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -429,7 +430,11 @@ public class RavelBleService extends Service {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
+        if(mBluetoothGatt != null)
+            mBluetoothGatt.disconnect();
+
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        refreshDeviceCache(mBluetoothGatt);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mBLEConnectionState = BLE_STATE_CONNECTING;
@@ -624,7 +629,23 @@ public class RavelBleService extends Service {
         sendBroadcast(intent);
     }
 
-
+    private boolean refreshDeviceCache(BluetoothGatt gatt){
+        try {
+            BluetoothGatt localBluetoothGatt = gatt;
+            Method localMethod = localBluetoothGatt.getClass().getMethod("refresh", new Class[0]);
+            if (localMethod != null) {
+                Log.d(TAG, "Refreshing cash");
+                boolean bool = ((Boolean) localMethod.invoke(localBluetoothGatt, new Object[0])).booleanValue();
+                return bool;
+            }else{
+                Log.d(TAG, "Local method is null");
+            }
+        }
+        catch (Exception localException) {
+            Log.e(TAG, "An exception occured while refreshing device");
+        }
+        return false;
+    }
     /**
      * Generic method that writes to the model instance on the embedded device
      * BLE assumption here!
@@ -632,24 +653,25 @@ public class RavelBleService extends Service {
 
      */
     public boolean write_to_embedded( BlePacket pkt) {
-        Log.d(TAG, "Writint go characteristic");
+        Log.d(TAG, "writing go characteristic");
         if( mBluetoothGatt != null) {
 
             BluetoothGattService service = mBluetoothGatt.getService(RavelGattAtrributes.RAVEL_DATA_MODEL_UUID);
             if (service == null){
                 //Should not end up here
-                Log.e(TAG, RavelErrorCodes.NO_SUCH_SERVICE);
+                Log.e(TAG, "No such service: " + RavelErrorCodes.NO_SUCH_SERVICE);
                 return false;
             }
-            for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
-                        Log.e(TAG, "char::: " + c.getUuid());
-            }
+//            for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
+//                        Log.e(TAG, "char::: " + c.getUuid());
+//            }
             BluetoothGattCharacteristic writeChar = service.getCharacteristic(RavelGattAtrributes.RAVEL_DATA_MODEL_WRITE_CHAR_UUID);
             if (writeChar == null) {
                 //Should not end up here
-                Log.e(TAG, RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
+                Log.e(TAG, "Can not find needed char " + RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
                 return false;
             }
+            Log.e(TAG, "got char::: " + writeChar.getUuid());
             byte[] byte_pkt = BlePacket.toPacketByteArray(pkt);
             Log.d(TAG, "Sending fragment isLast: " + pkt.isLast() +" :size[" +byte_pkt.length +"]");
             writeChar.setValue(byte_pkt);

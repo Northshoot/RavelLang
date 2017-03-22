@@ -425,7 +425,7 @@ void nrf52_r_core_ble_stack_init(NetworkClb *network)
 
     ble_stack_init();
     gap_params_init();
-    ble_rad_init_interface();
+   // ble_rad_init_interface();
     //TODO: set network callbacks
     services_init(network);
     advertising_init();
