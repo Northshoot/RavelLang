@@ -66,8 +66,8 @@ class InterfaceCompiler {
         }
 
         for (Symbol defSym : symbol.getSymbols()) {
-            if (defSym instanceof InterfaceMemberSymbol) {
-                InterfaceMemberSymbol imsym = (InterfaceMemberSymbol) defSym;
+            if (defSym instanceof MethodDeclarationSymbol) {
+                MethodDeclarationSymbol imsym = (MethodDeclarationSymbol) defSym;
                 if (imsym.isEvent())
                     iface.addEvent(imsym.getName());
             }

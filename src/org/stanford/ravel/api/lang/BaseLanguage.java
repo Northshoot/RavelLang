@@ -2,10 +2,7 @@ package org.stanford.ravel.api.lang;
 
 import org.stanford.ravel.api.builder.CodeModule;
 import org.stanford.ravel.api.builder.FileObject;
-import org.stanford.ravel.primitives.ConcreteController;
-import org.stanford.ravel.primitives.ConcreteInterface;
-import org.stanford.ravel.primitives.ConcreteModel;
-import org.stanford.ravel.primitives.Space;
+import org.stanford.ravel.primitives.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +30,10 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         mFileObjects.add(fo);
     }
 
-    // should be abstract, but CLang...
     protected abstract CodeModule createModel(ConcreteModel im);
     protected abstract CodeModule createController(ConcreteController ictr);
-    protected CodeModule createInterface(ConcreteInterface iiface) {
-        return null;
-    }
+    protected abstract CodeModule createView(ConcreteView iview);
+    protected abstract CodeModule createInterface(ConcreteInterface iiface);
 
     private void createModels(Space s) {
         for (ConcreteModel im : s.getModels())
@@ -52,6 +47,10 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         for (ConcreteInterface iiface : s.getInterfaces())
             addModule(createInterface(iiface));
     }
+    private void createViews(Space s) {
+        for (ConcreteView iview : s.getViews())
+            addModule(createView(iview));
+    }
     protected abstract CodeModule createDispatcher(Space s);
 
     public List<FileObject> build(Space s) {
@@ -59,6 +58,7 @@ public abstract class BaseLanguage implements ConcreteLanguage {
         createModels(s);
         createControllers(s);
         createInterfaces(s);
+        createViews(s);
         addModule(createDispatcher(s));
         return mFileObjects;
     }

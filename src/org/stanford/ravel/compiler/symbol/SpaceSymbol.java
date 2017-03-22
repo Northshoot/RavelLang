@@ -14,6 +14,7 @@ public class SpaceSymbol extends ComponentSymbol {
     private final Map<String, InstanceSymbol> modelInitMap;
     private final Map<String, InstanceSymbol> ctrInitMap;
     private final Map<String, InstanceSymbol> ifaceInitMap;
+    private final Map<String, InstanceSymbol> viewInitMap;
     private final Map<String, ReferenceSymbol> propInitMap;
     private final Map<String, ReferenceSymbol> platInitMap;
 
@@ -26,6 +27,7 @@ public class SpaceSymbol extends ComponentSymbol {
         propInitMap = new HashMap<>();
         platInitMap = new HashMap<>();
         ifaceInitMap = new HashMap<>();
+        viewInitMap = new HashMap<>();
     }
 
     @Override
@@ -63,6 +65,13 @@ public class SpaceSymbol extends ComponentSymbol {
 
     public void addInterface(String name, InstanceSymbol is) {
         ifaceInitMap.put(name, is);
+    }
+
+    public Map<String, InstanceSymbol> getViews() {
+        return viewInitMap;
+    }
+    public void addView(String name, InstanceSymbol is) {
+        viewInitMap.put(name, is);
     }
 }
 

@@ -35,7 +35,26 @@ model_endpoint_connected(model) ::=<<
 ravel_<model.component.baseModel.modelType; format="function">_model_endpoint_connected(&self->model_<model.varName>.__base, endpoint);
 >>
 
-c_file(includes,name,models,interfaces,controllers,space) ::=<<
+define_view_setter(view, name, viewAssignments) ::=<<
+void
+ravel_generated_<name; format="function">_set_view_<view.varName>(<name> *self, <view.component.name> *view)
+{
+    if (self->view_<view.varName> != NULL) {
+        self->view_<view.varName>->__id = -1;
+    }
+    self->view_<view.varName> = view;
+    self->view_<view.varName>->__id = <view.instanceId>;
+    <view.controllerList:{c|ravel_generated_<view.component.name; format="function">_set_controller_<c.varName>(self->view_<view.varName>, &self->ctr_<c.varName>);}; separator="\n">
+
+    <viewAssignments.(view.varName):{p|ravel_generated_<p.controllerType; format="function">_set_view_<p.viewVarName>(&self->ctr_<p.controllerVarName>, view);}; separator="\n">
+}
+>>
+
+declare_view_setter(view, name) ::=<<
+void ravel_generated_<name; format="function">_set_view_<view.varName>(<name> *self, <view.component.name> *view);
+>>
+
+c_file(includes,name,models,interfaces,controllers,views,viewAssignments,space) ::=<<
 <begin_source(name)>
 
 <includes:do_include(); separator="\n">
@@ -106,6 +125,8 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
     ravel_base_dispatcher_finalize(&self->base);
 }
 
+<views:define_view_setter(name, viewAssignments); separator="\n">
+
 void
 ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver)
 {
@@ -148,7 +169,7 @@ ravel_generated_<name; format="function">_disconnected(<name> *self, RavelEndpoi
 
 >>
 
-h_file(includes,name,models,interfaces,controllers,space) ::=<<
+h_file(includes,name,models,interfaces,controllers,views,viewAssignments,space) ::=<<
 <begin_header("", name)>
 
 #include \<api/endpoint.h>
@@ -165,6 +186,7 @@ typedef struct <name> {
 
     <models:{c|<c.component.name> model_<c.varName>;}; separator="\n">
     <interfaces:{c|<c.component.name> iface_<c.varName>;}; separator="\n">
+    <views:{c|<c.component.name>* view_<c.varName>;}; separator="\n">
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
 } <name>;
 
@@ -179,6 +201,8 @@ void ravel_generated_<name; format="function">_stopped(<name> *self);
 void ravel_generated_<name; format="function">_restarted(<name> *self);
 void ravel_generated_<name; format="function">_connected(<name> *self, RavelEndpoint *endpoint);
 void ravel_generated_<name; format="function">_disconnected(<name> *self, RavelEndpoint *endpoint);
+
+<views:declare_view_setter(name); separator="\n">
 
 <end_extern_c()>
 <end_header("", name)>

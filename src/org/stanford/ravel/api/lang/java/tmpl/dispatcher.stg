@@ -13,6 +13,9 @@ private final <comp.component.name> model_<comp.varName> = new <comp.component.n
 controller_field(ctr) ::=<<
 private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
 >>
+view_field(view) ::=<<
+private <view.component.name> view_<view.varName>;
+>>
 
 sink_field(sink) ::=<<
 private final SinkAPI sink_<sink.varName> = null;
@@ -28,7 +31,20 @@ set_component_controller(comp, prefix) ::=<<
 <comp.controllerList:{c|<prefix>_<comp.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
 >>
 
-file(package,imports,name,models,interfaces,controllers,space) ::=<<
+define_view_setter(view, viewAssignments) ::=<<
+public void setView_<view.varName>(<view.component.name> view) {
+    if (view_<view.varName> != null) {
+        view_<view.varName>.setInstanceId(-1);
+    }
+    view_<view.varName> = view;
+    view_<view.varName>.setInstanceId(<view.instanceId>);
+    <set_component_controller(view, "view")>
+
+    <viewAssignments.(view.varName):{p|ctr_<p.first>.setView_<p.second>(view);}; separator="\n">
+}
+>>
+
+file(package,imports,name,models,interfaces,controllers,views,viewAssignments,space) ::=<<
 package <package>;
 
 import java.util.Collection;
@@ -54,6 +70,7 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     <models:model_field(); separator="\n">
     <interfaces:interface_field(); separator="\n">
     <controllers:controller_field(); separator="\n">
+    <views:view_field(); separator="\n">
 
     private final KeyProvider keyProvider;
     private DriverAPI driver;
@@ -64,6 +81,8 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
         <models:set_component_controller("model"); separator="\n">
         <interfaces:set_component_controller("iface"); separator="\n">
     }
+
+    <views:define_view_setter(viewAssignments); separator="\n">
 
     @Override
     public KeyProvider getKeyProvider() {

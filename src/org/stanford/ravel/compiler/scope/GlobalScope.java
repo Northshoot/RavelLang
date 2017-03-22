@@ -5,7 +5,6 @@ import org.stanford.ravel.compiler.types.IntrinsicTypes;
 import org.stanford.ravel.compiler.types.PrimitiveType;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,6 +16,7 @@ public class GlobalScope extends BaseScope {
     private Map<String, ControllerSymbol> controllers = new LinkedHashMap<>();
     private Map<String, SpaceSymbol> spaces = new LinkedHashMap<>();
     private Map<String, InterfaceSymbol> interfaces = new LinkedHashMap<>();
+    private Map<String, ViewSymbol> views = new LinkedHashMap<>();
 
     public GlobalScope() {
         super();
@@ -53,6 +53,8 @@ public class GlobalScope extends BaseScope {
             spaces.put(sym.getName(), (SpaceSymbol)sym);
         else if (sym instanceof InterfaceSymbol)
             interfaces.put(sym.getName(), (InterfaceSymbol) sym);
+        else if (sym instanceof ViewSymbol)
+            views.put(sym.getName(), (ViewSymbol)sym);
         else if (!(sym instanceof PrimitiveTypeSymbol))
             throw new IllegalArgumentException("Invalid toplevel symbol " + sym.getName());
     }
@@ -71,5 +73,9 @@ public class GlobalScope extends BaseScope {
 
     public Collection<InterfaceSymbol> getInterfaces() {
         return interfaces.values();
+    }
+
+    public Collection<ViewSymbol> getViews() {
+        return views.values();
     }
 }

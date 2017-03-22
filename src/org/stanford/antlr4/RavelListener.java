@@ -227,6 +227,18 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ViewInstantiation}
+	 * labeled alternative in {@link RavelParser#views_scope}.
+	 * @param ctx the parse tree
+	 */
+	void enterViewInstantiation(RavelParser.ViewInstantiationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ViewInstantiation}
+	 * labeled alternative in {@link RavelParser#views_scope}.
+	 * @param ctx the parse tree
+	 */
+	void exitViewInstantiation(RavelParser.ViewInstantiationContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code InterfaceScope}
 	 * labeled alternative in {@link RavelParser#iface_comp}.
 	 * @param ctx the parse tree
@@ -318,6 +330,28 @@ public interface RavelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInterfaceEvent(RavelParser.InterfaceEventContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ViewScope}
+	 * labeled alternative in {@link RavelParser#view_comp}.
+	 * @param ctx the parse tree
+	 */
+	void enterViewScope(RavelParser.ViewScopeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ViewScope}
+	 * labeled alternative in {@link RavelParser#view_comp}.
+	 * @param ctx the parse tree
+	 */
+	void exitViewScope(RavelParser.ViewScopeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RavelParser#view_body}.
+	 * @param ctx the parse tree
+	 */
+	void enterView_body(RavelParser.View_bodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RavelParser#view_body}.
+	 * @param ctx the parse tree
+	 */
+	void exitView_body(RavelParser.View_bodyContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ModelScope}
 	 * labeled alternative in {@link RavelParser#model_comp}.

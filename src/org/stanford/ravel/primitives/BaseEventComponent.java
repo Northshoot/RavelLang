@@ -9,7 +9,7 @@ import java.util.*;
  *
  * Created by gcampagn on 1/30/17.
  */
-abstract class BaseEventComponent extends Primitive implements EventComponent {
+abstract class BaseEventComponent<BasePrimitive extends Primitive> extends Primitive implements EventComponent {
     private final Space mSpace;
 
     private final List<LinkedEvent> mEvents = new ArrayList<>();
@@ -17,10 +17,25 @@ abstract class BaseEventComponent extends Primitive implements EventComponent {
 
     private final Map<String, Map<Integer, Collection<LinkedEvent>>> mControllerMap = new HashMap<>();
     private final List<ConcreteControllerInstance> mControllerList = new ArrayList<>();
+    private int nInstances = 0;
+    private final BasePrimitive mBasePrimitive;
 
-    BaseEventComponent(Space space, Primitive primitive) {
+    BaseEventComponent(Space space, BasePrimitive primitive) {
         super(primitive.getName());
         mSpace = space;
+        mBasePrimitive = primitive;
+    }
+
+    BasePrimitive getBasePrimitive() {
+        return mBasePrimitive;
+    }
+
+    public void instanceCreated() {
+        nInstances++;
+    }
+
+    public boolean hasMultipleInstances() {
+        return nInstances > 1;
     }
 
     @Override

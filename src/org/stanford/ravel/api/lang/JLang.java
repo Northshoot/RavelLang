@@ -14,10 +14,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -114,6 +111,7 @@ public class JLang extends BaseLanguage {
     private final STGroup irGroup;
     private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
+    private final STGroup viewGroup;
 
     public JLang() {
         dispatcherGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/dispatcher.stg");
@@ -240,6 +238,15 @@ public class JLang extends BaseLanguage {
             irTranslator.translate(ir);
             return irTranslator.getCode();
         });
+
+        viewGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/view.stg");
+        viewGroup.registerRenderer(Type.class, JTYPES);
+        viewGroup.registerRenderer(String.class, JSTRING);
+        viewGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
     }
 
     @Override
@@ -265,6 +272,15 @@ public class JLang extends BaseLanguage {
         public String varName;
         public final List<String> parameterValues = new ArrayList<>();
     }
+    private class Pair<A, B> {
+        public final A first;
+        public final B second;
+
+        public Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
 
     @Override
     protected CodeModule createDispatcher(Space s) {
@@ -276,6 +292,8 @@ public class JLang extends BaseLanguage {
             tmpl.add("imports", packageName + ".models." + im.getName());
         for (ConcreteInterface iiface : s.getInterfaces())
             tmpl.add("imports", packageName + ".interfaces." + iiface.getName());
+        for (ConcreteView iview : s.getViews())
+            tmpl.add("imports", packageName + ".views." + iview.getName());
         for (org.stanford.ravel.primitives.ConcreteController ictr : s.getControllers())
             tmpl.add("imports", packageName + ".controller." + ictr.getName());
 
@@ -283,6 +301,15 @@ public class JLang extends BaseLanguage {
             tmpl.add("models", im);
         for (ConcreteInterfaceInstance iiface : s.getInterfaceInstances())
             tmpl.add("interfaces", iiface);
+
+        Map<String, List<Pair<String, String>>> viewAssignments = new HashMap<>();
+        for (ConcreteViewInstance iview : s.getViewInstances()) {
+            tmpl.add("views", iview);
+            viewAssignments.put(iview.getVarName(), new ArrayList<>());
+        }
+        tmpl.add("viewAssignments", viewAssignments);
+
+
         for (ConcreteControllerInstance ictr : s.getControllerInstances()) {
             ConcreteController concrete = new ConcreteController();
             concrete.name = ictr.getComponent().getName();
@@ -295,6 +322,9 @@ public class JLang extends BaseLanguage {
                     concrete.parameterValues.add("model_" + ((ConcreteModelInstance) pvalue).getVarName());
                 } else if (pvalue instanceof ConcreteInterfaceInstance) {
                     concrete.parameterValues.add("iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
+                } else if (pvalue instanceof ConcreteViewInstance) {
+                    concrete.parameterValues.add("null");
+                    viewAssignments.get(((ConcreteViewInstance) pvalue).getVarName()).add(new Pair<>(ictr.getVarName(), sym.getName()));
                 } else if (pvalue instanceof SystemAPIInstance) {
                     concrete.parameterValues.add("this");
                 } else {
@@ -332,6 +362,22 @@ public class JLang extends BaseLanguage {
         ifaceTmpl.add("interface", iiface);
 
         return simpleModule(ifaceTmpl, iiface.getName(), packageName);
+    }
+
+    @Override
+    public CodeModule createView(ConcreteView iview) {
+        JavaLanguageOptions options = JavaLanguageOptions.getInstance();
+        ST viewTmpl = viewGroup.getInstanceOf("file");
+
+        String packageName = options.getPackageName() + ".views";
+        viewTmpl.add("imports", options.getPackageName() + ".AppDispatcher");
+        for (ConcreteControllerInstance ictr : iview.getControllerList())
+            viewTmpl.add("imports", options.getPackageName() + ".controller." + ictr.getComponent().getName());
+        for (Model model : iview.getBaseView().getModels().values())
+            viewTmpl.add("imports", options.getPackageName() + ".models." + model.getName());
+        viewTmpl.add("view", iview);
+
+        return simpleModule(viewTmpl, iview.getName(), packageName);
     }
 
     @Override
@@ -379,6 +425,9 @@ public class JLang extends BaseLanguage {
         }
         for (ConcreteInterface iiface : ictr.getLinkedInterfaces()) {
             controllerTmpl.add("imports", options.getPackageName() + ".interfaces." + iiface.getName());
+        }
+        for (ConcreteView iview : ictr.getLinkedViews()) {
+            controllerTmpl.add("imports", options.getPackageName() + ".views." + iview.getName());
         }
 
         STControllerTranslator.FileConfig fileConfig = new STControllerTranslator.FileConfig(ictr.getName() + ".java", controllerTmpl);

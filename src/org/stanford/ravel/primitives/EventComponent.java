@@ -7,4 +7,6 @@ package org.stanford.ravel.primitives;
  */
 public interface EventComponent {
     void addLinkedEvent(LinkedEvent event);
+
+    boolean hasMultipleInstances();
 }

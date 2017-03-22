@@ -1,9 +1,9 @@
-replicated model Random(size : int32):
+streaming model Random(size : int32):
     properties:
         durable = False
         reliable = False
         records = size
-        flow = EmbeddedSpace, GatewaySpace
+        flow = GatewaySpace -> EmbeddedSpace
 
     schema:
         # comment here
@@ -16,7 +16,7 @@ replicated model Random(size : int32):
 interface TimerSource():
     implementation:
         java = "rlib/java/timer.stg"
-        c = "rlib/c/timer.stg"
+        c = "rlib/linux/timer.stg"
 
     def start_one_shot(time : int32)
     def cancel()
@@ -31,24 +31,20 @@ interface RandomSource():
 
     def next(): int32
 
-
-#view RandomCounter(timer: TimerSource):
-#    counter: int32
-#    time: timestamp
-
-#    def update(rec: Random.Record):
-#        time = timer.getNow()
-#        counter += 1
-#        value = rec.value
-
-
 local model Counter():
     properties:
         records = 1
     schema:
         v : int32
 
-controller RandomControllerEmbedded(random: Random, cnt : Counter, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
+view RandomView():
+    def update(value : int32)
+    event clicked()
+
+controller RandomControllerEmbedded(random: Random, v : RandomView, cnt : Counter, timer: TimerSource, timer2: TimerSource, rnd : RandomSource):
+    event v.clicked():
+        system.print("clicked on the view")
+
     event timer.fired():
         rec = random.create()
 
@@ -61,6 +57,7 @@ controller RandomControllerEmbedded(random: Random, cnt : Counter, timer: TimerS
         rec.str_value = "lol"
         rec.str2_value = "lol2"
         ctx = random.save(rec)
+        v.update(rec.value)
 
         if ctx.error:
             timer.cancel()
@@ -162,10 +159,10 @@ space CloudSpace:
 
 space GatewaySpace:
     platform:
-        language = JLang
-        system = J2SE.v18
-        #language = CLang
-        #system = Posix.v2008
+        #language = JLang
+        #system = J2SE.v18
+        language = CLang
+        system = Posix.v2008
 
     models:
         random = Random(size=5)
@@ -176,10 +173,13 @@ space GatewaySpace:
         timer_2 = TimerSource()
         rng_1 = RandomSource()
 
+    views:
+        v_0 = RandomView()
+
     controllers:
-        rndcnt_1 = RandomControllerEmbedded(random = models.random, cnt = models.cnt, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
+        rndcnt_1 = RandomControllerEmbedded(random = models.random, v = views.v_0, cnt = models.cnt, timer = interfaces.timer_1, timer2 = interfaces.timer_2, rnd = interfaces.rng_1)
         # swap the timers now
-        #rndcnt_2 = RandomControllerEmbedded(random = models.random, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
+        #rndcnt_2 = RandomControllerEmbedded(random = models.random, v = views.v_0, timer = interfaces.timer_2, timer2 = interfaces.timer_1, rnd = interfaces.rng_1)
 
 
 space EmbeddedSpace:

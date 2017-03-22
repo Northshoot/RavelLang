@@ -1,0 +1,84 @@
+import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+append_argument_decl(function) ::=<<
+<if(function.argumentSymbols)>, <function.argumentSymbols:{a|<a.type> <a.name>}; separator=", "><endif>
+>>
+append_arguments(fucntion) ::=<<
+<if(function.argumentSymbols)>, <function.argumentSymbols:{a|<a.name>}; separator=", "><endif>
+>>
+
+define_function(function, view_name) ::=<<
+<function.returnValue>
+ravel_generated_<name; format="function">_<function.name>(<view_name> *self<append_argument_decl(function)>)
+{
+    return self->__vtable-><function.name>(self<append_arguments(function)>);
+}
+>>
+
+declare_function(function, view_name) ::=<<
+<function.returnValue> ravel_generated_<view_name; format="function">_<function.name>(<view_name> *self<append_argument_decl(function)>);
+>>
+
+declare_vtable_entry(function, view_name) ::=<<
+<function.returnValue> (*<function.name>)(struct s_<view_name> *self<append_argument_decl(function)>);
+>>
+
+define_event(event, view) ::=<<
+<event.returnValue>
+ravel_generated_<view.name; format="function">_<event.name>(<view.name> *self<append_argument_decl(event)>)
+{
+    <dispatch_event(view, event.name, event.argumentSymbols:{a|<a.type> <a.name>})>
+}
+>>
+
+c_file(includes,name,view) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+
+void
+ravel_generated_<name; format="function">_init(<name> *self)
+{}
+
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{}
+
+<view.controllerList:define_set_controller_method(name); separator="\n">
+
+<view.baseView.functions:define_function(name); separator="\n\n">
+<view.baseView.events:define_event(view); separator="\n\n">
+
+>>
+
+h_file(includes,name,view) ::=<<
+<begin_header("VIEW", name)>
+
+/* Forward declare our view class before we include the controller headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    <view.baseView.functions:declare_vtable_entry(name); separator="\n">
+} <name>VTable;
+
+struct s_<name> {
+    <name>VTable *__vtable;
+    int __id;
+    <view.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+};
+
+void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+<view.controllerList:declare_set_controller_method(name); separator="\n">
+
+<view.baseView.functions:declare_function(name); separator="\n\n">
+<view.baseView.events:declare_function(name); separator="\n\n">
+
+<end_extern_c()>
+<end_header("VIEW", name)>
+>>

@@ -17,10 +17,7 @@ import org.stanford.ravel.compiler.DefPhase;
 import org.stanford.ravel.compiler.SourceLocation;
 import org.stanford.ravel.compiler.ValidateScope;
 import org.stanford.ravel.compiler.scope.GlobalScope;
-import org.stanford.ravel.compiler.symbol.ControllerSymbol;
-import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
-import org.stanford.ravel.compiler.symbol.ModelSymbol;
-import org.stanford.ravel.compiler.symbol.SpaceSymbol;
+import org.stanford.ravel.compiler.symbol.*;
 import org.stanford.ravel.error.FatalCompilerErrorException;
 import org.stanford.ravel.primitives.Controller;
 import org.stanford.ravel.primitives.Model;
@@ -135,6 +132,13 @@ public class RavelCompiler {
         }
     }
 
+    private void compileViews(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
+        ViewCompiler compiler = new ViewCompiler(app, this);
+        for (ViewSymbol isym : scope.getViews()) {
+            app.addView(isym.getName(), compiler.compileView(isym));
+        }
+    }
+
     private void compileControllersPreAnalysis(GlobalScope scope, RavelApplication app) throws FatalCompilerErrorException {
         for (ControllerSymbol c : scope.getControllers()) {
             app.addController(c.getName(), controllerCompiler.preAnalysis(c));
@@ -219,8 +223,9 @@ public class RavelCompiler {
                 if (!success())
                     return;
 
-                // typecheck the interfaces, find implementations
+                // typecheck the interfaces and views find implementations
                 compileInterfaces(globalScope, app);
+                compileViews(globalScope, app);
                 if (!success())
                     return;
 

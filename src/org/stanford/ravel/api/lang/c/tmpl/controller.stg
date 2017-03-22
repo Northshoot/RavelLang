@@ -11,6 +11,18 @@ define_array_constant(c) ::=<<
 static <c.type.elementType> static_<c.name>[] = { <c.values:{v|<v; format="literal">}; separator=", "> };
 >>
 
+define_view_setter(view, controller_name) ::=<<
+void
+ravel_generated_<controller_name; format="function">_set_view_<view.name>(<controller_name>* this, <view.type> view)
+{
+    this-><view.name> = view;
+}
+>>
+
+declare_view_setter(view, controller_name) ::=<<
+void ravel_generated_<controller_name; format="function">_set_view_<view.name>(<controller_name>* this, <view.type> view);
+>>
+
 c_file(includes,name,controller,eventHandlers) ::=<<
 <begin_source(name)>
 
@@ -35,6 +47,8 @@ ravel_generated_<name; format="function">_finalize(<name>* self)
 {
     /* Free any allocated resources here */
 }
+
+<controller.viewSymbols:define_view_setter(name); separator="\n\n">
 
 <eventHandlers:define_event_handler(name); separator="\n\n">
 >>
@@ -64,6 +78,8 @@ struct s_<name> {
 
 void ravel_generated_<name; format="function">_init(<name>* self<append_parameter_list(controller.parameterSymbols)>);
 void ravel_generated_<name; format="function">_finalize(<name>* self);
+
+<controller.viewSymbols:declare_view_setter(name); separator="\n\n">
 
 <eventHandlers:declare_event_handler(name); separator="\n">
 

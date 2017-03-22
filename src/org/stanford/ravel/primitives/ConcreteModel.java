@@ -10,8 +10,7 @@ import java.util.*;
 /**
  * Created by gcampagn on 1/26/17.
  */
-public class ConcreteModel extends BaseEventComponent {
-    private final Model mModel;
+public class ConcreteModel extends BaseEventComponent<Model> {
     private final Set<Space> mStreamingSinks = new HashSet<>();
     private final Set<Space> mStreamingSources = new HashSet<>();
 
@@ -25,7 +24,6 @@ public class ConcreteModel extends BaseEventComponent {
 
     ConcreteModel(Space space, Model model) {
         super(space, model);
-        mModel = model;
 
         for (ModelEvent e : ModelEvent.values())
             createEvent(e.name());
@@ -40,11 +38,11 @@ public class ConcreteModel extends BaseEventComponent {
     }
 
     public Model getBaseModel() {
-        return mModel;
+        return getBasePrimitive();
     }
 
     public void addStreamingSink(Space target) {
-        assert mModel.getModelType() != Model.Type.LOCAL;
+        assert getBaseModel().getModelType() != Model.Type.LOCAL;
         assert target != getSpace();
         mStreamingSinks.add(target);
     }
@@ -53,7 +51,7 @@ public class ConcreteModel extends BaseEventComponent {
     }
 
     public void addStreamingSource(Space target) {
-        assert mModel.getModelType() != Model.Type.LOCAL;
+        assert getBaseModel().getModelType() != Model.Type.LOCAL;
         assert target != getSpace();
         mStreamingSources.add(target);
     }
@@ -62,7 +60,7 @@ public class ConcreteModel extends BaseEventComponent {
     }
 
     void addSecurityOperation(ModelField field, Space target, Flow flow, Key key, SecurityPrimitive primitive, int offset) {
-        assert field.getModel() == mModel;
+        assert field.getModel() == getBaseModel();
 
         List<SecurityOperation> existingOps = mSecurityOps.get(primitive);
 
