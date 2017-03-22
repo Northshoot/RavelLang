@@ -41,7 +41,7 @@ public class Endpoint {
         return local;
     }
 
-    void setLocal(boolean local) {
+    public void setLocal(boolean local) {
         this.local = local;
     }
 

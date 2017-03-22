@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -33,6 +34,7 @@ import org.stanford.ravel.rrt.android.system.RavelErrorCodes;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +59,7 @@ public class RavelBleService extends Service {
     private boolean mScanning;
     private String mBluetoothDeviceAddress;
 
+    private int m_local_endpoint_id=-1;
     private int mBLEConnectionState = BLE_STATE_DISCONNECTED;
     private static final int BLE_STATE_DISCONNECTED = 0;
     private static final int BLE_STATE_CONNECTING = 1;
@@ -304,10 +307,9 @@ public class RavelBleService extends Service {
 //                    for(BluetoothGattCharacteristic c : bleS.getCharacteristics()) {
 //                        Log.e(TAG, "char::: " + c.getUuid());
 //                    }
-                    //FIXME: set name properly
-                    String name = "GatewaySpace";
-                    BlePacket pkt = new BlePacket(name.getBytes());
-                    write_to_embedded(pkt);
+                    byte[] bytes = ByteBuffer.allocate(4).putInt(m_local_endpoint_id).array();
+                    BlePacket blePacket = BlePacket.packetFromBytes(bytes, BleDefines.ENDPOINT_PROTOCOL);
+                    write_to_embedded(blePacket);
                 } else {
                     //TODO: need to implement dynamic attaching of services
                     //Log.e(TAG, "no compatible service was found " + bleS.getUuid());
@@ -382,7 +384,14 @@ public class RavelBleService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Received start id " + startId + ": " + intent);
+        Bundle extras = intent.getExtras();
+        if(extras == null) {
+            Log.e(TAG,"received null via extra, expecting endpoint id");
+        } else {
+            m_local_endpoint_id = (int) extras.get(BleDefines.ENDPOINT);
+        }
+        Log.i(TAG, "Received start id " + startId + ": flags " + ": intent" + intent + ": EP " +m_local_endpoint_id);
+
         return START_NOT_STICKY;
     }
 
@@ -641,7 +650,9 @@ public class RavelBleService extends Service {
                 Log.e(TAG, RavelErrorCodes.NO_SUCH_WRITE_CHARACTERISTIC);
                 return false;
             }
-            writeChar.setValue(pkt.getData());
+            byte[] byte_pkt = BlePacket.toPacketByteArray(pkt);
+            Log.d(TAG, "Sending fragment isLast: " + pkt.isLast() +" :size[" +byte_pkt.length +"]");
+            writeChar.setValue(byte_pkt);
             boolean status = mBluetoothGatt.writeCharacteristic(writeChar);
             if (!status) {
                 Log.e(TAG, RavelErrorCodes.WRITE_CHARACTERISTIC_ERROR);

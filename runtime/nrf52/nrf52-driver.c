@@ -23,6 +23,7 @@
 #include "nrf52_ravel_timer.h"
 #include "ravel/nrf52-driver.h"
 #include "nrf52_ravel_endpoint.h"
+#include "nrf52_ble_rad.h"
 //Implement global driver API
 #include "driver.h"
 #include "context.h"
@@ -141,9 +142,9 @@ void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
     // Main loop.
-        nrf52_network_init(&self->network);
-
-        nrf52_r_core_ble_stack_init(&self->network);
+     nrf52_network_init(&self->network);
+     ble_rad_init_handler();
+     nrf52_r_core_ble_stack_init(&self->network);
 
         ravel_key_provider_init(&self->base.key_provider);
     //START BLE

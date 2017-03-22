@@ -18,9 +18,9 @@
             android:name="android.permission.BLUETOOTH_ADMIN"
             android:required="true" />
 
-    <uses-permission
-            android:name="android.permission.ACCESS_FINE_LOCATION"
-            android:required="true" />
+    <!--<uses-permission-->
+            <!--android:name="android.permission.ACCESS_FINE_LOCATION"-->
+            <!--android:required="true" />-->
     <!-- needed for bluetooth from v6 -->
     <uses-permission
             android:name="android.permission.ACCESS_COARSE_LOCATION"

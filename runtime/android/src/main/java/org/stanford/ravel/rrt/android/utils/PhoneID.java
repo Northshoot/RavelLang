@@ -20,14 +20,14 @@ public class PhoneID {
         // Thanks http://www.pocketmagic.net/?p=1662!
         // Try not to use DISPLAY, HOST or ID - these items could change.
         // If there are collisions, there will be overlapping data
-        String m_szDevIDShort = "35" + (Build.BOARD.length() % 10) + (Build.BRAND.length() % 10) + (Build.CPU_ABI.length() % 10) + (Build.DEVICE.length() % 10) + (Build.MANUFACTURER.length() % 10) + (Build.MODEL.length() % 10) + (Build.PRODUCT.length() % 10);
+        String m_szDevIDShort = "78" + (Build.BOARD.length() % 10) + (Build.BRAND.length() % 10) + (Build.ID.length() % 10) + (Build.DEVICE.length() % 10) + (Build.MANUFACTURER.length() % 10) + (Build.MODEL.length() % 10) + (Build.PRODUCT.length() % 10);
 
         // Thanks to @Roman SL!
         // http://stackoverflow.com/a/4789483/950427
         // Only devices with API >= 9 have android.os.Build.SERIAL
         // http://developer.android.com/reference/android/os/Build.html#SERIAL
         // If a user upgrades software or roots their device, there will be a duplicate entry
-        String serial = null;
+        String serial;
         try {
             serial = Build.class.getField("SERIAL").get(null).toString();
 

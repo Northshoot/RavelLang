@@ -43,6 +43,7 @@ extern "C" {
 #endif
 
 //Interface to the systems
+void ble_rad_init_handler(void);
 
 void ble_rad_init_interface();
 

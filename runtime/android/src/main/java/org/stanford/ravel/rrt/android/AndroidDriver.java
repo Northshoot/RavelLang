@@ -32,6 +32,7 @@ public class AndroidDriver extends JavaDriver {
     private final static String TAG = AndroidDriver.class.getSimpleName();
     private final DispatcherAPI appDispatcher;
     private final Context ctx;
+
     private final Map<String, BleEndpoint> bleClients = new HashMap<>();
     // BLE related variables
     private boolean m_connected_ble = false;
@@ -41,7 +42,7 @@ public class AndroidDriver extends JavaDriver {
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
     public boolean GATEWAY_CONNECTED = false; // indicates open gateway application
 
-    //FIXME
+    //FIXME:
     //normaly the gateway will be the forwarding station and will need different endpoint
     //the endpoint should be generated based on the space and endpoint configuration
     //for now auto start
@@ -133,7 +134,7 @@ public class AndroidDriver extends JavaDriver {
         this.appDispatcher = dispatcher;
         this.ctx = ctx;
         Log.d(TAG, "Starting the driver");
-        start_ble_service();
+        //start_ble_service();
     }
 
     private static JavaDurableStorage createStorage(Context ctx) {
@@ -155,15 +156,19 @@ public class AndroidDriver extends JavaDriver {
             default:
                 super.sendDataThread(data, endpoint);
         }
+
     }
+
 
     @Override
     protected Error startLocalEndpoint(Endpoint endpoint) {
+        assert(endpoint.getId() == appDispatcher.getAppId());
+        Log.d(TAG, "Starting endpoint: " + endpoint.getId());
         switch (endpoint.getType()) {
             case BLE:
                 // open ble listening socket
                 // TODO
-                start_ble_service();
+                start_ble_service(endpoint);
                 break;
             case GCM:
                 // prepare connection from GCM
@@ -196,11 +201,12 @@ public class AndroidDriver extends JavaDriver {
         return Error.SUCCESS;
     }
 
-    void start_ble_service(){
+    void start_ble_service(Endpoint endpoint){
         m_frag_map = new LinkedHashMap<>();
         //init ble service
         Log.d(TAG, "Starting BLE service");
         mRavelServiceIntent = new Intent(ctx.getApplicationContext(), RavelBleService.class);
+        mRavelServiceIntent.putExtra(BleDefines.ENDPOINT, endpoint.getId());
         //register receiver
         ctx.startService(mRavelServiceIntent);
         ctx.registerReceiver((mRaveBleMessageReceiver), new IntentFilter(BleDefines.INTENT_BLE_FILTER));

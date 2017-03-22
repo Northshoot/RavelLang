@@ -84,7 +84,7 @@ static void fragment_rx(data_packet_t *m_pkt)
     pkt_length += m_pkt->length;
     //append to the packet buffer
     memcpy( pkt_buffer + m_pkt->indx, m_pkt, pkt_length);
-    NRF_LOG_DEBUG("fragment_rx inx: %u \r\n", m_pkt->indx);
+    NRF_LOG_DEBUG("fragment_rx indx: %u \r\n", m_pkt->indx);
     if( m_pkt->ctrf_flags = 1) {
         //finalize the data and send it off
         packetRxCompleted();

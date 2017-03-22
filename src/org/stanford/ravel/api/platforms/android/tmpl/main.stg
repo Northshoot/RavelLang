@@ -7,7 +7,9 @@ import java.util.Map;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Binder;
 import android.util.Log;
+import java.util.ArrayList;
 
 import org.stanford.ravel.rrt.android.AndroidDriver;
 import org.stanford.ravel.rrt.tiers.Endpoint;
@@ -16,9 +18,13 @@ import org.stanford.ravel.rrt.utils.FileSystemKeyProvider;
 import <package>.AppDispatcher;
 
 public class <name> extends Service {
-    public static final String LOG_TAG = "ravel";
+    public static final String LOG_TAG = <name>.class.getSimpleName();
 
     private AppDispatcher dispatcher;
+    private AndroidDriver driver;
+    private IBinder mBinder = new <name>Binder();
+
+
 
     public <name>() {}
 
@@ -42,7 +48,7 @@ public class <name> extends Service {
     private void startThread() {
         FileSystemKeyProvider keyProvider = new FileSystemKeyProvider();
         dispatcher = new AppDispatcher(keyProvider);
-        AndroidDriver driver = new AndroidDriver(dispatcher, this);
+        driver = new AndroidDriver(dispatcher, this);
         dispatcher.setDriver(driver);
 
         // FIXME load the list of endpoints and register them with the driver
@@ -60,10 +66,33 @@ public class <name> extends Service {
         Log.i(LOG_TAG, "Destroyed service");
     }
 
+    public void setEndpoints(ArrayList\<Endpoint> endp){
+            for (Endpoint e: endp) {
+                driver.registerEndpoint(e);
+            }
+    }
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+     public IBinder onBind(Intent intent) {
+     Log.v(LOG_TAG, "in onBind");
+     return mBinder;
+     }
+
+     @Override
+     public void onRebind(Intent intent) {
+        Log.v(LOG_TAG, "in onRebind");
+        super.onRebind(intent);
+     }
+
+     @Override
+     public boolean onUnbind(Intent intent) {
+        Log.v(LOG_TAG, "in onUnbind");
+        return true;
+     }
+
+    public class <name>Binder extends Binder {
+        public <name>  getService() {
+            return <name>.this;
+        }
     }
 }
 >>
