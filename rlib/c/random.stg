@@ -30,5 +30,5 @@ static inline void ravel_generated_<name; format="function">_finalize(<name> *se
 int ravel_generated_<name; format="function">_next(<name> *self);
 
 <end_extern_c()>
-<end_header("", name)>
+<end_header("LIBRARY", name)>
 >>

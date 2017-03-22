@@ -14,6 +14,7 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     private final List<VariableSymbol> mParamSymbols = new ArrayList<>();
     private final List<VariableSymbol> mClassScopeVariables = new ArrayList<>();
     private final List<VariableSymbol> mArrayConstants = new ArrayList<>();
+    private final List<VariableSymbol> mViews = new ArrayList<>();
     private final Set<Model> mWrittenToModels = new HashSet<>();
 
     public Controller(String name) {
@@ -38,6 +39,9 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     public void addAllArrayConstants(Collection<VariableSymbol> syms) {
         mArrayConstants.addAll(syms);
     }
+    public void addView(VariableSymbol sym) {
+        mViews.add(sym);
+    }
     public Type getParameterType(String name) {
         return mInterface.get(name);
     }
@@ -60,6 +64,10 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
 
     public List<VariableSymbol> getArrayConstantSymbols() {
         return Collections.unmodifiableList(mArrayConstants);
+    }
+
+    public List<VariableSymbol> getViewSymbols() {
+        return Collections.unmodifiableList(mViews);
     }
 
     public Iterator<EventHandler> iterator() {

@@ -130,6 +130,7 @@ comp_def
     : model_comp
     | controller_comp
     | iface_comp
+    | view_comp
     | space_comp
     ;
 
@@ -148,6 +149,7 @@ space_block
     | models_scope
     | controllers_scope
     | interface_scope
+    | views_scope
     | NEWLINE
     ;
 
@@ -210,6 +212,9 @@ controllers_scope returns [Scope scope]
 interface_scope returns [Scope scope]
     : 'interfaces:' instantiations #InterfaceInstantiation
     ;
+views_scope returns [Scope scope]
+    : 'views:' instantiations #ViewInstantiation
+    ;
 
 /**
  *
@@ -241,13 +246,26 @@ iface_members
     | NEWLINE
     ;
 
-iface_def returns [InterfaceMemberSymbol symbol]
+iface_def returns [MethodDeclarationSymbol symbol]
     : DEF Identifier '(' typed_identifier_list? ')' (':' type)? #InterfaceDef
     ;
 
-iface_event returns [InterfaceMemberSymbol symbol]
+iface_event returns [MethodDeclarationSymbol symbol]
     : EVENT Identifier '(' typed_identifier_list? ')' #InterfaceEvent
     ;
+
+/**
+ *
+ * View parser rules
+ */
+view_comp returns [Scope scope]
+    : VIEW Identifier '(' ')' ':' view_body #ViewScope
+    ;
+
+view_body
+    : NEWLINE INDENT uses_scope? iface_members* DEDENT
+    ;
+
 
 /**
  *

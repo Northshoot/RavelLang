@@ -4,19 +4,21 @@ import org.stanford.ravel.compiler.types.ClassType;
 import org.stanford.ravel.compiler.types.Type;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * A member declaration in an interface block
+ * A method declaration in an interface or view block
  *
  * Created by gcampagn on 1/30/17.
  */
-public class InterfaceMemberSymbol extends SymbolWithScope {
+public class MethodDeclarationSymbol extends SymbolWithScope {
     private final boolean event;
     private final List<Type> arguments = new ArrayList<>();
+    private final List<VariableSymbol> argumentSymbols = new ArrayList<>();
     private final Type returnValue;
 
-    public InterfaceMemberSymbol(String name, Type returnValue, boolean event) {
+    public MethodDeclarationSymbol(String name, Type returnValue, boolean event) {
         super(name);
 
         this.returnValue = returnValue;
@@ -29,6 +31,9 @@ public class InterfaceMemberSymbol extends SymbolWithScope {
 
     public Type[] getArguments() {
         return arguments.toArray(new Type[0]);
+    }
+    public List<VariableSymbol> getArgumentSymbols() {
+        return Collections.unmodifiableList(argumentSymbols);
     }
 
     public boolean isEvent() {
@@ -43,6 +48,7 @@ public class InterfaceMemberSymbol extends SymbolWithScope {
         Type definedType = ((VariableSymbol) sym).getType();
         if (definedType instanceof ClassType)
             definedType = ((ClassType) definedType).getInstanceType();
+        argumentSymbols.add((VariableSymbol)sym);
         arguments.add(definedType);
     }
 }

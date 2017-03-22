@@ -9,13 +9,19 @@ define_array_constant(c) ::=<<
 private static final <c.type> <c.name> = new <c.type>{ <c.values:{v|<v; format="literal">}; separator=", "> };
 >>
 
+define_view_setter(v) ::=<<
+public void setView_<v.name>(<v.type> view) {
+    this.<v.name> = view;
+}
+>>
+
 file(package,imports,name,controller,eventHandlers) ::=<<
 package <package>;
 
 <imports:do_import()>
 
 public class <name> {
-    <controller.parameterSymbols:{p|private final <p.type> <p.name>;}; separator="\n">
+    <controller.parameterSymbols:{p|private <p.type> <p.name>;}; separator="\n">
     <controller.classScopeVariableSymbols:{p|private <p.type> <p.name>;}; separator="\n">
     <controller.arrayConstantSymbols:define_array_constant(); separator="\n">
 
@@ -23,6 +29,8 @@ public class <name> {
         <controller.parameterSymbols:{p|this.<p.name> = <p.name>;}; separator="\n">
         <controller.classScopeVariableSymbols:{p|this.<p.name> = <p.value; format="literal">;}; separator="\n">
     }
+
+    <controller.viewSymbols:define_view_setter(); separator="\n">
 
     <eventHandlers:event_handler(); separator="\n">
 };

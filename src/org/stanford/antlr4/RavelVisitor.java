@@ -143,6 +143,13 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ViewInstantiation}
+	 * labeled alternative in {@link RavelParser#views_scope}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitViewInstantiation(RavelParser.ViewInstantiationContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code InterfaceScope}
 	 * labeled alternative in {@link RavelParser#iface_comp}.
 	 * @param ctx the parse tree
@@ -196,6 +203,19 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitInterfaceEvent(RavelParser.InterfaceEventContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ViewScope}
+	 * labeled alternative in {@link RavelParser#view_comp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitViewScope(RavelParser.ViewScopeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#view_body}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitView_body(RavelParser.View_bodyContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ModelScope}
 	 * labeled alternative in {@link RavelParser#model_comp}.

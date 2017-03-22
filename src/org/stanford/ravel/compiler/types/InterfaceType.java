@@ -1,14 +1,14 @@
 package org.stanford.ravel.compiler.types;
 
-import org.stanford.ravel.compiler.symbol.InterfaceSymbol;
+import org.stanford.ravel.compiler.symbol.Symbol;
 
 /**
- * The type of a block that declares an interface in Ravel code
+ * The type of a block that declares an interface or a view in Ravel code
  *
  * Created by gcampagn on 1/30/17.
  */
 public class InterfaceType extends ClassType {
-    public InterfaceType(InterfaceSymbol symbol) {
+    public InterfaceType(Symbol symbol) {
         super(symbol.getName());
     }
 

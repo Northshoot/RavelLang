@@ -7,19 +7,16 @@ import java.util.Map;
  *
  * Created by gcampagn on 1/30/17.
  */
-public class ConcreteInterface extends BaseEventComponent {
-    private final Interface mIface;
-
+public class ConcreteInterface extends BaseEventComponent<Interface> {
     ConcreteInterface(Space space, Interface iface) {
         super(space, iface);
-        mIface = iface;
 
         for (String event : iface.getEvents())
             createEvent(event);
     }
 
     public Interface getBaseInterface() {
-        return mIface;
+        return getBasePrimitive();
     }
 
     public Map<String, Object> getConfiguration() {

@@ -1,5 +1,7 @@
 package org.stanford.ravel.primitives;
 
+import org.stanford.ravel.compiler.symbol.VariableSymbol;
+
 import java.util.*;
 
 /**
@@ -37,6 +39,9 @@ public class ConcreteController extends Primitive implements Iterable<LinkedEven
     }
     public Collection<ConcreteInterface> getLinkedInterfaces() {
         return getLinkedComponents(ConcreteInterface.class);
+    }
+    public Collection<ConcreteView> getLinkedViews() {
+        return getLinkedComponents(ConcreteView.class);
     }
 
     private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {

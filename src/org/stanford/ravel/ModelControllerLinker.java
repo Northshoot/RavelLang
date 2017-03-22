@@ -89,7 +89,30 @@ public class ModelControllerLinker {
 
             // instantiate the interface on this space
             ConcreteInterfaceInstance instance = new ConcreteInterfaceInstance(iiface, is.getName());
+            iiface.instanceCreated();
             applyParametersAndProperties(i, instance, is);
+            space.add(is.getName(), instance);
+        });
+
+        // instantiate views
+        ssb.getViews().forEach((vName, is) -> {
+            // get the view
+            String viewName = is.getInstanceName();
+            View v = app.getView(viewName);
+            if (v == null) {
+                driver.emitError(new SourceLocation(is.getDefNode()), viewName + " does not refer to a valid view");
+                return;
+            }
+
+            // see if we have built the view already
+            ConcreteView iview = space.findView(v);
+            if (iview == null)
+                iview = v.instantiate(space);
+
+            // instantiate the views on this space
+            ConcreteViewInstance instance = new ConcreteViewInstance(iview, is.getName());
+            // views cannot have any parameter, but we call this for consistency, in case we change that in the future
+            applyParametersAndProperties(v, instance, is);
             space.add(is.getName(), instance);
         });
 
@@ -112,6 +135,7 @@ public class ModelControllerLinker {
             // instantiate the model on this space
             ConcreteModel im = m.instantiate(space);
             ConcreteModelInstance instance = new ConcreteModelInstance(im, is.getName());
+            im.instanceCreated();
 
             applyParametersAndProperties(m, instance, is);
             space.add(is.getName(), instance);
@@ -123,7 +147,7 @@ public class ModelControllerLinker {
             String controllerName = is.getInstanceName();
             Controller ctr = app.getController(is.getInstanceName());
             if (ctr == null) {
-                driver.emitError(new SourceLocation(is.getDefNode()), controllerName + " does not refer to a valid model");
+                driver.emitError(new SourceLocation(is.getDefNode()), controllerName + " does not refer to a valid controller");
                 return;
             }
 
@@ -146,17 +170,27 @@ public class ModelControllerLinker {
                 Object value;
                 Type type;
                 if (pvalue instanceof InstanceSymbol) {
-                    // must refer to a model
+                    // must refer to a model, interface or view
                     String instanceName = ((InstanceSymbol) pvalue).getInstanceName();
                     Model m = app.getModel(instanceName);
                     if (m == null) {
                         Interface i = app.getInterface(instanceName);
                         if (i == null) {
-                            // this can only happen if we complained above
-                            // (either it's an invalid model or an invalid interface)
-                            value = null;
-                            type = null;
-                            ok = false;
+                            View v = app.getView(instanceName);
+                            if (v == null) {
+                                // this can only happen if we complained above
+                                // (either it's an invalid model or an invalid interface)
+                                value = null;
+                                type = null;
+                                ok = false;
+                            } else {
+                                ConcreteViewInstance iview = space.getView(((InstanceSymbol)pvalue).getName());
+                                assert iview != null;
+                                assert v == iview.getComponent().getBaseView();
+                                eventMap.put(pname, iview);
+                                value = iview;
+                                type = v.getType();
+                            }
                         } else {
                             ConcreteInterfaceInstance iiface = space.getInterface(((InstanceSymbol) pvalue).getName());
                             assert iiface != null;

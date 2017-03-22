@@ -1,31 +1,23 @@
 package org.stanford.ravel.compiler.symbol;
 
 import org.stanford.ravel.compiler.scope.Scope;
-import org.stanford.ravel.compiler.types.InterfaceType;
+import org.stanford.ravel.compiler.types.ViewType;
 
 /**
- * Created by gcampagn on 1/30/17.
+ * Created by gcampagn on 3/22/17.
  */
-public class InterfaceSymbol extends ComponentSymbol {
-    private final InterfaceType definedType;
+public class ViewSymbol extends ComponentSymbol {
+    private final ViewType definedType;
 
-    public InterfaceSymbol(String name) {
+    public ViewSymbol(String name) {
         super(name);
 
-        definedType = new InterfaceType(this);
+        definedType = new ViewType(this);
     }
 
     @Override
-    public InterfaceType getDefinedType() {
+    public ViewType getDefinedType() {
         return definedType;
-    }
-    
-    public Scope getImplementationScope() {
-        return getNestedScope("implementation");
-    }
-
-    public Scope getConfigurationScope() {
-        return getNestedScope("configuration");
     }
 
     public void createInterfaceType() {

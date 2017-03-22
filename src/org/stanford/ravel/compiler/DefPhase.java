@@ -275,7 +275,7 @@ public class DefPhase extends RavelBaseListener {
         if (returnType instanceof ClassType)
             returnType = ((ClassType) returnType).getInstanceType();
 
-        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, returnType, false);
+        MethodDeclarationSymbol sym = new MethodDeclarationSymbol(name, returnType, false);
         ctx.symbol = sym;
         sym.setDefNode(ctx);
         currentScope.define(sym);
@@ -291,7 +291,7 @@ public class DefPhase extends RavelBaseListener {
     public void enterInterfaceEvent(RavelParser.InterfaceEventContext ctx) {
         String name = ctx.Identifier().getText();
 
-        InterfaceMemberSymbol sym = new InterfaceMemberSymbol(name, PrimitiveType.VOID, true);
+        MethodDeclarationSymbol sym = new MethodDeclarationSymbol(name, PrimitiveType.VOID, true);
         ctx.symbol = sym;
         sym.setDefNode(ctx);
         currentScope.define(sym);
@@ -309,6 +309,22 @@ public class DefPhase extends RavelBaseListener {
             emitError(ctx, "must define an 'implementation:' block for an interface pointing to the template files");
 
         ((InterfaceSymbol)currentScope).createInterfaceType();
+        popScope();
+    }
+
+    @Override
+    public void enterViewScope(RavelParser.ViewScopeContext ctx) {
+        String name = ctx.Identifier().getText();
+        ViewSymbol sym = new ViewSymbol(name);
+        ctx.scope = sym;
+        sym.setDefNode(ctx);
+        currentScope.define(sym);
+        pushScope(sym);
+    }
+
+    @Override
+    public void exitViewScope(RavelParser.ViewScopeContext ctx) {
+        ((ViewSymbol)currentScope).createInterfaceType();
         popScope();
     }
 
@@ -772,6 +788,20 @@ public class DefPhase extends RavelBaseListener {
     @Override public void exitInterfaceInstantiation(RavelParser.InterfaceInstantiationContext ctx) {
         for (Symbol re: ctx.scope.getSymbols()) {
             ((SpaceSymbol) currentScope.getEnclosingScope()).addInterface(re.getName(),(InstanceSymbol) re);
+        }
+        popScope();
+    }
+
+    @Override public void enterViewInstantiation(RavelParser.ViewInstantiationContext ctx) {
+        LocalScope ls = new LocalScope("views", currentScope);
+        ctx.scope = ls;
+        ls.setDefNode(ctx);
+        currentScope.nest(ls);
+        pushScope(ls);
+    }
+    @Override public void exitViewInstantiation(RavelParser.ViewInstantiationContext ctx) {
+        for (Symbol re: ctx.scope.getSymbols()) {
+            ((SpaceSymbol) currentScope.getEnclosingScope()).addView(re.getName(),(InstanceSymbol) re);
         }
         popScope();
     }

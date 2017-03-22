@@ -15,10 +15,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.stanford.ravel.api.Settings.BASE_TMPL_PATH;
@@ -126,6 +123,7 @@ public class CLang extends BaseLanguage {
 
     private final STGroup controllerGroup;
     private final STGroup modelGroup;
+    private final STGroup viewGroup;
     //private final STGroup irGroup;
     private final IRTranslator irTranslator;
     private final STGroup dispatcherGroup;
@@ -160,6 +158,16 @@ public class CLang extends BaseLanguage {
             irTranslator.translate(ir);
             return irTranslator.getCode();
         });
+
+        viewGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/view.stg");
+        viewGroup.registerRenderer(Type.class, CTYPES);
+        viewGroup.registerRenderer(String.class, CIDENT);
+        viewGroup.registerRenderer(Model.Type.class, CIDENT);
+        viewGroup.registerRenderer(TypedIR.class, (Object o, String s, Locale locale) -> {
+            TypedIR ir = (TypedIR)o;
+            irTranslator.translate(ir);
+            return irTranslator.getCode();
+        });
     }
 
     @Override
@@ -189,7 +197,7 @@ public class CLang extends BaseLanguage {
         iface_h.add("interface", iiface);
         iface_c.add("interface", iiface);
 
-        CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), this.app_dir);
+        CodeModule module = simpleModule(iface_h, iface_c, iiface.getName(), app_dir);
 
         //TODO: add
 //        extra_includes
@@ -200,17 +208,32 @@ public class CLang extends BaseLanguage {
         }
         ST extra_ldflags = interfaceGroup.getInstanceOf("extra_ldflags");
         if (extra_ldflags != null) {
-            module.buildSystemMeta.put("LDFLAGS", extra_cflags.render());
+            module.buildSystemMeta.put("LDFLAGS", extra_ldflags.render());
         }
         ST extra_includes = interfaceGroup.getInstanceOf("extra_includes");
         if (extra_includes != null) {
-            module.buildSystemMeta.put("EXTRA_INCLUDE", extra_cflags.render());
+            module.buildSystemMeta.put("EXTRA_INCLUDE", extra_includes.render());
         }
         ST extra_src = interfaceGroup.getInstanceOf("extra_src");
         if (extra_src != null) {
-            module.buildSystemMeta.put("EXTRA_SRC", extra_cflags.render());
+            module.buildSystemMeta.put("EXTRA_SRC", extra_src.render());
         }
         return module;
+    }
+
+    @Override
+    public CodeModule createView(ConcreteView iview) {
+        ST view_h = viewGroup.getInstanceOf("h_file");
+        ST view_c = viewGroup.getInstanceOf("c_file");
+
+        for (ConcreteControllerInstance ictr : iview.getControllerList())
+            view_h.add("includes", app_dir + ictr.getComponent().getName() + ".h");
+        view_c.add("includes", app_dir + iview.getName() + ".h");
+        view_c.add("includes", "AppDispatcher.h");
+        view_h.add("view", iview);
+        view_c.add("view", iview);
+
+        return simpleModule(view_h, view_c, iview.getName(), app_dir);
     }
 
     // A helper class to pass down to StringTemplates
@@ -219,6 +242,17 @@ public class CLang extends BaseLanguage {
         public String varName;
         public final List<String> parameterValues = new ArrayList<>();
     }
+    private class ViewAssignment {
+        public final String controllerType;
+        public final String controllerVarName;
+        public final String viewVarName;
+
+        public ViewAssignment(String controllerType, String controllerVarName, String viewVarName) {
+            this.controllerType = controllerType;
+            this.controllerVarName = controllerVarName;
+            this.viewVarName = viewVarName;
+        }
+    }
 
     @Override
     protected CodeModule createDispatcher(Space s) {
@@ -226,11 +260,13 @@ public class CLang extends BaseLanguage {
         ST dispatcher_c = dispatcherGroup.getInstanceOf("c_file");
 
         for (ConcreteModel im : s.getModels())
-            dispatcher_h.add("includes", this.app_dir + im.getName() + ".h");
+            dispatcher_h.add("includes", app_dir + im.getName() + ".h");
         for (ConcreteInterface iiface : s.getInterfaces())
-            dispatcher_h.add("includes", this.app_dir + iiface.getName() + ".h");
+            dispatcher_h.add("includes", app_dir + iiface.getName() + ".h");
+        for (ConcreteView iview : s.getViews())
+            dispatcher_h.add("includes", app_dir + iview.getName() + ".h");
         for (org.stanford.ravel.primitives.ConcreteController ictr : s.getControllers())
-            dispatcher_h.add("includes", this.app_dir + ictr.getName() + ".h");
+            dispatcher_h.add("includes", app_dir + ictr.getName() + ".h");
         dispatcher_c.add("includes", "AppDispatcher.h");
 
         for (ConcreteModelInstance im : s.getModelInstances()) {
@@ -241,6 +277,16 @@ public class CLang extends BaseLanguage {
             dispatcher_h.add("interfaces", iiface);
             dispatcher_c.add("interfaces", iiface);
         }
+        Map<String, List<ViewAssignment>> viewAssignments = new HashMap<>();
+        for (ConcreteViewInstance iview : s.getViewInstances()) {
+            dispatcher_h.add("views", iview);
+            dispatcher_c.add("views", iview);
+            viewAssignments.put(iview.getVarName(), new ArrayList<>());
+        }
+        for (ConcreteViewInstance iview : s.getViewInstances()) {
+        }
+        dispatcher_h.add("viewAssignments", viewAssignments);
+        dispatcher_c.add("viewAssignments", viewAssignments);
 
         for (ConcreteControllerInstance ictr : s.getControllerInstances()) {
             ConcreteController concrete = new ConcreteController();
@@ -254,6 +300,9 @@ public class CLang extends BaseLanguage {
                     concrete.parameterValues.add("&self->model_" + ((ConcreteModelInstance) pvalue).getVarName());
                 } else if (pvalue instanceof ConcreteInterfaceInstance) {
                     concrete.parameterValues.add("&self->iface_" + ((ConcreteInterfaceInstance) pvalue).getVarName());
+                } else if (pvalue instanceof ConcreteViewInstance) {
+                    concrete.parameterValues.add("NULL");
+                    viewAssignments.get(((ConcreteViewInstance) pvalue).getVarName()).add(new ViewAssignment(ictr.getComponent().getName(), ictr.getVarName(), sym.getName()));
                 } else if (pvalue instanceof SystemAPIInstance) {
                     concrete.parameterValues.add("&self->base.sys_api");
                 } else {
@@ -274,10 +323,13 @@ public class CLang extends BaseLanguage {
         ST h_tmpl = controllerGroup.getInstanceOf("h_file");
         h_tmpl.add("name", ictr.getName());
         for (ConcreteModel im : ictr.getLinkedModels()) {
-            h_tmpl.add("includes", this.app_dir + im.getName() + ".h");
+            h_tmpl.add("includes", app_dir + im.getName() + ".h");
         }
         for (ConcreteInterface iiface : ictr.getLinkedInterfaces()) {
-            h_tmpl.add("includes", this.app_dir + iiface.getName() + ".h");
+            h_tmpl.add("includes", app_dir + iiface.getName() + ".h");
+        }
+        for (ConcreteView iview : ictr.getLinkedViews()) {
+            h_tmpl.add("includes", app_dir + iview.getName() + ".h");
         }
 
         STControllerTranslator.FileConfig h_file = new STControllerTranslator.FileConfig(ictr.getName() + ".h", h_tmpl);
@@ -285,14 +337,14 @@ public class CLang extends BaseLanguage {
         ST c_tmpl = controllerGroup.getInstanceOf("c_file");
         c_tmpl.add("name", ictr.getName());
         //TODO: removed "controller/" +
-        c_tmpl.add("includes", this.app_dir + ictr.getName() + ".h");
+        c_tmpl.add("includes", app_dir + ictr.getName() + ".h");
         c_tmpl.add("includes", "AppDispatcher.h");
 
         STControllerTranslator.FileConfig c_file = new STControllerTranslator.FileConfig(ictr.getName() + ".c", c_tmpl);
 
         STControllerTranslator controllerTranslator = new STControllerTranslator(Arrays.asList(h_file, c_file), irTranslator);
         CodeModule generated = controllerTranslator.translate(ictr.getController());
-        generated.setSubPath(this.app_dir);
+        generated.setSubPath(app_dir);
         return generated;
     }
 
@@ -307,7 +359,7 @@ public class CLang extends BaseLanguage {
         FileObject cFile = new FileObject();
         cFile.setFileName(name + ".c");
         //TODO: need fix for the build system
-        cFile.setSubPath(this.app_dir);
+        cFile.setSubPath(app_dir);
         cFile.setContent(c_tmpl.render());
 
         CodeModule module = new CodeModule();
@@ -337,8 +389,8 @@ public class CLang extends BaseLanguage {
         }
 
         for (ConcreteControllerInstance ictr : im.getControllerList())
-            model_h.add("includes", this.app_dir + ictr.getComponent().getName() + ".h");
-        model_c.add("includes", this.app_dir + im.getName() + ".h");
+            model_h.add("includes", app_dir + ictr.getComponent().getName() + ".h");
+        model_c.add("includes", app_dir + im.getName() + ".h");
         model_c.add("includes", "AppDispatcher.h");
         model_h.add("base", baseClass);
         model_c.add("base", baseClass);
