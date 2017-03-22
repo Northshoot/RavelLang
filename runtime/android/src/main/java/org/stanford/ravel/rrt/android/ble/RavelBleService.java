@@ -309,6 +309,7 @@ public class RavelBleService extends Service {
                     BlePacket pkt = new BlePacket(name.getBytes());
                     write_to_embedded(pkt);
                 } else {
+                    //TODO: need to implement dynamic attaching of services
                     //Log.e(TAG, "no compatible service was found " + bleS.getUuid());
                 }
             }

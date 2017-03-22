@@ -69,12 +69,12 @@ static ble_services_uuids_t m_ble_all_uuids;
 
 //This is standard Ravel send mechanisms and hence passed via driver
 //other BLE can be added via interfaces as demoed with BAS service
-uint32_t nrf52_send_data(uint8_t * p_data, uint16_t length)
-{
-    //TODO: there is currently no dispatching between services
-    //The call is synchronous
-    return ble_rad_send_data_interface(p_data, length);
-}
+//uint32_t nrf52_send_data(uint8_t * p_data, uint16_t length)
+//{
+//    //TODO: there is currently no dispatching between services
+//    //The call is synchronous
+//    return ble_rad_send_data_interface(p_data, length);
+//}
 /**@brief Function for the GAP initialization.
  *
  * @details This function will set up all the necessary GAP (Generic Access Profile) parameters of

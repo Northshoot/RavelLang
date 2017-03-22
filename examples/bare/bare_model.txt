@@ -1,9 +1,0 @@
-streaming model Random(size):
-    properties:
-        durable=False
-        reliable=False
-        records = size
-
-    schema:
-        time=TimeStampField()
-        value = IntegerField()

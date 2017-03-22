@@ -9,6 +9,9 @@
 
 
 
+
+
+
 /* driver -> network */
 void network_send(RavelPacket *packet, RavelEndpoint *endpoint);
 
@@ -16,7 +19,7 @@ void network_send(RavelPacket *packet, RavelEndpoint *endpoint);
 void network_on_write(const uint8_t *data, uint16_t len);
 void network_on_read_request(const uint8_t *data, uint16_t len);
 
-void network_on_send_done();
+void network_on_send_done(void);
 void network_on_indicate(void);
 void network_on_notify(void);
 void network_on_connected(void);
@@ -41,6 +44,7 @@ typedef void (*net_notify_enable_t) (void);
 /**@brief Ravel Network nofity  event. */
 typedef void (*net_indicate_enable_t) (void);
 
+
 typedef struct {
     net_on_write_t          on_write;
     net_on_read_t           on_read;
@@ -52,9 +56,6 @@ typedef struct {
 } NetworkClb;
 
 void nrf52_network_init(NetworkClb *self);
-
-
-
 
 
 #endif

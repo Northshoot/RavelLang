@@ -44,4 +44,5 @@ void ravel_nrf52_driver_app_dispatcher_ready(RavelNrf52Driver *self);
 void ravel_nrf_driver_dispatch_event(RavelNrf52Driver *self);
 
 void ravel_nrf52_driver_send_done_from_low(RavelDriver *self);
+void ravel_nrf52_driver_rx_data_from_low(RavelDriver *self, RavelPacket *packet, nrf52_endpoint *endpoint);
 #endif /* NRF_DRIVER_H */

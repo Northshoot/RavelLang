@@ -8,7 +8,7 @@
 //maskt for rf_ctrf_flags
 #define FLAG_PARTIAL 0
 #define FLAG_LAST 1
-
+#define SET_ENDPOINT 0xCC
 typedef uint8_t rf_ctrf_flags;
 
 //TODO: eventually, source and destination should be handled
@@ -18,7 +18,7 @@ typedef struct {
     uint8_t indx; /* packet index */ // 1 bytes
     //uint8_t protocol; /* kind of protocol for Ravel */
     uint8_t length;     // 1 bytes
-    rf_ctrf_flags ctrf_flags; /* masked control field flags */ // 1 bytes
+    rf_ctrf_flags ctrf_flags; /* masked control field flags */ // 1 bytes 0xCC means endpoint setting
 }__attribute__((packed)) data_packet_t;
 
 #endif //NRF52_RAVEL_FRAME_H

@@ -9,8 +9,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf52_ble_interface.h"
 #include "nrf52_ble_rad.h"
-static ble_rad_t                        m_rad;
 
+static ble_rad_t                        m_rad;
 #define RAD_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN
 
 struct BleInterfaceVtable rad_handler;
@@ -18,36 +18,30 @@ struct BleInterfaceVtable rad_handler;
 ble_uuid_t m_rad_adv_uuids = {BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE};
 
 
-
-
+static uint32_t ble_rad_init(ble_rad_t * p_rad);
+static uint32_t ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length);
+static void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt);
 
 void
 ble_rad_init_interface(NetworkClb *network)
 {
      uint32_t       err_code;
-     ble_rad_init_t rad_init;
      NRF_LOG_DEBUG("ble_rad_init_interface\r\n");
-
-     memset(&rad_init, 0, sizeof(rad_init));
-
-     rad_init.data_handler = NULL;
      m_rad.network = network;
 
-     err_code = ble_rad_init(&m_rad, &rad_init);
+     err_code = ble_rad_init(&m_rad);
      APP_ERROR_CHECK(err_code);
 }
 
-
-
-
 uint32_t
 ble_rad_send_data_interface(uint8_t * p_data, uint16_t length){
-    return ble_rad_send_data(&m_rad, p_data, length);
+    uint32_t err =  ble_rad_send_data(&m_rad, p_data, length);
+    return err;
 }
 
 void ble_rad_on_ble_evt_interface(ble_evt_t * p_ble_evt)
 {
-    NRF_LOG_DEBUG("ble_rad_on_ble_evt_interfacee\r\n");
+    NRF_LOG_DEBUG("ble_rad_on_ble_evt_interface\r\n");
     //pass on the event to the implementation
     ble_rad_on_ble_evt(&m_rad, p_ble_evt);
 }
@@ -81,18 +75,8 @@ void ble_rad_init_handler()
 #define CALL_UP_SEND_DONE(P_STRUCT) (P_STRUCT->network)->send_done()
 #define CALL_UP_RX(P_STRUCT, P_DATA, LEN) (P_STRUCT->network)->on_write(P_DATA, LEN)
 
-//m
-static uint8_t m_tx_pkt_available=0;
-//Used for packet fragmentation
-static bool m_fragment_enqueued = false;
-static uint8_t m_enqueued_pkt = 0;
-static uint8_t m_sent_pkt = 0;
-
-/***
- *
- * Service function for interactions
- */
-
+//this could speedup the process of sending
+//static uint8_t m_tx_pkt_available=0;
 
 /**@brief Function for handling the @ref BLE_GAP_EVT_CONNECTED event from the S110 SoftDevice.
  *
@@ -102,11 +86,9 @@ static uint8_t m_sent_pkt = 0;
 static void on_connect(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("on_connect\r\n");
-
     //TODO: signal upwards
     p_rad->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
     CALL_UP_CONNECTED(p_rad);
-
 }
 
 
@@ -145,8 +127,8 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         {
             NRF_LOG_DEBUG("notification enabled\r\n");
             p_rad->is_notification_enabled = true;
-            sd_ble_tx_packet_count_get(p_rad->conn_handle, &m_tx_pkt_available);
-            NRF_LOG_DEBUG("available tx packets %u\r\n", m_tx_pkt_available);
+//            sd_ble_tx_packet_count_get(p_rad->conn_handle, &m_tx_pkt_available);
+//            NRF_LOG_DEBUG("available tx packets %u\r\n", m_tx_pkt_available);
             CALL_UP_NOTIFY(p_rad);
         }
         else
@@ -159,6 +141,7 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     else if ( (p_evt_write->handle == p_rad->tx_handles.value_handle) )
     {
         NRF_LOG_DEBUG("data received\r\n");
+        //need to demangle data from fragments
         CALL_UP_RX( p_rad, p_evt_write->data, p_evt_write->len);
     }
     else
@@ -181,7 +164,7 @@ static void on_write(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
  *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t rx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
+static uint32_t rx_char_add(ble_rad_t * p_rad)
 {
     /**@snippet [Adding proprietary characteristic to S110 SoftDevice] */
     ble_gatts_char_md_t char_md;
@@ -242,7 +225,7 @@ static uint32_t rx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init
  *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t tx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
+static uint32_t tx_char_add(ble_rad_t * p_rad)
 {
     ble_gatts_char_md_t char_md;
     ble_gatts_attr_t    attr_char_value;
@@ -287,7 +270,7 @@ static uint32_t tx_char_add(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init
 }
 
 
-void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
+static void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
 {
     NRF_LOG_DEBUG("on_ble_event %u \r\n", p_ble_evt->header.evt_id);
     if ((p_rad == NULL) || (p_ble_evt == NULL))
@@ -310,11 +293,7 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
             break;
         case BLE_EVT_TX_COMPLETE:
             NRF_LOG_DEBUG("TX_COMPLETE \r\n");
-            m_sent_pkt++;
-            if(m_enqueued_pkt == m_sent_pkt) {
-                m_enqueued_pkt = m_sent_pkt = 0;
-                CALL_UP_SEND_DONE(p_rad);
-            }
+            CALL_UP_SEND_DONE(p_rad);
 //            err_code = app_sched_event_put(NULL, 0, update_timers_state);
 //                APP_ERROR_CHECK(err_code);
         default:
@@ -323,18 +302,16 @@ void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
     }
 }
 
-uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
+static uint32_t ble_rad_init(ble_rad_t * p_rad)
 {
     uint32_t      err_code;
     ble_uuid_t    ble_uuid;
     ble_uuid128_t rad_base_uuid = RAD_BASE_UUID;
 
     VERIFY_PARAM_NOT_NULL(p_rad);
-    VERIFY_PARAM_NOT_NULL(p_rad_init);
 
     // Initialize the service structure.
     p_rad->conn_handle             = BLE_CONN_HANDLE_INVALID;
-    p_rad->data_handler            = p_rad_init->data_handler;
     p_rad->is_notification_enabled = false;
 
     /**@snippet [Adding proprietary Service to S110 SoftDevice] */
@@ -353,11 +330,11 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
     VERIFY_SUCCESS(err_code);
 
     // Add the RX Characteristic.
-    err_code = rx_char_add(p_rad, p_rad_init);
+    err_code = rx_char_add(p_rad);
     VERIFY_SUCCESS(err_code);
 
     // Add the TX Characteristic.
-    err_code = tx_char_add(p_rad, p_rad_init);
+    err_code = tx_char_add(p_rad);
     VERIFY_SUCCESS(err_code);
 
     return NRF_SUCCESS;
@@ -367,14 +344,12 @@ uint32_t ble_rad_init(ble_rad_t * p_rad, const ble_rad_init_t * p_rad_init)
 /**
  * sending of the fragment packets
  */
-uint32_t
-send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
+static uint32_t
+ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 {
     ble_gatts_hvx_params_t hvx_params;
     NRF_LOG_DEBUG("send_fragment\r\n");
     VERIFY_PARAM_NOT_NULL(p_rad);
-
-
     if (length > BLE_RAD_MAX_DATA_LEN)
     {
         return NRF_ERROR_INVALID_PARAM;
@@ -389,72 +364,72 @@ send_fragment(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 
     return sd_ble_gatts_hvx(p_rad->conn_handle, &hvx_params);
 }
-
-/**
- * called to send full packet
- */
-
-uint32_t
-ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
-{
-   if ((p_rad->conn_handle == BLE_CONN_HANDLE_INVALID) || (!p_rad->is_notification_enabled))
-    {
-        return NRF_ERROR_INVALID_STATE;
-    }
-
-    NRF_LOG_DEBUG("fragmenting data\r\n");
-    bool has_fragment = true; //we always have at least one fragment
-    m_fragment_enqueued = true;
-
-   // data pointer is for recursive use so we can traverse the rad_data
-    uint8_t * data_ptr = (uint8_t *)p_data;
-
-    // buffer to be sent over ble
-    uint8_t * buffer = (uint8_t*)malloc(BLE_RAD_MAX_DATA_LEN);
-    memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
-
-    // ravel header
-    data_packet_t ravel_pkt;
-
-    while(has_fragment)
-    {
-        if ( length >= BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
-            m_fragment_enqueued = true;
-            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\r\n", sizeof( data_packet_t));
-
-            ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
-            //only one flag TODO: need whole protocol suite
-            ravel_pkt.ctrf_flags = 0;
-            has_fragment = true;
-        } else {
-            NRF_LOG_DEBUG("data < bt frame length\r\n");
-            ravel_pkt.length = length;
-            has_fragment = false;
-            ravel_pkt.ctrf_flags = 1;
-        }
-        // set index
-        ravel_pkt.indx = m_enqueued_pkt;
-        // copy extended bluetooth header to buffer
-        memcpy(buffer, &ravel_pkt, sizeof( data_packet_t));
-
-        // copy RAD packet data to buffer
-        memcpy(buffer + sizeof(data_packet_t), p_data, ravel_pkt.length);
-
-        // TODO: enqueue the packet for sending
-        // FIXME: can not handle more than 7 pkt due to out buffer
-        //needs global buffer, that releasing the send through the sch
-       uint32_t send_result = send_fragment(p_rad, buffer, sizeof( data_packet_t)+ravel_pkt.length);
-        NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_enqueued_pkt, send_result);
-        m_enqueued_pkt++;
-        // updating
-        if (length - ravel_pkt.length > 0) {
-            length = length - ravel_pkt.length;
-            memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
-            data_ptr = data_ptr + ravel_pkt.length;
-        }
-
-     }
-    free(buffer);
-    return 0;
-
-}
+//
+///**
+// * called to send full packet
+// */
+//
+//uint32_t
+//ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_data, uint16_t length)
+//{
+//   if ((p_rad->conn_handle == BLE_CONN_HANDLE_INVALID) || (!p_rad->is_notification_enabled))
+//    {
+//        return NRF_ERROR_INVALID_STATE;
+//    }
+//
+//    NRF_LOG_DEBUG("fragmenting data\r\n");
+//    bool has_fragment = true; //we always have at least one fragment
+//    m_fragment_enqueued = true;
+//
+//   // data pointer is for recursive use so we can traverse the rad_data
+//    uint8_t * data_ptr = (uint8_t *)p_data;
+//
+//    // buffer to be sent over ble
+//    uint8_t * buffer = (uint8_t*)malloc(BLE_RAD_MAX_DATA_LEN);
+//    memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
+//
+//    // ravel header
+//    data_packet_t ravel_pkt;
+//
+//    while(has_fragment)
+//    {
+//        if ( length >= BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
+//            m_fragment_enqueued = true;
+//            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\r\n", sizeof( data_packet_t));
+//
+//            ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
+//            //only one flag TODO: need whole protocol suite
+//            ravel_pkt.ctrf_flags = 0;
+//            has_fragment = true;
+//        } else {
+//            NRF_LOG_DEBUG("data < bt frame length\r\n");
+//            ravel_pkt.length = length;
+//            has_fragment = false;
+//            ravel_pkt.ctrf_flags = 1;
+//        }
+//        // set index
+//        ravel_pkt.indx = m_enqueued_pkt;
+//        // copy extended bluetooth header to buffer
+//        memcpy(buffer, &ravel_pkt, sizeof( data_packet_t));
+//
+//        // copy RAD packet data to buffer
+//        memcpy(buffer + sizeof(data_packet_t), p_data, ravel_pkt.length);
+//
+//        // TODO: enqueue the packet for sending
+//        // FIXME: can not handle more than 7 pkt due to out buffer
+//        //needs global buffer, that releasing the send through the sch
+//       uint32_t send_result = send_fragment(p_rad, buffer, sizeof( data_packet_t)+ravel_pkt.length);
+//        NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_enqueued_pkt, send_result);
+//        m_enqueued_pkt++;
+//        // updating
+//        if (length - ravel_pkt.length > 0) {
+//            length = length - ravel_pkt.length;
+//            memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
+//            data_ptr = data_ptr + ravel_pkt.length;
+//        }
+//
+//     }
+//    free(buffer);
+//    return 0;
+//
+//}

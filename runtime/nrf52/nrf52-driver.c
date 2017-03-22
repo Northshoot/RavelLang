@@ -64,11 +64,14 @@ ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoi
 RavelPacket pkt_out;
 RavelEndpoint *endpoint_out;
 
+void ravel_nrf52_driver_rx_data_from_low(RavelDriver *self, RavelPacket *packet,nrf52_endpoint *endpoint)
+{
+    ravel_base_dispatcher_data_received(self->dispatcher, packet, endpoint);
+}
+
 RavelError
 ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *endpoint)
 {
-
-
     if (!m_network_is_busy) {
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
@@ -80,7 +83,6 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         return  RAVEL_ERROR_BUSY;
     }
 }
-
 
 void
 ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
@@ -123,9 +125,6 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     self->base.dispatcher = dispatcher;
     self->network = network;
     init_timer_module();
-
-
-
 }
 
 
@@ -134,7 +133,6 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 {
     /* Free any context resource here */
     NRF_LOG_INFO("FINALIZE!\r\n");
-
     ravel_key_provider_finalize(&self->base.key_provider);
 }
 
@@ -150,8 +148,6 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
         ravel_key_provider_init(&self->base.key_provider);
     //START BLE
     nrf52_r_core_ble_start();
-
-
     NRF_LOG_INFO("LOOP\r\n");
     //
     while (true)
