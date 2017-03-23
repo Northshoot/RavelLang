@@ -92,8 +92,10 @@ ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
 {
     NRF_LOG_DEBUG("SIGNAL_UP_SEND_DONE \r\n");
     m_network_is_busy = false;
-    ravel_base_dispatcher_send_done(self->dispatcher, RAVEL_ERROR_SUCCESS, &pkt_out, endpoint_out);
-    ravel_packet_finalize(&pkt_out);
+    RavelPacket copy = pkt_out;
+
+    ravel_base_dispatcher_send_done(self->dispatcher, RAVEL_ERROR_SUCCESS, &copy, endpoint_out);
+    ravel_packet_finalize(&copy);
 }
 void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)

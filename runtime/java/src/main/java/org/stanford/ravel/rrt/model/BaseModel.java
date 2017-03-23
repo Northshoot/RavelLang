@@ -228,6 +228,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
+        System.err.println("Got endpoint list " + endpoints);
+
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             try {

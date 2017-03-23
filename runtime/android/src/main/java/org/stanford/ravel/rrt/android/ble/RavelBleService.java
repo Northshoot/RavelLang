@@ -37,7 +37,10 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 
 /**
@@ -59,16 +62,17 @@ public class RavelBleService extends Service {
     List<BluetoothDevice> deviceList;
     private boolean mScanning;
     private String mBluetoothDeviceAddress;
-
+    private boolean m_endpoint_set=false;
     private int m_local_endpoint_id=-1;
     private int mBLEConnectionState = BLE_STATE_DISCONNECTED;
     private static final int BLE_STATE_DISCONNECTED = 0;
     private static final int BLE_STATE_CONNECTING = 1;
     private static final int BLE_STATE_CONNECTED = 2;
     private static final int BLE_STATE_INITIALIZED = 3;
+    private boolean mSending = false;
 
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
-    private ArrayList<BlePacket> out_pkt_queue;
+    private BlockingDeque<BlePacket> out_pkt_queue = new LinkedBlockingDeque<>();
 
     private IBinder mBinder = new BleBinder();
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -106,6 +110,7 @@ public class RavelBleService extends Service {
                 mBLEConnectionState = BLE_STATE_DISCONNECTED;
                 EMBEDDED_CONNECTED = false;
                 broadcastUpdate(BleDefines.ACTION_GATT_DISCONNECTED, gatt.getDevice().getAddress());
+                m_endpoint_set = false;
                 //start scanning after predefined period
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -182,7 +187,14 @@ public class RavelBleService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             //TODO: notify send_done
-            Log.d(TAG, "onCharacteristicWrite: enabling notification " + enableNotification());
+            if(!m_endpoint_set) {
+                Log.d(TAG, "onCharacteristicWrite: enabling notification " + enableNotification());
+                m_endpoint_set = true;
+            } else {
+                mSending = false;
+                transmitQueedData();
+                Log.d(TAG, "onCharacteristicWrite: reliable status " + status);
+            }
 
         }
 
@@ -311,7 +323,7 @@ public class RavelBleService extends Service {
 //                    }
                     byte[] bytes = ByteBuffer.allocate(4).putInt(m_local_endpoint_id).array();
                     BlePacket blePacket = BlePacket.packetToNetwork(bytes, 0, BleDefines.ENDPOINT_PROTOCOL);
-                    write_to_embedded(blePacket);
+                    sendData(Collections.singletonList(blePacket));
                 } else {
                     //TODO: need to implement dynamic attaching of services
                     //Log.e(TAG, "no compatible service was found " + bleS.getUuid());
@@ -645,16 +657,24 @@ public class RavelBleService extends Service {
      * TODO: extract BLE to a generic method
      */
     //make sure we can send all the packets and have packet queue
-    public void sendData(ArrayList<BlePacket> pkt_list){
+    private void transmitQueedData()
+    {
+        assert(!mSending);
+        if (!out_pkt_queue.isEmpty()) {
+            BlePacket pkt = out_pkt_queue.poll();
 
-        for (BlePacket pkt: pkt_list) {
-            Log.d(TAG, "sendData: " + pkt.toString());
-            write_to_embedded(pkt);
+            if (!write_to_embedded(pkt)) {
+                out_pkt_queue.add(pkt);
+            }
         }
-
-
     }
-    public boolean write_to_embedded( BlePacket pkt) {
+    public void sendData(List<BlePacket> pkt_list){
+        out_pkt_queue.addAll(pkt_list);
+        transmitQueedData();
+    }
+
+    private synchronized boolean write_to_embedded( BlePacket pkt) {
+        mSending = true;
         Log.d(TAG, "writing go characteristic");
         if( mBluetoothGatt != null) {
 
@@ -684,6 +704,7 @@ public class RavelBleService extends Service {
             }
             Log.d(TAG,"writeCharacteristic Success");
         } else {
+            m_endpoint_set = false;
             Log.d(TAG,"BLE Disconnected");
         }
         return true;

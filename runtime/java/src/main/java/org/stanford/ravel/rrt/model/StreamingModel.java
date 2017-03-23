@@ -97,8 +97,10 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             notifySaveDone(new Context<>(this, recordAt(recordPos)));
         } else {
             // send the ack first
-            RavelPacket ack = RavelPacket.makeAck(pkt.model_id, pkt.record_id);
-            dispatcher.model__sendData(ack, endpoint);
+            if (isReliable()) {
+                RavelPacket ack = RavelPacket.makeAck(pkt.model_id, pkt.record_id);
+                dispatcher.model__sendData(ack, endpoint);
+            }
 
             int recordPos = findRecordWithId(pkt.record_id);
             if (recordPos >= 0) {

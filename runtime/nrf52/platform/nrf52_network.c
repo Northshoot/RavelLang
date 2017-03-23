@@ -61,15 +61,17 @@ static void packetRxCompleted()
     NRF_LOG_DEBUG("packetRxCompleted \r\n");
     RavelPacket pkt;
 
-    NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u \r\n", pkt_buffer[0], pkt_buffer[1], pkt_buffer[2], pkt_buffer[3], pkt_buffer[4], pkt_buffer[5]);
+    uint8_t* pkt_data = pkt_buffer;
+    NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u \r\n", pkt_data[0], pkt_data[1], pkt_data[2], pkt_data[3], pkt_data[4], pkt_data[5]);
 
-    ravel_packet_init_from_network(&pkt, pkt_buffer+3,pkt_length);
+    ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
     ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
     m_receiving = false;
     m_rx_enqueued_pkt--; //should be zero now
     m_rx_enqueued_fragment = 0;
     free(pkt_buffer);
+    ravel_packet_finalize(&pkt);
 }
 
 
@@ -87,7 +89,7 @@ static void fragment_rx(data_packet_t *m_pkt)
     m_rx_enqueued_fragment++;
     pkt_length += m_pkt->length;
     //append to the packet buffer
-    memcpy( pkt_buffer + m_pkt->indx, m_pkt, pkt_length);
+    memcpy(pkt_buffer + m_pkt->indx * (BLE_RAD_MAX_DATA_LEN-3), ((uint8_t*)m_pkt)+3, m_pkt->length);
 
     NRF_LOG_DEBUG("fragment_rx indx: %u \r\n", m_pkt->indx);
     if( m_pkt->ctrf_flags == 1) {
@@ -107,7 +109,6 @@ network_on_write(const uint8_t *data, uint16_t len)
         create_endpoint( data, len);
     } else {
         m_rx_enqueued_fragment++;
-
         fragment_rx(&m_pkt);
     }
 }
@@ -135,7 +136,6 @@ network_on_send_done()
     NRF_LOG_DEBUG("network_on_send_done %u\r\n", m_total);
     m_tx_sent_done_fragment++;
     if(m_tx_fragment_enqueued == m_tx_sent_done_fragment) {
-
         packetTxCompleted();
     }
 }
