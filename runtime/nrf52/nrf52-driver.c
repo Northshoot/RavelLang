@@ -67,6 +67,7 @@ RavelEndpoint *endpoint_out;
 
 void ravel_nrf52_driver_rx_data_from_low(RavelDriver *self, RavelPacket *packet,nrf52_endpoint *endpoint)
 {
+    NRF_LOG_DEBUG("dispatching packet received model id %u record id %u is ack %u\r\n", packet->model_id, packet->record_id, packet->is_ack);
     ravel_base_dispatcher_data_received(self->dispatcher, packet, &endpoint->m_ravel_endpoint);
 }
 
@@ -77,6 +78,7 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
         m_network_is_busy = true;
+        NRF_LOG_DEBUG("Ravel PKT %u\r\n", pkt_out.packet_length);
         network_send(packet, endpoint);
 
         return RAVEL_ERROR_IN_TRANSIT;

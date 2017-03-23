@@ -51,8 +51,8 @@ public class <name> extends Service {
         driver = new AndroidDriver(dispatcher, this);
         dispatcher.setDriver(driver);
 
-        // FIXME load the list of endpoints and register them with the driver
-
+        dispatcher.addAllEndpoints();
+        driver.loadDurableStorage();
         driver.appDispatcherReady();
     }
 

@@ -58,8 +58,12 @@ create_endpoint(const uint8_t *data, uint16_t len)
 //called when packet is completed
 static void packetRxCompleted()
 {
+    NRF_LOG_DEBUG("packetRxCompleted \r\n");
     RavelPacket pkt;
-    ravel_packet_init_from_network(&pkt, pkt_buffer,pkt_length);
+
+    NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u \r\n", pkt_buffer[0], pkt_buffer[1], pkt_buffer[2], pkt_buffer[3], pkt_buffer[4], pkt_buffer[5]);
+
+    ravel_packet_init_from_network(&pkt, pkt_buffer+3,pkt_length);
     ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
     m_receiving = false;
@@ -84,6 +88,7 @@ static void fragment_rx(data_packet_t *m_pkt)
     pkt_length += m_pkt->length;
     //append to the packet buffer
     memcpy( pkt_buffer + m_pkt->indx, m_pkt, pkt_length);
+
     NRF_LOG_DEBUG("fragment_rx indx: %u \r\n", m_pkt->indx);
     if( m_pkt->ctrf_flags == 1) {
         //finalize the data and send it off
@@ -101,8 +106,8 @@ network_on_write(const uint8_t *data, uint16_t len)
     if( m_pkt.ctrf_flags == SET_ENDPOINT ){
         create_endpoint( data, len);
     } else {
-        //TODO: defragment it and pass it up
         m_rx_enqueued_fragment++;
+
         fragment_rx(&m_pkt);
     }
 }

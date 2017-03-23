@@ -155,11 +155,11 @@ CFLAGS += -DNRF52832
 CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
-CFLAGS +=  -Wall -Werror -O3 -g3
+#CFLAGS +=  -Wall -Werror -O3 -g3
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in separate section, this allows linker to discard unused ones
-CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
-CFLAGS += -fno-builtin --short-enums
+#CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
+#CFLAGS += -fno-builtin --short-enums
 
 # C++ flags common to all targets
 CXXFLAGS += \
@@ -212,6 +212,12 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 flash: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
 	@echo Flashing: $<
 	nrfjprog --program $< -f nrf52 --sectorerase
+	nrfjprog --reset -f nrf52
+
+# Flash softdevice
+flash_softdevice:
+	@echo Flashing: s132_nrf52_3.0.0_softdevice.hex
+	nrfjprog --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_3.0.0_softdevice.hex -f nrf52 --sectorerase
 	nrfjprog --reset -f nrf52
 
 erase:

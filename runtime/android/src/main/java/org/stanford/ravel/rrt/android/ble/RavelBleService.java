@@ -21,12 +21,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
@@ -68,8 +68,9 @@ public class RavelBleService extends Service {
     private static final int BLE_STATE_INITIALIZED = 3;
 
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
+    private ArrayList<BlePacket> out_pkt_queue;
 
-
+    private IBinder mBinder = new BleBinder();
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -197,7 +198,7 @@ public class RavelBleService extends Service {
             Log.d(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
             BlePacket ble_pkt = new BlePacket( gatt, characteristic);
             //TODO
-            Log.d("PKT: ", ble_pkt.toString());
+            Log.d(TAG, "PKT: " + ble_pkt.toString());
             dataReceived(ble_pkt);
 
         }
@@ -309,7 +310,7 @@ public class RavelBleService extends Service {
 //                        Log.e(TAG, "char::: " + c.getUuid());
 //                    }
                     byte[] bytes = ByteBuffer.allocate(4).putInt(m_local_endpoint_id).array();
-                    BlePacket blePacket = BlePacket.packetFromBytes(bytes, BleDefines.ENDPOINT_PROTOCOL);
+                    BlePacket blePacket = BlePacket.packetToNetwork(bytes, 0, BleDefines.ENDPOINT_PROTOCOL);
                     write_to_embedded(blePacket);
                 } else {
                     //TODO: need to implement dynamic attaching of services
@@ -571,15 +572,7 @@ public class RavelBleService extends Service {
         Log.d(TAG, "onTrimMemory");
     }
 
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-
-    /**
+        /**
      * This is called if the service is currently running and the user has
      * removed a task that comes from the service's application.  If you have
      * set {@link ServiceInfo#FLAG_STOP_WITH_TASK ServiceInfo.FLAG_STOP_WITH_TASK}
@@ -650,8 +643,17 @@ public class RavelBleService extends Service {
      * Generic method that writes to the model instance on the embedded device
      * BLE assumption here!
      * TODO: extract BLE to a generic method
-
      */
+    //make sure we can send all the packets and have packet queue
+    public void sendData(ArrayList<BlePacket> pkt_list){
+
+        for (BlePacket pkt: pkt_list) {
+            Log.d(TAG, "sendData: " + pkt.toString());
+            write_to_embedded(pkt);
+        }
+
+
+    }
     public boolean write_to_embedded( BlePacket pkt) {
         Log.d(TAG, "writing go characteristic");
         if( mBluetoothGatt != null) {
@@ -688,7 +690,29 @@ public class RavelBleService extends Service {
     }
 
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.v(TAG, "in onBind");
+        return mBinder;
+    }
 
+    @Override
+    public void onRebind(Intent intent) {
+        Log.v(TAG, "in onRebind");
+        super.onRebind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.v(TAG, "in onUnbind");
+        return true;
+    }
+
+    public class BleBinder extends Binder {
+        public RavelBleService  getService() {
+            return RavelBleService.this;
+        }
+    }
 
 }
 

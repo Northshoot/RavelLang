@@ -719,8 +719,10 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         Context *ctx;
 
         // send the ack first
-        ravel_packet_init_ack(&ack, pkt->model_id, pkt->record_id);
-        ravel_base_dispatcher_send_data(self->base.dispatcher, &ack, endpoint);
+        if (self->base.reliable) {
+            ravel_packet_init_ack(&ack, pkt->model_id, pkt->record_id);
+            ravel_base_dispatcher_send_data(self->base.dispatcher, &ack, endpoint);
+        }
 
         record_pos = find_record_with_id(&self->base, pkt->record_id);
         if (record_pos >= 0 && self->base.state[record_pos].is_allocated) {

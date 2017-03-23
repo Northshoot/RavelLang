@@ -1,10 +1,13 @@
 package org.stanford.ravel.rrt.android;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import org.stanford.ravel.rrt.DispatcherAPI;
@@ -32,11 +35,13 @@ public class AndroidDriver extends JavaDriver {
     private final static String TAG = AndroidDriver.class.getSimpleName();
     private final DispatcherAPI appDispatcher;
     private final Context ctx;
+    private RavelBleService mRavelService;
 
     private final Map<String, BleEndpoint> bleClients = new HashMap<>();
     // BLE related variables
     private boolean m_connected_ble = false;
     private boolean m_ble_endpoint_started = false;
+    boolean mBleServiceBound = false;
     private Map<String, ArrayList<BlePacket>> m_frag_map;
     //Connection states
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
@@ -57,10 +62,12 @@ public class AndroidDriver extends JavaDriver {
 
     private Intent mRavelServiceIntent;
 
+    //FIXME: move fragmentation to a separate class for processing
     void packetCompleted(BlePacket pkt){
         byte [] data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
-        packetReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
+        Log.e(TAG, "packetCompleted , sending it up");
+        appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
     }
 
     int counter = 0;
@@ -82,7 +89,20 @@ public class AndroidDriver extends JavaDriver {
         counter++;
 
     }
+    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
 
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBleServiceBound = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            RavelBleService.BleBinder myBinder = (RavelBleService.BleBinder) service;
+            mRavelService = myBinder.getService();
+            mBleServiceBound = true;
+        }
+    };
     private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -97,9 +117,11 @@ public class AndroidDriver extends JavaDriver {
                     BleEndpoint ble_e = new BleEndpoint(1);
                     ble_e.connected();
                     bleClients.put(device_address, ble_e);
+                    registerEndpoint(ble_e);
                     //add device to the fragment map
                     m_frag_map.put(device_address, new ArrayList<BlePacket>());
                     EMBEDDED_CONNECTED = true;
+                    m_connected_ble = true;
                     break;
                 case BleDefines.ACTION_GATT_DISCONNECTED:
                     Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
@@ -112,6 +134,7 @@ public class AndroidDriver extends JavaDriver {
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
                     //TODO: assemble fragment
+                    Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE");
                     BlePacket pkt = (BlePacket) data.getSerializable(BleDefines.EXTRA_DATA);
                     fragment_arrived(pkt);
                     break;
@@ -145,7 +168,11 @@ public class AndroidDriver extends JavaDriver {
     protected void sendDataThread(RavelPacket data, Endpoint endpoint) throws RavelIOException {
         switch (endpoint.getType()) {
             case BLE:
-                // send to a ble device
+
+                if(m_connected_ble && mBleServiceBound){
+                    Log.d(TAG, "sending packet " + endpoint.getId());
+                    mRavelService.sendData(BlePacket.packetsFromBytes(data.toBytes()));
+                }
                 // TODO
                 break;
             case GCM:
@@ -209,6 +236,7 @@ public class AndroidDriver extends JavaDriver {
         mRavelServiceIntent.putExtra(BleDefines.ENDPOINT, endpoint.getId());
         //register receiver
         ctx.startService(mRavelServiceIntent);
+        ctx.bindService(mRavelServiceIntent, mBleServiceConnection, Context.BIND_AUTO_CREATE);
         ctx.registerReceiver((mRaveBleMessageReceiver), new IntentFilter(BleDefines.INTENT_BLE_FILTER));
 
 

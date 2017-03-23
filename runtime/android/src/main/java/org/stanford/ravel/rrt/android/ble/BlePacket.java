@@ -21,12 +21,13 @@ public class BlePacket implements Serializable {
     private final static int LENGTH = 1;
     private final static int FLAGS = 2;
     private final static int protocol_offset = 3;
-
-    private String address;
-    private byte[] data;
-    private int flags = 0;
+    //Packet Structure
     private int indx=0;
     private int length=0;
+    private int flags = 0;
+    private byte[] data;
+    //addons not serializible to out/in
+    private String address;
     private boolean last = false;
     public static final int FLAG_LAST = 1;
 
@@ -51,7 +52,7 @@ public class BlePacket implements Serializable {
     }
 
     private void setIndx(int d) {this.indx = d ;}
-    private void setLast(int l) {this.flags = l; }
+    private void setLast(int l) {this.flags = l; this.last = (FLAG_LAST & this.flags) == FLAG_LAST; }
     private void setLength(int l) {this.length = l; }
     public void setData(byte[] d) {this.data = d ;}
 
@@ -100,28 +101,40 @@ public class BlePacket implements Serializable {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 bos.write(data, indx*m_max_pkt_length, m_max_pkt_length );
                 blePacket.setData(bos.toByteArray());
+                indx++;
+                data_length -=m_max_pkt_length;
             } else {
                 blePacket.setLast(1);
                 blePacket.setData(data);
                 blePacket.setLength(data_length);
                 hasFragment = false;
             }
-
+            mPacketList.add(blePacket);
         }
         return mPacketList;
     }
 
-    public static BlePacket packetFromBytes(byte[] data, int flag){
+    public static BlePacket packetToNetwork(byte[] data, int indx, int flags)
+    {
         assert (data.length <= BleDefines.BLE_MAX_DATA_LENGTH-BleDefines.BLE_FRAGMENT_HEADER_LENGTH);
         BlePacket blePacket = BlePacket.emptyPacket();
-        blePacket.setLast(flag);
-        blePacket.setData(data);
-        blePacket.setLength(data.length);
+        blePacket.indx = indx;
+        blePacket.length = data.length + BleDefines.BLE_FRAGMENT_HEADER_LENGTH;
+        blePacket.flags = flags;
+        blePacket.last = true;
+        blePacket.data = data;
+
         return blePacket;
     }
+    public static BlePacket packetFromNetworkBytes(byte[] data){
+        assert (data.length <= BleDefines.BLE_MAX_DATA_LENGTH-BleDefines.BLE_FRAGMENT_HEADER_LENGTH);
+        BlePacket blePacket = BlePacket.emptyPacket();
+        blePacket.setIndx(getIndex(data));
+        blePacket.setLength(getLength(data));
+        blePacket.setLast(getFlags(data));
+        blePacket.setData(data);
 
-    public static BlePacket packetFromBytes(byte[] data){
-        return packetFromBytes(data, 1);
+        return blePacket;
     }
     private BlePacket() {}
 
@@ -145,17 +158,22 @@ public class BlePacket implements Serializable {
         return pkt;
     }
     //FIXME: this is hardcoded values
-    private int getIndex(byte[] data)
+    private static int getIndex(byte[] data)
     {
-        return  ByteWork.convertByteToInt(ByteWork.getBytes(data, 0, 1)[0]);
+        return  ByteWork.convertByteToInt(ByteWork.getBytes(data, INDEX, INDEX+1)[0]);
     }
-    private int getLength(byte[] data)
+    private static int getLength(byte[] data)
     {
-        return ByteWork.convertByteToInt(ByteWork.getBytes(data, 1, 2)[0]);
+        return ByteWork.convertByteToInt(ByteWork.getBytes(data, LENGTH, LENGTH+1)[0]);
     }
-    private int getFlags(byte[] data)
+    private static int getFlags(byte[] data)
     {
-        return ByteWork.convertByteToInt(ByteWork.getBytes(data, 2, 3)[0]);
+        return ByteWork.convertByteToInt(ByteWork.getBytes(data, FLAGS, FLAGS+1)[0]);
+    }
+    private static byte[] getdata(byte[] data)
+    {
+        //data is data.length - header 3 bytes
+        return  ByteWork.getBytes(data, protocol_offset, data.length);
     }
     @Override
     public String toString() {
