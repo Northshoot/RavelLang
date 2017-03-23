@@ -651,9 +651,13 @@ ravel_streaming_model_forward(RavelStreamingModel *self, RavelPacket *pkt, void 
     if (endpoint_names[0] == -1) {
         if (!pkt->is_save_done) {
             RavelPacket save_done;
+            RavelError error;
 
             ravel_packet_init_save_done (&save_done, pkt->model_id, pkt->record_id);
-            return ravel_base_model_forward_packet (&self->base, &save_done, self->source_endpoints, NULL);
+            error = ravel_base_model_forward_packet (&self->base, &save_done, self->source_endpoints, NULL);
+
+            ravel_packet_finalize(&save_done);
+            return error;
         } else {
             return RAVEL_ERROR_SUCCESS;
         }

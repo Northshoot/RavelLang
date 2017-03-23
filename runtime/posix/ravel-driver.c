@@ -418,6 +418,8 @@ static void handle_new_data(RavelPosixDriver *self, int fd, RavelPosixEndpoint *
         return;
     }
 
+    fprintf(stderr, "received packet model id %d record id %d flags %u\n", packet.model_id, packet.record_id, (uint32_t)packet.packet_data[2]);
+
     ravel_base_dispatcher_data_received(self->base.dispatcher, &packet, &endpoint->base);
 
     ravel_packet_finalize (&packet);
