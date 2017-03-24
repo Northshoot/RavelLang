@@ -230,6 +230,10 @@ public class JavaDriver implements DriverAPI {
             return startRemoteEndpoint(ep);
     }
 
+    protected void pushThreadPool(Runnable r) {
+        threadPool.execute(r);
+    }
+
     @Override
     public void appDispatcherReady() {
         appDispatcher.started();

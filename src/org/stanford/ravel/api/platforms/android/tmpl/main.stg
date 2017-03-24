@@ -67,9 +67,7 @@ public class <name> extends Service {
     }
 
     public void setEndpoints(ArrayList\<Endpoint> endp){
-            for (Endpoint e: endp) {
-                driver.registerEndpoint(e);
-            }
+        driver.setEndpoints(endp);
     }
     @Override
      public IBinder onBind(Intent intent) {

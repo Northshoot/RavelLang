@@ -25,6 +25,7 @@ import org.stanford.ravel.rrt.tiers.RavelIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,6 +59,17 @@ public class AndroidDriver extends JavaDriver {
      */
 
     private Intent mRavelServiceIntent;
+
+    public void setEndpoints(final List<Endpoint> endpoints) {
+        pushThreadPool(new Runnable() {
+            @Override
+            public void run() {
+                for (Endpoint e: endpoints) {
+                    registerEndpoint(e);
+                }
+            }
+        });
+    }
 
     //FIXME: move fragmentation to a separate class for processing
     void packetCompleted(BlePacket pkt){

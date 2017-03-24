@@ -17,7 +17,11 @@ import org.stanford.ravel.generated.GatewaySpace;
 import org.stanford.ravel.rrt.tiers.BleEndpoint;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by gcampagn on 2/6/17.
@@ -30,6 +34,7 @@ public class MainActivity extends Activity {
     GatewaySpace gatewaySpace;
     boolean mServiceBound = false;
     BleEndpoint localEndpoint = new BleEndpoint(2);
+    Endpoint cloud;
 
     ArrayList<Endpoint> eps = new ArrayList<>();
 
@@ -47,6 +52,11 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            cloud = Endpoint.fromString(3, new URI("tcp://camembert.stanford.edu:1234"), Collections.<String, String>emptyMap());
+        } catch(URISyntaxException|MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
         setContentView(R.layout.main_activity);
 
 
@@ -67,6 +77,7 @@ public class MainActivity extends Activity {
             mServiceBound = true;
             localEndpoint.setLocal(true);
             eps.add(localEndpoint);
+            eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
         }
     };
