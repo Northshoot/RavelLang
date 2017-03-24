@@ -82,8 +82,8 @@ controller PongController(ping2 : Ping2, pong : Pong):
 space EmbeddedSpace:
     platform:
         language = CLang
-        system = Nrf52.v1
-        #system = Posix.v2008
+        #system = Nrf52.v1
+        system = Posix.v2008
 
     models:
         ref = Reference()
@@ -96,8 +96,8 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        system = Android.v19
-        #system = J2SE.v18
+        #system = Android.v19
+        system = J2SE.v18
 
     models:
         ping2 = Ping2()

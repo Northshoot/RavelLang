@@ -10,7 +10,7 @@ local model Reference():
         records = 1
         durable = False
     schema:
-        value : int32
+        value : int32[6]
 
 
 streaming model Pong():
