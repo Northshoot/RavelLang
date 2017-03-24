@@ -3,7 +3,7 @@
 set -e
 set -x
 
-FLAGS="-fno-encrypt -fno-mac"
+#FLAGS="-fno-encrypt -fno-mac"
 ex="$1"
 
 echo

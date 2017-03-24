@@ -519,7 +519,6 @@ public class SecurityTransformation {
 
         List<SecurityOperation> macs = im.getSecurityOperations(SecurityPrimitive.VERIFY_MAC);
         List<SecurityOperation> decryptions = im.getSecurityOperations(SecurityPrimitive.DECRYPT);
-        boolean doDecrypt = enableEncryption && decryptions.size() > 0;
 
         if (enableMAC) {
             for (SecurityOperation op : macs) {
@@ -543,13 +542,9 @@ public class SecurityTransformation {
 
         int isEncrypted = builder.allocateRegister(PrimitiveType.BOOL);
 
-        if (doDecrypt) {
-            builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, true));
-            for (SecurityOperation op : decryptions) {
-                applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
-            }
-        } else {
-            builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, false));
+        builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, enableEncryption));
+        for (SecurityOperation op : decryptions) {
+            applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
         }
 
         builder.add(IntrinsicFactory.createParameterSet(PrimitiveType.BOOL, isEncryptedSym.getRegister(), isEncrypted));

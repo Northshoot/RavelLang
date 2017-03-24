@@ -22,6 +22,7 @@ OBJS := $(patsubst %.c,%.o,$(addprefix $(RAVEL_C_RUNTIME_DIR),$(C_RUNTIME_SOURCE
 CFLAGS ?= -O2 -g
 
 WOLFSSL_CFLAGS := $(shell pkg-config --cflags wolfssl)
+WOLFSSL_LIBS := $(shell pkg-config --libs wolfssl)
 
 clean:
 	rm -f libravel.a $(OBJS)
@@ -33,5 +34,8 @@ clean:
 
 libravel.a: $(OBJS)
 	$(AR) crs -o $@ $^
+
+test-crypto: test-crypto.o libravel.a
+	gcc $(LDFLAGS) -o $@ $^ $(WOLFSSL_LIBS)
 
 -include .deps/*.d
