@@ -120,10 +120,6 @@ static inline uint32_t record_id_from_record(void *record)
 {
     return ((RavelRecord*)record)->record_id;
 }
-static inline void set_record_id(void *record, uint32_t id)
-{
-    ((RavelRecord*)record)->record_id = id;
-}
 
 static int
 find_record_with_id(RavelBaseModel *self,
@@ -348,8 +344,6 @@ ravel_base_model_save(RavelBaseModel *self, void *record)
     assert (self->state[record_pos].is_allocated);
 
     if (!self->state[record_pos].is_valid) {
-        set_record_id(record, self->next_record_id++);
-
         dl_remove(&self->nursery, record);
         dl_append_tail(&self->valid_records, record);
         self->state[record_pos].is_valid = true;

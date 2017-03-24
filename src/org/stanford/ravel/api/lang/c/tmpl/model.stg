@@ -127,6 +127,7 @@ ravel_generated_<model.name; format="function">_create(<model.name> *self)
     }
 
     ravel_generated_<model.name; format="function">_record_init(record);
+    record->__base.record_id = ravel_base_model(self)->next_record_id++;
 
     return record;
 }

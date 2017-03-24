@@ -159,6 +159,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         else
             return mRecords.get(recordPos);
     }
+    protected void assignIndex(RecordType record) {
+        record.index(mNextRecordId++);
+    }
 
     private int tryAddRecord(RecordType record) {
         for (int i = 0; i < mRecords.size(); i++) {
@@ -186,7 +189,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
 
         if (!state[recordPos].is_valid) {
-            record.index(mNextRecordId++);
             state[recordPos].is_valid = true;
             mValidRecords.add(record);
         }

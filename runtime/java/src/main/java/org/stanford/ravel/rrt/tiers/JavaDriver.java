@@ -129,7 +129,7 @@ public class JavaDriver implements DriverAPI {
                 break;
 
             default:
-                appDispatcher.driver__sendDone(Error.ENDPOINT_UNREACHABLE, data, endpoint);
+                throw new RavelIOException(Error.ENDPOINT_UNREACHABLE);
         }
     }
 

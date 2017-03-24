@@ -108,7 +108,9 @@ public class <name> extends <base>\<<name>.Record> {
     }
     @Override
     public Record create() {
-        return new Record();
+        Record r = new Record();
+        assignIndex(r);
+        return r;
     }
 
     // Adjust the type of all() to what the controllers expect
