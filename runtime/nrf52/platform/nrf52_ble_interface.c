@@ -1,6 +1,7 @@
 #include "nrf52_ble_interface.h"
 
 #define NRF_LOG_MODULE_NAME "BLE_H"
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 

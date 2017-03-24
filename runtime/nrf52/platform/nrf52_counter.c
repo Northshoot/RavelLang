@@ -2,6 +2,7 @@
 #include "nrf52_counter.h"
 #include "nrf_drv_rtc.h"
 #define NRF_LOG_MODULE_NAME "CNTR::"
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 

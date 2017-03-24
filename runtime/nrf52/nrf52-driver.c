@@ -34,6 +34,7 @@
 #include "temp_keys.h"
 
 #define NRF_LOG_MODULE_NAME "DRV"
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 

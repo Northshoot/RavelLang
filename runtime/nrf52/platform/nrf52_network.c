@@ -74,7 +74,7 @@ static void packetRxCompleted()
         value);
 
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
-    NRF_LOG_ERROR("packetRxCompleted free: %p\r\n", pkt_buffer);
+    //NRF_LOG_ERROR("packetRxCompleted free: %p\r\n", pkt_buffer);
     free(pkt_buffer);
     pkt_length =0;
     pkt_buffer = NULL;
@@ -101,7 +101,7 @@ static void fragment_rx(data_packet_t *m_pkt, const uint8_t* pkt_data)
         NRF_LOG_DEBUG("assert ok\r\n");
         //FIXME: MAX length set here :S
         pkt_buffer = malloc(BLE_RAD_MAX_DATA_LEN * 10);
-        NRF_LOG_ERROR("fragment_rx malloc: %p\r\n", pkt_buffer);
+        //NRF_LOG_ERROR("fragment_rx malloc: %p\r\n", pkt_buffer);
         if (pkt_buffer == NULL) {
             //NRF_LOG_ERROR("OUT OF MEMORY\r\n");
             return;
