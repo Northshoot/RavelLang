@@ -212,35 +212,27 @@ network_on_disconnected(void)
 static void
 network_send_data( uint8_t * p_data, uint16_t length)
 {
-
     NRF_LOG_DEBUG("fragmenting data\r\n");
     bool has_fragment = true; //we always have at least one fragment
    // data pointer is for recursive use so we can traverse the rad_data
     uint8_t * data_ptr = (uint8_t *)p_data;
     int32_t value = 0;
-    if (length > 6)
-        value = ravel_intrinsic_extract_int32(p_data, 6);
-    NRF_LOG_DEBUG("sending val %u\r\n", value);
     // buffer to be sent over ble
     uint8_t buffer[BLE_RAD_MAX_DATA_LEN];
     memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
 
     // ravel header
     data_packet_t ravel_pkt;
-
-    while(has_fragment)
+    while(length > 0)
     {
-        if ( length >= BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
-            NRF_LOG_DEBUG("data >= bt frame length  ext_bt_header= %d\r\n", sizeof( data_packet_t));
-
+        if ( length > BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
+            NRF_LOG_DEBUG("data >= bt %u\r\n", sizeof( data_packet_t));
             ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
             //only one flag TODO: need whole protocol suite
             ravel_pkt.ctrf_flags = 0;
-            has_fragment = true;
         } else {
             NRF_LOG_DEBUG("data < bt frame length\r\n");
             ravel_pkt.length = length;
-            has_fragment = false;
             ravel_pkt.ctrf_flags = 1;
         }
         // set index
@@ -249,7 +241,7 @@ network_send_data( uint8_t * p_data, uint16_t length)
         memcpy(buffer, &ravel_pkt, sizeof( data_packet_t));
 
         // copy RAD packet data to buffer
-        memcpy(buffer + sizeof(data_packet_t), p_data, ravel_pkt.length);
+        memcpy(buffer + sizeof(data_packet_t), data_ptr, ravel_pkt.length);
 
         // TODO: enqueue the packet for sending
         // FIXME: can not handle more than 7 pkt due to out buffer
@@ -258,11 +250,9 @@ network_send_data( uint8_t * p_data, uint16_t length)
        m_tx_fragment_enqueued++;
        NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_tx_fragment_enqueued, send_result);
         // updating
-        if (length - ravel_pkt.length > 0) {
-            length = length - ravel_pkt.length;
-            memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
-            data_ptr = data_ptr + ravel_pkt.length;
-        }
+        length -= ravel_pkt.length;
+        memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
+        data_ptr = data_ptr + ravel_pkt.length;
      }
 }
 

@@ -8,10 +8,13 @@
 #include <string.h>
 
 #include <api/keys.h>
+#include <api/system.h>
 
 void
 ravel_key_init(RavelKey *self, uint32_t key_id, size_t length, uint8_t *buffer)
 {
+    ravel_system_print_number(NULL, "ravel_key_init ", key_id);
+
     self->key_id = key_id;
 
     self->buffer = buffer;
@@ -58,7 +61,6 @@ ravel_key_provider_load_key(RavelKeyProvider *self, uint32_t key_id)
         if (key->key_id == -1)
             break;
     }
-
     return NULL;
 }
 

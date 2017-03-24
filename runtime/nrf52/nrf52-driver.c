@@ -135,6 +135,8 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     self->base.dispatcher = dispatcher;
     self->network = network;
     init_timer_module();
+
+    ravel_key_provider_init(&self->base.key_provider);
 }
 
 
@@ -154,7 +156,7 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
      nrf52_network_init(&self->network);
      ble_rad_init_handler();
      nrf52_r_core_ble_stack_init(&self->network);
-     ravel_key_provider_init(&self->base.key_provider);
+
     //START BLE
     nrf52_r_core_ble_start();
     NRF_LOG_INFO("LOOP\r\n");
