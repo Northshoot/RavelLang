@@ -30,6 +30,9 @@
 #include "packet.h"
 #include "intrinsics.h"
 
+//FIXME: ops static keys :O
+#include "temp_keys.h"
+
 #define NRF_LOG_MODULE_NAME "DRV"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -39,6 +42,11 @@
 NetworkClb network;
 
 #define MAX_NUMBER_OF_ENDPOINTS 1
+
+
+#define SCHED_MAX_EVENT_DATA_SIZE       sizeof(ravel_schedule_event_cntx)
+#define SCHED_QUEUE_SIZE                20
+
 
 static RavelEndpoint *endpoints[2] = { NULL, NULL };
 static bool m_network_is_busy = false;
@@ -110,8 +118,7 @@ ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
 
 
 /**** NRF 52 specific implementations ****/
-#define SCHED_MAX_EVENT_DATA_SIZE       sizeof(ravel_schedule_event_cntx)
-#define SCHED_QUEUE_SIZE                20
+//ravel_schedule_event_cntx
 
 extern void ravel_generated_app_dispatcher_started(struct AppDispatcher*);
 
@@ -137,6 +144,13 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     init_timer_module();
 
     ravel_key_provider_init(&self->base.key_provider);
+
+
+    bool ret = false;
+    ret =ravel_key_provider_add_key(&self->base.key_provider, 0, 16, key_0);
+    ret =ravel_key_provider_add_key(&self->base.key_provider, 1, 64, key_1);
+    ret =ravel_key_provider_add_key(&self->base.key_provider, 2, 16, key_2);
+    ret =ravel_key_provider_add_key(&self->base.key_provider, 3, 64, key_3);
 }
 
 

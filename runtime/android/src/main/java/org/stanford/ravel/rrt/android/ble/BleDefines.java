@@ -24,8 +24,9 @@ public class BleDefines {
     public final static int ACTION_GATT_DISCONNECTED =82;
     public final static int ACTION_GATT_SERVICES_DISCOVERED =83;
     public final static int ACTION_DATA_AVAILABLE =84;
+    public final static int ACTION_GATT_SEND_DONE =85;
 
-    public final static int DEVICE_DOES_NOT_SUPPORT_RAD =85;
+    public final static int DEVICE_DOES_NOT_SUPPORT_RAD =86;
     //FIXME: automate it
     // this is arbitrary number because of nrf52
     public final static int BLE_MAX_DATA_LENGTH =20;

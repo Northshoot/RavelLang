@@ -118,9 +118,9 @@ public class ByteWork {
 
     private static int charToNibble(char c) {
         if (c >= 'A' && c <= 'F')
-            return (c - 'A');
+            return 0xA + (c - 'A');
         if (c >= 'a' && c <= 'f')
-            return (c - 'a');
+            return 0xa + (c - 'a');
         if (c >= '0' && c <= '9')
             return (c - '0');
         throw new NumberFormatException("Invalid character " + c);

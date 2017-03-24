@@ -29,7 +29,7 @@ public class JavaDriver implements DriverAPI {
     }
 
     protected JavaDriver(DispatcherAPI appDispatcher, JavaDurableStorage storage) {
-        threadPool = Executors.newCachedThreadPool();
+        threadPool = Executors.newSingleThreadExecutor();
         this.appDispatcher = appDispatcher;
 
         this.storage = storage;

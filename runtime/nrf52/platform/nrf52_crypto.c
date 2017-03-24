@@ -17,6 +17,11 @@
 #include "nrf_drv_rng.h"
 #include <sha256.h>
 
+#define NRF_LOG_MODULE_NAME "CRYPT"
+#define NRF_LOG_LEVEL 4
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
 #define IV_SIZE 8
 #define FULL_IV_SIZE 16
 #define CIPHER_BLOCK_SIZE 16
@@ -51,9 +56,9 @@ hmac_sha256(uint8_t *data, size_t length, const uint8_t *key, uint8_t *output, s
     sha256_update (&inner_hash, sha256_block, SHA256_BLOCK_SIZE);
     sha256_update (&inner_hash, data, length);
 
-    sha256_final (&inner_hash, sha256_output, SHA256_OUTPUT_SIZE);
+    sha256_final (&inner_hash, sha256_output, 0);
     sha256_update (&outer_hash, sha256_output, SHA256_OUTPUT_SIZE);
-    sha256_final (&outer_hash, sha256_output, SHA256_OUTPUT_SIZE);
+    sha256_final (&outer_hash, sha256_output, 0);
 
     memcpy(output, sha256_output, output_length);
 }
@@ -76,8 +81,7 @@ ravel_crypto_verify_mac(uint8_t *data, int32_t endofdata, int32_t macoffset, Rav
     uint8_t local_mac[MAC_SIZE];
 
     hmac_sha256 (data, endofdata, key->buffer, local_mac, MAC_SIZE);
-
-    return constant_time_memcmp (local_mac, data + macoffset, MAC_SIZE);
+    return !constant_time_memcmp (local_mac, data + macoffset, MAC_SIZE);
 }
 
 void ravel_crypto_apply_mac(uint8_t *data, int32_t endofdata, int32_t writeOffset, RavelKey *key)
@@ -127,14 +131,14 @@ counter_mode(uint8_t *data, size_t length, const uint8_t *key)
 
     while (done < length) {
         AES_encrypt(iv, encrypted, key);
-        if (length - done <= CIPHER_BLOCK_SIZE) {
+        if (length - done >= CIPHER_BLOCK_SIZE) {
             for (i = 0; i < CIPHER_BLOCK_SIZE; i++)
-                data[done + i] ^= encrypted[i];
+                data[IV_SIZE + done + i] ^= encrypted[i];
             increment_iv(iv);
             done += CIPHER_BLOCK_SIZE;
         } else {
             for (i = 0; i < length - done; i++)
-                data[done + i] ^= encrypted[i];
+                data[IV_SIZE + done + i] ^= encrypted[i];
             done = length;
         }
     }
@@ -147,7 +151,11 @@ void ravel_crypto_encrypt(uint8_t *data, int32_t offset, int32_t length, RavelKe
 
 void ravel_crypto_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key)
 {
+    NRF_LOG_DEBUG("crypto_decrypt %d %d %d\r\n", offset, length, key->key_id);
+    NRF_LOG_HEXDUMP_DEBUG(data+offset, length);
+
     counter_mode(data+offset, length, key->buffer);
+    memmove(data+offset, data+offset+IV_SIZE, length-IV_SIZE);
 }
 
 void ravel_crypto_array_fill_random(uint8_t *array, int32_t offset, int32_t length)

@@ -3,7 +3,7 @@ streaming model Ping2():
         records = 5
         flow = EmbeddedSpace -> GatewaySpace
     schema:
-        value : int32
+        value : int32[6]
 
 local model Reference():
     properties:
@@ -18,7 +18,7 @@ streaming model Pong():
         records = 5
         flow = GatewaySpace -> EmbeddedSpace
     schema:
-        value : int32
+        value : int32[6]
 
 
 controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
@@ -29,10 +29,12 @@ controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
             refrec = ref.get(0)
         else:
             refrec = ref.create()
-            refrec.value = 42
+            for i=0 to 6:
+                refrec.value[i] = i
             ref.save(refrec)
         pingrec = ping2.create()
-        pingrec.value = refrec.value
+        for i=0 to 6:
+            pingrec.value[i] = refrec.value[i]
         ping2.save(pingrec)
 
 
@@ -41,19 +43,22 @@ controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
         pongrec = self.record
         refrec = ref.get(0)
         rec_ok : bool = True
-        if pongrec.value != refrec.value:
-            system.print_number("ERROR Want :", refrec.value)
-            system.print_number("ERROR Got :", pongrec.value)
-            rec_ok = False
+        for i=0 to 6:
+            if pongrec.value[i] != refrec.value[i]:
+                system.print_number("ERROR Want :", refrec.value[i])
+                system.print_number("ERROR Got :", pongrec.value[i])
+                rec_ok = False
 
         if rec_ok:
             system.print("pong ok")
             pong.delete(self.record)
             system.print("sending ping2")
-            refrec.value += 1
+            for i=0 to 6:
+                refrec.value[i] += 1
             ref.save(refrec)
             pingrec = ping2.create()
-            pingrec.value = refrec.value
+            for i=0 to 6:
+                pingrec.value[i] = refrec.value[i]
             ping2.save(pingrec)
 
     event ping2.departed():
@@ -68,9 +73,9 @@ controller PongController(ping2 : Ping2, pong : Pong):
     event ping2.arrived():
         system.print("ping2 received")
         pingrec = self.record
-        system.print("value is " + (str)pingrec.value)
         pongrec = pong.create()
-        pongrec.value =  pingrec.value
+        for i=0 to 6:
+            pongrec.value[i] =  pingrec.value[i]
         pong.save(pongrec)
         ping2.delete(self.record)
 

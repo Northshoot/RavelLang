@@ -13,8 +13,6 @@
 void
 ravel_key_init(RavelKey *self, uint32_t key_id, size_t length, uint8_t *buffer)
 {
-    ravel_system_print_number(NULL, "ravel_key_init ", key_id);
-
     self->key_id = key_id;
 
     self->buffer = buffer;

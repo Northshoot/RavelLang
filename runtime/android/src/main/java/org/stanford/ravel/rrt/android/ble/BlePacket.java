@@ -105,7 +105,13 @@ public class BlePacket implements Serializable {
                 data_length -=m_max_pkt_length;
             } else {
                 blePacket.setLast(1);
-                blePacket.setData(data);
+                if (data.length > data_length) {
+                    byte[] chunk = new byte[data_length];
+                    System.arraycopy(data, indx*m_max_pkt_length, chunk, 0, data_length);
+                    blePacket.setData(chunk);
+                } else {
+                    blePacket.setData(data);
+                }
                 blePacket.setLength(data_length);
                 hasFragment = false;
             }
@@ -116,7 +122,6 @@ public class BlePacket implements Serializable {
 
     public static BlePacket packetToNetwork(byte[] data, int indx, int flags)
     {
-        assert (data.length <= BleDefines.BLE_MAX_DATA_LENGTH-BleDefines.BLE_FRAGMENT_HEADER_LENGTH);
         BlePacket blePacket = BlePacket.emptyPacket();
         blePacket.indx = indx;
         blePacket.length = data.length + BleDefines.BLE_FRAGMENT_HEADER_LENGTH;
@@ -127,7 +132,6 @@ public class BlePacket implements Serializable {
         return blePacket;
     }
     public static BlePacket packetFromNetworkBytes(byte[] data){
-        assert (data.length <= BleDefines.BLE_MAX_DATA_LENGTH-BleDefines.BLE_FRAGMENT_HEADER_LENGTH);
         BlePacket blePacket = BlePacket.emptyPacket();
         blePacket.setIndx(getIndex(data));
         blePacket.setLength(getLength(data));
@@ -145,7 +149,6 @@ public class BlePacket implements Serializable {
     public static byte[] toPacketByteArray(BlePacket blePacket){
         Log.d(TAG, "converting to bytes");
         int total_pkt_lenght = blePacket.length+3;
-        assert(total_pkt_lenght <=20);
         byte[] pkt = new byte[blePacket.length+3];
 
         pkt[INDEX] = (byte) blePacket.indx;

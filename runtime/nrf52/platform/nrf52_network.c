@@ -77,11 +77,13 @@ static void packetRxCompleted()
     free(pkt_buffer);
     pkt_length =0;
     pkt_buffer = NULL;
-    ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
     m_receiving = false;
     m_rx_enqueued_pkt--; //should be zero now
     m_rx_enqueued_fragment = 0;
+
+    ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
+
     ravel_packet_finalize(&pkt);
 }
 
@@ -93,9 +95,11 @@ static void fragment_rx(data_packet_t *m_pkt, const uint8_t* pkt_data)
     //TODO: we handle/assume one packet a time
     if(!m_receiving && (m_pkt->indx == 0)){
         //first fragment
+        NRF_LOG_DEBUG("pkt_buffer %p\r\n", pkt_buffer);
         assert(pkt_buffer == NULL);
+        NRF_LOG_DEBUG("assert ok\r\n");
         //FIXME: MAX length set here :S
-        pkt_buffer = calloc(BLE_RAD_MAX_DATA_LEN, 10);
+        pkt_buffer = malloc(BLE_RAD_MAX_DATA_LEN * 10);
         NRF_LOG_ERROR("fragment_rx malloc: %p\r\n", pkt_buffer);
         if (pkt_buffer == NULL) {
             //NRF_LOG_ERROR("OUT OF MEMORY\r\n");

@@ -17,11 +17,16 @@ import org.stanford.ravel.generated.GatewaySpace;
 import org.stanford.ravel.rrt.tiers.BleEndpoint;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.stanford.ravel.rrt.android.DeleteMeKeys;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Created by gcampagn on 2/6/17.
@@ -62,6 +67,7 @@ public class MainActivity extends Activity {
 
 
 
+
     }
 
     @Override
@@ -88,6 +94,16 @@ public class MainActivity extends Activity {
             eps.add(localEndpoint);
             eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
+            InputStream stream = new ByteArrayInputStream(DeleteMeKeys.key_0.getBytes(UTF_8));
+            gatewaySpace.setKey(stream);
+            stream = new ByteArrayInputStream(DeleteMeKeys.key_1.getBytes(UTF_8));
+            gatewaySpace.setKey(stream);
+            stream = new ByteArrayInputStream(DeleteMeKeys.key_2.getBytes(UTF_8));
+            gatewaySpace.setKey(stream);
+            stream = new ByteArrayInputStream(DeleteMeKeys.key_3.getBytes(UTF_8));
+            gatewaySpace.setKey(stream);
+
+
         }
     };
     public void enable_sdk_23(){

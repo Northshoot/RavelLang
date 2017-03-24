@@ -17,8 +17,8 @@ android {
         }
     }
     sourceSets {
-        main.java.srcDirs += '../../../runtime/android/src/main'
-        main.java.srcDirs += '../../../runtime/java/src/main'
+        main.java.srcDirs += '../../../runtime/android/src/main/java'
+        main.java.srcDirs += '../../../runtime/java/src/main/java'
     }
 }
 

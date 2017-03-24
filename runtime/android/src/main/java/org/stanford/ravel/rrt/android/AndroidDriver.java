@@ -40,9 +40,10 @@ public class AndroidDriver extends JavaDriver {
 
     private final Map<String, BleEndpoint> bleClients = new HashMap<>();
     // BLE related variables
-    volatile private boolean m_connected_ble = false;
+    private volatile boolean m_connected_ble = false;
     private boolean m_ble_endpoint_started = false;
-    volatile boolean  mBleServiceBound = false;
+    private volatile boolean  mBleServiceBound = false;
+    private boolean  m_sending = false;
     private Map<String, ArrayList<BlePacket>> m_frag_map;
 
     //FIXME:
@@ -144,6 +145,10 @@ public class AndroidDriver extends JavaDriver {
                     //fragment maps
                     m_frag_map.remove(device_address);
                     m_connected_ble = false;
+                    synchronized (AndroidDriver.this) {
+                        m_sending = false;
+                        AndroidDriver.this.notifyAll();
+                    }
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
                     //TODO: assemble fragment
@@ -156,6 +161,13 @@ public class AndroidDriver extends JavaDriver {
                     break;
                 case BleDefines.DEVICE_DOES_NOT_SUPPORT_RAD:
                     Log.d(TAG, "onReceive: DEVICE_DOES_NOT_SUPPORT_RAD");
+                    break;
+                case BleDefines.ACTION_GATT_SEND_DONE:
+                    Log.d(TAG, "onReceive: ACTION_GATT_SEND_DONE");
+                    synchronized (AndroidDriver.this) {
+                        m_sending = false;
+                        AndroidDriver.this.notifyAll();
+                    }
                     break;
 
                 default:
@@ -182,11 +194,22 @@ public class AndroidDriver extends JavaDriver {
         switch (endpoint.getType()) {
             case BLE:
                 Log.d(TAG, "about to send packet model id " + data.model_id + " record id " + data.record_id);
-                if(m_connected_ble && mBleServiceBound){
+                if(m_connected_ble && mBleServiceBound ) {
                     Log.d(TAG, "sending packet " + endpoint.getId());
-                    mRavelService.sendData(BlePacket.packetsFromBytes(data.toBytes()));
+                    try {
+                        synchronized (this) {
+                            m_sending = true;
+                            mRavelService.sendData(BlePacket.packetsFromBytes(data.toBytes()));
+                            while (m_sending)
+                                wait();
+                        }
+                    } catch(InterruptedException e) {
+                        throw new RavelIOException(Error.NETWORK_BUSY);
+                    }
+                    Log.d(TAG, "sent packet model id " + data.model_id + " record id " + data.record_id);
+                } else {
+                    throw new RavelIOException(Error.ENDPOINT_UNREACHABLE);
                 }
-                // TODO
                 break;
             case GCM:
                 // send to the cloud using GCM

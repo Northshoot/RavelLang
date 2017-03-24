@@ -69,7 +69,7 @@ public class RavelBleService extends Service {
     private static final int BLE_STATE_CONNECTING = 1;
     private static final int BLE_STATE_CONNECTED = 2;
     private static final int BLE_STATE_INITIALIZED = 3;
-    private boolean mSending = false;
+    private volatile boolean mSending = false;
 
     public boolean EMBEDDED_CONNECTED = false; // indicates if EMBEDDED device connected
     private BlockingDeque<BlePacket> out_pkt_queue = new LinkedBlockingDeque<>();
@@ -191,7 +191,7 @@ public class RavelBleService extends Service {
                 Log.d(TAG, "onCharacteristicWrite: enabling notification " + enableNotification());
                 m_endpoint_set = true;
             } else {
-                mSending = false;
+
                 transmitQueedData();
                 Log.d(TAG, "onCharacteristicWrite: reliable status " + status);
             }
@@ -443,8 +443,10 @@ public class RavelBleService extends Service {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        if(mBluetoothGatt != null)
+        if(mBluetoothGatt != null){
             mBluetoothGatt.disconnect();
+
+        }
 
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         refreshDeviceCache(mBluetoothGatt);
@@ -659,16 +661,17 @@ public class RavelBleService extends Service {
     //make sure we can send all the packets and have packet queue
     private void transmitQueedData()
     {
-        assert(!mSending);
         if (!out_pkt_queue.isEmpty()) {
             BlePacket pkt = out_pkt_queue.poll();
 
             if (!write_to_embedded(pkt)) {
                 out_pkt_queue.add(pkt);
             }
+        } else {
+            broadcastUpdate(BleDefines.ACTION_GATT_SEND_DONE,"");
         }
     }
-    public void sendData(List<BlePacket> pkt_list){
+    public synchronized void sendData(List<BlePacket> pkt_list){
         out_pkt_queue.addAll(pkt_list);
         transmitQueedData();
     }
