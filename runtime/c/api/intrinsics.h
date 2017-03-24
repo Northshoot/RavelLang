@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "array.h"
 #include "keys.h"
@@ -94,6 +95,18 @@ static inline RavelKey *ravel_intrinsic_load_key(RavelSystemAPI *sys_api, int32_
 
 static inline int32_t ravel_intrinsic_endpoint_get_id(RavelEndpoint *endpoint) {
     return ravel_endpoint_get_id(endpoint);
+}
+
+static inline char * ravel_intrinsic_int_to_string(int32_t v) {
+    char *buffer = malloc(11);
+    int size = snprintf(buffer, 11, "%d", v);
+    return realloc(buffer, size+1);
+}
+
+static inline char * ravel_intrinsic_double_to_string(double v) {
+    char *buffer = malloc(40);
+    int size = snprintf(buffer, 41, "%g", v);
+    return realloc(buffer, size+1);
 }
 
 #define ravel_intrinsic_verify_mac ravel_crypto_verify_mac

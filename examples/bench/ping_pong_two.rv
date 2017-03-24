@@ -43,6 +43,7 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping2, pong : Po
         pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
+        system.print("sending initial ping2 " + (str)pingrec.value)
         ping2.save(pingrec)
 
 
@@ -52,19 +53,19 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping2, pong : Po
         refrec = ref.get(0)
         rec_ok : bool = True
         if pongrec.value != refrec.value:
-            system.print_number("ERROR Want :", refrec.value)
-            system.print_number("ERROR Got :", pongrec.value)
+            system.print("ERROR Want :" + (str)refrec.value)
+            system.print("ERROR Got :" + (str)pongrec.value)
             rec_ok = False
 
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
             system.print_number("RT: ",  t_now)
             pong.delete(self.record)
-            system.print("sending ping2")
             refrec.value += 1
             ref.save(refrec)
             pingrec = ping2.create()
             pingrec.value = refrec.value
+            system.print("sending ping2 " + (str)pingrec.value)
             ping2.save(pingrec)
 
     event ping2.departed():
