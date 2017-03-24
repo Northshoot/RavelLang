@@ -33,7 +33,7 @@ public class <name> extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (dispatcher != null)
-            return START_STICKY;
+            return START_NOT_STICKY;
 
         Log.i(LOG_TAG, "Starting service");
         try {

@@ -18,7 +18,7 @@
 #include <sha256.h>
 
 #define NRF_LOG_MODULE_NAME "CRYPT"
-#define NRF_LOG_LEVEL 4
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
