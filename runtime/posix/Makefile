@@ -35,7 +35,7 @@ clean:
 libravel.a: $(OBJS)
 	$(AR) crs -o $@ $^
 
-test-crypto: test-crypto.o libravel.a
+test-crypto: test-crypto.o sha256.o libravel.a
 	gcc $(LDFLAGS) -o $@ $^ $(WOLFSSL_LIBS)
 
 -include .deps/*.d
