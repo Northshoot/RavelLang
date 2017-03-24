@@ -13,7 +13,7 @@
 
 
 /* driver -> network */
-void network_send(RavelPacket *packet, RavelEndpoint *endpoint);
+bool network_send(RavelPacket *packet, RavelEndpoint *endpoint);
 
 /* network -> ble */
 void network_on_write(const uint8_t *data, uint16_t len);

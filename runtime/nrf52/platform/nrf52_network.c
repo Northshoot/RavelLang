@@ -5,6 +5,7 @@
 #include "nrf52_ravel_endpoint.h"
 #include "nrf52_ravel_frame.h"
 #include "ravel/nrf52-driver.h"
+#include "api/intrinsics.h"
 
 #define NRF_LOG_MODULE_NAME "NET::"
 #include "nrf_log.h"
@@ -62,15 +63,22 @@ static void packetRxCompleted()
     RavelPacket pkt;
 
     uint8_t* pkt_data = pkt_buffer;
-    NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u \r\n", pkt_data[0], pkt_data[1], pkt_data[2], pkt_data[3], pkt_data[4], pkt_data[5]);
+
+    int32_t value = 0;
+    if (pkt_length > 6)
+        value = ravel_intrinsic_extract_int32(pkt_data, 6);
+    uint16_t record_id = ravel_intrinsic_extract_uint16(pkt_data, 4);
+    NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u\r\n", pkt_data[0], pkt_data[1], pkt_data[2], pkt_data[3], record_id,
+        value);
 
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
+    free(pkt_buffer);
+
     ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
     m_receiving = false;
     m_rx_enqueued_pkt--; //should be zero now
     m_rx_enqueued_fragment = 0;
-    free(pkt_buffer);
     ravel_packet_finalize(&pkt);
 }
 
@@ -84,6 +92,11 @@ static void fragment_rx(data_packet_t *m_pkt)
         //first fragment
         //FIXME: MAX length set here :S
         pkt_buffer = malloc(BLE_RAD_MAX_DATA_LEN*10);
+        if (pkt_buffer == NULL) {
+            NRF_LOG_ERROR("OUT OF MEMORY");
+            return;
+        }
+
         m_rx_enqueued_pkt++;
     }
     m_rx_enqueued_fragment++;
@@ -200,9 +213,12 @@ network_send_data( uint8_t * p_data, uint16_t length)
     bool has_fragment = true; //we always have at least one fragment
    // data pointer is for recursive use so we can traverse the rad_data
     uint8_t * data_ptr = (uint8_t *)p_data;
-
+    int32_t value = 0;
+    if (length > 6)
+        value = ravel_intrinsic_extract_int32(p_data, 6);
+    NRF_LOG_DEBUG("sending val %u\r\n", value);
     // buffer to be sent over ble
-    uint8_t * buffer = (uint8_t*)malloc(BLE_RAD_MAX_DATA_LEN);
+    uint8_t buffer[BLE_RAD_MAX_DATA_LEN];
     memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
 
     // ravel header
@@ -244,11 +260,9 @@ network_send_data( uint8_t * p_data, uint16_t length)
             data_ptr = data_ptr + ravel_pkt.length;
         }
      }
-     //DONE
-    free(buffer);
 }
 
-void
+bool
 network_send(RavelPacket *packet, RavelEndpoint *endpoint)
 {
     NRF_LOG_DEBUG("packet size  %u\r\n", packet->packet_length);
@@ -256,10 +270,13 @@ network_send(RavelPacket *packet, RavelEndpoint *endpoint)
     {
         m_tx_enqueued_pkt++;
         network_send_data(packet->packet_data, packet->packet_length);
+        return true;
     } else {
         //TODO: enqueue packet
         //now drop
         NRF_LOG_DEBUG("no connection dropping %u\r\n", ++m_dropped);
+        ravel_packet_finalize(packet);
+        return false;
     }
 
 }

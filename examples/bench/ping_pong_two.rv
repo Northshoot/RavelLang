@@ -18,7 +18,6 @@ streaming model Pong():
         flow = GatewaySpace -> EmbeddedSpace
     schema:
         value : int32
-        blob : str
 
 
 controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
@@ -29,7 +28,7 @@ controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
             refrec = ref.get(0)
         else:
             refrec = ref.create()
-            refrec.value = 0
+            refrec.value = 42
             ref.save(refrec)
         pingrec = ping2.create()
         pingrec.value = refrec.value
@@ -44,16 +43,17 @@ controller PingController(ref : Reference, ping2 : Ping2, pong : Pong):
         refrec = ref.get(0)
         if pongrec.value != refrec.value:
             system.print("uh oh! the values don't match")
+            system.print_number(" want :", refrec.value)
+            system.print_number(" Got :", pongrec.value)
         else:
             system.print("pong ok")
-        pong.delete(self.record)
-
-        system.print("sending ping2")
-        refrec.value += 1
-        ref.save(refrec)
-        pingrec = ping2.create()
-        pingrec.value = refrec.value
-        ping2.save(pingrec)
+            pong.delete(self.record)
+            system.print("sending ping2")
+            refrec.value += 1
+            ref.save(refrec)
+            pingrec = ping2.create()
+            pingrec.value = refrec.value
+            ping2.save(pingrec)
 
     event ping2.departed():
         system.print("ping2 departed")

@@ -9,6 +9,7 @@
 
 #include "api/packet.h"
 #include "api/intrinsics.h"
+#include "api/system.h"
 
 #define SRC 0 // 8 bits for source
 #define DST 1 // 8 bits for destination
@@ -38,9 +39,23 @@
 //    self->is_save_done = false;
 //}
 
+static int32_t pkt_counter = 0;
+
+static void incr_counter() {
+    pkt_counter++;
+    ravel_system_print_number(NULL, " allocated packet, now", pkt_counter);
+}
+
+static void decr_counter() {
+    assert (pkt_counter > 0);
+    pkt_counter--;
+    ravel_system_print_number(NULL, " freed packet, now", pkt_counter);
+}
+
 void
 ravel_packet_init_copy (RavelPacket *self, RavelPacket *from)
 {
+    incr_counter();
     *self = *from;
 
     self->packet_data = malloc(from->packet_length);
@@ -54,6 +69,7 @@ ravel_packet_init_copy (RavelPacket *self, RavelPacket *from)
 void
 ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
 {
+    incr_counter();
     self->packet_data = calloc(length + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
@@ -71,6 +87,7 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
 void
 ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
 {
+    incr_counter();
     self->packet_data = calloc(length, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
@@ -89,6 +106,7 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
 static void
 ravel_packet_init_control (RavelPacket *self, uint8_t model_id, uint16_t record_id, int flags)
 {
+    incr_counter();
     self->packet_data = calloc(3 + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
@@ -121,6 +139,7 @@ ravel_packet_init_save_done (RavelPacket *self, uint8_t model_id, uint16_t recor
 void
 ravel_packet_finalize (RavelPacket *self)
 {
+    decr_counter();
     free (self->packet_data);
 }
 

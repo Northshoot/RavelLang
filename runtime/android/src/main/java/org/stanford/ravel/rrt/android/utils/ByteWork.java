@@ -21,7 +21,7 @@ public class ByteWork {
     }
     public static byte[] getBytesSize(byte[] bytes, int start, int length){
         byte[] b = new byte[length];
-        for(int i=0; start <= length;i++){
+        for (int i=0; i < length;i++) {
             b[i]=bytes[start++];
         }
         return b;

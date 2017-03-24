@@ -37,7 +37,7 @@ public class BlePacket implements Serializable {
     }
 
     private final static String TAG = BlePacket.class.getSimpleName();
-    public BlePacket(byte[] data, String device_address){
+    private BlePacket(byte[] data, String device_address){
         this.indx = getIndex(data);
         this.length = getLength(data);
         this.flags = getFlags(data);

@@ -10,6 +10,8 @@
 #include "nrf52_ble_interface.h"
 #include "nrf52_ble_rad.h"
 
+#include "api/intrinsics.h"
+
 static ble_rad_t                        m_rad;
 #define RAD_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN
 
@@ -349,6 +351,11 @@ ble_rad_send_data(ble_rad_t * p_rad, uint8_t * p_string, uint16_t length)
 {
     ble_gatts_hvx_params_t hvx_params;
     NRF_LOG_DEBUG("send_fragment\r\n");
+    int32_t value = 0;
+    if (length > 9)
+        value = ravel_intrinsic_extract_int32(p_string, 9);
+
+    NRF_LOG_DEBUG("ble_rad_send_data val %u\r\n", value);
     VERIFY_PARAM_NOT_NULL(p_rad);
     if (length > BLE_RAD_MAX_DATA_LEN)
     {

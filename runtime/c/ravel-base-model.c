@@ -229,6 +229,7 @@ ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
     if (!endpoint->connected) {
         //ravel_system_print(NULL, "Failed to send (not connected)");
         local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+        ravel_packet_finalize (&packet);
     } else {
         //ravel_system_print(NULL, "Sending data...");
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
@@ -620,6 +621,7 @@ ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const in
 
             if (!endpoint->connected) {
                 local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
+                ravel_packet_finalize (&copy);
             } else {
                 local_error = ravel_base_dispatcher_send_data (self->dispatcher, &copy, endpoint);
             }

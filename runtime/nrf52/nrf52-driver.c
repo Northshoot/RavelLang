@@ -79,10 +79,14 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         endpoint_out = endpoint;
         m_network_is_busy = true;
         NRF_LOG_DEBUG("Ravel PKT %u\r\n", pkt_out.packet_length);
-        network_send(packet, endpoint);
-
-        return RAVEL_ERROR_IN_TRANSIT;
+        if (network_send(packet, endpoint)) {
+            return RAVEL_ERROR_IN_TRANSIT;
+        } else {
+            m_network_is_busy = false;
+            return RAVEL_ERROR_NETWORK_ERROR;
+        }
     } else {
+        ravel_packet_finalize (packet);
         return  RAVEL_ERROR_BUSY;
     }
 }
@@ -101,6 +105,7 @@ void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
 {
     // TODO implement
+    ravel_packet_finalize(packet);
 }
 
 
