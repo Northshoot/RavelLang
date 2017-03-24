@@ -167,10 +167,26 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             if (!isValid(recordPos)) {
                 // record was deleted after sending
                 freeRecord(recordPos);
-            } else if (isReliable()) {
-                // do nothing and wait for the acks
             } else {
-                notifyDeparted(new Context<>(this, record));
+                markTransmitNotFailed(recordPos);
+
+                if (isReliable()) {
+                    // do nothing and wait for the acks
+                } else {
+                    notifyDeparted(new Context<>(this, record));
+                }
+            }
+        }
+
+        // retransmit any other record that was busy
+        retransmit(endpoint);
+    }
+
+    private void retransmit(Endpoint ep) {
+        for (int i = 0; i < getModelSize(); i++) {
+            if (isValid(i) && isTransmitFailed(i) && !isInTransit(i)) {
+                RecordType record = recordAt(i);
+                sendOneRecord(i, record, ep);
             }
         }
     }
@@ -179,7 +195,8 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     public void recordFailedToSend(RavelPacket pkt, Endpoint endpoint, Error error) {
         if (pkt.isAck() || pkt.isSaveDone()) {
             // unconditionally try to retransmit
-            dispatcher.model__sendData(pkt, endpoint);
+            if (endpoint.isConnected())
+                dispatcher.model__sendData(pkt, endpoint);
             return;
         }
 
@@ -200,7 +217,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         if (isReliable())
             handleAck(recordPos);
 
-        // try resending
-        sendOneRecord(recordPos, record, endpoint);
+        // retransmit any other record that was busy
+        retransmit(endpoint);
     }
 }

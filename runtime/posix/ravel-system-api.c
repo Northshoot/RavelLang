@@ -11,3 +11,9 @@ ravel_system_print(RavelSystemAPI *self, const char *msg)
 {
     fprintf(stderr, "%s\n", msg);
 }
+
+void
+ravel_system_print_number(RavelSystemAPI *self, const char *msg, int32_t num)
+{
+    fprintf(stderr, "%s %d\n", msg, num);
+}

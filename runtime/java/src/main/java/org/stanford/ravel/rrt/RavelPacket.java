@@ -58,7 +58,6 @@ public class RavelPacket {
 
             this.record_end = data.length;
             this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
-            System.err.println("RavelPacket[" + this.record_data.length +"]");
             //Record can not be less than model_id, record_id, and a byte
             if (record_data.length <3) throw new AssertionError("RavelPacket: Expected at least 3 bytes");
             this.model_id = getModelIdFromRecord(this.record_data);
