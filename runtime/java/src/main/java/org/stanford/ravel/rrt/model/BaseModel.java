@@ -22,6 +22,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         int in_save = 0;
         boolean is_valid = false;
         boolean is_arrived = false;
+        boolean is_transmit_failed = false;
 
         void reset() {
             expected_acks = 0;
@@ -29,6 +30,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             in_save = 0;
             is_valid = false;
             is_arrived = false;
+            is_transmit_failed = false;
         }
     }
 
@@ -36,7 +38,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     protected final DispatcherAPI dispatcher;
     private final RecordState[] state;
     private final ArrayList<RecordType> mRecords = new ArrayList<>();
-    private final ArrayList<RecordType> mValidRecords = new ArrayList<>();
+    final ArrayList<RecordType> mValidRecords = new ArrayList<>();
     private final boolean mReliable;
     private final boolean mDurable;
     private final int mModelSize;
@@ -53,6 +55,10 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         state = new RecordState[size];
         for (int i = 0; i < state.length; i++)
             state[i] = new RecordState();
+    }
+
+    int getModelSize() {
+        return mModelSize;
     }
 
     final boolean isReliable() {
@@ -98,6 +104,15 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         state[recordPos].in_transit --;
         return state[recordPos].in_transit == 0;
     }
+    boolean isTransmitFailed(int recordPos) {
+        return state[recordPos].is_transmit_failed;
+    }
+    boolean isInTransit(int recordPos) {
+        return state[recordPos].in_transit > 0;
+    }
+    void markTransmitNotFailed(int recordPos) {
+        state[recordPos].is_transmit_failed = false;
+    }
 
     private void queueFullEvent() {
         dispatcher.queueEvent(new RunnableEvent() {
@@ -139,7 +154,10 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         return -1;
     }
     RecordType recordAt(int recordPos) {
-        return mRecords.get(recordPos);
+        if (mRecords.size() <= recordPos)
+            return null;
+        else
+            return mRecords.get(recordPos);
     }
 
     private int tryAddRecord(RecordType record) {
@@ -216,11 +234,13 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     Error sendOneRecord(int recordPos, RecordType record, Endpoint e) {
         RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
 
-        state[recordPos].in_transit ++;
         if (isReliable())
             state[recordPos].expected_acks ++;
 
-        return dispatcher.model__sendData(pkt, e);
+        if (e.isConnected())
+            return dispatcher.model__sendData(pkt, e);
+        else
+            return Error.ENDPOINT_UNREACHABLE;
     }
 
     Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames) {
@@ -228,12 +248,19 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
-        //System.err.println("Got endpoint list " + endpoints);
+        if (endpoints.isEmpty()) {
+            state[recordPos].is_transmit_failed = true;
+            return Error.SUCCESS;
+        }
 
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             try {
                 Error error2 = sendOneRecord(recordPos, record, e);
+                if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
+                    state[recordPos].is_transmit_failed = true;
+                else
+                    state[recordPos].in_transit ++;
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                     error = error2;
             } catch(SecurityException securityException) {
@@ -286,13 +313,20 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             if (recordPos >= 0) {
-                state[recordPos].in_transit++;
-
                 if (isReliable())
                     state[recordPos].expected_acks++;
             }
-
-            Error error2 = dispatcher.model__sendData(pkt, e);
+            Error error2;
+            if (e.isConnected())
+                error2 = dispatcher.model__sendData(pkt, e);
+            else
+                error2 = Error.ENDPOINT_UNREACHABLE;
+            if (recordPos >= 0) {
+                if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
+                    state[recordPos].is_transmit_failed = true;
+                else
+                    state[recordPos].in_transit++;
+            }
             if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                 error = error2;
         }
