@@ -381,12 +381,12 @@ public class LocalOwnershipTaggingPass {
                 // in the value, value range propagation (or lowering constant arrays to variables)
                 // could allow us to split constant arrays and constant array indices
                 //
-                // but arrays are rare (mostly used for "for r in model.all()" and the like, for which
-                // the model tags are uniform anyway), constant arrays are not supported, and value
-                // range propagation is a mess, so forget about it for now
+                // BUT ACTUALLY
+                // we don't propagate the tags because we know that we will treats array stores as full
+                // decryption anyway, not as MOVE, because we don't have the space for an IV
 
-                tagAllModels(((TArrayStore) instr).object, modelTags.get(((TArrayStore) instr).value));
-                tagAllFields(((TArrayStore) instr).object, fieldTags.get(((TArrayStore) instr).value));
+                //tagAllModels(((TArrayStore) instr).object, modelTags.get(((TArrayStore) instr).value));
+                //tagAllFields(((TArrayStore) instr).object, fieldTags.get(((TArrayStore) instr).value));
             } else if (instr instanceof TArrayLoad) {
                 // an array load is the dual of an array store, and behaves like a field load, except
                 // that we don't create new field tags, because w'ere never reading from a record

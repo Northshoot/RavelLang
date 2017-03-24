@@ -2,7 +2,9 @@ package org.stanford.ravel.analysis.security;
 
 import org.stanford.ravel.RavelApplication;
 import org.stanford.ravel.RavelCompiler;
+import org.stanford.ravel.analysis.FieldTag;
 import org.stanford.ravel.analysis.Operation;
+import org.stanford.ravel.compiler.ir.typed.TArrayStore;
 import org.stanford.ravel.compiler.ir.typed.TBlock;
 import org.stanford.ravel.compiler.ir.typed.TFieldStore;
 import org.stanford.ravel.compiler.ir.typed.TInstruction;
@@ -128,6 +130,14 @@ public class SecurityAnalysis {
                 && instr.field.equals(field.getName());
     }
 
+    private static boolean hasFieldTag(LinkedEvent handler, int var, ModelField field) {
+        for (FieldTag tag : handler.getVariableFieldTags(var)) {
+            if (tag.model == field.getModel() && tag.field.equals(field.getName()))
+                return true;
+        }
+        return false;
+    }
+
     private static boolean writesToField(Space space, ModelField field) {
         for (ConcreteController ic : space.getControllers()) {
             for (LinkedEvent event : ic) {
@@ -136,6 +146,10 @@ public class SecurityAnalysis {
                         if (instr instanceof TFieldStore) {
                             TFieldStore fieldStore = (TFieldStore)instr;
                             if (isFieldWrite(fieldStore, field))
+                                return true;
+                        } else if (instr instanceof TArrayStore) {
+                            TArrayStore arrayStore = (TArrayStore)instr;
+                            if (hasFieldTag(event, arrayStore.object, field))
                                 return true;
                         }
                     }
