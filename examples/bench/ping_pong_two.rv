@@ -83,6 +83,7 @@ controller PongController(ping2 : Ping2, pong : Pong):
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
+        system.print("RX: " + (str)pingrec.timestamp)s
         pong.save(pongrec)
         ping2.delete(self.record)
 
@@ -94,8 +95,8 @@ controller PongController(ping2 : Ping2, pong : Pong):
 space EmbeddedSpace:
     platform:
         language = CLang
-        #system = Nrf52.v1
-        system = Posix.v2008
+        system = Nrf52.v1
+        #system = Posix.v2008
 
     interfaces:
         clock = Clock()
@@ -111,8 +112,8 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        #system = Android.v19
-        system = J2SE.v18
+        system = Android.v19
+        #system = J2SE.v18
 
     models:
         ping2 = Ping2()
