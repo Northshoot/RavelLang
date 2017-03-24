@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <assert.h>
 #include "nrf52_network.h"
 #include "nrf_error.h"
 #include "nrf52_ravel_endpoint.h"
@@ -33,7 +34,7 @@ static uint8_t m_rx_enqueued_pkt=0;
 static uint8_t m_rx_enqueued_fragment=0;
 //Buffer for the ravel packet
 static uint8_t *pkt_buffer;
-static size_t pkt_length;
+static size_t pkt_length =0;
 
 static bool m_endpoint_is_set = false;
 static bool m_receiving = false;
@@ -72,8 +73,10 @@ static void packetRxCompleted()
         value);
 
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
+    NRF_LOG_ERROR("packetRxCompleted free: %p\r\n", pkt_buffer);
     free(pkt_buffer);
-
+    pkt_length =0;git add -A
+    pkt_buffer = NULL;
     ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
     m_receiving = false;
@@ -85,26 +88,27 @@ static void packetRxCompleted()
 
 
 
-static void fragment_rx(data_packet_t *m_pkt)
+static void fragment_rx(data_packet_t *m_pkt, const uint8_t* pkt_data)
 {
     //TODO: we handle/assume one packet a time
     if(!m_receiving && (m_pkt->indx == 0)){
         //first fragment
+        assert(pkt_buffer == NULL);
         //FIXME: MAX length set here :S
-        pkt_buffer = malloc(BLE_RAD_MAX_DATA_LEN*10);
+        pkt_buffer = calloc(BLE_RAD_MAX_DATA_LEN, 10);
+        NRF_LOG_ERROR("fragment_rx malloc: %p\r\n", pkt_buffer);
         if (pkt_buffer == NULL) {
-            NRF_LOG_ERROR("OUT OF MEMORY");
+            NRF_LOG_ERROR("OUT OF MEMORY\r\n");
             return;
         }
-
         m_rx_enqueued_pkt++;
     }
     m_rx_enqueued_fragment++;
     pkt_length += m_pkt->length;
     //append to the packet buffer
-    memcpy(pkt_buffer + m_pkt->indx * (BLE_RAD_MAX_DATA_LEN-3), ((uint8_t*)m_pkt)+3, m_pkt->length);
+    memcpy(pkt_buffer + m_pkt->indx * (BLE_RAD_MAX_DATA_LEN-3), pkt_data, m_pkt->length);
 
-    NRF_LOG_DEBUG("fragment_rx indx: %u \r\n", m_pkt->indx);
+    NRF_LOG_DEBUG("fragment_rx indx: %u length %u \r\n", m_pkt->indx, m_pkt->length);
     if( m_pkt->ctrf_flags == 1) {
         //finalize the data and send it off
         packetRxCompleted();
@@ -117,12 +121,12 @@ network_on_write(const uint8_t *data, uint16_t len)
     NRF_LOG_DEBUG("network_on_write\r\n");
     //TODO: VERIFY the dispatching to the right place
     data_packet_t m_pkt;
-    memcpy(&m_pkt, data, len);
+    memcpy(&m_pkt, data, sizeof(m_pkt));
     if( m_pkt.ctrf_flags == SET_ENDPOINT ){
         create_endpoint( data, len);
     } else {
         m_rx_enqueued_fragment++;
-        fragment_rx(&m_pkt);
+        fragment_rx(&m_pkt, data+sizeof(m_pkt));
     }
 }
 
