@@ -75,7 +75,7 @@ static void packetRxCompleted()
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
     NRF_LOG_ERROR("packetRxCompleted free: %p\r\n", pkt_buffer);
     free(pkt_buffer);
-    pkt_length =0;git add -A
+    pkt_length =0;
     pkt_buffer = NULL;
     ravel_nrf52_driver_rx_data_from_low(&driver.base, &pkt, &endpoint_space);
     //TODO: re-enable rx
