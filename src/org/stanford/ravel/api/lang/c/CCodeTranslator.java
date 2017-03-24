@@ -103,6 +103,8 @@ public class CCodeTranslator extends BaseIRTranslator {
             addCode(typeToCType(type));
             addCode(" ");
             addCode(getRegisterName(reg));
+            if (type == PrimitiveType.STR)
+                addCode(" = NULL");
             addCode(";\n");
         }
     }
@@ -141,7 +143,7 @@ public class CCodeTranslator extends BaseIRTranslator {
             // FIXME this should be lowered at the IR level to have the proper check for overflow
             addLine(arithOp.target, " = malloc(strlen(", arithOp.src1, ") + strlen(", arithOp.src2, ") + 1)");
             addLine("if (", arithOp.target, " == NULL) abort() /* FIXME */");
-            addLine("stpcpy(stpcpy(", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
+            addLine("stpcpy(stpcpy((char*)", arithOp.target, ", ", arithOp.src1, "), ", arithOp.src2, ")");
 
             cleanup.append("free((char*)");
             cleanup.append(getRegisterName(arithOp.target));
@@ -170,17 +172,40 @@ public class CCodeTranslator extends BaseIRTranslator {
         addLine("continue");
     }
 
+    private void convertToString(TConvert convert) {
+        switch ((PrimitiveType)convert.srcType) {
+            case STR:
+                addLine(convert.target, " = ", convert.source);
+                return;
+            case BOOL:
+                addLine(convert.target, " = ", convert.source, " ? \"true\" : \"false\"");
+                return;
+            case ERROR_MSG:
+                addLine(convert.target, " = ravel_intrinsic_error_to_string(", convert.source, ")");
+                return;
+
+            case INT32:
+            case BYTE:
+            case TIMESTAMP:
+                addLine(convert.target, " = ravel_intrinsic_int_to_string(", convert.source, ")");
+                break;
+
+            case DOUBLE:
+                addLine(convert.target, " = ravel_intrinsic_int_to_string(", convert.source, ")");
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+        cleanup.append("free((char*)");
+        cleanup.append(getRegisterName(convert.target));
+        cleanup.append(");\n");
+    }
+
     @Override
     public void visit(TConvert convert) {
         if (convert.tgtType == PrimitiveType.STR) {
-            if (convert.srcType == PrimitiveType.DOUBLE) {
-                addLine("asprintf(&", convert.target, ", \"%g\", ", convert.source, ")");
-            } else {
-                addLine("asprintf(&", convert.target, ", \"%d\", ", convert.source, ")");
-            }
-            cleanup.append("free((char*)");
-            cleanup.append(getRegisterName(convert.target));
-            cleanup.append(");\n");
+            convertToString(convert);
         } else {
             addLine(convert.target, " = (", typeToCType(convert.tgtType), ") ", convert.source);
         }
