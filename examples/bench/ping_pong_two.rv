@@ -8,7 +8,7 @@ streaming model Ping2():
 local model Reference():
     properties:
         records = 1
-        durable = True
+        durable = False
     schema:
         value : int32
 
