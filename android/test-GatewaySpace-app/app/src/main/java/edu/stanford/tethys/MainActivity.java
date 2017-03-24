@@ -63,6 +63,15 @@ public class MainActivity extends Activity {
 
 
     }
+
+    @Override
+    public void onDestroy(){
+        mServiceBound = false;
+        if(gatewaySpace != null){
+            gatewaySpace.onDestroy();
+        }
+        super.onDestroy();
+    }
     private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
