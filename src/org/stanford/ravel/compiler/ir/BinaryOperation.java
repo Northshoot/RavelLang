@@ -46,6 +46,9 @@ public enum BinaryOperation {
     }
 
     public boolean isLegalType(Type type) {
+        if (type == PrimitiveType.ERROR)
+            return true;
+
         switch (this) {
             case POW:
             case DIV:

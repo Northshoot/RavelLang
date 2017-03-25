@@ -218,10 +218,8 @@ static void
 network_send_data( uint8_t * p_data, uint16_t length)
 {
     NRF_LOG_DEBUG("fragmenting data\r\n");
-    bool has_fragment = true; //we always have at least one fragment
    // data pointer is for recursive use so we can traverse the rad_data
     uint8_t * data_ptr = (uint8_t *)p_data;
-    int32_t value = 0;
     // buffer to be sent over ble
     uint8_t buffer[BLE_RAD_MAX_DATA_LEN];
     memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);

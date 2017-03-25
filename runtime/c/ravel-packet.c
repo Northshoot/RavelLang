@@ -43,13 +43,13 @@ static int32_t pkt_counter = 0;
 
 static void incr_counter() {
     pkt_counter++;
-    ravel_system_print_number(NULL, " allocated packet, now", pkt_counter);
+//    ravel_system_print_number(NULL, " allocated packet, now", pkt_counter);
 }
 
 static void decr_counter() {
     assert (pkt_counter > 0);
     pkt_counter--;
-    ravel_system_print_number(NULL, " freed packet, now", pkt_counter);
+//    ravel_system_print_number(NULL, " freed packet, now", pkt_counter);
 }
 
 void

@@ -5,12 +5,13 @@ interface Clock():
 
     def getNow() : int32
 
-streaming model Ping2():
+streaming model Ping():
     properties:
         records = 5
         flow = EmbeddedSpace -> GatewaySpace
     schema:
         value : int32
+        filler : int32[6]
         timestamp : int32
 
 local model Reference():
@@ -27,10 +28,11 @@ streaming model Pong():
         flow = GatewaySpace -> EmbeddedSpace
     schema:
         value : int32
+        filler : int32[6]
         timestamp : int32
 
 
-controller PingController(time: Clock, ref : Reference, ping2 : Ping2, pong : Pong):
+controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
     event system.started():
         system.print("system started")
         refrec : Reference.Record
@@ -38,17 +40,15 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping2, pong : Po
             refrec = ref.get(0)
         else:
             refrec = ref.create()
-            refrec.value = 42
+            refrec.value = 0
             ref.save(refrec)
         pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
-        system.print("sending initial ping2 " + (str)pingrec.value)
         ping2.save(pingrec)
 
 
     event pong.arrived():
-        system.print("pong received")
         pongrec = self.record
         refrec = ref.get(0)
         rec_ok : bool = True
@@ -59,32 +59,30 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping2, pong : Po
 
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
-            system.print_number("RT: ",  t_now)
-            pong.delete(self.record)
-            refrec.value += 1
-            ref.save(refrec)
-            pingrec = ping2.create()
-            pingrec.value = refrec.value
-            system.print("sending ping2 " + (str)pingrec.value)
-            ping2.save(pingrec)
+            system.print("RT: " + (str)t_now)
+            if self.record.value < 1000:
+                pong.delete(self.record)
+                refrec.value += 1
+                ref.save(refrec)
+                pingrec = ping2.create()
+                pingrec.value = refrec.value
+                pingrec.timestamp = time.getNow()
+                ping2.save(pingrec)
 
-    event ping2.departed():
-        system.print("ping2 departed")
+
 
     event ping2.save_done():
-        system.print("ping2 save done")
         ping2.delete(self.record)
 
 
-controller PongController(ping2 : Ping2, pong : Pong):
+controller PongController(ping2 : Ping, pong : Pong):
     event ping2.arrived():
         system.print("ping2 received")
         pingrec = self.record
-        system.print("value is " + (str)pingrec.value)
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
-        system.print("RX: " + (str)pingrec.timestamp)s
+        system.print("RX: " + (str)pingrec.timestamp)
         pong.save(pongrec)
         ping2.delete(self.record)
 
@@ -104,7 +102,7 @@ space EmbeddedSpace:
 
     models:
         ref = Reference()
-        ping2 = Ping2()
+        ping2 = Ping()
         pong = Pong()
 
     controllers:
@@ -117,7 +115,7 @@ space GatewaySpace:
         #system = J2SE.v18
 
     models:
-        ping2 = Ping2()
+        ping2 = Ping()
         pong = Pong()
 
     controllers:

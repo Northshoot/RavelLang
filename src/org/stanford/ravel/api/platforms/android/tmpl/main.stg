@@ -40,7 +40,7 @@ public class <name> extends Service {
             startThread();
 
             Log.i(LOG_TAG, "Started service");
-            return START_STICKY;
+            return START_NOT_STICKY;
         } catch(Exception e) {
             Log.e(LOG_TAG, "Exception while creating the app dispatcher", e);
             throw new RuntimeException(e);

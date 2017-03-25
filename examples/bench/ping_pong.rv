@@ -1,9 +1,17 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
+
+    def getNow() : int32
+
 streaming model Ping():
     properties:
         records = 5
         flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
     schema:
         value : int32
+        timestamp : int32
 
 local model Reference():
     properties:
@@ -18,11 +26,11 @@ streaming model Pong():
         flow = CloudSpace -> GatewaySpace -> EmbeddedSpace
     schema:
         value : int32
+        timestamp : int32
 
 
-controller PingController(ref : Reference, ping : Ping, pong : Pong):
+controller PingController(time: Clock, ref : Reference, ping : Ping, pong : Pong):
     event system.started():
-        system.print("system started")
         refrec : Reference.Record
         if ref.size() == 1:
             refrec = ref.get(0)
@@ -32,48 +40,47 @@ controller PingController(ref : Reference, ping : Ping, pong : Pong):
             ref.save(refrec)
         pingrec = ping.create()
         pingrec.value = refrec.value
+        pingrec.timestamp = time.getNow()
         ping.save(pingrec)
 
-        for refrec in ref:
-            system.print("one record")
 
     event pong.arrived():
-        system.print("pong received")
         pongrec = self.record
         refrec = ref.get(0)
+        rec_ok = True
         if pongrec.value != refrec.value:
-            system.print("uh oh! the values don't match")
-        else:
-            system.print("pong ok")
-        pong.delete(self.record)
-        system.print("sending ping")
-        refrec.value += 1
-        ref.save(refrec)
-        pingrec = ping.create()
-        pingrec.value = refrec.value
-        ping.save(pingrec)
+            system.print("ERROR Want :" + (str)refrec.value)
+            system.print("ERROR Got :" + (str)pongrec.value)
+            rec_ok = False
 
-    event ping.departed():
-        system.print("ping departed")
+        if rec_ok:
+            t_now = time.getNow() - self.record.timestamp
+            system.print("RT: " + (str)t_now)
+            if self.record.value < 1000:
+                pong.delete(self.record)
+                refrec.value += 1
+                ref.save(refrec)
+                pingrec = ping.create()
+                pingrec.value = refrec.value
+                pingrec.timestamp = time.getNow()
+                ping.save(pingrec)
+
 
     event ping.save_done():
-        system.print("ping save done")
         ping.delete(self.record)
 
 
 controller PongController(ping : Ping, pong : Pong):
     event ping.arrived():
-        system.print("ping received")
         pingrec = self.record
         pongrec = pong.create()
-        x = pingrec.value
-
-        pongrec.value = x
+        pongrec.value =  pingrec.value
+        pongrec.timestamp =  pingrec.timestamp
+        system.print("RX: " + (str)pingrec.timestamp)
         pong.save(pongrec)
         ping.delete(self.record)
 
     event pong.departed():
-        system.print("pong departed")
         pong.delete(self.record)
 
 
@@ -99,13 +106,15 @@ space EmbeddedSpace:
         system = Nrf52.v1
         #system = Posix.v2008
 
+    interfaces:
+        clock = Clock()
     models:
         ref = Reference()
         ping = Ping()
         pong = Pong()
 
     controllers:
-        ping_cnt = PingController(ref = models.ref, ping = models.ping, pong = models.pong)
+        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping = models.ping, pong = models.pong)
 
 space GatewaySpace:
     platform:

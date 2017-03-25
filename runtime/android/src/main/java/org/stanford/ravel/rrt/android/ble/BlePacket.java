@@ -75,11 +75,11 @@ public class BlePacket implements Serializable {
         //results
         byte[] result = new byte[total_lengh];
         //special case for zero
-        byte[] zero = m_frag.get(0).getData();
-        System.arraycopy(zero, 0, result, 0, zero.length);
-        for(int i = 1 ; i < m_frag.size(); i++){
+        int filled = 0;
+        for(int i = 0 ; i < m_frag.size(); i++){
             byte [] a = m_frag.get(i).getData();
-            System.arraycopy(a, 0, result, m_frag.get(i-1).getData().length, a.length);
+            System.arraycopy(a, 0, result, filled, a.length);
+            filled += a.length;
         }
         Log.e("BLE PKT: ", "data.length " + result.length);
         return  result;

@@ -543,8 +543,10 @@ public class SecurityTransformation {
         int isEncrypted = builder.allocateRegister(PrimitiveType.BOOL);
 
         builder.add(new TImmediateLoad(PrimitiveType.BOOL, isEncrypted, enableEncryption));
-        for (SecurityOperation op : decryptions) {
-            applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
+        if (enableEncryption) {
+            for (SecurityOperation op : decryptions) {
+                applyOneDecryption(builder, op, dispatcherSym.getRegister(), decrypted, zero, encryptedSize, endpointname, isEncrypted);
+            }
         }
 
         builder.add(IntrinsicFactory.createParameterSet(PrimitiveType.BOOL, isEncryptedSym.getRegister(), isEncrypted));

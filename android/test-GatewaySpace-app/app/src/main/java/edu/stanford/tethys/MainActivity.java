@@ -57,8 +57,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            cloud = Endpoint.fromString(3, new URI("tcp://camembert.stanford.edu:1234"), Collections.<String, String>emptyMap());
+        try { //"tcp://camembert.stanford.edu:1234"
+            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.104:1234"), Collections.<String, String>emptyMap());
         } catch(URISyntaxException|MalformedURLException e) {
             throw new RuntimeException(e);
         }
