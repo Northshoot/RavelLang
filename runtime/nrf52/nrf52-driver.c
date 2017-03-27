@@ -34,7 +34,7 @@
 #include "temp_keys.h"
 
 #define NRF_LOG_MODULE_NAME "DRV"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 3
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -87,7 +87,7 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
         m_network_is_busy = true;
-        NRF_LOG_DEBUG("Ravel PKT %u\r\n", pkt_out.packet_length);
+        NRF_LOG_INFO("Ravel PKT %u is saveDone %u \r\n", pkt_out.packet_length, pkt_out.is_save_done);
         if (network_send(packet, endpoint)) {
             return RAVEL_ERROR_IN_TRANSIT;
         } else {

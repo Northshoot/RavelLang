@@ -9,7 +9,7 @@
 #include "api/intrinsics.h"
 
 #define NRF_LOG_MODULE_NAME "NET::"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 3
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -65,7 +65,6 @@ static void packetRxCompleted()
     RavelPacket pkt;
 
     uint8_t* pkt_data = pkt_buffer;
-
     int32_t value = 0;
     if (pkt_length > 6)
         value = ravel_intrinsic_extract_int32(pkt_data, 6);
@@ -74,7 +73,7 @@ static void packetRxCompleted()
         value);
 
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
-    //NRF_LOG_ERROR("packetRxCompleted free: %p\r\n", pkt_buffer);
+
     free(pkt_buffer);
     pkt_length =0;
     pkt_buffer = NULL;
@@ -96,7 +95,6 @@ static void fragment_rx(data_packet_t *m_pkt, const uint8_t* pkt_data)
     //TODO: we handle/assume one packet a time
     if(!m_receiving && (m_pkt->indx == 0)){
         //first fragment
-        NRF_LOG_DEBUG("pkt_buffer %p\r\n", pkt_buffer);
         assert(pkt_buffer == NULL);
         NRF_LOG_DEBUG("assert ok\r\n");
         //FIXME: MAX length set here :S
@@ -218,6 +216,8 @@ static void
 network_send_data( uint8_t * p_data, uint16_t length)
 {
     NRF_LOG_DEBUG("fragmenting data\r\n");
+
+
    // data pointer is for recursive use so we can traverse the rad_data
     uint8_t * data_ptr = (uint8_t *)p_data;
     // buffer to be sent over ble

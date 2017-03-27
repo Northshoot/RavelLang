@@ -116,7 +116,7 @@ public class AndroidDriver extends JavaDriver {
 
         }
     };
-    private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {isSaveDone
+    private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle data = intent.getExtras();
