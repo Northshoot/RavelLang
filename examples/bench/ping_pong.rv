@@ -12,6 +12,7 @@ streaming model Ping():
     schema:
         value : int32
         timestamp : int32
+        filler : int32[14]
 
 local model Reference():
     properties:
@@ -27,6 +28,7 @@ streaming model Pong():
     schema:
         value : int32
         timestamp : int32
+        filler : int32[14]
 
 
 controller PingController(time: Clock, ref : Reference, ping : Ping, pong : Pong):
@@ -89,14 +91,13 @@ controller EavesDropController(ping : Ping, pong : Pong):
         system.print("ping arrived")
 
     event ping.departed():
-        system.print("ping departed")
+        #system.print("ping departed")
         ping.delete(self.record)
 
-    event pong.arrived():
-        system.print("pong arrived")
+    #event pong.arrived():
+    #   system.print("pong arrived")
 
     event pong.departed():
-        system.print("pong departed")
         pong.delete(self.record)
 
 

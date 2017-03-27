@@ -74,10 +74,12 @@ public class AndroidDriver extends JavaDriver {
 
     //FIXME: move fragmentation to a separate class for processing
     void packetCompleted(BlePacket pkt){
-        byte [] data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
+        byte [] raw_data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
         Log.e(TAG, "packetCompleted , sending it up");
-        appDispatcher.driver__dataReceived(RavelPacket.fromNetwork(data), bleClients.get(pkt.getAddress()));
+        RavelPacket data = RavelPacket.fromNetwork(raw_data);
+        Log.d(TAG, "got packet isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
+        appDispatcher.driver__dataReceived(data , bleClients.get(pkt.getAddress()));
     }
 
     int counter = 0;
@@ -114,7 +116,7 @@ public class AndroidDriver extends JavaDriver {
 
         }
     };
-    private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mRaveBleMessageReceiver = new BroadcastReceiver() {isSaveDone
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle data = intent.getExtras();
@@ -195,7 +197,7 @@ public class AndroidDriver extends JavaDriver {
             case BLE:
                 Log.d(TAG, "about to send packet model id " + data.model_id + " record id " + data.record_id);
                 if(m_connected_ble && mBleServiceBound ) {
-                    Log.d(TAG, "sending packet " + endpoint.getId());
+                    Log.d(TAG, "sending packet " + endpoint.getId() +" isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
                     try {
                         synchronized (this) {
                             m_sending = true;

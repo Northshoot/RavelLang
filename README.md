@@ -194,6 +194,17 @@ interface Led(led_num: int32):
 
 ### Writing Driver ###
 
+# Running Example #
+
+## Ping Pong ##
+
+Java:
+
+<pre> <code>
+java -cp ../../../../../runtime/java/build/libs/java-0.9.jar:app.jar org.stanford.ravel.generated.Application ../../../../../examples/endpoint.txt ../../keys.txt
+
+</code> </pre>
+
 # Future Work #
 
     Set timeout / number of retries on model.save

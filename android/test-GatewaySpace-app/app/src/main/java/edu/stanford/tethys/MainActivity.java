@@ -92,7 +92,8 @@ public class MainActivity extends Activity {
             mServiceBound = true;
             localEndpoint.setLocal(true);
             eps.add(localEndpoint);
-            eps.add(cloud);
+            //Can not add more end point than application is using
+            //eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
             InputStream stream = new ByteArrayInputStream(DeleteMeKeys.key_0.getBytes(UTF_8));
             gatewaySpace.setKey(stream);

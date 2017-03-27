@@ -11,8 +11,8 @@ streaming model Ping():
         flow = EmbeddedSpace -> GatewaySpace
     schema:
         value : int32
-        filler : int32[6]
         timestamp : int32
+        filler : int32[6]
 
 local model Reference():
     properties:
@@ -28,8 +28,8 @@ streaming model Pong():
         flow = GatewaySpace -> EmbeddedSpace
     schema:
         value : int32
-        filler : int32[6]
         timestamp : int32
+        filler : int32[6]
 
 
 controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
@@ -83,6 +83,7 @@ controller PongController(ping2 : Ping, pong : Pong):
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
         system.print("RX: " + (str)pingrec.timestamp)
+        system.print("Got: " + (str)pingrec.value)
         pong.save(pongrec)
         ping2.delete(self.record)
 
