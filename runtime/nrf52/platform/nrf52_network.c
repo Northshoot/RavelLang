@@ -40,6 +40,7 @@ static size_t pkt_length =0;
 static bool m_endpoint_is_set = false;
 static bool m_receiving = false;
 
+
 //class for handling RAD networking
 void
 create_endpoint(const uint8_t *data, uint16_t len)
@@ -143,12 +144,13 @@ network_on_read_request(const uint8_t *data, uint16_t len)
 
 static void inline packetTxCompleted()
 {
-    m_tx_enqueued_pkt --;
+    m_tx_enqueued_pkt--;
     m_tx_fragment_enqueued = m_tx_sent_done_fragment = 0;
     NRF_LOG_DEBUG("packetTxCompleted\r\n");
     //TODO: signal to the driver
     ravel_nrf52_driver_send_done_from_low(&driver.base);
 }
+
 void
 network_on_send_done()
 {
@@ -229,12 +231,12 @@ network_send_data( uint8_t * p_data, uint16_t length)
     while(length > 0)
     {
         if ( length > BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t) ){
-            NRF_LOG_DEBUG("data >= bt %u\r\n", sizeof( data_packet_t));
+            //NRF_LOG_DEBUG("data >= bt %u\r\n", sizeof( data_packet_t));
             ravel_pkt.length = BLE_RAD_MAX_DATA_LEN - sizeof( data_packet_t);
             //only one flag TODO: need whole protocol suite
             ravel_pkt.ctrf_flags = 0;
         } else {
-            NRF_LOG_DEBUG("data < bt frame length\r\n");
+           //NRF_LOG_DEBUG("data < bt frame length\r\n");
             ravel_pkt.length = length;
             ravel_pkt.ctrf_flags = 1;
         }
@@ -250,8 +252,9 @@ network_send_data( uint8_t * p_data, uint16_t length)
         // FIXME: can not handle more than 7 pkt due to out buffer
         //needs global buffer, that releasing the send through the sch
        uint32_t send_result = ble_rad_send_data_interface(buffer, sizeof( data_packet_t)+ravel_pkt.length);
+       NRF_LOG_DEBUG("RAW send results %u", send_result);
        m_tx_fragment_enqueued++;
-       NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_tx_fragment_enqueued, send_result);
+       //NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_tx_fragment_enqueued, send_result);
         // updating
         length -= ravel_pkt.length;
         memset(buffer, 0, BLE_RAD_MAX_DATA_LEN);
@@ -262,7 +265,7 @@ network_send_data( uint8_t * p_data, uint16_t length)
 bool
 network_send(RavelPacket *packet, RavelEndpoint *endpoint)
 {
-    NRF_LOG_DEBUG("packet size  %u\r\n", packet->packet_length);
+    //NRF_LOG_DEBUG("packet size  %u\r\n", packet->packet_length);
     if(m_connected && m_notify_enabled)
     {
         m_tx_enqueued_pkt++;

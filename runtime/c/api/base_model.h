@@ -174,6 +174,7 @@ static inline void ravel_local_model_add_source_endpoints(RavelLocalModel *self,
     assert(endpoints[0] == -1);
 }
 
+///Streaming model
 typedef struct {
     RavelBaseModel base;
     const int32_t *sink_endpoints;
@@ -197,6 +198,8 @@ static inline void ravel_streaming_model_add_sink_endpoints(RavelStreamingModel 
 static inline void ravel_streaming_model_add_source_endpoints(RavelStreamingModel *self, const int32_t * endpoints) {
     self->source_endpoints = endpoints;
 }
+
+//Replicated model
 
 typedef struct {
     RavelBaseModel base;

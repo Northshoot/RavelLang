@@ -30,6 +30,8 @@
 #include "packet.h"
 #include "intrinsics.h"
 
+#include "platform/nrf52_ravel_packet_queue.h"
+
 //FIXME: ops static keys :O
 #include "temp_keys.h"
 
@@ -86,18 +88,28 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
     if (!m_network_is_busy) {
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
-        m_network_is_busy = true;
+        m_network_is_busy = false;
         NRF_LOG_INFO("Ravel PKT %u is saveDone %u \r\n", pkt_out.packet_length, pkt_out.is_save_done);
         if (network_send(packet, endpoint)) {
             return RAVEL_ERROR_IN_TRANSIT;
         } else {
-            m_network_is_busy = false;
-            return RAVEL_ERROR_NETWORK_ERROR;
+            //enqueue packet
+            m_network_is_busy = true;
+            enqueue_ravel_packet(&enqueue_ravel_packet);
+            ravel_packet_finalize (packet);
+            return RAVEL_ERROR_WAITING_FOR_NETWORK;
         }
     } else {
+        //network is busy, need to queue the packet and retransmit when free
         ravel_packet_finalize (packet);
         return  RAVEL_ERROR_BUSY;
     }
+}
+
+static void deque_packet(void *p_event_data, uint16_t event_size)
+{
+    NRF_LOG_DEBUG("deque_packet \r\n");
+    //ravel_driver_send_data
 }
 
 void
@@ -106,9 +118,10 @@ ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
     NRF_LOG_DEBUG("SIGNAL_UP_SEND_DONE \r\n");
     m_network_is_busy = false;
     RavelPacket copy = pkt_out;
-
     ravel_base_dispatcher_send_done(self->dispatcher, RAVEL_ERROR_SUCCESS, &copy, endpoint_out);
     ravel_packet_finalize(&copy);
+    //dispatch packet queue
+    app_sched_event_put(NULL,sizeof(ravel_schedule_event_cntx), deque_packet);
 }
 void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)
@@ -134,6 +147,7 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
 {
     /* TODO: init any internal systems */
     NRF_LOG_INFO("INIT!\r\n");
+    uint32_t error;
     nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
 
     // Initialize the SoftDevice handler module.

@@ -8,6 +8,7 @@ PLATFORM_RUNTIME_SOURCES   += \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_network.c \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_print.c \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ravel_timer.c \
+    $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ravel_packet_queue.c \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/platform/nrf52_ble_interface.c \
     $(RAVEL_PLATFORM_RUNTIME_DIR)/nrf52-driver.c
 RPI := $(RAVEL_PLATFORM_RUNTIME_DIR)/platform
