@@ -47,6 +47,12 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
+        pingrec.filler[0] = 1
+        pingrec.filler[1] = 1
+        pingrec.filler[2] = 1
+        pingrec.filler[3] = 1
+        pingrec.filler[4] = 1
+        pingrec.filler[5] = 1
         ping2.save(pingrec)
 
 
@@ -84,8 +90,15 @@ controller PongController(ping2 : Ping, pong : Pong):
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
+        pongrec.filler[0] = 1
+        pongrec.filler[1] = 1
+        pongrec.filler[2] = 1
+        pongrec.filler[3] = 1
+        pongrec.filler[4] = 1
+        pongrec.filler[5] = 1
         system.print("RX: " + (str)pingrec.timestamp)
         system.print("Got: " + (str)pingrec.value)
+
         pong.save(pongrec)
         ping2.delete(self.record)
 

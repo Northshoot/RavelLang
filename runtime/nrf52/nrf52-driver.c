@@ -36,7 +36,7 @@
 #include "temp_keys.h"
 
 #define NRF_LOG_MODULE_NAME "DRV"
-#define NRF_LOG_LEVEL 3
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -53,6 +53,7 @@ NetworkClb network;
 
 static RavelEndpoint *endpoints[2] = { NULL, NULL };
 static bool m_network_is_busy = false;
+
 /**** ****/
 RavelEndpoint * const *
 ravel_driver_get_endpoints_by_name(RavelDriver *driver, int32_t name)
@@ -60,6 +61,18 @@ ravel_driver_get_endpoints_by_name(RavelDriver *driver, int32_t name)
     return endpoints;
 }
 
+static void deque_packet(void *p_event_data, uint16_t event_size)
+{
+    NRF_LOG_DEBUG("deque_packet \r\n");
+    //ravel_driver_send_data
+
+    RavelNetworkQueueData m_q_pkt;
+    if (dequeue_ravel_packet(&m_q_pkt)) {
+       ravel_driver_send_data(NULL, &m_q_pkt.m_ravel_packet, m_q_pkt.p_endpoint);
+    } else {
+        NRF_LOG_DEBUG("no packet to send \r\n");
+    }
+}
 
 void
 ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoint)
@@ -68,6 +81,7 @@ ravel_nrf52_driver_set_endpoint(RavelNrf52Driver *driver, nrf52_endpoint *endpoi
         NRF_LOG_DEBUG("setting endpoint\r\n");
         endpoints[0] = &endpoint->m_ravel_endpoint;
         ravel_base_dispatcher_endpoint_connected(driver->base.dispatcher, endpoints[0]);
+        app_sched_event_put(NULL,sizeof(ravel_schedule_event_cntx), deque_packet);
     } else {
         endpoints[0] = NULL;
     }
@@ -88,29 +102,19 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
     if (!m_network_is_busy) {
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
-        m_network_is_busy = false;
+        m_network_is_busy = true;
         NRF_LOG_INFO("Ravel PKT %u is saveDone %u \r\n", pkt_out.packet_length, pkt_out.is_save_done);
         if (network_send(packet, endpoint)) {
             return RAVEL_ERROR_IN_TRANSIT;
-        } else {
-            //enqueue packet
-            m_network_is_busy = true;
-            enqueue_ravel_packet(&enqueue_ravel_packet);
-            ravel_packet_finalize (packet);
-            return RAVEL_ERROR_WAITING_FOR_NETWORK;
         }
-    } else {
-        //network is busy, need to queue the packet and retransmit when free
-        ravel_packet_finalize (packet);
-        return  RAVEL_ERROR_BUSY;
     }
+    //enqueue packet
+    RavelNetworkQueueData m_queu_pkt;
+    m_queu_pkt.m_ravel_packet = *packet;
+    m_queu_pkt.p_endpoint = endpoint;
+    return enqueue_ravel_packet(m_queu_pkt);
 }
 
-static void deque_packet(void *p_event_data, uint16_t event_size)
-{
-    NRF_LOG_DEBUG("deque_packet \r\n");
-    //ravel_driver_send_data
-}
 
 void
 ravel_nrf52_driver_send_done_from_low(RavelDriver *self)

@@ -9,7 +9,7 @@
 #include "api/intrinsics.h"
 
 #define NRF_LOG_MODULE_NAME "NET::"
-#define NRF_LOG_LEVEL 3
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 

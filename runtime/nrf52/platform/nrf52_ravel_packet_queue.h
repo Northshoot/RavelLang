@@ -11,7 +11,13 @@ extern "C" {
 #endif
 
 
+typedef struct RavelNetworkQueueData {
+    struct RavelNetworkQueueData * next;
+    struct RavelNetworkQueueData * previous;
 
+    RavelPacket m_ravel_packet;
+    RavelEndpoint *p_endpoint;
+} RavelNetworkQueueData;
 
 uint32_t nrf52_ravel_packet_queue_init(void);
 
@@ -19,16 +25,10 @@ uint32_t nrf52_ravel_packet_queue_init(void);
 uint32_t nrf52_ravel_packet_queue_finalize(void);
 
 // enqueue Ravel Packet
-uint32_t enqueue_ravel_packet(RavelPacket *pkt);
+RavelError enqueue_ravel_packet(const RavelNetworkQueueData m_network_q);
 
 //dequeue Ravel Packet
-uint32_t dequeue_ravel_packet(RavelPacket *pkt);
-
-//returns size of queue
-size_t size(void);
-
-//returns available buffer
-size_t available(void);
+bool dequeue_ravel_packet( RavelNetworkQueueData *p_network_q);
 
 #ifdef __cplusplus
 }

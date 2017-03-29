@@ -76,9 +76,7 @@ public class AndroidDriver extends JavaDriver {
     void packetCompleted(BlePacket pkt){
         byte [] raw_data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
-        Log.e(TAG, "packetCompleted , sending it up");
         RavelPacket data = RavelPacket.fromNetwork(raw_data);
-        Log.d(TAG, "got packet isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
         appDispatcher.driver__dataReceived(data , bleClients.get(pkt.getAddress()));
     }
 

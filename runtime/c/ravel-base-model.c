@@ -614,7 +614,7 @@ ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const in
             if (!endpoint->connected) {
                 local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
                 ravel_packet_finalize (&copy);
-                ravel_system_print(NULL, "endpoint not connected");
+                //ravel_system_print(NULL, "endpoint not connected");
             } else {
 
                 local_error = ravel_base_dispatcher_send_data (self->dispatcher, &copy, endpoint);
@@ -648,10 +648,8 @@ ravel_streaming_model_forward(RavelStreamingModel *self, RavelPacket *pkt, void 
         if (!pkt->is_save_done) {
             RavelPacket save_done;
             RavelError error;
-            ravel_system_print(NULL, "save done about to send");
             ravel_packet_init_save_done (&save_done, pkt->model_id, pkt->record_id);
             error = ravel_base_model_forward_packet (&self->base, &save_done, self->source_endpoints, NULL);
-            ravel_system_print_number(NULL, "save done about to send ", error);
             ravel_packet_finalize(&save_done);
             return error;
         } else {

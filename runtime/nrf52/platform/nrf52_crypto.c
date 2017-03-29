@@ -18,7 +18,7 @@
 #include <sha256.h>
 
 #define NRF_LOG_MODULE_NAME "CRYPT"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -101,8 +101,11 @@ static void AES_encrypt(uint8_t *in, uint8_t *out, const uint8_t* aes_key) {
 	memcpy(datain.key,       aes_key, AES_KEY_SIZE);
 	memcpy(datain.cleartext, in,      CIPHER_BLOCK_SIZE);
 
+    uint32_t err;
     /* do the actual encryption */
-	sd_ecb_block_encrypt(&datain);
+	err = sd_ecb_block_encrypt(&datain);
+	if(err != NRF_SUCCESS)
+	    NRF_LOG_DEBUG("Error encrypting");
 
     /* read the ciphertext */
 	memcpy(out, datain.ciphertext, CIPHER_BLOCK_SIZE);
@@ -135,6 +138,8 @@ counter_mode(uint8_t *data, size_t length, const uint8_t *key)
             for (i = 0; i < CIPHER_BLOCK_SIZE; i++)
                 data[IV_SIZE + done + i] ^= encrypted[i];
             increment_iv(iv);
+            //NRF_LOG_HEXDUMP_DEBUG(iv+IV_SIZE, IV_SIZE);
+
             done += CIPHER_BLOCK_SIZE;
         } else {
             for (i = 0; i < length - done; i++)
@@ -151,11 +156,12 @@ void ravel_crypto_encrypt(uint8_t *data, int32_t offset, int32_t length, RavelKe
 
 void ravel_crypto_decrypt(uint8_t *data, int32_t offset, int32_t length, RavelKey *key)
 {
-    NRF_LOG_DEBUG("crypto_decrypt %d %d %d\r\n", offset, length, key->key_id);
-    NRF_LOG_HEXDUMP_DEBUG(data+offset, length);
+    //NRF_LOG_DEBUG("crypto_decrypt %d %d %d\r\n", offset, length, key->key_id);
 
     counter_mode(data+offset, length, key->buffer);
     memmove(data+offset, data+offset+IV_SIZE, length-IV_SIZE);
+
+    NRF_LOG_HEXDUMP_DEBUG(data+offset, length-IV_SIZE);
 }
 
 void ravel_crypto_array_fill_random(uint8_t *array, int32_t offset, int32_t length)

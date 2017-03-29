@@ -1,80 +1,88 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #define NRF_LOG_MODULE_NAME "QUE"
-#define NRF_LOG_LEVEL 4
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
+#include "api/context.h"
 #include "nrf52_ravel_packet_queue.h"
-#include "app_fifo.h"
 
-#define FIFO_LENGTH(F) fifo_length(&F)              /**< Macro to calculate length of a FIFO. */
-
-static __INLINE uint32_t fifo_length(app_fifo_t * const fifo)
-{
-  uint32_t tmp = fifo->read_pos;
-  return fifo->write_pos - tmp;
-}
-
-#ifndef BUFF_MAX_SIZE
-#define BUFF_MAX_SIZE        20 //can be set through make -DBUFF_MAX_SIZE=xxx
-#endif
-
-static RavelPacket           packet_buf[BUFF_MAX_SIZE];
-
-bool m_full                 = false;
-size_t m_current            = 0;
-size_t m_sending            = 0;
 // enqueue Ravel Packet
+
+static RavelNetworkQueueData *queue_head;
+static RavelNetworkQueueData *queue_tail;
 
 uint32_t nrf52_ravel_packet_queue_init()
 {
     NRF_LOG_INFO("INIT!\r\n");
     return 0;
 }
+
+
 uint32_t nrf52_ravel_packet_queue_finalize(void)
 {
+    RavelNetworkQueueData *iter, *next;
+
+    for (iter = queue_head; iter; iter = next) {
+        next = iter->next;
+        ravel_packet_finalize(&iter->m_ravel_packet);
+        free(iter);
+    }
+    queue_head = queue_tail = NULL;
     return 0;
 }
 
 
-uint32_t enqueue_ravel_packet(RavelPacket *pkt)
+RavelError enqueue_ravel_packet(const RavelNetworkQueueData m_network_q)
 {
+    RavelNetworkQueueData *copy;
+
     NRF_LOG_DEBUG("enqueue_ravel_packet\r\n");
-    if(m_full)
-        return 1;
 
-    //copy packet
-    RavelPacket copy;
-    ravel_packet_init_copy(&copy, pkt);
-    //add to the buffer
-    packet_buf[m_current] = copy;
-    m_current++;
-    if(m_current == BUFF_MAX_SIZE)
-        m_full = true;
+    copy = calloc(sizeof(RavelNetworkQueueData), 1);
+    if (copy == NULL)
+        return RAVEL_ERROR_OUT_OF_STORAGE;
 
-    return 0;
+    memcpy(copy, &m_network_q, sizeof(RavelNetworkQueueData));
+
+    if (queue_head == NULL) {
+        assert (queue_tail == NULL);
+        queue_head = queue_tail = copy;
+        copy->next = copy->previous = NULL;
+    } else {
+        copy->next = queue_head;
+        copy->previous = NULL;
+        queue_head->previous = copy;
+        queue_head = copy;
+    }
+
+    return RAVEL_ERROR_IN_TRANSIT;
 }
 
 //dequeue Ravel Packet
-uint32_t dequeue_ravel_packet(RavelPacket *pkt)
+bool dequeue_ravel_packet( RavelNetworkQueueData *p_network_q)
 {
-    NRF_LOG_DEBUG("dequeue_ravel_packett\r\n");
-    //copy over packet from queue to the pointer
-    pkt = &packet_buf[m_sending];
-    ravel_packet_finalize(&packet_buf[m_sending]);
-    if(m_sending == m_current)
-        m_sending = m_current = 0;
-}
+    RavelNetworkQueueData *last;
+    NRF_LOG_DEBUG("dequeue_ravel_packet\r\n");
 
-//returns size of queue
-size_t size(void){
-    return BUFF_MAX_SIZE;
-}
+    if (queue_tail == NULL) {
+        assert (queue_head == NULL);
+        return false;
+    }
 
-//returns available buffer
-size_t available(void){
-    return BUFF_MAX_SIZE - m_current;
+    last = queue_tail;
+    if (last->previous == NULL) {
+        queue_tail = queue_head = NULL;
+    } else {
+        last->previous->next = NULL;
+        queue_tail = last->previous;
+    }
+
+    memcpy(p_network_q, last, sizeof(RavelNetworkQueueData));
+    free(last);
 }
