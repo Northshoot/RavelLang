@@ -127,9 +127,11 @@ network_on_write(const uint8_t *data, uint16_t len)
     //TODO: VERIFY the dispatching to the right place
     data_packet_t m_pkt;
     memcpy(&m_pkt, data, sizeof(m_pkt));
+    //TODO: protocol implementation
     if( m_pkt.ctrf_flags == SET_ENDPOINT ){
         create_endpoint( data, len);
     } else {
+        //the rest is only data fragments
         m_rx_enqueued_fragment++;
         fragment_rx(&m_pkt, data+sizeof(m_pkt));
     }

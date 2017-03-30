@@ -31,8 +31,9 @@ streaming model Pong():
         filler : int32[14]
 
 
-controller PingController(time: Clock, ref : Reference, ping : Ping, pong : Pong):
+controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
     event system.started():
+        system.print("system started")
         refrec : Reference.Record
         if ref.size() == 1:
             refrec = ref.get(0)
@@ -40,16 +41,19 @@ controller PingController(time: Clock, ref : Reference, ping : Ping, pong : Pong
             refrec = ref.create()
             refrec.value = 0
             ref.save(refrec)
-        pingrec = ping.create()
+        pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
-        ping.save(pingrec)
+        system.print("Time :" + (str)pingrec.timestamp)
+        pingrec.filler[0] = 1
+        pingrec.filler[1] = 1
+        ping2.save(pingrec)
 
 
     event pong.arrived():
         pongrec = self.record
         refrec = ref.get(0)
-        rec_ok = True
+        rec_ok : bool = True
         if pongrec.value != refrec.value:
             system.print("ERROR Want :" + (str)refrec.value)
             system.print("ERROR Got :" + (str)pongrec.value)
@@ -57,33 +61,44 @@ controller PingController(time: Clock, ref : Reference, ping : Ping, pong : Pong
 
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
+            #system.print("RX: " + (str)self.record.timestamp)
             system.print("RT: " + (str)t_now)
-            if self.record.value < 1000:
+            if self.record.value < 1001:
                 pong.delete(self.record)
                 refrec.value += 1
                 ref.save(refrec)
-                pingrec = ping.create()
+                pingrec = ping2.create()
                 pingrec.value = refrec.value
                 pingrec.timestamp = time.getNow()
-                ping.save(pingrec)
+                ping2.save(pingrec)
 
 
-    event ping.save_done():
-        ping.delete(self.record)
+    event ping2.save_done():
+        ping2.delete(self.record)
 
 
-controller PongController(ping : Ping, pong : Pong):
-    event ping.arrived():
+controller PongController(ping2 : Ping, pong : Pong):
+    event ping2.arrived():
+        system.print("ping2 received")
         pingrec = self.record
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
+        pongrec.filler[0] = 1
+        pongrec.filler[1] = 1
         system.print("RX: " + (str)pingrec.timestamp)
+        system.print("Got: " + (str)pingrec.value)
+
         pong.save(pongrec)
-        ping.delete(self.record)
+        ping2.delete(self.record)
 
     event pong.departed():
+        system.print("pong departed")
         pong.delete(self.record)
+
+
+    event pong.save_done():
+        system.print("pong save done")
 
 
 controller EavesDropController(ping : Ping, pong : Pong):
@@ -91,13 +106,14 @@ controller EavesDropController(ping : Ping, pong : Pong):
         system.print("ping arrived")
 
     event ping.departed():
-        #system.print("ping departed")
+        system.print("ping departed")
         ping.delete(self.record)
 
-    #event pong.arrived():
-    #   system.print("pong arrived")
+    event pong.arrived():
+       system.print("pong arrived")
 
     event pong.departed():
+        system.print("pong departed")
         pong.delete(self.record)
 
 
@@ -115,7 +131,7 @@ space EmbeddedSpace:
         pong = Pong()
 
     controllers:
-        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping = models.ping, pong = models.pong)
+        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping2 = models.ping, pong = models.pong)
 
 space GatewaySpace:
     platform:
@@ -141,4 +157,4 @@ space CloudSpace:
         pong = Pong()
 
     controllers:
-        pong_cnt = PongController(ping = models.ping, pong = models.pong)
+        pong_cnt = PongController(ping2 = models.ping, pong = models.pong)

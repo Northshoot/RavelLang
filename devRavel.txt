@@ -4,7 +4,7 @@ making variables
 TODO's for Ravel:
 
 * add imports
-* define controller life cycle
+* define controller life cycle X
 * draw architecture
 * move to multiple models and multiple controller using same model per tier
 * remove fields from compiler to and make them writen in Ravel

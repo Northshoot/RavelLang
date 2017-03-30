@@ -329,7 +329,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             }
         } break; // BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST
             case BLE_GAP_EVT_CONN_PARAM_UPDATE:
-                NRF_LOG_DEBUG("BLE_GAP_EVT_CONN_PARAM_UPDATE %u\r\n", err_code);
+                NRF_LOG_DEBUG("BLE_GAP_EVT_CONN_PARAM_UPDATE \r\n");
             break;
         default:
             // No implementation needed.

@@ -1,13 +1,10 @@
-interface Timer():
+interface Clock():
     implementation:
-        c = "rlib/nrf52/app_timer_sys.stg"
-        #c = "rlib/linux/timer.stg"
-        java = "rlib/java/timer.stg"
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
 
-    def start_one_shot(time : int32)
-    def cancel()
-    def start_periodic(time: int32)
-    event fired()
+    def getNow() : int32
+
 
 streaming model Random(size : int32):
     properties:
@@ -19,52 +16,32 @@ streaming model Random(size : int32):
     schema:
         value : int32
 
-interface RandomSource():
-    implementation:
-        java = "rlib/java/random.stg"
-        c = "rlib/c/random.stg"
-
-    def next(): int32
 
 
-controller EmbeddedController(random: Random, timer : Timer, random_src : RandomSource):
+controller EmbeddedController(random: Random, clock : Clock):
     running = False
     frequency = 1000
 
     event system.started():
-        system.print("system started")
-        timer.start_periodic(frequency)
-        running = True
-
-    event timer.fired():
-        system.print("timer tick")
-        rand = random.create()
-        rand.value = random_src.next()
-        random.save(rand)
+        for i=0 to 100:
+            rand = random.create()
+            rand.value = i
+            random.save(rand)
 
     event random.full():
         system.print("model full")
-        timer.cancel()
-        running = False
 
-    event random.departed():
-        if not running:
-            timer.start_periodic(frequency)
-            running = True
 
-    event random.save_done():
-        system.print("save done")
-        random.delete(self.record)
 
 
 controller GatewayController(random: Random):
-    event random.save_done():
-        random.delete(self.record)
 
-
-controller CloudController(random : Random):
     event random.arrived():
-        system.print("random arrived " + (str)self.record.value)
+        system.print("random arrived")
+
+
+
+
 
 
 space EmbeddedSpace:
@@ -74,14 +51,13 @@ space EmbeddedSpace:
         #system = Posix.v2008
 
     models:
-        random = Random(size=10)
+        random = Random(size=100)
 
     interfaces:
-        timer_0 = Timer()
-        rnd = RandomSource()
+        clock = Clock()
 
     controllers:
-        ectrl = EmbeddedController(random = models.random, random_src = interfaces.rnd, timer = interfaces.timer_0)
+        ectrl = EmbeddedController(random = models.random, clock = interfaces.clock)
 
 space GatewaySpace:
     platform:
@@ -94,16 +70,5 @@ space GatewaySpace:
         
     controllers:
         gctrl = GatewayController(random = models.random)
-        
-space CloudSpace:
-    platform:
-        language = JLang
-        system = J2SE.v18
-        
-    models:
-        random = Random(size=1000)
-        
-    controllers:
-        cctrl = CloudController(random = models.random)
 
 

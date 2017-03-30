@@ -151,7 +151,6 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
 {
     /* TODO: init any internal systems */
     NRF_LOG_INFO("INIT!\r\n");
-    uint32_t error;
     nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
 
     // Initialize the SoftDevice handler module.

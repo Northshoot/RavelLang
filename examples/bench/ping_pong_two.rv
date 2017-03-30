@@ -13,14 +13,7 @@ streaming model Ping():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[2]
-
-local model Reference():
-    properties:
-        records = 1
-        durable = False
-    schema:
-        value : int32
+        filler : int32[4]
 
 
 streaming model Pong():
@@ -31,8 +24,14 @@ streaming model Pong():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[2]
+        filler : int32[4]
 
+local model Reference():
+    properties:
+        records = 1
+        durable = False
+    schema:
+        value : int32
 
 controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
     event system.started():
@@ -50,10 +49,6 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         system.print("Time :" + (str)pingrec.timestamp)
         pingrec.filler[0] = 1
         pingrec.filler[1] = 1
-        pingrec.filler[2] = 1
-        pingrec.filler[3] = 1
-        pingrec.filler[4] = 1
-        pingrec.filler[5] = 1
         ping2.save(pingrec)
 
 
@@ -69,14 +64,14 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
             #system.print("RX: " + (str)self.record.timestamp)
-            #system.print("RT: " + (str)t_now)
+            system.print("RT: " + (str)t_now)
             if self.record.value < 1001:
-                pong.delete(self.record)
+                pong.delete(self.record)make cl
                 refrec.value += 1
                 ref.save(refrec)
                 pingrec = ping2.create()
                 pingrec.value = refrec.value
-                pingrec.timestamp = t_now
+                pingrec.timestamp = time.getNow()
                 ping2.save(pingrec)
 
 

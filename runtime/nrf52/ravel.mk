@@ -25,7 +25,6 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
-  $(APP_DIR)/config \
   $(APP_DIR) \
   $(APP_FILE_DIR) \
   $(PROJECTDIRS) \

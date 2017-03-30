@@ -2,36 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="org.stanford.ravel.rrt">
-    <uses-sdk
-        android:minSdkVersion="23"
-        android:targetSdkVersion="25"
-        tools:targetAPI="23"/>
 
-    <uses-feature
-            android:name="android.hardware.bluetooth_le"
-            android:required="true" />
 
-    <uses-permission
-            android:name="android.permission.BLUETOOTH"
-            android:required="true" />
-    <uses-permission
-            android:name="android.permission.BLUETOOTH_ADMIN"
-            android:required="true" />
+
 
     <!--<uses-permission-->
             <!--android:name="android.permission.ACCESS_FINE_LOCATION"-->
             <!--android:required="true" />-->
     <!-- needed for bluetooth from v6 -->
-    <uses-permission
-            android:name="android.permission.ACCESS_COARSE_LOCATION"
-            android:required="true" />
 
-    <uses-permission android:name="android.permission.INTERNET"
-                     android:required="true" />
 
     <!-- Create phones unique ID -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-feature android:name="android.hardware.location.gps" />
+
 
     <application>
         <service

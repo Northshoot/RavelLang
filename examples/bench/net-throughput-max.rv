@@ -8,32 +8,36 @@ interface Clock():
 
 streaming model Ping():
     properties:
-        records = 100
+        records = 101
         durable = False
         reliable = False
         flow = EmbeddedSpace -> GatewaySpace
     schema:
         #changing the size for measurements
-        value : int32[30]
+        counter : int32
+        value : int32[2]
 
 
 controller PingController( ping : Ping , clock : Clock):
     counter : int32 = 0
-    time_save : int32 = 0
+    t_first : int32 = 0
     time_departed : int32 = 0
     delta : int32 = 0
+    first : bool = True
 
 
     event system.started():
         system.print("system started")
         pingrec = ping.create()
-        #pingrec.value = counter
-        counter += 1
-        time_save = clock.getNow()
+        pingrec.counter = counter
         ping.save(pingrec)
 
     event ping.departed():
+        system.print("model departed")
         ## create new packet after each send
+        if first:
+            t_first = clock.getNow()
+            first = False
         pingrec = ping.create()
         counter += 1
         ping.save(pingrec)
@@ -43,9 +47,7 @@ controller PingController( ping : Ping , clock : Clock):
 
     event ping.full():
         system.print("model full")
-        time_departed = clock.getNow()
-        delta = time_departed - time_save
-        #this prints on android
+        delta = t_first - clock.getNow()
         system.print_number("All PING's :::", delta)
 
 

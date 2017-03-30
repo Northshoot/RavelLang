@@ -12,8 +12,10 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.stanford.ravel.generated.GatewaySpace;
+import org.stanford.ravel.rrt.android.DeleteMeKeys;
 import org.stanford.ravel.rrt.tiers.BleEndpoint;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 
@@ -22,7 +24,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.stanford.ravel.rrt.android.DeleteMeKeys;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -46,6 +47,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
         enable_sdk_23();
         // start the service if not already
         Intent intent = new Intent(this, GatewaySpace.class);
@@ -58,7 +64,7 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try { //"tcp://camembert.stanford.edu:1234"
-            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.104:1234"), Collections.<String, String>emptyMap());
+            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.106:1234"), Collections.<String, String>emptyMap());
         } catch(URISyntaxException|MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -93,6 +99,7 @@ public class MainActivity extends Activity {
             localEndpoint.setLocal(true);
             eps.add(localEndpoint);
             //Can not add more end point than application is using
+            //FIXME: commenting out cloud for two way test
             //eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
             InputStream stream = new ByteArrayInputStream(DeleteMeKeys.key_0.getBytes(UTF_8));
