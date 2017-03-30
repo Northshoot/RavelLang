@@ -29,7 +29,7 @@ public class BleDefines {
     public final static int DEVICE_DOES_NOT_SUPPORT_RAD =86;
     //FIXME: automate it
     // this is arbitrary number because of nrf52
-    public final static int BLE_MAX_DATA_LENGTH =20;
+    public final static int BLE_MAX_DATA_LENGTH =27;
     public static final int BLE_FRAGMENT_HEADER_LENGTH = 3;
     public static final int ENDPOINT_PROTOCOL = 0xCC;
 

@@ -46,7 +46,7 @@ public class GrowableByteArray {
     }
 
     public void write(byte[] bytes, int off, int srclength) {
-        if (length + srclength < storage.length)
+        if (length + srclength > storage.length)
             grow(length + srclength);
         System.arraycopy(bytes, off, storage, length, srclength);
         length += srclength;

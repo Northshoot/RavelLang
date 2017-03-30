@@ -13,7 +13,7 @@ streaming model Ping():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[6]
+        filler : int32[2]
 
 local model Reference():
     properties:
@@ -31,7 +31,7 @@ streaming model Pong():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[6]
+        filler : int32[2]
 
 
 controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
@@ -58,7 +58,6 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
 
 
     event pong.arrived():
-        system.print("pong arrived")
         pongrec = self.record
         refrec = ref.get(0)
         rec_ok : bool = True
@@ -70,14 +69,14 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
             #system.print("RX: " + (str)self.record.timestamp)
-            system.print("RT: " + (str)t_now)
-            if self.record.value < 1000:
+            #system.print("RT: " + (str)t_now)
+            if self.record.value < 1001:
                 pong.delete(self.record)
                 refrec.value += 1
                 ref.save(refrec)
                 pingrec = ping2.create()
                 pingrec.value = refrec.value
-                pingrec.timestamp = time.getNow()
+                pingrec.timestamp = t_now
                 ping2.save(pingrec)
 
 
