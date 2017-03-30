@@ -130,7 +130,7 @@ public class LocalModelOperationAnalysis {
             } else if (instr instanceof TArrayStore) {
                 meetOperation(((TArrayStore) instr).index, Operation.ANY);
                 meetOperation(((TArrayStore) instr).value, Operation.MOVE);
-                meetOperation(((TArrayStore) instr).object, Operation.INDEX_LOAD);
+                meetOperation(((TArrayStore) instr).object, Operation.INDEX_STORE);
             } else if (instr instanceof TFieldLoad) {
                 if (!(((TFieldLoad) instr).compoundType instanceof ModelType.RecordType))
                     meetOperation(((TFieldLoad) instr).source, Operation.INDEX_LOAD);
