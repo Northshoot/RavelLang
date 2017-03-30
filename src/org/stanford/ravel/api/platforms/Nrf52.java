@@ -44,7 +44,7 @@ public class Nrf52 extends BaseCPlatform {
         List<FileObject> all_files = new ArrayList<>(super.createBuildSystem(s,files, NrfPlatformOptions.getInstance(), make_addons));
 
         all_files.add(makeLinkerScript(tmpl_extra));
-        all_files.add(makeConfigFile(tmpl_extra1, build_nrf_config_file(s)));
+        //all_files.add(makeConfigFile(tmpl_extra1, build_nrf_config_file(s)));
 
         return all_files;
     }

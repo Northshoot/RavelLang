@@ -31,13 +31,13 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
 
 <interface.controllerList:define_set_controller_method(name); separator="\n">
 
-uint32_t ravel_generated_<name; format="function">_get_now()
+uint32_t ravel_generated_<name; format="function">_get_now(<name> *self)
 {
     uint32_t now = counter_get();
     return now;
 }
 
-uint32_t ravel_generated_<name; format="function">_get_ms()
+uint32_t ravel_generated_<name; format="function">_get_ms(<name> *self)
 {
     return counter_ms();
 }
@@ -60,9 +60,9 @@ typedef struct s_<name> {
 void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
-uint32_t ravel_generated_<name; format="function">_get_now();
+uint32_t ravel_generated_<name; format="function">_get_now(<name> *self);
 
-uint32_t ravel_generated_<name; format="function">_get_ms();
+uint32_t ravel_generated_<name; format="function">_get_ms(<name> *self);
 <interface.controllerList:declare_set_controller_method(name); separator="\n">
 
 <end_extern_c()>

@@ -9,7 +9,7 @@
 
 static void *handlers[MAX_HANDLERS];
 
-ble_services_uuids_t m_ble_uuids;
+static ble_services_uuids_t m_ble_uuids;
 
 static uint8_t m_current_handler = 0;
 
@@ -49,7 +49,7 @@ void set_adv_uuid(ble_services_uuids_t * p_adv_uuids)
     //number of current handlers
     NRF_LOG_DEBUG("num handlers %u\r\n", m_current_handler);
     m_ble_uuids.m_ble_services_cnt = m_current_handler;
-    p_adv_uuids = &m_ble_uuids;
+    *p_adv_uuids = m_ble_uuids;
 
 }
 

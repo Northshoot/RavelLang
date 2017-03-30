@@ -2,8 +2,7 @@
 #include "boards.h"
 #include "nrf_drv_gpiote.h"
 #include "app_error.h"
-//#include "app_timer.h"
-#include "app_timer_appsh.h"
+#include "app_timer.h"
 
 #include "app_scheduler.h"
 #include "nordic_common.h"
@@ -49,7 +48,8 @@ ravel_system_timer_handler(void *context)
 RAVEL_DRIVER_ERROR init_timer_module()
 {
     uint32_t err_code=0;
-    APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+    err_code = app_timer_init();
+    APP_ERROR_CHECK(err_code);
     err_code = app_timer_create(&m_ravel_system_timer_id,
                                 APP_TIMER_MODE_SINGLE_SHOT,
                                 ravel_system_timer_handler);
@@ -175,7 +175,7 @@ start_timer(DriverTimer *timer, uint32_t t0, uint32_t time)
     uint32_t err_code;
     timer->__is_running = true;
     timer->t0 = t0;
-    timer->dt = APP_TIMER_TICKS(time, APP_TIMER_PRESCALER);
+    timer->dt = APP_TIMER_TICKS(time);
     err_code = app_sched_event_put(NULL, 0,update_timers_state);
     APP_ERROR_CHECK(err_code);
     return SUCCESS;

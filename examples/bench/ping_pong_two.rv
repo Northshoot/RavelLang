@@ -47,6 +47,7 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
+        system.print("Time :" + (str)pingrec.timestamp)
         pingrec.filler[0] = 1
         pingrec.filler[1] = 1
         pingrec.filler[2] = 1
@@ -57,6 +58,7 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
 
 
     event pong.arrived():
+        system.print("pong arrived")
         pongrec = self.record
         refrec = ref.get(0)
         rec_ok : bool = True
@@ -67,6 +69,7 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
 
         if rec_ok:
             t_now = time.getNow() - self.record.timestamp
+            #system.print("RX: " + (str)self.record.timestamp)
             system.print("RT: " + (str)t_now)
             if self.record.value < 1000:
                 pong.delete(self.record)
@@ -90,12 +93,8 @@ controller PongController(ping2 : Ping, pong : Pong):
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
-        pongrec.filler[0] = 1
-        pongrec.filler[1] = 1
-        pongrec.filler[2] = 1
-        pongrec.filler[3] = 1
-        pongrec.filler[4] = 1
-        pongrec.filler[5] = 1
+        #pongrec.filler[0] = 1
+        #pongrec.filler[1] = 1
         system.print("RX: " + (str)pingrec.timestamp)
         system.print("Got: " + (str)pingrec.value)
 

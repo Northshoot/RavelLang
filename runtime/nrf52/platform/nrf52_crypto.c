@@ -17,8 +17,10 @@
 #include "nrf_drv_rng.h"
 #include <sha256.h>
 
+//#include "external/tiny-AES128/aes.c"
+
 #define NRF_LOG_MODULE_NAME "CRYPT"
-#define NRF_LOG_LEVEL 4
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -43,7 +45,7 @@ hmac_sha256(uint8_t *data, size_t length, const uint8_t *key, uint8_t *output, s
     uint8_t sha256_output[SHA256_OUTPUT_SIZE];
     size_t i;
     sha256_context_t inner_hash, outer_hash;
-
+    NRF_LOG_HEXDUMP_DEBUG(data, length);
     sha256_init(&inner_hash);
     sha256_init(&outer_hash);
 
@@ -61,6 +63,8 @@ hmac_sha256(uint8_t *data, size_t length, const uint8_t *key, uint8_t *output, s
     sha256_final (&outer_hash, sha256_output, 0);
 
     memcpy(output, sha256_output, output_length);
+    NRF_LOG_DEBUG("HMAC data_length %u MAC_l %u\r\n", length, output_length);
+    NRF_LOG_HEXDUMP_DEBUG(sha256_output, output_length);
 }
 
 static bool
@@ -105,7 +109,7 @@ static void AES_encrypt(uint8_t *in, uint8_t *out, const uint8_t* aes_key) {
     /* do the actual encryption */
 	err = sd_ecb_block_encrypt(&datain);
 	if(err != NRF_SUCCESS)
-	    NRF_LOG_DEBUG("Error encrypting");
+	    NRF_LOG_DEBUG("Error encrypting\r\n");
 
     /* read the ciphertext */
 	memcpy(out, datain.ciphertext, CIPHER_BLOCK_SIZE);
@@ -113,7 +117,7 @@ static void AES_encrypt(uint8_t *in, uint8_t *out, const uint8_t* aes_key) {
 
 static void increment_iv(uint8_t *iv)
 {
-    size_t n = FULL_IV_SIZE - 1;
+    int n = FULL_IV_SIZE - 1;
     while ((n >= 0) && (++iv[n] == 0)) {
         n--;
     }
@@ -134,6 +138,7 @@ counter_mode(uint8_t *data, size_t length, const uint8_t *key)
 
     while (done < length) {
         AES_encrypt(iv, encrypted, key);
+        //AES128_ECB_encrypt(iv, key, encrypted);
         if (length - done >= CIPHER_BLOCK_SIZE) {
             for (i = 0; i < CIPHER_BLOCK_SIZE; i++)
                 data[IV_SIZE + done + i] ^= encrypted[i];

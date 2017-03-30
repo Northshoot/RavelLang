@@ -100,7 +100,7 @@ public class RavelBleService extends Service {
                 //Driver creates new endpoint
                 broadcastUpdate(BleDefines.ACTION_GATT_CONNECTED, gatt.getDevice().getAddress());
 
-                Log.i(TAG, "Connected to GATT server.");
+                //Log.d(TAG, "Connected to GATT server. " + gatt.requestMtu(20));
                 //Scan for services
                 if ( gatt.discoverServices() ) {
                     Log.i(TAG, "Service Discovery started.");
@@ -299,7 +299,7 @@ public class RavelBleService extends Service {
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
+                Log.w(TAG, "onMtuChanged error status: " + status + " mtu " + mtu );
             } else {
                 Log.w(TAG, "onMtuChanged error status: " + status);
             }

@@ -294,7 +294,7 @@ static void ble_rad_on_ble_evt(ble_rad_t * p_rad, ble_evt_t * p_ble_evt)
         case BLE_GATTS_EVT_WRITE:
             on_write(p_rad, p_ble_evt);
             break;
-        case BLE_EVT_TX_COMPLETE:
+        case BLE_GATTS_EVT_HVN_TX_COMPLETE:
             NRF_LOG_DEBUG("TX_COMPLETE \r\n");
             CALL_UP_SEND_DONE(p_rad);
 //            err_code = app_sched_event_put(NULL, 0, update_timers_state);
@@ -320,6 +320,7 @@ static uint32_t ble_rad_init(ble_rad_t * p_rad)
     /**@snippet [Adding proprietary Service to S110 SoftDevice] */
     // Add a custom base UUID.
     err_code = sd_ble_uuid_vs_add(&rad_base_uuid, &p_rad->uuid_type);
+    NRF_LOG_DEBUG("sd_ble_uuid_vs_add %d\r\n", err_code);
     VERIFY_SUCCESS(err_code);
 
     ble_uuid.type = p_rad->uuid_type;
@@ -329,17 +330,18 @@ static uint32_t ble_rad_init(ble_rad_t * p_rad)
     err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY,
                                         &ble_uuid,
                                         &p_rad->service_handle);
+    NRF_LOG_DEBUG("sd_ble_gatts_service_add %d\r\n", err_code);
     /**@snippet [Adding proprietary Service to S110 SoftDevice] */
     VERIFY_SUCCESS(err_code);
 
     // Add the RX Characteristic.
     err_code = rx_char_add(p_rad);
+    NRF_LOG_DEBUG("rx (tx add) %d\r\n", err_code);
     VERIFY_SUCCESS(err_code);
-
     // Add the TX Characteristic.
     err_code = tx_char_add(p_rad);
     VERIFY_SUCCESS(err_code);
-
+NRF_LOG_DEBUG("tx (rx add) t\r\n");
     return NRF_SUCCESS;
 }
 

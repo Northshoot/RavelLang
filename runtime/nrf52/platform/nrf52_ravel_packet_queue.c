@@ -85,4 +85,5 @@ bool dequeue_ravel_packet( RavelNetworkQueueData *p_network_q)
 
     memcpy(p_network_q, last, sizeof(RavelNetworkQueueData));
     free(last);
+    return true;
 }

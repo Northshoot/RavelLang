@@ -73,6 +73,7 @@ static void packetRxCompleted()
     NRF_LOG_DEBUG("pkt buffer %u %u %u %u %u %u\r\n", pkt_data[0], pkt_data[1], pkt_data[2], pkt_data[3], record_id,
         value);
 
+    NRF_LOG_HEXDUMP_DEBUG(pkt_data, pkt_length);
     ravel_packet_init_from_network(&pkt, pkt_data, pkt_length);
 
     free(pkt_buffer);
@@ -122,7 +123,7 @@ static void fragment_rx(data_packet_t *m_pkt, const uint8_t* pkt_data)
 void
 network_on_write(const uint8_t *data, uint16_t len)
 {
-    NRF_LOG_DEBUG("network_on_write\r\n");
+    NRF_LOG_DEBUG("network_on_write length %u\r\n", len);
     //TODO: VERIFY the dispatching to the right place
     data_packet_t m_pkt;
     memcpy(&m_pkt, data, sizeof(m_pkt));

@@ -19,6 +19,7 @@
 #include "peer_manager.h"
 #include "fds.h"
 #include "fstorage.h"
+#include "nrf_ble_gatt.h"
 
 #include "nrf_delay.h"
 #include "boards.h"
@@ -43,6 +44,7 @@
 
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
+#define CONN_CFG_TAG                     1                                          /**< A tag that refers to the BLE stack configuration we set with @ref sd_ble_cfg_set. Default tag is @ref BLE_CONN_CFG_TAG_DEFAULT. */
 
 #define DEVICE_NAME                     "RavelBLE"                               /**< Name of device. Will be included in the advertising data. */
 #define RAD_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
@@ -57,13 +59,14 @@
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(40, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
 #define SLAVE_LATENCY                   0                                           /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(300, UNIT_10_MS)             /**< Connection supervisory timeout (4 seconds), Supervision Timeout uses 10 ms units. */
-#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
-#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
+#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(1000)  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
+#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(5000) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
 
                                      /**< Structure to identify the Nordic UART Service. */
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
+static nrf_ble_gatt_t m_gatt;                             /**< Structure for gatt module*/
 
 //static ble_uuid_t                       m_adv_uuids[] ={{BLE_UUID_RAD_SERVICE, RAD_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
 static ble_services_uuids_t m_ble_all_uuids;
@@ -105,8 +108,28 @@ static void gap_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
+static void sys_evt_dispatch(uint32_t sys_evt)
+{
 
 
+    // Dispatch to the Advertising module last, since it will check if there are any
+    // pending flash operations in fstorage. Let fstorage process system events first,
+    // so that it can report correctly to the Advertising module.
+    ble_advertising_on_sys_evt(sys_evt);
+}
+
+/**@brief GATT module event handler.
+ */
+static void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
+{
+    if (p_evt->evt_id == NRF_BLE_GATT_EVT_ATT_MTU_UPDATED)
+    {
+        NRF_LOG_INFO("GATT ATT MTU on connection 0x%x changed to %d.\r\n",
+                     p_evt->conn_handle,
+                     p_evt->params.att_mtu_effective);
+    }
+
+}
 
 
 /**@brief Function for initializing services that will be used by the application.
@@ -132,9 +155,10 @@ static void services_init(NetworkClb *network)
 static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
 {
     uint32_t err_code;
-    NRF_LOG_DEBUG("conn_params_error_handler\r\n");
+    NRF_LOG_DEBUG("on_conn_params_evt %d\r\n", p_evt->evt_type);
     if (p_evt->evt_type == BLE_CONN_PARAMS_EVT_FAILED)
     {
+        NRF_LOG_DEBUG("sd_ble_gap_disconnect\r\n");
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_CONN_INTERVAL_UNACCEPTABLE);
         APP_ERROR_CHECK(err_code);
     }
@@ -191,8 +215,8 @@ void nrf_52_ble_advertising_start()
 {
     uint32_t err_code;
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+    NRF_LOG_DEBUG("nrf_52_ble_advertising_start %d\r\n", err_code);
     APP_ERROR_CHECK(err_code);
-    NRF_LOG_DEBUG("nrf_52_ble_advertising_start\r\n");
 }
 /**@brief Function for handling advertising events.
  *
@@ -304,16 +328,9 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
                 }
             }
         } break; // BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST
-
-#if (NRF_SD_BLE_API_VERSION == 3)
-        case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
-            NRF_LOG_DEBUG("BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST\r\n");
-            err_code = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle,
-                                                       NRF_BLE_MAX_MTU_SIZE);
-            APP_ERROR_CHECK(err_code);
-            break; // BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST
-#endif
-
+            case BLE_GAP_EVT_CONN_PARAM_UPDATE:
+                NRF_LOG_DEBUG("BLE_GAP_EVT_CONN_PARAM_UPDATE %u\r\n", err_code);
+            break;
         default:
             // No implementation needed.
             break;
@@ -337,9 +354,14 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     nrf52_on_ble_generic_event(p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
+    nrf_ble_gatt_on_ble_evt(&m_gatt, p_ble_evt);
 }
 
-
+static void gatt_init(void)
+{
+    ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, gatt_evt_handler);
+    APP_ERROR_CHECK(err_code);
+}
 /**@brief Function for the SoftDevice initialization.
  *
  * @details This function initializes the SoftDevice and the BLE event interrupt.
@@ -349,24 +371,71 @@ static void ble_stack_init(void)
     uint32_t err_code;
 
     NRF_LOG_DEBUG("ble_stack_init\r\n");
-    ble_enable_params_t ble_enable_params;
-    err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
-                                                    PERIPHERAL_LINK_COUNT,
-                                                    &ble_enable_params);
+//    ble_enable_params_t ble_enable_params;
+//    err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
+//                                                    PERIPHERAL_LINK_COUNT,
+//                                                    &ble_enable_params);
+//    APP_ERROR_CHECK(err_code);
+//
+//    //Check the ram settings against the used number of links
+//    CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT,PERIPHERAL_LINK_COUNT);
+//
+//    // Enable BLE stack.
+//#if (NRF_SD_BLE_API_VERSION == 3)
+//    ble_enable_params.gatt_enable_params.att_mtu = NRF_BLE_MAX_MTU_SIZE;
+//#endif
+//    err_code = softdevice_enable(&ble_enable_params);
+//    APP_ERROR_CHECK(err_code);
+//
+//    // Subscribe for BLE events.
+//    err_code = softdevice_ble_evt_handler_set(ble_evt_dispatch);
+//    APP_ERROR_CHECK(err_code);
+
+// Overwrite some of the default configurations for the BLE stack.
+uint32_t ram_start = 0;
+    err_code = softdevice_app_ram_start_get(&ram_start);
+    APP_ERROR_CHECK(err_code);
+    ble_cfg_t ble_cfg;
+
+    // Configure number of custom UUIDS.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+    ble_cfg.common_cfg.vs_uuid_cfg.vs_uuid_count = 1;
+    err_code = sd_ble_cfg_set(BLE_COMMON_CFG_VS_UUID, &ble_cfg, ram_start);
     APP_ERROR_CHECK(err_code);
 
-    //Check the ram settings against the used number of links
-    CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT,PERIPHERAL_LINK_COUNT);
+    // Configure the maximum number of connections.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+    ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = BLE_GAP_ROLE_COUNT_PERIPH_DEFAULT;
+    ble_cfg.gap_cfg.role_count_cfg.central_role_count = 0;
+    ble_cfg.gap_cfg.role_count_cfg.central_sec_count  = 0;
+    err_code = sd_ble_cfg_set(BLE_GAP_CFG_ROLE_COUNT, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
+
+    // Configure the maximum ATT MTU.
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                 = CONN_CFG_TAG;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = NRF_BLE_GATT_MAX_MTU_SIZE;
+    err_code = sd_ble_cfg_set(BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
+
+    // Configure the maximum event length.
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                     = CONN_CFG_TAG;
+    ble_cfg.conn_cfg.params.gap_conn_cfg.event_length = 320;
+    ble_cfg.conn_cfg.params.gap_conn_cfg.conn_count   = BLE_GAP_CONN_COUNT_DEFAULT;
+    err_code = sd_ble_cfg_set(BLE_CONN_CFG_GAP, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
 
     // Enable BLE stack.
-#if (NRF_SD_BLE_API_VERSION == 3)
-    ble_enable_params.gatt_enable_params.att_mtu = NRF_BLE_MAX_MTU_SIZE;
-#endif
-    err_code = softdevice_enable(&ble_enable_params);
+    err_code = softdevice_enable(&ram_start);
     APP_ERROR_CHECK(err_code);
 
-    // Subscribe for BLE events.
+    // Register with the SoftDevice handler module for BLE events.
     err_code = softdevice_ble_evt_handler_set(ble_evt_dispatch);
+    APP_ERROR_CHECK(err_code);
+
+    // Register with the SoftDevice handler module for BLE events.
+    err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -384,8 +453,8 @@ static void advertising_init(void)
     ble_advdata_t          advdata;
     ble_advdata_t          scanrsp;
     ble_adv_modes_config_t options;
-
-    NRF_LOG_DEBUG("advertising_init\r\n");
+//
+  NRF_LOG_DEBUG("advertising_init\r\n");
     memset(&advdata, 0, sizeof(advdata));
 
     advdata.name_type          = BLE_ADVDATA_FULL_NAME;
@@ -393,13 +462,7 @@ static void advertising_init(void)
     advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
 
     memset(&scanrsp, 0, sizeof(scanrsp));
-
-
-
-
     set_adv_uuid(&m_ble_all_uuids);
-
-    NRF_LOG_DEBUG("num of handlers %u\r\n", m_ble_all_uuids.m_ble_services_cnt);
 
     scanrsp.uuids_complete.uuid_cnt = m_ble_all_uuids.m_ble_services_cnt;
     scanrsp.uuids_complete.p_uuids  = m_ble_all_uuids.m_adv_uuids;
@@ -411,6 +474,8 @@ static void advertising_init(void)
 
     err_code = ble_advertising_init(&advdata, &scanrsp, &options, on_adv_evt, NULL);
     APP_ERROR_CHECK(err_code);
+
+    ble_advertising_conn_cfg_tag_set(CONN_CFG_TAG);
 }
 
 
@@ -426,6 +491,7 @@ void nrf52_r_core_ble_stack_init(NetworkClb *network)
 
     ble_stack_init();
     gap_params_init();
+    gatt_init();
    // ble_rad_init_interface();
     //TODO: set network callbacks
     services_init(network);

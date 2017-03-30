@@ -1,9 +1,18 @@
 package org.stanford.ravel.rrt;
 
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import java.security.*;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidParameterSpecException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by gcampagn on 2/28/17.
@@ -11,6 +20,7 @@ import java.security.spec.InvalidParameterSpecException;
 public class Crypto {
     private static final SecurityMechanism SECURITY_MECHANISM = new SecurityMechanism();
 
+    private final static String TAG =Crypto.class.getSimpleName();
     public static void apply_mac(byte[] data, int endofdata, int writeOffset, Key key) {
         try {
             Mac macAlgorithm = Mac.getInstance(SecurityMechanism.MAC_ALGORITHM);
@@ -35,8 +45,10 @@ public class Crypto {
                 if (mac[i] != data[macoffset + i])
                     valid = false;
             }
-            if (!valid)
+            if (!valid) {
+                System.err.println("RRT Crypto Invalid MAC " );
                 throw new SecurityException("Invalid MAC");
+            }
         } catch(NoSuchAlgorithmException|InvalidKeyException e) {
             throw new SecurityException("Failed to verify MAC", e);
         }
