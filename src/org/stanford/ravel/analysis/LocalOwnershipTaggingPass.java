@@ -304,11 +304,11 @@ public class LocalOwnershipTaggingPass {
                     }
                 }
             } else if (instr instanceof TFieldLoad) {
-                // a field load propagates the field and model tags of the source (the object from which the field
-                // is read)
+                // a field load propagates the model tags of the source (the object from which the field
+                // is read), but not the field tags
                 for (int source : instr.getSources()) {
                     tagAllModels(instr.getSink(), modelTags.get(source));
-                    tagAllFields(instr.getSink(), fieldTags.get(source));
+                    //tagAllFields(instr.getSink(), fieldTags.get(source));
                 }
 
                 // Additionally, when reading the field of a record, it creates a brand new field tag for that

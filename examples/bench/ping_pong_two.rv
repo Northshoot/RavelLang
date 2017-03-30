@@ -93,8 +93,8 @@ controller PongController(ping2 : Ping, pong : Pong):
         pongrec = pong.create()
         pongrec.value =  pingrec.value
         pongrec.timestamp =  pingrec.timestamp
-        #pongrec.filler[0] = 1
-        #pongrec.filler[1] = 1
+        pongrec.filler[0] = 1
+        pongrec.filler[1] = 1
         system.print("RX: " + (str)pingrec.timestamp)
         system.print("Got: " + (str)pingrec.value)
 
