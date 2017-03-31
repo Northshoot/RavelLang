@@ -1,4 +1,4 @@
-import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
 
 c_file(includes,name,interface) ::=<<
 <begin_source(name)>

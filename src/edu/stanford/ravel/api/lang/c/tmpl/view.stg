@@ -1,4 +1,4 @@
-import "org/stanford/ravel/api/lang/c/tmpl/common.stg"
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
 
 append_argument_decl(function) ::=<<
 <if(function.argumentSymbols)>, <function.argumentSymbols:{a|<a.type> <a.name>}; separator=", "><endif>

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static edu.stanford.ravel.compiler.ir.Registers.*;
+
 /**
  * Created by gcampagn on 1/20/17.
  */

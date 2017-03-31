@@ -1,4 +1,4 @@
-import "org/stanford/ravel/api/lang/java/tmpl/common.stg"
+import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
 
 make_insert_query(table, model) ::=<<
 "insert into <table>(<model.fields:{f|<f.name>}; separator=", ">) values (<model.fields:{f|?}; separator=", ">)"
