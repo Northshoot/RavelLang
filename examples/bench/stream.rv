@@ -46,7 +46,7 @@ controller GatewayController(data: DataMule, clock: Clock):
             t_first = clock.getNow()
             first = False
         counter = self.record.value
-        ystem.print("data arrived" + (str) counter)
+        system.print("data arrived" + (str) counter)
 
     event data.full():
         t_delta = clock.getNow() - t_first
