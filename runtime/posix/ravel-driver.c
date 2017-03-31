@@ -11,7 +11,9 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef __linux__
 #include <netinet/ip.h>
+#endif
 #include <unistd.h>
 #include <arpa/inet.h>
 

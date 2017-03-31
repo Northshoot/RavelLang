@@ -33,7 +33,7 @@ clean:
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WOLFSSL_CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Werror=implicit-function-declaration -Werror=return-type -I$(RAVEL_C_RUNTIME_DIR) -I. -MT $@ -MD -MP -MF .deps/$(notdir $@).d -c -o $@ $<
 
 libravel.a: $(OBJS)
-	$(AR) crs -o $@ $^
+	$(AR) -crs $@ $^
 
 test-crypto: test-crypto.o sha256.o libravel.a
 	gcc $(LDFLAGS) -o $@ $^ $(WOLFSSL_LIBS)

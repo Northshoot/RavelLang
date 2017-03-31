@@ -1,7 +1,8 @@
 interface Clock():
     implementation:
-        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/nrf52/clock.stg"
         #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
 
     def getNow() : int32
 
@@ -119,9 +120,9 @@ controller EavesDropController(ping : Ping, pong : Pong):
 
 space EmbeddedSpace:
     platform:
-        language = CLang
-        system = Nrf52.v1
-        #system = Posix.v2008
+        language = JLang
+        #system = Android.v19
+        system = J2SE.v18
 
     interfaces:
         clock = Clock()
@@ -136,8 +137,8 @@ space EmbeddedSpace:
 space GatewaySpace:
     platform:
         language = JLang
-        system = Android.v19
-        #system = J2SE.v18
+        #system = Android.v19
+        system = J2SE.v18
 
     models:
         ping = Ping()

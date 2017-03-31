@@ -11,6 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "array.h"
 #include "keys.h"
@@ -99,7 +100,7 @@ static inline int32_t ravel_intrinsic_endpoint_get_id(RavelEndpoint *endpoint) {
 
 static inline char * ravel_intrinsic_int_to_string(int32_t v) {
     char *buffer = malloc(11);
-    int size = snprintf(buffer, 11, "%ld", v);
+    int size = snprintf(buffer, 11, "%" PRIi32, v);
     return realloc(buffer, size+1);
 }
 

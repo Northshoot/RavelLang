@@ -26,6 +26,11 @@ extern "C" {
 #undef  HAVE_THREAD_LS
 #define HAVE_THREAD_LS
 
+#ifndef WOLFSSL_OPTIONS_IGNORE_SYS
+#undef  _THREAD_SAFE
+#define _THREAD_SAFE
+#endif
+
 #undef  TFM_TIMING_RESISTANT
 #define TFM_TIMING_RESISTANT
 
