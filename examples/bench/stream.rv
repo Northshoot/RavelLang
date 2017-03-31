@@ -2,6 +2,7 @@ interface Clock():
     implementation:
         c = "rlib/nrf52/clock.stg"
         #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
 
     def getNow() : int32
 
@@ -15,13 +16,12 @@ streaming model DataMule(size : int32):
 
     schema:
         value : int32
-        fill : int32[5]
+        fill : int32[15]
 
 
 
 controller EmbeddedController(data: DataMule, clock : Clock):
-    running = False
-    frequency = 1000
+
 
     event system.started():
         for i=0 to 100:
@@ -29,18 +29,28 @@ controller EmbeddedController(data: DataMule, clock : Clock):
             rec.value = i
             data.save(rec)
 
+
     event data.full():
         system.print("model full")
 
 
 
 
-controller GatewayController(data: DataMule):
+controller GatewayController(data: DataMule, clock: Clock):
+    t_first : int32 = 0
+    t_delta : int32 = 0
+    first : bool = True
 
     event data.arrived():
-        system.print("data arrived")
+        if first:
+            t_first = clock.getNow()
+            first = False
+        counter = self.record.value
+        ystem.print("data arrived" + (str) counter)
 
-
+    event data.full():
+        t_delta = clock.getNow() - t_first
+        system.print("RX 100pkts: " + (str)t_delta)
 
 
 
@@ -67,9 +77,12 @@ space GatewaySpace:
         #system = J2SE.v18
         
     models:
-        data = DataMule(size=50)
+        data = DataMule(size=100)
+
+    interfaces:
+            clock = Clock()
         
     controllers:
-        gctrl = GatewayController(data = models.data)
+        gctrl = GatewayController(data = models.data, clock = interfaces.clock)
 
 

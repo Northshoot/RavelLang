@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">001-RAD</string>
+    <string name="ble_not_supported">\"BLE not supported on this device\"</string>
 </resources>
