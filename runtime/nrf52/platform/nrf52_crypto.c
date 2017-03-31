@@ -12,8 +12,6 @@
 
 #include "nrf_soc.h"
 #include "nrf52_network.h"
-#include "nrf52_log.h"
-#include "nrf52_config.h"
 #include "nrf_drv_rng.h"
 #include <sha256.h>
 

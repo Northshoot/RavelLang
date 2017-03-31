@@ -15,9 +15,6 @@
 /* local includes */
 #include "platform/nrf52_ble_core.h"
 #include "platform/nrf52_network.h"
-#include "platform/nrf52_flash.h"
-#include "platform/nrf52_config.h"
-#include "platform/nrf52_log.h"
 #include "boards.h"
 #include "AppDispatcher.h"
 #include "nrf52_ravel_timer.h"
