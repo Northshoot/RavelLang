@@ -16,19 +16,24 @@ streaming model DataMule(size : int32):
 
     schema:
         value : int32
-        fill : int32[15]
+        fill : int32[58]
 
 
 
 controller EmbeddedController(data: DataMule, clock : Clock):
-
+    counter : int32 = 0
 
     event system.started():
-        for i=0 to 100:
-            rec = data.create()
-            rec.value = i
-            data.save(rec)
+        rec = data.create()
+        rec.value = counter
+        data.save(rec)
 
+    event data.departed():
+        delete(self.record)
+        counter +=1
+        rec = data.create()
+        rec.value = counter
+        data.save(rec)
 
     event data.full():
         system.print("model full")
@@ -45,12 +50,13 @@ controller GatewayController(data: DataMule, clock: Clock):
         if first:
             t_first = clock.getNow()
             first = False
+            system.print("TIME: now: " + (str) t_first)
         counter = self.record.value
         system.print("data arrived" + (str) counter)
 
     event data.full():
         t_delta = clock.getNow() - t_first
-        system.print("RX 100pkts: " + (str)t_delta)
+        system.print("TIME: RX 100 pkts: " + (str)t_delta)
 
 
 
@@ -62,7 +68,7 @@ space EmbeddedSpace:
         #system = Posix.v2008
 
     models:
-        data = DataMule(size=100)
+        data = DataMule(size=10)
 
     interfaces:
         clock = Clock()

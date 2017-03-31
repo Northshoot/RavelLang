@@ -9,7 +9,7 @@
 #include "api/intrinsics.h"
 
 #define NRF_LOG_MODULE_NAME "NET::"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -255,7 +255,7 @@ network_send_data( uint8_t * p_data, uint16_t length)
         // FIXME: can not handle more than 7 pkt due to out buffer
         //needs global buffer, that releasing the send through the sch
        uint32_t send_result = ble_rad_send_data_interface(buffer, sizeof( data_packet_t)+ravel_pkt.length);
-       NRF_LOG_DEBUG("RAW send results %u", send_result);
+       NRF_LOG_DEBUG("RAW send results %u\r\n", send_result);
        m_tx_fragment_enqueued++;
        //NRF_LOG_DEBUG("send_fragment %u [%u]\r\n", m_tx_fragment_enqueued, send_result);
         // updating

@@ -25,7 +25,7 @@
 #include "boards.h"
 
 #define NRF_LOG_MODULE_NAME "BLE"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_sdm.h"
@@ -56,9 +56,9 @@
 #define APP_TIMER_OP_QUEUE_SIZE         4                                           /**< Size of timer operation queues. */
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(7.5, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
-#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(40, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
+#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(12, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
 #define SLAVE_LATENCY                   0                                           /**< Slave latency. */
-#define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(300, UNIT_10_MS)             /**< Connection supervisory timeout (4 seconds), Supervision Timeout uses 10 ms units. */
+#define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(3000, UNIT_10_MS)             /**< Connection supervisory timeout (4 seconds), Supervision Timeout uses 10 ms units. */
 #define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(1000)  /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(5000) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
@@ -250,7 +250,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  */
 static void on_ble_evt(ble_evt_t * p_ble_evt)
 {
-    uint32_t err_code;
+    uint32_t err_code, ms;
 
     switch (p_ble_evt->header.evt_id)
     {
@@ -329,7 +329,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             }
         } break; // BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST
             case BLE_GAP_EVT_CONN_PARAM_UPDATE:
-                NRF_LOG_DEBUG("BLE_GAP_EVT_CONN_PARAM_UPDATE \r\n");
+                 ms =  p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.max_conn_interval *1.25;
+                NRF_LOG_DEBUG("BLE_GAP_EVT_CONN_PARAM_UPDATE %u \r\n", ms);
             break;
         default:
             // No implementation needed.
@@ -348,7 +349,6 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
  */
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
-    NRF_LOG_DEBUG("ble_evt_dispatch\r\n");
     ble_conn_params_on_ble_evt(p_ble_evt);
     //ble_rad_on_ble_evt(&m_rad, p_ble_evt);
     nrf52_on_ble_generic_event(p_ble_evt);
