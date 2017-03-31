@@ -10,7 +10,7 @@ echo
 echo "Building ${ex}"
 rm -fr "rout/${ex}"
 mkdir -p "rout/${ex}"
-java -cp lib/*:out org.stanford.ravel.RavelCompiler "examples/${ex}.rv" -o "rout/${ex}/" $FLAGS ${EXTRA_FLAGS}
+java -cp lib/*:out edu.stanford.ravel.RavelCompiler "examples/${ex}.rv" -o "rout/${ex}/" $FLAGS ${EXTRA_FLAGS}
 
 cd "rout/${ex}"
 
