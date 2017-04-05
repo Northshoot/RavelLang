@@ -7,7 +7,7 @@
 #include "app_scheduler.h"
 #include "nordic_common.h"
 #define NRF_LOG_MODULE_NAME "SYS_T"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_sdm.h"

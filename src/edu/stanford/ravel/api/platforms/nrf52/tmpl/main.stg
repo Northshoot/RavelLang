@@ -27,15 +27,18 @@ int main(void) {
   // Initialize.
   err_code = NRF_LOG_INIT(NULL);
   APP_ERROR_CHECK(err_code);
-  NRF_LOG_DEBUG("Main Starting: <name>\n");
+  NRF_LOG_DEBUG("Main Starting: <name>\r\n");
   NRF_LOG_FLUSH();
 
 //system flow:
-  //init dispatcher
-  ravel_generated_app_dispatcher_init(&dispatcher);
+
 
   //init driver
   ravel_nrf52_driver_init(&driver, &dispatcher.base, "<name>", <id>);
+// first system components must be innited
+//idealy the interfaces would have an option to deal with the init priorities
+    //init dispatcher
+    ravel_generated_app_dispatcher_init(&dispatcher);
 
   //set driver
   ravel_generated_app_dispatcher_set_driver(&dispatcher, &driver.base);

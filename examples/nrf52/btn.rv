@@ -1,0 +1,40 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
+
+    def getNow() : int32
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+
+
+
+controller ButtonController(btn : Button, clk: Clock):
+
+    event system.started():
+        system.print("system started")
+
+
+    event btn.pressed(id  :int32):
+        system.print("Pressed: " + (str)(id+1) + " now: " + (str) clk.getNow())
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn, clk = interfaces.clk)

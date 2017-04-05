@@ -1,0 +1,113 @@
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+<begin_source(name)>
+
+#define NRF_LOG_MODULE_NAME "BTN:::"
+#define NRF_LOG_LEVEL 4
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "bsp.h"
+#include "app_button.h"
+#include "bsp_btn_ble.h"
+
+
+<includes:do_include(); separator="\n">
+
+
+static Button *btn_self;
+static void bsp_event_handler(bsp_event_t event)
+{
+    switch (event)
+    {
+        case BSP_EVENT_KEY_0:
+            ravel_generated_<name; format="function">_pressed(1);
+            break; // BSP_EVENT_KEY_0
+
+        case BSP_EVENT_KEY_1:
+            ravel_generated_<name; format="function">_pressed(2);
+            break; // BSP_EVENT_KEY_1
+
+        case BSP_EVENT_KEY_2:
+            ravel_generated_<name; format="function">_pressed(3);
+            break; // BSP_EVENT_KEY_2
+        case BSP_EVENT_KEY_3:
+            ravel_generated_<name; format="function">_pressed(4);
+            break; // BSP_EVENT_KEY_2
+
+        default:
+            // No implementation needed.
+            break;
+    }
+}
+
+static void buttons_init()
+{
+    ret_code_t err_code;
+
+    err_code = bsp_init( BSP_INIT_LED | BSP_INIT_BUTTONS, bsp_event_handler);
+    NRF_LOG_INFO("INIT! %u\r\n", err_code);
+    APP_ERROR_CHECK(err_code);
+
+}
+
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+
+    btn_self = self;
+    self->__id = instance_id;
+    buttons_init();
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+}
+
+void
+ravel_generated_<name; format="function">_pressed(int32_t btn)
+{
+        <name> *self = btn_self;
+        <dispatch_event(interface, "pressed",["btn"])>
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdint.h>
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_pressed(int32_t btn);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

@@ -33,7 +33,7 @@
 #include "temp_keys.h"
 
 #define NRF_LOG_MODULE_NAME "DRV"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
@@ -154,9 +154,16 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
 
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+
+    init_timer_module();
+    // Main loop.
+
+
     self->base.dispatcher = dispatcher;
     self->network = network;
-    init_timer_module();
+             nrf52_network_init(&self->network);
+             ble_rad_init_handler();
+             nrf52_r_core_ble_stack_init(&self->network);
 
     ravel_key_provider_init(&self->base.key_provider);
 
@@ -166,6 +173,7 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     ret =ravel_key_provider_add_key(&self->base.key_provider, 1, 64, key_1);
     ret =ravel_key_provider_add_key(&self->base.key_provider, 2, 16, key_2);
     ret =ravel_key_provider_add_key(&self->base.key_provider, 3, 64, key_3);
+
 }
 
 
@@ -181,10 +189,7 @@ ravel_nrf52_driver_finalize(RavelNrf52Driver *self)
 void
 ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
-    // Main loop.
-     nrf52_network_init(&self->network);
-     ble_rad_init_handler();
-     nrf52_r_core_ble_stack_init(&self->network);
+
 
     //START BLE
     nrf52_r_core_ble_start();
