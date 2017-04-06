@@ -28,6 +28,21 @@ static inline int32_t ravel_intrinsic_array_length(void *array) {
     return (int32_t)ravel_array_length(array);
 }
 
+static inline bool ravel_intrinsic_extract_bool(uint8_t *array, int32_t pos) {
+    uint8_t boolean_value = array[pos];
+    if(boolean_value)
+        return true;
+    else
+        return false;
+}
+
+
+static inline double ravel_intrinsic_extract_double(uint8_t *array, int32_t pos) {
+    double ret;
+    memcpy(&ret, &array[pos], sizeof(double));
+
+    return ret;
+}
 static inline int32_t ravel_intrinsic_extract_uint16(uint8_t *array, int32_t pos) {
     // Little endian!!
 

@@ -1,0 +1,76 @@
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+<begin_source(name)>
+
+#include \<stdbool.h>
+#include \<stdint.h>
+#include \<stdio.h>
+
+#define NRF_LOG_MODULE_NAME "VOLT:::"
+#define NRF_LOG_LEVEL 4
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+
+
+<includes:do_include(); separator="\n">
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+
+
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+}
+
+int32_t
+ravel_generated_<name; format="function">_read()
+{
+    //TODO: actual voltage implementation
+    return 3;
+
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdint.h>
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+int32_t ravel_generated_<name; format="function">_read();
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

@@ -49,9 +49,10 @@ interface VolcanoAlgorithm():
 
 interface VibrationSensor():
     implementation:
-        #c = "rlib/nrf52/sensor.stg"
-    
-    event detected(val : double)
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
 
 interface Timer():
     implementation:
@@ -94,7 +95,7 @@ controller Node(vibration_model : Vibration,
     event system.started():
         last = (int32)p_clock.getNow()
 
-    event vib_src.detected(val : double):
+    event vib_src.pressed(val : int32):
         now = p_clock.getNow()
         t_diff = (int32)now - last
         last = (int32)now
@@ -104,7 +105,7 @@ controller Node(vibration_model : Vibration,
             if vib_threshold < val:
                 rec = vibration_model.create()
                 rec.time = now
-                rec.vibration = val
+                rec.vibration = val+0.123
                 vibration_model.save(rec)
 
     event vibration_model.full():

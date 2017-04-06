@@ -1,0 +1,39 @@
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+
+<includes:do_include(); separator="\n">
+
+int32_t ravel_generated_<name; format="function">_select(void *data);
+int32_t ravel_generated_<name; format="function">_compute_pphase(void *data);
+int32_t ravel_generated_<name; format="function">_sparsity(void *data);
+int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data);
+
+
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct {
+    int dummy;
+} <name>;
+
+static inline void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>) {}
+static inline void ravel_generated_<name; format="function">_finalize(<name> *self) {}
+
+
+int32_t ravel_generated_<name; format="function">_select(void *data);
+int32_t ravel_generated_<name; format="function">_compute_pphase(void *data);
+int32_t ravel_generated_<name; format="function">_sparsity(void *data);
+int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data);
+
+<end_extern_c()>
+<end_header("", name)>
+>>

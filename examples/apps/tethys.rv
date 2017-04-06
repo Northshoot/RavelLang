@@ -8,7 +8,7 @@ interface Clock():
 
 replicated model AppDevice(size : int32):
     properties:
-        durable = True
+        durable = False
         records = size
         reliable = True
 
@@ -18,7 +18,7 @@ replicated model AppDevice(size : int32):
         hw_v : double
         sw_v : double
         first_boot : bool
-        last_reboot : timestamp
+        last_reboot : int32
         error : error_msg
 
 
@@ -31,7 +31,7 @@ streaming model BootError(size : int32):
 
     schema:
         device_id : int32
-        time : timestamp
+        time : int32
         error : error_msg
 
 
@@ -96,7 +96,7 @@ replicated model GatewayAppConfig(size : int32):
         hw_v : double
         sw_v : double
         first_boot : bool
-        last_reboot : timestamp
+        last_reboot : int32
         error : error_msg
 
 
@@ -116,7 +116,7 @@ local model Measurement(size : int32, durable : bool):
         records = size
 
     schema:
-        time : timestamp
+        time : int32
         temperature : int32
         voltage : int32
 
@@ -130,7 +130,7 @@ streaming model MeasurementPacket(num_packets : int32):
 
     schema:
         device_id : int32
-        time : timestamp[50]
+        time : int32[50]
         temperature : int32[50]
         voltage : int32[50]
 
@@ -165,15 +165,14 @@ controller GatewayController(app_config : GatewayAppConfig,
 interface TemperatureSource():
     implementation:
         #java = "rlib/java/temperature.stg"
-        c = "rlib/c/temperature.stg"
+        c = "rlib/nrf52/temperature.stg"
 
     def read(): int32
 
 interface VoltageSource():
     implementation:
-        # FIXME
         #java = "rlib/java/voltage.stg"
-        #c = "rlib/c/voltage.stg"
+        c = "rlib/nrf52/voltage.stg"
 
     def read(): int32
 
@@ -188,6 +187,7 @@ controller MeasurementController(temp : TemperatureSource,
                                  voltage : VoltageSource,
                                  timer : TimerSource,
                                  fft : FFT,
+                                 clock: Clock,
                                  measurement_model : Measurement,
                                  measurement_pkt : MeasurementPacket,
                                  adc_model : ADCModel,
@@ -215,7 +215,7 @@ controller MeasurementController(temp : TemperatureSource,
     event adc_model.full():
         rec = measurement_model.create()
         
-        rec.time = (timestamp)0
+        rec.time = clock.getNow()
         rec.voltage = 0
         rec.temperature = temp.read()
         measurement_model.save(rec)
@@ -363,6 +363,7 @@ space EmbeddedSpace:
                                                 measurement_pkt = models.measurement_packet,
                                                 adc_model = models.adc_model,
                                                 timer = interfaces.timer,
+                                                clock = interfaces.clock,
                                                 temp = interfaces.temperature,
                                                 fft = interfaces.fft,
                                                 voltage = interfaces.voltage,
