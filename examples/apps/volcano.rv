@@ -40,7 +40,7 @@ interface VolcanoAlgorithm():
         vibration = Vibration
         phase_model = PPhase
     implementation:
-        #c = "rlib/c/libvolcano.stg"
+        c = "rlib/c/libvolcano.stg"
     
     def select(phase_model : PPhase) : Endpoint
     def compute_pphase(vibration : Vibration) : int32
@@ -48,6 +48,7 @@ interface VolcanoAlgorithm():
     def compressing_sampling(vibration : Vibration) : byte[]
 
 interface VibrationSensor():
+    # we triger the sensor with a button
     implementation:
         c = "rlib/nrf52/buttons.stg"
 

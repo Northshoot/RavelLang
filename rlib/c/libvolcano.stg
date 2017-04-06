@@ -5,10 +5,26 @@ c_file(includes,name,interface) ::=<<
 
 <includes:do_include(); separator="\n">
 
-int32_t ravel_generated_<name; format="function">_select(void *data);
-int32_t ravel_generated_<name; format="function">_compute_pphase(void *data);
-int32_t ravel_generated_<name; format="function">_sparsity(void *data);
-int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data);
+
+
+int32_t ravel_generated_<name; format="function">_select(void *data)
+{
+    return 0;
+}
+
+int32_t ravel_generated_<name; format="function">_compute_pphase(void *data)
+{
+    return 0;
+}
+int32_t ravel_generated_<name; format="function">_sparsity(void *data)
+{
+    return 0;
+}
+
+int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data)
+{
+    return 0;
+}
 
 
 
