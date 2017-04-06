@@ -19,6 +19,8 @@ PROJ_DIR := $(NRF52_PROJECT)
 $(OUTPUT_DIRECTORY)/nrf52832_<target>.out: \
   LINKER_SCRIPT  := <linker_script>.ld
 
+default: nrf52832_<target>
+
 CFLAGS += -Wno-unused-but-set-variable
 
 include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk

@@ -25,7 +25,7 @@ c_file(includes,name,interface) ::=<<
 <includes:do_include(); separator="\n">
 
 
-static Button *btn_self;
+static <name> *p_<name>_self;
 static void bsp_event_handler(bsp_event_t event)
 {
     switch (event)
@@ -66,7 +66,7 @@ void
 ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
 {
 
-    btn_self = self;
+    p_<name>_self = self;
     self->__id = instance_id;
     buttons_init();
 }
@@ -78,7 +78,7 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
 void
 ravel_generated_<name; format="function">_pressed(int32_t btn)
 {
-        <name> *self = btn_self;
+        <name> *self = p_<name>_self;
         <dispatch_event(interface, "pressed",["btn"])>
 }
 

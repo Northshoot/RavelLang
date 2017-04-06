@@ -22,7 +22,7 @@ controller ButtonController(btn : Button, clk: Clock):
 
 
     event btn.pressed(id  :int32):
-        system.print("Pressed: " + (str)(id+1) + " now: " + (str) clk.getNow())
+        system.print("Pressed: " + (str)id + " now: " + (str) clk.getNow())
 
 
 

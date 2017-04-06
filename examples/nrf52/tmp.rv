@@ -1,0 +1,54 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
+
+    def getNow() : int32
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+
+interface TemperatureSource():
+    implementation:
+        #java = "rlib/java/temperature.stg"
+        c = "rlib/nrf52/temperature.stg"
+
+    def read(): int32
+
+
+controller ButtonController(btn : Button, clk: Clock, tmp : TemperatureSource):
+
+    event system.started():
+        system.print("system started")
+
+
+    event btn.pressed(id  :int32):
+        if id == 1:
+            system.print("Time is: " + (str) clk.getNow())
+        elif id == 2:
+            system.print("Temp is: " + (str) tmp.read())
+        else:
+            system.print("Pressed: " + (str) id)
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+        temp = TemperatureSource()
+
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn,
+                                   clk = interfaces.clk,
+                                   tmp = interfaces.temp)

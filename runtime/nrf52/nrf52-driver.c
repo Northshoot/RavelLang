@@ -156,18 +156,17 @@ ravel_nrf52_driver_init(RavelNrf52Driver *self, RavelBaseDispatcher *dispatcher,
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 
     init_timer_module();
-    // Main loop.
-
 
     self->base.dispatcher = dispatcher;
     self->network = network;
-             nrf52_network_init(&self->network);
-             ble_rad_init_handler();
-             nrf52_r_core_ble_stack_init(&self->network);
-
+    nrf52_network_init(&self->network);
+    ble_rad_init_handler();
+    nrf52_r_core_ble_stack_init(&self->network);
+    //START BLE
+    nrf52_r_core_ble_start();
     ravel_key_provider_init(&self->base.key_provider);
 
-
+    //TODO: hardcoded keys...
     bool ret = false;
     ret =ravel_key_provider_add_key(&self->base.key_provider, 0, 16, key_0);
     ret =ravel_key_provider_add_key(&self->base.key_provider, 1, 64, key_1);
@@ -191,8 +190,6 @@ ravel_nrf52__driver_main_loop(RavelNrf52Driver *self)
 {
 
 
-    //START BLE
-    nrf52_r_core_ble_start();
     NRF_LOG_INFO("LOOP\r\n");
     //
     while (true)

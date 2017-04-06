@@ -197,8 +197,7 @@ LDFLAGS += --specs=nano.specs -lc -lnosys
 
 .PHONY: $(TARGETS) default all clean help flash flash_softdevice
 
-# Default target - first one defined
-default: $(TARGET)
+
 
 # Print all targets that can be built
 help:

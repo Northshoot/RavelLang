@@ -1,3 +1,11 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
+
+    def getNow() : int32
+
 replicated model AppDevice(size : int32):
     properties:
         durable = True
@@ -50,7 +58,9 @@ interface TimerSource():
     event fired()
 
 
-controller EmBootstrapController(app_device : AppDevice, boot_error : BootError):
+controller EmBootstrapController(app_device : AppDevice,
+                                 clock: Clock,
+                                 boot_error : BootError):
     event system.started():
         rec : AppDevice.Record
         if app_device.size() == 0:
@@ -59,11 +69,11 @@ controller EmBootstrapController(app_device : AppDevice, boot_error : BootError)
             rec.hw_v = 0
             rec.sw_v = 0
             rec.first_boot = True
-            rec.last_reboot = (timestamp) 0 # FIXME
+            rec.last_reboot = clock.getNow()
         else:
             rec = app_device.first()
             rec.first_boot = False
-            rec.last_reboot = (timestamp) 0 # FIXME
+            rec.last_reboot = clock.getNow()
         app_device.save(rec, None)
 
     event app_device.save_done():
@@ -124,7 +134,10 @@ streaming model MeasurementPacket(num_packets : int32):
         temperature : int32[50]
         voltage : int32[50]
 
-controller GatewayController(app_config : GatewayAppConfig, boot_error : BootError, measurement_pkt : MeasurementPacket):
+controller GatewayController(app_config : GatewayAppConfig,
+                              clock : Clock,
+                              boot_error : BootError,
+                              measurement_pkt : MeasurementPacket):
     event system.started():
         rec : GatewayAppConfig.Record
         if app_config.size() == 0:
@@ -133,11 +146,11 @@ controller GatewayController(app_config : GatewayAppConfig, boot_error : BootErr
             rec.hw_v = 0
             rec.sw_v = 0
             rec.first_boot = True
-            rec.last_reboot = (timestamp) 0 # FIXME
+            rec.last_reboot = clock.getNow()
         else:
             rec = app_config.first()
             rec.first_boot = False
-            rec.last_reboot = (timestamp) 0 # FIXME
+            rec.last_reboot = clock.getNow()
         app_config.save(rec, None)
             
     event boot_error.save_done():
@@ -151,9 +164,8 @@ controller GatewayController(app_config : GatewayAppConfig, boot_error : BootErr
 
 interface TemperatureSource():
     implementation:
-        # FIXME
         #java = "rlib/java/temperature.stg"
-        #c = "rlib/c/temperature.stg"
+        c = "rlib/c/temperature.stg"
 
     def read(): int32
 
@@ -203,8 +215,8 @@ controller MeasurementController(temp : TemperatureSource,
     event adc_model.full():
         rec = measurement_model.create()
         
-        rec.time = (timestamp)0 # FIXME
-        rec.voltage = 0 # FIXME
+        rec.time = (timestamp)0
+        rec.voltage = 0
         rec.temperature = temp.read()
         measurement_model.save(rec)
         adc_model.clear()
@@ -341,9 +353,12 @@ space EmbeddedSpace:
         temperature = TemperatureSource()
         voltage = VoltageSource()
         fft = FFT()
+        clock = Clock()
 
     controllers:
-        boot_ctr = EmBootstrapController(boot_error = models.boot_error, app_device = models.device)
+        boot_ctr = EmBootstrapController(boot_error = models.boot_error,
+                                         clock = interfaces.clock,
+                                         app_device = models.device)
         measurement_ctr = MeasurementController(measurement_model = models.measurement,
                                                 measurement_pkt = models.measurement_packet,
                                                 adc_model = models.adc_model,
@@ -367,8 +382,12 @@ space GatewaySpace:
         boot_error = BootError(size=100)
         measurement_packet = MeasurementPacket(num_packets=100)
 
+    interfaces:
+        clock = Clock()
+
     controllers:
         gateway = GatewayController(app_config = models.config,
+                                    clock = interfaces.clock,
                                     boot_error = models.boot_error,
                                     measurement_pkt = models.measurement_packet)
         packet_counter = PacketCounter(number_packets = models.number_packets,
