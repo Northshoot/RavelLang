@@ -2,6 +2,7 @@ package org.stanford.ravel.rrt;
 
 import org.stanford.ravel.rrt.model.ModelCommandAPI;
 import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
 import java.util.Date;
@@ -15,6 +16,7 @@ public class Context<RecordType extends ModelRecord> {
     // These fields are accessed directly by Ravel-generated controller code
     // so they must not be renamed
     public final RecordType record;
+    public Endpoint endpoint;
     public final Error error;
     public final ModelCommandAPI model;
 
@@ -33,6 +35,14 @@ public class Context<RecordType extends ModelRecord> {
         this.model = model;
         this.record = record;
         this.error = error;
+    }
+
+    public Context(ModelCommandAPI<RecordType> model, RecordType record, Error error, Endpoint endpoint) {
+        createTime = new Date();
+        this.model = model;
+        this.record = record;
+        this.error = error;
+        this.endpoint = endpoint;
     }
 
     public Context(ModelCommandAPI<RecordType> model, Error error) {

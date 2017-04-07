@@ -6,8 +6,11 @@
       <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.13.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/java-uuid-generator-3.1.4.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/java-uuid-generator-3.1.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.13.jar!/" />
     </CLASSES>
     <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/java-uuid-generator-3.1.4-javadoc.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/java-uuid-generator-3.1.4-javadoc.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/java-uuid-generator-3.1.4-javadoc.jar!/" />
     </JAVADOC>

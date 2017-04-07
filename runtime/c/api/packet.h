@@ -16,6 +16,7 @@ typedef struct {
 
     bool is_ack;
     bool is_save_done;
+    bool is_delete;
 
     uint8_t *packet_data;
     uint8_t *record_data;
@@ -26,6 +27,7 @@ typedef struct {
 void ravel_packet_init_empty (RavelPacket *self, size_t record_size, uint8_t model_id, uint16_t record_id);
 void ravel_packet_init_ack (RavelPacket *self, uint8_t model_id, uint16_t record_id);
 void ravel_packet_init_save_done (RavelPacket *self, uint8_t model_id, uint16_t record_id);
+void ravel_packet_init_delete (RavelPacket *self, uint8_t model_id, uint16_t record_id);
 
 void ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length);
 void ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length);

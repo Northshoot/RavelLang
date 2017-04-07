@@ -18,6 +18,7 @@
 
 #define FLAG_ACK 1
 #define FLAG_SAVE_DONE 4
+#define FLAG_DELETE 8
 
 #define MIN_LENGTH RESERVED
 
@@ -82,6 +83,7 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
     self->record_id = ravel_intrinsic_extract_uint16(self->record_data, 1);
     self->is_ack = false;
     self->is_save_done = false;
+    self->is_delete = false;
 }
 
 void
@@ -99,6 +101,7 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
     self->record_id = ravel_intrinsic_extract_uint16(self->record_data, 1);
     self->is_ack = self->packet_data[FLAGS] & FLAG_ACK;
     self->is_save_done = self->packet_data[FLAGS] & FLAG_SAVE_DONE;
+    self->is_delete = self->packet_data[FLAGS] & FLAG_DELETE;
 
     assert (!(self->is_ack && self->is_save_done));
 }
@@ -122,6 +125,7 @@ ravel_packet_init_control (RavelPacket *self, uint8_t model_id, uint16_t record_
     self->record_id = record_id;
     self->is_ack = flags & FLAG_ACK;
     self->is_save_done = flags & FLAG_SAVE_DONE;
+    self->is_delete = flags & FLAG_DELETE;
 }
 
 void
@@ -134,6 +138,12 @@ void
 ravel_packet_init_save_done (RavelPacket *self, uint8_t model_id, uint16_t record_id)
 {
     ravel_packet_init_control (self, model_id, record_id, FLAG_SAVE_DONE);
+}
+
+void
+ravel_packet_init_delete (RavelPacket *self, uint8_t model_id, uint16_t record_id)
+{
+    ravel_packet_init_control (self, model_id, record_id, FLAG_DELETE);
 }
 
 void

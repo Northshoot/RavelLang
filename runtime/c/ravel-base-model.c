@@ -64,6 +64,7 @@ static inline void *record_at(RavelBaseModel *self,
 void
 ravel_base_model_init(RavelBaseModel *self,
                       struct RavelBaseDispatcher *dispatcher,
+                      int32_t model_id,
                       size_t num_records,
                       size_t record_size,
                       bool reliable,
@@ -73,6 +74,7 @@ ravel_base_model_init(RavelBaseModel *self,
 
     self->vtable = NULL; /* will be set by the actual model */
     self->dispatcher = dispatcher;
+    self->model_id = model_id;
     self->reliable = reliable;
     self->durable = durable;
     self->record_size = record_size;
@@ -169,7 +171,7 @@ ravel_record_free(RavelBaseModel *self, void *record, bool is_in_nursery)
 
     assert (self->state[record_pos].is_allocated);
     assert (!self->state[record_pos].is_valid);
-    assert (!self->state[record_pos].in_save);
+    assert (self->state[record_pos].in_save == 0);
     assert (self->state[record_pos].in_transit == 0);
     self->state[record_pos].is_allocated = false;
     self->vtable->record_finalize(self, record);
@@ -202,9 +204,9 @@ ravel_base_model_size(RavelBaseModel *self)
 }
 
 static RavelError
-ravel_base_model_send_record_endpoint(RavelBaseModel     *self,
-                                      void               *record,
-                                      RavelEndpoint      *endpoint)
+ravel_base_model_send_record_endpoint(RavelBaseModel *self,
+                                      void           *record,
+                                      RavelEndpoint  *endpoint)
 {
     RavelPacket packet;
     uint8_t *byte_array;
@@ -244,7 +246,7 @@ out:
 }
 
 static RavelError
-ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *endpoint_names)
+ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *endpoint_names, bool mark_in_save)
 {
 
     int i, j;
@@ -271,6 +273,8 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *
 
             if (self->reliable)
                 self->state[record_pos_from_record (self, record)].expected_acks++;
+            if (mark_in_save)
+                self->state[record_pos_from_record (self, record)].in_save++;
 
             local_error = ravel_base_model_send_record_endpoint(self, record, endpoint);
             if (local_error != RAVEL_ERROR_SUCCESS)
@@ -283,12 +287,13 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *
 void
 ravel_local_model_init(RavelLocalModel *self,
                        struct RavelBaseDispatcher *dispatcher,
+                       int32_t model_id,
                        size_t num_records,
                        size_t record_size,
                        bool reliable,
                        bool durable)
 {
-    ravel_base_model_init (&self->base, dispatcher, num_records, record_size, reliable, durable);
+    ravel_base_model_init (&self->base, dispatcher, model_id, num_records, record_size, reliable, durable);
 }
 
 void
@@ -303,7 +308,7 @@ save_done_out_of_storage(void *ptr1, void *ptr2)
     RavelBaseModel *self = ptr1;
     void *record = ptr2;
     int record_pos = record_pos_from_record(self, record);
-    self->state[record_pos].in_save = false;
+    self->state[record_pos].in_save--;
 
     ravel_context_init_error (&self->current_ctx, RAVEL_ERROR_OUT_OF_STORAGE);
     self->current_ctx.record = record;
@@ -316,7 +321,7 @@ save_done_next_loop(void *ptr1, void *ptr2)
     RavelBaseModel *self = ptr1;
     void *record = ptr2;
     int record_pos = record_pos_from_record(self, record);
-    self->state[record_pos].in_save = false;
+    self->state[record_pos].in_save--;
 
     assert (self->state[record_pos].is_allocated);
     if (self->state[record_pos].is_valid) {
@@ -355,7 +360,7 @@ ravel_base_model_save(RavelBaseModel *self, void *record)
         }
     }
 
-    self->state[record_pos].in_save = true;
+    self->state[record_pos].in_save++;
     if (self->durable) {
         RavelPacket packet;
         uint8_t *data;
@@ -398,7 +403,7 @@ ravel_base_model_delete(RavelBaseModel *self, void *record)
         self->num_valid_records --;
         dl_remove(&self->valid_records, record);
 
-        if (self->state[record_pos].in_save ||
+        if (self->state[record_pos].in_save > 0 ||
             self->state[record_pos].in_transit > 0 ||
             self->state[record_pos].expected_acks > 0) {
             // we cannot delete right away
@@ -447,9 +452,9 @@ ravel_base_model_record_saved_durably(RavelBaseModel *self, RavelPacket *pkt, Ra
         return NULL;
     record = record_at(self, record_pos);
 
-    assert(self->state[record_pos].in_save);
+    assert(self->state[record_pos].in_save > 0);
     assert(self->state[record_pos].is_allocated);
-    self->state[record_pos].in_save = false;
+    self->state[record_pos].in_save--;
 
     if (self->state[record_pos].is_valid) {
         return record;
@@ -500,94 +505,6 @@ ravel_base_model_handle_record(RavelBaseModel *self, void *record, RavelPacket *
     }
 }
 
-void
-ravel_replicated_model_init(RavelReplicatedModel *self,
-                            struct RavelBaseDispatcher *dispatcher,
-                            size_t num_records,
-                            size_t record_size,
-                            bool reliable,
-                            bool durable)
-{
-    ravel_base_model_init (&self->base, dispatcher, num_records, record_size, reliable, durable);
-}
-
-void
-ravel_replicated_model_finalize(RavelReplicatedModel *self)
-{
-    ravel_base_model_finalize (&self->base);
-}
-
-Context *
-ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
-{
-    /* FIXME actually send the data around */
-
-    ravel_context_finalize(&self->base.current_ctx);
-    ravel_context_init_error(&self->base.current_ctx, RAVEL_ERROR_WRITE_ERROR);
-    return &self->base.current_ctx;
-}
-
-void
-ravel_replicated_model_endpoint_connected(RavelReplicatedModel *self, RavelEndpoint *endpoint)
-{
-    // TODO implement
-}
-
-
-void
-ravel_streaming_model_init(RavelStreamingModel *self,
-                           struct RavelBaseDispatcher *dispatcher,
-                           size_t num_records,
-                           size_t record_size,
-                           bool reliable,
-                           bool durable)
-{
-    ravel_base_model_init (&self->base, dispatcher, num_records, record_size, reliable, durable);
-}
-
-void
-ravel_streaming_model_finalize(RavelStreamingModel *self)
-{
-    ravel_base_model_finalize (&self->base);
-}
-
-Context *
-ravel_streaming_model_save(RavelStreamingModel *self, void *record)
-{
-    Context *ctx;
-
-    ctx = ravel_base_model_save(&self->base, record);
-    //ravel_system_print_number(NULL, "Record save ctx", ctx->error);
-    if (ctx->error == RAVEL_ERROR_SUCCESS) {
-        //ravel_system_print(NULL, "Record saved");
-
-        RavelError send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints);
-        int record_pos = record_pos_from_record (&self->base, record);
-
-        // clear the save flag because we won't send a save done until much later
-        self->base.state[record_pos].in_save = false;
-
-        ravel_context_finalize(&self->base.current_ctx);
-        ravel_context_init_error(&self->base.current_ctx, send_error);
-        self->base.current_ctx.record = record;
-        return &self->base.current_ctx;
-    } else {
-        // OUT_OF_STORAGE or IN_TRANSIT (= during save)
-        return ctx;
-    }
-}
-
-void
-ravel_streaming_model_delete(RavelStreamingModel *self, void *record)
-{
-    bool was_valid;
-
-    was_valid = ravel_base_model_delete(&self->base, record);
-    if (was_valid && self->base.durable) {
-        // TODO remove from durable storage
-    }
-}
-
 static RavelError
 ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const int32_t *endpoint_names, void *record)
 {
@@ -632,6 +549,322 @@ ravel_base_model_forward_packet(RavelBaseModel *self, RavelPacket *pkt, const in
         }
     }
     return error;
+}
+
+void
+ravel_replicated_model_init(RavelReplicatedModel *self,
+                            struct RavelBaseDispatcher *dispatcher,
+                            int32_t model_id,
+                            size_t num_records,
+                            size_t record_size,
+                            bool reliable,
+                            bool durable)
+{
+    ravel_base_model_init (&self->base, dispatcher, model_id, num_records, record_size, reliable, durable);
+}
+
+void
+ravel_replicated_model_finalize(RavelReplicatedModel *self)
+{
+    ravel_base_model_finalize (&self->base);
+}
+
+Context *
+ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
+{
+    Context *ctx;
+
+    ctx = ravel_base_model_save(&self->base, record);
+    if (ctx->error == RAVEL_ERROR_SUCCESS) {
+        RavelError send_error;
+        int record_pos = record_pos_from_record (&self->base, record);
+
+        // clear the save flag because we won't send a save done until much later
+        self->base.state[record_pos].in_save--;
+
+        send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints, true);
+
+        ravel_context_finalize(&self->base.current_ctx);
+        ravel_context_init_error(&self->base.current_ctx, send_error);
+        self->base.current_ctx.record = record;
+        return &self->base.current_ctx;
+    } else {
+        // OUT_OF_STORAGE or IN_TRANSIT (= during save)
+        return ctx;
+    }
+}
+
+void
+ravel_replicated_model_endpoint_connected(RavelReplicatedModel *self, RavelEndpoint *endpoint)
+{
+    // TODO implement
+}
+
+static void
+ravel_replicated_model_send_save_done(RavelReplicatedModel *self, RavelPacket *pkt, RavelEndpoint *endpoint)
+{
+    RavelPacket save_done;
+
+    ravel_packet_init_save_done (&save_done, pkt->model_id, pkt->record_id);
+    ravel_base_dispatcher_send_data (self->base.dispatcher, &save_done, endpoint);
+}
+
+void
+ravel_replicated_model_record_arrived(RavelReplicatedModel *self, RavelPacket *pkt, RavelEndpoint *endpoint)
+{
+    if (pkt->is_delete) {
+        int record_pos = find_record_with_id(&self->base, pkt->record_id);
+
+        if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
+            return;
+
+        ravel_base_model_delete (&self->base, record_at(&self->base, record_pos));
+    } else if (pkt->is_ack) {
+        int record_pos = find_record_with_id(&self->base, pkt->record_id);
+
+        if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
+            return;
+
+        if (self->base.reliable) {
+            if (ravel_base_model_handle_ack (&self->base, record_at(&self->base, record_pos), endpoint)) {
+                ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+                self->base.vtable->dispatch_departed(self, &self->base.current_ctx);
+            }
+        }
+    } else if (pkt->is_save_done) {
+        int record_pos = find_record_with_id(&self->base, pkt->record_id);
+
+        if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
+            return;
+
+        self->base.state[record_pos].in_save--;
+        if (self->base.state[record_pos].in_save == 0) {
+            ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+            self->base.vtable->dispatch_save_done(self, &self->base.current_ctx);
+        }
+    } else {
+        RavelPacket ack;
+        int record_pos;
+        void *record;
+        Context *ctx;
+        bool was_created;
+
+        // send the ack first
+        if (self->base.reliable) {
+            ravel_packet_init_ack(&ack, pkt->model_id, pkt->record_id);
+            ravel_base_dispatcher_send_data(self->base.dispatcher, &ack, endpoint);
+        }
+
+        record_pos = find_record_with_id(&self->base, pkt->record_id);
+        if (record_pos >= 0 && self->base.state[record_pos].is_allocated) {
+            record = record_at (&self->base, record_pos);
+            was_created = false;
+        } else {
+            record = ravel_base_model_allocate (&self->base);
+            was_created = true;
+        }
+
+        if (record == NULL) {
+            // uh oh!
+            // FIXME what to do here?
+            return;
+        }
+
+        record_pos = record_pos_from_record(&self->base, record);
+        ctx = ravel_base_model_handle_record(&self->base, record, pkt, endpoint);
+        if (ctx->error == RAVEL_ERROR_SUCCESS) {
+            // clear the save flag
+            self->base.state[record_pos].in_save--;
+            ravel_replicated_model_send_save_done(self, pkt, endpoint);
+
+            self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
+        } else if (ctx->error == RAVEL_ERROR_IN_TRANSIT) {
+            // saving, wait until done saving to tell the app
+            assert (self->base.state[record_pos].is_valid);
+            self->base.state[record_pos].is_arrived = true;
+            self->base.state[record_pos].arrived_from = endpoint;
+        } else {
+            // security error or some other error, free the allocation
+            if (was_created) {
+                assert (!self->base.state[record_pos].is_valid);
+                ravel_record_free(&self->base, record, true);
+            }
+        }
+    }
+}
+
+void
+ravel_replicated_model_record_departed(RavelReplicatedModel *self, RavelPacket *pkt, RavelEndpoint *endpoint)
+{
+    int record_pos;
+    void *record;
+
+    if (pkt->is_ack || pkt->is_save_done || pkt->is_delete) {
+        return;
+    }
+
+    //ravel_system_print_number(NULL, "record departed", pkt->record_id);
+
+    record_pos = find_record_with_id(&self->base, pkt->record_id);
+    // we cannot free stuff that is in transit
+    assert (record_pos >= 0);
+    assert (self->base.state[record_pos].is_allocated);
+
+    record = record_at(&self->base, record_pos);
+    self->base.state[record_pos].in_transit--;
+    if (self->base.state[record_pos].in_transit == 0) {
+        if (!self->base.state[record_pos].is_valid) {
+            // record was deleted after sending
+            ravel_record_free(&self->base, record, false);
+        } else {
+            self->base.state[record_pos].is_transmit_failed = false;
+
+            if (self->base.reliable) {
+                // do nothing and wait for the acks
+            } else {
+                ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+                self->base.vtable->dispatch_departed(self, &self->base.current_ctx);
+            }
+        }
+    }
+}
+void
+ravel_replicated_model_record_failed_to_send(RavelReplicatedModel *self,
+                                             RavelPacket          *pkt,
+                                             RavelEndpoint        *endpoint,
+                                             RavelError            error)
+{
+    int record_pos;
+    void *record;
+    RavelPacket copy;
+
+    if (pkt->is_ack || pkt->is_save_done || pkt->is_delete) {
+        // unconditionally try to retransmit
+        ravel_packet_init_copy(&copy, pkt);
+        ravel_base_dispatcher_send_data(self->base.dispatcher, &copy, endpoint);
+        return;
+    }
+
+    //ravel_system_print_number(NULL, "record failed to send", pkt->record_id);
+
+    record_pos = find_record_with_id(&self->base, pkt->record_id);
+    // we cannot free stuff that is in transit
+    assert (record_pos >= 0);
+    assert (self->base.state[record_pos].is_allocated);
+
+    record = record_at(&self->base, record_pos);
+    self->base.state[record_pos].in_transit--;
+    if (self->base.state[record_pos].in_transit == 0 && !self->base.state[record_pos].is_valid) {
+        // if the record was deleted after sending, no matter what we're
+        // not going to try resending
+        ravel_record_free(&self->base, record, false);
+    } else {
+        // balance the retransmission increasing the counter
+        if (self->base.reliable)
+            self->base.state[record_pos].expected_acks--;
+
+        // try to retransmit
+        ravel_packet_init_copy(&copy, pkt);
+        ravel_base_dispatcher_send_data(self->base.dispatcher, &copy, endpoint);
+    }
+}
+
+void
+ravel_replicated_model_record_saved_durably(RavelReplicatedModel *self, RavelPacket *pkt, RavelError error)
+{
+    void *record;
+    int record_pos;
+
+    record = ravel_base_model_record_saved_durably (&self->base, pkt, error);
+    if (record == NULL)
+        return;
+
+    record_pos = record_pos_from_record (&self->base, record);
+    if (self->base.state[record_pos].is_arrived) {
+        ravel_replicated_model_send_save_done (self, pkt, self->base.state[record_pos].arrived_from);
+        self->base.state[record_pos].is_arrived = false;
+
+        ravel_context_init_ok (&self->base.current_ctx, record);
+        self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
+    } else {
+        ravel_base_model_send_record(&self->base, record, self->sink_endpoints, true);
+        // ignore errors
+        // if we're reliable, we'll retry with a timeout
+    }
+}
+
+void
+ravel_replicated_model_delete(RavelReplicatedModel *self, void *record)
+{
+    bool was_valid;
+
+    was_valid = ravel_base_model_delete(&self->base, record);
+    if (was_valid) {
+        RavelPacket delete;
+
+        if (self->base.durable) {
+            // TODO remove from durable storage
+        }
+
+        ravel_packet_init_delete (&delete, self->base.model_id, record_id_from_record (record));
+        ravel_base_model_forward_packet (&self->base, &delete, self->sink_endpoints, NULL);
+    }
+}
+
+
+void
+ravel_streaming_model_init(RavelStreamingModel *self,
+                           struct RavelBaseDispatcher *dispatcher,
+                           int32_t model_id,
+                           size_t num_records,
+                           size_t record_size,
+                           bool reliable,
+                           bool durable)
+{
+    ravel_base_model_init (&self->base, dispatcher, model_id, num_records, record_size, reliable, durable);
+}
+
+void
+ravel_streaming_model_finalize(RavelStreamingModel *self)
+{
+    ravel_base_model_finalize (&self->base);
+}
+
+Context *
+ravel_streaming_model_save(RavelStreamingModel *self, void *record)
+{
+    Context *ctx;
+
+    ctx = ravel_base_model_save(&self->base, record);
+    //ravel_system_print_number(NULL, "Record save ctx", ctx->error);
+    if (ctx->error == RAVEL_ERROR_SUCCESS) {
+        //ravel_system_print(NULL, "Record saved");
+
+        RavelError send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints, false);
+        int record_pos = record_pos_from_record (&self->base, record);
+
+        // clear the save flag because we won't send a save done until much later
+        self->base.state[record_pos].in_save--;
+
+        ravel_context_finalize(&self->base.current_ctx);
+        ravel_context_init_error(&self->base.current_ctx, send_error);
+        self->base.current_ctx.record = record;
+        return &self->base.current_ctx;
+    } else {
+        // OUT_OF_STORAGE or IN_TRANSIT (= during save)
+        return ctx;
+    }
+}
+
+void
+ravel_streaming_model_delete(RavelStreamingModel *self, void *record)
+{
+    bool was_valid;
+
+    was_valid = ravel_base_model_delete(&self->base, record);
+    if (was_valid && self->base.durable) {
+        // TODO remove from durable storage
+    }
 }
 
 static RavelError
@@ -679,7 +912,7 @@ ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, RavelPacke
 
         ravel_streaming_model_forward(self, pkt, record);
     } else {
-        ravel_base_model_send_record(&self->base, record, self->sink_endpoints);
+        ravel_base_model_send_record(&self->base, record, self->sink_endpoints, false);
         // ignore errors
         // if we're reliable, we'll retry with a timeout
     }
@@ -688,7 +921,9 @@ ravel_streaming_model_record_saved_durably(RavelStreamingModel *self, RavelPacke
 void
 ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt, RavelEndpoint *endpoint)
 {
-    if (pkt->is_ack) {
+    if (pkt->is_delete) {
+        // spurious, do nothing
+    } else if (pkt->is_ack) {
         int record_pos = find_record_with_id(&self->base, pkt->record_id);
 
         if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
@@ -741,7 +976,7 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         ctx = ravel_base_model_handle_record(&self->base, record, pkt, endpoint);
         if (ctx->error == RAVEL_ERROR_SUCCESS) {
             // clear the save flag
-            self->base.state[record_pos].in_save = false;
+            self->base.state[record_pos].in_save--;
 
             self->base.vtable->dispatch_arrived(self, &self->base.current_ctx);
 

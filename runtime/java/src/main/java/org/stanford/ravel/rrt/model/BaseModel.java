@@ -23,6 +23,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         boolean is_valid = false;
         boolean is_arrived = false;
         boolean is_transmit_failed = false;
+        Endpoint arrived_from = null;
 
         void reset() {
             expected_acks = 0;
@@ -31,6 +32,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             is_valid = false;
             is_arrived = false;
             is_transmit_failed = false;
+            arrived_from = null;
         }
     }
 
@@ -42,10 +44,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     private final boolean mReliable;
     private final boolean mDurable;
     private final int mModelSize;
+    final int mModelId;
 
     private int mNextRecordId = 1;
 
-    BaseModel(DispatcherAPI dispatcher, int size, boolean reliable, boolean durable) {
+    BaseModel(DispatcherAPI dispatcher, int modelId, int size, boolean reliable, boolean durable) {
+        mModelId = modelId;
         mModelSize = size;
         mReliable = reliable;
         mDurable = durable;
@@ -87,15 +91,23 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         doSave(record, false);
     }
 
-    void markSaved(int recordPos) {
+    boolean markSaved(int recordPos) {
         assert state[recordPos].in_save > 0;
         state[recordPos].in_save--;
+        return state[recordPos].in_save == 0;
+    }
+    void markInSave(int recordPos) {
+        state[recordPos].in_save++;
     }
     boolean isArrived(int recordPos) {
         return state[recordPos].is_arrived;
     }
-    void markArrived(int recordPos, boolean is_arrived) {
+    Endpoint getArrivedFrom(int recordPos) {
+        return state[recordPos].arrived_from;
+    }
+    void markArrived(int recordPos, boolean is_arrived, Endpoint from) {
         state[recordPos].is_arrived = is_arrived;
+        state[recordPos].arrived_from = from;
     }
     boolean isValid(int recordPos) {
         return state[recordPos].is_valid;
@@ -233,11 +245,13 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
     }
 
-    Error sendOneRecord(int recordPos, RecordType record, Endpoint e) {
+    Error sendOneRecord(int recordPos, RecordType record, Endpoint e, boolean markAsInSave) {
         RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
 
         if (isReliable())
             state[recordPos].expected_acks ++;
+        if (markAsInSave)
+            state[recordPos].in_save ++;
 
         if (e.isConnected())
             return dispatcher.model__sendData(pkt, e);
@@ -245,7 +259,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             return Error.ENDPOINT_UNREACHABLE;
     }
 
-    Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames) {
+    Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
         Collection<Endpoint> endpoints = new ArrayList<>();
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
@@ -258,7 +272,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             try {
-                Error error2 = sendOneRecord(recordPos, record, e);
+                Error error2 = sendOneRecord(recordPos, record, e, markAsInSave);
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     state[recordPos].is_transmit_failed = true;
                 else

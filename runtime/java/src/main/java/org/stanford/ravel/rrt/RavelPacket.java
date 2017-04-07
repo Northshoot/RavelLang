@@ -17,6 +17,7 @@ public class RavelPacket {
     public static class Flags {
         public static final int FLAG_ACK = 1;
         public static final int FLAG_SAVE_DONE = 4;
+        public static final int FLAG_DELETE = 8;
     }
 
     /**
@@ -44,8 +45,6 @@ public class RavelPacket {
 //    at org.stanford.ravel.rrt.android.AndroidDriver$1.onReceive(AndroidDriver.java:115)
 
     private int flags = 0;
-    private boolean ack = false;
-    private boolean save_done = false;
 
     private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
@@ -53,8 +52,6 @@ public class RavelPacket {
             this.src = data[SRC];
             this.dst = data[DST];
             this.flags = data[FLAGS];
-            this.ack = (this.flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
-            this.save_done = (this.flags & Flags.FLAG_SAVE_DONE) == Flags.FLAG_SAVE_DONE;
 
             this.record_end = data.length;
             this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
@@ -104,6 +101,12 @@ public class RavelPacket {
         return pkt;
     }
 
+    public static RavelPacket makeDelete(int modelId, int recordId) {
+        RavelPacket pkt = new RavelPacket(modelId, recordId);
+        pkt.setDelete();
+        return pkt;
+    }
+
     // For testing only
     public static RavelPacket empty(int recordSize, int modelId, int recordId) {
         return new RavelPacket(recordSize, modelId, recordId);
@@ -115,12 +118,14 @@ public class RavelPacket {
 
     private void setAck() {
         flags |= Flags.FLAG_ACK;
-        ack = true;
     }
 
     private void setSaveDone() {
         flags |= Flags.FLAG_SAVE_DONE;
-        save_done = true;
+    }
+
+    private void setDelete() {
+        flags |= Flags.FLAG_DELETE;
     }
 
     private static int getModelIdFromRecord(byte[] data) {
@@ -170,10 +175,13 @@ public class RavelPacket {
     }
 
     public boolean isAck() {
-        return ack;
+        return (flags & Flags.FLAG_ACK) == Flags.FLAG_ACK;
     }
     public boolean isSaveDone() {
-        return save_done;
+        return (flags & Flags.FLAG_SAVE_DONE) == Flags.FLAG_SAVE_DONE;
+    }
+    public boolean isDelete() {
+        return (flags & Flags.FLAG_DELETE) == Flags.FLAG_DELETE;
     }
 
     @Override

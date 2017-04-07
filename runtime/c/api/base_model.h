@@ -36,9 +36,9 @@ typedef struct {
     // reliable models)
     int32_t expected_acks;
 
-    // true if this record is currently in use by the
+    // > 0 if this record is currently in use by the
     // storage (resp. network) subsystems
-    bool in_save;
+    int32_t in_save;
     int32_t in_transit;
 
     // true if this record was saved
@@ -51,6 +51,7 @@ typedef struct {
     // true if this record arrived and we
     // haven't told the controller yet
     bool is_arrived;
+    RavelEndpoint *arrived_from;
 
     // true if this record was sent but we never called
     // departed because we never got a successfull send_done()
@@ -94,6 +95,7 @@ typedef struct RavelBaseModel {
     DoubleLinkedList free_list;
     DoubleLinkedList nursery;
 
+    int32_t model_id;
     bool reliable;
     bool durable;
     size_t record_size;
@@ -107,7 +109,7 @@ typedef struct RavelBaseModel {
 
 #define ravel_base_model(m) (&(m)->__base.base)
 
-void ravel_base_model_init(RavelBaseModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
+void ravel_base_model_init(RavelBaseModel *self, struct RavelBaseDispatcher *dispatcher, int32_t model_id, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_base_model_finalize(RavelBaseModel *self);
 
 void ravel_base_model_reset_alloc(RavelBaseModel *self);
@@ -150,7 +152,7 @@ typedef struct {
     RavelBaseModel base;
 } RavelLocalModel;
 
-void ravel_local_model_init(RavelLocalModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
+void ravel_local_model_init(RavelLocalModel *self, struct RavelBaseDispatcher *dispatcher, int32_t model_id, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_local_model_finalize(RavelLocalModel *self);
 
 static inline void ravel_local_model_endpoint_connected(RavelLocalModel *self, RavelEndpoint   *endpoint) {}
@@ -181,7 +183,7 @@ typedef struct {
     const int32_t *source_endpoints;
 } RavelStreamingModel;
 
-void ravel_streaming_model_init(RavelStreamingModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
+void ravel_streaming_model_init(RavelStreamingModel *self, struct RavelBaseDispatcher *dispatcher, int32_t model_id, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_streaming_model_finalize(RavelStreamingModel *self);
 
 void ravel_streaming_model_endpoint_connected(RavelStreamingModel *self, RavelEndpoint *endpoint);
@@ -206,14 +208,14 @@ typedef struct {
     const int32_t *sink_endpoints;
 } RavelReplicatedModel;
 
-void ravel_replicated_model_init(RavelReplicatedModel *self, struct RavelBaseDispatcher *dispatcher, size_t num_records, size_t record_size, bool reliable, bool durable);
+void ravel_replicated_model_init(RavelReplicatedModel *self, struct RavelBaseDispatcher *dispatcher, int32_t model_id, size_t num_records, size_t record_size, bool reliable, bool durable);
 void ravel_replicated_model_finalize(RavelReplicatedModel *self);
 
 void ravel_replicated_model_endpoint_connected(RavelReplicatedModel *self, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_arrived(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_departed(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_failed_to_send(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint, RavelError error);
-void ravel_replicated_model_record_saved_durably(RavelStreamingModel *self, RavelPacket *pkt, RavelError error);
+void ravel_replicated_model_record_saved_durably(RavelReplicatedModel *self, RavelPacket *pkt, RavelError error);
 Context *ravel_replicated_model_save(RavelReplicatedModel *self, void *record);
 void ravel_replicated_model_delete(RavelReplicatedModel *self, void *record);
 

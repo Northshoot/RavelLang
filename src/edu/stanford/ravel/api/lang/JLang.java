@@ -65,6 +65,8 @@ public class JLang extends BaseLanguage {
                 }
             } else if (type instanceof ArrayType) {
                 return toNativeType(((ArrayType) type).getElementType()) + "[]";
+            } else if (type == IntrinsicTypes.ENDPOINT.getInstanceType()) {
+                return RUNTIME_PKG + ".tiers.Endpoint";
             } else if (typeIsIteratorInstance(type)) {
                 ClassType classType = ((ClassType.InstanceType)type).getClassType();
                 ModelType modelType = ((ModelType.IteratorType)classType).getOwner();

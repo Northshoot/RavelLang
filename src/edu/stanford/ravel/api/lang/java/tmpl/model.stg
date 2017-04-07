@@ -52,7 +52,7 @@ public class <name> extends <base>\<<name>.Record> {
     <model.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
 
     public <name>(AppDispatcher dispatcher<append_parameter_list(model.baseModel.parameters)>) {
-        super(dispatcher, <model.baseModel.size; format="literal">, <model.baseModel.reliable>, <model.baseModel.durable>);
+        super(dispatcher, MODEL_ID, <model.baseModel.size; format="literal">, <model.baseModel.reliable>, <model.baseModel.durable>);
     }
 
     // Setter methods for AppDispatcher
