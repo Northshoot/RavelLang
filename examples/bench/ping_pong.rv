@@ -9,7 +9,7 @@ interface Clock():
 streaming model Ping():
     properties:
         records = 5
-        flow = EmbeddedSpace -> GatewaySpace -> CloudSpace
+        flow = Embedded -> Gateway -> Cloud
     schema:
         value : int32
         timestamp : int32
@@ -25,7 +25,7 @@ local model Reference():
 streaming model Pong():
     properties:
         records = 5
-        flow = CloudSpace -> GatewaySpace -> EmbeddedSpace
+        flow = Cloud -> Gateway -> Embedded
     schema:
         value : int32
         timestamp : int32
@@ -111,14 +111,17 @@ controller EavesDropController(ping : Ping, pong : Pong):
         ping.delete(self.record)
 
     event pong.arrived():
-       system.print("pong arrived")
+        rec = self.record
+        x = rec.value
+        system.print((str)x)
+        system.print("pong arrived")
 
     event pong.departed():
         system.print("pong departed")
         pong.delete(self.record)
 
 
-space EmbeddedSpace:
+space Embedded:
     platform:
         language = JLang
         system = Android.v19
@@ -134,7 +137,7 @@ space EmbeddedSpace:
     controllers:
         ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping2 = models.ping, pong = models.pong)
 
-space GatewaySpace:
+space Gateway:
     platform:
         language = JLang
         system = Android.v19
@@ -148,7 +151,7 @@ space GatewaySpace:
         pong_cnt = EavesDropController(ping = models.ping, pong = models.pong)
 
 
-space CloudSpace:
+space Cloud:
     platform:
         language = JLang
         system = J2SE.v18

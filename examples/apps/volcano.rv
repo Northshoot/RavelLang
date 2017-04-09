@@ -48,7 +48,6 @@ interface VolcanoAlgorithm():
     def compressing_sampling(vibration : Vibration) : byte[]
 
 interface VibrationSensor():
-    # we triger the sensor with a button
     implementation:
         c = "rlib/nrf52/buttons.stg"
 

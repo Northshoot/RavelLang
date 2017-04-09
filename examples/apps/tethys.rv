@@ -238,6 +238,7 @@ controller MeasurementController(temp : TemperatureSource,
 
 
 local model NumberOfPackets():
+local model NumberOfPackets():
     properties:
         records = 1
 
