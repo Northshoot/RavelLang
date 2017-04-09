@@ -84,7 +84,7 @@ controller EmBootstrapController(app_device : AppDevice,
             boot_error.save(rec)
 
 
-replicated model GatewayAppConfig(size : int32):
+replicated model AppConfig(size : int32):
     properties:
         durable = True
         reliable = True
@@ -237,7 +237,6 @@ controller MeasurementController(temp : TemperatureSource,
             measurement_pkt.delete(self.record) 
 
 
-local model NumberOfPackets():
 local model NumberOfPackets():
     properties:
         records = 1

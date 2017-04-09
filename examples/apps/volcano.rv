@@ -45,7 +45,7 @@ interface VolcanoAlgorithm():
     def select(phase_model : PPhase) : Endpoint
     def compute_pphase(vibration : Vibration) : int32
     def sparsity(vibration : Vibration) : int32
-    def compressing_sampling(vibration : Vibration) : byte[]
+    def compressing_sampling(output : byte[], vibration : Vibration)
 
 interface VibrationSensor():
     implementation:

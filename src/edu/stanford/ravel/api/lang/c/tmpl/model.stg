@@ -104,7 +104,7 @@ static const RavelModelVTable vtable = {
 void
 ravel_generated_<model.name; format="function">_init(<model.name> *self, struct AppDispatcher *dispatcher<append_parameter_list(model.baseModel.parameters)>)
 {
-    <base; format="function">_init(&self->__base, &dispatcher->base, <model.baseModel.size>, sizeof(<model.name>_Record), <model.baseModel.reliable>, <model.baseModel.durable>);
+    <base; format="function">_init(&self->__base, &dispatcher->base, <model.baseModel.size>, <model.baseModel.id>, sizeof(<model.name>_Record), <model.baseModel.reliable>, <model.baseModel.durable>);
     ravel_base_model(self)->vtable = &vtable;
     self->dispatcher = &dispatcher->base.sys_api;
 }

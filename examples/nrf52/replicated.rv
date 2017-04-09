@@ -1,0 +1,92 @@
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        #c = "rlib/posix/clock.stg"
+        java = "rlib/java/clock.stg"
+
+    def getNow() : int32
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+
+interface TemperatureSource():
+    implementation:
+        #java = "rlib/java/temperature.stg"
+        c = "rlib/nrf52/temperature.stg"
+
+    def read(): int32
+
+replicated model Temperature():
+    properties:
+        reliable = False
+        durable = False
+    schema:
+        temperature: int32
+        timestamp : int32
+
+controller ButtonController(btn : Button, clk: Clock, tmp : TemperatureSource, tmp_model :Temperature):
+
+    event system.started():
+        system.print("system started")
+
+
+    event btn.pressed(id  :int32):
+        if id == 1:
+            system.print("Time is: " + (str) clk.getNow())
+        elif id == 2:
+            system.print("Temp is: " + (str) tmp.read())
+        elif id == 3:
+            rec = tmp_model.create()
+            rec.temperature = tmp.read()
+            rec.timestamp = clk.getNow()
+            tmp_model.save(rec, None)
+        else:
+            system.print("Pressed: " + (str) id)
+
+
+controller GCtrl(tmp_model : Temperature):
+
+    event system.started():
+        system.print("system started")
+
+    event tmp_model.arrived():
+        temp = self.record.temperature
+        time = self.record.timestamp
+        system.print("tmp_model.arrived t: " + (str) time + ", tmp: " + (str)temp)
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+        temp = TemperatureSource()
+
+    models:
+        tmp_model = Temperature()
+
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn,
+                                   clk = interfaces.clk,
+                                   tmp = interfaces.temp,
+                                   tmp_model = models.tmp_model)
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        #system = J2SE.v18
+        system = Android.v19
+
+    models:
+        tmp_model = Temperature()
+
+    controllers:
+        cntr = GCtrl(tmp_model = models.tmp_model)
