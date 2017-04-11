@@ -191,6 +191,8 @@ public class CLang extends BaseLanguage {
 
         for (ConcreteControllerInstance ictr : iiface.getControllerList())
             iface_h.add("includes", app_dir + ictr.getComponent().getName() + ".h");
+        for (Model model : iiface.getBaseInterface().getModels().values())
+            iface_h.add("includes", app_dir + model.getName() + ".h");
         iface_c.add("includes", app_dir + iiface.getName() + ".h");
         iface_c.add("includes", "AppDispatcher.h");
         iface_h.add("interface", iiface);

@@ -3,27 +3,31 @@ import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
 c_file(includes,name,interface) ::=<<
 <begin_source(name)>
 
+#include "api/endpoint.h"
+#include "api/array.h"
 <includes:do_include(); separator="\n">
 
+RavelEndpoint *
+ravel_generated_<name; format="function">_select(<name> *self, <interface.baseInterface.models.phase_model.name> *pphase_model)
+{
+    return NULL;
+}
 
-
-int32_t ravel_generated_<name; format="function">_select(void *data)
+int32_t
+ravel_generated_<name; format="function">_compute_pphase(<name> *self, double *vibration)
+{
+    return 0;
+}
+int32_t
+ravel_generated_<name; format="function">_sparsity(<name> *self, double *vibration)
 {
     return 0;
 }
 
-int32_t ravel_generated_<name; format="function">_compute_pphase(void *data)
+int32_t *
+ravel_generated_<name; format="function">_compressing_sampling(<name> *self, double *vibration)
 {
-    return 0;
-}
-int32_t ravel_generated_<name; format="function">_sparsity(void *data)
-{
-    return 0;
-}
-
-int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data)
-{
-    return 0;
+    return ravel_array_new(0, sizeof(int32_t));
 }
 
 
@@ -33,6 +37,8 @@ int32_t ravel_generated_<name; format="function">_compressing_sampling(void *dat
 h_file(includes,name,interface) ::=<<
 <begin_header("LIBRARY", name)>
 
+#include "api/endpoint.h"
+#include "api/array.h"
 <includes:do_include(); separator="\n">
 
 <begin_extern_c()>
@@ -44,11 +50,10 @@ typedef struct {
 static inline void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>) {}
 static inline void ravel_generated_<name; format="function">_finalize(<name> *self) {}
 
-
-int32_t ravel_generated_<name; format="function">_select(void *data);
-int32_t ravel_generated_<name; format="function">_compute_pphase(void *data);
-int32_t ravel_generated_<name; format="function">_sparsity(void *data);
-int32_t ravel_generated_<name; format="function">_compressing_sampling(void *data);
+RavelEndpoint *ravel_generated_<name; format="function">_select(<name> *self, <interface.baseInterface.models.phase_model.name> *pphase_model);
+int32_t ravel_generated_<name; format="function">_compute_pphase(<name> *self, double *vibration);
+int32_t ravel_generated_<name; format="function">_sparsity(<name> *self, double *vibration);
+int32_t ravel_generated_<name; format="function">_compressing_sampling(<name> *self, double *vibration);
 
 <end_extern_c()>
 <end_header("", name)>
