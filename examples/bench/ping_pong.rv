@@ -105,6 +105,9 @@ controller PongController(ping2 : Ping, pong : Pong):
 controller EavesDropController(ping : Ping, pong : Pong):
     event ping.arrived():
         system.print("ping arrived")
+        rec = self.record
+        x = rec.value
+        system.print((str)x)
 
     event ping.departed():
         system.print("ping departed")

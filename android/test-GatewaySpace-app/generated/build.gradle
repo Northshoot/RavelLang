@@ -1,3 +1,4 @@
 configurations.create("default")
 //artifacts.add("default", file('../../../rout/bench/nrf-bench/ping_pong/GatewaySpace/build/outputs/aar/GatewaySpace-debug.aar'))
-artifacts.add("default", file('../../../rout/bench/nrf-bench/stream/GatewaySpace/build/outputs/aar/GatewaySpace-debug.aar'))
+//artifacts.add("default", file('../../../rout/bench/nrf-bench/stream/GatewaySpace/build/outputs/aar/GatewaySpace-debug.aar'))
+artifacts.add("default", file('../../../rout/bench/nrf-bench/ping-pong/two-tier/16/plain/GatewaySpace/build/outputs/aar/GatewaySpace-debug.aar'))

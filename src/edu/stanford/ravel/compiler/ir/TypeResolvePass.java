@@ -631,6 +631,7 @@ public class TypeResolvePass implements InstructionVisitor {
         }
 
         int target;
+        //TODO: when cast is initiated it should cast
         Type targetType = getRegisterType(instr.target);
         if (targetType == PrimitiveType.ANY) {
             target = instr.target;
@@ -670,8 +671,9 @@ public class TypeResolvePass implements InstructionVisitor {
         if (op.isNumeric()) {
             if (resultType == PrimitiveType.BOOL || resultType == PrimitiveType.BYTE)
                 return PrimitiveType.INT32;
-            if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE)
+            if (resultType != PrimitiveType.INT32 && resultType != PrimitiveType.DOUBLE) {
                 return PrimitiveType.ERROR;
+            }
             return resultType;
         }
         if (op == UnaryOperation.NOT)
