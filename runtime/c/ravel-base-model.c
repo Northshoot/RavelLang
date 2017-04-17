@@ -79,8 +79,8 @@ ravel_base_model_init(RavelBaseModel *self,
     self->durable = durable;
     self->record_size = record_size;
 
-    //ravel_system_print_number(NULL, "record_size", record_size);
-    //ravel_system_print_number(NULL, "num_records", num_records);
+    ravel_system_print_number(NULL, "record_size", record_size);
+    ravel_system_print_number(NULL, "num_records", num_records);
 
     self->num_records = num_records;
     self->state = calloc(num_records, sizeof(RavelRecordState));

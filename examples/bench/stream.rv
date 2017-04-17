@@ -6,6 +6,11 @@ interface Clock():
 
     def getNow() : int32
 
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
 
 streaming model DataMule(size : int32):
     properties:
@@ -16,28 +21,37 @@ streaming model DataMule(size : int32):
 
     schema:
         value : int32
-        fill : int32[58]
 
 
 
-controller EmbeddedController(data: DataMule, clock : Clock):
+
+controller EmbeddedController(data: DataMule, clock : Clock, btn: Button):
     counter : int32 = 0
+    send: bool = True
 
     event system.started():
-        rec = data.create()
-        rec.value = counter
-        data.save(rec)
+        system.print("System Started")
 
-    event data.departed():
+    event btn.pressed(id  :int32):
+        if id == 3:
+            send = False
+        if id == 1 and send:
+            rec = data.create()
+            rec.value = counter
+            data.save(rec)
+
+
+
+    event data.save_done():
         delete(self.record)
-        counter +=1
-        rec = data.create()
-        rec.value = counter
-        data.save(rec)
+        if send:
+            counter +=1
+            rec = data.create()
+            rec.value = counter
+            data.save(rec)
 
     event data.full():
         system.print("model full")
-
 
 
 
@@ -56,7 +70,7 @@ controller GatewayController(data: DataMule, clock: Clock):
 
     event data.full():
         t_delta = clock.getNow() - t_first
-        system.print("TIME: RX 100 pkts: " + (str)t_delta)
+        system.print("TIME: RX 1000 pkts: " + (str)t_delta)
 
 
 
@@ -68,13 +82,14 @@ space EmbeddedSpace:
         #system = Posix.v2008
 
     models:
-        data = DataMule(size=10)
+        data = DataMule(size=100)
 
     interfaces:
         clock = Clock()
+        btn = Button()
 
     controllers:
-        ectrl = EmbeddedController(data = models.data, clock = interfaces.clock)
+        ectrl = EmbeddedController(data = models.data, clock = interfaces.clock, btn = interfaces.btn)
 
 space GatewaySpace:
     platform:
@@ -83,7 +98,7 @@ space GatewaySpace:
         #system = J2SE.v18
         
     models:
-        data = DataMule(size=100)
+        data = DataMule(size=1000)
 
     interfaces:
             clock = Clock()

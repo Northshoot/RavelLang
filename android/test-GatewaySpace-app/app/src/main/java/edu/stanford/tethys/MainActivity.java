@@ -21,11 +21,7 @@ import org.stanford.ravel.rrt.tiers.Endpoint;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -63,11 +59,11 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try { //"tcp://camembert.stanford.edu:1234"
-            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.106:1234"), Collections.<String, String>emptyMap());
-        } catch(URISyntaxException|MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+//        try { //"tcp://camembert.stanford.edu:1234"
+//            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.106:1234"), Collections.<String, String>emptyMap());
+//        } catch(URISyntaxException|MalformedURLException e) {
+//            throw new RuntimeException(e);
+//        }
         setContentView(R.layout.main_activity);
 
 

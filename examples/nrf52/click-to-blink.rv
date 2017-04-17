@@ -40,9 +40,17 @@ interface TemperatureSource():
 
     def read(): int32
 
+local model Temperature():
+    properties:
+	size = 10
+    schema:
+	timestamp : int32
+	temperature: int32
+	
 controller ButtonController(btn : Button, clk: Clock,
                             tmp : TemperatureSource,
-                            led : Led, timer: Timer ):
+                            led : Led, timer: Timer,
+			                temperature: Temperature ):
 
     blinker = 1000
     steps = 400 #why step is reserved?
@@ -67,7 +75,11 @@ controller ButtonController(btn : Button, clk: Clock,
             timer.cancel()
             timer.start_periodic(blinker)
         else:
-            system.print("Pressed: " + (str) id)
+	        rec = temperature.create()
+	        rec.timestamp = clk.getNow()
+	        rec.temperature = tmp.read()
+	        temperature.save(rec)
+	        system.print("Pressed: " + (str) id)
 
 
     event timer.fired():
@@ -86,10 +98,13 @@ space EmbeddedSpace:
         timer = Timer()
         tmp = TemperatureSource()
 
+    models:
+        temperature = Temperature()
     controllers:
         btn_ctr = ButtonController(btn = interfaces.btn,
                                    clk = interfaces.clk,
                                    tmp = interfaces.tmp,
                                    led = interfaces.led,
-                                   timer = interfaces.timer
+                                   timer = interfaces.timer,
+                                   temperature = models.temperature
                                    )
