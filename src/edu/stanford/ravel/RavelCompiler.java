@@ -297,6 +297,7 @@ public class RavelCompiler {
     }
 
     public static void main(String[] args) {
+        System.out.println();
         RavelCompiler driver = new RavelCompiler();
         driver.run(args);
     }

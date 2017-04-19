@@ -1,5 +1,6 @@
 package edu.stanford.ravel.api.platforms;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.Settings;
 import edu.stanford.ravel.api.platforms.posix.PosixRuntimeOptions;
 import edu.stanford.ravel.primitives.Space;
@@ -14,7 +15,7 @@ import java.util.List;
  * Created by gcampagn on 1/31/17.
  */
 public class Posix extends BaseCPlatform {
-    private final static String BASE_LANG_TMPL_PATH = Settings.BASE_TMPL_PATH +"/platforms/posix/tmpl";
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_posix_tmpl_dir();
 
 
     public Posix() {

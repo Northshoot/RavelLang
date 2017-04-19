@@ -1,5 +1,6 @@
 package edu.stanford.ravel.api.lang;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.OptionParser;
 import edu.stanford.ravel.api.Settings;
 import edu.stanford.ravel.api.builder.CodeModule;
@@ -25,8 +26,8 @@ import java.util.logging.Logger;
  */
 public class JLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(JLang.class.getName());
-    private final static String BASE_LANG_TMPL_PATH = Settings.BASE_TMPL_PATH +"/lang/java/tmpl";
-    private final static String RUNTIME_PKG = "org.stanford.ravel.rrt";
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_java_tmpl_dir();
+    private final static String RUNTIME_PKG = RavelProperties.get_runtime_package();
 
     private static boolean typeIsIteratorInstance(Type type) {
         if (!(type instanceof ClassType.InstanceType))

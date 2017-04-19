@@ -1,5 +1,6 @@
 package edu.stanford.ravel.api.platforms;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.Settings;
 import edu.stanford.ravel.api.builder.CodeModule;
 import edu.stanford.ravel.api.builder.FileObject;
@@ -22,7 +23,7 @@ import java.util.List;
  * Created by gcampagn on 1/31/17.
  */
 public class J2SE extends BasePlatform {
-    private final static String BASE_LANG_TMPL_PATH = Settings.BASE_TMPL_PATH +"/platforms/j2se/tmpl";
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_j2se_tmpl_dir();
 
     private final STGroup mainGroup;
     private final STGroup buildGroup;

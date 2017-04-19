@@ -1,5 +1,6 @@
 package edu.stanford.ravel.api.platforms;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.builder.FileObject;
 import edu.stanford.ravel.api.platforms.nrf52.NrfConfig;
 import edu.stanford.ravel.api.platforms.nrf52.NrfPlatformOptions;
@@ -12,7 +13,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.ArrayList;
 import java.util.List;
 //TODO: platforms should be separated form the compiler
-import static edu.stanford.ravel.api.Settings.BASE_TMPL_PATH;
+
 
 /**
  * The NRF52 runtime
@@ -21,7 +22,7 @@ import static edu.stanford.ravel.api.Settings.BASE_TMPL_PATH;
  */
 public class Nrf52 extends BaseCPlatform {
     //TODO: platform path should be configurable
-    private final static String BASE_LANG_TMPL_PATH = BASE_TMPL_PATH +"/platforms/nrf52/tmpl";
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_nrf52_tmpl_dir();
     private final STGroup ldGroup;
     private final STGroup configGroup;
 
@@ -82,6 +83,7 @@ public class Nrf52 extends BaseCPlatform {
 
     private FileObject makeLinkerScript(TemplatePair p){
         //TODO: values could come from config file
+        //TODO: we need to increase the memory with each BLE service
         /**
          *
          MEMORY

@@ -1,5 +1,6 @@
 package edu.stanford.ravel.api.lang;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.OptionParser;
 import edu.stanford.ravel.api.Settings;
 import edu.stanford.ravel.api.builder.CodeModule;
@@ -26,8 +27,8 @@ import java.util.logging.Logger;
  */
 public class CLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
-    public final static String BASE_LANG_TMPL_PATH = Settings.BASE_TMPL_PATH +"/lang/c/tmpl";
-    private final static String app_dir = "app_files/";
+    public final static String BASE_LANG_TMPL_PATH = RavelProperties.get_c_tmpl_dir();
+    private final static String app_dir = RavelProperties.get_fileOutDir();
 
     private static final AttributeRenderer CTYPES = new AttributeRenderer() {
         private String toNativeType(Type type) {

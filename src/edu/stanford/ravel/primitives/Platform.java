@@ -1,5 +1,6 @@
 package edu.stanford.ravel.primitives;
 
+import edu.stanford.ravel.RavelProperties;
 import edu.stanford.ravel.api.Settings;
 import edu.stanford.ravel.api.lang.ConcreteLanguage;
 import edu.stanford.ravel.api.platforms.ConcretePlatform;
@@ -38,8 +39,8 @@ public class Platform {
         String platform = pAPI[0];
         LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
 
-        mLanguage = (ConcreteLanguage) Class.forName(Settings.API_LANG + mLang).newInstance();
-        mPlatform = (ConcretePlatform) Class.forName( Settings.API_PLATFORM + platform).newInstance();
+        mLanguage = (ConcreteLanguage) Class.forName(RavelProperties.get_language_package()+ mLang).newInstance();
+        mPlatform = (ConcretePlatform) Class.forName( RavelProperties.get_platform_package() + platform).newInstance();
         if (!mPlatform.allowsLanguage(mLanguage)) {
             // FIXME emit a better error
             throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());
