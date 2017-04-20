@@ -40,12 +40,24 @@ interface TemperatureSource():
 
     def read(): int32
 
+streaming model TemperatureData(size : int32):
+    properties:
+        records = size
+        flow = EmbeddedSpace -> GatewaySpace
+
+    schema:
+        temperature : int32
+        local_time : int32
+        counter : int32
+
 controller ButtonController(btn : Button, clk: Clock,
                             tmp : TemperatureSource,
-                            led : Led, timer: Timer ):
+                            led : Led, timer: Timer,
+                            data: TemperatureData):
 
     blinker = 1000
-    steps = 400 #why step is reserved?
+    steps = 400
+    counter = 0
 
     event system.started():
         system.print("system started")
@@ -55,20 +67,26 @@ controller ButtonController(btn : Button, clk: Clock,
     event btn.pressed(id  :int32):
         if id == 1:
             system.print("Time is: " + (str) clk.getNow())
-
         elif id == 2:
             system.print("Temp is: " + (str) tmp.read())
         elif id == 3:
             if blinker < 400:
                 blinker = 1000
             else:
-                # blinker = (int32) blinker/2 error
                 blinker = blinker - steps
             timer.cancel()
             timer.start_periodic(blinker)
         else:
-            system.print("Pressed: " + (str) id)
+            counter += 1
+            record = data.create()
+            record.temperature = tmp.read()
+            record.local_time=clk.getNow()
+            record.counter = counter
+            data.save(record)
 
+
+    event data.full():
+        data.delete(self.record)
 
     event timer.fired():
         led.toggle()
@@ -78,7 +96,6 @@ space EmbeddedSpace:
         language = CLang
         system = Nrf52.v1
 
-
     interfaces:
         btn = Button()
         clk =  Clock()
@@ -86,10 +103,33 @@ space EmbeddedSpace:
         timer = Timer()
         tmp = TemperatureSource()
 
+    models:
+        data = TemperatureData(size=10)
+
     controllers:
         btn_ctr = ButtonController(btn = interfaces.btn,
                                    clk = interfaces.clk,
                                    tmp = interfaces.tmp,
                                    led = interfaces.led,
-                                   timer = interfaces.timer
+                                   timer = interfaces.timer,
+                                   data = models.data
                                    )
+
+controller DataController(data : TemperatureData, clock : Clock):
+
+    event data.arrived():
+        arrived_data = self.record
+        system.print((str) clock.getNow() + ":: received pkt: " + (str) arrived_data.counter + " temp: " + (str)arrived_data.temperature)
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    interfaces:
+        clock = Clock()
+    models:
+        data = TemperatureData(size=1000)
+
+    controllers:
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
