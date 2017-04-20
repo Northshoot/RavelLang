@@ -1,0 +1,144 @@
+interface Timer():
+    implementation:
+        c = "rlib/nrf52/app_timer_sys.stg"
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+    def is_one_shoot() : bool
+    event fired()
+
+interface Led(led_num: int32):
+    configuration:
+        # 0 - 3
+        led_id = led_num
+    implementation:
+        c = "rlib/nrf52/led.stg"
+
+    def init()
+    def on()
+    def off()
+    def toggle()
+
+interface Clock():
+    implementation:
+        c = "rlib/nrf52/clock.stg"
+        java = "rlib/java/clock.stg"
+
+    def getNow() : int32
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+interface TemperatureSource():
+    implementation:
+        c = "rlib/nrf52/temperature.stg"
+
+    def read(): int32
+
+streaming model TemperatureData(size : int32):
+    properties:
+        records = size
+        flow = EmbeddedSpace -> GatewaySpace
+
+    schema:
+        temperature : int32
+        local_time : int32
+        counter : int32
+
+controller ButtonController(btn : Button, clk: Clock,
+                            tmp : TemperatureSource,
+                            led : Led, timer: Timer,
+                            data: TemperatureData):
+
+    blinker = 1000
+    steps = 100
+    counter = 0
+
+    event system.started():
+        system.print("system started")
+        timer.start_periodic(blinker)
+
+
+    event btn.pressed(id  :int32):
+        if id == 1:
+            system.print("Time is: " + (str) clk.getNow())
+        elif id == 2:
+            system.print("Temp is: " + (str) tmp.read())
+        elif id == 3:
+            if blinker < 300:
+                blinker = 1000
+            else:
+                blinker = blinker - steps
+            timer.cancel()
+            timer.start_periodic(blinker)
+        else:
+            counter += 1
+            record = data.create()
+            record.temperature = tmp.read()
+            record.local_time=clk.getNow()
+            record.counter = counter
+            data.save(record)
+
+
+    event data.full():
+        data.delete(self.record)
+
+    event data.departed():
+        data.delete(self.record)
+        system.print("data_departed")
+
+    event timer.fired():
+        led.toggle()
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+        led = Led(led_num = 1)
+        timer = Timer()
+        tmp = TemperatureSource()
+
+    models:
+        data = TemperatureData(size=10)
+
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn,
+                                   clk = interfaces.clk,
+                                   tmp = interfaces.tmp,
+                                   led = interfaces.led,
+                                   timer = interfaces.timer,
+                                   data = models.data
+                                   )
+
+view TempView():
+    def update(counter : int32, temperature: int32)
+
+controller DataController(data : TemperatureData, clock : Clock, v: TempView):
+
+    event data.arrived():
+        arrived_data = self.record
+        v.update(arrived_data.counter, arrived_data.temperature)
+
+        #system.print("received pkt: " + (str) arrived_data.counter + " temp: " + (str)arrived_data.temperature)
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    interfaces:
+        clock = Clock()
+    views:
+        v = TempView()
+    models:
+        data = TemperatureData(size=1000)
+
+    controllers:
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock, v=views.v)

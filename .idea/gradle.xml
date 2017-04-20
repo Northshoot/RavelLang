@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/android/test-GatewaySpace-app" />
+            <option value="$PROJECT_DIR$/android/test-GatewaySpace-app/app" />
+            <option value="$PROJECT_DIR$/android/test-GatewaySpace-app/generated" />
+            <option value="$PROJECT_DIR$/android/test-GatewaySpace-app/runtime" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -21,7 +21,7 @@ c_file(includes,name,interface) ::=<<
 #include "app_error.h"
 #include "bsp.h"
 #define NRF_LOG_MODULE_NAME "TMP:::"
-#define NRF_LOG_LEVEL 4
+#define NRF_LOG_LEVEL 1
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
