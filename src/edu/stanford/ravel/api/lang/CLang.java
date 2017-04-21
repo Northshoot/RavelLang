@@ -75,6 +75,8 @@ public class CLang extends BaseLanguage {
                 return ((ModelType.RecordType) type).getModel().getName() + "_Record*";
             } else if (type instanceof ModelType.ContextType) {
                 return "Context*";
+            } else if (type instanceof NullType) {
+                return "void*";
             } else  {
                 // everything else ought to be a pointer
                 return type.getName() + "*";
@@ -119,7 +121,14 @@ public class CLang extends BaseLanguage {
             }
         }
     };
-    private static final LiteralFormatter CLITERAL = new CStyleLiteralFormatter();
+    private static final LiteralFormatter CLITERAL = new CStyleLiteralFormatter() {
+        @Override
+        public String toLiteral(Object o) {
+            if (o == NullType.NULL)
+                return "NULL";
+            return super.toLiteral(o);
+        }
+    };
 
     private final STGroup controllerGroup;
     private final STGroup modelGroup;
@@ -398,6 +407,8 @@ public class CLang extends BaseLanguage {
         model_c.add("base", baseClass);
         model_h.add("model", im);
         model_c.add("model", im);
+        model_h.add("hasEndpointInSave", im.getBaseModel().getModelType() == Model.Type.REPLICATED);
+        model_c.add("hasEndpointInSave", im.getBaseModel().getModelType() == Model.Type.REPLICATED);
 
         return simpleModule(model_h, model_c, im.getName(), this.app_dir);
     }

@@ -631,7 +631,6 @@ public class TypeResolvePass implements InstructionVisitor {
         }
 
         int target;
-        //TODO: when cast is initiated it should cast
         Type targetType = getRegisterType(instr.target);
         if (targetType == PrimitiveType.ANY) {
             target = instr.target;

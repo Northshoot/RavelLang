@@ -216,7 +216,7 @@ void ravel_replicated_model_record_arrived(RavelReplicatedModel *self, RavelPack
 void ravel_replicated_model_record_departed(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint);
 void ravel_replicated_model_record_failed_to_send(RavelReplicatedModel *self, RavelPacket *packet, RavelEndpoint *endpoint, RavelError error);
 void ravel_replicated_model_record_saved_durably(RavelReplicatedModel *self, RavelPacket *pkt, RavelError error);
-Context *ravel_replicated_model_save(RavelReplicatedModel *self, void *record);
+Context *ravel_replicated_model_save(RavelReplicatedModel *self, void *record, RavelEndpoint *endpoint);
 void ravel_replicated_model_delete(RavelReplicatedModel *self, void *record);
 
 static inline void ravel_replicated_model_add_sink_endpoints(RavelReplicatedModel *self, const int32_t * endpoints) {

@@ -171,7 +171,8 @@ ravel_record_free(RavelBaseModel *self, void *record, bool is_in_nursery)
 
     assert (self->state[record_pos].is_allocated);
     assert (!self->state[record_pos].is_valid);
-    assert (self->state[record_pos].in_save == 0);
+    ravel_system_print_number(NULL, "record in save", self->state[record_pos].in_save);
+    //assert (self->state[record_pos].in_save == 0);
     assert (self->state[record_pos].in_transit == 0);
     self->state[record_pos].is_allocated = false;
     self->vtable->record_finalize(self, record);
@@ -212,7 +213,7 @@ ravel_base_model_send_record_endpoint(RavelBaseModel *self,
     uint8_t *byte_array;
     int record_pos = record_pos_from_record (self, record);
     RavelError local_error;
-    //ravel_system_print(NULL, "ravel_base_model_send_record_endpoint");
+    ravel_system_print(NULL, "ravel_base_model_send_record_endpoint");
     // serialize the record
     byte_array = self->vtable->marshall(self, record, endpoint);
     if (byte_array == NULL) {
@@ -252,8 +253,7 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *
     int i, j;
     RavelError error, local_error;
 
-    //ravel_system_print(NULL, "send_record");
-    //ravel_system_print(NULL, endpoint_names[0]);
+    ravel_system_print_number(NULL, "send_record", endpoint_names[0]);
 
     if (endpoint_names[0] == -1)
         return RAVEL_ERROR_SUCCESS;
@@ -570,7 +570,7 @@ ravel_replicated_model_finalize(RavelReplicatedModel *self)
 }
 
 Context *
-ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
+ravel_replicated_model_save(RavelReplicatedModel *self, void *record, RavelEndpoint *endpoint)
 {
     Context *ctx;
 
@@ -582,7 +582,14 @@ ravel_replicated_model_save(RavelReplicatedModel *self, void *record)
         // clear the save flag because we won't send a save done until much later
         self->base.state[record_pos].in_save--;
 
-        send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints, true);
+        if (endpoint == NULL) {
+            send_error = ravel_base_model_send_record(&self->base, record, self->sink_endpoints, true);
+        } else {
+            if (self->base.reliable)
+                self->base.state[record_pos].expected_acks++;
+            self->base.state[record_pos].in_save++;
+            send_error = ravel_base_model_send_record_endpoint(&self->base, record, endpoint);
+        }
 
         ravel_context_finalize(&self->base.current_ctx);
         ravel_context_init_error(&self->base.current_ctx, send_error);
@@ -943,9 +950,11 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
 
         if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
             return;
-
+        ravel_system_print(NULL, "context init");
         ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
+
         self->base.vtable->dispatch_save_done(self, &self->base.current_ctx);
+        ravel_system_print(NULL, "dispatch called save done");
     } else {
         RavelPacket ack;
         int record_pos;
@@ -969,6 +978,7 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         if (record == NULL) {
             // uh oh!
             // FIXME what to do here?
+            ravel_system_print(NULL, "allocate null 971");
             return;
         }
 

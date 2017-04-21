@@ -141,9 +141,13 @@ public class AndroidDriver extends JavaDriver {
                     device_address = intent.getStringExtra(BleDefines.EXTRA_DATA);
                     //Clean up device from
                     //client lists
+                    android.util.Log.d(TAG, "onReceive: removing from bleClients" + device_address);
+
                     bleClients.remove(device_address);
+                    android.util.Log.d(TAG, "onReceive: removing bleClients" + bleClients.size());
                     //fragment maps
                     m_frag_map.remove(device_address);
+                    android.util.Log.d(TAG, "onReceive: removing m_frag_map" + m_frag_map.size());
                     m_connected_ble = false;
                     synchronized (AndroidDriver.this) {
                         m_sending = false;

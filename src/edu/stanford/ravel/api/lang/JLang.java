@@ -59,7 +59,6 @@ public class JLang extends BaseLanguage {
                         return "void";
 
                     case ANY:
-                        return "Object"; // FIXME
                     case ERROR:
                     default:
                         throw new AssertionError();
@@ -82,6 +81,8 @@ public class JLang extends BaseLanguage {
                 return RUNTIME_PKG + ".DispatcherAPI";
             } else if (type == IntrinsicTypes.KEY) {
                 return "java.security.Key";
+            } else if (type instanceof NullType) {
+                return RUNTIME_PKG + ".utils.None";
             } else {
                 return type.getName();
             }
@@ -92,7 +93,14 @@ public class JLang extends BaseLanguage {
             return toNativeType((Type)o);
         }
     };
-    private static final LiteralFormatter JLITERAL = new CStyleLiteralFormatter();
+    private static final LiteralFormatter JLITERAL = new CStyleLiteralFormatter(){
+    @Override
+    public String toLiteral(Object o) {
+        if (o == NullType.NULL)
+            return "null";
+        return super.toLiteral(o);
+    }
+};
     private static final AttributeRenderer JSTRING = new AttributeRenderer() {
         @Override
         public String toString(Object o, String s, Locale locale) {

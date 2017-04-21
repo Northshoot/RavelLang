@@ -14,8 +14,7 @@ import java.util.logging.Logger;
 public abstract class BaseLanguage implements ConcreteLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
 
-    // FIXME: make private when CLang is fixed
-    protected final List<FileObject> mFileObjects;
+    private final List<FileObject> mFileObjects;
 
     protected BaseLanguage() {
         mFileObjects = new ArrayList<>();

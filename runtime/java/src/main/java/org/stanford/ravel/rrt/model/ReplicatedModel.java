@@ -54,9 +54,13 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
             int recordPos = recordPosFromRecord(record);
 
             // clear the save flag because we won't send a save done until later
+            Error sendError = null;
             markSaved(recordPos);
-
-            Error sendError = sendOneRecord(recordPos, record, endpoint, true);
+            if (endpoint == null) {
+                sendError = sendRecord(recordPos, record, mEndpoints, true);
+            } else {
+                    sendError = sendOneRecord(recordPos, record, endpoint, true);
+            }
             return new Context<>(this, record, sendError);
         } else {
             // OUT OF STORAGE or IN TRANSIT (= during save)

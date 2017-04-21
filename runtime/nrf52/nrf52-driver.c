@@ -89,8 +89,9 @@ RavelEndpoint *endpoint_out;
 
 void ravel_nrf52_driver_rx_data_from_low(RavelDriver *self, RavelPacket *packet,nrf52_endpoint *endpoint)
 {
-    NRF_LOG_DEBUG("dispatching packet received model id %u record id %u is ack %u\r\n", packet->model_id, packet->record_id, packet->is_ack);
+    NRF_LOG_DEBUG("dispatching packet received model id %u record id %u is ack %u is save done %u\r\n", packet->model_id, packet->record_id, packet->is_ack, packet->is_save_done);
     ravel_base_dispatcher_data_received(self->dispatcher, packet, &endpoint->m_ravel_endpoint);
+    ravel_system_print(NULL, "dispatch called save done");
 }
 
 RavelError
@@ -123,6 +124,7 @@ ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
     ravel_packet_finalize(&copy);
     //dispatch packet queue
     app_sched_event_put(NULL,sizeof(ravel_schedule_event_cntx), deque_packet);
+     NRF_LOG_DEBUG("SEND_DONE exit \r\n");
 }
 void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)

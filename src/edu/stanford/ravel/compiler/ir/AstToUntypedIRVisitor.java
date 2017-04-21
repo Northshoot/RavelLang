@@ -319,7 +319,7 @@ class AstToUntypedIRVisitor extends RavelBaseVisitor<Integer> {
     }
     
     @Override public Integer visitArray_literal(RavelParser.Array_literalContext ctx) {
-        // TODO
+        // TODO: needs representation in IR and code generation
         return ERROR_REG;
     }
 

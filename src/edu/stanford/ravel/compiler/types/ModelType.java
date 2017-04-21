@@ -39,6 +39,7 @@ public class ModelType extends ClassType {
     private final RecordType immutableRecordType;
     private final ContextType ctxType;
     private final IteratorType iteratorType;
+    private final Model.Type modelType;
 
     public ModelType(ModelSymbol symbol, Model.Type modelType) {
         super(symbol.getName());
@@ -46,6 +47,7 @@ public class ModelType extends ClassType {
         recordType = new RecordType(symbol.getName() + ".Record");
         immutableRecordType = (RecordType) recordType.makeImmutable();
         ctxType = new ContextType();
+        this.modelType = modelType;
 
         Type queryRecordType;
         switch (modelType) {
@@ -123,7 +125,7 @@ public class ModelType extends ClassType {
                 case "error":
                     return PrimitiveType.ERROR_MSG;
                 case "record":
-                    return immutableRecordType;
+                    return modelType == Model.Type.STREAMING ? immutableRecordType : recordType;
                 case "endpoint":
                     return IntrinsicTypes.ENDPOINT.getInstanceType();
                 default:

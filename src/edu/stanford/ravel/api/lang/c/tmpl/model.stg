@@ -9,7 +9,7 @@ static void dispatch_<event>(<model.name> *self, Context *ctx)
 }
 >>
 
-c_file(includes,name,base,model) ::=<<
+c_file(includes,name,base,model,hasEndpointInSave) ::=<<
 <begin_source(name)>
 
 #include \<api/context.h>
@@ -104,7 +104,7 @@ static const RavelModelVTable vtable = {
 void
 ravel_generated_<model.name; format="function">_init(<model.name> *self, struct AppDispatcher *dispatcher<append_parameter_list(model.baseModel.parameters)>)
 {
-    <base; format="function">_init(&self->__base, &dispatcher->base, <model.baseModel.size>, <model.baseModel.id>, sizeof(<model.name>_Record), <model.baseModel.reliable>, <model.baseModel.durable>);
+    <base; format="function">_init(&self->__base, &dispatcher->base, <model.baseModel.id>, <model.baseModel.size>, sizeof(<model.name>_Record), <model.baseModel.reliable>, <model.baseModel.durable>);
     ravel_base_model(self)->vtable = &vtable;
     self->dispatcher = &dispatcher->base.sys_api;
 }
@@ -132,9 +132,9 @@ ravel_generated_<model.name; format="function">_create(<model.name> *self)
     return record;
 }
 Context *
-ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record)
+ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record<if(hasEndpointInSave)>, RavelEndpoint *endpoint<endif>)
 {
-    return <base; format="function">_save(&self->__base, record);
+    return <base; format="function">_save(&self->__base, record<if(hasEndpointInSave)>, endpoint<endif>);
 }
 void
 ravel_generated_<model.name; format="function">_delete(<model.name> *self, <model.name>_Record *record)
@@ -164,7 +164,7 @@ void ravel_generated_<model_name; format="function">_record_init(<model_name>_Re
 void ravel_generated_<model_name; format="function">_record_finalize(<model_name>_Record *record);
 >>
 
-h_file(includes,name,base,model) ::=<<
+h_file(includes,name,base,model,hasEndpointInSave) ::=<<
 <begin_header("MODEL", name)>
 
 #include \<api/context.h>
@@ -195,7 +195,7 @@ void ravel_generated_<model.name; format="function">_finalize(<model.name> *self
 
 /* The Top API, used by the Controller */
 <model.name>_Record *ravel_generated_<model.name; format="function">_create(<model.name> *self);
-Context *ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record);
+Context *ravel_generated_<model.name; format="function">_save(<model.name> *self, <model.name>_Record *record<if(hasEndpointInSave)>, RavelEndpoint *endpoint<endif>);
 void ravel_generated_<model.name; format="function">_delete(<model.name> *self, <model.name>_Record *record);
 
 static inline <model.name>_Record *ravel_generated_<model.name; format="function">_get(<model.name> *self, int idx)

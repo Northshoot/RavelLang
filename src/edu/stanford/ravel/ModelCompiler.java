@@ -520,15 +520,12 @@ public class ModelCompiler {
         }
 
         // create fields for the schema
-        //TODO: why unused
         Scope schemaScope = ms.getNestedScope("schema");
-        Collection<Symbol> schema = schemaScope.getAllSymbols();
         for (Symbol s : schemaScope.getSymbols()) {
             FieldSymbol fs = (FieldSymbol)s;
             m.addField(fs);
         }
         //end field constructions
-
         m.packFields();
 
         m.setSendCode(compileSend(m));

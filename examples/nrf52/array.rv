@@ -1,0 +1,49 @@
+local model Pong():
+    properties:
+        records = 5
+
+    schema:
+        value : int32
+        timestamp : int32
+        filler : int32[6]
+        filler2 : int32[4]
+
+controller Test(m : Pong):
+
+    event system.started():
+        pingrec = m.create()
+
+        arr : int32[]
+        if ... :
+            arr = pingrec.filler
+        else:
+            arr = pingrec.filler2
+        arr[4] = 5
+        pingrec.filler2 = pingrec.filler
+
+        x : int32[]
+        x = pingrec.filler
+
+        x[0] = 1
+        x[1] = 1
+        x[2] = 1
+        x[3] = 1
+        x[4] = 1
+        x[5] = 1
+
+        index = ....
+        pingrec.filler[index] = 1
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    models:
+        m = Pong()
+
+    controllers:
+        btn_ctr = Test(m = models.m)

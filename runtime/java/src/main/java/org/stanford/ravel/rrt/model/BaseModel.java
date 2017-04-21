@@ -7,7 +7,9 @@ import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -276,10 +278,10 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     state[recordPos].is_transmit_failed = true;
                 else
-                    state[recordPos].in_transit ++;
+                    state[recordPos].in_transit++;
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                     error = error2;
-            } catch(SecurityException securityException) {
+            } catch (SecurityException securityException) {
                 if (error == Error.SUCCESS)
                     error = Error.SECURITY_ERROR;
             }

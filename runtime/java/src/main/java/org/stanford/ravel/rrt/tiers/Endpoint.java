@@ -4,11 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-
+import org.stanford.ravel.rrt.utils.None;
 /**
  * Created by lauril on 1/23/17.
  */
-public class Endpoint {
+public class Endpoint extends None{
     public enum TYPE { BLE, SQUARE, SOCKET, HTTP, GCM }
 
     private final int id;

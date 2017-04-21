@@ -32,9 +32,8 @@ public class ValidateIR {
 
                 for (int i = 0; i < sources.length; i++) {
                     assert Registers.isNormal(sources[i]);
-                    // FIXME change this assert when you change PrimitiveType.ANY.isAssignable back to strict equality
-                    //assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID
-                    //        && sourceTypes[i] != PrimitiveType.ANY;
+                    assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID
+                            && sourceTypes[i] != PrimitiveType.ANY;
                     assert sourceTypes[i] != PrimitiveType.ERROR && sourceTypes[i] != PrimitiveType.VOID;
                     assert ir.getRegisterType(sources[i]).equals(sourceTypes[i]);
                 }

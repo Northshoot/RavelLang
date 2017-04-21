@@ -40,10 +40,9 @@ interface TemperatureSource():
 
     def read(): int32
 
-streaming model TemperatureData(size : int32):
+replicated model TemperatureData(size : int32):
     properties:
         records = size
-        flow = EmbeddedSpace -> GatewaySpace
 
     schema:
         temperature : int32
@@ -65,6 +64,11 @@ controller ButtonController(btn : Button, clk: Clock,
 
 
     event btn.pressed(id  :int32):
+        for i = 0 to 10 step 2:
+            pass
+
+        system.print("Button event")
+        counter = (int32) (counter / steps)
         if id == 1:
             system.print("Time is: " + (str) clk.getNow())
         elif id == 2:
@@ -77,13 +81,20 @@ controller ButtonController(btn : Button, clk: Clock,
             timer.cancel()
             timer.start_periodic(blinker)
         else:
+
             counter += 1
             record = data.create()
             record.temperature = tmp.read()
             record.local_time=clk.getNow()
             record.counter = counter
-            data.save(record)
+            data.save(record, None)
 
+    event data.save_done():
+        system.print("save done")
+
+    event data.arrived():
+        system.print("arrived")
+        counter = self.record.counter
 
     event data.full():
         data.delete(self.record)
@@ -120,6 +131,8 @@ controller DataController(data : TemperatureData, clock : Clock):
     event data.arrived():
         arrived_data = self.record
         system.print((str) clock.getNow() + ":: received pkt: " + (str) arrived_data.counter + " temp: " + (str)arrived_data.temperature)
+        self.record.counter = arrived_data.counter+1
+        data.save(self.record, None)
 
 space GatewaySpace:
     platform:
@@ -129,7 +142,20 @@ space GatewaySpace:
     interfaces:
         clock = Clock()
     models:
-        data = TemperatureData(size=1000)
+        data = TemperatureData(size=10)
+
+    controllers:
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+
+space CloudSpace:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    interfaces:
+        clock = Clock()
+    models:
+        data = TemperatureData(size=10)
 
     controllers:
         btn_ctr = DataController(data = models.data, clock = interfaces.clock)

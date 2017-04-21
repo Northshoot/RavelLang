@@ -14,7 +14,6 @@ import java.util.Locale;
 /**
  * Convert IR to C code.
  *
- * FIXME: should be replaced with string templates
  *
  * Created by gcampagn on 1/25/17.
  */

@@ -364,6 +364,9 @@ public class SecurityAnalysis {
         }
     }
     private void computeEncryptionForFieldWithEncryptor(ModelField field, Flow flow, Space encryptor) {
+        if (!flow.involvesSpace(encryptor))
+            return;
+
         // compute the overall homomorphic operation that will be performed on this
         // field on this flow
         HomomorphicOperation homoOp = HomomorphicOperation.NONE;
@@ -416,7 +419,7 @@ public class SecurityAnalysis {
         Set<Space> decryptors = new HashSet<>();
 
         for (Space space : flow) {
-            if (space == flow.getSource())
+            if (space == flow.getSource() || space == encryptor)
                 continue;
 
             SecurityLevel prim = securityPrimitives.getOrDefault(field, Collections.emptyMap())
@@ -438,6 +441,8 @@ public class SecurityAnalysis {
                     break;
             }
         }
+        if (decryptors.isEmpty())
+            return;
 
         if (encryptionKey == decryptionKey) {
             // make a symmetric key

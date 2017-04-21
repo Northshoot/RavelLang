@@ -87,6 +87,7 @@ public class JavaDriver implements DriverAPI {
 
     private void forwardPacket(final RavelPacket pkt) {
         for (final Endpoint ep : getEndpointsByName(pkt.getDestination())) {
+            // TODO: forwarding table
             // careful! this is not sendData because we must not tell the app dispatcher
             // about this packet, or the models will be very confused
 

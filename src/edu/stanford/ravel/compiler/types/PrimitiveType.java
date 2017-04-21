@@ -11,13 +11,7 @@ public enum PrimitiveType implements Type {
 
     // the type of an expression whose type we haven't determined yet
     // (before type inference/type resolution)
-    ANY(-1) {
-        @Override
-        public boolean isAssignable(Type type) {
-            // FIXME FIXME FIXME THIS BREAKS THE TYPE SYSTEM
-            return true;
-        }
-    },
+    ANY(-1),
 
     // the type of an expression which does not type check
     ERROR(-1) {
