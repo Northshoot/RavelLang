@@ -1,0 +1,80 @@
+streaming model Ping():
+    properties:
+        records = 5
+        flow = Embedded -> Gateway -> Cloud
+    schema:
+        value : int32
+
+
+
+controller PingController(ping : Ping):
+    event system.started():
+        pingrec = ping.create()
+        pingrec.value = 1
+        ping.save(pingrec)
+
+
+    event ping.save_done():
+        ping.delete(self.record)
+
+controller PongController(ping2 : Ping):
+    event ping2.arrived():
+        system.print("ping received")
+        pingrec = self.record
+        system.print("Got: " + (str)pingrec.value)
+
+        ping2.delete(self.record)
+
+
+
+controller EavesDropController(ping : Ping):
+    event ping.arrived():
+        rec = self.record
+        x = rec.value
+        system.print((str)x)
+        system.print("ping arrived")
+
+    event ping.departed():
+        system.print("ping departed")
+        ping.delete(self.record)
+
+
+
+space Embedded:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+        #system = Android.v19
+        #system = Posix.v2008
+
+    models:
+        ping = Ping()
+
+    controllers:
+        ping_cnt = PingController(ping = models.ping)
+
+space Gateway:
+    platform:
+        language = JLang
+        system = Android.v19
+        #system = J2SE.v18
+
+    models:
+        ping = Ping()
+
+
+    controllers:
+        pong_cnt = EavesDropController(ping = models.ping)
+
+
+space Cloud:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    models:
+        ping = Ping()
+
+
+    controllers:
+        pong_cnt = PongController(ping2 = models.ping)

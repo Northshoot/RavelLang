@@ -37,18 +37,16 @@ replicated model TransmitCS():
 
 interface VolcanoAlgorithm():
     use:
-        vibration = Vibration
         phase_model = PPhase
     implementation:
         c = "rlib/c/libvolcano.stg"
     
     def select(phase_model : PPhase) : Endpoint
-    def compute_pphase(vibration : Vibration) : int32
-    def sparsity(vibration : Vibration) : int32
-    def compressing_sampling(vibration : Vibration) : byte[]
+    def compute_pphase(vibrations : double[]) : int32
+    def sparsity(vibrations : double[]) : int32
+    def compressing_sampling(vibrations : double[]) : byte[]
 
 interface VibrationSensor():
-    # we triger the sensor with a button
     implementation:
         c = "rlib/nrf52/buttons.stg"
 
@@ -112,8 +110,12 @@ controller Node(vibration_model : Vibration,
     event vibration_model.full():
         rec = phase_model.create()
         rec.time = p_clock.getNow()
-        rec.prelim_pphase = algo.compute_pphase(vibration_model)
-        rec.signal_sparsity = algo.sparsity(vibration_model)
+        vibrations : double[50]
+        i = 0
+        for v in vibration_model:
+            vibrations[i] = v.vibration
+        rec.prelim_pphase = algo.compute_pphase(vibrations)
+        rec.signal_sparsity = algo.sparsity(vibrations)
         phase_model.save(rec)
 
     event vibration_model.save_done():
@@ -129,7 +131,11 @@ controller Node(vibration_model : Vibration,
         rec = tx_cs.first()
         if rec.tx_cs:
             rec_cs = cs_model.create()
-            rec_cs.sample = algo.compressing_sampling(vibration_model)
+            vibrations : double[50]
+            i = 0
+            for v in vibration_model:
+                vibrations[i] = v.vibration
+            rec_cs.sample = algo.compressing_sampling(vibrations)
             cs_model.save(rec_cs)
             rec.tx_cs = False
             tx_cs.save(rec, self.endpoint)

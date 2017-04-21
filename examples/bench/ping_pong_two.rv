@@ -5,6 +5,12 @@ interface Clock():
 
     def getNow() : int32
 
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
 streaming model Ping():
     properties:
         records = 5
@@ -13,7 +19,7 @@ streaming model Ping():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[4]
+        filler : int32[2]
 
 
 streaming model Pong():
@@ -24,7 +30,7 @@ streaming model Pong():
     schema:
         value : int32
         timestamp : int32
-        filler : int32[4]
+        filler : int32[2]
 
 local model Reference():
     properties:
@@ -33,7 +39,8 @@ local model Reference():
     schema:
         value : int32
 
-controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
+controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong, btn : Button):
+
     event system.started():
         system.print("system started")
         refrec : Reference.Record
@@ -43,6 +50,10 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
             refrec = ref.create()
             refrec.value = 0
             ref.save(refrec)
+
+
+    event btn.pressed(id  :int32):
+        refrec = ref.get(0)
         pingrec = ping2.create()
         pingrec.value = refrec.value
         pingrec.timestamp = time.getNow()
@@ -50,7 +61,6 @@ controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pon
         pingrec.filler[0] = 1
         pingrec.filler[1] = 1
         ping2.save(pingrec)
-
 
     event pong.arrived():
         pongrec = self.record
@@ -111,6 +121,7 @@ space EmbeddedSpace:
 
     interfaces:
         clock = Clock()
+        btn = Button()
 
     models:
         ref = Reference()
@@ -118,7 +129,7 @@ space EmbeddedSpace:
         pong = Pong()
 
     controllers:
-        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping2 = models.ping2, pong = models.pong)
+        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping2 = models.ping2, pong = models.pong, btn = interfaces.btn)
 
 space GatewaySpace:
     platform:

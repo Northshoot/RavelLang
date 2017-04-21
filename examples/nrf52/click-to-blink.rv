@@ -1,0 +1,92 @@
+interface Timer():
+    implementation:
+        c = "rlib/nrf52/app_timer_sys.stg"
+    def start_one_shot(time : int32)
+    def cancel()
+    def start_periodic(time: int32)
+    def is_one_shoot() : bool
+    event fired()
+
+interface Led(led_num: int32):
+    configuration:
+        # 0 - 3
+        led_id = led_num
+    implementation:
+        c = "rlib/nrf52/led.stg"
+
+    def init()
+    def on()
+    def off()
+    def toggle()
+
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+interface TemperatureSource():
+    implementation:
+        #java = "rlib/java/temperature.stg"
+        c = "rlib/nrf52/temperature.stg"
+
+    def read(): int32
+
+	
+controller ButtonController(btn : Button, clk: Clock,
+                            tmp : TemperatureSource,
+                            led : Led, timer: Timer):
+
+    blinker = 1000
+    steps = 400
+
+    event system.started():
+        system.print("system started")
+        timer.start_periodic(blinker)
+
+
+    event btn.pressed(id  :int32):
+        if id == 1:
+            system.print("Time is: " + (str) clk.getNow())
+
+        elif id == 2:
+            system.print("Temp is: " + (str) tmp.read())
+        elif id == 3:
+            if blinker < 400:
+                blinker = 1000
+            else:
+                # blinker = (int32) blinker/2 error
+                blinker = blinker - steps
+            timer.cancel()
+            timer.start_periodic(blinker)
+        else:
+	        system.print("Pressed: " + (str) id)
+
+
+    event timer.fired():
+        led.toggle()
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+        led = Led(led_num = 1)
+        tmp = TemperatureSource()
+
+    models:
+        temperature = Temperature(mSize = 50)
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn,
+                                   clk = interfaces.clk,
+                                   tmp = interfaces.tmp,
+                                   led = interfaces.led,
+                                   temperature = models.temperature
+                                   )
