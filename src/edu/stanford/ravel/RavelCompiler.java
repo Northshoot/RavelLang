@@ -2,8 +2,7 @@ package edu.stanford.ravel;
 
 import edu.stanford.antlr4.RavelLexer;
 import edu.stanford.ravel.analysis.security.SecurityAnalysis;
-import edu.stanford.ravel.compiler.CompileError;
-import edu.stanford.ravel.compiler.DefPhase;
+import edu.stanford.ravel.compiler.*;
 import edu.stanford.ravel.compiler.scope.GlobalScope;
 import edu.stanford.ravel.compiler.symbol.*;
 import edu.stanford.ravel.primitives.Controller;
@@ -18,8 +17,6 @@ import edu.stanford.ravel.analysis.ModelOwnershipAnalysis;
 import edu.stanford.ravel.analysis.ModelWritingAnalysis;
 import edu.stanford.ravel.analysis.security.SecurityTransformation;
 import edu.stanford.ravel.api.InvalidOptionException;
-import edu.stanford.ravel.compiler.SourceLocation;
-import edu.stanford.ravel.compiler.ValidateScope;
 import edu.stanford.ravel.error.FatalCompilerErrorException;
 import edu.stanford.ravel.primitives.Space;
 
@@ -107,10 +104,15 @@ public class RavelCompiler {
                 emitError(new SourceLocation(line, charPositionInLine), msg);
             }
         });
-
         return  parser.file_input();
     }
+    private List<String> importPhase(ParseTree tree) {
+        ImportPhase listener = new ImportPhase(this, options.hasFOption("dump-scope-tree"));
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(listener, tree);
 
+        return listener.getImportList();
+    }
     private GlobalScope defPhase(ParseTree tree) {
         DefPhase listener = new DefPhase(this, options.hasFOption("dump-scope-tree"));
         ParseTreeWalker walker = new ParseTreeWalker();
@@ -197,6 +199,8 @@ public class RavelCompiler {
             System.err.println("Build path " + options.getBuildPath());
 
             try {
+                //get all imports:
+
                 ParseTree tree;
 
                 try {
@@ -209,6 +213,9 @@ public class RavelCompiler {
                 if (!success())
                     return;
 
+                //get import list from the main file
+                List<String> imports = importPhase(tree);
+                //merge trees
                 // define (hoist) the models and controllers
                 GlobalScope globalScope = defPhase(tree);
                 if (!success())

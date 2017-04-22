@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RavelLang.iml" filepath="$PROJECT_DIR$/RavelLang.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/test-GatewaySpace-app/test-GatewaySpace-app.iml" filepath="$PROJECT_DIR$/android/test-GatewaySpace-app/test-GatewaySpace-app.iml" />
     </modules>
   </component>
 </project>

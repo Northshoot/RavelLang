@@ -30,7 +30,7 @@ public class DefPhase extends RavelBaseListener {
     }
 
     private Scope currentScope;
-    //will be imports eventually
+    //TODO: will be imports eventually
 
     private GlobalScope globalScope;
     private int intend = 0;
@@ -46,6 +46,7 @@ public class DefPhase extends RavelBaseListener {
     private void prettyPrint(String s){
         System.out.println(getTab() + s);
     }
+
 
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {

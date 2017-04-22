@@ -1,0 +1,26 @@
+interface Led(led_num: int32):
+    configuration:
+        # 0 - 3
+        led_id = led_num
+    implementation:
+        c = "rlib/nrf52/led.stg"
+
+    def init()
+    def on()
+    def off()
+    def toggle()
+
+interface Button():
+    implementation:
+        c = "rlib/nrf52/buttons.stg"
+
+    event pressed(button_id : int32)
+
+replicated model LedState(size : int32):
+    properties:
+        records = size
+
+    schema:
+        temperature : int32
+        local_time : int32
+        counter : int32

@@ -1,9 +1,9 @@
 grammar Ravel;
 
 @header{
-import org.stanford.ravel.compiler.scope.*;
-import org.stanford.ravel.compiler.symbol.*;
-import org.stanford.ravel.compiler.types.Type;
+import edu.stanford.ravel.compiler.scope.*;
+import edu.stanford.ravel.compiler.symbol.*;
+import edu.stanford.ravel.compiler.types.Type;
 }
 tokens { INDENT, DEDENT }
 
@@ -106,9 +106,6 @@ tokens { INDENT, DEDENT }
   }
 }
 
-// most of the lexer rules are copy pasted from antrl4 pthon 3 implementation
-// thank you Ter! :)
-
 
 
 /*
@@ -119,13 +116,64 @@ tokens { INDENT, DEDENT }
 //the file can be newlines or components definitions
 //TODO: add imports
 file_input returns [Scope scope]
-    : ( NEWLINE | comp_def )* EOF
+    : ( NEWLINE | import_def | comp_def )* EOF
     ;
+
+import_def
+    : import_stmt #importStatement
+    ;
+
+import_stmt
+ : import_name
+ | import_from
+ ;
+
+/// import_name: 'import' dotted_as_names
+import_name
+ : IMPORT dotted_as_names
+ ;
+
+/// # note below: the ('.' | '...') is necessary because '...' is tokenized as ELLIPSIS
+/// import_from: ('from' (('.' | '...')* dotted_name | ('.' | '...')+)
+///               'import' ('*' | '(' import_as_names ')' | import_as_names))
+import_from
+ : FROM ( ( '.' | '...' )* dotted_name
+        | ('.' | '...')+
+        )
+   IMPORT ( '*'
+          | '(' import_as_names ')'
+          | import_as_names
+          )
+ ;
+
+/// import_as_name: NAME ['as' NAME]
+import_as_name
+ : Identifier ( AS Identifier )?
+ ;
+
+/// dotted_as_name: dotted_name ['as' NAME]
+dotted_as_name
+ : dotted_name ( AS Identifier )?
+ ;
+
+/// import_as_names: import_as_name (',' import_as_name)* [',']
+import_as_names
+ : import_as_name ( ',' import_as_name )* ','?
+ ;
+/// dotted_as_names: dotted_as_name (',' dotted_as_name)*
+dotted_as_names
+ : dotted_as_name ( ',' dotted_as_name )*
+ ;
+
+/// dotted_name: NAME ('.' NAME)*
+dotted_name
+ : Identifier ( '.' Identifier )* #dottedName
+ ;
 /**
  *
  * Ravel application consists of componets
  */
-//we have models, views, controllers, spaces, transform, flow?
+//we have models, views, controllers, spaces, interfaces
 comp_def
     : model_comp
     | controller_comp
@@ -595,6 +643,11 @@ DEF                 : 'def' ;
 //controller
 EVENT               : 'event' ;
 COMMAND             : 'command' ;
+
+//import python style
+FROM : 'from';
+IMPORT : 'import';
+AS : 'as';
 
 //expression operators
 ASSERT              : 'assert' ;

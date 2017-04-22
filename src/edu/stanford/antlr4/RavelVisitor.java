@@ -1,5 +1,9 @@
-// Generated from /home/gcampagn/secureiot/ravellang/Ravel.g4 by ANTLR 4.6
+// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.7
 package edu.stanford.antlr4;
+
+import edu.stanford.ravel.compiler.scope.*;
+import edu.stanford.ravel.compiler.symbol.*;
+import edu.stanford.ravel.compiler.types.Type;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -17,6 +21,62 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFile_input(RavelParser.File_inputContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code importStatement}
+	 * labeled alternative in {@link RavelParser#import_def}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportStatement(RavelParser.ImportStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#import_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImport_stmt(RavelParser.Import_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#import_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImport_name(RavelParser.Import_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#import_from}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImport_from(RavelParser.Import_fromContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#import_as_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImport_as_name(RavelParser.Import_as_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#dotted_as_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDotted_as_name(RavelParser.Dotted_as_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#import_as_names}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImport_as_names(RavelParser.Import_as_namesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link RavelParser#dotted_as_names}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDotted_as_names(RavelParser.Dotted_as_namesContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code dottedName}
+	 * labeled alternative in {@link RavelParser#dotted_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDottedName(RavelParser.DottedNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#comp_def}.
 	 * @param ctx the parse tree
