@@ -41,6 +41,20 @@ public class RavelCompiler {
     private ControllerCompiler controllerCompiler;
     private ModelCompiler modelCompiler;
 
+    public String getClassPath() {
+        return mClassPath;
+    }
+
+    public String getAppPath() {
+        return mAppPath;
+    }
+
+    //Class path of the compiler
+    //TODO: add search for libs
+    private String mClassPath;
+    //Application path
+    private String mAppPath;
+
     public boolean success() {
         return !hadErrors;
     }
@@ -106,18 +120,11 @@ public class RavelCompiler {
         });
         return  parser.file_input();
     }
-    private List<String> importPhase(ParseTree tree) {
-        ImportPhase listener = new ImportPhase(this, options.hasFOption("dump-scope-tree"));
-        ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(listener, tree);
 
-        return listener.getImportList();
-    }
     private GlobalScope defPhase(ParseTree tree) {
         DefPhase listener = new DefPhase(this, options.hasFOption("dump-scope-tree"));
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
-
         return listener.getGlobalScope();
     }
 
@@ -196,26 +203,21 @@ public class RavelCompiler {
             }
 
             logBuildStart();
-            System.err.println("Build path " + options.getBuildPath());
+            this.mAppPath = options.getInputPath();
 
             try {
-                //get all imports:
-
                 ParseTree tree;
-
+                //get main file
                 try {
-                    InputStream is = new FileInputStream(options.getInputPath());
-                    tree = parse(is);
+                    tree = treeFromInput(options.getInputPath());
                 } catch (IOException e) {
-                    System.err.println("Failed to read input file: " + e.getLocalizedMessage());
+                    e.printStackTrace();
                     return;
                 }
+
                 if (!success())
                     return;
 
-                //get import list from the main file
-                List<String> imports = importPhase(tree);
-                //merge trees
                 // define (hoist) the models and controllers
                 GlobalScope globalScope = defPhase(tree);
                 if (!success())
@@ -301,6 +303,20 @@ public class RavelCompiler {
             System.err.println();
             options.help();
         }
+    }
+
+    public ParseTree treeFromInput(String path) throws IOException{
+            ParseTree tree;
+
+        try {
+            InputStream is = new FileInputStream(path);
+            tree = parse(is);
+            return tree;
+        } catch (IOException e) {
+            throw new IOException("Failed to read input file: " + e.getLocalizedMessage());
+
+        }
+
     }
 
     public static void main(String[] args) {

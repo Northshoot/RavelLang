@@ -29,14 +29,14 @@ public class RavelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitImportStatement(RavelParser.ImportStatementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitImportName(RavelParser.ImportNameContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitImport_stmt(RavelParser.Import_stmtContext ctx) { return visitChildren(ctx); }
+	@Override public T visitImportFrom(RavelParser.ImportFromContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -85,7 +85,7 @@ public class RavelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDottedName(RavelParser.DottedNameContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDotted_name(RavelParser.Dotted_nameContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

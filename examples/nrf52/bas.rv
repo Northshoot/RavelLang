@@ -37,15 +37,4 @@ controller BatteryController(bas : Bas, timer : TimerSource):
         bas_val = 0
         timer.cancel()
 
-space EmbeddedSpace:
-    platform:
-        language = CLang
-        system = Nrf52.v1
 
-
-    interfaces:
-        timer = TimerSource()
-        bas = Bas()
-
-    controllers:
-        bas_ctr = BatteryController(bas = interfaces.bas, timer = interfaces.timer)

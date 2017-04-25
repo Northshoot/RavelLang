@@ -23,27 +23,29 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitFile_input(RavelParser.File_inputContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code importStatement}
-	 * labeled alternative in {@link RavelParser#import_def}.
+	 * Enter a parse tree produced by the {@code importName}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterImportStatement(RavelParser.ImportStatementContext ctx);
+	void enterImportName(RavelParser.ImportNameContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code importStatement}
-	 * labeled alternative in {@link RavelParser#import_def}.
+	 * Exit a parse tree produced by the {@code importName}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitImportStatement(RavelParser.ImportStatementContext ctx);
+	void exitImportName(RavelParser.ImportNameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RavelParser#import_stmt}.
+	 * Enter a parse tree produced by the {@code importFrom}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterImport_stmt(RavelParser.Import_stmtContext ctx);
+	void enterImportFrom(RavelParser.ImportFromContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RavelParser#import_stmt}.
+	 * Exit a parse tree produced by the {@code importFrom}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitImport_stmt(RavelParser.Import_stmtContext ctx);
+	void exitImportFrom(RavelParser.ImportFromContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#import_name}.
 	 * @param ctx the parse tree
@@ -105,17 +107,15 @@ public interface RavelListener extends ParseTreeListener {
 	 */
 	void exitDotted_as_names(RavelParser.Dotted_as_namesContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code dottedName}
-	 * labeled alternative in {@link RavelParser#dotted_name}.
+	 * Enter a parse tree produced by {@link RavelParser#dotted_name}.
 	 * @param ctx the parse tree
 	 */
-	void enterDottedName(RavelParser.DottedNameContext ctx);
+	void enterDotted_name(RavelParser.Dotted_nameContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code dottedName}
-	 * labeled alternative in {@link RavelParser#dotted_name}.
+	 * Exit a parse tree produced by {@link RavelParser#dotted_name}.
 	 * @param ctx the parse tree
 	 */
-	void exitDottedName(RavelParser.DottedNameContext ctx);
+	void exitDotted_name(RavelParser.Dotted_nameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RavelParser#comp_def}.
 	 * @param ctx the parse tree

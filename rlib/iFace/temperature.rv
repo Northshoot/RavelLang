@@ -1,0 +1,6 @@
+interface TemperatureSource():
+    implementation:
+        #java = "rlib/java/temperature.stg"
+        c = "rlib/nrf52/temperature.stg"
+
+    def read(): int32

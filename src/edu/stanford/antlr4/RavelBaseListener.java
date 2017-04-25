@@ -33,25 +33,25 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterImportStatement(RavelParser.ImportStatementContext ctx) { }
+	@Override public void enterImportName(RavelParser.ImportNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImportStatement(RavelParser.ImportStatementContext ctx) { }
+	@Override public void exitImportName(RavelParser.ImportNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterImport_stmt(RavelParser.Import_stmtContext ctx) { }
+	@Override public void enterImportFrom(RavelParser.ImportFromContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImport_stmt(RavelParser.Import_stmtContext ctx) { }
+	@Override public void exitImportFrom(RavelParser.ImportFromContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -129,13 +129,13 @@ public class RavelBaseListener implements RavelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDottedName(RavelParser.DottedNameContext ctx) { }
+	@Override public void enterDotted_name(RavelParser.Dotted_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDottedName(RavelParser.DottedNameContext ctx) { }
+	@Override public void exitDotted_name(RavelParser.Dotted_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

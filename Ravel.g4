@@ -116,16 +116,12 @@ tokens { INDENT, DEDENT }
 //the file can be newlines or components definitions
 //TODO: add imports
 file_input returns [Scope scope]
-    : ( NEWLINE | import_def | comp_def )* EOF
-    ;
-
-import_def
-    : import_stmt #importStatement
+    : ( NEWLINE | import_stmt | comp_def )* EOF
     ;
 
 import_stmt
- : import_name
- | import_from
+ : import_name #importName
+ | import_from #importFrom
  ;
 
 /// import_name: 'import' dotted_as_names
@@ -167,7 +163,7 @@ dotted_as_names
 
 /// dotted_name: NAME ('.' NAME)*
 dotted_name
- : Identifier ( '.' Identifier )* #dottedName
+ : Identifier ( '.' Identifier )*
  ;
 /**
  *

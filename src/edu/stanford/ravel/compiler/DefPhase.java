@@ -4,6 +4,8 @@ import edu.stanford.antlr4.RavelParser;
 import edu.stanford.ravel.compiler.symbol.*;
 import edu.stanford.ravel.compiler.types.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import edu.stanford.antlr4.RavelBaseListener;
 import edu.stanford.ravel.RavelCompiler;
@@ -13,6 +15,7 @@ import edu.stanford.ravel.compiler.scope.LocalScope;
 import edu.stanford.ravel.compiler.scope.Scope;
 import edu.stanford.ravel.primitives.Model;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +25,7 @@ import java.util.List;
 public class DefPhase extends RavelBaseListener {
     private final boolean debug;
 
+    private GlobalScope globalScope;
     private final RavelCompiler driver;
 
     public DefPhase(RavelCompiler driver, boolean debug) {
@@ -29,10 +33,15 @@ public class DefPhase extends RavelBaseListener {
         this.debug = debug;
     }
 
+    private DefPhase(RavelCompiler driver, GlobalScope globalScope, boolean debug) {
+        this.globalScope = globalScope;
+        this.driver = driver;
+        this.debug = debug;
+    }
     private Scope currentScope;
     //TODO: will be imports eventually
 
-    private GlobalScope globalScope;
+
     private int intend = 0;
     private boolean walked = false;
     private int nextBlockId = 1;
@@ -47,10 +56,50 @@ public class DefPhase extends RavelBaseListener {
         System.out.println(getTab() + s);
     }
 
+    private void recursiveDefPhase(String path) {
+        try {
+            ParseTree tree = driver.treeFromInput(path);
+            DefPhase listener = new DefPhase(driver, globalScope, false);
+            ParseTreeWalker walker = new ParseTreeWalker();
+            walker.walk(listener, tree);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Override
+    public void enterImportFrom(RavelParser.ImportFromContext ctx) {
+        ImportSymbol is;
+        RavelParser.Dotted_nameContext impf = ctx.import_from().dotted_name();
+
+
+        List<RavelParser.Import_as_nameContext> imp = ctx.import_from().import_as_names().import_as_name();
+        for (RavelParser.Import_as_nameContext dname:imp) {
+            is = new ImportSymbol(impf.getText()+"." + dname.getText());
+            is.setFrom(impf.getText());
+            is.setName(dname.getText());
+            recursiveDefPhase(is.getPath());
+        }
+
+    }
+
+    @Override public void enterImportName(RavelParser.ImportNameContext ctx) {
+        ImportSymbol is;
+        List<RavelParser.Dotted_as_nameContext> impf = ctx.import_name().dotted_as_names().dotted_as_name();
+        for (RavelParser.Dotted_as_nameContext dname:impf) {
+            is = new ImportSymbol(dname.getText());
+            is.setName(driver.getAppPath() + "/" + dname.getText());
+            recursiveDefPhase(is.getPath());
+        }
+
+    }
 
     @Override
     public void enterFile_input(RavelParser.File_inputContext ctx) {
-        globalScope = new GlobalScope();
+        if(this.globalScope == null){
+            //we enter first file
+            globalScope = new GlobalScope();
+        }
         ctx.scope = globalScope;
         globalScope.setDefNode(ctx);
         pushScope(globalScope);

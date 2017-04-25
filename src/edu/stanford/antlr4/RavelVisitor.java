@@ -22,18 +22,19 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFile_input(RavelParser.File_inputContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code importStatement}
-	 * labeled alternative in {@link RavelParser#import_def}.
+	 * Visit a parse tree produced by the {@code importName}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitImportStatement(RavelParser.ImportStatementContext ctx);
+	T visitImportName(RavelParser.ImportNameContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link RavelParser#import_stmt}.
+	 * Visit a parse tree produced by the {@code importFrom}
+	 * labeled alternative in {@link RavelParser#import_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitImport_stmt(RavelParser.Import_stmtContext ctx);
+	T visitImportFrom(RavelParser.ImportFromContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#import_name}.
 	 * @param ctx the parse tree
@@ -71,12 +72,11 @@ public interface RavelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDotted_as_names(RavelParser.Dotted_as_namesContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code dottedName}
-	 * labeled alternative in {@link RavelParser#dotted_name}.
+	 * Visit a parse tree produced by {@link RavelParser#dotted_name}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDottedName(RavelParser.DottedNameContext ctx);
+	T visitDotted_name(RavelParser.Dotted_nameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link RavelParser#comp_def}.
 	 * @param ctx the parse tree

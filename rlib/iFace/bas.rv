@@ -1,0 +1,7 @@
+interface Bas():
+    implementation:
+        c = "rlib/nrf52/bas-ble.stg"
+
+    def updateBatteryLevel(level : int32)
+    event connected()
+    event disconnected()
