@@ -1,0 +1,8 @@
+replicated model TemperatureData(size : int32):
+    properties:
+        records = size
+
+    schema:
+        temperature : int32
+        local_time : int32
+        counter : int32

@@ -1,0 +1,61 @@
+from rlib.iFace import timer, led, button, clock
+from rlib.iFace import temperature
+
+import models
+import embedded_controllers
+import gateway_controllers
+
+
+
+space EmbeddedSpace:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        btn = Button()
+        clk =  Clock()
+        led = Led(led_num = 1)
+        timer = Timer()
+        tmp = TemperatureSource()
+
+    models:
+        data = TemperatureData(size=10)
+
+    controllers:
+        btn_ctr = ButtonController(btn = interfaces.btn,
+                                   clk = interfaces.clk,
+                                   tmp = interfaces.tmp,
+                                   led = interfaces.led,
+                                   timer = interfaces.timer,
+                                   data = models.data
+                                   )
+
+
+
+space GatewaySpace:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    interfaces:
+        clock = Clock()
+    models:
+        data = TemperatureData(size=10)
+
+    controllers:
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+
+space CloudSpace:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    interfaces:
+        clock = Clock()
+    models:
+        data = TemperatureData(size=10)
+
+    controllers:
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+
