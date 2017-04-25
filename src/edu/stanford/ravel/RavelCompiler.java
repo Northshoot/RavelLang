@@ -203,7 +203,12 @@ public class RavelCompiler {
             }
 
             logBuildStart();
-            this.mAppPath = options.getInputPath();
+            //TODO: enalbe to define import path
+            String[] path = options.getInputPath().split("/");
+            this.mAppPath="";
+            for(int i=0;i<path.length-1;i++){
+                this.mAppPath+=path[i]+"/";
+            }
 
             try {
                 ParseTree tree;
