@@ -22,7 +22,7 @@ interface Led(led_num: int32):
 streaming model Counter(size : int32):
     properties:
         records = size
-        flow = EmbeddedSpace -> GatewaySpace
+        flow = EmbeddedSpace -> GatewaySpace ->Cloudspace
 
     schema:
         counter0 : int32

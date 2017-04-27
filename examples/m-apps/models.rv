@@ -1,0 +1,51 @@
+################################################################################
+###########################        App Models     ##############################
+################################################################################
+streaming model DataSample(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = RPie->Gateway->Cloud
+
+    schema:
+        timestamp : int32
+        temperature : int32
+        #add any other data sample
+
+############################# Tier specific       #############################
+################################################################################
+###########################          Cloud        ##############################
+################################################################################
+
+
+################################################################################
+##########################          Gateway         ############################
+################################################################################
+
+
+################################################################################
+#########################          Embedded        #############################
+################################################################################
+#model for node configuration
+replicated model NodeConfig():
+    properties:
+        size = 5 #keep the last 5 configs to try resetting in case of failure
+        reliable = False
+        durable = False
+
+    schema:
+        timestamp : int32
+        certificate : byte[]
+
+#model for app configuration
+replicated model NodeAppConfig()
+    properties:
+        size = 5 #keep the last 5 configs to try resetting in case of failure
+        reliable = False
+        durable = False
+
+    schema:
+        timestamp : int32
+        sampling_frq : int32
+
