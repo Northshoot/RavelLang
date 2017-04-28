@@ -1,6 +1,9 @@
-replicated model TemperatureData(size : int32):
+streaming model TemperatureData(size : int32):
     properties:
         records = size
+        reliable = False
+        durable = False
+        flow = EmbeddedSpace->GatewaySpace
 
     schema:
         temperature : int32

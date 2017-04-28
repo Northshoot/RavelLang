@@ -1,7 +1,10 @@
-controller DataController(data : TemperatureData, clock : Clock):
+view ShowData():
+    def data_arrived(seq: int32,  temperature : int32)
+
+
+controller DataController(data : TemperatureData, clock : Clock, tempView: ShowData):
 
     event data.arrived():
         arrived_data = self.record
         system.print((str) clock.getNow() + ":: received pkt: " + (str) arrived_data.counter + " temp: " + (str)arrived_data.temperature)
-        self.record.counter = arrived_data.counter+1
-        data.save(self.record, None)
+        #tempView.data_arrived(arrived_data.counter, arrived_data.temperature)

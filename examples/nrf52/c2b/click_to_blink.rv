@@ -40,22 +40,15 @@ space GatewaySpace:
 
     interfaces:
         clock = Clock()
+
+    views:
+        v = ShowData()
+
     models:
         data = TemperatureData(size=10)
 
     controllers:
-        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+        btn_ctr = DataController(data = models.data, clock = interfaces.clock, tempView = views.v)
 
-space CloudSpace:
-    platform:
-        language = JLang
-        system = J2SE.v18
 
-    interfaces:
-        clock = Clock()
-    models:
-        data = TemperatureData(size=10)
-
-    controllers:
-        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
 

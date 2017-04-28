@@ -3,8 +3,8 @@ controller ButtonController(btn : Button, clk: Clock,
                             led : Led, timer: Timer,
                             data: TemperatureData):
 
-    blinker = 1000
-    steps = 400
+    blinker = 2000
+    steps = 2
     counter = 0
 
     event system.started():
@@ -24,26 +24,22 @@ controller ButtonController(btn : Button, clk: Clock,
             system.print("Temp is: " + (str) tmp.read())
         elif id == 3:
             if blinker < 400:
-                blinker = 1000
+                blinker = 2000
             else:
-                blinker = blinker - steps
+                blinker = (int32)(blinker/steps)
             timer.cancel()
             timer.start_periodic(blinker)
         else:
-
             counter += 1
             record = data.create()
             record.temperature = tmp.read()
             record.local_time=clk.getNow()
             record.counter = counter
-            data.save(record, None)
+            data.save(record)
 
     event data.save_done():
         system.print("save done")
 
-    event data.arrived():
-        system.print("arrived")
-        counter = self.record.counter
 
     event data.full():
         data.delete(self.record)
