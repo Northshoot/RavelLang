@@ -35,26 +35,75 @@ controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
 ##########################          AgentApp         ############################
 ################################################################################
 
+
+
+
+view TemperatureAlarmView():
+    #called from the systems when alarm model arrives
+    def alarm(device: int32, time_Stamp: int32, temperature: int32)
+
+view DeviceView():
+    event getDeviceList()
+    def updateDeviceList(device_list: DeviceList )
+
+    event getDeviceLocation()
+    def updateDeviceLocation(device_location : DeviceLocation)
+
+view LoginView():
+    #event when user clicks and submits the form
+    event requestLogin(userName: str, password: str)
+
+    #callback when the login have been verified
+    #error: login error if any
+    #token: session ID
+    #ttl: length of the session in milliseconds
+    def loginResponse(error: str, token: str, ttl: int32)
+
+
 controller AgentAlarm(alarm: Alarm,
         device_location: DeviceLocation,
         device_list: DeviceList,
         agent_location: AgentLocation,
+        temp_view : TemperatureAlarmView,
         clock: Clock):
 
     event alarm.arrived():
-        system.print("alarm arrived")
+        system.print("alarm arrived: " + (str)(clock.getNow()))
         rec = agent_location.create()
         agent_location.save(rec)
+        temp_view.alarm(0,0,0)
+
+controller DeviceViewController(device_location: DeviceLocation,
+                                device_list: DeviceList,
+                                agent_location: AgentLocation,
+                                device_view : DeviceView,
+                                clock: Clock):
+
+    event device_view.getDeviceList():
+          pass
+
+
+controller AgentBootController(log_in: LoginView, clock: Clock):
+
+    event system.started():
+        pass
+
+    event log_in.requestLogin(userName: str, password: str):
+        system.print("UNAME: " + userName + " psw " + password)
+
+
 
 controller DataController(data: DataSample, clock: Clock):
     event system.started():
         pass
 
-controller DataGenerator(data: DataSample, clock: Clock):
-    event system.started():
-        rec = data.create()
-        data.save(rec)
+
 
 ################################################################################
 #########################          Embedded        #############################
 ################################################################################
+
+controller DataGenerator(data: DataSample, clock: Clock):
+    event system.started():
+        rec = data.create()
+        data.save(rec)

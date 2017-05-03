@@ -1,6 +1,6 @@
 from rlib.iFace import timer, led, button, clock
 
-import models, iface, cntrl, views
+import models, iface, cntrl, dataviews
 
 
 
@@ -46,6 +46,11 @@ space AgentApp:
     interfaces:
         clock = Clock()
 
+    views:
+        log_in = LoginView()
+        temp_view = TemperatureAlarmView()
+        device_view = DeviceView()
+
     models:
         alarm = Alarm(size=10)
         device_list = DeviceList(size=10)
@@ -53,10 +58,18 @@ space AgentApp:
         device_location = DeviceLocation(size=10)
 
     controllers:
+        start_ctr = AgentBootController(log_in = views.log_in, clock = interfaces.clock)
+        view_ctr = DeviceViewController(device_location = models.device_location,
+                                             device_list = models.device_list,
+                                             agent_location = models.agent_location,
+                                             device_view = views.device_view,
+                                             clock = interfaces.clock)
+
         alarm_ctr = AgentAlarm(alarm = models.alarm,
                                device_location = models.device_location,
                                device_list = models.device_list,
                                agent_location = models.agent_location,
+                               temp_view = views.temp_view,
                                clock = interfaces.clock)
 
 

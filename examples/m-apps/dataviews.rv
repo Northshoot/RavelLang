@@ -11,19 +11,9 @@
 ##########################          Agent         ##############################
 ################################################################################
 
-view LogInView():
-    #event when user clicks and submits the form
-    event requestLogin(userName: str, password: str)
 
-    #callback when the login have been verified
-    #error: login error if any
-    #token: session ID
-    #ttl: length of the session in milliseconds
-    def loginResponse(error: str, token: str, ttl: int32)
 
-view TemperatureAlarmView():
-    #called from the systems when alarm model arrives
-    def alarm(device: int32, time_Stamp: int32, temperature: int32)
+
 
 ################################################################################
 #########################          Embedded        #############################
