@@ -30,6 +30,10 @@ public class <name> extends Service {
 
     public <name>() {}
 
+    public AppDispatcher getDispatcher(){
+        return dispatcher;
+        }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (dispatcher != null)

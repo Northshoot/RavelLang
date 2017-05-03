@@ -45,7 +45,7 @@ space GatewaySpace:
         v = ShowData()
 
     models:
-        data = TemperatureData(size=10)
+        data = TemperatureData(size=1000)
 
     controllers:
         btn_ctr = DataController(data = models.data, clock = interfaces.clock, tempView = views.v)

@@ -18,11 +18,48 @@ streaming model DataSample(size:int32):
 ###########################          Cloud        ##############################
 ################################################################################
 
+streaming model TemperatureAlert(size:int32):
+        properties:
+            durable = False
+            reliable = False
+            records = size
+
+        schema:
+            event_time :int32
+            event_id : int32
+            device_id: int32
+
 
 ################################################################################
 ##########################          Gateway         ############################
 ################################################################################
 
+################################################################################
+##########################          Mobile Device         ######################
+################################################################################
+
+streaming model MobileAgentResponse(size : int32):
+   properties:
+       durable = False
+       reliable = False
+       records = size
+
+   schema:
+       time_arrived : int32 #when did the event arrived to the mobile agent
+       time_notified : int32 #when did the agent alarm fired
+       time_displayed : int32 #when did the alarm was viewed
+       time_responded : int32 #when did the agent reported problem fixed
+
+streaming model MobileAgentLocation(size : int32):
+    properties:
+        durable = False
+        reliable = False
+        records = size
+
+    schema:
+        time :int32
+        lat : double
+        long : double
 
 ################################################################################
 #########################          Embedded        #############################

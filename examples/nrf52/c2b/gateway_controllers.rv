@@ -7,4 +7,4 @@ controller DataController(data : TemperatureData, clock : Clock, tempView: ShowD
     event data.arrived():
         arrived_data = self.record
         system.print((str) clock.getNow() + ":: received pkt: " + (str) arrived_data.counter + " temp: " + (str)arrived_data.temperature)
-        #tempView.data_arrived(arrived_data.counter, arrived_data.temperature)
+        tempView.data_arrived(arrived_data.counter, arrived_data.temperature)
