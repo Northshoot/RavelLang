@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public abstract class BaseScope implements Scope {
     protected Scope enclosingScope = null; // null if this scope is the root of the scope tree
     private ParserRuleContext defNode; // points at definition node in tree
+    private String fileName="";
     /** All symbols defined in this scope; can include classes, functions,
      *  variables, or anything else that is a Symbol impl. It does NOT
      *  include non-Symbol-based things like LocalScope. See nestedScopes.
@@ -205,6 +206,11 @@ public abstract class BaseScope implements Scope {
         return syms;
     }
 
+    public void setFileName(String fn){
+        this.fileName = fn;
+    }
+
+    public String getFileName(){ return this.fileName; }
     @Override
     public int getNumberOfSymbols() {
         return symbols.size();

@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
  * Created by gcampagn on 1/20/17.
  */
 public class SourceLocation {
+    public final String fileName="";
     public final int lineStart;
     public final int columnStart;
     public final int lineEnd;

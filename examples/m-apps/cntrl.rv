@@ -1,12 +1,59 @@
+from rlib.iFace import temperature
+
 ################################################################################
 ###########################          Cloud        ##############################
 ################################################################################
+
+controller AlarmController(alarm: Alarm, device_list: DeviceList, clock: Clock):
+
+    event alarm.arrived():
+        system.print("alarm arrived")
+
+
+controller DeviceManager(device_location: DeviceLocation, device_list: DeviceList, clock: Clock):
+
+    event system.started():
+        rec = device_location.create()
+        device_location.save(rec)
+
+        rec1 = device_list.create()
+        device_list.save(rec1)
 
 
 ################################################################################
 ##########################          Gateway         ############################
 ################################################################################
 
+controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
+
+    event data.arrived():
+        system.print("alarm arrived")
+        rec = alarm.create()
+        alarm.save(rec)
+
+################################################################################
+##########################          AgentApp         ############################
+################################################################################
+
+controller AgentAlarm(alarm: Alarm,
+        device_location: DeviceLocation,
+        device_list: DeviceList,
+        agent_location: AgentLocation,
+        clock: Clock):
+
+    event alarm.arrived():
+        system.print("alarm arrived")
+        rec = agent_location.create()
+        agent_location.save(rec)
+
+controller DataController(data: DataSample, clock: Clock):
+    event system.started():
+        pass
+
+controller DataGenerator(data: DataSample, clock: Clock):
+    event system.started():
+        rec = data.create()
+        data.save(rec)
 
 ################################################################################
 #########################          Embedded        #############################
