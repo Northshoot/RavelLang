@@ -1,0 +1,40 @@
+################################################################################
+###########################          Cloud        ##############################
+################################################################################
+
+
+################################################################################
+##########################          Gateway         ############################
+################################################################################
+
+################################################################################
+##########################          Agent         ##############################
+################################################################################
+
+
+view TemperatureAlarmView():
+    #called from the systems when alarm model arrives
+    def alarm(device: int32, time_Stamp: int32, temperature: int32)
+    event alarmResponse()
+
+
+view DeviceView():
+    event getDevice()
+    def updateDevice(device_list: Device )
+
+    event getDeviceLocation()
+    def updateDeviceLocation(device_location : DeviceLocation)
+
+view LoginView():
+    #event when user clicks and submits the form
+    event requestLogin(userName: str, password: str)
+
+    #callback when the login have been verified
+    #error: login error if any
+    #token: session ID
+    #ttl: length of the session in milliseconds
+    def loginResponse(error: str, token: str, ttl: int32)
+
+################################################################################
+#########################          Embedded        #############################
+################################################################################

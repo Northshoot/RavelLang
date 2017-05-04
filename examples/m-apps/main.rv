@@ -1,16 +1,15 @@
-from rlib.core.models import boot
-import models, iface, cntrl, views
+from rlib.iFace import timer, led, button, clock
 
-import models
-import embedded_controllers
-import gateway_controllers
+import models, iface,  dataviews, cntrl
+
+
 
 ################################################################################
 ###########################          Cloud        ##############################
 ################################################################################
 
 
-space CloudSpace:
+space Cloud:
     platform:
         language = JLang
         system = J2SE.v18
@@ -18,10 +17,70 @@ space CloudSpace:
     interfaces:
         clock = Clock()
     models:
-        data = TemperatureData(size=10)
+        alarm = Alarm(size=100)
+        data = DataSample(size=100)
+        device_location = DeviceLocation(size=10)
+        device_list = Device(size=10)
+        agent_location = AgentLocation(size=10)
+        temp_alarm = TemperatureAlert(size=10)
+        agent_response = MobileAgentResponse(size=10)
 
     controllers:
-        btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+        data_cntr = DataController(data = models.data, clock = interfaces.clock)
+        device_cntr = AssetManager(device_location = models.device_location,
+                                    device_list = models.device_list,
+                                    agent_location = models.agent_location,
+                                    clock = interfaces.clock)
+
+        alarm_ctr = AlarmController(alarm = models.alarm,
+                                    device_list = models.device_list,
+                                    temp_alarm = models.temp_alarm,
+                                    agent_response = models.agent_response,
+                                    clock = interfaces.clock)
+
+################################################################################
+##########################          AgentApp         ############################
+################################################################################
+
+
+
+space AgentApp:
+    platform:
+        language = JLang
+        system = Android.v19
+
+    interfaces:
+        clock = Clock()
+
+    views:
+        log_in = LoginView()
+        temp_view = TemperatureAlarmView()
+        device_view = DeviceView()
+
+    models:
+
+        device_list = Device(size=10)
+        agent_location = AgentLocation(size=10)
+        device_location = DeviceLocation(size=10)
+        agent_response = MobileAgentResponse(size=10)
+        temp_alarm = TemperatureAlert(size=10)
+
+    controllers:
+        start_ctr = AgentBootController(log_in = views.log_in, clock = interfaces.clock)
+        view_ctr = DeviceViewController(device_location = models.device_location,
+                                             device_list = models.device_list,
+                                             agent_location = models.agent_location,
+                                             device_view = views.device_view,
+                                             clock = interfaces.clock)
+
+        alarm_ctr = AgentAlarm(device_location = models.device_location,
+                               device_list = models.device_list,
+                               agent_location = models.agent_location,
+                               temp_view = views.temp_view,
+                               agent_response= models.agent_response,
+                               temp_alarm = models.temp_alarm,
+                               clock = interfaces.clock)
+
 
 ################################################################################
 ##########################          Gateway         ############################
@@ -29,47 +88,42 @@ space CloudSpace:
 
 
 
-space GatewaySpace:
+space Gateway:
     platform:
-        language = JLang
-        system = Android.v19
+        language = CLang
+        system = Posix.v2008
 
     interfaces:
         clock = Clock()
     models:
-        data = TemperatureData(size=10)
+        data = DataSample(size=10000)
+        alarm = Alarm(size=100)
 
     controllers:
         btn_ctr = DataController(data = models.data, clock = interfaces.clock)
+        alarm_ctr = AlarmCreator(alarm = models.alarm, data = models.data,clock = interfaces.clock)
 
 
 ################################################################################
 #########################          Embedded        #############################
 ################################################################################
 
-space EmbeddedSpace:
+space RPie:
     platform:
         language = CLang
+        #system = Posix.v2008
         system = Nrf52.v1
 
     interfaces:
         btn = Button()
-        clk =  Clock()
+        clock =  Clock()
         led = Led(led_num = 1)
         timer = Timer()
         tmp = TemperatureSource()
 
     models:
-        data = TemperatureData(size=10)
+        data = DataSample(size=1000)
+        #node_config = NodeConfig()
 
     controllers:
-        btn_ctr = ButtonController(btn = interfaces.btn,
-                                   clk = interfaces.clk,
-                                   tmp = interfaces.tmp,
-                                   led = interfaces.led,
-                                   timer = interfaces.timer,
-                                   data = models.data
-                                   )
-
-
-
+        btn_ctr = DataGenerator(data = models.data, timer = interfaces.timer, clock = interfaces.clock)

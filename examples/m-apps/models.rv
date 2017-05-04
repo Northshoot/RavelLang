@@ -13,21 +13,75 @@ streaming model DataSample(size:int32):
         temperature : int32
         #add any other data sample
 
+streaming model Alarm(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = Gateway->Cloud
+
+    schema:
+        timestamp : int32
+        device_id : int32
+        temperature : int32
+
+
+streaming model DeviceLocation(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = Cloud->AgentApp
+
+    schema:
+        device_id : int32
+        longitude : int32
+        latitude : int32
+
+
+streaming model Device(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = Cloud->AgentApp
+
+    schema:
+        device_id : int32
+        location_id : int32
+
+replicated model Authenticate(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+
+
+    schema:
+        device_id : int32
+        device_key :byte[]
+        token : byte[]
+        ttl : int32
+
 ############################# Tier specific       #############################
 ################################################################################
 ###########################          Cloud        ##############################
 ################################################################################
 
-streaming model TemperatureAlert(size:int32):
-        properties:
-            durable = False
-            reliable = False
-            records = size
 
-        schema:
-            event_time :int32
-            event_id : int32
-            device_id: int32
+
+streaming model TemperatureAlert(size:int32):
+    properties:
+        durable = False
+        reliable = False
+        records = size
+        flow = Cloud->AgentApp
+
+    schema:
+        timestamp : int32
+        temperature : int32
+        device_id: str
+        device_location_id: str
 
 
 ################################################################################
@@ -35,7 +89,7 @@ streaming model TemperatureAlert(size:int32):
 ################################################################################
 
 ################################################################################
-##########################          Mobile Device         ######################
+##########################          AgentApp         ###########################
 ################################################################################
 
 streaming model MobileAgentResponse(size : int32):
@@ -43,6 +97,7 @@ streaming model MobileAgentResponse(size : int32):
        durable = False
        reliable = False
        records = size
+       flow = AgentApp->Cloud
 
    schema:
        time_arrived : int32 #when did the event arrived to the mobile agent
@@ -50,16 +105,21 @@ streaming model MobileAgentResponse(size : int32):
        time_displayed : int32 #when did the alarm was viewed
        time_responded : int32 #when did the agent reported problem fixed
 
-streaming model MobileAgentLocation(size : int32):
+
+
+streaming model AgentLocation(size: int32):
     properties:
-        durable = False
-        reliable = False
         records = size
+        reliable = False
+        durable = False
+        flow = AgentApp->Cloud
 
     schema:
-        time :int32
-        lat : double
-        long : double
+        timestamp : int32
+        longitude : int32
+        latitude : int32
+
+
 
 ################################################################################
 #########################          Embedded        #############################
@@ -67,7 +127,7 @@ streaming model MobileAgentLocation(size : int32):
 #model for node configuration
 replicated model NodeConfig():
     properties:
-        size = 5 #keep the last 5 configs to try resetting in case of failure
+        records = 5 #keep the last 5 configs to try resetting in case of failure
         reliable = False
         durable = False
 
@@ -76,9 +136,9 @@ replicated model NodeConfig():
         certificate : byte[]
 
 #model for app configuration
-replicated model NodeAppConfig()
+replicated model NodeAppConfig():
     properties:
-        size = 5 #keep the last 5 configs to try resetting in case of failure
+        records = 5 #keep the last 5 configs to try resetting in case of failure
         reliable = False
         durable = False
 

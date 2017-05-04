@@ -1,13 +1,136 @@
+from rlib.iFace import temperature
+
 ################################################################################
 ###########################          Cloud        ##############################
 ################################################################################
 
+controller AlarmController(
+                            alarm: Alarm,
+                            device_list: Device,
+                            temp_alarm: TemperatureAlert,
+                            agent_response : MobileAgentResponse,
+                            clock: Clock):
+
+
+    event alarm.arrived():
+        rec = self.record
+        # get device id
+        # get associated agent(s)
+        # issiue alarm
+        alarm_rec = temp_alarm.create()
+        temp_alarm.save(alarm_rec)
+
+    event temp_alarm.save_done():
+        #delete from local buffer
+        temp_alarm.delete(self.record)
+
+    event agent_response.arrived():
+        system.print("response arrived")
+
+controller AssetManager(device_location: DeviceLocation,
+                        device_list: Device,
+                        agent_location: AgentLocation,
+                        clock: Clock):
+
+    event system.started():
+        rec = device_location.create()
+        device_location.save(rec)
+
+        rec1 = device_list.create()
+        device_list.save(rec1)
+
+
+
+    event agent_location.arrived():
+        system.print("agent location arrived")
 
 ################################################################################
 ##########################          Gateway         ############################
 ################################################################################
 
+controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
+
+    event data.arrived():
+        system.print("alarm arrived")
+        rec = alarm.create()
+        alarm.save(rec)
+
+################################################################################
+##########################          AgentApp         ############################
+################################################################################
+
+
+
+
+
+
+
+controller AgentAlarm(
+        device_location: DeviceLocation,
+        device_list: Device,
+        agent_location: AgentLocation,
+        temp_view : TemperatureAlarmView,
+        agent_response : MobileAgentResponse,
+        temp_alarm : TemperatureAlert,
+        clock: Clock):
+
+    event temp_alarm.arrived():
+        system.print("alarm arrived: " + (str)(clock.getNow()))
+        rec = agent_location.create()
+        agent_location.save(rec)
+        temp_view.alarm(0,0,0)
+
+    event temp_view.alarmResponse():
+        rec = agent_response.create()
+        agent_response.save(rec)
+
+
+controller DeviceViewController(device_location: DeviceLocation,
+                                device_list: Device,
+                                agent_location: AgentLocation,
+                                device_view : DeviceView,
+                                clock: Clock):
+
+    event device_view.getDevice():
+          pass
+
+
+controller AgentBootController(log_in: LoginView, clock: Clock):
+
+    event system.started():
+        pass
+
+    event log_in.requestLogin(userName: str, password: str):
+        system.print("UNAME: " + userName + " psw " + password)
+
+
+
+controller DataController(data: DataSample, clock: Clock):
+
+    event data.arrived():
+        system.print("Data arrived")
+
 
 ################################################################################
 #########################          Embedded        #############################
 ################################################################################
+
+controller DataGenerator(data: DataSample, timer: Timer, clock: Clock):
+
+    #event system.connected():
+
+    event system.started():
+        ## request authentication
+        timer.start_periodic(1000)
+
+    event timer.fired():
+        rec = data.create()
+        data.save(rec)
+
+    event data.save_done():
+        #save done we delete the record
+        data.delete(self.record)
+
+    event data.full():
+        #the buffer is full and we need to discard
+        data.delete(data.first())
