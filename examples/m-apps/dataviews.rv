@@ -22,8 +22,7 @@ view DeviceView():
     event getDevice()
     def updateDevice(device_list: Device )
 
-    event getDeviceLocation()
-    def updateDeviceLocation(device_location : DeviceLocation)
+
 
 view LoginView():
     #event when user clicks and submits the form

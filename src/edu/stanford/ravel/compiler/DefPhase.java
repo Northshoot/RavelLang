@@ -796,7 +796,7 @@ public class DefPhase extends RavelBaseListener {
                 else if (referencedSymbol instanceof InstanceSymbol)
                     instance.symbol.addParameter(pname, referencedSymbol);
                 else // null, or some weird symbol (eg another SpaceSymbol or a ModelSymbol)
-                    emitError(ctx, "invalid parameter value (not a variable in scope)");
+                    emitError(ctx, ">> " + pname + " with reference to " +pval.qualified_name().getText() +" << does not name a variable in the scope");
             } else {
                 instance.symbol.addParameter(pname, ParserUtils.literalToValue(pval.literal()));
             }

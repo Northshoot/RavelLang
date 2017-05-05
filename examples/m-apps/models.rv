@@ -9,6 +9,7 @@ streaming model DataSample(size:int32):
         flow = RPie->Gateway->Cloud
 
     schema:
+        device_id : int32
         timestamp : int32
         temperature : int32
         #add any other data sample
@@ -26,40 +27,47 @@ streaming model Alarm(size:int32):
         temperature : int32
 
 
-streaming model DeviceLocation(size:int32):
-    properties:
-        records = size
-        reliable = False
-        durable = False
-        flow = Cloud->AgentApp
-
-    schema:
-        device_id : int32
-        longitude : int32
-        latitude : int32
-
-
 streaming model Device(size:int32):
     properties:
         records = size
         reliable = False
         durable = False
-        flow = Cloud->AgentApp
+        flow = RPie->Gateway->Cloud->AgentApp
 
     schema:
         device_id : int32
         location_id : int32
+        longitude : int32
+        latitude : int32
 
-replicated model Authenticate(size:int32):
+
+
+#the device issue and authentication request.
+streaming model AuthRQDevice(size:int32):
     properties:
         records = size
         reliable = False
         durable = False
+        flow = RPie->Gateway->Cloud
 
 
     schema:
         device_id : int32
+        request_time: int32
         device_key :byte[]
+
+#cloud authenticated the device
+streaming model AuthRPDevice(size:int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = Cloud->Gateway->RPie
+
+
+    schema:
+        device_id : int32
+        timestamp : int32
         token : byte[]
         ttl : int32
 

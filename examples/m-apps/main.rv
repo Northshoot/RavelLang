@@ -16,18 +16,21 @@ space Cloud:
 
     interfaces:
         clock = Clock()
+        timer = Timer()
+
     models:
         alarm = Alarm(size=100)
         data = DataSample(size=100)
-        device_location = DeviceLocation(size=10)
-        device_list = Device(size=10)
+        device_list = Device(size=100)
         agent_location = AgentLocation(size=10)
         temp_alarm = TemperatureAlert(size=10)
         agent_response = MobileAgentResponse(size=10)
+        auth_reply = AuthRPDevice(size=100)
+        auth_rq = AuthRQDevice(size=100)
 
     controllers:
         data_cntr = DataController(data = models.data, clock = interfaces.clock)
-        device_cntr = AssetManager(device_location = models.device_location,
+        device_cntr = AssetManager(
                                     device_list = models.device_list,
                                     agent_location = models.agent_location,
                                     clock = interfaces.clock)
@@ -37,6 +40,12 @@ space Cloud:
                                     temp_alarm = models.temp_alarm,
                                     agent_response = models.agent_response,
                                     clock = interfaces.clock)
+
+        auth_server = AuthenticateDevices(auth_rq = models.auth_rq,
+                                  auth_reply=models.auth_reply,
+                                  clock = interfaces.clock,
+                                  timer = interfaces.timer
+                                  )
 
 ################################################################################
 ##########################          AgentApp         ############################
@@ -51,6 +60,7 @@ space AgentApp:
 
     interfaces:
         clock = Clock()
+        timer = Timer()
 
     views:
         log_in = LoginView()
@@ -58,28 +68,28 @@ space AgentApp:
         device_view = DeviceView()
 
     models:
-
         device_list = Device(size=10)
         agent_location = AgentLocation(size=10)
-        device_location = DeviceLocation(size=10)
         agent_response = MobileAgentResponse(size=10)
         temp_alarm = TemperatureAlert(size=10)
 
     controllers:
         start_ctr = AgentBootController(log_in = views.log_in, clock = interfaces.clock)
-        view_ctr = DeviceViewController(device_location = models.device_location,
-                                             device_list = models.device_list,
-                                             agent_location = models.agent_location,
-                                             device_view = views.device_view,
-                                             clock = interfaces.clock)
+        view_ctr = DeviceViewController(
+                                         device_list = models.device_list,
+                                         agent_location = models.agent_location,
+                                         device_view = views.device_view,
+                                         clock = interfaces.clock)
 
-        alarm_ctr = AgentAlarm(device_location = models.device_location,
-                               device_list = models.device_list,
+        alarm_ctr = AgentAlarm(device_list = models.device_list,
                                agent_location = models.agent_location,
                                temp_view = views.temp_view,
                                agent_response= models.agent_response,
                                temp_alarm = models.temp_alarm,
                                clock = interfaces.clock)
+
+
+
 
 
 ################################################################################
@@ -96,8 +106,11 @@ space Gateway:
     interfaces:
         clock = Clock()
     models:
+        device = Device(size=100)
         data = DataSample(size=10000)
         alarm = Alarm(size=100)
+        auth_reply = AuthRPDevice(size=100)
+        auth_rq = AuthRQDevice(size=100)
 
     controllers:
         btn_ctr = DataController(data = models.data, clock = interfaces.clock)
@@ -121,9 +134,23 @@ space RPie:
         timer = Timer()
         tmp = TemperatureSource()
 
+
     models:
         data = DataSample(size=1000)
+        device = Device(size=1)
+        auth_reply = AuthRPDevice(size=3)
+        auth_rq = AuthRQDevice(size=3)
         #node_config = NodeConfig()
 
     controllers:
-        btn_ctr = DataGenerator(data = models.data, timer = interfaces.timer, clock = interfaces.clock)
+        auth_client = Authentication(
+                                   device = models.device,
+                                   auth_rq = models.auth_rq,
+                                   auth_reply=models.auth_reply,
+                                   clock = interfaces.clock,
+                                   timer = interfaces.timer
+                                   )
+        btn_ctr = DataGenerator(data = models.data,
+                                temperature=interfaces.tmp,
+                                timer = interfaces.timer,
+                                clock = interfaces.clock)

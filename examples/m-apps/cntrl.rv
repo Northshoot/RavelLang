@@ -4,6 +4,31 @@ from rlib.iFace import temperature
 ###########################          Cloud        ##############################
 ################################################################################
 
+controller AuthenticateDevices(auth_rq: AuthRQDevice,
+                          auth_reply: AuthRPDevice,
+                          clock: Clock,
+                          timer : Timer
+                          ):
+
+
+    #need interface to perform auth computations
+    #need interface to access ttl and byte[]
+
+    event auth_rq.arrived():
+        #deal with the request
+        rx_rec = self.record
+        rec = auth_reply.create()
+        rec.device_id = rx_rec.device_id
+        rec.timestamp = clock.getNow()
+        rec.ttl = 150000
+        auth_reply.save(rec)
+
+     event auth_reply.full():
+        auth_reply.delete(auth_reply.first())
+
+     event auth_rq.full():
+        auth_rq.delete(auth_rq.first())
+
 controller AlarmController(
                             alarm: Alarm,
                             device_list: Device,
@@ -27,17 +52,12 @@ controller AlarmController(
     event agent_response.arrived():
         system.print("response arrived")
 
-controller AssetManager(device_location: DeviceLocation,
-                        device_list: Device,
+controller AssetManager(device_list: Device,
                         agent_location: AgentLocation,
                         clock: Clock):
 
     event system.started():
-        rec = device_location.create()
-        device_location.save(rec)
-
-        rec1 = device_list.create()
-        device_list.save(rec1)
+        pass
 
 
 
@@ -66,7 +86,6 @@ controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
 
 
 controller AgentAlarm(
-        device_location: DeviceLocation,
         device_list: Device,
         agent_location: AgentLocation,
         temp_view : TemperatureAlarmView,
@@ -85,8 +104,7 @@ controller AgentAlarm(
         agent_response.save(rec)
 
 
-controller DeviceViewController(device_location: DeviceLocation,
-                                device_list: Device,
+controller DeviceViewController(device_list: Device,
                                 agent_location: AgentLocation,
                                 device_view : DeviceView,
                                 clock: Clock):
@@ -115,7 +133,48 @@ controller DataController(data: DataSample, clock: Clock):
 #########################          Embedded        #############################
 ################################################################################
 
-controller DataGenerator(data: DataSample, timer: Timer, clock: Clock):
+controller Authentication(device: Device,
+                          auth_rq: AuthRQDevice,
+                          auth_reply: AuthRPDevice,
+                          clock: Clock,
+                          timer : Timer
+                          ):
+
+    auth_ttl:int32 = 100000
+    device_id = 123456
+
+    event system.started():
+        #set to default value
+        rec = device.create()
+        rec.device_id = device_id
+        device.save(rec)
+        timer.start_periodic(auth_ttl)
+
+
+    event timer.fired():
+        rec = auth_rq.create()
+        rec.device_id = device_id
+        rec.request_time = clock.getNow()
+        auth_rq.save(rec)
+
+
+    event auth_reply.arrived():
+        #we got response, set timer to fire in ttl
+        timer.cancel()
+        rec = self.record
+        auth_ttl = rec.ttl
+        timer.start_periodic(auth_ttl)
+
+     event auth_reply.full():
+        auth_reply.delete(auth_reply.first())
+
+
+    event auth_rq.save_done():
+        #authentication request have been received
+        #we set second timer if the reply does not come and deal with it
+        auth_rq.delete(self.record)
+
+controller DataGenerator(data: DataSample, temperature: TemperatureSource, timer: Timer, clock: Clock):
 
     #event system.connected():
 
@@ -125,6 +184,8 @@ controller DataGenerator(data: DataSample, timer: Timer, clock: Clock):
 
     event timer.fired():
         rec = data.create()
+        rec.timestamp = clock.getNow()
+        rec.temperature = temperature.read()
         data.save(rec)
 
     event data.save_done():
