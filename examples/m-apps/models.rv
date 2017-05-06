@@ -114,6 +114,16 @@ streaming model MobileAgentResponse(size : int32):
        time_responded : int32 #when did the agent reported problem fixed
 
 
+local model DeviceData(size:int32):
+   properties:
+       durable = False
+       reliable = False
+       records = size
+
+   schema:
+       device_id: int32
+       last_seen: int32
+       temperature: int32
 
 streaming model AgentLocation(size: int32):
     properties:

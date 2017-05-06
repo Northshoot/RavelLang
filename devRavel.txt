@@ -3,7 +3,6 @@ making variables
 
 TODO's for Ravel:
 
-* add imports
 * define controller life cycle X
 * draw architecture
 * move to multiple models and multiple controller using same model per tier

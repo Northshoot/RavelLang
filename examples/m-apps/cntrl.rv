@@ -34,7 +34,8 @@ controller AlarmController(
                             device_list: Device,
                             temp_alarm: TemperatureAlert,
                             agent_response : MobileAgentResponse,
-                            clock: Clock):
+                            clock: Clock
+                            ):
 
 
     event alarm.arrived():
@@ -70,11 +71,26 @@ controller AssetManager(device_list: Device,
 
 controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
 
-    event data.arrived():
-        system.print("alarm arrived")
-        rec = alarm.create()
-        alarm.save(rec)
+    low_bound: int32 = 20
+    high_bound: int32 = 40
 
+    event data.arrived():
+        system.print("data arrived")
+        rx_data = self.record
+        if rx_data.temperature < low_bound or rx_data.temperature > high_bound:
+            rec = alarm.create()
+            rec.timestamp = clock.getNow()
+            rec.device_id = rx_data.device_id
+            rec.temperature = rx_data.temperature
+            alarm.save(rec)
+
+    event data.full():
+        #clean out records
+        pass
+
+    event alarm.full():
+        #clean out records
+        pass
 ################################################################################
 ##########################          AgentApp         ############################
 ################################################################################
@@ -83,7 +99,27 @@ controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
 
 
 
+controller DataFlowController( device: Device,
+                               auth_reply: AuthRPDevice,
+                               auth_rq:  AuthRQDevice ):
 
+        event device.arrived():
+            rec = self.record
+            system.print("Device bootstraping: " + (str)(rec.device_id))
+
+
+        event auth_rq.arrived():
+            system.print("Auth request arrived")
+
+        event auth_reply.arrived():
+            system.print("Auth reply arrived")
+
+        event auth_reply.full():
+            auth_reply.delete(auth_reply.first())
+
+
+        event auth_rq.full():
+            auth_rq.delete(auth_rq.first())
 
 controller AgentAlarm(
         device_list: Device,
@@ -140,7 +176,7 @@ controller Authentication(device: Device,
                           timer : Timer
                           ):
 
-    auth_ttl:int32 = 100000
+    auth_ttl:int32 = 10000
     device_id = 123456
 
     event system.started():
@@ -166,8 +202,12 @@ controller Authentication(device: Device,
         timer.start_periodic(auth_ttl)
 
      event auth_reply.full():
+        system.print("auth_reply full")
         auth_reply.delete(auth_reply.first())
 
+    event auth_rq.full():
+        system.print("auth_rq full")
+        auth_rq.delete(self.record)
 
     event auth_rq.save_done():
         #authentication request have been received

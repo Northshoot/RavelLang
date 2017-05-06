@@ -27,6 +27,7 @@ public class J2SE extends BasePlatform {
 
     private final STGroup mainGroup;
     private final STGroup buildGroup;
+    private final String mMainFileName = "Application";
 
     public J2SE() {
         // java 1.8 required
@@ -43,7 +44,7 @@ public class J2SE extends BasePlatform {
         tmpl.add("package", javaOptions.getPackageName());
 
         FileObject file = new FileObject();
-        file.setFileName("Application.java");
+        file.setFileName(mMainFileName+ ".java");
         file.setContent(tmpl.render());
         file.setSubPath("src/" + javaOptions.getPackageName().replace(".", "/"));
         CodeModule module = new CodeModule();
@@ -59,6 +60,7 @@ public class J2SE extends BasePlatform {
 
         ST tmpl = buildGroup.getInstanceOf("ant");
         tmpl.add("java_runtime", runtimePath);
+        tmpl.add("main_class", joptions.getPackageName()+"."+mMainFileName);
 
         FileObject build_xml = new FileObject();
         build_xml.setFileName("build.xml");

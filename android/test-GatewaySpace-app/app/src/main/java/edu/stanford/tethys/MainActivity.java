@@ -14,14 +14,18 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.stanford.ravel.generated.GatewaySpace;
+import org.stanford.ravel.generated.Gateway;
 import org.stanford.ravel.rrt.android.DeleteMeKeys;
 import org.stanford.ravel.rrt.tiers.BleEndpoint;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -33,7 +37,7 @@ public class MainActivity extends Activity {
     //Application has to create endpoints
     //FIXME: this should me more automated
     //for now output is from Ravel compiler
-    GatewaySpace gatewaySpace;
+    Gateway gatewaySpace;
     boolean mServiceBound = false;
     BleEndpoint localEndpoint = new BleEndpoint(2);
     Endpoint cloud;
@@ -50,7 +54,7 @@ public class MainActivity extends Activity {
 
         enable_sdk_23();
         // start the service if not already
-        Intent intent = new Intent(this, GatewaySpace.class);
+        Intent intent = new Intent(this, Gateway.class);
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -59,11 +63,11 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        try { //"tcp://camembert.stanford.edu:1234"
-//            cloud = Endpoint.fromString(3, new URI("tcp://171.64.70.106:1234"), Collections.<String, String>emptyMap());
-//        } catch(URISyntaxException|MalformedURLException e) {
-//            throw new RuntimeException(e);
-//        }
+        try { //"tcp://192.168.2.117:1234"
+            cloud = Endpoint.fromString(1, new URI("tcp://192.168.2.117:1234"), Collections.<String, String>emptyMap());
+        } catch(URISyntaxException |MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
         setContentView(R.layout.main_activity);
 
 
@@ -89,14 +93,14 @@ public class MainActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            GatewaySpace.GatewaySpaceBinder myBinder = (GatewaySpace.GatewaySpaceBinder) service;
+            Gateway.GatewayBinder myBinder = (Gateway.GatewayBinder) service;
             gatewaySpace = myBinder.getService();
             mServiceBound = true;
             localEndpoint.setLocal(true);
             eps.add(localEndpoint);
             //Can not add more end point than application is using
             //FIXME: commenting out cloud for two way test
-            //eps.add(cloud);
+            eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
             InputStream stream = new ByteArrayInputStream(DeleteMeKeys.key_0.getBytes(UTF_8));
             gatewaySpace.setKey(stream);

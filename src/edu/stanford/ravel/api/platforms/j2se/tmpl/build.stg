@@ -1,6 +1,6 @@
 delimiters "%", "%"
 
-ant(java_runtime) ::=<<
+ant(java_runtime, main_class) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="compile" name="ravel">
   <!-- Set useful variables -->
@@ -15,7 +15,12 @@ ant(java_runtime) ::=<<
     <mkdir dir="${classes}"/>
     <javac srcdir="${src}" destdir="${classes}" classpath="%java_runtime%" debug="true" includeantruntime="false" source="${source}" target="${target}">
     </javac>
-    <jar destfile="app.jar" basedir="${classes}" />
+    <jar destfile="app.jar" basedir="${classes}" >
+        <zipfileset includes="**/*.class" src="%java_runtime%"/>
+        <manifest>
+          <attribute name="Main-Class" value="%main_class%"/>
+        </manifest>
+        </jar>
   </target>
 
   <!-- Clean up -->
