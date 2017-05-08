@@ -1,0 +1,89 @@
+import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.*;
+
+<imports:do_import()>
+
+public class <name> {
+    <interface.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
+
+    private final static String TAG = <name>.class.getSimpleName();
+    private final int __id;
+    private String database = "?db=";
+    private String type = "application/x-www-form-urlencoded";
+
+    private String url;
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
+        __id = instanceId;
+
+
+    }
+
+    // Setter methods for AppDispatcher
+    <interface.controllerList:set_controller_method(); separator="\n">
+
+ public void innit(String db, String url){
+        this.database+=db;
+        this.url = url;
+    }
+
+    public void pushData(String data){
+            URL u = null;
+            try {
+                u = new URL(this.url+this.database );
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            assert u != null;
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) u.openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            conn.setDoOutput(true);
+            try {
+                conn.setRequestMethod("POST");
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            }
+            conn.setRequestProperty( "Content-Type", type );
+
+
+            OutputStream os = null;
+            try {
+                DataOutputStream output = new DataOutputStream(conn.getOutputStream());
+                output.writeBytes(data);
+
+                output.close();
+                System.out.println(TAG + " :: Resp Code:"+conn .getResponseCode());
+                System.out.println(TAG + " :: Resp Message:"+ conn .getResponseMessage());
+                 /*
+                DataInputStream input = new DataInputStream( conn.getInputStream() );
+
+
+
+                for( int c = input.read(); c != -1; c = input.read() )
+                    System.out.print( (char)c );
+                input.close();
+
+                System.out.println(TAG + " :: Resp Code:" +conn .getResponseCode());
+                System.out.println(TAG + " :: Resp Message:" + conn .getResponseMessage());
+                */
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+}
+
+>>

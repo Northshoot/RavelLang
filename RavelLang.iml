@@ -13,6 +13,12 @@
       <excludeFolder url="file://$MODULE_DIR$/src/org/stanford/ravel/api/platforms/android-old" />
       <excludeFolder url="file://$MODULE_DIR$/src/patterns/Android" />
     </content>
+    <content url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc">
+      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout" />
+      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/AgentApp/src/main/java" />
+      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/Cloud/src" />
+      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/Gateway/src/main/java" />
+    </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
@@ -31,11 +37,13 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../12-sdk/antlr/antlr-4.7-complete.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../12-sdk/antrl/antlr-4.7-complete.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="R User Library" level="project" />
+    <orderEntry type="library" name="R Skeletons" level="application" />
   </component>
 </module>

@@ -1,0 +1,7 @@
+interface InfluxWriter():
+    implementation:
+        java = "rlib/java/influx.stg"
+
+    def innit(db : str, url : str)
+
+    def pushData(data : str)
