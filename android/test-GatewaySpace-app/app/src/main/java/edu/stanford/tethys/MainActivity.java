@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
     //for now output is from Ravel compiler
     Gateway gatewaySpace;
     boolean mServiceBound = false;
-    BleEndpoint localEndpoint = new BleEndpoint(2);
+    BleEndpoint localEndpoint = new BleEndpoint(3);
     Endpoint cloud;
 
     ArrayList<Endpoint> eps = new ArrayList<>();
@@ -80,11 +80,15 @@ public class MainActivity extends Activity {
     public void onDestroy(){
         mServiceBound = false;
         if(gatewaySpace != null){
+
             gatewaySpace.onDestroy();
+        }
+        if (mServiceConnection != null) {
+            unbindService(mServiceConnection);
         }
         super.onDestroy();
     }
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    protected ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {

@@ -6,6 +6,7 @@ from rlib.iFace import temperature
 
 controller AuthenticateDevices(auth_rq: AuthRQDevice,
                           auth_reply: AuthRPDevice,
+                          device: Device,
                           clock: Clock,
                           timer : Timer
                           ):
@@ -14,13 +15,18 @@ controller AuthenticateDevices(auth_rq: AuthRQDevice,
     #need interface to perform auth computations
     #need interface to access ttl and byte[]
 
+    event device.arrived():
+        rec = self.record
+        system.print("New device: " + (str)(rec.device_id))
+
     event auth_rq.arrived():
         #deal with the request
         rx_rec = self.record
+        system.print("["+(str)(clock.getNow())+"]: " + "Auth request from: " + (str)(rx_rec.device_id))
         rec = auth_reply.create()
         rec.device_id = rx_rec.device_id
         rec.timestamp = clock.getNow()
-        rec.ttl = 150000
+        rec.ttl = 15000
         auth_reply.save(rec)
 
      event auth_reply.full():
@@ -31,7 +37,7 @@ controller AuthenticateDevices(auth_rq: AuthRQDevice,
 
 controller AlarmController(
                             alarm: Alarm,
-                            device_list: Device,
+                            device_list: DeviceS,
                             temp_alarm: TemperatureAlert,
                             agent_response : MobileAgentResponse,
                             clock: Clock
@@ -43,6 +49,9 @@ controller AlarmController(
         # get device id
         # get associated agent(s)
         # issiue alarm
+        dev_rec = device_list.create()
+        dev_rec.device_id = rec.device_id
+        device_list.save(dev_rec)
         alarm_rec = temp_alarm.create()
         temp_alarm.save(alarm_rec)
 
@@ -65,6 +74,12 @@ controller AssetManager(device_list: Device,
     event agent_location.arrived():
         system.print("agent location arrived")
 
+controller DataController(data: DataSample, clock: Clock):
+
+    event data.arrived():
+        rec = self.record
+        system.print("Data arrived from: " +(str)(rec.device_id) + " temp " + (str)(rec.temperature))
+
 ################################################################################
 ##########################          Gateway         ############################
 ################################################################################
@@ -75,8 +90,9 @@ controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
     high_bound: int32 = 40
 
     event data.arrived():
-        system.print("data arrived")
         rx_data = self.record
+        system.print("Data arrived from: " +(str)(rx_data.device_id) + " temp " + (str)(rx_data.temperature))
+
         if rx_data.temperature < low_bound or rx_data.temperature > high_bound:
             rec = alarm.create()
             rec.timestamp = clock.getNow()
@@ -86,18 +102,11 @@ controller AlarmCreator(alarm: Alarm, data: DataSample, clock: Clock):
 
     event data.full():
         #clean out records
-        pass
+        system.print("data full")
 
     event alarm.full():
         #clean out records
-        pass
-################################################################################
-##########################          AgentApp         ############################
-################################################################################
-
-
-
-
+        system.print("alarm full")
 
 controller DataFlowController( device: Device,
                                auth_reply: AuthRPDevice,
@@ -121,8 +130,19 @@ controller DataFlowController( device: Device,
         event auth_rq.full():
             auth_rq.delete(auth_rq.first())
 
+
+################################################################################
+##########################          AgentApp         ############################
+################################################################################
+
+
+
+
+
+
+
 controller AgentAlarm(
-        device_list: Device,
+        device_list: DeviceS,
         agent_location: AgentLocation,
         temp_view : TemperatureAlarmView,
         agent_response : MobileAgentResponse,
@@ -140,7 +160,7 @@ controller AgentAlarm(
         agent_response.save(rec)
 
 
-controller DeviceViewController(device_list: Device,
+controller DeviceViewController(device_list: DeviceS,
                                 agent_location: AgentLocation,
                                 device_view : DeviceView,
                                 clock: Clock):
@@ -159,10 +179,6 @@ controller AgentBootController(log_in: LoginView, clock: Clock):
 
 
 
-controller DataController(data: DataSample, clock: Clock):
-
-    event data.arrived():
-        system.print("Data arrived")
 
 
 ################################################################################
@@ -173,10 +189,10 @@ controller Authentication(device: Device,
                           auth_rq: AuthRQDevice,
                           auth_reply: AuthRPDevice,
                           clock: Clock,
-                          timer : Timer
+                          timer_1 : Timer
                           ):
 
-    auth_ttl:int32 = 10000
+    auth_ttl:int32 = 1000
     device_id = 123456
 
     event system.started():
@@ -184,10 +200,14 @@ controller Authentication(device: Device,
         rec = device.create()
         rec.device_id = device_id
         device.save(rec)
-        timer.start_periodic(auth_ttl)
+        timer_1.start_one_shot(auth_ttl)
 
+    event device.save_done():
+        system.print("Device sent done")
+        timer_1.start_one_shot(auth_ttl)
 
-    event timer.fired():
+    event timer_1.fired():
+        system.print("auth timer")
         rec = auth_rq.create()
         rec.device_id = device_id
         rec.request_time = clock.getNow()
@@ -196,10 +216,10 @@ controller Authentication(device: Device,
 
     event auth_reply.arrived():
         #we got response, set timer to fire in ttl
-        timer.cancel()
+        system.print("Got auth reply")
         rec = self.record
         auth_ttl = rec.ttl
-        timer.start_periodic(auth_ttl)
+        #timer.start_periodic(auth_ttl)
 
      event auth_reply.full():
         system.print("auth_reply full")
@@ -214,23 +234,29 @@ controller Authentication(device: Device,
         #we set second timer if the reply does not come and deal with it
         auth_rq.delete(self.record)
 
-controller DataGenerator(data: DataSample, temperature: TemperatureSource, timer: Timer, clock: Clock):
+controller DataGenerator(data: DataSample,
+                        temperature: TemperatureSource,
+                        auth_reply: AuthRPDevice,
+                        timer: Timer, clock: Clock):
 
-    #event system.connected():
+
 
     event system.started():
         ## request authentication
+        system.print("DG: auth reply arrived")
         timer.start_periodic(1000)
 
     event timer.fired():
         rec = data.create()
         rec.timestamp = clock.getNow()
         rec.temperature = temperature.read()
+        system.print("data: " + (str)(rec.temperature))
         data.save(rec)
 
     event data.save_done():
         #save done we delete the record
-        data.delete(self.record)
+        system.print("data save_done")
+        #data.delete(self.record)
 
     event data.full():
         #the buffer is full and we need to discard

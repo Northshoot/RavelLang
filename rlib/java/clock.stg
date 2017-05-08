@@ -11,7 +11,7 @@ public class <name> {
     }
 
     public int getNow() {
-        return (int) (System.nanoTime()/1000);
+        return (int) (System.nanoTime()/1000000);
     }
 }
 >>

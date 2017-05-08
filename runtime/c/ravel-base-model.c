@@ -213,7 +213,6 @@ ravel_base_model_send_record_endpoint(RavelBaseModel *self,
     uint8_t *byte_array;
     int record_pos = record_pos_from_record (self, record);
     RavelError local_error;
-    ravel_system_print(NULL, "ravel_base_model_send_record_endpoint");
     // serialize the record
     byte_array = self->vtable->marshall(self, record, endpoint);
     if (byte_array == NULL) {
@@ -954,7 +953,7 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
 
         self->base.vtable->dispatch_save_done(self, &self->base.current_ctx);
-        ravel_system_print(NULL, "dispatch called save done");
+        //ravel_system_print(NULL, "dispatch called save done");
     } else {
         RavelPacket ack;
         int record_pos;
@@ -978,7 +977,7 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         if (record == NULL) {
             // uh oh!
             // FIXME what to do here?
-            ravel_system_print(NULL, "allocate null 971");
+            ravel_system_print(NULL, "Could not allocate record 980 " );
             return;
         }
 

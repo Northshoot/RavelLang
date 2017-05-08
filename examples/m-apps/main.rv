@@ -22,6 +22,7 @@ space Cloud:
         alarm = Alarm(size=100)
         data = DataSample(size=100)
         device_list = Device(size=100)
+        deviceS = DeviceS(size=100)
         agent_location = AgentLocation(size=10)
         temp_alarm = TemperatureAlert(size=10)
         agent_response = MobileAgentResponse(size=10)
@@ -36,13 +37,14 @@ space Cloud:
                                     clock = interfaces.clock)
 
         alarm_ctr = AlarmController(alarm = models.alarm,
-                                    device_list = models.device_list,
+                                    device_list = models.deviceS,
                                     temp_alarm = models.temp_alarm,
                                     agent_response = models.agent_response,
                                     clock = interfaces.clock)
 
         auth_server = AuthenticateDevices(auth_rq = models.auth_rq,
                                   auth_reply=models.auth_reply,
+                                  device = models.device_list,
                                   clock = interfaces.clock,
                                   timer = interfaces.timer
                                   )
@@ -68,7 +70,7 @@ space AgentApp:
         device_view = DeviceView()
 
     models:
-        device_list = Device(size=10)
+        device_list = DeviceS(size=10)
         agent_location = AgentLocation(size=10)
         agent_response = MobileAgentResponse(size=10)
         temp_alarm = TemperatureAlert(size=10)
@@ -135,6 +137,7 @@ space RPie:
         clock =  Clock()
         led = Led(led_num = 1)
         timer = Timer()
+        timer_1 = Timer()
         tmp = TemperatureSource()
 
 
@@ -151,9 +154,10 @@ space RPie:
                                    auth_rq = models.auth_rq,
                                    auth_reply=models.auth_reply,
                                    clock = interfaces.clock,
-                                   timer = interfaces.timer
+                                   timer_1 = interfaces.timer_1
                                    )
         btn_ctr = DataGenerator(data = models.data,
                                 temperature=interfaces.tmp,
+                                auth_reply=models.auth_reply,
                                 timer = interfaces.timer,
                                 clock = interfaces.clock)
