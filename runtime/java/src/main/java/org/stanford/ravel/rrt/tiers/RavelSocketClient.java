@@ -20,6 +20,9 @@ class RavelSocketClient implements RavelSocket {
 
     private Socket socket;
     private Thread listeningThread;
+    private int mNumberOfretries = 1000;
+    private int mBackOffExponent = 2;
+    private int getmBackOffTime = 1000;
 
     RavelSocketClient(int identity, TcpEndpoint remote, JavaDriver driver) throws RavelIOException {
         this.identity = identity;
@@ -69,18 +72,40 @@ class RavelSocketClient implements RavelSocket {
     private void connect() throws IOException {
         if (socket != null)
             return;
+        int sleepTime = getmBackOffTime;
+        IOException ioe = null;
+        while(mNumberOfretries > 0) {
 
-        socket = new Socket(remote.getAddress(), remote.getPort());
-        RavelSocketProtocol.writeIdentity(socket.getOutputStream(), identity);
-        remote.connected();
+            try{
+                socket = new Socket(remote.getAddress(), remote.getPort());
+                mNumberOfretries = 0;
+                ioe = null;
+                RavelSocketProtocol.writeIdentity(socket.getOutputStream(), identity);
+                remote.connected();
 
-        listeningThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                readLoop();
+                listeningThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        readLoop();
+                    }
+                });
+                listeningThread.start();
+            } catch (IOException e){
+                try{
+                    Thread.sleep(sleepTime);
+                    mNumberOfretries--;
+                    sleepTime*=mBackOffExponent;
+                    ioe = e;
+                    System.err.println("Retry # " + mNumberOfretries);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
             }
-        });
-        listeningThread.start();
+        }
+        if (ioe != null)
+            throw new IOException(ioe);
+
+
     }
 
     private synchronized void closeSocket() {

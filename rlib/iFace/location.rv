@@ -1,0 +1,6 @@
+interface Location():
+    implementation:
+        java="rlib/java/iface/android_location.stg"
+
+    event locationChanged()
+    def getCurrentLocation()

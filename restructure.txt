@@ -1,0 +1,9 @@
+this repo moving out
+
+1) ravellang + compiler (to separate later
+2) java runtime
+3) c runtime
+4) android drivers
+5) posix drivers
+6) nrf drivers
+7) ravel library

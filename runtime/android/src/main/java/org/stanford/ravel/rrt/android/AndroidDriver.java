@@ -65,8 +65,9 @@ public class AndroidDriver extends JavaDriver {
         pushThreadPool(new Runnable() {
             @Override
             public void run() {
-                for (Endpoint e: endpoints) {
-                    registerEndpoint(e);
+                for (Endpoint e : endpoints) {
+                    //TODO: fix when error is returned: aka server is unreachible
+                    Error err = registerEndpoint(e);
                 }
             }
         });

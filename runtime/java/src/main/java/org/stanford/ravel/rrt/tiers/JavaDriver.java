@@ -202,7 +202,7 @@ public class JavaDriver implements DriverAPI {
                     break;
 
                 case HTTP:
-                    return Error.SUCCESS;
+                    return Error.ENDPOINT_UNREACHABLE;
 
                 default:
                     return Error.ENDPOINT_UNREACHABLE;
@@ -210,6 +210,8 @@ public class JavaDriver implements DriverAPI {
         } catch(RavelIOException e) {
             // ignore the error if the connection fails, we'll try at a later time
             // and see if it fails again
+            System.err.println("Could not connect: " +ep.toString());
+            return  Error.ENDPOINT_UNREACHABLE;
         }
         return Error.SUCCESS;
     }
