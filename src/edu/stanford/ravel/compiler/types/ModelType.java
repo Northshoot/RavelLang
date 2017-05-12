@@ -76,6 +76,7 @@ public class ModelType extends ClassType {
         this.addMethod("first", new Type[0], queryRecordType);
         this.addMethod("last", new Type[0], queryRecordType);
         this.addMethod("get", new Type[]{PrimitiveType.INT32}, queryRecordType);
+        // TODO fix all method
         //this.addMethod("all", new Type[0], new ArrayType(queryRecordType).makeImmutable());
         this.addMethod("clear", new Type[0], PrimitiveType.VOID);
         this.addMethod("size", new Type[0], PrimitiveType.INT32);

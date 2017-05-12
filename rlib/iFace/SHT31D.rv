@@ -1,0 +1,7 @@
+interface TempHumSource():
+    implementation:
+        c = "rlib/rpie/sht31d.stg"
+        java ="rlib/java/temphum_sim.stg"
+
+    def readTemperature() : double
+    def readHumidity(): double

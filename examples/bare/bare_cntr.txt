@@ -1,2 +1,0 @@
-controller foo(param: type, param1: type1):
-    pass

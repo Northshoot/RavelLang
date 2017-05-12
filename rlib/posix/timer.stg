@@ -1,0 +1,102 @@
+import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
+
+extra_cflags() ::=<<
+>>
+extra_ldflags() ::=<<
+>>
+
+extra_includes() ::=<<
+
+>>
+
+c_file(includes,name,interface) ::=<<
+<begin_source(name)>
+#include \<stdbool.h>
+#include \<ravel/posix-driver.h>
+#include \<unistd.h>
+
+<includes:do_include(); separator="\n">
+
+extern RavelPosixDriver ravel_posix_driver;
+
+static void
+fired(void* data)
+{
+        <name> *self = data;
+        uint8_t buffer[8];
+
+        // clear the timer
+        read(self->fd, buffer, 8);
+
+        <dispatch_event(interface, "fired",[])>
+}
+
+void
+ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
+{
+    self->__id = instance_id;
+
+    self->fd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC);
+    ravel_posix_driver_add_fd(&ravel_posix_driver, self->fd, fired, self);
+}
+void
+ravel_generated_<name; format="function">_finalize(<name> *self)
+{
+    close(self->fd);
+}
+
+<interface.controllerList:define_set_controller_method(name); separator="\n">
+
+void
+ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
+{
+    struct itimerspec itimer = { { 0, 0 }, { (time/1000), (time % 1000) * 1000000 } };
+    timerfd_settime(self->fd, 0, &itimer, NULL);
+}
+void
+ravel_generated_<name; format="function">_cancel(<name>* self)
+{
+    struct itimerspec itimer = { { 0, 0 }, { 0, 0 } };
+    timerfd_settime(self->fd, 0, &itimer, NULL);
+}
+void
+ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
+{
+    struct itimerspec itimer = { { (time/1000), (time % 1000) * 1000000 }, { (time/1000), (time % 1000) * 1000000 } };
+    timerfd_settime(self->fd, 0, &itimer, NULL);
+}
+
+>>
+
+h_file(includes,name,interface) ::=<<
+<begin_header("LIBRARY", name)>
+#include \<stdbool.h>
+#include \<stdint.h>
+#include \<sys/timerfd.h>
+
+
+/* Forward declare our controller class before we include the model headers */
+typedef struct s_<name> <name>;
+
+<includes:do_include(); separator="\n">
+
+<begin_extern_c()>
+
+typedef struct s_<name> {
+    int __id;
+    int fd;
+    <interface.controllerList:{c|<c.component.name> *ctr_<c.varName>;}; separator="\n">
+} <name>;
+
+void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
+void ravel_generated_<name; format="function">_finalize(<name> *self);
+
+void ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time);
+void ravel_generated_<name; format="function">_cancel(<name>* self);
+void ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time);
+
+<interface.controllerList:declare_set_controller_method(name); separator="\n">
+
+<end_extern_c()>
+<end_header("", name)>
+>>

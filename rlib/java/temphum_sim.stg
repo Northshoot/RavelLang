@@ -1,0 +1,27 @@
+import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+import java.util.concurrent.ThreadLocalRandom;
+
+<imports:do_import()>
+
+public class <name> {
+    private final java.util.Random rng = new java.util.Random();
+
+    private static final double temp_min = 40.0;
+    private static final double temp_max = 90.0;
+    private static final double hum_min = 20.0;
+    private static final double hum_max = 99.0;
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseModel.parameters)>) {
+    }
+
+    public double readTemperature() {
+        return ThreadLocalRandom.current().nextDouble(temp_min, temp_max );
+    }
+
+    public double readHumidity() {
+        return ThreadLocalRandom.current().nextDouble(hum_min, hum_max);
+    }
+}
+>>

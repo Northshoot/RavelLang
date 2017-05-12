@@ -1,8 +1,0 @@
-interface MemeMic():
-    implementation:
-        c = ""
-
-
-    def start() : bool
-    def readTemperature() : int32
-    def readHumidity(): int32
