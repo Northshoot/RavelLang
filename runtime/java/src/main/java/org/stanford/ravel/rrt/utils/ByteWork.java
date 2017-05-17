@@ -152,7 +152,7 @@ public class ByteWork {
     }
 
     public static byte[] getByteArray(double val) {
-        return ByteBuffer.allocate(4).putDouble(val).array();
+        return ByteBuffer.allocate(8).putDouble(val).array();
     }
 
     public static byte[] getByteArray(boolean val) {

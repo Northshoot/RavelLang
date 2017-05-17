@@ -1,0 +1,46 @@
+import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.*;
+
+<imports:do_import()>
+
+public class <name> {
+    <interface.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
+
+    private final static String TAG = <name>.class.getSimpleName();
+    private final int __id;
+    private String database = "?db=";
+    private String type = "application/x-www-form-urlencoded";
+
+    private String url;
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
+        __id = instanceId;
+
+
+    }
+
+    // Setter methods for AppDispatcher
+    <interface.controllerList:set_controller_method(); separator="\n">
+
+ public void innit(String db, String url){
+        this.database+=db;
+        this.url = url;
+    }
+
+    public void addDevice(int device_id){
+            // TODO: push data to django
+
+
+
+        }
+}
+
+>>
