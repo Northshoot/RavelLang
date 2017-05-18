@@ -20,18 +20,16 @@ class RavelSocketClient implements RavelSocket {
 
     private Socket socket;
     private Thread listeningThread;
-    private int mNumberOfretries = 1000;
-    private int mBackOffExponent = 2;
-    private int getmBackOffTime = 100;
 
     RavelSocketClient(int identity, TcpEndpoint remote, JavaDriver driver) throws RavelIOException {
         this.identity = identity;
         this.remote = remote;
         this.driver = driver;
-        System.out.println("Connecting to: " + remote);
+
         try {
             connect();
         } catch(IOException e) {
+
             throw new RavelIOException(e);
         }
     }
@@ -56,60 +54,44 @@ class RavelSocketClient implements RavelSocket {
                 RavelPacket pkt = RavelSocketProtocol.readInput(is);
                 driver.packetReceived(pkt, remote);
             } catch(EOFException e) {
+
                 closeSocket();
                 return;
             } catch(IOException e) {
                 // FIXME report the error to the dispatcher
 
                 System.err.println("IOException on client socket to " + remote.getAddress() + ":" + remote.getPort());
-                //e.printStackTrace(System.err);
+                e.printStackTrace(System.err);
                 closeSocket();
                 return;
             }
         }
     }
 
-    private void connect() throws IOException {
+    private void connect()  throws IOException{
         if (socket != null)
             return;
-        int sleepTime = getmBackOffTime;
-        IOException ioe = null;
-        boolean notconnected = true;
-        while(notconnected) {
-            try{
-                socket = new Socket(remote.getAddress(), remote.getPort());
-                ioe = null;
-                RavelSocketProtocol.writeIdentity(socket.getOutputStream(), identity);
-                remote.connected();
-                notconnected = false;
-                listeningThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        readLoop();
-                    }
-                });
-                listeningThread.start();
-                return;
-            } catch (IOException e){
-                try{
-                    Thread.sleep(sleepTime);
-                    mNumberOfretries--;
-                    sleepTime*=mBackOffExponent;
-                    ioe = e;
-                    System.err.println("Retry # " + mNumberOfretries);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
+
+        socket = new Socket(remote.getAddress(), remote.getPort());
+        RavelSocketProtocol.writeIdentity(socket.getOutputStream(), identity);
+        remote.connected();
+        try {
+            listeningThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    readLoop();
                 }
-            }
+            });
+            listeningThread.start();
+        } catch ( Exception e){
+            System.err.println("Disconect");
+            throw new IOException(e);
         }
-        if (ioe != null)
-            throw new IOException(ioe);
-
-
     }
 
     private synchronized void closeSocket() {
         try {
+
             socket.close();
             remote.disconnected();
             socket = null;
@@ -122,6 +104,7 @@ class RavelSocketClient implements RavelSocket {
     private void closeSocketAndJoin() {
         closeSocket();
         try {
+            System.err.println("Closing socket  and joining");
             listeningThread.join();
         } catch(InterruptedException e) {
             System.err.println("Interrupted while terminating listening thread");

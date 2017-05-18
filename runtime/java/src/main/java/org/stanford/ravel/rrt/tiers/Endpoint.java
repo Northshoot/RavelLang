@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import org.stanford.ravel.rrt.utils.None;
+import org.stanford.ravel.rrt.DispatcherAPI;
 /**
  * Created by lauril on 1/23/17.
  */
@@ -15,22 +16,32 @@ public class Endpoint extends None{
     private final Endpoint.TYPE type;
     private boolean local = false;
     private volatile boolean mConnected = false;
+    private DispatcherAPI appDispatcher = null;
 
     Endpoint(Endpoint.TYPE type, int id) {
         this.type = type;
         this.id = id;
+
     }
     public TYPE getType() { return type; }
     public int getId() {
         return id;
     }
 
+    public void setAppDispatcher(DispatcherAPI dapi ){
+        this.appDispatcher = appDispatcher;
+    }
     public void connected() {
         mConnected = true;
+        System.err.println("Endpoint connected");
+        if ( this.appDispatcher != null )
+            appDispatcher.connected(this);
     }
 
     public void disconnected() {
         mConnected = false;
+        if ( this.appDispatcher != null )
+            appDispatcher.disconected(this);
     }
 
     public boolean isConnected() {

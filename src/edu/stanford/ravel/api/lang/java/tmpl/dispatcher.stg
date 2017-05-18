@@ -57,8 +57,6 @@ import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.SystemEventAPI;
 import org.stanford.ravel.rrt.AbstractDispatcher;
 import org.stanford.ravel.rrt.DriverAPI;
-import org.stanford.ravel.rrt.SourceAPI;
-import org.stanford.ravel.rrt.SinkAPI;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
@@ -66,7 +64,7 @@ import org.stanford.ravel.rrt.KeyProvider;
 
 <imports:do_import()>
 
-public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemEventAPI {
+public class <name> extends AbstractDispatcher implements DispatcherAPI {
     <models:model_field(); separator="\n">
     <interfaces:interface_field(); separator="\n">
     <controllers:controller_field(); separator="\n">
@@ -186,6 +184,16 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI, SystemE
     @Override
     public void restarted() {
         <dispatch_event_single_instance(space.systemAPI.component, "restarted", [])>
+    }
+
+   @Override
+    public void connected(Endpoint endpoint) {
+        <dispatch_event_single_instance(space.systemAPI.component, "connected", ["endpoint"])>
+    }
+
+    @Override
+    public void disconected(Endpoint endpoint) {
+        <dispatch_event_single_instance(space.systemAPI.component, "disconnected", ["endpoint"])>
     }
 
     @Override

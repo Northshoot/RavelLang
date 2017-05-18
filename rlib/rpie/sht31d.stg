@@ -47,7 +47,7 @@ void read_sensors(){
     hum = (((data[3] * 256) + data[4])) * 100.0 / 65535.0;
     }
 }
- //TODO: this is quick soliution and it must be read temperature, then humidity
+ //TODO: this is quick solution and it must be read temperature, then humidity
 double
 ravel_generated_<name; format="function">_read_temperature(<name> *self)
 {

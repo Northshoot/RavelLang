@@ -202,9 +202,11 @@ public class JavaDriver implements DriverAPI {
                     break;
 
                 case HTTP:
+                    //TODO: create connection
                     return Error.ENDPOINT_UNREACHABLE;
 
                 default:
+                    //TODO: create connection
                     return Error.ENDPOINT_UNREACHABLE;
             }
         } catch(RavelIOException e) {

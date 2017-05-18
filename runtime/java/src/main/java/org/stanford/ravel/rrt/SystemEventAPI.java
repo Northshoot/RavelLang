@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt;
 
+import org.stanford.ravel.rrt.tiers.Endpoint;
 /**
  * The API exposed by the "system" object in the controllers.
  *
@@ -21,6 +22,8 @@ public interface SystemEventAPI {
     void started();
     void stopped();
     void restarted();
+    void connected(Endpoint endpoint);
+    void disconected(Endpoint endpoint);
 
     enum BatteryLevel {HIGH, HIGH_MID, MID, MID_LOW, LOW, CRITICAL }
     void battery(BatteryLevel bl);

@@ -13,5 +13,7 @@ package edu.stanford.ravel.primitives;
 public enum SystemEvent {
     started,
     stopped,
-    restarted
+    restarted,
+    connected,
+    disconnected
 }

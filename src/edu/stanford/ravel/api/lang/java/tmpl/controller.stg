@@ -19,6 +19,8 @@ file(package,imports,name,controller,eventHandlers) ::=<<
 package <package>;
 
 <imports:do_import()>
+//TODO  fix hack
+import org.stanford.ravel.rrt.tiers.Endpoint;
 
 public class <name> {
     <controller.parameterSymbols:{p|private <p.type> <p.name>;}; separator="\n">

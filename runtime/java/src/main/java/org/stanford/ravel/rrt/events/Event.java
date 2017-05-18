@@ -8,6 +8,9 @@ public abstract class Event {
         DISPATCHER__QUIT, // SystemEvent
         DISPATCHER__STOP, // SystemEvent
 
+        SYSTEM_CONNECTED,
+        SYSTEM_DISCONNECTED,
+
         DRIVER__DATA_RECEIVED, // NetworkEvent
         DRIVER__SAVED_DURABLY, // NetworkEvent
         DRIVER__LOAD_FROM_STORAGE, // NetworkEvent

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by lauril on 9/7/16.
  */
-public abstract class BasePlatform implements SystemApi, ConcretePlatform {
+public abstract class BasePlatform implements ConcretePlatform {
     private final int mMinAPI, mMaxAPI;
     private int mAPI;
 

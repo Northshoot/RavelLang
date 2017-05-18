@@ -1,0 +1,94 @@
+from rlib.iFace import timer
+
+streaming model DataSample(size: int32):
+    properties:
+        records = size
+        reliable = False
+        durable = False
+        flow = One -> Two
+
+    schema:
+        this_double : double
+        this_int : int32
+
+controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
+
+    counter: int32 = 0
+    d_counter: double = 0.111111
+
+    event system.started():
+        system.print("Started with ID: " +(str)(this_id))
+        timer.start_periodic(1000)
+
+    event system.restarted():
+        system.print("Restarted with ID: " +(str)(this_id))
+
+    event system.connected(ep : Endpoint ):
+        system.print("Connected with ID: " +(str)(this_id))
+
+    event system.disconnected( ep : Endpoint ):
+        system.print("Disconnected with ID: " +(str)(this_id))
+
+
+    event timer.fired():
+        rec = data.create()
+        rec.this_double = d_counter
+        d_counter+=1.1
+        rec.this_int = counter
+        counter+=1
+        data.save(rec)
+
+    event data.save_done():
+        system.print((str)(this_id) + ":: save_done")
+
+    event data.departed():
+        system.print((str)(this_id) + ":: departed" )
+
+controller DataControllerTwo(data : DataSample, this_id: int32):
+
+    counter: int32 = 0
+    d_counter: double = 0.111111
+
+    event system.started():
+        system.print("Started with ID: " +(str)(this_id))
+
+
+     event data.arrived():
+        system.print((str)(this_id) + ":: arrived" + (str)(self.record.this_int))
+
+
+
+space One:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    interfaces:
+        timer = Timer()
+
+    models:
+        data = DataSample(size=1000)
+
+    controllers:
+        one_cntr = DataControllerOne(
+                                   data = models.data,
+                                   timer = interfaces.timer,
+                                   this_id = 1
+                                   )
+
+space Two:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    interfaces:
+        timer = Timer()
+
+    models:
+        data = DataSample(size=1000)
+
+    controllers:
+        one_cntr = DataControllerTwo(
+                                   data = models.data,
+                                   this_id = 2
+                                   )
