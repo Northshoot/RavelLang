@@ -20,7 +20,6 @@ public class GoogleFinance{
 
     public GoogleFinance() {
          this.gson= new GsonBuilder()
-                .setLenient()
                 .create();
 
 

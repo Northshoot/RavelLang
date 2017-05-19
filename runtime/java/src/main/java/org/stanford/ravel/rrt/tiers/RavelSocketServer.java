@@ -92,6 +92,8 @@ public class RavelSocketServer implements Runnable, Closeable {
 
     private void closeClient(ClientSocket socket) {
         try {
+
+            socket.getEndpoint().connected();
             socket.close();
         } catch (IOException e) {
             pprint("Failed to close client socket to " + socket.getEndpoint());
@@ -129,6 +131,7 @@ public class RavelSocketServer implements Runnable, Closeable {
                 try {
                     ClientSocket client = new ClientSocket(socket);
                     pprint("New connection from " + client.getEndpoint());
+
                     driver.registerSocket(client.getEndpoint(), client);
                 } catch(IOException e) {
                     pprint("IOException while preparing client socket");

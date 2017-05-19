@@ -70,11 +70,13 @@ public class JavaDriver implements DriverAPI {
             if (socketClients.containsKey(endpoint)) {
                 try {
                     socketClients.get(endpoint).close();
+                    endpoint.disconnected();
                 } catch(IOException e) {
                     System.err.println("Failed to close existing socket to " + endpoint.getAddress() + ":" + endpoint.getPort());
                     e.printStackTrace(System.err);
                 }
             }
+            endpoint.connected();
             socketClients.put(endpoint, socket);
         }
     }
@@ -196,6 +198,7 @@ public class JavaDriver implements DriverAPI {
         try {
             // make sure we register the endpoint as client, by attempting the connection
             // immediately
+
             switch (ep.getType()) {
                 case SOCKET:
                     getSocket((TcpEndpoint) ep);
@@ -228,7 +231,7 @@ public class JavaDriver implements DriverAPI {
     @Override
     public Error registerEndpoint(Endpoint ep) {
         internalRegisterEndpoint(ep);
-
+        ep.setAppDispatcher(appDispatcher);
         if (ep.isLocal())
             return startLocalEndpoint(ep);
         else

@@ -29,19 +29,26 @@ public class Endpoint extends None{
     }
 
     public void setAppDispatcher(DispatcherAPI dapi ){
-        this.appDispatcher = appDispatcher;
+        this.appDispatcher = dapi;
     }
+
     public void connected() {
         mConnected = true;
-        System.err.println("Endpoint connected");
+
+
         if ( this.appDispatcher != null )
             appDispatcher.connected(this);
+        else
+            System.err.println("Local endpoint " + this.isLocal());
     }
 
     public void disconnected() {
         mConnected = false;
+        System.err.println("Endpoint disconnect " + this.toString());
         if ( this.appDispatcher != null )
             appDispatcher.disconected(this);
+        else
+            System.err.println("Local endpoint " + this.isLocal());
     }
 
     public boolean isConnected() {

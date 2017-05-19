@@ -41,6 +41,7 @@ class Application {
             Endpoint ep = reader.next();
             while (ep != null) {
                 Error err = driver.registerEndpoint(ep);
+
                 if (err != Error.SUCCESS) {
                     System.err.println("Failed to register endpoint " + ep.getId() + ": " + err);
                     // die immediately if endpoint registration failed (it means we could not

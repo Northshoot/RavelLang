@@ -39,10 +39,12 @@ controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
         data.save(rec)
 
     event data.save_done():
-        system.print((str)(this_id) + ":: save_done")
+        system.print((str)(this_id) + ":: save_done " + (str) (self.record.this_int))
 
     event data.departed():
         system.print((str)(this_id) + ":: departed" )
+
+
 
 controller DataControllerTwo(data : DataSample, this_id: int32):
 
@@ -54,7 +56,7 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
 
 
      event data.arrived():
-        system.print((str)(this_id) + ":: arrived" + (str)(self.record.this_int))
+        system.print((str)(this_id) + ":: arrived " + (str)(self.record.this_int))
 
 
 
