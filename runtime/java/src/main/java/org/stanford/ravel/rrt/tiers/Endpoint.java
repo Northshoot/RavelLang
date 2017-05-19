@@ -34,21 +34,15 @@ public class Endpoint extends None{
 
     public void connected() {
         mConnected = true;
-
-
         if ( this.appDispatcher != null )
             appDispatcher.connected(this);
-        else
-            System.err.println("Local endpoint " + this.isLocal());
     }
 
     public void disconnected() {
         mConnected = false;
-        System.err.println("Endpoint disconnect " + this.toString());
         if ( this.appDispatcher != null )
             appDispatcher.disconected(this);
-        else
-            System.err.println("Local endpoint " + this.isLocal());
+
     }
 
     public boolean isConnected() {
@@ -69,7 +63,7 @@ public class Endpoint extends None{
         return "[Type: " + this.type
                 +", id: " + this.id
                 + ", connected: " + mConnected
-                + "]";
+                + " local " + this.isLocal() "]";
     }
 
     public static Endpoint fromString(int id, URI uri, Map<String, String> options) throws MalformedURLException {
