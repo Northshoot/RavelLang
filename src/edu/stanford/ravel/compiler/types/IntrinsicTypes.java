@@ -21,12 +21,13 @@ public class IntrinsicTypes {
             addStaticMethod("create", new Type[]{}, getInstanceType());
         }
     }
-
+//TODO: extend endpoint type
     private static class Endpoint extends ClassType {
         public Endpoint() {
             super("Endpoint");
             //Add methods to the endpoint
             addMethod("getId", new Type[]{}, PrimitiveType.INT32);
+            addMethod("isLocal", new Type[]{}, PrimitiveType.BOOL);
         }
     }
 

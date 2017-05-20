@@ -166,7 +166,9 @@ public class JLang extends BaseLanguage {
                 } else if (convert.tgtType == PrimitiveType.STR) {
                     if (convert.srcType == PrimitiveType.ERROR_MSG) {
                         addLine(convert.target, " = ", convert.source, " == null ? \"success\" : ", convert.source, ".name().toLowerCase()");
-                    } else {
+                    }  else if (convert.srcType == PrimitiveType.BOOL){
+                        addLine(convert.target, " = ", "Boolean", ".toString(", convert.source, ")");girta
+                    }else {
                         addLine(convert.target, " = ", (convert.srcType == PrimitiveType.INT32 ? "Integer" : "Double"), ".toString(", convert.source, ")");
                     }
                 } else {

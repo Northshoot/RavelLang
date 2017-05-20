@@ -63,7 +63,7 @@ public class Endpoint extends None{
         return "[Type: " + this.type
                 +", id: " + this.id
                 + ", connected: " + mConnected
-                + " local " + this.isLocal() "]";
+                + " local " + this.isLocal() + "]";
     }
 
     public static Endpoint fromString(int id, URI uri, Map<String, String> options) throws MalformedURLException {
