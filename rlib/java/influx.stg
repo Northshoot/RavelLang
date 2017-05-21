@@ -46,6 +46,9 @@ public class <name> {
             HttpURLConnection conn = null;
             try {
                 conn = (HttpURLConnection) u.openConnection();
+            } catch( java.net.ConnectException e) {
+                //todo: deal with no connection
+                //return error
             } catch (IOException e) {
                 e.printStackTrace();
             }

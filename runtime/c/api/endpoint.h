@@ -1,6 +1,6 @@
 /**
  * endpoint.h: Ravel network endpoints
- *
+ * Endpoint API
  */
 
 #ifndef API_ENDPOINT_H
@@ -12,11 +12,22 @@
 
 typedef struct {
     uint8_t id;
+    bool is_local;
     bool connected;
 } RavelEndpoint;
 
-static inline int32_t ravel_endpoint_get_id(RavelEndpoint *self) {
+typedef RavelEndpoint Endpoint;
+
+static inline int32_t ravel_endpoint_get_id(Endpoint *self) {
     return self->id;
+}
+
+static inline int32_t ravel_endpoint_is_local(Endpoint *self) {
+    return self->is_local;
+}
+
+static inline int32_t ravel_endpoint_is_connected(Endpoint *self) {
+    return self->connected;
 }
 
 #endif /* API_PACKET_H */

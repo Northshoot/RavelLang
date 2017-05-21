@@ -11,7 +11,6 @@ extra_includes() ::=<<
 
 c_file(includes,name,interface) ::=<<
 <begin_source(name)>
-#include \<stdbool.h>
 #include \<ravel/posix-driver.h>
 #include \<unistd.h>
 
@@ -35,8 +34,13 @@ void
 ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>)
 {
     self->__id = instance_id;
-
+    #ifdef __APPLE__
+    //TODO: fix me
+    #elif __posix
     self->fd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC);
+    #else
+    #   error "Unknown compiler"
+    #endif
     ravel_posix_driver_add_fd(&ravel_posix_driver, self->fd, fired, self);
 }
 void
@@ -51,19 +55,38 @@ void
 ravel_generated_<name; format="function">_start_one_shot(<name>* self, uint32_t time)
 {
     struct itimerspec itimer = { { 0, 0 }, { (time/1000), (time % 1000) * 1000000 } };
+    #ifdef __APPLE__
+        //TODO: fix me
+    #elif __posix
     timerfd_settime(self->fd, 0, &itimer, NULL);
+    #else
+    #   error "Unknown compiler"
+    #endif
 }
 void
 ravel_generated_<name; format="function">_cancel(<name>* self)
 {
     struct itimerspec itimer = { { 0, 0 }, { 0, 0 } };
+    #ifdef __APPLE__
+    #elif __posix
     timerfd_settime(self->fd, 0, &itimer, NULL);
+    #else
+    #   error "Unknown compiler"
+    #endif
+
+
 }
 void
 ravel_generated_<name; format="function">_start_periodic(<name>* self, uint32_t time)
 {
     struct itimerspec itimer = { { (time/1000), (time % 1000) * 1000000 }, { (time/1000), (time % 1000) * 1000000 } };
+   #ifdef __APPLE__
+       //TODO: fix me
+    #elif __posix
     timerfd_settime(self->fd, 0, &itimer, NULL);
+    #else
+        #   error "Unknown compiler"
+    #endif
 }
 
 >>
@@ -72,9 +95,14 @@ h_file(includes,name,interface) ::=<<
 <begin_header("LIBRARY", name)>
 #include \<stdbool.h>
 #include \<stdint.h>
+#ifdef __APPLE__
+#include \<signal.h>
+#include \<sys/time.h>
+#elif __posix
 #include \<sys/timerfd.h>
-
-
+#else
+#   error "Unknown compiler"
+#endif
 /* Forward declare our controller class before we include the model headers */
 typedef struct s_<name> <name>;
 

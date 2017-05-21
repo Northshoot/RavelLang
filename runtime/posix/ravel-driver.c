@@ -60,6 +60,7 @@ load_endpoint_table(RavelPosixDriver *self, const char *file_name)
         endpoint->base.id = id;
         endpoint->port = port;
         endpoint->address = inet_addr (url + strlen("tcp://"));
+        endpoint->base.is_local = true;
         ravel_posix_driver_register_endpoint (self, endpoint);
 
         free(url);
@@ -311,7 +312,9 @@ ravel_posix_driver_register_endpoint(RavelPosixDriver *self, RavelPosixEndpoint 
     if (!insert_endpoint_in_table(self, endpoint))
         abort();
 
-    endpoint->is_local = endpoint->base.id == self->app_id;
+    bool is_local = endpoint->base.id == self->app_id;
+    endpoint->is_local =  is_local;
+    endpoint->base.is_local = is_local;
     if (endpoint->is_local)
         start_local_endpoint(self, endpoint);
     else
