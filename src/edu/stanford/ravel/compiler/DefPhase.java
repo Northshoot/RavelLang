@@ -98,6 +98,7 @@ public class DefPhase extends RavelBaseListener {
     public void enterFile_input(RavelParser.File_inputContext ctx) {
         if(this.globalScope == null){
             //we enter first file
+
             globalScope = new GlobalScope();
         }
         ctx.scope = globalScope;

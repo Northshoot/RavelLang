@@ -15,40 +15,76 @@
 #### System API ####
 
 #### Model API ####
+**Commands**
+
+model`.create()` : returns new record of type model
+
+model`.save(rec) `: save's current record `rec`, can only be done on the record creating tier
+
+for the replicated model: model`.save(rec, tier) `: saves to the flow
+
+model`.delete(rec) `: deletes current record `rec` deletes record in local buffer
+
+TODO: need global delete flag
+
+TODO: define behaviour of deleting record before save_done is received
+
+**Events**
+
+model`.arrived():` record arrived to the tier access `self.record`, can not happen on the record originating tier
+
+
+model`.departed():` record departed from the tier
+
+model`.save_done():`  record have been saved accross the flow
+
+TODO: make a table of save vs local etc
+
+model`.full():`  model buffer is full, no more records will be accepted until its cleaned up
+
+**Queries**
+
+mode`.first()`
+
+model`.last()`
+
+**Other notes**
+
+it is not implemented to have two models of the same type in the same space, and now you get a compile error if you try
+
 
 #### Space API ####
 
 #### View API ####
 
 #### System API ####
+`system.started()`
+
+`system.restarted()`
+
+`system.stopped()`
+
+`system.connected(Endpoint ep)`
+
+`system.disconnected(Endpoint ep)`
+
 
 #### Interface API ####
-1) interfaces now receive an "instance id" as the first argument to the constructor (after self in C)
-
-[6:50]  
-2) interfaces must have a field in their struct called __id, and they must store the instance id in there in the constructor, if they have any event
-
-[6:51]  
+1) interfaces now receive an "instance id" as the first argument to the constructor (after self in C) 
+2) interfaces must have a field in their struct called __id, and they must store the instance id in there in the constructor, if they have any event 
 3) interfaces must use the template <dispatch_event(interface, eventName, params)> (where params is a list of additional event parameters) to dispatch events
-
-[6:51]  
 4) interfaces (and models) receive additional parameters (as declared in ravel) as part of their constructors
-
-[6:52]  
 5) you can no longer rely on interfaces.configuration being made only of constants, as it could refer to one of the parameters, which are only available in the constructor (so you must copy the stuff over to the instance struct)
-
-[6:52]  
 6) same for model.size, but the templates have been updated
-
-[6:53]  
 7) you can now have two controllers of the same type, connected to different interfaces, in the same space
-
-[6:53]  
-:sunglasses:  you still cannot have two models of the same type in the same space, and now you get a compile error if you try
+ 
 
 #### Template API ####
 Ravel uses StringTemplate developed by Terence Parr. Please refer http://www.stringtemplate.org/ for details.
 Below we elaborate on Ravel's template structure.
+
+TODO
+define template interface
 
 ##### C Templates ######
 Includes and flags 

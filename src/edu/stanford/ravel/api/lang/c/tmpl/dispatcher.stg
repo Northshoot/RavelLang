@@ -158,13 +158,13 @@ ravel_generated_<name; format="function">_restarted(<name> *self)
 void
 ravel_generated_<name; format="function">_connected(<name> *self, RavelEndpoint *endpoint)
 {
-    <dispatch_event_single_instance_ptr(space.systemAPI.component, "connected", [])>
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "connected", ["endpoint"])>
 }
 
 void
 ravel_generated_<name; format="function">_disconnected(<name> *self, RavelEndpoint *endpoint)
 {
-    <dispatch_event_single_instance_ptr(space.systemAPI.component, "disconnected", [])>
+    <dispatch_event_single_instance_ptr(space.systemAPI.component, "disconnected", ["endpoint"])>
 }
 
 >>

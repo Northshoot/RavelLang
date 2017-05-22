@@ -18,7 +18,7 @@ controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
 
     event system.started():
         system.print("Started with ID: " +(str)(this_id))
-        timer.start_periodic(1000)
+        timer.start_periodic(100)
 
     event system.restarted():
         system.print("Restarted with ID: " +(str)(this_id))
@@ -41,10 +41,13 @@ controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
 
     event data.save_done():
         system.print((str)(this_id) + ":: save_done " + (str) (self.record.this_int))
+        data.delete(self.record)
 
     event data.departed():
-        system.print((str)(this_id) + ":: departed" )
+        system.print((str)(this_id) + ":: departed " + (str)(self.record.this_double))
 
+    event data.full():
+        data.delete(data.first())
 
 
 controller DataControllerTwo(data : DataSample, this_id: int32):
@@ -59,12 +62,14 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
      event data.arrived():
         system.print((str)(this_id) + ":: arrived " + (str)(self.record.this_int))
 
+    event data.full():
+        data.delete(data.first())
 
 
 space One:
     platform:
-        language = JLang
-        system = J2SE.v18
+        language = CLang
+        system = Posix
 
     interfaces:
         timer = Timer()
