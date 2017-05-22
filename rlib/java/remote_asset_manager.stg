@@ -1,6 +1,7 @@
 import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
 
 
+
 file(package,imports,name,interface) ::=<<
 package <package>;
 
@@ -18,13 +19,15 @@ public class <name> {
     private final static String TAG = <name>.class.getSimpleName();
     private final int __id;
     private String database = "?db=";
+    private String url;
     private String type = "application/x-www-form-urlencoded";
+    private AppDispatcher dispatcher;
 
     private String url;
     public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
         __id = instanceId;
-
-
+        this.dispatcher = dispatcher;
+        this.url = url;
     }
 
     // Setter methods for AppDispatcher
@@ -35,12 +38,23 @@ public class <name> {
         this.url = url;
     }
 
-    public void addDevice(int device_id){
+    public void addDevice(<interface.baseInterface.models.table.name>.Record record){
             // TODO: push data to django
 
 
 
         }
+
+    public <interface.baseInterface.models.table.name>.Record getDevice(int device_id){
+        <interface.baseInterface.models.table.name>.Record device = new <interface.baseInterface.models.table.name>.Record();
+        //TODO: query db
+        try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
+            JsonObject obj = rdr.readObject();
+
+            }
+
+        <interface.baseInterface.models.table.fields:{f|device.<f.name>=(<f.type>)obj.get("<f.name>");}; separator="\n">
+        return device;
 }
 
 >>

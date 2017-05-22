@@ -4,7 +4,6 @@ out/
 rout/*/
 
 .idea/workspace.xml
-lib/*
 # Prerequisites
 *.d
 
