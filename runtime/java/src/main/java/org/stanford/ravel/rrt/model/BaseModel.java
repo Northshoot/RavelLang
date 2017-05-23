@@ -254,7 +254,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             state[recordPos].expected_acks ++;
         if (markAsInSave)
             state[recordPos].in_save ++;
-        System.out.println("SEND ONE RECORD");
+        //TODO: fix this properly
         return dispatcher.model__sendData(pkt, e);
 //        if (e.isConnected()) {
 //            System.out.println("COMNNECTED " + e.toString());
@@ -339,6 +339,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             }
             Error error2;
             error2 = dispatcher.model__sendData(pkt, e);
+            // TODO: this this properly
 //            if (e.isConnected())
 //                error2 = dispatcher.model__sendData(pkt, e);
 //            else

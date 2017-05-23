@@ -107,7 +107,7 @@ class RavelSocketClient implements RavelSocket {
     private void closeSocketAndJoin() {
         closeSocket();
         try {
-            System.err.println("Closing socket  and joining");
+//            System.err.println("Closing socket  and joining");
             listeningThread.join();
         } catch(InterruptedException e) {
             System.err.println("Interrupted while terminating listening thread");
@@ -116,12 +116,12 @@ class RavelSocketClient implements RavelSocket {
 
     @Override
     public synchronized void write(RavelPacket pkt) throws RavelIOException {
-        System.err.println("RavelSocketProtocol.writeOutput");
+//        System.err.println("RavelSocketProtocol.writeOutput");
         try {
             connect();
             try {
                 RavelSocketProtocol.writeOutput(socket.getOutputStream(), pkt);
-                System.err.println("RavelSocketProtocol.writeOutput");
+//                System.err.println("RavelSocketProtocol.writeOutput");
 //            } finally {
 //                System.err.println("socket.isClosed() " + socket.isClosed() + " socket.isInputShutdown() " + socket.isInputShutdown());
 //                if (socket.isClosed() || socket.isInputShutdown()) {
