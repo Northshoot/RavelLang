@@ -254,11 +254,14 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             state[recordPos].expected_acks ++;
         if (markAsInSave)
             state[recordPos].in_save ++;
-
-        if (e.isConnected())
-            return dispatcher.model__sendData(pkt, e);
-        else
-            return Error.ENDPOINT_UNREACHABLE;
+        System.out.println("SEND ONE RECORD");
+        return dispatcher.model__sendData(pkt, e);
+//        if (e.isConnected()) {
+//            System.out.println("COMNNECTED " + e.toString());
+//            return dispatcher.model__sendData(pkt, e);
+//        } else {
+//             System.out.println("NOT CONNECTED " + e.toString());
+//            return Error.ENDPOINT_UNREACHABLE;}
     }
 
     Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
@@ -335,10 +338,11 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                     state[recordPos].expected_acks++;
             }
             Error error2;
-            if (e.isConnected())
-                error2 = dispatcher.model__sendData(pkt, e);
-            else
-                error2 = Error.ENDPOINT_UNREACHABLE;
+            error2 = dispatcher.model__sendData(pkt, e);
+//            if (e.isConnected())
+//                error2 = dispatcher.model__sendData(pkt, e);
+//            else
+//                error2 = Error.ENDPOINT_UNREACHABLE;
             if (recordPos >= 0) {
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     state[recordPos].is_transmit_failed = true;

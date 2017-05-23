@@ -199,6 +199,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     public void recordFailedToSend(RavelPacket pkt, Endpoint endpoint, Error error) {
         if (pkt.isAck() || pkt.isSaveDone()) {
             // unconditionally try to retransmit
+            System.out.println("retransmitting");
             if (endpoint.isConnected())
                 dispatcher.model__sendData(pkt, endpoint);
             return;
