@@ -33,8 +33,7 @@ public class <name> extends HttpBaseUrlConnection{
 
     private final static String TAG = <name>.class.getSimpleName();
     private final int __id;
-    private String database = "?db=";
-    private String urlName;
+    private String urlName = "<interface.baseInterface.configuration.remote>";
     private String type = "application/x-www-form-urlencoded";
     private AppDispatcher dispatcher;
 
@@ -42,7 +41,7 @@ public class <name> extends HttpBaseUrlConnection{
         super();
         __id = instanceId;
         this.dispatcher = dispatcher;
-        this.urlName = url;
+
 
     }
 
@@ -57,13 +56,14 @@ public class <name> extends HttpBaseUrlConnection{
 
         }
 
-    public <interface.baseInterface.models.table_remote.name>.Record getDevice(<interface.baseInterface.models.table_remote.name>.Record record){
+    public void getDevice(<interface.baseInterface.models.table_remote.name>.Record record){
+    System.out.println(TAG + " :: get device:");
          try {
-        Response rr = super.writePost("<interface.baseInterface.configuration.url>", "device_id" + Integer.toString(record.device_id));
+        Response rr = super.writePost(this.urlName, "device_id=" + Integer.toString(record.device_idd));
         JsonArray gson = new Gson().fromJson(rr.content, JsonArray.class);
-        JsonObject jobj = (JsonObject) gson.get(0);
-        JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
-
+        JsonObject jfields = (JsonObject) gson.get(0);
+        //JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
+        System.out.println(TAG + " :: return:"+ jfields);
         <interface.baseInterface.models.table_remote.fields:{f|record.<f.name>=jfields.get("<f.name>")<type_to_json_type(f.type)>;}; separator="\n">
 
         } catch (ConnectException ex) {
@@ -71,7 +71,6 @@ public class <name> extends HttpBaseUrlConnection{
          }
 
 
-        return record;
 }
 }
 

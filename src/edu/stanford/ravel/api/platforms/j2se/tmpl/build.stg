@@ -22,6 +22,7 @@ ant(java_runtime, main_class) ::=<<
     </javac>
     <jar destfile="app.jar" basedir="${classes}" >
         <zipfileset includes="**/*.class" src="%java_runtime%"/>
+        <zipgroupfileset dir="/Users/larry/workspace/01-Ravel/ravellang/lib/" includes="gson-2.7.jar"/>
         <manifest>
           <attribute name="Main-Class" value="%main_class%"/>
         </manifest>
