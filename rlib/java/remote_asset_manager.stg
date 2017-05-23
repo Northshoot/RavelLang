@@ -1,60 +1,78 @@
 import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
 
 
+type_to_json_type_dict ::=[
+    "int": ".getAsInt()",
+    "boolean": ".getAsBoolean()",
+    "java.lang.String": ".getAsString()",
+    "double": ".getAsDouble()",
+    "byte": "getAsByte()",
+    "java.util.Date": "Timestamp",
+    default: {<type>}
+]
+type_to_json_type(type) ::=<<
+<type_to_json_type_dict.(type)>
+>>
+
 
 file(package,imports,name,interface) ::=<<
 package <package>;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.InputStream;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.*;
+import java.net.ConnectException;
 
+import org.stanford.ravel.rrt.tiers.HttpBaseUrlConnection;
 <imports:do_import()>
 
-public class <name> {
+public class <name> extends HttpBaseUrlConnection{
     <interface.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
 
     private final static String TAG = <name>.class.getSimpleName();
     private final int __id;
     private String database = "?db=";
-    private String url;
+    private String urlName;
     private String type = "application/x-www-form-urlencoded";
     private AppDispatcher dispatcher;
 
-    private String url;
     public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
+        super();
         __id = instanceId;
         this.dispatcher = dispatcher;
-        this.url = url;
+        this.urlName = url;
+
     }
 
     // Setter methods for AppDispatcher
     <interface.controllerList:set_controller_method(); separator="\n">
 
- public void innit(String db, String url){
-        this.database+=db;
-        this.url = url;
-    }
 
-    public void addDevice(<interface.baseInterface.models.table.name>.Record record){
+    public void addDevice(<interface.baseInterface.models.table_local.name>.Record record){
             // TODO: push data to django
 
 
 
         }
 
-    public <interface.baseInterface.models.table.name>.Record getDevice(int device_id){
-        <interface.baseInterface.models.table.name>.Record device = new <interface.baseInterface.models.table.name>.Record();
-        //TODO: query db
-        try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
-            JsonObject obj = rdr.readObject();
+    public <interface.baseInterface.models.table_remote.name>.Record getDevice(<interface.baseInterface.models.table_remote.name>.Record record){
+         try {
+        Response rr = super.writePost("<interface.baseInterface.configuration.url>", "device_id" + Integer.toString(record.device_id));
+        JsonArray gson = new Gson().fromJson(rr.content, JsonArray.class);
+        JsonObject jobj = (JsonObject) gson.get(0);
+        JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
 
-            }
+        <interface.baseInterface.models.table_remote.fields:{f|record.<f.name>=jfields.get("<f.name>")<type_to_json_type(f.type)>;}; separator="\n">
 
-        <interface.baseInterface.models.table.fields:{f|device.<f.name>=(<f.type>)obj.get("<f.name>");}; separator="\n">
-        return device;
+        } catch (ConnectException ex) {
+         } catch (IOException ex) {
+         }
+
+
+        return record;
+}
 }
 
 >>

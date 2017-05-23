@@ -1,7 +1,8 @@
 interface InfluxWriter():
+    configuration:
+        remote = "http://localhost:8086/write?db=harmony"
+
     implementation:
         java = "rlib/java/influx.stg"
-
-    def innit(db : str, url : str)
 
     def pushData(data : str)

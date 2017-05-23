@@ -4,8 +4,8 @@ ant(java_runtime, main_class) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="compile" name="ravel">
   <!-- Set useful variables -->
-  <property name="target" value="1.7"/>
-  <property name="source" value="1.7"/>
+  <property name="target" value="1.8"/>
+  <property name="source" value="1.8"/>
   <property name="root" value="."/>
   <property name="src" location="${root}/src"/>
   <property name="classes" location="${root}/classes"/>
@@ -13,7 +13,12 @@ ant(java_runtime, main_class) ::=<<
   <!-- Compile -->
   <target name="compile">
     <mkdir dir="${classes}"/>
-    <javac srcdir="${src}" destdir="${classes}" classpath="%java_runtime%" debug="true" includeantruntime="false" source="${source}" target="${target}">
+    <javac srcdir="${src}" destdir="${classes}"  debug="true" includeantruntime="false" source="${source}" target="${target}">
+    <classpath>
+            <pathelement path="%java_runtime%"/>
+            <pathelement path="/Users/larry/workspace/01-Ravel/ravellang/lib/gson-2.7.jar"/>
+       </classpath>
+
     </javac>
     <jar destfile="app.jar" basedir="${classes}" >
         <zipfileset includes="**/*.class" src="%java_runtime%"/>

@@ -17,10 +17,10 @@ public class <name> {
 
     private final static String TAG = <name>.class.getSimpleName();
     private final int __id;
-    private String database = "?db=";
     private String type = "application/x-www-form-urlencoded";
 
-    private String url;
+    private String urlName = <interface.baseInterface.configuration.remote; format="literal">;
+
     public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
         __id = instanceId;
 
@@ -30,15 +30,11 @@ public class <name> {
     // Setter methods for AppDispatcher
     <interface.controllerList:set_controller_method(); separator="\n">
 
- public void innit(String db, String url){
-        this.database+=db;
-        this.url = url;
-    }
 
     public void pushData(String data){
             URL u = null;
             try {
-                u = new URL(this.url+this.database );
+                u = new URL(this.urlName );
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
