@@ -41,12 +41,12 @@ class Application {
             Endpoint ep = reader.next();
             while (ep != null) {
                 Error err = driver.registerEndpoint(ep);
-
+                //TODO: fix this properly
                 if (err != Error.SUCCESS) {
-                    System.err.println("Failed to register endpoint " + ep.getId() + ": " + err);
+                    System.err.println("Waiting for connection..." + ep.getId() + ": " + err);
                     // die immediately if endpoint registration failed (it means we could not
                     // bind the right ports)
-                    return;
+                    //return;
                 }
                 ep = reader.next();
             }

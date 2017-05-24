@@ -27,6 +27,7 @@ public class RavelProperties {
     public final static String API_LANG = "apiLangPackage";
     public final static String API_PLATFORM = "apiPlatformPackage";
     public final static String RUNTIME = "apiRuntimePackage";
+    private static final String API_RIE_J2SE_TMPL_DIR = "apiRPIEDir";
 
     private InputStream inputStream;
     private static Properties properties;
@@ -74,6 +75,11 @@ public class RavelProperties {
     }
     public static String get_runtime_package(){
         return RESOURCE_BUNDLE.getString(RUNTIME);
+    }
+
+    public static String get_rpiej2se_tmpl_dir() {
+        System.out.println(get_base_tmpl_dir());
+        return get_base_tmpl_dir() +RESOURCE_BUNDLE.getString(API_RIE_J2SE_TMPL_DIR);
     }
 
     private void propInit()  {

@@ -1,0 +1,71 @@
+delimiters "%", "%"
+
+ant(java_runtime, main_class) ::=<<
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Set useful variables -->
+
+<project name="ravel-app" default="all" basedir=".">
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <property name="root" value="."/>
+    <property name="src" location="${root}/src"/>
+    <property name="build" value="../bin" />
+    <property name="lib" value="../../java-jars" />
+
+    <property name="classes" location="${root}/classes"/>
+
+    <!-- scan the lib directory for jars and put into a variable classpath-->
+    <path id="classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar" />
+            <include name="%java_runtime%" />
+        </fileset>
+    </path>
+
+    <!-- convert it into manifest format (space separated)-->
+    <pathconvert property="mf.classpath" pathsep=" ">
+        <path refid="classpath" />
+        <flattenmapper />
+    </pathconvert>
+
+    <target name="init">
+        <delete dir="${build}" />
+        <mkdir dir="${build}" />
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${build}" classpathref="classpath">
+            <classpath>
+                <pathelement path="${lib}/*.jar"/>
+            </classpath>
+
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile" >
+        <jar destfile="app.jar" basedir="${build}">
+
+            <zipgroupfileset dir="${lib}" includes="*.jar"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.stanford.ravel.generated.Application" />
+                <attribute name="Class-Path" value="${mf.classpath}" />
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="all" depends="jar"/>
+    <!-- Clean up -->
+    <target name="clean">
+        <delete includeemptydirs="true" quiet="true">
+            <fileset dir="${classes}" followsymlinks="false"/>
+            <fileset file="app.jar" followsymlinks="false"/>
+        </delete>
+    </target>
+
+</project>
+
+
+
+
+>>
