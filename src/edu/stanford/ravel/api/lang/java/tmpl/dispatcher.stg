@@ -72,11 +72,14 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     private final KeyProvider keyProvider;
     private DriverAPI driver;
+    private int __device_id__;
 
-    public AppDispatcher(KeyProvider keyProvider) {
+    public AppDispatcher(KeyProvider keyProvider, int device_id) {
         this.keyProvider = keyProvider;
-
+        this.__device_id__ = device_id;
+         // set controller for models
         <models:set_component_controller("model"); separator="\n">
+        //set controller for Interfaces
         <interfaces:set_component_controller("iface"); separator="\n">
     }
 
@@ -102,6 +105,11 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
     @Override
     public int getAppId() {
         return <space.id>;
+    }
+
+    @Override
+    public int getDeviceId() {
+        return __device_id__;
     }
 
     @Override

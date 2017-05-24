@@ -14,6 +14,7 @@ public interface DispatcherAPI extends SystemEventAPI {
 
     int getAppId();
 
+    int getDeviceId();
     /***********************************************************************/
     /*************** AD Commands from driver to AD *************************/
     /***********************************************************************/

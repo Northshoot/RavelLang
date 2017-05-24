@@ -61,3 +61,4 @@ src/patterns/src/contiki/coap/
 android/app/libs/
 android/src/main/gen/
 posix/.deps/
+/runtime/java/src/nbproject/private/

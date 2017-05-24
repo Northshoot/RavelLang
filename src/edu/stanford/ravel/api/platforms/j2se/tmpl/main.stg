@@ -32,7 +32,7 @@ class Application {
             }
         }
 
-        AppDispatcher dispatcher = new AppDispatcher(keyProvider);
+        AppDispatcher dispatcher = new AppDispatcher(keyProvider, 1234);
         JavaDriver driver = new JavaDriver(dispatcher);
         dispatcher.setDriver(driver);
 
@@ -43,7 +43,7 @@ class Application {
                 Error err = driver.registerEndpoint(ep);
                 //TODO: fix this properly
                 if (err != Error.SUCCESS) {
-                    System.err.println("Waiting for connection..." + ep.getId() + ": " + err);
+                    System.err.println("Waiting for connection... AppId " + ep.getId() + " dId "+ dispatcher.getDeviceId() + ": " + err);
                     // die immediately if endpoint registration failed (it means we could not
                     // bind the right ports)
                     //return;

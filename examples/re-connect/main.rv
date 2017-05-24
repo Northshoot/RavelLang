@@ -18,7 +18,7 @@ controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
 
     event system.started():
         system.print("Started with ID: " +(str)(this_id))
-        timer.start_periodic(100)
+        timer.start_periodic(2000)
 
     event system.restarted():
         system.print("Restarted with ID: " +(str)(this_id))
@@ -60,7 +60,7 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
 
 
      event data.arrived():
-        system.print((str)(this_id) + ":: arrived " + (str)(self.record.this_int))
+        system.print((str)(this_id) + ":: from [" +  "] arrived " + (str)(self.record.this_int))
 
     event data.full():
         data.delete(data.first())
@@ -68,8 +68,8 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
 
 space One:
     platform:
-        language = CLang
-        system = Posix
+        language = JLang
+        system = J2SE.v18
 
     interfaces:
         timer = Timer()

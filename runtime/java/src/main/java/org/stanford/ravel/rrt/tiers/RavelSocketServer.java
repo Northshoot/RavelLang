@@ -26,6 +26,7 @@ public class RavelSocketServer implements Runnable, Closeable {
             this.socket = socket;
 
             int identity = RavelSocketProtocol.readIdentity(socket.getInputStream());
+            System.err.println("Creating identity " + identity);
             this.endpoint = new TcpEndpoint(identity, (InetSocketAddress)socket.getRemoteSocketAddress());
             endpoint.connected();
             listeningThread = new Thread(new Runnable() {

@@ -700,7 +700,7 @@ public class DefPhase extends RavelBaseListener {
 
         String name = ctx.qualified_name().getText();
         RavelParser.Simple_expressionContext value = ctx.simple_expression();
-        if (value.literal() != null) {
+        if (value.literal() != null ) {
             if (allowLiteral) {
                 Object literal = ParserUtils.literalToValue(value.literal());
                 ConstantSymbol sym = new ConstantSymbol(name, literal);

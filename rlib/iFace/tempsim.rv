@@ -1,0 +1,6 @@
+interface TempHumSim():
+    implementation:
+        java ="rlib/java/temphum_sim.stg"
+
+    def readTemperature() : double
+    def readHumidity(): double

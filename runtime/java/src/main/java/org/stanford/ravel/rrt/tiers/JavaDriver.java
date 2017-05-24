@@ -63,6 +63,7 @@ public class JavaDriver implements DriverAPI {
         }
     }
 
+    //new endpoin connected
     void registerSocket(TcpEndpoint endpoint, RavelSocket socket) {
         internalRegisterEndpoint(endpoint);
 
@@ -71,6 +72,7 @@ public class JavaDriver implements DriverAPI {
                 try {
                     socketClients.get(endpoint).close();
                     endpoint.disconnected();
+                    System.err.println("rejecting endpoint " + endpoint.getAddress());
                 } catch(IOException e) {
                     System.err.println("Failed to close existing socket to " + endpoint.getAddress() + ":" + endpoint.getPort());
                     e.printStackTrace(System.err);

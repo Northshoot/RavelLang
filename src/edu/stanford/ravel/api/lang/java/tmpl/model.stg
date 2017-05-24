@@ -3,6 +3,7 @@ import "common.stg"
 record_class(model, fields) ::=<<
 public static class Record implements ModelRecord {
     private int __idx = -1;
+    private int __device_id = -1;
 
     <fields:{f|public <f.type> <f.name>;}; separator="\n">
 
@@ -26,6 +27,16 @@ public static class Record implements ModelRecord {
     @Override
     public int index() {
         return __idx;
+    }
+
+    @Override
+    public void device_id(int i) {
+        __device_id = i & 0xFFFF;
+    }
+
+    @Override
+    public int device_id() {
+        return __device_id;
     }
 };
 >>
@@ -99,10 +110,11 @@ public class <name> extends <base>\<<name>.Record> {
             <model.encryptCode>
             return __returnValue;
         } else {
-            byte[] packet = new byte[data.length + 2];
+            byte[] packet = new byte[data.length + 3];
             System.arraycopy(data, 0, packet, 2, data.length);
             packet[0] = (byte)MODEL_ID;
             packet[1] = (byte)record.index();
+            packet[2] = (byte)record.device_id();
             return packet;
         }
     }

@@ -37,6 +37,9 @@ public class Space extends Primitive {
     public int getId() {
         return id;
     }
+    public int getDeviceId() {
+        return id;
+    }
 
     /** add components to the particular space */
     public void add(String ref, ConcreteViewInstance v) {
