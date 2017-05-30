@@ -347,7 +347,7 @@ property_line
     | flow_assign
     | NEWLINE
     ;
-
+// TODO: add flow lists, star, and flow as parameter
 flow_assign
     : FLOW '=' Identifier ('->' Identifier)+ #DirectedFlow
     | FLOW '=' Identifier (',' Identifier)+ #UndirectedFlow
