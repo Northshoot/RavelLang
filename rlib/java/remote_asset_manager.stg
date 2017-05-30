@@ -49,29 +49,19 @@ public class <name> extends HttpBaseUrlConnection{
     <interface.controllerList:set_controller_method(); separator="\n">
 
 
-    public void addDevice(<interface.baseInterface.models.table_local.name>.Record record){
-            // TODO: push data to django
-
-
-
-        }
-
     public void getDevice(<interface.baseInterface.models.table_remote.name>.Record record){
-    System.out.println(TAG + " :: get device:");
          try {
-        Response rr = super.writePost(this.urlName, "device_id=" + Integer.toString(record.device_idd));
-        JsonArray gson = new Gson().fromJson(rr.content, JsonArray.class);
-        JsonObject jfields = (JsonObject) gson.get(0);
-        //JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
-        System.out.println(TAG + " :: return:"+ jfields);
-        <interface.baseInterface.models.table_remote.fields:{f|record.<f.name>=jfields.get("<f.name>")<type_to_json_type(f.type)>;}; separator="\n">
+            Response rr = super.writePost(this.urlName, "device_id=" + Integer.toString(record.device_idd));
+            JsonArray gson = new Gson().fromJson(rr.content, JsonArray.class);
+            JsonObject jfields = (JsonObject) gson.get(0);
+            //JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
+            System.out.println(TAG + " :: return:"+ jfields);
+            <interface.baseInterface.models.table_remote.fields:{f|record.<f.name>=jfields.get("<f.name>")<type_to_json_type(f.type)>;}; separator="\n">
 
         } catch (ConnectException ex) {
-         } catch (IOException ex) {
-         }
-
-
-}
+        } catch (Exception ex) {
+        }
+    }
 }
 
 >>
