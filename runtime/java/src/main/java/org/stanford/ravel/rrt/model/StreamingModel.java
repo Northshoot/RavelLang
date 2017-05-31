@@ -111,7 +111,6 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
                 // ignore
                 return;
             }*/
-
             RecordType record = create();
             Context<RecordType> ctx = handleRecord(record, pkt, endpoint);
             ctx.endpoint = endpoint;
