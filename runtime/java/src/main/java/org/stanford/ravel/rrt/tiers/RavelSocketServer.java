@@ -24,7 +24,8 @@ public class RavelSocketServer implements Runnable, Closeable {
 
         public ClientSocket(Socket socket) throws IOException {
             this.socket = socket;
-
+            //TODO: figure out with the endpoint here creating new for each connections
+            //
             int identity = RavelSocketProtocol.readIdentity(socket.getInputStream());
             System.err.println("Creating identity " + identity);
             this.endpoint = new TcpEndpoint(identity, (InetSocketAddress)socket.getRemoteSocketAddress());
@@ -72,6 +73,7 @@ public class RavelSocketServer implements Runnable, Closeable {
         }
     }
 
+    private final String TAG  = RavelSocketServer.class.getSimpleName();
     private final ServerSocket listeningSocket;
     private volatile boolean closed = false;
     private final Thread listeningThread;
@@ -92,9 +94,8 @@ public class RavelSocketServer implements Runnable, Closeable {
     }
 
     private void closeClient(ClientSocket socket) {
+        System.out.println(TAG + " Close client " + socket.getEndpoint().getAddress());
         try {
-
-            socket.getEndpoint().connected();
             socket.close();
         } catch (IOException e) {
             pprint("Failed to close client socket to " + socket.getEndpoint());

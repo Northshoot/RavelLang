@@ -66,7 +66,7 @@ public class JavaDriver implements DriverAPI {
     //new endpoin connected
     void registerSocket(TcpEndpoint endpoint, RavelSocket socket) {
         internalRegisterEndpoint(endpoint);
-
+        endpoint.setAppDispatcher(appDispatcher);
         synchronized (socketClients) {
             if (socketClients.containsKey(endpoint)) {
                 try {
@@ -142,8 +142,7 @@ public class JavaDriver implements DriverAPI {
     public final Error sendData(final RavelPacket data, final Endpoint endpoint) {
         if (endpoint.isLocal()) // can't send to one self
             return Error.SYSTEM_ERROR;
-
-        data.setSourceDestination(appDispatcher.getAppId(), endpoint.getId());
+        data.setSourceDestination(appDispatcher.getDeviceId(), appDispatcher.getAppId(), endpoint.getId());
 
         threadPool.execute(new Runnable() {
             public void run() {
@@ -233,7 +232,6 @@ public class JavaDriver implements DriverAPI {
     @Override
     public Error registerEndpoint(Endpoint ep) {
         internalRegisterEndpoint(ep);
-        ep.setAppDispatcher(appDispatcher);
         if (ep.isLocal())
             return startLocalEndpoint(ep);
         else

@@ -84,15 +84,17 @@ class RavelSocketClient implements RavelSocket {
             });
             listeningThread.start();
         } catch ( Exception e){
-            System.err.println("Disconect");
+            System.err.println("Connect: " + e.getMessage());
+            remote.disconnected();
             throw new IOException(e);
         }
     }
 
     private synchronized void closeSocket() {
+        if ( socket == null )
+            return;
         try {
             System.err.println("Close socker " + remote.getAddress() + ":" + remote.getPort());
-
             socket.shutdownInput();
             socket.shutdownOutput();
             remote.disconnected();
@@ -121,24 +123,22 @@ class RavelSocketClient implements RavelSocket {
             connect();
             try {
                 RavelSocketProtocol.writeOutput(socket.getOutputStream(), pkt);
-//                System.err.println("RavelSocketProtocol.writeOutput");
-//            } finally {
-//                System.err.println("socket.isClosed() " + socket.isClosed() + " socket.isInputShutdown() " + socket.isInputShutdown());
-//                if (socket.isClosed() || socket.isInputShutdown()) {
-//                    System.err.println("socket.isClosed() || socket.isInputShutdown()");
-//                    closeSocketAndJoin();
-//                } else {
-//                    System.err.println("socket.isClosed() || socket.isInputShutdown() FALSE");
-//                }
-//            }
+
+            } finally {
+                //System.err.println("socket.isClosed() " + socket.isClosed() + " socket.isInputShutdown() " + socket.isInputShutdown());
+                if (socket.isClosed() || socket.isInputShutdown()) {
+                  //  System.err.println("socket.isClosed() || socket.isInputShutdown()");
+                    closeSocketAndJoin();
+                }
+            }
             } catch (IOException e) {
                 closeSocketAndJoin();
                 throw new RavelIOException(e);
             }
-        }catch (IOException e){
-                System.err.println("connect throughn an exeption");
-
-            }
+//        }catch (IOException e){
+//                System.err.println("connect throughn an exeption");
+//
+//        }
     }
 
     @Override

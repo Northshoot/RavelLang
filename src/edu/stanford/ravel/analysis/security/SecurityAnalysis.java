@@ -521,7 +521,7 @@ public class SecurityAnalysis {
         flow.setNumMACs(offset);
 
         // NOTE: TRICKY:
-        //
+        // FIXME
         // we make the following assumptions:
         // for replicated models, all flows are single hop
         // for streaming models, there is only one flow

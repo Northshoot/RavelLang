@@ -8,11 +8,12 @@ import org.stanford.ravel.rrt.utils.GrowableByteArray;
  * Created by lauril on 1/25/17.
  */
 public class RavelPacket {
-    private final static int SRC = 0; // 8 bits for source
-    private final static int DST = 1; // 8 bits for destination
-    private final static int FLAGS = 2; // 8 bits for flags
+    private final static int TIER = 0; // 8 bits for source TODO: this is tier ID
+    private final static int SRC = 1; // 32 bits for source TODO: source
+    private final static int DST = 5; // 8 bits for destination
+    private final static int FLAGS = 6; // 8 bits for flags
 
-    private final static int RESERVED = 3; // reserved for byte mapping
+    private final static int RESERVED = 7; // reserved for byte mapping
 
     public static class Flags {
         public static final int FLAG_ACK = 1;
@@ -30,7 +31,8 @@ public class RavelPacket {
     private final byte[] record_data;
     private final int record_end;
     private byte dst = -1;
-    private byte src = -1;
+    private int src = -1;
+    private byte tier = -1;
 
     private static int BYTE_POS_MODEL_ID = 0;
 
@@ -49,14 +51,15 @@ public class RavelPacket {
     private RavelPacket(byte[] data, boolean isNetwork) {
         //unmangle data
         if (isNetwork) {
-            this.src = data[SRC];
+            this.tier = data[TIER];
+            this.src = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data,SRC, DST));
             this.dst = data[DST];
             this.flags = data[FLAGS];
 
             this.record_end = data.length;
             this.record_data = ByteWork.getBytes(data, RESERVED, record_end);
             //Record can not be less than model_id, record_id, and a byte
-            if (record_data.length <3) throw new AssertionError("RavelPacket: Expected at least 3 bytes");
+            if (record_data.length < 3) throw new AssertionError("RavelPacket: Expected at least 3 bytes");
             this.model_id = getModelIdFromRecord(this.record_data);
             this.record_id = getRecordIdFromRecord(this.record_data);
         } else {
@@ -133,23 +136,28 @@ public class RavelPacket {
     }
 
     private static int getRecordIdFromRecord(byte[] data) {
-        if (data.length <3) throw new AssertionError("getRecordIdFromRecord: Expected at least 3 bytes");
+        if (data.length < 3) throw new AssertionError("getRecordIdFromRecord: Expected at least 3 bytes");
         return (int)((data[2] & 0xFF) << 8 | (data[1] & 0xFF));
     }
 
-    public void setSourceDestination(int source, int destination) {
-        assert source < 255;
-        assert source >= 0;
+    public void setSourceDestination(int source, int tier, int destination) {
+        //TODO expand addressing
+        assert tier < 255;
+        assert tier >= 0;
         assert destination < 255;
         assert destination >= 0;
-        src = (byte)source;
-        dst = (byte)destination;
+        this.src = source;
+        this.tier = (byte)tier;
+        this.dst = (byte)destination;
     }
 
     public int getSource() {
-        return (int)src & 0xFF;
+        return src;
     }
 
+    public int getTier() {
+        return (int)tier & 0xFF;
+    }
     public int getDestination() {
         return (int)dst & 0xFF;
     }
@@ -167,7 +175,8 @@ public class RavelPacket {
 
     public byte[] toBytes() {
         GrowableByteArray outputStream = new GrowableByteArray();
-        outputStream.write_byte(src);
+        outputStream.write_byte(tier);
+        outputStream.write_int32(src);
         outputStream.write_byte(dst);
         outputStream.write_byte((byte)this.flags);
         outputStream.write(record_data, 0, record_data.length);
@@ -186,7 +195,7 @@ public class RavelPacket {
 
     @Override
     public String toString() {
-        return "[SRC: " + this.src + ", DST: " + this.dst
+        return "[TIER: " + this.tier + ", SRC: " + this.src + ", DST: " + this.dst
                 +", MODEL_ID: " + this.model_id + " rec_idx: " + this.record_id + "]";
     }
 }

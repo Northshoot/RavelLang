@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+
+
 import org.stanford.ravel.rrt.utils.None;
 import org.stanford.ravel.rrt.DispatcherAPI;
 /**
@@ -16,12 +18,11 @@ public class Endpoint extends None{
     private final Endpoint.TYPE type;
     private boolean local = false;
     private volatile boolean mConnected = false;
-    private DispatcherAPI appDispatcher = null;
+    protected DispatcherAPI appDispatcher = null;
 
     Endpoint(Endpoint.TYPE type, int id) {
         this.type = type;
         this.id = id;
-
     }
     public TYPE getType() { return type; }
     public int getId() {
@@ -34,14 +35,15 @@ public class Endpoint extends None{
 
     public void connected() {
         mConnected = true;
-        if ( this.appDispatcher != null )
+        if ( this.appDispatcher != null && !local)
             appDispatcher.connected(this);
     }
 
     public void disconnected() {
         mConnected = false;
-        if ( this.appDispatcher != null )
+        if ( this.appDispatcher != null && !local) {
             appDispatcher.disconected(this);
+        }
 
     }
 

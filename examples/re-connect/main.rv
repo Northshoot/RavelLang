@@ -3,7 +3,7 @@ from rlib.iFace import timer
 streaming model DataSample(size: int32):
     properties:
         records = size
-        reliable = False
+        reliable = True
         durable = False
         flow = One -> Two
 
@@ -24,11 +24,11 @@ controller DataControllerOne(data : DataSample, timer: Timer, this_id: int32):
         system.print("Restarted with ID: " +(str)(this_id))
 
     event system.connected(ep : Endpoint ):
-        system.print("Connected with ID: " +(str)(this_id)  + " " + (str)(ep.getId()))
+        system.print("Connected with ID: " +(str)(this_id)  + " remote id: " + (str)(ep.getId()))
         system.print("is Local: " + (str)(ep.isLocal()))
 
     event system.disconnected( ep : Endpoint ):
-        system.print("Disconnected with ID: " +(str)(this_id))
+        system.print("Disconnected with ID: " +(str)(this_id) )
 
 
     event timer.fired():
@@ -58,6 +58,12 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
     event system.started():
         system.print("Started with ID: " +(str)(this_id))
 
+    event system.connected(ep : Endpoint ):
+        system.print("Connected with ID: " +(str)(this_id)  + " remote id: " + (str)(ep.getId()))
+        system.print("is Local: " + (str)(ep.isLocal()))
+
+    event system.disconnected( ep : Endpoint ):
+        system.print("Disconnected with ID: " +(str)(this_id) +" is Local: " + (str)(ep.isLocal()))
 
      event data.arrived():
         system.print((str)(this_id) + ":: from [" +  "] arrived " + (str)(self.record.this_int))

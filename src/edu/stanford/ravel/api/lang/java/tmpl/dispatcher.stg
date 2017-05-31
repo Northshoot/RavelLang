@@ -201,7 +201,6 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     @Override
     public void disconected(Endpoint endpoint) {
-         System.err.println(" ENDPOINT DISCONNECTED ");
         <dispatch_event_single_instance(space.systemAPI.component, "disconnected", ["endpoint"])>
     }
 

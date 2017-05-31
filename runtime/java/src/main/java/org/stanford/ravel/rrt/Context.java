@@ -56,6 +56,10 @@ public class Context<RecordType extends ModelRecord> {
         return this.error != Error.SUCCESS;
     }
 
+    public void setEndpoint(Endpoint ep){
+        this.endpoint = ep;
+    }
+
     @Override
     public String toString() {
         return "[CTX: " + getError() +"]";
