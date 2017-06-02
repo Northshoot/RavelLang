@@ -23,16 +23,14 @@ import java.util.List;
 public class Nrf52 extends BaseCPlatform {
     //TODO: platform path should be configurable
     private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_nrf52_tmpl_dir();
-    private final STGroup ldGroup;
-    private final STGroup configGroup;
+    private STGroup ldGroup;
+    private STGroup configGroup;
 
     public Nrf52() {
         super(
                 new STGroupFile(BASE_LANG_TMPL_PATH + "/main.stg"),
                 new STGroupFile(BASE_LANG_TMPL_PATH + "/makefile.stg")
         );
-        ldGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/linker.stg");
-        configGroup = new STGroupFile(BASE_LANG_TMPL_PATH + "/sdk_config.stg");
     }
     @Override
     public List<FileObject> createBuildSystem(Space s, List<FileObject> files) {
@@ -50,6 +48,14 @@ public class Nrf52 extends BaseCPlatform {
         return all_files;
     }
 
+    private STGroup getConfigGroup(){
+        configGroup = new STGroupFile(BASE_LANG_TMPL_PATH + getAPILevel()+"/sdk_config.stg");
+        return configGroup;
+    }
+    private STGroup getLDGroup(){
+        ldGroup = new STGroupFile(BASE_LANG_TMPL_PATH + getAPILevel()+"/linker.stg");
+        return ldGroup;
+    }
     private NrfConfig build_nrf_config_file(Space s) {
         
         NrfConfig nc = new NrfConfig();
@@ -84,6 +90,7 @@ public class Nrf52 extends BaseCPlatform {
     private FileObject makeLinkerScript(TemplatePair p){
         //TODO: values could come from config file
         //TODO: we need to increase the memory with each BLE service
+
         /**
          *
          MEMORY
@@ -92,7 +99,7 @@ public class Nrf52 extends BaseCPlatform {
          RAM (rwx) :  ORIGIN = 0x20002128, LENGTH = 0xded8
          }
          */
-        ST tmpl_ld = ldGroup.getInstanceOf(p.getKeyword());
+        ST tmpl_ld = getLDGroup().getInstanceOf(p.getKeyword());
         FileObject file_ld = new FileObject();
         file_ld.setFileName( p.getValue()+".ld");
         file_ld.setContent(tmpl_ld.render());
@@ -103,7 +110,7 @@ public class Nrf52 extends BaseCPlatform {
 
     private FileObject makeConfigFile(TemplatePair p, NrfConfig configObj){
         //TODO: these could come from config
-        ST tmpl_sd = configGroup.getInstanceOf("sdk_config");
+        ST tmpl_sd = getConfigGroup().getInstanceOf("sdk_config");
         tmpl_sd.add("config", configObj);
         FileObject sdk_config_file = new FileObject();
         sdk_config_file.setSubPath("config/");

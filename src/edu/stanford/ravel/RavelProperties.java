@@ -61,11 +61,11 @@ public class RavelProperties {
     }
 
     public static String get_nrf52_tmpl_dir(){
-        return get_base_tmpl_dir()+"/" +RESOURCE_BUNDLE.getString(API_NRF52_TMPL_DIR)+"/";
+        return get_base_tmpl_dir()+"/" + RESOURCE_BUNDLE.getString(API_NRF52_TMPL_DIR)+"/";
     }
 
     public static String get_base_tmpl_dir(){
-        return RESOURCE_BUNDLE.getString(BASE_TMPL_DIR)+"/";
+        return RESOURCE_BUNDLE.getString(BASE_TMPL_DIR);
     }
     public static String get_language_package(){
         return RESOURCE_BUNDLE.getString(API_LANG);

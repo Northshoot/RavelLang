@@ -45,9 +45,11 @@ public class Platform {
             // FIXME emit a better error
             throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());
         }
-        System.out.println("API: " +pAPI[1]);
-        if (pAPI.length > 1)
+
+        if (pAPI.length > 1) {
             mPlatform.setAPILevel(Integer.valueOf(pAPI[1].substring(1)));
+
+        }
 
         //TODO: resolve existence of the references to sinks and sources
     }
@@ -55,6 +57,7 @@ public class Platform {
     public static class Builder {
         private String system;
         private String lang;
+        private String name;
 
         public Platform build(){
             return new Platform(system, lang);
@@ -62,6 +65,7 @@ public class Platform {
 
         public Builder name(String name) {
             // FIXME
+            this.name = name;
             return this;
         }
 

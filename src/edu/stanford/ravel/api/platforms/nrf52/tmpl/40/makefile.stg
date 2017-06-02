@@ -10,16 +10,16 @@ APP_FILE_DIR = $(APP_DIR)/app_files
 SRC_APP = <sources:{s|$(APP_FILE_DIR)/<s>.c}; separator=" "> <main>.c
 
 PROJECT_NAME     := <target>
-TARGETS          := nrf52<version>_<target>
+TARGETS          := nrf52832_<target>
 OUTPUT_DIRECTORY := _build
 
 SDK_ROOT := $(NRF52SDK)
 PROJ_DIR := $(NRF52_PROJECT)
 
-$(OUTPUT_DIRECTORY)/nrf52<version>_<target>.out: \
+$(OUTPUT_DIRECTORY)/nrf52832_<target>.out: \
   LINKER_SCRIPT  := <linker_script>.ld
 
-default: nrf52<version>_<target>
+default: nrf52832_<target>
 
 CFLAGS += -Wno-unused-but-set-variable
 

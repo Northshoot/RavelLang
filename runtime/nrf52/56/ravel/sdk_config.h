@@ -1,4 +1,8 @@
+
+
 #ifndef SDK_CONFIG_H
+#define SDK_CONFIG_H
+// <<< Use Configuration Wizard in Context Menu >>>\n
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
@@ -11,21 +15,6 @@
 #ifndef BLE_ADVERTISING_ENABLED
 #define BLE_ADVERTISING_ENABLED 1
 #endif
-
-// <e> NRF_BLE_GATT_ENABLED - nrf_ble_gatt - GATT module
-//==========================================================
-#ifndef NRF_BLE_GATT_ENABLED
-#define NRF_BLE_GATT_ENABLED 1
-#endif
-#if  NRF_BLE_GATT_ENABLED
-// <o> NRF_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size that is passed to the @ref sd_ble_enable function.
-#ifndef NRF_BLE_GATT_MAX_MTU_SIZE
-#define NRF_BLE_GATT_MAX_MTU_SIZE 158
-#endif
-
-#endif //NRF_BLE_GATT_ENABLED
-
-
 
 // <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
 
@@ -40,6 +29,20 @@
 #ifndef BLE_RACP_ENABLED
 #define BLE_RACP_ENABLED 0
 #endif
+
+// <e> NRF_BLE_GATT_ENABLED - nrf_ble_gatt - GATT module
+//==========================================================
+#ifndef NRF_BLE_GATT_ENABLED
+#define NRF_BLE_GATT_ENABLED 1
+#endif
+#if  NRF_BLE_GATT_ENABLED
+// <o> NRF_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size that is passed to the @ref sd_ble_enable function.
+#ifndef NRF_BLE_GATT_MAX_MTU_SIZE
+#define NRF_BLE_GATT_MAX_MTU_SIZE 158
+#endif
+
+#endif //NRF_BLE_GATT_ENABLED
+// </e>
 
 // <q> NRF_BLE_QWR_ENABLED  - nrf_ble_qwr - Queued writes support module (prepare/execute write)
 
@@ -228,89 +231,10 @@
 // <h> nRF_Drivers
 
 //==========================================================
-// <e> ADC_ENABLED - nrf_drv_adc - Driver for ADC peripheral (nRF51)
-//==========================================================
-#ifndef ADC_ENABLED
-#define ADC_ENABLED 0
-#endif
-#if  ADC_ENABLED
-// <o> ADC_CONFIG_IRQ_PRIORITY  - Interrupt priority
-
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest)
-// <1=> 1
-// <2=> 2
-// <3=> 3
-// <4=> 4
-// <5=> 5
-// <6=> 6
-// <7=> 7
-
-#ifndef ADC_CONFIG_IRQ_PRIORITY
-#define ADC_CONFIG_IRQ_PRIORITY 7
-#endif
-
-// <e> ADC_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef ADC_CONFIG_LOG_ENABLED
-#define ADC_CONFIG_LOG_ENABLED 0
-#endif
-#if  ADC_CONFIG_LOG_ENABLED
-// <o> ADC_CONFIG_LOG_LEVEL  - Default Severity level
-
-// <0=> Off
-// <1=> Error
-// <2=> Warning
-// <3=> Info
-// <4=> Debug
-
-#ifndef ADC_CONFIG_LOG_LEVEL
-#define ADC_CONFIG_LOG_LEVEL 4
-#endif
-
-// <o> ADC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef ADC_CONFIG_INFO_COLOR
-#define ADC_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> ADC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-
-// <0=> Default
-// <1=> Black
-// <2=> Red
-// <3=> Green
-// <4=> Yellow
-// <5=> Blue
-// <6=> Magenta
-// <7=> Cyan
-// <8=> White
-
-#ifndef ADC_CONFIG_DEBUG_COLOR
-#define ADC_CONFIG_DEBUG_COLOR 1
-#endif
-
-#endif //ADC_CONFIG_LOG_ENABLED
-// </e>
-
-#endif //ADC_ENABLED
-// </e>
-
 // <e> APP_USBD_ENABLED - app_usbd - USB Device library
 //==========================================================
 #ifndef APP_USBD_ENABLED
-#define APP_USBD_ENABLED 1
+#define APP_USBD_ENABLED 0
 #endif
 #if  APP_USBD_ENABLED
 // <o> APP_USBD_VID - Vendor ID  <0x0000-0xFFFF>
@@ -1472,6 +1396,13 @@
 #define PWM2_ENABLED 0
 #endif
 
+// <q> PWM3_ENABLED  - Enable PWM3 instance
+
+
+#ifndef PWM3_ENABLED
+#define PWM3_ENABLED 0
+#endif
+
 // <e> PWM_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef PWM_CONFIG_LOG_ENABLED
@@ -1689,7 +1620,7 @@
 // <e> RNG_ENABLED - nrf_drv_rng - RNG peripheral driver
 //==========================================================
 #ifndef RNG_ENABLED
-#define RNG_ENABLED 1
+#define RNG_ENABLED 0
 #endif
 #if  RNG_ENABLED
 // <q> RNG_CONFIG_ERROR_CORRECTION  - Error correction
@@ -1771,6 +1702,13 @@
 #define RNG_CONFIG_DEBUG_COLOR 0
 #endif
 
+// <q> RNG_CONFIG_RANDOM_NUMBER_LOG_ENABLED  - Enables logging of random numbers.
+
+
+#ifndef RNG_CONFIG_RANDOM_NUMBER_LOG_ENABLED
+#define RNG_CONFIG_RANDOM_NUMBER_LOG_ENABLED 0
+#endif
+
 #endif //RNG_CONFIG_LOG_ENABLED
 // </e>
 
@@ -1780,7 +1718,7 @@
 // <e> RTC_ENABLED - nrf_drv_rtc - RTC peripheral driver
 //==========================================================
 #ifndef RTC_ENABLED
-#define RTC_ENABLED 1
+#define RTC_ENABLED 0
 #endif
 #if  RTC_ENABLED
 // <o> RTC_DEFAULT_CONFIG_FREQUENCY - Frequency  <16-32768>
@@ -1832,7 +1770,7 @@
 
 
 #ifndef RTC2_ENABLED
-#define RTC2_ENABLED 1
+#define RTC2_ENABLED 0
 #endif
 
 // <o> NRF_MAXIMUM_LATENCY_US - Maximum possible time[us] in highest priority interrupt
@@ -2826,6 +2764,22 @@
 #endif //UART0_ENABLED
 // </e>
 
+// <e> UART1_ENABLED - Enable UART1 instance
+//==========================================================
+#ifndef UART1_ENABLED
+#define UART1_ENABLED 0
+#endif
+#if  UART1_ENABLED
+// <q> UART1_CONFIG_USE_EASY_DMA  - Default setting for using EasyDMA
+
+
+#ifndef UART1_CONFIG_USE_EASY_DMA
+#define UART1_CONFIG_USE_EASY_DMA 1
+#endif
+
+#endif //UART1_ENABLED
+// </e>
+
 // <e> UART_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef UART_CONFIG_LOG_ENABLED
@@ -2888,6 +2842,23 @@
 #define USBD_ENABLED 0
 #endif
 #if  USBD_ENABLED
+// <o> USBD_CONFIG_IRQ_PRIORITY  - Interrupt priority
+
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest)
+// <1=> 1
+// <2=> 2
+// <3=> 3
+// <4=> 4
+// <5=> 5
+// <6=> 6
+// <7=> 7
+
+#ifndef USBD_CONFIG_IRQ_PRIORITY
+#define USBD_CONFIG_IRQ_PRIORITY 7
+#endif
+
 // <o> NRF_DRV_USBD_DMASCHEDULER_MODE  - USBD SMA scheduler working scheme
 
 // <0=> Prioritized access
@@ -2897,7 +2868,7 @@
 #define NRF_DRV_USBD_DMASCHEDULER_MODE 0
 #endif
 
-// <q> NRF_USBD_DRV_LOG_ENABLED  - Enable logging.
+// <q> NRF_USBD_DRV_LOG_ENABLED  - Enable logging
 
 
 #ifndef NRF_USBD_DRV_LOG_ENABLED
@@ -3060,24 +3031,59 @@
 #define APP_TIMER_ENABLED 1
 #endif
 #if  APP_TIMER_ENABLED
-// <q> APP_TIMER_WITH_PROFILER  - Enable app_timer profiling
+// <o> APP_TIMER_CONFIG_RTC_FREQUENCY  - Configure RTC prescaler.
 
-
-#ifndef APP_TIMER_CONFIG_IRQ_PRIORITY
-#define APP_TIMER_CONFIG_IRQ_PRIORITY 7
-#endif
+// <0=> 32768 Hz
+// <1=> 16384 Hz
+// <3=> 8192 Hz
+// <7=> 4096 Hz
+// <15=> 2048 Hz
+// <31=> 1024 Hz
 
 #ifndef APP_TIMER_CONFIG_RTC_FREQUENCY
 #define APP_TIMER_CONFIG_RTC_FREQUENCY 0
 #endif
 
-#ifndef APP_TIMER_CONFIG_USE_SCHEDULER
-#define APP_TIMER_CONFIG_USE_SCHEDULER 1
+// <o> APP_TIMER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest)
+// <1=> 1
+// <2=> 2
+// <3=> 3
+// <4=> 4
+// <5=> 5
+// <6=> 6
+// <7=> 7
+
+#ifndef APP_TIMER_CONFIG_IRQ_PRIORITY
+#define APP_TIMER_CONFIG_IRQ_PRIORITY 7
 #endif
+
+// <o> APP_TIMER_CONFIG_OP_QUEUE_SIZE - Capacity of timer requests queue.
+// <i> Size of the queue depends on how many timers are used
+// <i> in the system, how often timers are started and overall
+// <i> system latency. If queue size is too small app_timer calls
+// <i> will fail.
+
 #ifndef APP_TIMER_CONFIG_OP_QUEUE_SIZE
 #define APP_TIMER_CONFIG_OP_QUEUE_SIZE 10
 #endif
 
+// <q> APP_TIMER_CONFIG_USE_SCHEDULER  - Enable scheduling app_timer events to app_scheduler
+
+
+#ifndef APP_TIMER_CONFIG_USE_SCHEDULER
+#define APP_TIMER_CONFIG_USE_SCHEDULER 0
+#endif
+
+// <q> APP_TIMER_WITH_PROFILER  - Enable app_timer profiling
+
+
+#ifndef APP_TIMER_WITH_PROFILER
+#define APP_TIMER_WITH_PROFILER 0
+#endif
 
 // <q> APP_TIMER_KEEPS_RTC_ACTIVE  - Enable RTC always on
 
@@ -3087,6 +3093,15 @@
 
 #ifndef APP_TIMER_KEEPS_RTC_ACTIVE
 #define APP_TIMER_KEEPS_RTC_ACTIVE 0
+#endif
+
+// <o> APP_TIMER_CONFIG_SWI_NUMBER  - Configure SWI instance used.
+
+// <0=> 0
+// <1=> 1
+
+#ifndef APP_TIMER_CONFIG_SWI_NUMBER
+#define APP_TIMER_CONFIG_SWI_NUMBER 0
 #endif
 
 #endif //APP_TIMER_ENABLED
@@ -3431,6 +3446,62 @@
 #define MEMORY_MANAGER_LARGE_BLOCK_SIZE 256
 #endif
 
+// <o> MEMORY_MANAGER_XLARGE_BLOCK_COUNT - Size of each memory blocks identified as 'extra large' block.  <0-255>
+
+
+#ifndef MEMORY_MANAGER_XLARGE_BLOCK_COUNT
+#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 0
+#endif
+
+// <o> MEMORY_MANAGER_XLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra large' block.
+// <i>  Size of each memory blocks identified as 'extra large' block. Memory block are recommended to be word-sized.
+
+#ifndef MEMORY_MANAGER_XLARGE_BLOCK_SIZE
+#define MEMORY_MANAGER_XLARGE_BLOCK_SIZE 1320
+#endif
+
+// <o> MEMORY_MANAGER_XXLARGE_BLOCK_COUNT - Size of each memory blocks identified as 'extra extra large' block.  <0-255>
+
+
+#ifndef MEMORY_MANAGER_XXLARGE_BLOCK_COUNT
+#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 0
+#endif
+
+// <o> MEMORY_MANAGER_XXLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra large' block.
+// <i>  Size of each memory blocks identified as 'extra extra large' block. Memory block are recommended to be word-sized.
+
+#ifndef MEMORY_MANAGER_XXLARGE_BLOCK_SIZE
+#define MEMORY_MANAGER_XXLARGE_BLOCK_SIZE 3444
+#endif
+
+// <o> MEMORY_MANAGER_XSMALL_BLOCK_COUNT - Size of each memory blocks identified as 'extra small' block.  <0-255>
+
+
+#ifndef MEMORY_MANAGER_XSMALL_BLOCK_COUNT
+#define MEMORY_MANAGER_XSMALL_BLOCK_COUNT 0
+#endif
+
+// <o> MEMORY_MANAGER_XSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra small' block.
+// <i>  Size of each memory blocks identified as 'extra large' block. Memory block are recommended to be word-sized.
+
+#ifndef MEMORY_MANAGER_XSMALL_BLOCK_SIZE
+#define MEMORY_MANAGER_XSMALL_BLOCK_SIZE 64
+#endif
+
+// <o> MEMORY_MANAGER_XXSMALL_BLOCK_COUNT - Size of each memory blocks identified as 'extra extra small' block.  <0-255>
+
+
+#ifndef MEMORY_MANAGER_XXSMALL_BLOCK_COUNT
+#define MEMORY_MANAGER_XXSMALL_BLOCK_COUNT 0
+#endif
+
+// <o> MEMORY_MANAGER_XXSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra small' block.
+// <i>  Size of each memory blocks identified as 'extra extra small' block. Memory block are recommended to be word-sized.
+
+#ifndef MEMORY_MANAGER_XXSMALL_BLOCK_SIZE
+#define MEMORY_MANAGER_XXSMALL_BLOCK_SIZE 32
+#endif
+
 // <q> MEM_MANAGER_ENABLE_LOGS  - Enable debug trace in the module.
 
 
@@ -3448,23 +3519,23 @@
 #endif //MEM_MANAGER_ENABLED
 // </e>
 
-// <e> NRF_CSENSE_ENABLED - nrf_csense - nrf_csense module
+// <e> NRF_CSENSE_ENABLED - nrf_csense - Capacitive sensor module
 //==========================================================
 #ifndef NRF_CSENSE_ENABLED
 #define NRF_CSENSE_ENABLED 0
 #endif
 #if  NRF_CSENSE_ENABLED
-// <o> NRF_CSENSE_PAD_HYSTERESIS - Minimal value of change to decide that pad was touched.
+// <o> NRF_CSENSE_PAD_HYSTERESIS - Minimum value of change required to determine that a pad was touched.
 #ifndef NRF_CSENSE_PAD_HYSTERESIS
 #define NRF_CSENSE_PAD_HYSTERESIS 15
 #endif
 
-// <o> NRF_CSENSE_PAD_DEVIATION - Minimal value measured on pad to take its value while calculating step.
+// <o> NRF_CSENSE_PAD_DEVIATION - Minimum value measured on a pad required to take it into account while calculating the step.
 #ifndef NRF_CSENSE_PAD_DEVIATION
 #define NRF_CSENSE_PAD_DEVIATION 70
 #endif
 
-// <o> NRF_CSENSE_MIN_PAD_VALUE - Minimum normalized value on pad to take its value into account.
+// <o> NRF_CSENSE_MIN_PAD_VALUE - Minimum normalized value on a pad required to take its value into account.
 #ifndef NRF_CSENSE_MIN_PAD_VALUE
 #define NRF_CSENSE_MIN_PAD_VALUE 20
 #endif
@@ -3474,43 +3545,56 @@
 #define NRF_CSENSE_MAX_PADS_NUMBER 20
 #endif
 
-// <o> NRF_CSENSE_MAX_VALUE - Maximum normalized value got from measurement.
+// <o> NRF_CSENSE_MAX_VALUE - Maximum normalized value obtained from measurement.
 #ifndef NRF_CSENSE_MAX_VALUE
 #define NRF_CSENSE_MAX_VALUE 1000
 #endif
 
-// <o> NRF_CSENSE_OUTPUT_PIN - Output pin used by lower module.
-// <i> This is only used when running on NRF51.
+// <o> NRF_CSENSE_OUTPUT_PIN - Output pin used by the low-level module.
+// <i> This is used when capacitive sensor does not use COMP.
 
 #ifndef NRF_CSENSE_OUTPUT_PIN
-#define NRF_CSENSE_OUTPUT_PIN 30
+#define NRF_CSENSE_OUTPUT_PIN 26
 #endif
 
 #endif //NRF_CSENSE_ENABLED
 // </e>
 
-// <e> NRF_DRV_CSENSE_ENABLED - nrf_drv_csense - Capacitive sensor module
+// <e> NRF_DRV_CSENSE_ENABLED - nrf_drv_csense - Capacitive sensor low-level module
 //==========================================================
 #ifndef NRF_DRV_CSENSE_ENABLED
 #define NRF_DRV_CSENSE_ENABLED 0
 #endif
 #if  NRF_DRV_CSENSE_ENABLED
-// <o> TIMER0_FOR_CSENSE - First TIMER instance used by the driver (except nRF51)
+// <e> USE_COMP - Use the comparator to implement the capacitive sensor driver.
+
+// <i> Due to Anomaly 84, COMP I_SOURCE is not functional. It has too high a varation.
+//==========================================================
+#ifndef USE_COMP
+#define USE_COMP 0
+#endif
+#if  USE_COMP
+// <o> TIMER0_FOR_CSENSE - First TIMER instance used by the driver (not used on nRF51).
 #ifndef TIMER0_FOR_CSENSE
 #define TIMER0_FOR_CSENSE 1
 #endif
 
-// <o> TIMER1_FOR_CSENSE - Second TIMER instance used by the driver (except nRF51)
+// <o> TIMER1_FOR_CSENSE - Second TIMER instance used by the driver (not used on nRF51).
 #ifndef TIMER1_FOR_CSENSE
 #define TIMER1_FOR_CSENSE 2
 #endif
 
 // <o> MEASUREMENT_PERIOD - Single measurement period.
-// <i> Time of single measurement can be calculated as T = (1/2)*MEASUREMENT_PERIOD*(1/f_OSC) where f_OSC = I_SOURCE / (2C*(VUP-VDOWN) ). I_SOURCE, VUP and VDOWN are values used to initialize COMP and C is capacitance of used pad.
+// <i> Time of a single measurement can be calculated as
+// <i> T = (1/2)*MEASUREMENT_PERIOD*(1/f_OSC) where f_OSC = I_SOURCE / (2C*(VUP-VDOWN) ).
+// <i> I_SOURCE, VUP, and VDOWN are values used to initialize COMP and C is the capacitance of the used pad.
 
 #ifndef MEASUREMENT_PERIOD
 #define MEASUREMENT_PERIOD 20
 #endif
+
+#endif //USE_COMP
+// </e>
 
 #endif //NRF_DRV_CSENSE_ENABLED
 // </e>
@@ -3519,7 +3603,14 @@
 
 
 #ifndef NRF_QUEUE_ENABLED
-#define NRF_QUEUE_ENABLED 1
+#define NRF_QUEUE_ENABLED 0
+#endif
+
+// <q> NRF_STRERROR_ENABLED  - nrf_strerror - Library for converting error code to string.
+
+
+#ifndef NRF_STRERROR_ENABLED
+#define NRF_STRERROR_ENABLED 1
 #endif
 
 // <q> RETARGET_ENABLED  - retarget - Retargeting stdio functions
@@ -3529,7 +3620,7 @@
 #define RETARGET_ENABLED 1
 #endif
 
-// <q> SLIP_ENABLED  - slip - SLIP encoding decoding
+// <q> SLIP_ENABLED  - slip - SLIP encoding and decoding
 
 
 #ifndef SLIP_ENABLED
@@ -3591,7 +3682,7 @@
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================
 #ifndef NRF_LOG_USES_COLORS
-#define NRF_LOG_USES_COLORS 1
+#define NRF_LOG_USES_COLORS 0
 #endif
 #if  NRF_LOG_USES_COLORS
 // <o> NRF_LOG_COLOR_DEFAULT  - ANSI escape code prefix.
@@ -3607,7 +3698,7 @@
 // <8=> White
 
 #ifndef NRF_LOG_COLOR_DEFAULT
-#define NRF_LOG_COLOR_DEFAULT 5
+#define NRF_LOG_COLOR_DEFAULT 0
 #endif
 
 // <o> NRF_LOG_ERROR_COLOR  - ANSI escape code prefix.
@@ -3654,7 +3745,7 @@
 // <4=> Debug
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 4
+#define NRF_LOG_DEFAULT_LEVEL 3
 #endif
 
 // <e> NRF_LOG_DEFERRED - Enable deffered logger.
@@ -3707,7 +3798,7 @@
 // <e> NRF_LOG_BACKEND_SERIAL_USES_UART - If enabled data is printed over UART
 //==========================================================
 #ifndef NRF_LOG_BACKEND_SERIAL_USES_UART
-#define NRF_LOG_BACKEND_SERIAL_USES_UART 1
+#define NRF_LOG_BACKEND_SERIAL_USES_UART 0
 #endif
 #if  NRF_LOG_BACKEND_SERIAL_USES_UART
 // <o> NRF_LOG_BACKEND_SERIAL_UART_BAUDRATE  - Default Baudrate
@@ -3776,7 +3867,7 @@
 // <e> NRF_LOG_BACKEND_SERIAL_USES_RTT - If enabled data is printed using RTT
 //==========================================================
 #ifndef NRF_LOG_BACKEND_SERIAL_USES_RTT
-#define NRF_LOG_BACKEND_SERIAL_USES_RTT 0
+#define NRF_LOG_BACKEND_SERIAL_USES_RTT 1
 #endif
 #if  NRF_LOG_BACKEND_SERIAL_USES_RTT
 // <o> NRF_LOG_BACKEND_RTT_OUTPUT_BUFFER_SIZE - RTT output buffer size.
@@ -3790,6 +3881,14 @@
 
 #endif //NRF_LOG_BACKEND_SERIAL_USES_RTT
 // </e>
+
+// </h>
+//==========================================================
+
+// </h>
+//==========================================================
+
+// <h> nRF_Segger_RTT
 
 //==========================================================
 // <h> segger_rtt - SEGGER RTT
@@ -3832,4 +3931,13 @@
 #ifndef SEGGER_RTT_CONFIG_DEFAULT_MODE
 #define SEGGER_RTT_CONFIG_DEFAULT_MODE 0
 #endif
+
+// </h>
+//==========================================================
+
+// </h>
+//==========================================================
+
+// <<< end of configuration section >>>
 #endif //SDK_CONFIG_H
+
