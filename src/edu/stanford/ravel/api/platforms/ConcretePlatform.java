@@ -18,5 +18,10 @@ public interface ConcretePlatform {
 
     List<FileObject> createBuildSystem(Space s, List<FileObject> files);
 
+    /**
+     * set level of API
+     * @param level
+     */
     void setAPILevel(int level);
+
 }

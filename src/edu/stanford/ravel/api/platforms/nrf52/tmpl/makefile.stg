@@ -1,4 +1,4 @@
-application(runtime,plat_runtime,path,target,sources, linker_script, main) ::=<<
+application(runtime,plat_runtime,path,target,sources, linker_script, main, version) ::=<<
 <! NRF52 make file !>
 APP_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 RAVEL_C_RUNTIME_DIR = <runtime>
@@ -24,4 +24,5 @@ default: nrf52832_<target>
 CFLAGS += -Wno-unused-but-set-variable
 
 include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
+include $(RAVEL_PLATFORM_RUNTIME_DIR)/<version>/base.mk
 >>

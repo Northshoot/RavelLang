@@ -27,6 +27,7 @@ public class NrfPlatformOptions extends PlatformOptions {
     public boolean setOption(String prefix, String option, String value) throws InvalidOptionException {
         if (prefix.equals("nrf52")) {
             switch (option) {
+
                 case "runtime-path":
                     runtimePath = value;
                     break;

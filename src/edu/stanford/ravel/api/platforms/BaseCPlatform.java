@@ -84,6 +84,7 @@ public class BaseCPlatform extends BasePlatform {
         tmpl.add("runtime", runtimePath);
         tmpl.add("plat_runtime", platformRuntimePath);
         tmpl.add("path", path);
+        tmpl.add("version", getAPILevel());
         if ( make_addon != null) {
             for (TemplatePair p: make_addon){
                 tmpl.add(p.getKeyword(), p.getValue());

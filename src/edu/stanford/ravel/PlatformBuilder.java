@@ -54,6 +54,7 @@ class PlatformBuilder {
 
     private void buildSpace(Space s) {
         Platform platform = s.getPlatform();
+
         ConcreteLanguage lang = platform.getConcreteLanguage();
         ConcretePlatform concretePlatform = platform.getConcretePlatform();
 

@@ -34,5 +34,3 @@ INC_FOLDERS += \
 #would be in base make for deployment
 CFLAGS +=  -Wall  -O3 -g3
 # need to disable some errors due to how IR is generated -Werror
-
-include $(RAVEL_PLATFORM_RUNTIME_DIR)/base.mk

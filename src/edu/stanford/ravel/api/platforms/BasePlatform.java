@@ -24,6 +24,7 @@ public abstract class BasePlatform implements ConcretePlatform {
     protected BasePlatform(int minApi, int maxApi) {
         mMinAPI = minApi;
         mMaxAPI = maxApi;
+
     }
 
     protected void addModule(CodeModule module) {
