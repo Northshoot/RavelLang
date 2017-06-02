@@ -4,11 +4,17 @@ import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
 file(package,imports,name,interface) ::=<<
 package <package>;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.*;
+import java.util.List;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDB.ConsistencyLevel;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
+import org.influxdb.dto.Pong;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
+
 
 <imports:do_import()>
 
@@ -17,9 +23,17 @@ public class <name> {
 
     private final static String TAG = <name>.class.getSimpleName();
     private final int __id;
-    private String type = "application/x-www-form-urlencoded";
+   	private Pong pong;
+   	private InfluxDB influxDB = null;
+   	private String dbName = "harmony";
+   	private String url =  <interface.baseInterface.configuration.remote; format="literal">;
+   	private String database =  <interface.baseInterface.configuration.database; format="literal">;
+   	private String table =  <interface.baseInterface.configuration.table; format="literal">;
+   	//private String user =  <interface.baseInterface.configuration.uname.value.name; format="literal">;
+   	//private String psw =  <interface.baseInterface.configuration.psw; format="literal">;
+   	private String user = "admin";
+   	private String psw = "egg9Dxmn";
 
-    private String urlName = <interface.baseInterface.configuration.remote; format="literal">;
 
     public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
         __id = instanceId;
@@ -31,58 +45,53 @@ public class <name> {
     <interface.controllerList:set_controller_method(); separator="\n">
 
 
-    public void pushData(String data){
-            URL u = null;
-            try {
-                u = new URL(this.urlName );
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            assert u != null;
-            HttpURLConnection conn = null;
-            try {
-                conn = (HttpURLConnection) u.openConnection();
-            } catch( java.net.ConnectException e) {
-                //todo: deal with no connection
-                //return error
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            conn.setDoOutput(true);
-            try {
-                conn.setRequestMethod("POST");
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            }
-            conn.setRequestProperty( "Content-Type", type );
+ 	//try to create connection to the server
+ 	private boolean createConnection(){
+ 		//Establish connection
+ 		influxDB = InfluxDBFactory.connect(url, user, psw);
+ 		//test ping
+ 		try{
+ 			long responseTime = testConnection();
+ 			System.out.println("Connected to " + dbName + " db, response time " + responseTime + "ms");
+ 			return true;
+ 		} catch (RuntimeException e){
+ 			System.out.println("Connection timeouted");
+ 			return false;
+ 		}
+ 	}
 
+ 	public long testConnection(){
+ 		pong = influxDB.ping();
+ 		return pong.getResponseTime();
+ 	}
 
-            OutputStream os = null;
-            try {
-                DataOutputStream output = new DataOutputStream(conn.getOutputStream());
-                output.writeBytes(data);
+	public void pushData(String table, String name, String geohash, double temperature, double humidity){
+		if ( influxDB == null ){
+			if (!createConnection())
+				return;
+		}
+		BatchPoints batchPoints = BatchPoints
+				.database(dbName)
+				.tag("async", "true")
+				.retentionPolicy("autogen")
+				.consistency(ConsistencyLevel.ALL)
+				.build();
 
-                output.close();
-                System.out.println(TAG + " :: Resp Code:"+conn .getResponseCode());
-                System.out.println(TAG + " :: Resp Message:"+ conn .getResponseMessage());
-                 /*
-                DataInputStream input = new DataInputStream( conn.getInputStream() );
+		Point point1 = Point.measurement(table)
+							.tag("device_name", name)
+							.tag("geohash", geohash)
+							.addField("temperature", temperature)
+							.addField("humidity", humidity)
+							.build();
 
+		batchPoints.point(point1);
+		influxDB.write(batchPoints);
+	}
 
+ 	public void closeConnection(){
+ 		influxDB.close();
+ 	}
 
-                for( int c = input.read(); c != -1; c = input.read() )
-                    System.out.print( (char)c );
-                input.close();
-
-                System.out.println(TAG + " :: Resp Code:" +conn .getResponseCode());
-                System.out.println(TAG + " :: Resp Message:" + conn .getResponseMessage());
-                */
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        }
 }
 
 >>

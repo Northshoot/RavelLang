@@ -1,8 +1,13 @@
-interface InfluxWriter():
+interface InfluxWriter(username: str, password: str):
     configuration:
-        remote = "http://localhost:8086/write?db=harmony"
+        remote = "http://harmony.local:8086"
+        #remote = "http://130.211.228.90:8086"
+        database = "harmony"
+        table = "kiosk"
+        uname = username
+        psw = password
 
     implementation:
         java = "rlib/java/influx.stg"
 
-    def pushData(data : str)
+    def pushData( table: str, name: str, geohash : str, temperature : double, humidity: double)

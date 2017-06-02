@@ -50,8 +50,11 @@ class InterfaceCompiler {
             for (Symbol s : config.getSymbols()) {
                 if (s instanceof ConstantSymbol)
                     iface.setConstantProperty(s.getName(), ((ConstantSymbol) s).getValue());
-                else if (s instanceof ReferenceSymbol)
+                else if (s instanceof ReferenceSymbol) {
+                    //TODO: argument values are not passed
+//                    /System.out.println(config.getEnclosingScope().getAllSymbols());
                     iface.setReferenceProperty(s.getName(), ((ReferenceSymbol) s).getValue());
+                }
                 else
                     throw new AssertionError();
             }

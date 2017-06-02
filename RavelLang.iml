@@ -67,5 +67,10 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="org.eclipse.ecf:org.apache.httpcomponents.httpcore:4.4.6.v20170210-0925" level="application" />
+    <orderEntry type="library" name="org.eclipse.ecf:org.apache.httpcomponents.httpcore:4.4.6.v20170210-09251" level="application" />
+    <orderEntry type="library" name="org.eclipse.ecf:org.apache.commons.logging:1.1.1.v201101211721" level="application" />
+    <orderEntry type="library" name="org.eclipse.ecf:org.apache.commons.codec:1.9.0.v20170208-1614" level="application" />
+    <orderEntry type="library" name="org.influxdb:influxdb-java:2.5" level="application" />
   </component>
 </module>

@@ -2,40 +2,76 @@ delimiters "%", "%"
 
 ant(java_runtime, main_class) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="compile" name="ravel">
-  <!-- Set useful variables -->
-  <property name="target" value="1.8"/>
-  <property name="source" value="1.8"/>
-  <property name="root" value="."/>
-  <property name="src" location="${root}/src"/>
-  <property name="classes" location="${root}/classes"/>
 
-  <!-- Compile -->
-  <target name="compile">
-    <mkdir dir="${classes}"/>
-    <javac srcdir="${src}" destdir="${classes}"  debug="true" includeantruntime="false" source="${source}" target="${target}">
-    <classpath>
-            <pathelement path="%java_runtime%"/>
-            <pathelement path="/Users/larry/workspace/01-Ravel/ravellang/lib/gson-2.7.jar"/>
-       </classpath>
+<!-- Set useful variables -->
 
-    </javac>
-    <jar destfile="app.jar" basedir="${classes}" >
-        <zipfileset includes="**/*.class" src="%java_runtime%"/>
-        <zipgroupfileset dir="/Users/larry/workspace/01-Ravel/ravellang/lib/" includes="gson-2.7.jar"/>
-        <manifest>
-          <attribute name="Main-Class" value="%main_class%"/>
-        </manifest>
+<project name="ravel-app" default="all" basedir=".">
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <property name="root" value="."/>
+    <property name="src" location="${root}/src"/>
+    <property name="build" value="../bin" />
+    <property name="lib" value="../../java-jars" />
+
+    <property name="classes" location="${root}/classes"/>
+
+    <!-- scan the lib directory for jars and put into a variable classpath-->
+    <path id="classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar" />
+            <include name="%java_runtime%" />
+        </fileset>
+    </path>
+
+    <!-- convert it into manifest format (space separated)-->
+    <pathconvert property="mf.classpath" pathsep=" ">
+        <path refid="classpath" />
+        <flattenmapper />
+    </pathconvert>
+
+    <target name="init">
+        <delete dir="${build}" />
+        <mkdir dir="${build}" />
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${build}" classpathref="classpath">
+            <classpath>
+                <pathelement path="${lib}/*.jar"/>
+            </classpath>
+
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile" >
+        <jar jarfile="${build}/deps.jar">
+            <zipgroupfileset dir="${lib}">
+                <include name="**/*.jar" />
+            </zipgroupfileset>
         </jar>
-  </target>
+        <sleep seconds="1" />
+        <jar destfile="app.jar" basedir="${build}">
 
-  <!-- Clean up -->
-  <target name="clean">
-    <delete includeemptydirs="true" quiet="true">
-      <fileset dir="${classes}" followsymlinks="false"/>
-      <fileset file="app.jar" followsymlinks="false"/>
-    </delete>
-  </target>
+            <zipfileset src="${build}/deps.jar" excludes="META-INF/*.SF" />
+            <manifest>
+                <attribute name="Main-Class" value="org.stanford.ravel.generated.Application" />
+                <attribute name="Class-Path" value="${mf.classpath}" />
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="all" depends="jar"/>
+    <!-- Clean up -->
+    <target name="clean">
+        <delete includeemptydirs="true" quiet="true">
+            <fileset dir="${classes}" followsymlinks="false"/>
+            <fileset file="app.jar" followsymlinks="false"/>
+        </delete>
+    </target>
 
 </project>
+
+
+
+
 >>
