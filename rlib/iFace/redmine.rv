@@ -1,0 +1,11 @@
+interface Redmine(username: str, password: str):
+    configuration:
+        remote = "http://harmony.local:3001"
+        uname = username
+        psw = password
+
+    implementation:
+        java = "rlib/java/redmine.stg"
+
+    def createIssue( subject: str, desc: str)
+    def closeIssue( id: int32)

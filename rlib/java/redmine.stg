@@ -1,0 +1,84 @@
+import "edu/stanford/ravel/api/lang/java/tmpl/common.stg"
+
+
+file(package,imports,name,interface) ::=<<
+package <package>;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Map;
+import com.google.gson.Gson;
+
+<imports:do_import()>
+
+public class <name>  {
+
+    <interface.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
+
+    private final static String TAG = <name>.class.getSimpleName();
+
+    private int projectId = 1;
+    private String host = <interface.baseInterface.configuration.remote; format="literal">;
+    private String user =  <interface.baseInterface.configuration.uname.value.name; format="literal">;
+    private String psw =  <interface.baseInterface.configuration.psw; format="literal">;
+
+    public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
+        __id = instanceId;
+    }
+
+    // Setter methods for AppDispatcher
+    <interface.controllerList:set_controller_method(); separator="\n">
+
+    public int createIssue(String subject, String desc)
+    {
+        return ((Double)(((Map)new Gson().fromJson(send( "/issues.json", "{\"issue\": {\"subject\":\""+subject+
+                    "\", \"description\": \""+desc+"\", \"project_id\":" +projectId+ "}}", "POST"), Map.class).get("issue")).get("id"))).intValue();
+    }
+
+    public void closeIssue(int id) {
+        System.out.println(send("/issues/"+id+".json", "{ \"issue\": {\"status_id\":3}}", "PUT"));
+    }
+
+    private String send(String endpoint, String data, String method) {
+        try {
+            HttpURLConnection conn;
+
+            String response;
+            String input;
+
+            URL url = new URL(host + endpoint);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setRequestProperty( "Content-Type", "application/json" );
+            String userpass = user + ":" + psw;
+            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+            conn.setRequestProperty ("Authorization", basicAuth);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            DataOutputStream output = new DataOutputStream(conn.getOutputStream());
+            output.writeBytes(data);
+            output.close();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                            conn.getInputStream()));
+            response = "";
+            while ((input = in.readLine()) != null)
+            {
+                response += input;
+            }
+            return response;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+>>
