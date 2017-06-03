@@ -23,8 +23,9 @@ public class <name>  {
 
     private int projectId = 1;
     private String host = <interface.baseInterface.configuration.remote; format="literal">;
-    private String user =  <interface.baseInterface.configuration.uname.value.name; format="literal">;
+    private String user =  <interface.baseInterface.configuration.uname; format="literal">;
     private String psw =  <interface.baseInterface.configuration.psw; format="literal">;
+    private int __id;
 
     public <name>(AppDispatcher dispatcher, int instanceId<append_parameter_list(interface.baseInterface.parameters)>) {
         __id = instanceId;

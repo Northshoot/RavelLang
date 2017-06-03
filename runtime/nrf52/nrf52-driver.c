@@ -6,8 +6,6 @@
 #include "nordic_common.h"
 #include "nrf_soc.h"
 #include "softdevice_handler.h"
-#include "boards.h"
-#include "nrf_drv_gpiote.h"
 #include "app_error.h"
 #include "app_timer.h"
 #include "nrf_drv_clock.h"

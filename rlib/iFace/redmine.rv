@@ -1,8 +1,8 @@
 interface Redmine(username: str, password: str):
     configuration:
         remote = "http://harmony.local:3001"
-        uname = username
-        psw = password
+        uname = "admin"
+        psw = "egg9Dxmn"
 
     implementation:
         java = "rlib/java/redmine.stg"

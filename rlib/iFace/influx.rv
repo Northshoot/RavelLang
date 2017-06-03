@@ -1,7 +1,7 @@
 interface InfluxWriter(username: str, password: str):
     configuration:
         #remote = "http://harmony.local:8086"
-        remote = "http://130.211.228.90:8086"
+        remote = "http://104.155.130.43:8086"
         database = "harmony"
         table = "kiosk"
         uname = username

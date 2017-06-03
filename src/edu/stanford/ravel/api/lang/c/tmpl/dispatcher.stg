@@ -103,10 +103,12 @@ static const RavelDispatcherVTable vtable = {
 };
 
 void
-ravel_generated_<name; format="function">_init(<name> *self)
+ravel_generated_<name; format="function">_init(<name> *self, int32_t tier_id, int32_t src_id)
 {
     ravel_base_dispatcher_init(&self->base);
     self->base.vtable = &vtable;
+    self->base.tier_id = tier_id;
+    self->base.src_id = src_id;
 
     <models:init_model(); separator="\n">
     <interfaces:init_interface(); separator="\n">
@@ -190,7 +192,7 @@ typedef struct <name> {
     <controllers:{c|<c.name> ctr_<c.varName>;}; separator="\n">
 } <name>;
 
-void ravel_generated_<name; format="function">_init(<name> *self);
+void ravel_generated_<name; format="function">_init(<name> *self, int32_t tier_id, int32_t src_id);
 void ravel_generated_<name; format="function">_finalize(<name> *self);
 
 void ravel_generated_<name; format="function">_set_driver(<name> *self, RavelDriver *driver);

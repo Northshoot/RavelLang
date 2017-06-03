@@ -31,6 +31,8 @@ typedef struct RavelBaseDispatcher {
     const RavelDispatcherVTable *vtable;
     RavelSystemAPI sys_api;
     RavelDriver *driver;
+    int32_t tier_id;
+    int32_t src_id;
 } RavelBaseDispatcher;
 
 void ravel_base_dispatcher_init(RavelBaseDispatcher *self);
@@ -38,6 +40,14 @@ void ravel_base_dispatcher_finalize(RavelBaseDispatcher *self);
 
 static inline void ravel_base_dispatcher_queue_callback(RavelBaseDispatcher *self, void (*callback)(void*, void*), void* ptr1, void *ptr2) {
     ravel_driver_queue_callback (self->driver, callback, ptr1, ptr2);
+}
+
+static inline int32_t ravel_base_dispatcher_get_src_id(RavelBaseDispatcher *self) {
+    return self->src_id;
+}
+
+static inline int32_t ravel_base_dispatcher_get_tier_id(RavelBaseDispatcher *self) {
+    return self->tier_id;
 }
 
 static inline RavelKeyProvider *ravel_base_dispatcher_get_key_provider(RavelBaseDispatcher *self) {

@@ -2,11 +2,6 @@
 #define RAVEL_TIMER_H
 
 #include <stdbool.h>
-#include "boards.h"
-#include "nrf_drv_gpiote.h"
-#include "app_error.h"
-#include "app_timer.h"
-#include "nrf_drv_clock.h"
 #include "nrf52_ravel_error.h"
 #include "module.h"
 

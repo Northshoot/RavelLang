@@ -11,10 +11,11 @@
 #include "api/intrinsics.h"
 #include "api/system.h"
 
-#define SRC 0 // 8 bits for source
-#define DST 1 // 8 bits for destination
-#define FLAGS 2 // 8 bits for flags
-#define RESERVED 3 // reserved for byte mapping
+#define TIER 0 // 8 bits for tier ID
+#define SRC 1 // 8 bits for source should be expanded later
+#define DST 3 // 8 bits for destination
+#define FLAGS 4 // 8 bits for flags
+#define RESERVED 4 // reserved for byte mapping
 
 #define FLAG_ACK 1
 #define FLAG_SAVE_DONE 4
@@ -154,11 +155,12 @@ ravel_packet_finalize (RavelPacket *self)
 }
 
 void
-ravel_packet_set_source_destination (RavelPacket *self, int32_t source, int32_t destination)
+ravel_packet_set_source_destination (RavelPacket *self, int32_t tier, int32_t source, int32_t destination)
 {
+    assert (tier >= 0 && tier < 256);
     assert (source >= 0 && source < 256);
     assert (destination >= 0 && destination < 256);
-
+    self->packet_data[TIER] = tier;
     self->packet_data[SRC] = source;
     self->packet_data[DST] = destination;
 }

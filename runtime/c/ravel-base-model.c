@@ -230,6 +230,8 @@ ravel_base_model_send_record_endpoint(RavelBaseModel *self,
         ravel_packet_finalize (&packet);
     } else {
         //ravel_system_print(NULL, "Sending data...");
+        ravel_packet_set_source_destination(&packet, self->dispatcher->tier_id, 
+                                            self->dispatcher->src_id, 0);
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
     }
 

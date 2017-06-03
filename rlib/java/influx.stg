@@ -52,10 +52,9 @@ public class <name> {
  		//test ping
  		try{
  			long responseTime = testConnection();
- 			System.out.println("Connected to " + dbName + " db, response time " + responseTime + "ms");
  			return true;
  		} catch (RuntimeException e){
- 			System.out.println("Connection timeouted");
+ 			System.out.println("Connection timeout");
  			return false;
  		}
  	}
@@ -80,8 +79,9 @@ public class <name> {
 		Point point1 = Point.measurement(table)
 							.tag("device_name", name)
 							.tag("geohash", geohash)
-							.addField("temperature", Math.floor(temperature * 100) / 100)
-                            .addField("humidity", Math.floor(humidity * 100) / 100)
+							.addField("device_name", name)
+							.addField("temperature", (double) Math.floor(temperature * 100) / 100)
+                            .addField("humidity", (double) Math.floor(humidity * 100) / 100)
 							.build();
 
 		batchPoints.point(point1);

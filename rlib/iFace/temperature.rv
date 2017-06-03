@@ -3,4 +3,5 @@ interface TemperatureSource():
         #java = "rlib/java/temperature.stg"
         c = "rlib/nrf52/temperature.stg"
 
-    def read(): int32
+    def readTemperature(): double
+    def readHumidity(): double

@@ -40,15 +40,22 @@ ravel_generated_<name; format="function">_finalize(<name> *self)
 {
 }
 
-int32_t
-ravel_generated_<name; format="function">_read()
+double
+ravel_generated_<name; format="function">_read_temperature(<name>  *self<name>)
 {
     int32_t temp;
+    double far = 0;
     sd_temp_get(&temp);
-    NRF_LOG_DEBUG("Actual temperature: %d\r\n", (int)temp/4);
+    far = temp/4;
+    far =1.8 * far + 32;
+    NRF_LOG_DEBUG("Actual temperature: %f\r\n", far);
+    return far;
+}
 
-    return temp/4;
-
+double
+ravel_generated_<name; format="function">_read_humidity(<name>  *self<name>)
+{
+    return 52.2;
 }
 
 <interface.controllerList:define_set_controller_method(name); separator="\n">
@@ -71,9 +78,10 @@ typedef struct s_<name> {
 } <name>;
 
 void ravel_generated_<name; format="function">_init(<name> *self, int instance_id<append_parameter_list(interface.baseInterface.parameters)>);
-void ravel_generated_<name; format="function">_finalize(<name> *self);
+void ravel_generated_<name; format="function">_finalize(<name>  *self<name>);
 
-int32_t ravel_generated_<name; format="function">_read();
+double ravel_generated_<name; format="function">_read_temperature(<name>  *self<name>);
+double ravel_generated_<name; format="function">_read_humidity(<name>  *self<name>);
 
 <interface.controllerList:declare_set_controller_method(name); separator="\n">
 
