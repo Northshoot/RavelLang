@@ -53,6 +53,7 @@ class RavelSocketClient implements RavelSocket {
             try {
                 RavelPacket pkt = RavelSocketProtocol.readInput(is);
                 driver.packetReceived(pkt, remote);
+                System.out.println("[BTM RX: " + pkt.toString());
             } catch(EOFException e) {
 
                 closeSocket();
@@ -65,6 +66,7 @@ class RavelSocketClient implements RavelSocket {
                 closeSocket();
                 return;
             }
+
         }
     }
 
@@ -94,7 +96,7 @@ class RavelSocketClient implements RavelSocket {
         if ( socket == null )
             return;
         try {
-            System.err.println("Close socker " + remote.getAddress() + ":" + remote.getPort());
+            System.err.println("Close socket " + remote.getAddress() + ":" + remote.getPort());
             socket.shutdownInput();
             socket.shutdownOutput();
             remote.disconnected();
@@ -118,12 +120,11 @@ class RavelSocketClient implements RavelSocket {
 
     @Override
     public synchronized void write(RavelPacket pkt) throws RavelIOException {
-//        System.err.println("RavelSocketProtocol.writeOutput");
+        System.err.println("RavelSocketProtocol.writeOutput: " +pkt.toString());
         try {
             connect();
             try {
                 RavelSocketProtocol.writeOutput(socket.getOutputStream(), pkt);
-
             } finally {
                 //System.err.println("socket.isClosed() " + socket.isClosed() + " socket.isInputShutdown() " + socket.isInputShutdown());
                 if (socket.isClosed() || socket.isInputShutdown()) {

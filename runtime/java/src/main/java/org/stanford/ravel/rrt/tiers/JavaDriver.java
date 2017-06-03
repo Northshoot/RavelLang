@@ -107,17 +107,19 @@ public class JavaDriver implements DriverAPI {
         }
     }
 
-    protected void packetReceived(RavelPacket pkt, Endpoint endpoint) {
+    protected  void packetReceived(RavelPacket pkt, Endpoint endpoint) {
         if (pkt.getSource() == appDispatcher.getAppId()) {
             // routing loop or malicious packet, drop
+            System.out.println("pkt.getSource() == appDispatcher.getAppId(): " + pkt.toString());
             return;
         }
         if (pkt.getDestination() != appDispatcher.getAppId()) {
             // not for us, forward
             forwardPacket(pkt);
+            System.out.println("forwardPacket " + pkt.toString());
             return;
         }
-
+        System.out.println("javaDriver.packetReceived " + pkt.toString());
         appDispatcher.driver__dataReceived(pkt, endpoint);
     }
 

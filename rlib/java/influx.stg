@@ -80,8 +80,8 @@ public class <name> {
 		Point point1 = Point.measurement(table)
 							.tag("device_name", name)
 							.tag("geohash", geohash)
-							.addField("temperature", temperature)
-							.addField("humidity", humidity)
+							.addField("temperature", Math.floor(temperature * 100) / 100)
+                            .addField("humidity", Math.floor(humidity * 100) / 100)
 							.build();
 
 		batchPoints.point(point1);

@@ -53,7 +53,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     protected abstract void models__notifyLoadFromStorage(NetworkEvent event);
 
     /******************* ******* event queue ***************************/
-    private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<>(5);
+    private final ArrayBlockingQueue<Event> eventQueue = new ArrayBlockingQueue<>(20);
 
     private void runNextEvent(Event e) {
         switch (e.getType()) {
@@ -82,7 +82,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
         }
     }
 
-    private void eventLoop() {
+    private synchronized void eventLoop() {
         LOGGER.info(getAppName() + ": dispatcher event loop started");
 
         try {
@@ -115,8 +115,9 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/
     @Override
-    public void driver__dataReceived(RavelPacket pkt, Endpoint endpoint) {
+    public void  driver__dataReceived(RavelPacket pkt, Endpoint endpoint) {
         NetworkEvent ne = new NetworkEvent(pkt, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
+        System.out.println("DOPE: driver__dataReceived: " + pkt.toString());
         queueEvent(ne);
     }
 

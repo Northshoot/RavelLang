@@ -106,11 +106,11 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             }
 
             int recordPos = findRecordWithId(pkt.record_id);
-            /*if (recordPos >= 0) {
-                // duplicate record (spurious retransmission)
-                // ignore
-                return;
-            }*/
+//            if (recordPos >= 0) {
+//                // duplicate record (spurious retransmission)
+//                // ignore
+//                return;
+//            }
             RecordType record = create();
             Context<RecordType> ctx = handleRecord(record, pkt, endpoint);
             ctx.endpoint = endpoint;

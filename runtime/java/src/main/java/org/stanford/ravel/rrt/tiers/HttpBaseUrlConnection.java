@@ -30,7 +30,6 @@ public abstract class HttpBaseUrlConnection {
             java.net.ConnectException,
             IOException{
         url = new URL(db);
-        System.out.println(db+data);
         conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");

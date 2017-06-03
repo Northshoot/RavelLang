@@ -14,20 +14,6 @@
       <excludeFolder url="file://$MODULE_DIR$/src/org/stanford/ravel/api/platforms/android-old" />
       <excludeFolder url="file://$MODULE_DIR$/src/patterns/Android" />
     </content>
-    <content url="file://$MODULE_DIR$/../../02-demos/mapps/ravelmpoc">
-      <excludeFolder url="file://$MODULE_DIR$/../../02-demos/mapps/ravelmpoc/rout" />
-      <excludeFolder url="file://$MODULE_DIR$/../../02-demos/mapps/ravelmpoc/rout/AgentApp/src/main/java" />
-      <excludeFolder url="file://$MODULE_DIR$/../../02-demos/mapps/ravelmpoc/rout/Cloud/src" />
-      <excludeFolder url="file://$MODULE_DIR$/../../02-demos/mapps/ravelmpoc/rout/Gateway/src/main/java" />
-    </content>
-    <content url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc">
-      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout" />
-      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/AgentApp/src/main/java" />
-      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/Cloud/src" />
-      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/Gateway/src/main/java" />
-      <excludeFolder url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/RPie" />
-    </content>
-    <content url="file://$MODULE_DIR$/../../04-harmony/ravelmpoc/rout/RPie" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">

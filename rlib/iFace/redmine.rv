@@ -7,5 +7,5 @@ interface Redmine(username: str, password: str):
     implementation:
         java = "rlib/java/redmine.stg"
 
-    def createIssue( subject: str, desc: str)
+    def createIssue( subject: str, desc: str) :int32
     def closeIssue( id: int32)

@@ -66,7 +66,7 @@ controller DataControllerTwo(data : DataSample, this_id: int32):
         system.print("Disconnected with ID: " +(str)(this_id) +" is Local: " + (str)(ep.isLocal()))
 
      event data.arrived():
-        system.print((str)(this_id) + ":: from [" +  "] arrived " + (str)(self.record.this_int) + " endpoint " + (str)(self.endpoint.getId()))
+        system.print((str)(this_id) + ":: from [" + self.record.device_id + "] arrived " + (str)(self.record.this_int) + " endpoint " + (str)(self.endpoint.getId()))
 
     event data.full():
         data.delete(data.first())
@@ -106,4 +106,21 @@ space Two:
         one_cntr = DataControllerTwo(
                                    data = models.data,
                                    this_id = 2
+                                   )
+
+space Three:
+    platform:
+        language = JLang
+        system = J2SE.v18
+
+    interfaces:
+        timer = Timer()
+
+    models:
+        data = DataSample(size=1000)
+
+    controllers:
+        one_cntr = DataControllerTwo(
+                                   data = models.data,
+                                   this_id = 3
                                    )

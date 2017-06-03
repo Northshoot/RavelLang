@@ -1,3 +1,5 @@
+
+
 apply plugin: 'java'
 
 version = '0.9'
@@ -10,6 +12,9 @@ jar {
     }
 }
 
+
+
+
 repositories {
     jcenter()
     mavenCentral()
@@ -18,3 +23,19 @@ repositories {
 dependencies {
     testCompile 'junit:junit:4.11'
 }
+
+
+task copyJar(type: Copy) {
+    println "Copy jar"
+    from jar
+    into '../../lib/'
+}
+
+task copyJarToMatson(type: Copy) {
+    println "Copy jar"
+    from jar
+    into '/Users/larry/workspace/02-demos/mapps/ravelmpoc/java-jars/'
+}
+
+jar.finalizedBy copyJar
+jar.finalizedBy copyJarToMatson

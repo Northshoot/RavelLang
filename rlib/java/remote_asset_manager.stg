@@ -55,7 +55,7 @@ public class <name> extends HttpBaseUrlConnection{
             JsonArray gson = new Gson().fromJson(rr.content, JsonArray.class);
             JsonObject jfields = (JsonObject) gson.get(0);
             //JsonObject jfields = (JsonObject)jobj.get("fields").getAsJsonObject();
-            System.out.println(TAG + " :: return:"+ jfields);
+            //System.out.println(TAG + " :: return:"+ jfields);
             <interface.baseInterface.models.table_remote.fields:{f|record.<f.name>=jfields.get("<f.name>")<type_to_json_type(f.type)>;}; separator="\n">
 
         } catch (ConnectException ex) {

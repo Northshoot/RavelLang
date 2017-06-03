@@ -196,6 +196,6 @@ public class RavelPacket {
     @Override
     public String toString() {
         return "[TIER: " + this.tier + ", SRC: " + this.src + ", DST: " + this.dst
-                +", MODEL_ID: " + this.model_id + " rec_idx: " + this.record_id + "]";
+                +", MODEL_ID: " + this.model_id + " rec_idx: " + this.record_id + " ACK: " + isAck() + "]";
     }
 }
