@@ -24,19 +24,26 @@ class Application {
         }
 
         FileSystemKeyProvider keyProvider = new FileSystemKeyProvider();
-        if (args.length >= 2) {
+        if (args.length >= 3) {
             try (FileInputStream keyFile = new FileInputStream(args[1])) {
                 keyProvider.load(keyFile);
             } catch (IOException e) {
                 System.err.println("Failed to load key provider file: " + e.getMessage());
             }
         }
+         int  endpoint_id = -1;
+         try {
+                endpoint_id = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.err.println("Argument" + args[0] + " must be an integer: device ID");
+                System.exit(1);
+            }
 
-        AppDispatcher dispatcher = new AppDispatcher(keyProvider, 1234);
+        AppDispatcher dispatcher = new AppDispatcher(keyProvider, endpoint_id);
         JavaDriver driver = new JavaDriver(dispatcher);
         dispatcher.setDriver(driver);
 
-        String configFileName = args[0];
+        String configFileName = args[1];
         try (EndpointListReader reader = new EndpointListReader(new FileInputStream(configFileName))) {
             Endpoint ep = reader.next();
             while (ep != null) {

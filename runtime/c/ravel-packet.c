@@ -12,10 +12,10 @@
 #include "api/system.h"
 
 #define TIER 0 // 8 bits for tier ID
-#define SRC 1 // 8 bits for source should be expanded later
-#define DST 3 // 8 bits for destination
-#define FLAGS 4 // 8 bits for flags
-#define RESERVED 4 // reserved for byte mapping
+#define SRC 1 // 32 bits for source 
+#define DST 5 // 8 bits for destination
+#define FLAGS 6 // 8 bits for flags
+#define RESERVED 7 // reserved for byte mapping
 
 #define FLAG_ACK 1
 #define FLAG_SAVE_DONE 4
@@ -158,9 +158,12 @@ void
 ravel_packet_set_source_destination (RavelPacket *self, int32_t tier, int32_t source, int32_t destination)
 {
     assert (tier >= 0 && tier < 256);
-    assert (source >= 0 && source < 256);
+    
     assert (destination >= 0 && destination < 256);
-    self->packet_data[TIER] = tier;
-    self->packet_data[SRC] = source;
+    self->packet_data[TIER] = tier;;
+    self->packet_data[SRC+3] = (source >> 24) & 0xFF;
+    self->packet_data[SRC+2] = (source >> 16) & 0xFF;
+    self->packet_data[SRC+1] = (source >> 8) & 0xFF;
+    self->packet_data[SRC] = source & 0xFF;
     self->packet_data[DST] = destination;
 }

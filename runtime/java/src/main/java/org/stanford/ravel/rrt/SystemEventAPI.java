@@ -23,7 +23,9 @@ public interface SystemEventAPI {
     void stopped();
     void restarted();
     void connected(Endpoint endpoint);
-    void disconected(Endpoint endpoint);
+    void disconnected(Endpoint endpoint);
+
+    int deviceID();
 
     enum BatteryLevel {HIGH, HIGH_MID, MID, MID_LOW, LOW, CRITICAL }
     void battery(BatteryLevel bl);

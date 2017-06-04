@@ -111,6 +111,10 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
         System.err.println(msg);
     }
 
+    public int deviceID() {
+        return this.getDeviceId();
+    }
+
     /***********************************************************************/
     /************** Network callbacks from Driver to AD ********************/
     /***********************************************************************/

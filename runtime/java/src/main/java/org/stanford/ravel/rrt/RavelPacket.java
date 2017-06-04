@@ -36,16 +36,6 @@ public class RavelPacket {
 
     private static int BYTE_POS_MODEL_ID = 0;
 
-//    //TODO: add packetization
-
-//    Caused by: java.lang.ArrayIndexOutOfBoundsException: length=2; index=2
-//    at org.stanford.ravel.rrt.RavelPacket.getRecordIdFromRecord(RavelPacket.java:122)
-//    at org.stanford.ravel.rrt.RavelPacket.<init>(RavelPacket.java:56)
-//    at org.stanford.ravel.rrt.RavelPacket.fromNetwork(RavelPacket.java:105)
-//    at org.stanford.ravel.rrt.android.AndroidDriver.packetCompleted(AndroidDriver.java:62)
-//    at org.stanford.ravel.rrt.android.AndroidDriver.fragment_arrived(AndroidDriver.java:81)
-//    at org.stanford.ravel.rrt.android.AndroidDriver$1.onReceive(AndroidDriver.java:115)
-
     private int flags = 0;
 
     private RavelPacket(byte[] data, boolean isNetwork) {

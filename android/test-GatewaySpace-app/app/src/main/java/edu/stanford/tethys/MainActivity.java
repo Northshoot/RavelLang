@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try { //"tcp://192.168.2.117:1234"
-            cloud = Endpoint.fromString(1, new URI("tcp://192.168.2.207:6100"), Collections.<String, String>emptyMap());
+            cloud = Endpoint.fromString(1, new URI("tcp://172.16.12.161:6100"), Collections.<String, String>emptyMap());
         } catch(URISyntaxException |MalformedURLException e) {
             throw new RuntimeException(e);
         }

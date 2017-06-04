@@ -11,7 +11,7 @@ import edu.stanford.ravel.primitives.SystemEvent;
 public class SystemType extends ClassType {
     private SystemType() {
         super("SystemAPI");
-
+        //TODO: add new methods and events here
         for (SystemEvent event : SystemEvent.values()) {
             addEvent(event.name(), new Type[]{}, false);
         }
@@ -19,6 +19,7 @@ public class SystemType extends ClassType {
         addEvent("disconnected", new Type[]{IntrinsicTypes.ENDPOINT}, false);
 
         addMethod("print", new Type[]{PrimitiveType.STR}, PrimitiveType.VOID);
+        addMethod("deviceID", new Type[]{}, PrimitiveType.INT32);
         addMethod("print_number", new Type[]{PrimitiveType.STR, PrimitiveType.INT32}, PrimitiveType.VOID);
     }
 

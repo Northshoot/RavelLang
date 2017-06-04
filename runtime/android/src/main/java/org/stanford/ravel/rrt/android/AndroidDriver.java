@@ -77,6 +77,7 @@ public class AndroidDriver extends JavaDriver {
     void packetCompleted(BlePacket pkt){
         byte [] raw_data = BlePacket.fromArray(m_frag_map.get(pkt.getAddress()));
         m_frag_map.get(pkt.getAddress()).clear();
+        //TODO: convert source 8 bits
         RavelPacket data = RavelPacket.fromNetwork(raw_data);
         appDispatcher.driver__dataReceived(data , bleClients.get(pkt.getAddress()));
     }

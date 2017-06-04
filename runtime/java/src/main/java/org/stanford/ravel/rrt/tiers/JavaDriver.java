@@ -57,7 +57,7 @@ public class JavaDriver implements DriverAPI {
             if (socketClients.containsKey(endpoint))
                 return socketClients.get(endpoint);
 
-            RavelSocketClient client = new RavelSocketClient(appDispatcher.getAppId(), endpoint, this);
+            RavelSocketClient client = new RavelSocketClient(appDispatcher.getDeviceId(), endpoint, this);
             socketClients.put(endpoint, client);
             return client;
         }

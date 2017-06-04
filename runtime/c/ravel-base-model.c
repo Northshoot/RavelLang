@@ -229,7 +229,8 @@ ravel_base_model_send_record_endpoint(RavelBaseModel *self,
         local_error = RAVEL_ERROR_ENDPOINT_UNREACHABLE;
         ravel_packet_finalize (&packet);
     } else {
-        //ravel_system_print(NULL, "Sending data...");
+        //ravel_system_print_number(NULL, "Sending data...");
+        ravel_system_print_number( NULL, "Dipacther src " , self->dispatcher->src_id);
         ravel_packet_set_source_destination(&packet, self->dispatcher->tier_id, 
                                             self->dispatcher->src_id, 0);
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);

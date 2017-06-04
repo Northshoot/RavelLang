@@ -14,7 +14,7 @@ import java.io.OutputStream;
  * Created by lauril on 1/27/17.
  */
 public class RavelSocketProtocol {
-    public static final int DEFAULT_PORT = 1234;
+    public static final int DEFAULT_PORT = 2222;
 
     private RavelSocketProtocol() {
     }
@@ -35,6 +35,7 @@ public class RavelSocketProtocol {
         readLoop(in, small, 0);
 
         int length = ByteWork.convertTwoUnsignedBytesToInt(new byte[]{ small[0], small[1] });
+        System.out.println("Length: " + length);
         byte[] full = new byte[length];
         System.arraycopy(small, 2, full, 0, RavelPacket.MIN_LENGTH);
 
@@ -45,7 +46,6 @@ public class RavelSocketProtocol {
     public static void writeOutput(OutputStream out, RavelPacket pkt) throws IOException {
         byte[] bytes = pkt.toBytes();
         int length = bytes.length;
-
         synchronized (out) {
             out.write(ByteWork.getLengthByteArray(length));
             out.write(bytes);

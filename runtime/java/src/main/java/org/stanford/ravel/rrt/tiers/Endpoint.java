@@ -42,7 +42,7 @@ public class Endpoint extends None{
     public void disconnected() {
         mConnected = false;
         if ( this.appDispatcher != null && !local) {
-            appDispatcher.disconected(this);
+            appDispatcher.disconnected(this);
         }
 
     }
