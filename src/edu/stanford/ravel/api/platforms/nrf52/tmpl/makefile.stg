@@ -22,7 +22,10 @@ $(OUTPUT_DIRECTORY)/nrf52<version>_<target>.out: \
 default: nrf52<version>_<target>
 
 CFLAGS += -Wno-unused-but-set-variable
+CFLAGS +=  -Wall  -ggdb #-Werror
 
+#TODO: change the device ID
+#CFLAGS += -DDEVICE_ID=2111
 include $(RAVEL_PLATFORM_RUNTIME_DIR)/ravel.mk
 include $(RAVEL_PLATFORM_RUNTIME_DIR)/<version>/base.mk
 >>

@@ -122,7 +122,7 @@ void update_timers_state(void *p_event_data, uint16_t event_size)
     uint32_t err_code;
     //first time it is not running, so better not to stop
     if (timer_running) {
-        app_timer_stop(m_ravel_system_timer_id);
+        err_code = app_timer_stop(m_ravel_system_timer_id);
         APP_ERROR_CHECK(err_code);
     }
 

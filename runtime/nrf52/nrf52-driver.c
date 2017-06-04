@@ -89,7 +89,6 @@ void ravel_nrf52_driver_rx_data_from_low(RavelDriver *self, RavelPacket *packet,
 {
     NRF_LOG_DEBUG("dispatching packet received model id %u record id %u is ack %u is save done %u\r\n", packet->model_id, packet->record_id, packet->is_ack, packet->is_save_done);
     ravel_base_dispatcher_data_received(self->dispatcher, packet, &endpoint->m_ravel_endpoint);
-    ravel_system_print(NULL, "dispatch called save done");
 }
 
 RavelError
