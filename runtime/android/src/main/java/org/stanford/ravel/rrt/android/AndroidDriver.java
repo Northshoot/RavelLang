@@ -79,6 +79,7 @@ public class AndroidDriver extends JavaDriver {
         m_frag_map.get(pkt.getAddress()).clear();
         //TODO: convert source 8 bits
         RavelPacket data = RavelPacket.fromNetwork(raw_data);
+        Log.e(TAG, "RavelPacket Created: " + data.toString());
         appDispatcher.driver__dataReceived(data , bleClients.get(pkt.getAddress()));
     }
 
@@ -124,7 +125,7 @@ public class AndroidDriver extends JavaDriver {
             switch (data.getInt(BleDefines.COMMAND,0)) {
 
                 case BleDefines.ACTION_GATT_CONNECTED:
-                    Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
+                    //Log.d(TAG, "onReceive: ACTION_GATT_CONNECTED");
                     synchronized(this) {
                         device_address = intent.getStringExtra(BleDefines.EXTRA_DATA);
                         BleEndpoint ble_e = new BleEndpoint(1);
@@ -158,7 +159,7 @@ public class AndroidDriver extends JavaDriver {
                     break;
                 case BleDefines.ACTION_DATA_AVAILABLE:
                     //TODO: assemble fragment
-                    Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE");
+                    //Log.d(TAG, "onReceive: ACTION_DATA_AVAILABLE");
                     BlePacket pkt = (BlePacket) data.getSerializable(BleDefines.EXTRA_DATA);
                     fragment_arrived(pkt);
                     break;
@@ -200,19 +201,20 @@ public class AndroidDriver extends JavaDriver {
         switch (endpoint.getType()) {
             case BLE:
                 Log.d(TAG, "about to send packet model id " + data.model_id + " record id " + data.record_id);
+                Log.d(TAG, "Packet size " + data.getSize() + " pkt " + data.toString());
                 if(m_connected_ble && mBleServiceBound ) {
                     Log.d(TAG, "sending packet " + endpoint.getId() +" isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
-                    try {
+                    //try {
                         synchronized (this) {
                             m_sending = true;
                             mRavelService.sendData(BlePacket.packetsFromBytes(data.toBytes()));
-                            while (m_sending)
-                                wait();
+//                            while (m_sending)
+//                                wait();
                         }
-                    } catch(InterruptedException e) {
-                        throw new RavelIOException(Error.NETWORK_BUSY);
-                    }
-                    Log.d(TAG, "sent packet model id " + data.model_id + " record id " + data.record_id);
+//                    } catch(InterruptedException e) {
+//                        throw new RavelIOException(Error.NETWORK_BUSY);
+
+                    Log.d(TAG, "sendDataThread, sent packet model id " +data.toString());
                 } else {
                     throw new RavelIOException(Error.ENDPOINT_UNREACHABLE);
                 }

@@ -1,11 +1,4 @@
-interface Timer():
-    implementation:
-        c = "rlib/nrf52/app_timer_sys.stg"
-        #c = "rlib/linux/timer.stg"
-    def start_one_shot(time : int32)
-    def cancel()
-    def start_periodic(time: int32)
-    event fired()
+from rlib.iFace import timer_nrf
 
 interface Led(led_num: int32):
     configuration:
@@ -22,41 +15,40 @@ interface Led(led_num: int32):
 streaming model Counter(size : int32):
     properties:
         records = size
-        flow = EmbeddedSpace -> GatewaySpace ->Cloudspace
-
+        flow = EmbeddedSpace -> Gateway
     schema:
         counter0 : int32
 
 
 
-controller EController(timer : Timer,
+controller EController(timer : TimerNRF,
                        #led_0 : Led,
                        counter : Counter):
     value = 0
-    timer_on = False
 
     event system.started():
-        timer.start_periodic(100)
-        timer_on = True
+        timer.start_periodic(1000)
 
     event timer.fired():
+        system.print("timer.fired " + (str)(value))
         rec = counter.create()
         rec.counter0 = value
         value += 1
-
-
         counter.save(rec)
+
+    event system.connected( ep : Endpoint):
+        system.print("Connected" )
 
     event counter.full():
         system.print("model is full")
         timer.cancel()
-        timer_on = False
 
     event counter.departed():
-        if not timer_on:
-            timer.start_periodic(100)
-            timer_on = True
-        counter.delete(self.record)
+        system.print("Record is out")
+
+    event counter.save_done():
+        system.print("counter.save_done()")
+
 
 controller GCtrl(counter: Counter):
     value = 0
@@ -64,28 +56,30 @@ controller GCtrl(counter: Counter):
     event counter.arrived():
         value += 1
         rec = self.record
-        system.print("Arrived counter " + (str)value)
+        system.print("\tArrived counter " + (str)value)
+
+
 
 
 space EmbeddedSpace:
     platform:
         language = CLang
-        system = Nrf52.v1
+        system = Nrf52.v56
         #system = Posix.v2008
 
     interfaces:
-        timer = Timer()
+        timer = TimerNRF()
         #led0 = Led(led_num = 0)
 
     models:
-        cnt = Counter(size=10)
+        cnt = Counter(size=100)
 
     controllers:
         main_ctrl = EController(timer = interfaces.timer,
                                 counter = models.cnt)
 
 
-space GatewaySpace:
+space Gateway:
     platform:
         language = JLang
         #system = J2SE.v18

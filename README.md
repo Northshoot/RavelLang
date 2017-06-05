@@ -4,17 +4,24 @@
 
 ##Programming with Ravel ##
 
-## Syntax ##
+### Abstractions ###
+
+### Syntax ###
 
 ### Keywords ###
 
+### Brief of API's ###
 
+#### Model API ####
 
-### Programming Ravel ###
+#### Runtime API ####
 
 #### System API ####
 
-#### Model API ####
+
+### Programming with API'S 
+
+### Models API ###
 **Commands**
 
 model`.create()` : returns new record of type model

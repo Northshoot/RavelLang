@@ -32,7 +32,7 @@ int main(void) {
 
 //system flow:
     int32_t tier_id = <id>;
-    int32_t src_id = 1236;
+    int32_t src_id = DEVICE_ID;
 
   //init driver
   ravel_nrf52_driver_init(&driver, &dispatcher.base, "<name>", tier_id);

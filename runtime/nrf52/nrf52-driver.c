@@ -63,6 +63,7 @@ static void deque_packet(void *p_event_data, uint16_t event_size)
 
     RavelNetworkQueueData m_q_pkt;
     if (dequeue_ravel_packet(&m_q_pkt)) {
+        NRF_LOG_DEBUG("sending to driver\r\n");
        ravel_driver_send_data(NULL, &m_q_pkt.m_ravel_packet, m_q_pkt.p_endpoint);
     } else {
         NRF_LOG_DEBUG("no packet to send \r\n");
@@ -98,8 +99,8 @@ ravel_driver_send_data(RavelDriver *driver, RavelPacket *packet, RavelEndpoint *
         memcpy(&pkt_out, packet, sizeof(RavelPacket));
         endpoint_out = endpoint;
         m_network_is_busy = true;
-        NRF_LOG_INFO("Ravel PKT %u is saveDone %u \r\n", pkt_out.packet_length, pkt_out.is_save_done);
         if (network_send(packet, endpoint)) {
+            NRF_LOG_INFO("\tnetwork_send(packet, endpoint) \r\n")
             return RAVEL_ERROR_IN_TRANSIT;
         }
     }
@@ -121,7 +122,6 @@ ravel_nrf52_driver_send_done_from_low(RavelDriver *self)
     ravel_packet_finalize(&copy);
     //dispatch packet queue
     app_sched_event_put(NULL,sizeof(ravel_schedule_event_cntx), deque_packet);
-     NRF_LOG_DEBUG("SEND_DONE exit \r\n");
 }
 void
 ravel_driver_save_durably(RavelDriver *driver, RavelPacket *packet)

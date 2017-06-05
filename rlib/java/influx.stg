@@ -69,23 +69,27 @@ public class <name> {
 			if (!createConnection())
 				return;
 		}
-		BatchPoints batchPoints = BatchPoints
-				.database(dbName)
-				.tag("async", "true")
-				.retentionPolicy("autogen")
-				.consistency(ConsistencyLevel.ALL)
-				.build();
+        try{
+            BatchPoints batchPoints = BatchPoints
+                    .database(dbName)
+                    .tag("async", "true")
+                    .retentionPolicy("autogen")
+                    .consistency(ConsistencyLevel.ALL)
+                    .build();
 
-		Point point1 = Point.measurement(table)
-							.tag("device_name", name)
-							.tag("geohash", geohash)
-							.addField("device_name", name)
-							.addField("temperature", (double) Math.floor(temperature * 100) / 100)
-                            .addField("humidity", (double) Math.floor(humidity * 100) / 100)
-							.build();
+            Point point1 = Point.measurement(table)
+                                .tag("device_name", name)
+                                .tag("geohash", geohash)
+                                .addField("device_name", name)
+                                .addField("temperature", (double) Math.floor(temperature * 100) / 100)
+                                .addField("humidity", (double) Math.floor(humidity * 100) / 100)
+                                .build();
 
-		batchPoints.point(point1);
-		influxDB.write(batchPoints);
+            batchPoints.point(point1);
+            influxDB.write(batchPoints);
+		} catch (Exception e) {
+        			//FIXME jsut catch them all
+        }
 	}
 
  	public void closeConnection(){

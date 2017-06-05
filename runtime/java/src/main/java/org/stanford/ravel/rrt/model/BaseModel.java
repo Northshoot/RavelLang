@@ -94,9 +94,18 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     boolean markSaved(int recordPos) {
+
         assert state[recordPos].in_save > 0;
-        state[recordPos].in_save--;
-        return state[recordPos].in_save == 0;
+        try {
+            state[recordPos].in_save--;
+            return state[recordPos].in_save == 0;
+        } catch (Exception e){
+            //FIXME: why do we end up here?
+            System.err.println("Index out of range: got " + recordPos + " size: " + state.length);
+            return true;
+        }
+
+
     }
     void markInSave(int recordPos) {
         state[recordPos].in_save++;
@@ -138,20 +147,25 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         });
     }
     void queueSaveDone(final RecordType record) {
-        dispatcher.queueEvent(new RunnableEvent() {
-            @Override
-            public void run() {
-                Context<RecordType> ctx = new Context<>(BaseModel.this, record);
-                int recordPos = recordPosFromRecord(record);
-                assert recordPos >= 0;
-                markSaved(recordPos);
+        try {
+            dispatcher.queueEvent(new RunnableEvent() {
+                @Override
+                public void run() {
+                    Context<RecordType> ctx = new Context<>(BaseModel.this, record);
+                    int recordPos = recordPosFromRecord(record);
+                    assert recordPos >= 0;
+                    markSaved(recordPos);
 
-                if (isValid(recordPos))
-                    notifySaveDone(ctx);
-                else
-                    freeRecord(recordPos);
-            }
-        });
+                    if (isValid(recordPos))
+                        notifySaveDone(ctx);
+                    else
+                        freeRecord(recordPos);
+                }
+            });
+        } catch (Exception e ){
+            //FIXME: we just catch them all
+            System.err.println("Index out of range: got " + record.toString());
+        }
     }
 
     int recordPosFromRecord(RecordType record) {

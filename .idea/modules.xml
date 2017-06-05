@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/RavelLang.iml" filepath="$PROJECT_DIR$/RavelLang.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../02-demos/mapps/ravelmpoc/ravelmpoc.iml" filepath="$PROJECT_DIR$/../../02-demos/mapps/ravelmpoc/ravelmpoc.iml" />
       <module fileurl="file://$PROJECT_DIR$/../rout/re-connect/re-connect.iml" filepath="$PROJECT_DIR$/../rout/re-connect/re-connect.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../rout/rout.iml" filepath="$PROJECT_DIR$/../rout/rout.iml" />
     </modules>
   </component>
 </project>

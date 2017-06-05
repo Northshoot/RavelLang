@@ -230,7 +230,6 @@ ravel_base_model_send_record_endpoint(RavelBaseModel *self,
         ravel_packet_finalize (&packet);
     } else {
         //ravel_system_print_number(NULL, "Sending data...");
-        ravel_system_print_number( NULL, "Dipacther src " , self->dispatcher->src_id);
         ravel_packet_set_source_destination(&packet, self->dispatcher->tier_id, 
                                             self->dispatcher->src_id, 0);
         local_error = ravel_base_dispatcher_send_data(self->dispatcher, &packet, endpoint);
@@ -254,8 +253,7 @@ ravel_base_model_send_record(RavelBaseModel *self, void *record, const int32_t *
 
     int i, j;
     RavelError error, local_error;
-
-    ravel_system_print_number(NULL, "send_record", endpoint_names[0]);
+    //ravel_system_print_number(NULL, "send_record", endpoint_names[0]);
 
     if (endpoint_names[0] == -1)
         return RAVEL_ERROR_SUCCESS;
@@ -880,7 +878,7 @@ static RavelError
 ravel_streaming_model_forward(RavelStreamingModel *self, RavelPacket *pkt, void *record)
 {
     const int32_t *endpoint_names;
-
+    ravel_system_print(NULL, "ravel_streaming_model_forward");
     if (pkt->is_save_done)
         endpoint_names = self->source_endpoints;
     else
@@ -946,17 +944,19 @@ ravel_streaming_model_record_arrived(RavelStreamingModel *self, RavelPacket *pkt
         }
     } else if (pkt->is_save_done) {
         // forward the save done no matter what
-        ravel_streaming_model_forward(self, pkt, NULL);
-
+        ravel_system_print(NULL, "Packet save done");
+        //TODO: fixme
+       // ravel_streaming_model_forward(self, pkt, NULL);
+        ravel_system_print_number(NULL, "record ID", pkt->record_id);
         int record_pos = find_record_with_id(&self->base, pkt->record_id);
-
+        ravel_system_print_number(NULL, "record position", record_pos);
         if (record_pos < 0 || !self->base.state[record_pos].is_allocated || !self->base.state[record_pos].is_valid)
             return;
-        ravel_system_print(NULL, "context init");
+        
         ravel_context_init_ok(&self->base.current_ctx, record_at(&self->base, record_pos));
 
         self->base.vtable->dispatch_save_done(self, &self->base.current_ctx);
-        //ravel_system_print(NULL, "dispatch called save done");
+        ravel_system_print(NULL, "dispatch called save done");
     } else {
         RavelPacket ack;
         int record_pos;

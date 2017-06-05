@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="generated-unspecified">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.android/build-cache/512e0ef0aed4bd626cfbcae1c24d524458f08a3b/output/jars/libs/java-0.9.jar!/" />
-      <root url="jar://$USER_HOME$/.android/build-cache/512e0ef0aed4bd626cfbcae1c24d524458f08a3b/output/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.android/build-cache/512e0ef0aed4bd626cfbcae1c24d524458f08a3b/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/3ef306d742d3e18ae81d47b40069b1ef26c9130b/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/3ef306d742d3e18ae81d47b40069b1ef26c9130b/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/3ef306d742d3e18ae81d47b40069b1ef26c9130b/output/jars/libs/java-0.9.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -106,6 +106,9 @@
     <content url="file://$MODULE_DIR$/../../../runtime/java/src/main/java">
       <sourceFolder url="file://$MODULE_DIR$/../../../runtime/java/src/main/java" isTestSource="false" />
     </content>
+    <content url="file://$MODULE_DIR$/../../../../rout/counter/Gateway/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../../../rout/counter/Gateway/src/main/java" isTestSource="false" />
+    </content>
     <orderEntry type="jdk" jdkName="Android API 25 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-annotations-25.0.1" level="project" />

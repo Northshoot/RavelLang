@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #define NRF_LOG_MODULE_NAME "QUE"
-#define NRF_LOG_LEVEL 1
+#define NRF_LOG_LEVEL 4
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 

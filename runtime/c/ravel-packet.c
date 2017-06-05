@@ -72,6 +72,7 @@ void
 ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
 {
     incr_counter();
+    
     self->packet_data = calloc(length + RESERVED, 1);
     if (self->packet_data == NULL) abort();
     self->record_data = self->packet_data + RESERVED;
@@ -85,15 +86,18 @@ ravel_packet_init_from_record (RavelPacket *self, uint8_t *data, size_t length)
     self->is_ack = false;
     self->is_save_done = false;
     self->is_delete = false;
+    
+    
 }
 
 void
 ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
 {
     incr_counter();
-    self->packet_data = calloc(length, 1);
+    
+    self->packet_data = calloc(1, length);
     if (self->packet_data == NULL) abort();
-    self->record_data = self->packet_data + RESERVED;
+    self->record_data = self->packet_data - RESERVED;
     self->record_length = length - RESERVED;
     self->packet_length = length;
     memcpy(self->packet_data, data, length);
@@ -103,8 +107,9 @@ ravel_packet_init_from_network (RavelPacket *self, uint8_t *data, size_t length)
     self->is_ack = self->packet_data[FLAGS] & FLAG_ACK;
     self->is_save_done = self->packet_data[FLAGS] & FLAG_SAVE_DONE;
     self->is_delete = self->packet_data[FLAGS] & FLAG_DELETE;
-
-    assert (!(self->is_ack && self->is_save_done));
+    ravel_system_print_number(NULL, "\tinit data leng: ", length);
+    ravel_system_print_number(NULL, "\tinit pkt leng: ", self->packet_length);
+    //assert (!(self->is_ack && self->is_save_done));
 }
 
 static void
@@ -158,12 +163,12 @@ void
 ravel_packet_set_source_destination (RavelPacket *self, int32_t tier, int32_t source, int32_t destination)
 {
     assert (tier >= 0 && tier < 256);
-    
     assert (destination >= 0 && destination < 256);
-    self->packet_data[TIER] = tier;;
-    self->packet_data[SRC+3] = (source >> 24) & 0xFF;
-    self->packet_data[SRC+2] = (source >> 16) & 0xFF;
-    self->packet_data[SRC+1] = (source >> 8) & 0xFF;
-    self->packet_data[SRC] = source & 0xFF;
+    
+    self->packet_data[TIER] = tier;
+    self->packet_data[SRC] = (source >> 24) & 0xFF;
+    self->packet_data[SRC+1] = (source >> 16) & 0xFF;
+    self->packet_data[SRC+2] = (source >> 8) & 0xFF;
+    self->packet_data[SRC+3] = source & 0xFF;
     self->packet_data[DST] = destination;
 }

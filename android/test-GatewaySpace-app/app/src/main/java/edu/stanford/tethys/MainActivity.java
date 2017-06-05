@@ -39,7 +39,8 @@ public class MainActivity extends Activity {
     //for now output is from Ravel compiler
     Gateway gatewaySpace;
     boolean mServiceBound = false;
-    BleEndpoint localEndpoint = new BleEndpoint(3);
+    //TODO: add the gateway space number here
+    BleEndpoint localEndpoint = new BleEndpoint(2);
     Endpoint cloud;
 
     ArrayList<Endpoint> eps = new ArrayList<>();
@@ -63,8 +64,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try { //"tcp://192.168.2.117:1234"
-            cloud = Endpoint.fromString(1, new URI("tcp://172.16.12.161:6100"), Collections.<String, String>emptyMap());
+        try { //"tcp://192.168.2.117:1234" 192.168.0.102
+            cloud = Endpoint.fromString(1, new URI("tcp://192.168.0.102:6100"), Collections.<String, String>emptyMap());
         } catch(URISyntaxException |MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +105,7 @@ public class MainActivity extends Activity {
             eps.add(localEndpoint);
             //Can not add more end point than application is using
             //FIXME: commenting out cloud for two way test
-            eps.add(cloud);
+           eps.add(cloud);
             gatewaySpace.setEndpoints(eps);
             InputStream stream = new ByteArrayInputStream(DeleteMeKeys.key_0.getBytes(UTF_8));
             gatewaySpace.setKey(stream);

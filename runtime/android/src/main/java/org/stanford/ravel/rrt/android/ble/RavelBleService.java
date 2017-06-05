@@ -621,7 +621,7 @@ public class RavelBleService extends Service {
     }
 
     private void broadcastUpdate(final int action, final String extra){
-        Log.d(TAG,"Sending broadcast: " + action +  " extra " + extra);
+        Log.d(TAG,"broadcastUpdate: " + action +  " extra " + extra);
         final Intent intent = new Intent(BleDefines.INTENT_BLE_FILTER);
         intent.putExtra(BleDefines.COMMAND, action);
         intent.putExtra(BleDefines.EXTRA_DATA, extra);
@@ -629,7 +629,7 @@ public class RavelBleService extends Service {
     }
 
     private void dataReceived(final BlePacket pkt){
-        Log.d(TAG,"Sending broadcast with packet ");
+        Log.d(TAG,"dataReceived with packet " + pkt.toString());
         final Intent intent = new Intent(BleDefines.INTENT_BLE_FILTER);
         intent.putExtra(BleDefines.COMMAND, BleDefines.ACTION_DATA_AVAILABLE);
         intent.putExtra(BleDefines.EXTRA_DATA, pkt);
@@ -641,7 +641,7 @@ public class RavelBleService extends Service {
             BluetoothGatt localBluetoothGatt = gatt;
             Method localMethod = localBluetoothGatt.getClass().getMethod("refresh", new Class[0]);
             if (localMethod != null) {
-                Log.d(TAG, "Refreshing cash");
+                Log.d(TAG, "Refreshing cache");
                 boolean bool = ((Boolean) localMethod.invoke(localBluetoothGatt, new Object[0])).booleanValue();
                 return bool;
             }else{

@@ -159,12 +159,19 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         if (pkt.isAck() || pkt.isSaveDone()) {
             return;
         }
-
-        int recordPos = findRecordWithId(pkt.record_id);
-        // we cannot free stuff that is in transit
+        //FIXME need to be adressed
+        int recordPos =recordPos = findRecordWithId(pkt.record_id);
         assert recordPos >= 0;
+        // we cannot free stuff that is in transit
+        RecordType record;
 
-        RecordType record = recordAt(recordPos);
+        try{
+            record = recordAt(recordPos);
+        } catch (java.lang.ArrayIndexOutOfBoundsException e){
+            //TODO: record have been deleted while in processing in the system
+            //we just drop call here
+            return;
+        }
 
         if (markNotInTransit(recordPos)) {
             if (!isValid(recordPos)) {
