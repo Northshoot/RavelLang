@@ -16,9 +16,10 @@ public abstract class LocalModel<RecordType extends ModelRecord> extends BaseMod
 
     @Override
     public Context<RecordType> save(RecordType record) {
-        Context<RecordType> ctx = doSave(record, true);
+        Context<RecordType> ctx = doSave(record, dispatcher.getDeviceId(), false);
         if (ctx.error == Error.SUCCESS)
-            queueSaveDone(record);
+            queueSaveDone( record, dispatcher.getDeviceId());
+
         return ctx;
     }
 
@@ -39,7 +40,7 @@ public abstract class LocalModel<RecordType extends ModelRecord> extends BaseMod
 
     @Override
     public void delete(RecordType record) {
-        if (doDelete(record) && isDurable()) {
+        if (doDelete(record, dispatcher.getDeviceId()) && isDurable()) {
             // TODO remove from durable storage
         }
     }

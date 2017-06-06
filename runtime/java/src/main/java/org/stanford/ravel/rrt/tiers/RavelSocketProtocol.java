@@ -35,7 +35,7 @@ public class RavelSocketProtocol {
         readLoop(in, small, 0);
 
         int length = ByteWork.convertTwoUnsignedBytesToInt(new byte[]{ small[0], small[1] });
-        System.out.println("Length: " + length);
+        //System.out.println("Length: " + length);
         byte[] full = new byte[length];
         System.arraycopy(small, 2, full, 0, RavelPacket.MIN_LENGTH);
 

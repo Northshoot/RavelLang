@@ -3,13 +3,13 @@ package org.stanford.ravel.rrt.model;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.ModelEvent;
 import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -40,13 +40,17 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
     // This is accessed by the generated code, so it must be protected
     protected final DispatcherAPI dispatcher;
-    private final RecordState[] state;
-    private final ArrayList<RecordType> mRecords = new ArrayList<>();
-    final ArrayList<RecordType> mValidRecords = new ArrayList<>();
+    //private final RecordState[] state;
+    //private final ArrayList<RecordType> mRecords = new ArrayList<>(); //This is array for one flow
+    //final ArrayList<RecordType> mValidRecords = new ArrayList<>(); //This is array for one flow
+    protected  Map<Integer, ArrayList<RecordType>> mRecordFlowMap = new LinkedHashMap<>(4);
+    private  Map<Integer, ArrayList<RecordType>> mValidRecordsFlowMap = new LinkedHashMap<>(4);
+    private Map<Integer, RecordState[]> mRecordStateMap = new LinkedHashMap<>(4);
     private final boolean mReliable;
     private final boolean mDurable;
     private final int mModelSize;
     final int mModelId;
+    //protected int mThisDeviceSrc;
 
     private int mNextRecordId = 1;
 
@@ -55,12 +59,68 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         mModelSize = size;
         mReliable = reliable;
         mDurable = durable;
-        mRecords.ensureCapacity(size);
+        //mRecords.ensureCapacity(size);
         this.dispatcher = dispatcher;
+        //mThisDeviceSrc = dispatcher.getDeviceId();
+//        state = new RecordState[size];
+//        for (int i = 0; i < state.length; i++)
+//            state[i] = new RecordState();
+    }
 
-        state = new RecordState[size];
-        for (int i = 0; i < state.length; i++)
-            state[i] = new RecordState();
+    protected void pprint_base(String type, String msg){
+        //System.out.println("M[ID: " +this.mModelId +", T: "+ type + "]>>>" + msg);
+
+    }
+    /**
+     * This is replacement for single array structure
+     * Now we create an individual flow per source
+     * @param src_id source id
+     * @return
+     */
+    protected ArrayList<RecordType> getRecordFlowMap(int src_id){
+        synchronized (mRecordFlowMap) {
+            Integer src_key = Integer.valueOf(src_id);
+            if (!mRecordFlowMap.containsKey(src_key)) {
+                // new node is connected, create flow map
+                ArrayList<RecordType> mRecords = new ArrayList<>();
+                mRecords.ensureCapacity(mModelSize);
+                mRecordFlowMap.put(src_key, mRecords);
+            }
+        }
+        return mRecordFlowMap.get(src_id);
+    }
+
+    /**
+     * this is replacement for valid records single array structure
+     * @param src_id
+     * @return
+     */
+    protected ArrayList<RecordType>  getValidRecordsFlowMap(int src_id){
+        synchronized (mValidRecordsFlowMap) {
+            Integer src_key = Integer.valueOf(src_id);
+            if (!mValidRecordsFlowMap.containsKey(src_key)) {
+                // new node is connected, create flow map
+                ArrayList<RecordType> mRecords = new ArrayList<>();
+                mRecords.ensureCapacity(mModelSize);
+                mValidRecordsFlowMap.put(src_key, mRecords);
+            }
+        }
+        return mValidRecordsFlowMap.get(src_id);
+    }
+
+    protected RecordState[] getRecordStateMap(int src_id){
+        synchronized (mRecordStateMap) {
+            Integer src_key = Integer.valueOf(src_id);
+            if (!mRecordStateMap.containsKey(src_key)) {
+                // new node is connected, create flow map
+                RecordState[] state;
+                state = new RecordState[mModelSize];
+                for (int i = 0; i < state.length; i++)
+                    state[i] = new RecordState();
+                mRecordStateMap.put(src_key, state);
+            }
+        }
+        return mRecordStateMap.get(src_id);
     }
 
     int getModelSize() {
@@ -90,53 +150,56 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     public void recordLoaded(RavelPacket pkt) {
         RecordType record = create();
         record = unmarshall(record, pkt.getRecordData(), null);
-        doSave(record, false);
+        doSave(record, pkt.getSource(),false);
     }
 
-    boolean markSaved(int recordPos) {
-
+    boolean  markSaved(int src, int recordPos) {
+         RecordState [] state = mRecordStateMap.get(src);
         assert state[recordPos].in_save > 0;
-        try {
-            state[recordPos].in_save--;
-            return state[recordPos].in_save == 0;
-        } catch (Exception e){
-            //FIXME: why do we end up here?
-            System.err.println("Index out of range: got " + recordPos + " size: " + state.length);
-            return true;
-        }
+//        try {
+        pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
+        state[recordPos].in_save--;
+        return state[recordPos].in_save == 0;
+//        } catch (Exception e){
+//            //FIXME: why do we end up here?
+//            System.err.println("Index out of range: got " + recordPos + " size: " + state.length);
+//            return true;
+//        }
+    }
+    void markInSave(int src, int recordPos) {
+        mRecordStateMap.get(src)[recordPos].in_save++;
+    }
 
-
+    boolean isArrived(int src, int recordPos) {
+        return mRecordStateMap.get(src)[recordPos].is_arrived;
     }
-    void markInSave(int recordPos) {
-        state[recordPos].in_save++;
+    Endpoint getArrivedFrom(int src, int recordPos) {
+        return mRecordStateMap.get(src)[recordPos].arrived_from;
     }
-    boolean isArrived(int recordPos) {
-        return state[recordPos].is_arrived;
-    }
-    Endpoint getArrivedFrom(int recordPos) {
-        return state[recordPos].arrived_from;
-    }
-    void markArrived(int recordPos, boolean is_arrived, Endpoint from) {
+    void markArrived(int src, int recordPos, boolean is_arrived, Endpoint from) {
+        RecordState [] state = mRecordStateMap.get(src);
         state[recordPos].is_arrived = is_arrived;
         state[recordPos].arrived_from = from;
     }
-    boolean isValid(int recordPos) {
-        return state[recordPos].is_valid;
+    boolean isValid(int src, int recordPos) {
+        return mRecordStateMap.get(src)[recordPos].is_valid;
     }
-    boolean markNotInTransit(int recordPos) {
+    boolean markNotInTransit(int src, int recordPos) {
+        RecordState [] state = mRecordStateMap.get(src);
         state[recordPos].in_transit --;
         return state[recordPos].in_transit == 0;
     }
-    boolean isTransmitFailed(int recordPos) {
-        return state[recordPos].is_transmit_failed;
+    boolean isTransmitFailed(int src, int recordPos) {
+        return mRecordStateMap.get(src)[recordPos].is_transmit_failed;
     }
-    boolean isInTransit(int recordPos) {
-        return state[recordPos].in_transit > 0;
+    boolean isInTransit(int src, int recordPos) {
+        return mRecordStateMap.get(src)[recordPos].in_transit > 0;
     }
-    void markTransmitNotFailed(int recordPos) {
-        state[recordPos].is_transmit_failed = false;
+    void markTransmitNotFailed(int src, int recordPos) {
+        mRecordStateMap.get(src)[recordPos].is_transmit_failed = false;
     }
 
+    //TODO: need to be fixed properluy
     private void queueFullEvent() {
         dispatcher.queueEvent(new RunnableEvent() {
             @Override
@@ -146,32 +209,38 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             }
         });
     }
-    void queueSaveDone(final RecordType record) {
-        try {
+    void queueSaveDone(final RecordType record, final int src) {
+//        try {
             dispatcher.queueEvent(new RunnableEvent() {
                 @Override
                 public void run() {
                     Context<RecordType> ctx = new Context<>(BaseModel.this, record);
-                    int recordPos = recordPosFromRecord(record);
+                    int recordPos = recordPosFromRecord(record, src);
                     assert recordPos >= 0;
-                    markSaved(recordPos);
+                    markSaved(src, recordPos);
 
-                    if (isValid(recordPos))
+                    if (isValid(src, recordPos))
                         notifySaveDone(ctx);
                     else
-                        freeRecord(recordPos);
+                        freeRecord(src, recordPos);
                 }
             });
-        } catch (Exception e ){
-            //FIXME: we just catch them all
-            System.err.println("Index out of range: got " + record.toString());
-        }
+//        } catch (Exception e ){
+//            //FIXME: we just catch them all
+//            System.err.println("Index out of range: got " + record.toString());
+//        }
     }
 
-    int recordPosFromRecord(RecordType record) {
-        return mRecords.indexOf(record);
+
+    int recordPosFromRecord(RecordType record, int src) {
+        pprint_base("Base",  " src " + src);
+        ArrayList<RecordType> rt = getRecordFlowMap(src);
+        //System.out.println("Containts " + rt.contains(record));
+        return rt.indexOf(record);
     }
-    int findRecordWithId(int recordId) {
+
+    int findRecordWithId(int src, int recordId) {
+        ArrayList<RecordType> mRecords = getRecordFlowMap(src);
         for (int i = 0; i < mRecords.size(); i++) {
             RecordType record = mRecords.get(i);
             if (record == null)
@@ -181,7 +250,8 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
         return -1;
     }
-    RecordType recordAt(int recordPos) {
+    RecordType recordAt(int src,int recordPos) {
+        ArrayList<RecordType> mRecords = getRecordFlowMap(src);
         if (mRecords.size() <= recordPos)
             return null;
         else
@@ -191,34 +261,38 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         record.index(mNextRecordId++);
     }
 
-    private int tryAddRecord(RecordType record) {
+    private int tryAddRecord(int src, RecordType record) {
+        ArrayList<RecordType> mRecords = getRecordFlowMap(src);
+        if (mRecords.size() == mModelSize){
+            queueFullEvent();
+            return -1;
+        }
         for (int i = 0; i < mRecords.size(); i++) {
             if (mRecords.get(i) == null) {
                 mRecords.set(i, record);
+
                 return i;
             }
         }
-        if (mRecords.size() == mModelSize)
-            return -1;
         mRecords.add(record);
         return mRecords.size()-1;
     }
 
-    Context<RecordType> doSave(RecordType record, boolean saveDurably) {
-        int recordPos = recordPosFromRecord(record);
-
+     Context<RecordType>  doSave(RecordType record, int src, boolean saveDurably) {
+        int recordPos = recordPosFromRecord(record, src);
+        RecordState[] state = getRecordStateMap(src);
         if (recordPos < 0) {
-            recordPos = tryAddRecord(record);
-            if (recordPos < 0)
+            recordPos = tryAddRecord(src, record);
+            if (recordPos < 0) {
                 return new Context<>(this, Error.OUT_OF_STORAGE);
-
-            if (mRecords.size() == mModelSize)
+            }
+            if (recordFlowSize(src) == mModelSize)
                 queueFullEvent();
         }
 
         if (!state[recordPos].is_valid) {
             state[recordPos].is_valid = true;
-            mValidRecords.add(record);
+            getValidRecordsFlowMap(src).add(record);
         }
 
         if (!saveDurably)
@@ -229,7 +303,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         if (isDurable()) {
             RavelPacket pkt;
 
-            pkt = RavelPacket.fromRecord(marshall(record, null));
+            pkt = RavelPacket.fromRecord(marshall(record, null), dispatcher.getDeviceId());
             dispatcher.model__saveDurably(pkt);
             return new Context<>(this, Error.IN_TRANSIT);
         } else {
@@ -237,65 +311,69 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
     }
 
-    void freeRecord(int recordPos) {
-        mRecords.set(recordPos, null);
-        state[recordPos].reset();
+    private int recordFlowSize(int src) {
+        return getRecordFlowMap(src).size();
     }
 
-    boolean doDelete(RecordType record) {
-        int recordPos = recordPosFromRecord(record);
+    void freeRecord(int src, int recordPos) {
+        getRecordFlowMap(src).set(recordPos, null);
+        getRecordStateMap(src)[recordPos].reset();
+    }
 
-        if (recordPos < 0 || !state[recordPos].is_valid) {
+    boolean doDelete(RecordType record, int src) {
+        int recordPos = recordPosFromRecord(record, src);
+
+        if (recordPos < 0 || !getRecordStateMap(src)[recordPos].is_valid) {
             return false;
         } else {
-            state[recordPos].is_valid = false;
-            mValidRecords.remove(record);
-            if (state[recordPos].in_save > 0 || state[recordPos].in_transit > 0 ||
-                    state[recordPos].expected_acks > 0) {
+            getRecordStateMap(src)[recordPos].is_valid = false;
+            getValidRecordsFlowMap(src).remove(record);
+            if (getRecordStateMap(src)[recordPos].in_save > 0 || getRecordStateMap(src)[recordPos].in_transit > 0 ||
+                    getRecordStateMap(src)[recordPos].expected_acks > 0) {
                 // we cannot delete right away
                 return true;
             } else {
-                freeRecord(recordPos);
+                freeRecord(src, recordPos);
                 return true;
             }
         }
     }
 
-    Error sendOneRecord(int recordPos, RecordType record, Endpoint e, boolean markAsInSave) {
-        RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e));
-
+    Error sendOneRecord(int recordPos, int src, RecordType record, Endpoint e, boolean markAsInSave) {
+        RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e), dispatcher.getDeviceId());
+        pkt.setDestination(dispatcher.getAppId(), e.getId());
         if (isReliable())
-            state[recordPos].expected_acks ++;
+            getRecordStateMap(src)[recordPos].expected_acks ++;
         if (markAsInSave)
-            state[recordPos].in_save ++;
+            getRecordStateMap(src)[recordPos].in_save ++;
         //TODO: fix this properly
         return dispatcher.model__sendData(pkt, e);
 //        if (e.isConnected()) {
-//            System.out.println("COMNNECTED " + e.toString());
+//            System.out.println("CONNECTED " + e.toString());
 //            return dispatcher.model__sendData(pkt, e);
 //        } else {
 //             System.out.println("NOT CONNECTED " + e.toString());
 //            return Error.ENDPOINT_UNREACHABLE;}
     }
 
-    Error sendRecord(int recordPos, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
+    Error sendRecord(int recordPos, int src, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
         Collection<Endpoint> endpoints = new ArrayList<>();
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
         if (endpoints.isEmpty()) {
-            state[recordPos].is_transmit_failed = true;
+            getRecordStateMap(src)[recordPos].is_transmit_failed = true;
             return Error.SUCCESS;
         }
 
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             try {
-                Error error2 = sendOneRecord(recordPos, record, e, markAsInSave);
+                Error error2 = sendOneRecord(recordPos, src, record, e, markAsInSave);
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
-                    state[recordPos].is_transmit_failed = true;
+                    getRecordStateMap(src)[recordPos].is_transmit_failed = true;
                 else
-                    state[recordPos].in_transit++;
+                    getRecordStateMap(src)[recordPos].in_transit++;
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                     error = error2;
             } catch (SecurityException securityException) {
@@ -307,30 +385,35 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     RecordType savedDurably(RavelPacket pkt) {
-        int recordPos = findRecordWithId(pkt.record_id);
+        int src = pkt.getSource();
+        int recordPos = findRecordWithId(src,pkt.record_id);
         if (recordPos < 0)
             return null;
-        RecordType record = mRecords.get(recordPos);
+        RecordType record = getRecord(src, recordPos);
 
-        markSaved(recordPos);
+        markSaved(src, recordPos);
 
-        if (state[recordPos].is_valid) {
+        if (getRecordStateMap(src)[recordPos].is_valid) {
             return record;
         } else {
-            freeRecord(recordPos);
+            freeRecord(src, recordPos);
             return null;
         }
     }
 
-    boolean handleAck(int recordPos) {
-        state[recordPos].expected_acks--;
-        return state[recordPos].expected_acks == 0;
+    private RecordType getRecord(int source, int recordPos) {
+        return (RecordType) getRecordFlowMap(source).get(recordPos);
+    }
+
+    boolean handleAck(int src, int recordPos) {
+        getRecordStateMap(src)[recordPos].expected_acks--;
+        return getRecordStateMap(src)[recordPos].expected_acks == 0;
     }
 
     Context<RecordType> handleRecord(RecordType record, RavelPacket pkt, Endpoint endpoint) {
         try {
             record = unmarshall(record, pkt.getRecordData(), endpoint);
-            return doSave(record, true);
+            return doSave( record, pkt.getSource(),true);
         } catch(SecurityException e) {
             return new Context<>(this, Error.SECURITY_ERROR);
         }
@@ -338,20 +421,22 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
     Error forwardPacket(RavelPacket pkt, Collection<Integer> endpointNames, RecordType record) {
         Collection<Endpoint> endpoints = new ArrayList<>();
+        int src = pkt.getSource();
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
 
         int recordPos = -1;
         if (record != null)
-            recordPos = recordPosFromRecord(record);
+            recordPos = recordPosFromRecord(record, src);
 
         Error error = Error.SUCCESS;
         for (Endpoint e : endpoints) {
             if (recordPos >= 0) {
                 if (isReliable())
-                    state[recordPos].expected_acks++;
+                    getRecordStateMap(src)[recordPos].expected_acks++;
             }
             Error error2;
+            pkt.setDestination(dispatcher.getAppId(), e.getId());
             error2 = dispatcher.model__sendData(pkt, e);
             // TODO: this this properly
 //            if (e.isConnected())
@@ -360,9 +445,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 //                error2 = Error.ENDPOINT_UNREACHABLE;
             if (recordPos >= 0) {
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
-                    state[recordPos].is_transmit_failed = true;
+                    getRecordStateMap(src)[recordPos].is_transmit_failed = true;
                 else
-                    state[recordPos].in_transit++;
+                    getRecordStateMap(src)[recordPos].in_transit++;
             }
             if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                 error = error2;
@@ -373,39 +458,48 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     /***************************************************************/
     /*************** Model Query API implementation ***************/
     /***************************************************************/
+    /**
+     * TODO: this needs to be redefined and addressed
+     * @return
+     */
     @Override
     public RecordType first() {
-        return mValidRecords.get(0);
+
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).get(0);
     }
 
     @Override
     public RecordType last() {
-        return mValidRecords.get(mValidRecords.size()-1);
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).get(getValidRecordsFlowMap(dispatcher.getDeviceId()).size()-1);
     }
 
     @Override
     public RecordType get(int x) {
-        return mValidRecords.get(x);
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).get(x);
     }
 
     @Override
     public RecordType[] all(RecordType[] unused) {
-        return mValidRecords.toArray(unused);
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).toArray(unused);
     }
 
     @Override
     public Iterator<RecordType> iterator() {
-        return mValidRecords.iterator();
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).iterator();
     }
 
     @Override
     public void clear() {
-        mRecords.clear();
-        mValidRecords.clear();
+        //mRecords.clear();
+        //TODO: add clear from source method
+        pprint_base("Base", "clean model");
+        mRecordFlowMap.clear();
+        mValidRecordsFlowMap.clear();
+        mRecordStateMap.clear();
     }
 
     @Override
     public int size() {
-        return mValidRecords.size();
+        return getValidRecordsFlowMap(dispatcher.getDeviceId()).size();
     }
 }

@@ -17,7 +17,9 @@ public abstract class Event {
         MODELS__NOTIFY_RECORD_DEPARTED, // NetworkEvent
         MODELS__NOTIFY_RECORD_FAILED_TO_SEND, // NetworkEvent
 
-        GENERIC__RUNNABLE // RunnableEvent
+        GENERIC__RUNNABLE,  // RunnableEvent
+
+        OUT_OF_STORAGE //ModelEvent
     }
 
     public abstract Type getType();

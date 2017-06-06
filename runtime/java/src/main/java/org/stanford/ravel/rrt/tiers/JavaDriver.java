@@ -44,7 +44,7 @@ public class JavaDriver implements DriverAPI {
             storage.load(new JavaDurableStorage.Loader() {
                 @Override
                 public void handleRecord(int modelId, int recordId, byte[] data) {
-                    appDispatcher.driver__loadFromStorage(RavelPacket.fromRecord(data));
+                    appDispatcher.driver__loadFromStorage(RavelPacket.fromRecord(data, appDispatcher.getDeviceId()));
                 }
             });
         } catch(IOException e) {
@@ -110,7 +110,7 @@ public class JavaDriver implements DriverAPI {
     protected  void packetReceived(RavelPacket pkt, Endpoint endpoint) {
         if (pkt.getSource() == appDispatcher.getAppId()) {
             // routing loop or malicious packet, drop
-            System.out.println("pkt.getSource() == appDispatcher.getAppId(): " + pkt.toString());
+           // System.out.println("pkt.getSource() == appDispatcher.getAppId(): " + pkt.toString());
             return;
         }
         if (pkt.getDestination() != appDispatcher.getAppId()) {
@@ -119,11 +119,12 @@ public class JavaDriver implements DriverAPI {
             System.out.println("forwardPacket " + pkt.toString());
             return;
         }
-        System.out.println("javaDriver.packetReceived " + pkt.toString());
+        //System.out.println("javaDriver.packetReceived " + pkt.toString());
         appDispatcher.driver__dataReceived(pkt, endpoint);
     }
 
     protected void sendDataThread(RavelPacket data, Endpoint endpoint) throws RavelIOException {
+        System.out.println("sendData " + data.toString());
         switch (endpoint.getType()) {
             case SOCKET:
                 RavelSocket socket = getSocket((TcpEndpoint)endpoint);
@@ -144,7 +145,7 @@ public class JavaDriver implements DriverAPI {
     public final Error sendData(final RavelPacket data, final Endpoint endpoint) {
         if (endpoint.isLocal()) // can't send to one self
             return Error.SYSTEM_ERROR;
-        data.setSourceDestination(appDispatcher.getDeviceId(), appDispatcher.getAppId(), endpoint.getId());
+        //data.setSourceDestination(appDispatcher.getDeviceId(), appDispatcher.getAppId(), endpoint.getId());
 
         threadPool.execute(new Runnable() {
             public void run() {

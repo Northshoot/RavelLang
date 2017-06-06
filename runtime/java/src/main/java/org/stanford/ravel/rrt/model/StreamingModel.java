@@ -6,9 +6,7 @@ import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by gcampagn on 1/30/17.
@@ -29,20 +27,21 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     void pprint(String s) {
-        System.out.println("[StreamingModel::]>" + s);
+        pprint_base("StreamingModel" , s);
     }
 
     @Override
     public Context<RecordType> save(RecordType record) {
         // save locally first
-        Context<RecordType> local = doSave(record, true);
+        int src = dispatcher.getDeviceId();
+        Context<RecordType> local = doSave(record, src, false);
         if (local.error == Error.SUCCESS) {
-            int recordPos = recordPosFromRecord(record);
+            int recordPos = recordPosFromRecord(record, src);
 
-            Error sendError = sendRecord(recordPos, record, mSinkEndpoints, false);
+            Error sendError = sendRecord(recordPos, src, record, mSinkEndpoints, false);
 
             // clear the save flag because we won't send a save done until later
-            markSaved(recordPos);
+            markSaved(src, recordPos);
 
             return new Context<>(this, record, sendError);
         } else {
@@ -53,26 +52,28 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
 
     @Override
     public void delete(RecordType record) {
-        if (doDelete(record) && isDurable()) {
-            // TODO remove from durable storage
-        }
+        //TODO: need redefine how delete works
+//        if (doDelete(record) && isDurable()) {
+//            // TODO remove from durable storage
+//        }
     }
 
     @Override
     public void recordSavedDurably(RavelPacket pkt, Error error) {
         RecordType record = savedDurably(pkt);
+        int src = pkt.getSource();
         if (record == null)
             return;
 
-        int recordPos = recordPosFromRecord(record);
-        if (isArrived(recordPos)) {
-            Endpoint arrivedFrom = getArrivedFrom(recordPos);
-            markArrived(recordPos, false, null);
+        int recordPos = recordPosFromRecord(record,src);
+        if (isArrived(src, recordPos)) {
+            Endpoint arrivedFrom = getArrivedFrom(src, recordPos);
+            markArrived(src, recordPos, false, null);
             notifyArrived(new Context<>(this, record, Error.SUCCESS, arrivedFrom));
 
             forward(pkt, record);
         } else {
-            sendRecord(recordPos, record, mSinkEndpoints, false);
+            sendRecord(recordPos, src, record, mSinkEndpoints, false);
             // ignore errors
             // if we're reliable, we'll retry with a timeout
         }
@@ -80,24 +81,25 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
 
     @Override
     public void recordArrived(RavelPacket pkt, Endpoint endpoint) {
+        int src = pkt.getSource();
         if (pkt.isDelete()) {
             // do nothing
         } else if (pkt.isAck()) {
-            int recordPos = findRecordWithId(pkt.record_id);
-            if (recordPos < 0 || isValid(recordPos))
+            int recordPos = findRecordWithId(pkt.getSource(), pkt.record_id);
+            if (recordPos < 0 || isValid(src, recordPos))
                 return;
 
-            if (isReliable() && handleAck(recordPos))
-                notifyDeparted(new Context<>(this, recordAt(recordPos)));
+            if (isReliable() && handleAck(src, recordPos))
+                notifyDeparted(new Context<>(this, recordAt(src, recordPos)));
         } else if (pkt.isSaveDone()) {
             // forward the save done no matter what
             forward(pkt, null);
 
-            int recordPos = findRecordWithId(pkt.record_id);
-            if (recordPos < 0 || !isValid(recordPos))
+            int recordPos = findRecordWithId(src, pkt.record_id);
+            if (recordPos < 0 || !isValid(src, recordPos))
                 return;
 
-            notifySaveDone(new Context<>(this, recordAt(recordPos)));
+            notifySaveDone(new Context<>(this, recordAt(src, recordPos)));
         } else {
             // send the ack first
             if (isReliable()) {
@@ -105,28 +107,28 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
                 dispatcher.model__sendData(ack, endpoint);
             }
 
-            int recordPos = findRecordWithId(pkt.record_id);
-//            if (recordPos >= 0) {
-//                // duplicate record (spurious retransmission)
-//                // ignore
-//                return;
-//            }
+            int recordPos = findRecordWithId(src, pkt.record_id);
+            if (recordPos >= 0) {
+                // duplicate record (spurious retransmission)
+                // ignore
+                return;
+            }
             RecordType record = create();
             Context<RecordType> ctx = handleRecord(record, pkt, endpoint);
             ctx.endpoint = endpoint;
 
             if (ctx.error == Error.SUCCESS) {
-                recordPos = recordPosFromRecord(record);
-                markSaved(recordPos);
+                recordPos = recordPosFromRecord(record, src);
+                markSaved(src, recordPos);
 
                 notifyArrived(ctx);
                 forward(pkt, record);
             } else if (ctx.error == Error.IN_TRANSIT) {
                 // saving, wait until done saving to tell the app
-                recordPos = recordPosFromRecord(record);
+                recordPos = recordPosFromRecord(record, src);
 
-                assert isValid(recordPos);
-                markArrived(recordPos, true, endpoint);
+                assert isValid(src, recordPos);
+                markArrived(src, recordPos, true, endpoint);
             } else {
                 // security error or some other error, nothing to do
             }
@@ -156,29 +158,23 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
 
     @Override
     public void recordDeparted(RavelPacket pkt, Endpoint endpoint) {
+        int src = pkt.getSource();
         if (pkt.isAck() || pkt.isSaveDone()) {
             return;
         }
-        //FIXME need to be adressed
-        int recordPos =recordPos = findRecordWithId(pkt.record_id);
+        //FIXME need to be addressed
+        int recordPos  = findRecordWithId(src, pkt.record_id);
         assert recordPos >= 0;
         // we cannot free stuff that is in transit
         RecordType record;
+        record = recordAt(src, recordPos);
 
-        try{
-            record = recordAt(recordPos);
-        } catch (java.lang.ArrayIndexOutOfBoundsException e){
-            //TODO: record have been deleted while in processing in the system
-            //we just drop call here
-            return;
-        }
-
-        if (markNotInTransit(recordPos)) {
-            if (!isValid(recordPos)) {
+        if (markNotInTransit(src, recordPos)) {
+            if (!isValid(src, recordPos)) {
                 // record was deleted after sending
-                freeRecord(recordPos);
+                freeRecord(src, recordPos);
             } else {
-                markTransmitNotFailed(recordPos);
+                markTransmitNotFailed(src, recordPos);
 
                 if (isReliable()) {
                     // do nothing and wait for the acks
@@ -193,16 +189,20 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     private void retransmit(Endpoint ep) {
-        for (int i = 0; i < getModelSize(); i++) {
-            if (isValid(i) && isTransmitFailed(i) && !isInTransit(i)) {
-                RecordType record = recordAt(i);
-                sendOneRecord(i, record, ep, false);
+        for(Map.Entry<Integer, ArrayList<RecordType>> entry : mRecordFlowMap.entrySet()) {
+            Integer src = entry.getKey();
+            for (int i = 0; i < getModelSize(); i++) {
+                if (isValid(src, i) && isTransmitFailed(src, i) && !isInTransit(src, i)) {
+                    RecordType record = recordAt(src, i);
+                    sendOneRecord(i, src, record, ep, false);
+                }
             }
         }
     }
 
     @Override
     public void recordFailedToSend(RavelPacket pkt, Endpoint endpoint, Error error) {
+        int src = pkt.getSource();
         if (pkt.isAck() || pkt.isSaveDone()) {
             // unconditionally try to retransmit
             System.out.println("retransmitting");
@@ -211,22 +211,22 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             return;
         }
 
-        int recordPos = findRecordWithId(pkt.record_id);
+        int recordPos = findRecordWithId(src, pkt.record_id);
         // we cannot free stuff that is in transit
         assert recordPos >= 0;
 
-        RecordType record = recordAt(recordPos);
+        RecordType record = recordAt(src, recordPos);
 
-        if (markNotInTransit(recordPos) && !isValid(recordPos)) {
+        if (markNotInTransit(src, recordPos) && !isValid(src, recordPos)) {
             // if the record was deleted after sending, no matter what we're
             // not going to try resending
-            freeRecord(recordPos);
+            freeRecord(src, recordPos);
             return;
         }
 
         // balance the retransmission increasing the counter
         if (isReliable())
-            handleAck(recordPos);
+            handleAck(src, recordPos);
 
         // retransmit any other record that was busy
         retransmit(endpoint);

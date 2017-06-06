@@ -175,7 +175,10 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
     public void model__deleteFromStorage(int modelId, int recordId) {
         driver.deleteFromDurableStorage(modelId, recordId);
     }
-
+     @Override
+    public int deviceID() {
+        return getDeviceId();
+    }
     /***********************************************************************/
     /************** System callbacks from Driver to AD *********************/
     /***********************************************************************/

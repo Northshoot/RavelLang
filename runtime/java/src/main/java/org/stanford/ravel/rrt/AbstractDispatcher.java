@@ -111,9 +111,6 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
         System.err.println(msg);
     }
 
-    public int deviceID() {
-        return this.getDeviceId();
-    }
 
     /***********************************************************************/
     /************** Network callbacks from Driver to AD ********************/
@@ -121,7 +118,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     @Override
     public void  driver__dataReceived(RavelPacket pkt, Endpoint endpoint) {
         NetworkEvent ne = new NetworkEvent(pkt, endpoint, Event.Type.DRIVER__DATA_RECEIVED);
-        System.out.println("DOPE: driver__dataReceived: " + pkt.toString());
+        //System.out.println("DOPE: driver__dataReceived: " + pkt.toString());
         queueEvent(ne);
     }
 
