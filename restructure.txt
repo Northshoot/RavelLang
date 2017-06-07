@@ -7,3 +7,15 @@ this repo moving out
 5) posix drivers
 6) nrf drivers
 7) ravel library
+
+7/6/2017 13:22:18
+so after consideration and reading around I decided to keep repo monolithic but with some local restructure and cean up.
+
+Having separate repos makes sense, maybe when re start releasing code until then all the more reason to save devop time and put it into productions of quality code
+
+The strategy there would be to actually push out the code through review and clean process to separate repo. So rather than bunglin code for customer, we push out needed code
+
+
+more reasons?
+http://danluu.com/monorepo/
+

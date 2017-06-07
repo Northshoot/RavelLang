@@ -209,5 +209,6 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     @Override
     public void battery(SystemEventAPI.BatteryLevel bl) {}
+
 };
 >>
