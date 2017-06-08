@@ -6,6 +6,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/runtime-api" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/rout" />
       <excludeFolder url="file://$MODULE_DIR$/rout/re-connect/One/src" />
       <excludeFolder url="file://$MODULE_DIR$/runtime" />
@@ -46,7 +47,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/lib" />
+          <root url="file://$MODULE_DIR$/lib-jar" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
