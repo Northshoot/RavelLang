@@ -10,6 +10,7 @@ import edu.stanford.ravel.primitives.Model;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.CharStreams;
 import edu.stanford.antlr4.RavelParser;
 import edu.stanford.ravel.analysis.FlowAnalysis;
 import edu.stanford.ravel.analysis.ModelOperationAnalysis;
@@ -24,10 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -105,7 +103,7 @@ public class RavelCompiler {
     }
 
     private ParseTree parse(InputStream is) throws IOException {
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromStream(is);
 
         RavelLexer lexer = new RavelLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);

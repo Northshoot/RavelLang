@@ -1,7 +1,7 @@
 interface TemperatureSource():
     implementation:
-        #java = "rlib/java/temperature.stg"
-        c = "rlib/nrf52/temperature.stg"
+        java = "ravellib/templates/language/java/temphum_sim.stg"
+        c = "ravellib/templates/platform/nrf52/temperature.stg"
 
     def readTemperature(): double
     def readHumidity(): double

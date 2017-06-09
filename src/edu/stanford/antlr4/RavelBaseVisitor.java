@@ -1,4 +1,4 @@
-// Generated from /Users/larry/workspace/01-Ravel/ravellang/Ravel.g4 by ANTLR 4.7
+// Generated from /Users/lauril/workspace/01-ravel/RavelLang/Ravel.g4 by ANTLR 4.7
 package edu.stanford.antlr4;
 
 import edu.stanford.ravel.compiler.scope.*;

@@ -1,5 +1,5 @@
 interface Button():
     implementation:
-        c = "rlib/nrf52/buttons.stg"
+        c = "ravellib/templates/platform/nrf52/buttons.stg"
 
     event pressed(button_id : int32)

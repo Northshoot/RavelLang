@@ -5,7 +5,7 @@ interface Redmine(username: str, password: str):
         psw = "egg9Dxmn"
 
     implementation:
-        java = "rlib/java/redmine.stg"
+        java = "ravellib/templates/language/java/redmine.stg"
 
     def createIssue( subject: str, desc: str) :int32
     def closeIssue( id: int32)

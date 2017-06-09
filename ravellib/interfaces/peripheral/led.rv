@@ -3,7 +3,7 @@ interface Led(led_num: int32):
         # 0 - 3
         led_id = led_num
     implementation:
-        c = "rlib/nrf52/led.stg"
+        c = "rravellib/templates/platform/nrf52/led.stg"
 
     def init()
     def on()

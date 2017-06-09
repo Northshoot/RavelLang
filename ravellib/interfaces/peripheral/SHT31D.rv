@@ -1,7 +1,7 @@
 interface TempHumSource():
     implementation:
-        c = "rlib/rpie/sht31d-c.stg"
-        java ="rlib/rpie/sht31d.stg"
+        c = "ravellib/templates/platform/rpie/sht31d-c.stg"
+        java ="ravellib/templates/platform/rpie/sht31d.stg"
 
     def readTemperature() : double
     def readHumidity(): double

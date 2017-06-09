@@ -8,6 +8,6 @@ interface InfluxWriter(username: str, password: str):
         psw = password
 
     implementation:
-        java = "rlib/java/influx.stg"
+        java = "ravellib/templates/language/java/influx.stg"
 
     def pushData( table: str, name: str, geohash : str, temperature : double, humidity: double)

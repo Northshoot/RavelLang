@@ -1,6 +1,6 @@
 interface TimerNRF():
     implementation:
-        c = "rlib/nrf52/app_timer_sys.stg"
+        c = "ravellib/templates/platform/nrf52/app_timer_sys.stg"
 
     def start_one_shot(time : int32)
     def cancel()

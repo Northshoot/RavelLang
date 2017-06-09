@@ -1,8 +1,8 @@
 interface Timer():
     implementation:
-        #c = "rlib/nrf52/app_timer_sys.stg"
-        c = "rlib/posix/timer.stg"
-        java = "rlib/java/timer.stg"
+        c = "ravellib/templates/platform/nrf52/app_timer_sys.stg"
+        #c = "ravellib/templates/platform/posix/timer.stg"
+        java = "ravellib/templates/language/java/timer.stg"
 
     def start_one_shot(time : int32)
     def cancel()

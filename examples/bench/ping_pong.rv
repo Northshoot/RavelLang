@@ -1,10 +1,4 @@
-interface Clock():
-    implementation:
-        #c = "rlib/nrf52/clock.stg"
-        c = "rlib/posix/clock.stg"
-        java = "rlib/java/clock.stg"
-
-    def getNow() : int32
+from ravellib.interfaces.system import clock
 
 streaming model Ping():
     properties:

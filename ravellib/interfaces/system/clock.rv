@@ -1,7 +1,7 @@
 interface Clock():
     implementation:
-        c = "rlib/nrf52/clock.stg"
-        #c = "rlib/posix/clock.stg"
-        java = "rlib/java/clock.stg"
+        c = "ravellib/templates/platform//nrf52/clock.stg"
+        #c = "ravellib/templates/platform/posix/clock.stg"
+        java = "ravellib/templates/language/java/clock.stg"
 
     def getNow() : int32

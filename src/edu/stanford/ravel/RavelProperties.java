@@ -1,8 +1,10 @@
 package edu.stanford.ravel;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -10,7 +12,7 @@ import java.util.ResourceBundle;
  * Created by larry on 4/19/17.
  */
 public class RavelProperties {
-    private static final String BUNDLE_NAME = "edu.stanford.resources.config"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "edu.stanford.resources.config";
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
     private final static String FILE_OUT_DIR="fileOutDir";
@@ -28,9 +30,6 @@ public class RavelProperties {
     public final static String API_PLATFORM = "apiPlatformPackage";
     public final static String RUNTIME = "apiRuntimePackage";
     private static final String API_RIE_J2SE_TMPL_DIR = "apiRPIEDir";
-
-    private InputStream inputStream;
-    private static Properties properties;
 
 
 
@@ -68,6 +67,7 @@ public class RavelProperties {
         return RESOURCE_BUNDLE.getString(BASE_TMPL_DIR);
     }
     public static String get_language_package(){
+        System.out.println("hello");
         return RESOURCE_BUNDLE.getString(API_LANG);
     }
     public static String get_platform_package(){
@@ -82,29 +82,27 @@ public class RavelProperties {
         return get_base_tmpl_dir() +RESOURCE_BUNDLE.getString(API_RIE_J2SE_TMPL_DIR);
     }
 
+
+    private static RavelProperties mRavelProperties = new RavelProperties( );
+    private final Properties properties = new Properties();
+
+
+    private RavelProperties(){ propInit(); }
+
+    public static RavelProperties getInstance() {
+        return mRavelProperties;
+    }
     private void propInit()  {
+        InputStream input = null;
 
         try {
-            properties = new Properties();
-            String propFileName = "config.properties";
+            String propFileName = System.getProperty("user.dir")+"/default.properties";
+            System.out.println(propFileName);
+            properties.load(new FileInputStream(propFileName ));
 
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-            if (inputStream != null) {
-                properties.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-            }
-
+            Enumeration<?> e = properties.propertyNames();
         } catch (Exception e) {
             System.out.println("Exception opening: " + e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                System.out.println("Exception closing file: " + e);
-                e.printStackTrace();
-            }
         }
 
     }
