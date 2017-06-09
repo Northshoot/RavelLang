@@ -67,7 +67,6 @@ public class RavelProperties {
         return RESOURCE_BUNDLE.getString(BASE_TMPL_DIR);
     }
     public static String get_language_package(){
-        System.out.println("hello");
         return RESOURCE_BUNDLE.getString(API_LANG);
     }
     public static String get_platform_package(){
@@ -78,7 +77,6 @@ public class RavelProperties {
     }
 
     public static String get_rpiej2se_tmpl_dir() {
-        System.out.println(get_base_tmpl_dir());
         return get_base_tmpl_dir() +RESOURCE_BUNDLE.getString(API_RIE_J2SE_TMPL_DIR);
     }
 
@@ -97,10 +95,8 @@ public class RavelProperties {
 
         try {
             String propFileName = System.getProperty("user.dir")+"/default.properties";
-            System.out.println(propFileName);
             properties.load(new FileInputStream(propFileName ));
 
-            Enumeration<?> e = properties.propertyNames();
         } catch (Exception e) {
             System.out.println("Exception opening: " + e);
         }

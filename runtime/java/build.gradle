@@ -28,7 +28,7 @@ dependencies {
 task copyJar(type: Copy) {
     println "Copy jar"
     from jar
-    into '../../lib/'
+    into '../../lib-jar/'
 }
 
 task copyJarToMatson(type: Copy) {
@@ -38,4 +38,4 @@ task copyJarToMatson(type: Copy) {
 }
 
 jar.finalizedBy copyJar
-jar.finalizedBy copyJarToMatson
+//jar.finalizedBy copyJarToMatson

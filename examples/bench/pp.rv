@@ -1,0 +1,122 @@
+from ravellib.interfaces.system import clock
+
+streaming model Ping():
+    properties:
+        records = 5
+        flow = Embedded -> Gateway
+    schema:
+        value : int32
+        timestamp : int32
+
+local model Reference():
+    properties:
+        records = 1
+        durable = True
+    schema:
+        value : int32
+
+streaming model Pong():
+    properties:
+        records = 5
+        flow = Gateway -> Embedded
+    schema:
+        value : int32
+        timestamp : int32
+
+
+
+controller PingController(time: Clock, ref : Reference, ping2 : Ping, pong : Pong):
+    event system.started():
+        system.print("system started")
+        refrec : Reference.Record
+        if ref.size() == 1:
+            refrec = ref.get(0)
+        else:
+            refrec = ref.create()
+            refrec.value = 0
+            ref.save(refrec)
+        pingrec = ping2.create()
+        pingrec.value = refrec.value
+        pingrec.timestamp = time.getNow()
+        system.print("Time :" + (str)pingrec.timestamp)
+        ping2.save(pingrec)
+
+
+    event pong.arrived():
+        pongrec = self.record
+        refrec = ref.get(0)
+        rec_ok : bool = True
+        if pongrec.value != refrec.value:
+            system.print("ERROR Want :" + (str)refrec.value)
+            system.print("ERROR Got :" + (str)pongrec.value)
+            rec_ok = False
+
+        if rec_ok:
+            t_now = time.getNow() - self.record.timestamp
+            system.print("RT: " + (str)t_now)
+            if self.record.value < 1001:
+                pong.delete(self.record)
+                refrec.value += 1
+                ref.save(refrec)
+                pingrec = ping2.create()
+                pingrec.value = refrec.value
+                pingrec.timestamp = time.getNow()
+                ping2.save(pingrec)
+
+    event ping2.save_done():
+        ping2.delete(self.record)
+
+
+controller PongController(ping2 : Ping, pong : Pong):
+    event ping2.arrived():
+        system.print("ping2 received")
+        pingrec = self.record
+        pongrec = pong.create()
+        pongrec.value =  pingrec.value
+        pongrec.timestamp =  pingrec.timestamp
+        system.print("RX: " + (str)pingrec.timestamp)
+        system.print("Got: " + (str)pingrec.value)
+
+        pong.save(pongrec)
+        ping2.delete(self.record)
+
+    event pong.departed():
+        system.print("pong departed")
+        pong.delete(self.record)
+
+
+    event pong.save_done():
+        system.print("pong save done")
+
+
+
+space Embedded:
+    platform:
+        language = JLang
+        system = J2SE.v18
+        #system = Android.v19
+        #system = Posix.v2008
+
+    interfaces:
+        clock = Clock()
+    models:
+        ref = Reference()
+        ping = Ping()
+        pong = Pong()
+
+    controllers:
+        ping_cnt = PingController(time = interfaces.clock, ref = models.ref, ping2 = models.ping, pong = models.pong)
+
+space Gateway:
+    platform:
+        language = JLang
+        system = J2SE.v18
+        #system = Android.v19
+        #system = J2SE.v18
+
+    models:
+        ping = Ping()
+        pong = Pong()
+
+    controllers:
+        pong_cnt = PongController(ping2 = models.ping, pong = models.pong)
