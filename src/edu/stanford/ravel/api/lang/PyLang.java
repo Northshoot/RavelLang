@@ -15,8 +15,8 @@ import java.util.logging.Logger;
  */
 public class PyLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
-    private final static String app_dir = RavelProperties.get_fileOutDir();
-    public final static String BASE_LANG_TMPL_PATH = RavelProperties.get_python_tmpl_dir();
+    private final static String app_dir = RavelProperties.getInstance().get_fileOutDir();
+    public final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_python_tmpl_dir();
 
     public PyLang() {
     }

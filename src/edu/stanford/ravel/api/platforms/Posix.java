@@ -15,7 +15,7 @@ import java.util.List;
  * Created by gcampagn on 1/31/17.
  */
 public class Posix extends BaseCPlatform {
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_posix_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_posix_tmpl_dir();
 
 
     public Posix() {

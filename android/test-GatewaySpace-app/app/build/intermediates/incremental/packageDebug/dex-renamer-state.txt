@@ -1,0 +1,7 @@
+#Sat Jun 03 11:06:18 PDT 2017
+base.0=/Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_3efeabdd06fe582126dccc16cb19d1ab9bd9c26a
+renamed.1=classes.dex
+renamed.0=classes2.dex
+file.1=/Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_a8ed216ef9c4e8e4fa753cfdae4787e44a86ed03/classes.dex
+base.1=/Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_a8ed216ef9c4e8e4fa753cfdae4787e44a86ed03
+file.0=/Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_3efeabdd06fe582126dccc16cb19d1ab9bd9c26a/classes.dex

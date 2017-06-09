@@ -26,8 +26,8 @@ import java.util.logging.Logger;
  */
 public class JLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(JLang.class.getName());
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_java_tmpl_dir();
-    private final static String RUNTIME_PKG = RavelProperties.get_runtime_package();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_java_tmpl_dir();
+    private final static String RUNTIME_PKG = RavelProperties.getInstance().get_runtime_package();
 
     private static boolean typeIsIteratorInstance(Type type) {
         if (!(type instanceof ClassType.InstanceType))

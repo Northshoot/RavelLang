@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * Created by lauril on 9/7/16.
  */
 public class Android  extends BasePlatform {
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_android_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_android_tmpl_dir();
 
     private static Logger LOGGER = Logger.getLogger(Android.class.getName());
 

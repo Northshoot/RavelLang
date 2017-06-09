@@ -27,8 +27,8 @@ import java.util.logging.Logger;
  */
 public class CLang extends BaseLanguage {
     private static Logger LOGGER = Logger.getLogger(CLang.class.getName());
-    public final static String BASE_LANG_TMPL_PATH = RavelProperties.get_c_tmpl_dir();
-    private final static String app_dir = RavelProperties.get_fileOutDir();
+    public final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_c_tmpl_dir();
+    private final static String app_dir = RavelProperties.getInstance().get_fileOutDir();
 
     private static final AttributeRenderer CTYPES = new AttributeRenderer() {
         private String toNativeType(Type type) {

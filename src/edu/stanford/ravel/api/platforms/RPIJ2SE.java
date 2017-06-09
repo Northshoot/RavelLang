@@ -22,8 +22,8 @@ import java.util.List;
  * Created by gcampagn on 1/31/17.
  */
 public class RPIJ2SE extends BasePlatform {
-    private final static String BASE_BUILD_TMPL_PATH = RavelProperties.get_rpiej2se_tmpl_dir();
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_j2se_tmpl_dir();
+    private final static String BASE_BUILD_TMPL_PATH = RavelProperties.getInstance().get_rpiej2se_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_j2se_tmpl_dir();
 
     private final STGroup mainGroup;
     private final STGroup buildGroup;

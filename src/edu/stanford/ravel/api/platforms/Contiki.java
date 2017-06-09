@@ -15,7 +15,7 @@ import java.util.List;
  * Created by gcampagn on 2/3/17.
  */
 public class Contiki extends BaseCPlatform {
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_contiki_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_contiki_tmpl_dir();
 
 
 

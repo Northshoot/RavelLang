@@ -1,6 +1,6 @@
 delimiters "%", "%"
 
-ant(java_runtime, main_class) ::=<<
+ant(java_runtime, main_class,java_jarlib_path) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Set useful variables -->

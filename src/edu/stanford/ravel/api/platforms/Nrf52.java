@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class Nrf52 extends BaseCPlatform {
     //TODO: platform path should be configurable
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_nrf52_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_nrf52_tmpl_dir();
     private STGroup ldGroup;
     private STGroup configGroup;
 

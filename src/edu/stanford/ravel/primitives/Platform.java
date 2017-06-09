@@ -39,8 +39,8 @@ public class Platform {
         String platform = pAPI[0];
         LOGGER.info("Building language: " + mLang + " for system: " + mSystem);
 
-        mLanguage = (ConcreteLanguage) Class.forName(RavelProperties.getInstance().get_language_package()+ mLang).newInstance();
-        mPlatform = (ConcretePlatform) Class.forName( RavelProperties.get_platform_package() + platform).newInstance();
+        mLanguage = (ConcreteLanguage) Class.forName(RavelProperties.getInstance().getInstance().get_language_package()+ mLang).newInstance();
+        mPlatform = (ConcretePlatform) Class.forName( RavelProperties.getInstance().get_platform_package() + platform).newInstance();
         if (!mPlatform.allowsLanguage(mLanguage)) {
             // FIXME emit a better error
             throw new IllegalArgumentException("Platform " + mPlatform.getClass().getSimpleName() + " is not compatible with language " + mLanguage.getClass().getSimpleName());

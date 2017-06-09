@@ -23,7 +23,7 @@ import java.util.List;
  * Created by gcampagn on 1/31/17.
  */
 public class J2SE extends BasePlatform {
-    private final static String BASE_LANG_TMPL_PATH = RavelProperties.get_j2se_tmpl_dir();
+    private final static String BASE_LANG_TMPL_PATH = RavelProperties.getInstance().get_j2se_tmpl_dir();
 
     private final STGroup mainGroup;
     private final STGroup buildGroup;
@@ -61,7 +61,7 @@ public class J2SE extends BasePlatform {
         ST tmpl = buildGroup.getInstanceOf("ant");
         tmpl.add("java_runtime", runtimePath);
         tmpl.add("main_class", joptions.getPackageName()+"."+mMainFileName);
-
+        tmpl.add("java_jarlib_path", RavelProperties.getInstance().getLibJarPath());
         FileObject build_xml = new FileObject();
         build_xml.setFileName("build.xml");
         build_xml.setContent(tmpl.render());

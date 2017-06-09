@@ -1,6 +1,6 @@
 delimiters "%", "%"
 
-ant(java_runtime, main_class) ::=<<
+ant(java_runtime, main_class, java_jarlib_path) ::=<<
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Set useful variables -->
@@ -10,8 +10,8 @@ ant(java_runtime, main_class) ::=<<
     <property name="source" value="1.8"/>
     <property name="root" value="."/>
     <property name="src" location="${root}/src"/>
-    <property name="build" value="../bin" />
-    <property name="lib" value="../../java-jars" />
+    <property name="build" value="bin/" />
+    <property name="lib" value="%java_jarlib_path%" />
 
     <property name="classes" location="${root}/classes"/>
 

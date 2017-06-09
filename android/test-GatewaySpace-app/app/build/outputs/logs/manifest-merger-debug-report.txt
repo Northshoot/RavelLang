@@ -1,0 +1,129 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:2:1-43:12
+	package
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:3:11-40
+	android:versionName
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:2:11-69
+	android:versionCode
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+uses-sdk
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:4:5-6:45
+MERGED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:8:5-10:41
+MERGED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:7:5-9:41
+MERGED from [com.android.support:appcompat-v7:25.0.1] /Users/larry/.android/build-cache/e306847ec4b63beb746e77d754cefa1f7121b481/output/AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support:support-v4:25.0.1] /Users/larry/.android/build-cache/a83af94ba4cfedfc713265667d4cfb921218ddf6/output/AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-fragment:25.0.1] /Users/larry/.android/build-cache/21b985c14e5d4247a77f6cef87deeb6f24a13bd5/output/AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-media-compat:25.0.1] /Users/larry/.android/build-cache/3c9bbd6859ff14103b57872b550a14e484cfbf9d/output/AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-core-ui:25.0.1] /Users/larry/.android/build-cache/beb72d70fd735a1deb53afe152f333ac381a2d28/output/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-core-utils:25.0.1] /Users/larry/.android/build-cache/2031f5084785f3b2e2600a8b872bbb18ea22a78c/output/AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:animated-vector-drawable:25.0.1] /Users/larry/.android/build-cache/2f02a3f822a1b102cbcd26c2cbb5dbc19e15b6e0/output/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:25.0.1] /Users/larry/.android/build-cache/62b725bc9fc217410a18096667b92ab9cc0ced92/output/AndroidManifest.xml:21:5-43
+MERGED from [com.android.support:support-compat:25.0.1] /Users/larry/.android/build-cache/80f8f26708fe4322e8d1c47843b96414a975f2e9/output/AndroidManifest.xml:21:5-23:58
+	tools:overrideLibrary
+		ADDED from [com.android.support:appcompat-v7:25.0.1] /Users/larry/.android/build-cache/e306847ec4b63beb746e77d754cefa1f7121b481/output/AndroidManifest.xml:23:9-75
+	android:targetSdkVersion
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:6:13-42
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:5:13-39
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:8:9-10:43
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:10:17-40
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:9:17-73
+uses-permission#android.permission.INTERNET
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:12:9-13:52
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:13:26-49
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:12:26-68
+uses-feature#android.hardware.bluetooth_le
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:15:9-17:43
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:17:17-40
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:16:17-61
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:19:9-21:43
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:21:17-40
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:20:17-60
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:22:9-24:43
+MERGED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:15:5-17:35
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:24:17-40
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:23:17-66
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:25:9-27:35
+MERGED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:12:5-14:35
+	android:required
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:27:9-32
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:26:9-63
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:29:5-75
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:29:22-72
+uses-feature#android.hardware.location.gps
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:30:5-66
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:30:19-63
+application
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:31:5-41:19
+MERGED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:20:5-24:19
+MERGED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:11:5-16:19
+MERGED from [com.android.support:appcompat-v7:25.0.1] /Users/larry/.android/build-cache/e306847ec4b63beb746e77d754cefa1f7121b481/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:support-v4:25.0.1] /Users/larry/.android/build-cache/a83af94ba4cfedfc713265667d4cfb921218ddf6/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:support-fragment:25.0.1] /Users/larry/.android/build-cache/21b985c14e5d4247a77f6cef87deeb6f24a13bd5/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:support-media-compat:25.0.1] /Users/larry/.android/build-cache/3c9bbd6859ff14103b57872b550a14e484cfbf9d/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:support-core-ui:25.0.1] /Users/larry/.android/build-cache/beb72d70fd735a1deb53afe152f333ac381a2d28/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:support-core-utils:25.0.1] /Users/larry/.android/build-cache/2031f5084785f3b2e2600a8b872bbb18ea22a78c/output/AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:animated-vector-drawable:25.0.1] /Users/larry/.android/build-cache/2f02a3f822a1b102cbcd26c2cbb5dbc19e15b6e0/output/AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:support-vector-drawable:25.0.1] /Users/larry/.android/build-cache/62b725bc9fc217410a18096667b92ab9cc0ced92/output/AndroidManifest.xml:23:5-20
+MERGED from [com.android.support:support-compat:25.0.1] /Users/larry/.android/build-cache/80f8f26708fe4322e8d1c47843b96414a975f2e9/output/AndroidManifest.xml:25:5-20
+	android:label
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:33:13-45
+	android:supportsRtl
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:34:13-39
+	android:allowBackup
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:32:13-40
+activity#edu.stanford.tethys.MainActivity
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:35:9-40:20
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:35:19-47
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:36:13-39:29
+action#android.intent.action.MAIN
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:37:17-68
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:37:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:38:17-76
+	android:name
+		ADDED from /Users/larry/workspace/01-Ravel/ravellang/android/test-GatewaySpace-app/app/src/main/AndroidManifest.xml:38:27-74
+service#org.stanford.ravel.rrt.android.ble.RavelBleService
+ADDED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:21:9-23:38
+	android:enabled
+		ADDED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:23:13-35
+	android:name
+		ADDED from [test-GatewaySpace-app:runtime:unspecified] /Users/larry/.android/build-cache/8a8cb674182689cb34c28f47a59d2aaa48f8fd98/output/AndroidManifest.xml:22:13-78
+service#org.stanford.ravel.generated.Gateway
+ADDED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:12:9-15:39
+	android:enabled
+		ADDED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:14:13-35
+	android:exported
+		ADDED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:15:13-36
+	android:name
+		ADDED from [test-GatewaySpace-app:generated:unspecified] /Users/larry/.android/build-cache/33d10b1dfc9277a99ee9dacf775d475eaa114643/output/AndroidManifest.xml:13:13-64
