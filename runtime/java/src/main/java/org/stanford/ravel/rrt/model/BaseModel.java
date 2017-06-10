@@ -3,8 +3,6 @@ package org.stanford.ravel.rrt.model;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
-import org.stanford.ravel.rrt.events.Event;
-import org.stanford.ravel.rrt.events.ModelEvent;
 import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
@@ -19,8 +17,8 @@ import java.util.*;
  */
 public abstract class BaseModel<RecordType extends ModelRecord> implements ModelQuery<RecordType>, ModelBottomAPI, ModelCommandAPI<RecordType> {
     private static class RecordState {
-        int expected_acks = 0;
-        int in_transit = 0;
+        int expected_acks = 0; //should the record receive ACK
+        int in_transit = 0; //Have the record be send?
         int in_save = 0;
         boolean is_valid = false;
         boolean is_arrived = false;
@@ -35,6 +33,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             is_arrived = false;
             is_transmit_failed = false;
             arrived_from = null;
+        }
+
+        public String toString(){
+            return "[expected_acks:" +expected_acks +", in_transit: " + in_transit +", in_save: "+ in_save+
+                    ", is_valid: "+is_valid+", : "+is_arrived+ ", is_transmit_failed: "+is_transmit_failed+
+                    ", arrived_from: "+arrived_from+ "]";
         }
     }
 
@@ -68,7 +72,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     protected void pprint_base(String type, String msg){
-        //System.out.println("M[ID: " +this.mModelId +", T: "+ type + "]>>>" + msg);
+        System.out.println("M[ID: " +this.mModelId +", T: "+ type + "]>>>" + msg);
 
     }
     /**
@@ -82,9 +86,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             Integer src_key = Integer.valueOf(src_id);
             if (!mRecordFlowMap.containsKey(src_key)) {
                 // new node is connected, create flow map
-                ArrayList<RecordType> mRecords = new ArrayList<>();
-                mRecords.ensureCapacity(mModelSize);
-                mRecordFlowMap.put(src_key, mRecords);
+                mRecordFlowMap.put(src_key, new ArrayList<RecordType>(mModelSize));
             }
         }
         return mRecordFlowMap.get(src_id);
@@ -235,7 +237,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     int recordPosFromRecord(RecordType record, int src) {
         pprint_base("Base",  " src " + src);
         ArrayList<RecordType> rt = getRecordFlowMap(src);
-        //System.out.println("Containts " + rt.contains(record));
         return rt.indexOf(record);
     }
 
@@ -270,7 +271,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         for (int i = 0; i < mRecords.size(); i++) {
             if (mRecords.get(i) == null) {
                 mRecords.set(i, record);
-
                 return i;
             }
         }
@@ -402,7 +402,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     private RecordType getRecord(int source, int recordPos) {
-        return (RecordType) getRecordFlowMap(source).get(recordPos);
+        return  getRecordFlowMap(source).get(recordPos);
     }
 
     boolean handleAck(int src, int recordPos) {
@@ -419,24 +419,29 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         }
     }
 
-    Error forwardPacket(RavelPacket pkt, Collection<Integer> endpointNames, RecordType record) {
-        Collection<Endpoint> endpoints = new ArrayList<>();
-        int src = pkt.getSource();
-        for (int name : endpointNames)
-            endpoints.addAll(dispatcher.getEndpointsByName(name));
-
+    /*
+    TODO: ghabndle this for multiple streams for replicated model
+     */
+    Error forwardPacket(RavelPacket pkt, int dst, RecordType record) {
+//        Collection<Endpoint> endpoints = new ArrayList<>();
+//        System.out.println("forwardPacket: " + endpointNames.toString());
+//        int src = pkt.getSource();
+//        for (int name : endpointNames)
+//            endpoints.addAll(dispatcher.getEndpointsByName(name));
+        Collection<Endpoint> endpoints= dispatcher.getEndpointsByName(dst);
         int recordPos = -1;
+        int src = pkt.getSource();
         if (record != null)
             recordPos = recordPosFromRecord(record, src);
 
         Error error = Error.SUCCESS;
-        for (Endpoint e : endpoints) {
-            if (recordPos >= 0) {
-                if (isReliable())
+      for (Endpoint e : endpoints) {
+           if (recordPos >= 0) {
+               if (isReliable())
                     getRecordStateMap(src)[recordPos].expected_acks++;
             }
             Error error2;
-            pkt.setDestination(dispatcher.getAppId(), e.getId());
+            pkt.setDestination(dispatcher.getAppId(), dst);
             error2 = dispatcher.model__sendData(pkt, e);
             // TODO: this this properly
 //            if (e.isConnected())

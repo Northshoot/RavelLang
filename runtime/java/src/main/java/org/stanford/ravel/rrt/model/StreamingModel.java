@@ -20,9 +20,11 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     public void addSinkEndpoints(Collection<Integer> e) {
-        mSinkEndpoints.addAll(e);
+
+        System.out.println("\t  addSinkEndpoints " + e.toString());mSinkEndpoints.addAll(e);
     }
     public void addSourceEndpoints(Collection<Integer> e) {
+        System.out.println("\t  mSourceEndpoints " + e.toString());
         mSourceEndpoints.addAll(e);
     }
 
@@ -33,11 +35,12 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     @Override
     public Context<RecordType> save(RecordType record) {
         // save locally first
+        System.out.println("Save record");
         int src = dispatcher.getDeviceId();
+        record.device_id(src);
         Context<RecordType> local = doSave(record, src, false);
         if (local.error == Error.SUCCESS) {
             int recordPos = recordPosFromRecord(record, src);
-
             Error sendError = sendRecord(recordPos, src, record, mSinkEndpoints, false);
 
             // clear the save flag because we won't send a save done until later
@@ -82,6 +85,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     @Override
     public void recordArrived(RavelPacket pkt, Endpoint endpoint) {
         int src = pkt.getSource();
+        System.out.println("recordArrived: " + pkt.toString());
         if (pkt.isDelete()) {
             // do nothing
         } else if (pkt.isAck()) {
@@ -143,17 +147,16 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         } else {
             endpointNames = mSinkEndpoints;
         }
-
         if (endpointNames.isEmpty()) {
             if (!pkt.isSaveDone()) {
-                RavelPacket saveDone = RavelPacket.makeSaveDone(pkt.model_id, pkt.record_id);
-                return forwardPacket(saveDone, mSourceEndpoints, null);
+                RavelPacket saveDone = RavelPacket.makeSaveDone(pkt.getTier(), dispatcher.getAppId(), pkt.model_id, pkt.record_id);
+                return forwardPacket(saveDone, pkt.getSource(), null);
             } else {
                 return Error.SUCCESS;
             }
         }
-
-        return forwardPacket(pkt, endpointNames, record);
+    //todo fix me
+        return forwardPacket(pkt, pkt.getSource(), record);
     }
 
     @Override
