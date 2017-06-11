@@ -94,9 +94,10 @@ public class RavelPacket {
         return pkt;
     }
 
-    public static RavelPacket makeSaveDone(int tier, int dst, int modelId, int recordId) {
+    public static RavelPacket makeSaveDone(int tier, int dst, int src, int modelId, int recordId) {
         RavelPacket pkt = new RavelPacket(modelId, recordId);
         pkt.setDestination(tier, dst);
+        pkt.src = src;
         pkt.setSaveDone();
         return pkt;
     }

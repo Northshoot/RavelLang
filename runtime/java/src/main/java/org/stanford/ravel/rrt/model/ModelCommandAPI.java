@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.stanford.ravel.rrt.Context;
 
 /**
@@ -18,6 +19,9 @@ public interface ModelCommandAPI<RecordType extends ModelRecord> {
 
     /**
      * Removes a record from storage
+     * src defines flow number
      */
-    void delete(RecordType record);
+    void delete(RecordType record, @Nullable int src);
+
+
 }

@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
@@ -8,6 +9,7 @@ import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -47,9 +49,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     //private final RecordState[] state;
     //private final ArrayList<RecordType> mRecords = new ArrayList<>(); //This is array for one flow
     //final ArrayList<RecordType> mValidRecords = new ArrayList<>(); //This is array for one flow
-    protected  Map<Integer, ArrayList<RecordType>> mRecordFlowMap = new LinkedHashMap<>(4);
-    private  Map<Integer, ArrayList<RecordType>> mValidRecordsFlowMap = new LinkedHashMap<>(4);
-    private Map<Integer, RecordState[]> mRecordStateMap = new LinkedHashMap<>(4);
+    protected  Map<Integer, ArrayList<RecordType>> mRecordFlowMap = new LinkedHashMap<>(1);
+    protected  Map<Integer, ArrayList<RecordType>> mValidRecordsFlowMap = new LinkedHashMap<>(1);
+    protected Map<Integer, RecordState[]> mRecordStateMap = new LinkedHashMap<>(4);
     private final boolean mReliable;
     private final boolean mDurable;
     private final int mModelSize;
@@ -81,12 +83,14 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
      * @param src_id source id
      * @return
      */
-    protected ArrayList<RecordType> getRecordFlowMap(int src_id){
+    protected synchronized ArrayList<RecordType> getRecordFlowMap(int src_id){
         synchronized (mRecordFlowMap) {
             Integer src_key = Integer.valueOf(src_id);
             if (!mRecordFlowMap.containsKey(src_key)) {
                 // new node is connected, create flow map
                 mRecordFlowMap.put(src_key, new ArrayList<RecordType>(mModelSize));
+                getRecordStateMap(src_id);
+                getValidRecordsFlowMap(src_id);
             }
         }
         return mRecordFlowMap.get(src_id);
@@ -97,8 +101,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
      * @param src_id
      * @return
      */
-    protected ArrayList<RecordType>  getValidRecordsFlowMap(int src_id){
-        synchronized (mValidRecordsFlowMap) {
+    protected synchronized ArrayList<RecordType>  getValidRecordsFlowMap(int src_id){
             Integer src_key = Integer.valueOf(src_id);
             if (!mValidRecordsFlowMap.containsKey(src_key)) {
                 // new node is connected, create flow map
@@ -106,22 +109,18 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 mRecords.ensureCapacity(mModelSize);
                 mValidRecordsFlowMap.put(src_key, mRecords);
             }
-        }
         return mValidRecordsFlowMap.get(src_id);
     }
 
-    protected RecordState[] getRecordStateMap(int src_id){
-        synchronized (mRecordStateMap) {
+    protected synchronized RecordState[] getRecordStateMap(int src_id){
             Integer src_key = Integer.valueOf(src_id);
             if (!mRecordStateMap.containsKey(src_key)) {
                 // new node is connected, create flow map
-                RecordState[] state;
-                state = new RecordState[mModelSize];
+                RecordState[] state = new RecordState[mModelSize];
                 for (int i = 0; i < state.length; i++)
                     state[i] = new RecordState();
                 mRecordStateMap.put(src_key, state);
             }
-        }
         return mRecordStateMap.get(src_id);
     }
 
@@ -156,17 +155,23 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     boolean  markSaved(int src, int recordPos) {
-         RecordState [] state = mRecordStateMap.get(src);
-        assert state[recordPos].in_save > 0;
-//        try {
-        pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
-        state[recordPos].in_save--;
-        return state[recordPos].in_save == 0;
+        boolean ret;
+        synchronized ( mRecordStateMap ) {
+            RecordState[] state = getRecordStateMap(src);
+            assert state[recordPos].in_save > 0;
+//     try {
+//        pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
+//
 //        } catch (Exception e){
 //            //FIXME: why do we end up here?
 //            System.err.println("Index out of range: got " + recordPos + " size: " + state.length);
 //            return true;
 //        }
+            pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
+            state[recordPos].in_save--;
+            ret = state[recordPos].in_save == 0;
+        }
+        return ret;
     }
     void markInSave(int src, int recordPos) {
         mRecordStateMap.get(src)[recordPos].in_save++;
@@ -184,12 +189,23 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         state[recordPos].arrived_from = from;
     }
     boolean isValid(int src, int recordPos) {
-        return mRecordStateMap.get(src)[recordPos].is_valid;
+        try {
+            return mRecordStateMap.get(src)[recordPos].is_valid;
+        } catch ( NullPointerException e){
+            //record has been deleted
+            return false;
+        }
     }
     boolean markNotInTransit(int src, int recordPos) {
-        RecordState [] state = mRecordStateMap.get(src);
-        state[recordPos].in_transit --;
-        return state[recordPos].in_transit == 0;
+        RecordState[] state = mRecordStateMap.get(src);
+        try {
+            state[recordPos].in_transit--;
+            return state[recordPos].in_transit == 0;
+        } catch (ArrayIndexOutOfBoundsException e){
+            //we end up here when the record has been deleted but send done arrived
+            return true;
+        }
+
     }
     boolean isTransmitFailed(int src, int recordPos) {
         return mRecordStateMap.get(src)[recordPos].is_transmit_failed;
@@ -233,9 +249,15 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 //        }
     }
 
-
+    /**
+     * Returns index of the recodd sored in record flow map
+     * or -1 id record is not found
+     * @param record
+     * @param src flow source
+     * @return record possition of -1
+     */
     int recordPosFromRecord(RecordType record, int src) {
-        pprint_base("Base",  " src " + src);
+//        pprint_base("Base",  " src " + src);
         ArrayList<RecordType> rt = getRecordFlowMap(src);
         return rt.indexOf(record);
     }
@@ -259,13 +281,18 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
             return mRecords.get(recordPos);
     }
     protected void assignIndex(RecordType record) {
+        //record index is 16b need to overflow pretty
+        //TODO: add support for index mapping and overfloww counting from embedded devices
+        if( mNextRecordId == 32767) {
+            //we reset index
+            mNextRecordId = -1;
+        }
         record.index(mNextRecordId++);
     }
 
     private int tryAddRecord(int src, RecordType record) {
         ArrayList<RecordType> mRecords = getRecordFlowMap(src);
         if (mRecords.size() == mModelSize){
-            queueFullEvent();
             return -1;
         }
         for (int i = 0; i < mRecords.size(); i++) {
@@ -316,7 +343,6 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     void freeRecord(int src, int recordPos) {
-        getRecordFlowMap(src).set(recordPos, null);
         getRecordStateMap(src)[recordPos].reset();
     }
 
@@ -356,7 +382,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 //            return Error.ENDPOINT_UNREACHABLE;}
     }
 
-    Error sendRecord(int recordPos, int src, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
+    synchronized Error sendRecord(int recordPos, int src, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
         Collection<Endpoint> endpoints = new ArrayList<>();
         for (int name : endpointNames)
             endpoints.addAll(dispatcher.getEndpointsByName(name));
@@ -372,13 +398,17 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 Error error2 = sendOneRecord(recordPos, src, record, e, markAsInSave);
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     getRecordStateMap(src)[recordPos].is_transmit_failed = true;
-                else
+                else {
+                    System.out.println("rec src: " + src + "Record pos: " + recordPos + " Record state size " + getRecordStateMap(src).length);
                     getRecordStateMap(src)[recordPos].in_transit++;
+                }
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
                     error = error2;
             } catch (SecurityException securityException) {
                 if (error == Error.SUCCESS)
                     error = Error.SECURITY_ERROR;
+            } catch (NullPointerException ex){
+                System.out.println("Exception: recordpos: " + recordPos + " size" + getRecordStateMap(src).length);
             }
         }
         return error;
@@ -420,7 +450,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     /*
-    TODO: ghabndle this for multiple streams for replicated model
+    TODO: handle this for multiple streams for replicated model
      */
     Error forwardPacket(RavelPacket pkt, int dst, RecordType record) {
 //        Collection<Endpoint> endpoints = new ArrayList<>();
@@ -441,7 +471,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                     getRecordStateMap(src)[recordPos].expected_acks++;
             }
             Error error2;
-            pkt.setDestination(dispatcher.getAppId(), dst);
+            //pkt.setDestination(dispatcher.getAppId(), dst);
             error2 = dispatcher.model__sendData(pkt, e);
             // TODO: this this properly
 //            if (e.isConnected())
@@ -468,9 +498,22 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
      * @return
      */
     @Override
-    public RecordType first() {
+    public RecordType first(Endpoint endpoint) {
+        int  flow_id = -1;
+        if (endpoint != null){
+            flow_id = endpoint.getId();
+        }
+        else{
+            flow_id = dispatcher.getDeviceId();
+        }
+        //Handle deleted records
+        System.out.println("FLow id: " + flow_id + " valid records: " + getValidRecordsFlowMap(flow_id).size()
+                            + " flow records " + getRecordFlowMap(flow_id).size());
+        if(getValidRecordsFlowMap(flow_id).size()>0 )
+            return getValidRecordsFlowMap(flow_id).get(0);
+        else
+            return null;
 
-        return getValidRecordsFlowMap(dispatcher.getDeviceId()).get(0);
     }
 
     @Override
@@ -494,17 +537,35 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     }
 
     @Override
-    public void clear() {
-        //mRecords.clear();
-        //TODO: add clear from source method
-        pprint_base("Base", "clean model");
+    public void clear(@Nullable Endpoint endpoint) {
+        if(endpoint != null){
+            int src = endpoint.getId();
+            mRecordFlowMap.remove(src);
+            mValidRecordsFlowMap.remove(src);
+
+           // mRecordStateMap.remove(src);
+        } else {
+            mRecordFlowMap.clear();
+            mValidRecordsFlowMap.clear();
+           // mRecordStateMap.clear();
+        }
+
+    }
+
+    @Override
+    public synchronized void clearAll() {
         mRecordFlowMap.clear();
         mValidRecordsFlowMap.clear();
         mRecordStateMap.clear();
     }
 
     @Override
-    public int size() {
+    public int size(@Nullable Endpoint endpoint) {
+        if(endpoint != null){
+//            System.out.println("getValidRecordsFlowMap(endpoint.getId()).size() " + getValidRecordsFlowMap(endpoint.getId()).size()
+//                    + " getRecordFlowMap(endpoint.getId()).size() " + getRecordFlowMap(endpoint.getId()).size());
+            return getValidRecordsFlowMap(endpoint.getId()).size();
+        }
         return getValidRecordsFlowMap(dispatcher.getDeviceId()).size();
     }
 }

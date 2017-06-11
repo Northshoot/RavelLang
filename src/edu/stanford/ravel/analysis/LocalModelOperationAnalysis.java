@@ -63,23 +63,23 @@ public class LocalModelOperationAnalysis {
         if (type.getOwner() instanceof ModelType) {
             // first the easy case: method calls on a model object
             // we know the semantics of these, we can just encode them directly
-
+            //TODO: not sure this is the best way to handle call, har do add new methods
             switch (type.getFunctionName()) {
                 case "create":
                 case "iterator":
-                case "first":
                 case "last":
-                case "clear":
-                case "size":
+                case "clearAll":
                     assert instr.getSources().length == 1;
                     // all these have no sources, so no operations to meet
                     break;
 
                 case "get":
+                case "clear":
+                case "size":
+                case "first":
                     // the argument to get is an index, which must be fully decrypted
                     meetOperation(instr.getSources()[1], Operation.ANY);
                     break;
-
                 case "save":
                     // save is just a fancy move, but we're moving all fields
                     ModelType.RecordType recordType = (ModelType.RecordType) instr.getSourceTypes()[1];

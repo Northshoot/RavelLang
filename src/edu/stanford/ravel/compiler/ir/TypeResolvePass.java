@@ -452,7 +452,7 @@ public class TypeResolvePass implements InstructionVisitor {
             typeError(instr, ownerType.getName() + "." + instr.method + " is not a method");
             return;
         }
-
+        //System.out.println("Visit method call: " +((CompoundType) ownerType).getMemberList());
         FunctionType functionType = (FunctionType)methodType;
         Type[] argumentTypes = functionType.getArgumentTypes();
         if (instr.arguments.length != argumentTypes.length) {

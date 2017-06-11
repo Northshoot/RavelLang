@@ -258,8 +258,9 @@ public class LocalOwnershipTaggingPass {
                                 tagAllFields(instr.getSink(), fieldTags.get(source));
                             }
                             break;
-
+                        //TODO: model api access
                         case "clear":
+                        case "clearAll":
                         case "delete":
                             assert instr.getSink() == Registers.VOID_REG;
                             break;

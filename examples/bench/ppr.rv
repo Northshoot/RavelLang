@@ -1,10 +1,9 @@
 from ravellib.interfaces.system import clock
 from ravellib.interfaces.system import timer
 
-streaming model Ping():
+replicated model Ping():
     properties:
-        records = 2
-        flow = Embedded -> Gateway
+        records = 5
     schema:
         counter : int32
         timestamp : int32
@@ -16,20 +15,33 @@ controller PingController(time: Clock, timer: Timer, ping2 : Ping):
     device_id :int32 = 0
 
     event system.started():
-        #system.print("system started")
+        system.print("system started")
         device_id = system.deviceID()
-        timer.start_periodic(500)
-
-
-    event timer.fired():
-        #system.print((str)ping2.size(None))
         pingrec = ping2.create()
         pingrec.counter = counter
         pingrec.timestamp = time.getNow()
         #system.print("Time :" + (str)pingrec.timestamp)
-        ping2.save(pingrec)
+        ping2.save(pingrec, None)
         counter+=1
 
+
+    event timer.fired():
+        system.print((str)ping2.size(None))
+        pingrec = ping2.create()
+        pingrec.counter = counter
+        pingrec.timestamp = time.getNow()
+        system.print("Time :" + (str)pingrec.timestamp)
+        ping2.save(pingrec, None)
+        counter+=1
+
+
+    event ping2.arrived():
+        pingrec = ping2.create()
+        pingrec.counter = counter
+        pingrec.timestamp = time.getNow()
+        system.print("Time :" + (str)pingrec.timestamp)
+        ping2.save(pingrec, None)
+        counter+=1
 
     event ping2.departed():
         system.print("record departed to tier:" + (str)(self.endpoint.getId()))
@@ -46,20 +58,22 @@ controller PingController(time: Clock, timer: Timer, ping2 : Ping):
 controller PongController(ping2 : Ping):
 
     event ping2.arrived():
-        system.print("ping2 received")
-        pingrec = self.record
-        size = ping2.size(self.endpoint)
-        system.print("EP: " + (str)(self.endpoint.getId()) + " CNT[" + (str)(size) + "]=" + (str)pingrec.counter + " RXT: " + (str)pingrec.timestamp  )
-        if size >0:
-            rec = ping2.first(self.endpoint)
-            system.print("First counter: " + (str)rec.counter)
+        system.print("RX: " + (str)pingrec.timestamp)
+        system.print("Got: " + (str)pingrec.counter)
+        pingrec = ping2.create()
+        pingrec.counter = counter
+        pingrec.timestamp = time.getNow()
+        system.print("Time :" + (str)pingrec.timestamp)
+        ping2.save(pingrec, None)
+        counter+=1
 
 
     event ping2.full():
         system.print("ping is full")
         ping2.clearAll()
 
-
+    event ping2.departed():
+        system.print("record departed to tier:" + (str)(self.endpoint.getId()))
 
 
 space Embedded:

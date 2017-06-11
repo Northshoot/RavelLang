@@ -1,5 +1,9 @@
 package org.stanford.ravel.rrt.model;
 
+import org.jetbrains.annotations.Nullable;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+
+import java.lang.annotation.Native;
 import java.util.Iterator;
 
 /**
@@ -15,7 +19,7 @@ public interface ModelQuery<RecordType> extends Iterable<RecordType> {
      *
      * @return pointer to the first record
      */
-    RecordType first();
+    RecordType first(Endpoint endpoint);
 
     /**
      * Queries local model storage
@@ -29,7 +33,7 @@ public interface ModelQuery<RecordType> extends Iterable<RecordType> {
      *  if x >= 0 && x <= current_pos
      * @return pointer to the x's record
      * else
-     * @return getFirst()
+     * @return record
      */
     RecordType get(int x);
 
@@ -47,14 +51,21 @@ public interface ModelQuery<RecordType> extends Iterable<RecordType> {
     Iterator<RecordType> iterator();
 
     /**
-     * Clears local model storage
+     * Clears local model storage or endpoint storage
      */
-    void clear();
+    void clear(@Nullable Endpoint endpoint);
 
     /**
-     * Returns the number of records in this model
+     * clears all model storage
+     */
+    void clearAll();
+
+
+    /**
+     * Returns the number of records in this model or endpoint model
      *
      * @return the model size
      */
-    int size();
+    int size(@Nullable Endpoint endpoint);
+
 }

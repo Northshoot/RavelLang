@@ -144,7 +144,7 @@ public class AliasAnalysis {
         writtenRecordsAtStart.put(block, deepCopy(localWrittenRecords));
         readRecordsAtStart.put(block, deepCopy(localReadRecords));
         mayAliasAtStart.put(block, deepCopy(localMayAlias));
-
+        //TODO: another model call pass
         for (TInstruction instr : block) {
             if (instr instanceof TMethodCall) {
                 FunctionType type = ((TMethodCall) instr).type;
@@ -170,6 +170,7 @@ public class AliasAnalysis {
                         case "iterator":
                         case "size":
                         case "clear":
+                        case "clearAll":
                             // no pointers, no alias
                             break;
 

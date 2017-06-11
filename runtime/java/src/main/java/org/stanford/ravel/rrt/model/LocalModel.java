@@ -1,5 +1,6 @@
 package org.stanford.ravel.rrt.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.DispatcherAPI;
 import org.stanford.ravel.rrt.RavelPacket;
@@ -39,7 +40,8 @@ public abstract class LocalModel<RecordType extends ModelRecord> extends BaseMod
     }
 
     @Override
-    public void delete(RecordType record) {
+    public void delete(RecordType record, @Nullable int src) {
+        //We ignore source
         if (doDelete(record, dispatcher.getDeviceId()) && isDurable()) {
             // TODO remove from durable storage
         }

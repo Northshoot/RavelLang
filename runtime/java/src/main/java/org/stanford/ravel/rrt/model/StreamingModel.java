@@ -20,11 +20,9 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     public void addSinkEndpoints(Collection<Integer> e) {
-
-        System.out.println("\t  addSinkEndpoints " + e.toString());mSinkEndpoints.addAll(e);
+        mSinkEndpoints.addAll(e);
     }
     public void addSourceEndpoints(Collection<Integer> e) {
-        System.out.println("\t  mSourceEndpoints " + e.toString());
         mSourceEndpoints.addAll(e);
     }
 
@@ -35,17 +33,15 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     @Override
     public Context<RecordType> save(RecordType record) {
         // save locally first
-        System.out.println("Save record");
         int src = dispatcher.getDeviceId();
         record.device_id(src);
-        Context<RecordType> local = doSave(record, src, false);
+        Context<RecordType> local = doSave(record, src, true);
+        //if success send record
         if (local.error == Error.SUCCESS) {
             int recordPos = recordPosFromRecord(record, src);
             Error sendError = sendRecord(recordPos, src, record, mSinkEndpoints, false);
-
             // clear the save flag because we won't send a save done until later
             markSaved(src, recordPos);
-
             return new Context<>(this, record, sendError);
         } else {
             // OUT OF STORAGE or IN TRANSIT (= during save)
@@ -54,11 +50,11 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     @Override
-    public void delete(RecordType record) {
+    public void delete(RecordType record, int src) {
         //TODO: need redefine how delete works
-//        if (doDelete(record) && isDurable()) {
-//            // TODO remove from durable storage
-//        }
+        if (doDelete(record, src) && isDurable()) {
+            // TODO remove from durable storage
+        }
     }
 
     @Override
@@ -83,7 +79,7 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     }
 
     @Override
-    public void recordArrived(RavelPacket pkt, Endpoint endpoint) {
+    public synchronized void  recordArrived(RavelPacket pkt, Endpoint endpoint) {
         int src = pkt.getSource();
         System.out.println("recordArrived: " + pkt.toString());
         if (pkt.isDelete()) {
@@ -124,9 +120,11 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             if (ctx.error == Error.SUCCESS) {
                 recordPos = recordPosFromRecord(record, src);
                 markSaved(src, recordPos);
-
-                notifyArrived(ctx);
+                System.out.println("mValidRecordsFlowMap size "+ mValidRecordsFlowMap.size());
+                System.out.println("mRecordFlowMap size "+ mRecordFlowMap.size());
                 forward(pkt, record);
+                notifyArrived(ctx);
+
             } else if (ctx.error == Error.IN_TRANSIT) {
                 // saving, wait until done saving to tell the app
                 recordPos = recordPosFromRecord(record, src);
@@ -149,7 +147,12 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         }
         if (endpointNames.isEmpty()) {
             if (!pkt.isSaveDone()) {
-                RavelPacket saveDone = RavelPacket.makeSaveDone(pkt.getTier(), dispatcher.getAppId(), pkt.model_id, pkt.record_id);
+//                System.out.println("make send done : " + pkt.toString());
+                RavelPacket saveDone = RavelPacket.makeSaveDone(dispatcher.getAppId(),
+                                                                pkt.getTier(),
+                                                                dispatcher.getDeviceId(),
+                                                                pkt.model_id, pkt.record_id);
+//                System.out.println("send done pkt: " + saveDone.toString());
                 return forwardPacket(saveDone, pkt.getSource(), null);
             } else {
                 return Error.SUCCESS;
@@ -167,7 +170,11 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         }
         //FIXME need to be addressed
         int recordPos  = findRecordWithId(src, pkt.record_id);
-        assert recordPos >= 0;
+        if (recordPos <0 ){
+            //TODO: need an formal flow description
+            //record has been deleted while departing,
+            return;
+        }
         // we cannot free stuff that is in transit
         RecordType record;
         record = recordAt(src, recordPos);
@@ -182,7 +189,8 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
                 if (isReliable()) {
                     // do nothing and wait for the acks
                 } else {
-                    notifyDeparted(new Context<>(this, record));
+
+                    notifyDeparted(new Context<>(this, record, Error.SUCCESS, endpoint));
                 }
             }
         }
@@ -208,17 +216,17 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         int src = pkt.getSource();
         if (pkt.isAck() || pkt.isSaveDone()) {
             // unconditionally try to retransmit
-            System.out.println("retransmitting");
             if (endpoint.isConnected())
                 dispatcher.model__sendData(pkt, endpoint);
             return;
         }
 
         int recordPos = findRecordWithId(src, pkt.record_id);
-        // we cannot free stuff that is in transit
-        assert recordPos >= 0;
-
-        RecordType record = recordAt(src, recordPos);
+        if(recordPos <0 ){
+            //record has been deleted
+            return;
+        }
+        //RecordType record = recordAt(src, recordPos);
 
         if (markNotInTransit(src, recordPos) && !isValid(src, recordPos)) {
             // if the record was deleted after sending, no matter what we're

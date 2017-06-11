@@ -74,6 +74,7 @@ public class TMethodCall extends TInstruction {
 
     @Override
     public boolean writesMemory() {
+        //TODO: kmethod calls need to be consolidated
         if (type.getOwner() instanceof ModelType) {
             switch (method) {
                 case "create":
@@ -86,6 +87,7 @@ public class TMethodCall extends TInstruction {
 
                 case "save":
                 case "clear":
+                case "clearAll":
                 case "delete":
                     return true;
 
