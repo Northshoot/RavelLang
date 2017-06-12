@@ -203,7 +203,7 @@ public class AndroidDriver extends JavaDriver {
                 Log.d(TAG, "about to send packet model id " + data.model_id + " record id " + data.record_id);
                 Log.d(TAG, "Packet size " + data.getSize() + " pkt " + data.toString());
                 if(m_connected_ble && mBleServiceBound ) {
-                    Log.d(TAG, "sending packet " + endpoint.getId() +" isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
+                    Log.d(TAG, "sending packet " + endpoint.getTier() +" isSaveDone: " +data.isSaveDone()+" isAck: " +data.isAck());
                     //try {
                         synchronized (this) {
                             m_sending = true;
@@ -233,8 +233,8 @@ public class AndroidDriver extends JavaDriver {
 
     @Override
     protected Error startLocalEndpoint(Endpoint endpoint) {
-        assert(endpoint.getId() == appDispatcher.getAppId());
-        Log.d(TAG, "Starting endpoint: " + endpoint.getId());
+        assert(endpoint.getTier() == appDispatcher.getAppId());
+        Log.d(TAG, "Starting endpoint: " + endpoint.getTier());
         switch (endpoint.getType()) {
             case BLE:
                 // open ble listening socket
@@ -279,7 +279,7 @@ public class AndroidDriver extends JavaDriver {
         //init ble service
         Log.d(TAG, "Starting BLE service");
         mRavelServiceIntent = new Intent(ctx.getApplicationContext(), RavelBleService.class);
-        mRavelServiceIntent.putExtra(BleDefines.ENDPOINT, endpoint.getId());
+        mRavelServiceIntent.putExtra(BleDefines.ENDPOINT, endpoint.getTier());
         //register receiver
         ctx.startService(mRavelServiceIntent);
         ctx.bindService(mRavelServiceIntent, mBleServiceConnection, Context.BIND_AUTO_CREATE);

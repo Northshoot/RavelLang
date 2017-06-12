@@ -1,6 +1,7 @@
 package org.stanford.ravel.rrt.tiers;
 
 import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
 
 import java.io.Closeable;
 import java.io.EOFException;
@@ -22,11 +23,11 @@ public class RavelSocketServer implements Runnable, Closeable {
         private final TcpEndpoint endpoint;
         private final Thread listeningThread;
 
-        public ClientSocket(Socket socket) throws IOException {
+        public ClientSocket(Socket socket) throws IOException, ClassNotFoundException {
             this.socket = socket;
             //TODO: figure out with the endpoint here creating new for each connections
             //
-            int identity = RavelSocketProtocol.readIdentity(socket.getInputStream());
+            RavelIdentity identity = RavelSocketProtocol.readIdentity(socket.getInputStream());
             System.err.println("Creating identity " + identity);
             this.endpoint = new TcpEndpoint(identity, (InetSocketAddress)socket.getRemoteSocketAddress());
             endpoint.connected();
@@ -135,6 +136,9 @@ public class RavelSocketServer implements Runnable, Closeable {
                     pprint("New connection from " + client.getEndpoint());
 
                     driver.registerSocket(client.getEndpoint(), client);
+                } catch(ClassNotFoundException eIdent) {
+                    pprint("Could not read identity");
+                    throw new IOException();
                 } catch(IOException e) {
                     pprint("IOException while preparing client socket");
                     e.printStackTrace(System.err);

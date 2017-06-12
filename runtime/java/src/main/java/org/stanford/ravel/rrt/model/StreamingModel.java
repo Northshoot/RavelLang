@@ -83,7 +83,6 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
     @Override
     public synchronized void  recordArrived(RavelPacket pkt, Endpoint endpoint) {
         int src = pkt.getSource();
-        System.out.println("recordArrived: " + pkt.toString());
         if (pkt.isDelete()) {
             // do nothing
         } else if (pkt.isAck()) {
@@ -122,8 +121,6 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
             if (ctx.error == Error.SUCCESS) {
                 recordPos = recordPosFromRecord(record, src);
                 markSaved(src, recordPos);
-                System.out.println("mValidRecordsFlowMap size "+ mValidRecordsFlowMap.size());
-                System.out.println("mRecordFlowMap size "+ mRecordFlowMap.size());
                 forward(pkt, record);
                 notifyArrived(ctx);
 
@@ -149,19 +146,17 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         }
         if (endpointNames.isEmpty()) {
             if (!pkt.isSaveDone()) {
-//                System.out.println("make send done : " + pkt.toString());
                 RavelPacket saveDone = RavelPacket.makeSaveDone(dispatcher.getAppId(),
                                                                 pkt.getTier(),
                                                                 dispatcher.getDeviceId(),
                                                                 pkt.model_id, pkt.record_id);
-//                System.out.println("send done pkt: " + saveDone.toString());
-                return forwardPacket(saveDone, pkt.getSource(), null);
+                return forwardPacket(saveDone, mSourceEndpoints, null);
             } else {
                 return Error.SUCCESS;
             }
         }
     //todo fix me
-        return forwardPacket(pkt, pkt.getSource(), record);
+        return forwardPacket(pkt, endpointNames, record);
     }
 
     @Override

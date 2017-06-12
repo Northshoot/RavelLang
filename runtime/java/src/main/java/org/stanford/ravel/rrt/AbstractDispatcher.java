@@ -6,6 +6,7 @@ import org.stanford.ravel.rrt.events.RunnableEvent;
 import org.stanford.ravel.rrt.events.SystemEvent;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ public abstract class AbstractDispatcher implements DispatcherAPI {
     private static final Logger LOGGER = Logger.getLogger(AbstractDispatcher.class.getName());
 
     private Thread loopThread;
+    protected RavelIdentity ravelIdentity;
 
     protected AbstractDispatcher() {
         loopThread = new Thread(new Runnable() {

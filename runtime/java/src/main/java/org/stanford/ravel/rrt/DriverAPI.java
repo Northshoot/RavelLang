@@ -22,7 +22,8 @@ public interface DriverAPI {
      * @param id
      * @return
      */
-    Collection<Endpoint> getEndpointsByName(int id);
+    Collection<Endpoint> getEndpointsBySrc(int id);
+    Collection<Endpoint> getEndpointsByTier(int id);
 
     /**
      * Register a remote endpoint;
@@ -35,4 +36,6 @@ public interface DriverAPI {
      * @return Error.SUCCESS if the registration succeeded, or an error code
      */
     Error registerEndpoint(Endpoint ep);
+
+
 }

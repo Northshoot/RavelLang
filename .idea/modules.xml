@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RavelLang.iml" filepath="$PROJECT_DIR$/RavelLang.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../02-demos/mapps/ravelmpoc/rout/Gateway/mapps-rout.iml" filepath="$PROJECT_DIR$/../../02-demos/mapps/ravelmpoc/rout/Gateway/mapps-rout.iml" />
       <module fileurl="file://$PROJECT_DIR$/../rout/rout.iml" filepath="$PROJECT_DIR$/../rout/rout.iml" />
-      <module fileurl="file://$PROJECT_DIR$/runtime/java/runtime.iml" filepath="$PROJECT_DIR$/runtime/java/runtime.iml" />
     </modules>
   </component>
 </project>

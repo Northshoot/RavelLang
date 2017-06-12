@@ -9,7 +9,6 @@ import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for generated models, containing code to track acks and
@@ -167,7 +166,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 //            System.err.println("Index out of range: got " + recordPos + " size: " + state.length);
 //            return true;
 //        }
-            pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
+            //pprint_base("Base", "markSaved src: " + src + " recordPos " + recordPos + " state.lenght " + state.length);
             state[recordPos].in_save--;
             ret = state[recordPos].in_save == 0;
         }
@@ -367,7 +366,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
     Error sendOneRecord(int recordPos, int src, RecordType record, Endpoint e, boolean markAsInSave) {
         RavelPacket pkt = RavelPacket.fromRecord(marshall(record, e), dispatcher.getDeviceId());
-        pkt.setDestination(dispatcher.getAppId(), e.getId());
+        pkt.setDestination(dispatcher.getAppId(), e.getTier());
         if (isReliable())
             getRecordStateMap(src)[recordPos].expected_acks ++;
         if (markAsInSave)
@@ -384,9 +383,9 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
 
     synchronized Error sendRecord(int recordPos, int src, RecordType record, Collection<Integer> endpointNames, boolean markAsInSave) {
         Collection<Endpoint> endpoints = new ArrayList<>();
-        for (int name : endpointNames)
-            endpoints.addAll(dispatcher.getEndpointsByName(name));
-
+        for (int name : endpointNames) {
+            endpoints.addAll(dispatcher.getEndpointsBySrc(name));
+        }
         if (endpoints.isEmpty()) {
             getRecordStateMap(src)[recordPos].is_transmit_failed = true;
             return Error.SUCCESS;
@@ -399,7 +398,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     getRecordStateMap(src)[recordPos].is_transmit_failed = true;
                 else {
-                    System.out.println("rec src: " + src + " Record pos: " + recordPos + " Record state size " + getRecordStateMap(src).length);
+                    //System.out.println("rec src: " + src + " Record pos: " + recordPos + " Record state size " + getRecordStateMap(src).length);
                     getRecordStateMap(src)[recordPos].in_transit++;
                 }
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
@@ -452,13 +451,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     /*
     TODO: handle this for multiple streams for replicated model
      */
-    Error forwardPacket(RavelPacket pkt, int dst, RecordType record) {
-//        Collection<Endpoint> endpoints = new ArrayList<>();
-//        System.out.println("forwardPacket: " + endpointNames.toString());
-//        int src = pkt.getSource();
-//        for (int name : endpointNames)
-//            endpoints.addAll(dispatcher.getEndpointsByName(name));
-        Collection<Endpoint> endpoints= dispatcher.getEndpointsByName(dst);
+    Error forwardPacket(RavelPacket pkt, Collection<Integer> endpointNames, RecordType record) {
+        Collection<Endpoint> endpoints = new ArrayList<>();
+        for (int name : endpointNames) {
+            endpoints.addAll(dispatcher.getEndpointsByTier(name));
+        }
+        //Collection<Endpoint> endpoints= dispatcher.getEndpointsByName(dst);
         int recordPos = -1;
         int src = pkt.getSource();
         if (record != null)
@@ -471,7 +469,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                     getRecordStateMap(src)[recordPos].expected_acks++;
             }
             Error error2;
-            //pkt.setDestination(dispatcher.getAppId(), dst);
+            pkt.setDestination(dispatcher.getAppId(), e.getTier());
             error2 = dispatcher.model__sendData(pkt, e);
             // TODO: this this properly
 //            if (e.isConnected())
@@ -501,7 +499,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     public RecordType first(Endpoint endpoint) {
         int  flow_id = -1;
         if (endpoint != null){
-            flow_id = endpoint.getId();
+            flow_id = endpoint.getSrc();
         }
         else{
             flow_id = dispatcher.getDeviceId();
@@ -539,7 +537,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
     @Override
     public void clear(@Nullable Endpoint endpoint) {
         if(endpoint != null){
-            int src = endpoint.getId();
+            int src = endpoint.getSrc();
             mRecordFlowMap.remove(src);
             mValidRecordsFlowMap.remove(src);
 
@@ -564,7 +562,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         if(endpoint != null){
 //            System.out.println("getValidRecordsFlowMap(endpoint.getId()).size() " + getValidRecordsFlowMap(endpoint.getId()).size()
 //                    + " getRecordFlowMap(endpoint.getId()).size() " + getRecordFlowMap(endpoint.getId()).size());
-            return getValidRecordsFlowMap(endpoint.getId()).size();
+            return getValidRecordsFlowMap(endpoint.getSrc()).size();
         }
         return getValidRecordsFlowMap(dispatcher.getDeviceId()).size();
     }

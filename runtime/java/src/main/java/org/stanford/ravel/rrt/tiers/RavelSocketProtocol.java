@@ -2,7 +2,7 @@ package org.stanford.ravel.rrt.tiers;
 
 import org.stanford.ravel.rrt.RavelPacket;
 import org.stanford.ravel.rrt.utils.ByteWork;
-
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,13 +52,22 @@ public class RavelSocketProtocol {
         }
     }
 
-    public static void writeIdentity(OutputStream out, int identity) throws IOException {
-        out.write(ByteWork.getByteArray(identity));
+//    public static void writeIdentity(OutputStream out, int identity) throws IOException {
+//        out.write(ByteWork.getByteArray(identity));
+//    }
+    public static void writeIdentity(OutputStream out, RavelIdentity identity) throws IOException {
+        out.write(RavelIdentity.identityToBytes(identity));
     }
 
-    public static int readIdentity(InputStream in) throws IOException {
-        byte[] buf = new byte[4];
+//    public static int readIdentity(InputStream in) throws IOException {
+//        byte[] buf = new byte[4];
+//        readLoop(in, buf, 0);
+//        return ByteWork.convertFourBytesToInt(buf);
+//    }
+
+    public static RavelIdentity readIdentity(InputStream in) throws IOException, ClassNotFoundException {
+        byte[] buf = new byte[RavelIdentity.length];
         readLoop(in, buf, 0);
-        return ByteWork.convertFourBytesToInt(buf);
+        return RavelIdentity.identityFromBytes(buf);
     }
 }

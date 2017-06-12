@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
+
 /**
  * Created by lauril on 1/31/17.
  */
@@ -17,7 +19,7 @@ public class HttpEndpoint extends Endpoint {
     }
 
     HttpEndpoint(int id, URI url, String method, String user_agent) throws MalformedURLException {
-        super(TYPE.HTTP, id);
+        super(TYPE.HTTP, RavelIdentity.makeRemoteIdentity(id));
         this.url = url.toURL();
         this.method = method != null ? method : "POST";
         this.user_agent = user_agent != null ? user_agent : "Ravel-Java-Client/1.0";

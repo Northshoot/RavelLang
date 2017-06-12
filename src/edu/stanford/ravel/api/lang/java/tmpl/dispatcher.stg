@@ -61,6 +61,7 @@ import org.stanford.ravel.rrt.Context;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.events.NetworkEvent;
 import org.stanford.ravel.rrt.KeyProvider;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
 
 <imports:do_import()>
 
@@ -72,11 +73,10 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     private final KeyProvider keyProvider;
     private DriverAPI driver;
-    private int __device_id__;
 
     public AppDispatcher(KeyProvider keyProvider, int device_id) {
         this.keyProvider = keyProvider;
-        this.__device_id__ = device_id;
+        ravelIdentity = RavelIdentity.makeLocalIdentity(device_id, <space.id>);
          // set controller for models
         <models:set_component_controller("model"); separator="\n">
         //set controller for Interfaces
@@ -109,14 +109,22 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     @Override
     public int getDeviceId() {
-        return __device_id__;
+        return ravelIdentity.id;
     }
 
     @Override
-    public Collection\<Endpoint> getEndpointsByName(int id) {
-        return driver.getEndpointsByName(id);
-    }
+    public RavelIdentity getIdentity(){
+        return ravelIdentity;
+        }
 
+    @Override
+    public Collection\<Endpoint> getEndpointsBySrc(int id) {
+        return driver.getEndpointsBySrc(id);
+    }
+   @Override
+    public Collection\<Endpoint> getEndpointsByTier(int id) {
+        return driver.getEndpointsByTier(id);
+    }
     /***********************************************************************/
     /************** AD callbacks to the models ****************************/
     /***********************************************************************/

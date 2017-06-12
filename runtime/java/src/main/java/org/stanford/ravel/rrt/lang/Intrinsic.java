@@ -18,7 +18,7 @@ import java.util.Date;
  */
 public class Intrinsic {
     public static int endpoint_get_id(Endpoint ep) {
-        return ep.getId();
+        return ep.getTier();
     }
 
     public static int read_record_id(ModelRecord record) {

@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 
 import static org.stanford.ravel.rrt.tiers.RavelSocketProtocol.DEFAULT_PORT;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
+
 
 /**
  * A TCP endpoint, as seen from the client
@@ -14,7 +16,7 @@ public class TcpEndpoint extends Endpoint {
     private final int port;
     private final String address;
 
-    TcpEndpoint(int id, URI url) {
+    TcpEndpoint(RavelIdentity id, URI url) {
         super(TYPE.SOCKET, id);
 
         int port = url.getPort();
@@ -25,6 +27,10 @@ public class TcpEndpoint extends Endpoint {
     }
 
     TcpEndpoint(int id, InetSocketAddress address) {
+        this( RavelIdentity.makeRemoteIdentity(id), address);
+    }
+
+    TcpEndpoint(RavelIdentity id, InetSocketAddress address) {
         super(TYPE.SOCKET, id);
 
         this.port = address.getPort();

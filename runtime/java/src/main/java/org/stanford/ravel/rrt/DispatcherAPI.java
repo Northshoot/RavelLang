@@ -3,6 +3,7 @@ package org.stanford.ravel.rrt;
 import org.stanford.ravel.rrt.events.Event;
 import org.stanford.ravel.rrt.tiers.Endpoint;
 import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
 
 import java.util.Collection;
 
@@ -15,6 +16,7 @@ public interface DispatcherAPI extends SystemEventAPI {
     int getAppId();
 
     int getDeviceId();
+    RavelIdentity getIdentity();
     /***********************************************************************/
     /*************** AD Commands from driver to AD *************************/
     /***********************************************************************/
@@ -31,7 +33,9 @@ public interface DispatcherAPI extends SystemEventAPI {
     /*************** AD Commands from model to AD **************************/
     /***********************************************************************/
 
-    Collection<Endpoint> getEndpointsByName(int id);
+    Collection<Endpoint> getEndpointsBySrc(int id);
+
+    Collection<Endpoint> getEndpointsByTier(int tier);
 
     Error model__sendData(RavelPacket data, Endpoint endpoint);
     void model__saveDurably(RavelPacket data);

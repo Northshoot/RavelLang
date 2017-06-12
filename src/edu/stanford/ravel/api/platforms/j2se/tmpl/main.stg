@@ -50,7 +50,7 @@ class Application {
                 Error err = driver.registerEndpoint(ep);
                 //TODO: fix this properly
                 if (err != Error.SUCCESS) {
-                    System.err.println("Waiting for connection... AppId " + ep.getId() + " dId "+ dispatcher.getDeviceId() + ": " + err);
+                    System.err.println("Waiting for connection... AppId " + ep.getTier() + " dId "+ dispatcher.getDeviceId() + ": " + err);
                     // die immediately if endpoint registration failed (it means we could not
                     // bind the right ports)
                     //return;

@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
  * Created by lauril on 1/23/17.
  */
 public class JavaDriver implements DriverAPI {
+    //<Tier, Set<Endpoint> same endpoint can have many tiers
     private final Map<Integer, Set<Endpoint>> endpointsMap = new HashMap<>();
 
     private final DispatcherAPI appDispatcher;
@@ -54,10 +55,11 @@ public class JavaDriver implements DriverAPI {
 
     private RavelSocket getSocket(TcpEndpoint endpoint) throws RavelIOException {
         synchronized (socketClients) {
-            if (socketClients.containsKey(endpoint))
+            if (socketClients.containsKey(endpoint)) {
                 return socketClients.get(endpoint);
+            }
 
-            RavelSocketClient client = new RavelSocketClient(appDispatcher.getDeviceId(), endpoint, this);
+            RavelSocketClient client = new RavelSocketClient(appDispatcher.getIdentity(), endpoint, this);
             socketClients.put(endpoint, client);
             return client;
         }
@@ -90,11 +92,10 @@ public class JavaDriver implements DriverAPI {
     }
 
     private void forwardPacket(final RavelPacket pkt) {
-        for (final Endpoint ep : getEndpointsByName(pkt.getDestination())) {
+        for (final Endpoint ep : getEndpointsBySrc(pkt.getDestination())) {
             // TODO: forwarding table
             // careful! this is not sendData because we must not tell the app dispatcher
             // about this packet, or the models will be very confused
-
             threadPool.execute(new Runnable() {
                 public void run() {
                     try {
@@ -110,13 +111,11 @@ public class JavaDriver implements DriverAPI {
     protected  void packetReceived(RavelPacket pkt, Endpoint endpoint) {
         if (pkt.getSource() == appDispatcher.getAppId()) {
             // routing loop or malicious packet, drop
-           // System.out.println("pkt.getSource() == appDispatcher.getAppId(): " + pkt.toString());
             return;
         }
         if (pkt.getDestination() != appDispatcher.getAppId()) {
             // not for us, forward
             forwardPacket(pkt);
-            System.out.println("forwardPacket " + pkt.toString());
             return;
         }
         //System.out.println("javaDriver.packetReceived " + pkt.toString());
@@ -124,7 +123,6 @@ public class JavaDriver implements DriverAPI {
     }
 
     protected void sendDataThread(RavelPacket data, Endpoint endpoint) throws RavelIOException {
-        System.out.println("sendData " + data.toString());
         switch (endpoint.getType()) {
             case SOCKET:
                 RavelSocket socket = getSocket((TcpEndpoint)endpoint);
@@ -173,12 +171,36 @@ public class JavaDriver implements DriverAPI {
         return s;
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     @Override
-    public Collection<Endpoint> getEndpointsByName(int id) {
+    public Collection<Endpoint> getEndpointsByTier(int id) {
         synchronized (endpointsMap) {
             // Make a copy of the associated endpoint set so that we can pass it outside
             // the synchronized block without fear for concurrent modification
             return Collections.unmodifiableCollection(new ArrayList<>(getEndpointsSet(id)));
+        }
+    }
+
+    @Override
+    public Collection<Endpoint> getEndpointsBySrc(int tier) {
+        synchronized (endpointsMap) {
+            Set<Endpoint> s = new HashSet<>();
+            for (Map.Entry<Integer, Set<Endpoint>> entry : endpointsMap.entrySet()) {
+                int key = entry.getKey();
+                Set<Endpoint> e = entry.getValue();
+                Iterator it = e.iterator();
+                while(it.hasNext()){
+                    Endpoint endp = (Endpoint) it.next();
+                    if ( endp.getTier() == tier ) s.add(endp);
+                }
+
+
+            }
+            return Collections.unmodifiableCollection(new ArrayList<>(s));
         }
     }
 
@@ -219,7 +241,7 @@ public class JavaDriver implements DriverAPI {
         } catch(RavelIOException e) {
             // ignore the error if the connection fails, we'll try at a later time
             // and see if it fails again
-            System.err.println("Could not connect: " +ep.toString());
+            System.err.println("EoS Could not connect: " +ep.toString());
             return  Error.ENDPOINT_UNREACHABLE;
         }
         return Error.SUCCESS;
@@ -227,8 +249,9 @@ public class JavaDriver implements DriverAPI {
 
     private void internalRegisterEndpoint(Endpoint ep) {
         synchronized (endpointsMap) {
-            getEndpointsSet(ep.getId()).add(ep);
-            ep.setLocal(ep.getId() == appDispatcher.getAppId());
+            System.out.println("Internal register endpoint: " + ep.toString());
+            getEndpointsSet(ep.getTier()).add(ep);
+            ep.setLocal(ep.getTier() == appDispatcher.getAppId());
         }
     }
 

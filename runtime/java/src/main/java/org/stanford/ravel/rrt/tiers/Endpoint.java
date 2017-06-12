@@ -8,25 +8,31 @@ import java.util.Map;
 
 import org.stanford.ravel.rrt.utils.None;
 import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
+
 /**
  * Created by lauril on 1/23/17.
  */
 public class Endpoint extends None{
     public enum TYPE { BLE, SQUARE, SOCKET, HTTP, GCM }
 
-    private final int id;
+    private final RavelIdentity ravelIdentity;
     private final Endpoint.TYPE type;
     private boolean local = false;
     private volatile boolean mConnected = false;
     protected DispatcherAPI appDispatcher = null;
 
-    Endpoint(Endpoint.TYPE type, int id) {
+    Endpoint(Endpoint.TYPE type, RavelIdentity id) {
         this.type = type;
-        this.id = id;
+        this.ravelIdentity = id;
     }
     public TYPE getType() { return type; }
-    public int getId() {
-        return id;
+
+    public int getTier(){
+        return ravelIdentity.tier;
+    }
+    public int getSrc() {
+        return ravelIdentity.id;
     }
 
     public void setAppDispatcher(DispatcherAPI dapi ){
@@ -47,6 +53,7 @@ public class Endpoint extends None{
 
     }
 
+
     public boolean isConnected() {
         return mConnected;
     }
@@ -63,7 +70,7 @@ public class Endpoint extends None{
     @Override
     public String toString() {
         return "[Type: " + this.type
-                +", id: " + this.id
+                +", id: " + this.ravelIdentity
                 + ", connected: " + mConnected
                 + " local " + this.isLocal() + "]";
     }
@@ -78,7 +85,7 @@ public class Endpoint extends None{
             case "https":
                 return new HttpEndpoint(id, uri, options.get("method"), options.get("user-agent"));
             case "tcp":
-                return new TcpEndpoint(id, uri);
+                return new TcpEndpoint(RavelIdentity.makeRemoteIdentity(id), uri);
             default:
                 throw new MalformedURLException("Invalid URI scheme " + uri.getScheme());
         }
