@@ -35,10 +35,10 @@ task copyJar(type: Copy) {
 }
 
 task copyJarToMatson(type: Copy) {
-    println "Copy jar"
+    println "Move to runtime jar to: /Users/larry/workspace/02-demos/mapps/ravelmpoc/java-jars/git add -A"
     from jar
     into '/Users/larry/workspace/02-demos/mapps/ravelmpoc/java-jars/'
 }
 
 jar.finalizedBy copyJar
-//jar.finalizedBy copyJarToMatson
+jar.finalizedBy copyJarToMatson

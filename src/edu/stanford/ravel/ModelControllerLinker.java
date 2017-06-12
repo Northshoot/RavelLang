@@ -59,9 +59,23 @@ public class ModelControllerLinker {
         /** build platform */
         Map<String, ReferenceSymbol> prop = ssb.getPlatform();
         Platform.Builder p = new Platform.Builder();
-        p.name(prop.get("language").getName());
-        p.language(prop.get("language").getValue());
-        p.system(prop.get("system").getValue());
+        try{
+            p.name(prop.get("language").getName());
+            p.language(prop.get("language").getValue());
+        } catch (NullPointerException e){
+            System.err.println("Can not find property >>language<< in space: " + name);
+            System.exit(-1);
+        }
+
+        try{
+            p.system(prop.get("system").getValue());
+        } catch (NullPointerException e){
+            System.err.println("Can not find property >>system<< in space: " + name);
+            System.exit(-1);
+        }
+
+
+
 
         Platform platform = p.build();
         try {

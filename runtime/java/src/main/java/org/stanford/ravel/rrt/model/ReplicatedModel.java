@@ -19,10 +19,10 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
     protected ReplicatedModel(DispatcherAPI dispatcher, int modelId, int size, boolean reliable, boolean durable) {
         super(dispatcher, modelId, size, reliable, durable);
     }
-
-    void pprint(String s){
-        System.out.println("[ReplicatedModel::]>" + s);
-    }
+//
+//    void pprint(String s){
+//        System.out.println("[ReplicatedModel::]>" + s);
+//    }
 //
 //    public void addSinkEndpoints(Collection<Integer> e) {
 //        mEndpoints.addAll(e);
@@ -32,14 +32,16 @@ public abstract class ReplicatedModel<RecordType extends ModelRecord> extends Ba
 //    @Override
 //    public Context<RecordType> save(RecordType record) {
 //        // save locally first
-//        Context<RecordType> local = doSave(record, true);
+//        int src = dispatcher.getDeviceId();
+//        Context<RecordType> local = doSave(record, src, true);
 //        if (local.error == Error.SUCCESS) {
-//            int recordPos = recordPosFromRecord(record);
-//
+//            int recordPos = recordPosFromRecord(record, src);
 //            // clear the save flag because we won't send a save done until later
-//            markSaved(recordPos);
-//
-//            Error sendError = sendRecord(recordPos, record, mEndpoints, true);
+//            markSaved(recordPos, src);
+//            //TODO: we want to send to every endpoint that is registered
+//            // In streaming model we want to send only to the physical flows, here we want to fan out
+//            //to all endpoint
+//            Error sendError = sendRecord(recordPos, src, record, mEndpoints, true);
 //            return new Context<>(this, record, sendError);
 //        } else {
 //            // OUT OF STORAGE or IN TRANSIT (= during save)

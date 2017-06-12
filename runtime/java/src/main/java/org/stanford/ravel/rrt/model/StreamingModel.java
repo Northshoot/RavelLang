@@ -36,12 +36,14 @@ public abstract class StreamingModel<RecordType extends ModelRecord> extends Bas
         int src = dispatcher.getDeviceId();
         record.device_id(src);
         Context<RecordType> local = doSave(record, src, true);
+        //this just addressing rise condition, when after adding a record clearAll is called
+        //TODO: should formalize soliution for these events
+        int recordPos = recordPosFromRecord(record, src);
         //if success send record
-        if (local.error == Error.SUCCESS) {
-            int recordPos = recordPosFromRecord(record, src);
-            Error sendError = sendRecord(recordPos, src, record, mSinkEndpoints, false);
+        if (local.error == Error.SUCCESS && recordPos >= 0) {
             // clear the save flag because we won't send a save done until later
             markSaved(src, recordPos);
+            Error sendError = sendRecord(recordPos, src, record, mSinkEndpoints, false);
             return new Context<>(this, record, sendError);
         } else {
             // OUT OF STORAGE or IN TRANSIT (= during save)

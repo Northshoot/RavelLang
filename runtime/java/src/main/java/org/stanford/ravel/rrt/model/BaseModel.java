@@ -399,7 +399,7 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
                 if (error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS)
                     getRecordStateMap(src)[recordPos].is_transmit_failed = true;
                 else {
-                    System.out.println("rec src: " + src + "Record pos: " + recordPos + " Record state size " + getRecordStateMap(src).length);
+                    System.out.println("rec src: " + src + " Record pos: " + recordPos + " Record state size " + getRecordStateMap(src).length);
                     getRecordStateMap(src)[recordPos].in_transit++;
                 }
                 if ((error2 != Error.IN_TRANSIT && error2 != Error.SUCCESS) || error == Error.SUCCESS)
@@ -506,12 +506,12 @@ public abstract class BaseModel<RecordType extends ModelRecord> implements Model
         else{
             flow_id = dispatcher.getDeviceId();
         }
-        //Handle deleted records
-        System.out.println("FLow id: " + flow_id + " valid records: " + getValidRecordsFlowMap(flow_id).size()
-                            + " flow records " + getRecordFlowMap(flow_id).size());
+        //TODO: Handle deleted records
+//        System.out.println("FLow id: " + flow_id + " valid records: " + getValidRecordsFlowMap(flow_id).size()
+//                            + " flow records " + getRecordFlowMap(flow_id).size());
         if(getValidRecordsFlowMap(flow_id).size()>0 )
             return getValidRecordsFlowMap(flow_id).get(0);
-        else
+        else //TODO: should never happen but user can call so we need to implement how to handle error better
             return null;
 
     }
