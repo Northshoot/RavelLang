@@ -36,8 +36,14 @@ public class <name>  {
 
     public int createIssue(String subject, String desc)
     {
-        return ((Double)(((Map)new Gson().fromJson(send( "/issues.json", "{\"issue\": {\"subject\":\""+subject+
+        try{
+            return ((Double)(((Map)new Gson().fromJson(send( "/issues.json", "{\"issue\": {\"subject\":\""+subject+
                     "\", \"description\": \""+desc+"\", \"project_id\":" +projectId+ "}}", "POST"), Map.class).get("issue")).get("id"))).intValue();
+        } catch (Exception e) {
+                    //e.printStackTrace();
+                    System.out.println("Could not connect to server " );
+        }
+        return 0;
     }
 
     public void closeIssue(int id) {
@@ -76,7 +82,8 @@ public class <name>  {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("Could not connect to server " );
         }
         return null;
     }

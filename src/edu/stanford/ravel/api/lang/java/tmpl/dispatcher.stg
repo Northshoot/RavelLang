@@ -76,7 +76,7 @@ public class <name> extends AbstractDispatcher implements DispatcherAPI {
 
     public AppDispatcher(KeyProvider keyProvider, int device_id) {
         this.keyProvider = keyProvider;
-        ravelIdentity = RavelIdentity.makeLocalIdentity(device_id, <space.id>);
+        ravelIdentity = RavelIdentity.makeLocalIdentity(<space.id>, device_id);
          // set controller for models
         <models:set_component_controller("model"); separator="\n">
         //set controller for Interfaces
