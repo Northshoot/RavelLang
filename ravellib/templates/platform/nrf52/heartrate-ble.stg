@@ -1,4 +1,4 @@
-import "edu/stanford/ravel/api/lang/c/tmpl/common.stg"
+import "ai/harmony/ravel/api/lang/c/tmpl/common.stg"
 
 extra_cflags() ::=<<
 >>

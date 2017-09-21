@@ -28,8 +28,6 @@ controller EController(timer : Timer,
         timer.start_periodic(1000)
 
 
-
-
     event timer.fired():
         led_0.toggle()
 

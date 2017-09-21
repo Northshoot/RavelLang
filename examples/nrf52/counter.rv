@@ -1,4 +1,4 @@
-from rlib.iFace import timer_nrf
+from ravellib.interfaces.system import timer_nrf
 
 interface Led(led_num: int32):
     configuration:

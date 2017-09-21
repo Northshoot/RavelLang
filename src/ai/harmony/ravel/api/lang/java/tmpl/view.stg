@@ -1,0 +1,33 @@
+import "ai/harmony/ravel/api/lang/java/tmpl/common.stg"
+
+declare_function(function, view_name) ::=<<
+public abstract <function.returnValue> <function.name>(<function.argumentSymbols:{a|<a.type> <a.name>}; separator=", ">);
+>>
+
+define_event(event, view) ::=<<
+public <event.returnValue> <event.name>(<event.argumentSymbols:{a|<a.type> <a.name>}; separator=", ">)
+{
+    <dispatch_event(view, event.name, {<event.argumentSymbols:{a|<a.type> <a.name>}; separator=", ">})>
+}
+>>
+
+file(package,imports,name,view) ::=<<
+package <package>;
+
+<imports:do_import()>
+
+public abstract class <name> {
+    <view.controllerList:{c|private <c.component.name> ctr_<c.varName>;}; separator="\n">
+    private int __id;
+
+    // Setter methods for AppDispatcher
+    public void setInstanceId(int id) {
+        __id = id;
+    }
+    <view.controllerList:set_controller_method(); separator="\n">
+
+    <view.baseView.functions:declare_function(name); separator="\n">
+
+    <view.baseView.events:define_event(view); separator="\n">
+}
+>>

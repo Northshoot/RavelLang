@@ -1,0 +1,222 @@
+import "common.stg"
+
+append_params(comp) ::=<<
+<if(comp.allParameters)>, <comp.allParameters:{p|<p; format="literal">}; separator=", "><endif>
+>>
+
+interface_field(comp) ::=<<
+private final <comp.component.name> iface_<comp.varName> = new <comp.component.name>(this, <comp.instanceId><append_params(comp)>);
+>>
+model_field(comp) ::=<<
+private final <comp.component.name> model_<comp.varName> = new <comp.component.name>(this<append_params(comp)>);
+>>
+controller_field(ctr) ::=<<
+private final <ctr.name> ctr_<ctr.varName> = new <ctr.name>(<ctr.parameterValues; separator=", ">);
+>>
+view_field(view) ::=<<
+private <view.component.name> view_<view.varName>;
+>>
+
+sink_field(sink) ::=<<
+private final SinkAPI sink_<sink.varName> = null;
+>>
+
+model_case_event(model, event, parameters) ::=<<
+case <model.component.baseModel.id>:
+    model_<model.varName>.<event>(<parameters>);
+    break;
+>>
+
+set_component_controller(comp, prefix) ::=<<
+<comp.controllerList:{c|<prefix>_<comp.varName>.setController_<c.varName>(ctr_<c.varName>);}; separator="\n">
+>>
+
+define_view_setter(view, viewAssignments) ::=<<
+public void setView_<view.varName>(<view.component.name> view) {
+    if (view_<view.varName> != null) {
+        view_<view.varName>.setInstanceId(-1);
+    }
+    view_<view.varName> = view;
+    view_<view.varName>.setInstanceId(<view.instanceId>);
+    <set_component_controller(view, "view")>
+
+    <viewAssignments.(view.varName):{p|ctr_<p.first>.setView_<p.second>(view);}; separator="\n">
+}
+>>
+
+file(package,imports,name,models,interfaces,controllers,views,viewAssignments,space) ::=<<
+package <package>;
+
+import java.util.Collection;
+import org.stanford.ravel.rrt.tiers.Endpoint;
+import org.stanford.ravel.rrt.tiers.Error;
+import org.stanford.ravel.rrt.model.ModelBottomAPI;
+import org.stanford.ravel.rrt.model.ModelRecord;
+import org.stanford.ravel.rrt.RavelPacket;
+import org.stanford.ravel.rrt.DispatcherAPI;
+import org.stanford.ravel.rrt.SystemEventAPI;
+import org.stanford.ravel.rrt.AbstractDispatcher;
+import org.stanford.ravel.rrt.DriverAPI;
+import org.stanford.ravel.rrt.Context;
+import org.stanford.ravel.rrt.events.Event;
+import org.stanford.ravel.rrt.events.NetworkEvent;
+import org.stanford.ravel.rrt.KeyProvider;
+import org.stanford.ravel.rrt.tiers.RavelIdentity;
+
+<imports:do_import()>
+
+public class <name> extends AbstractDispatcher implements DispatcherAPI {
+    <models:model_field(); separator="\n">
+    <interfaces:interface_field(); separator="\n">
+    <controllers:controller_field(); separator="\n">
+    <views:view_field(); separator="\n">
+
+    private final KeyProvider keyProvider;
+    private DriverAPI driver;
+
+    public AppDispatcher(KeyProvider keyProvider, int device_id) {
+        this.keyProvider = keyProvider;
+        ravelIdentity = RavelIdentity.makeLocalIdentity(<space.id>, device_id);
+         // set controller for models
+        <models:set_component_controller("model"); separator="\n">
+        //set controller for Interfaces
+        <interfaces:set_component_controller("iface"); separator="\n">
+    }
+
+    <views:define_view_setter(viewAssignments); separator="\n">
+
+    @Override
+    public KeyProvider getKeyProvider() {
+        return keyProvider;
+    }
+
+    void setDriver(DriverAPI driver) {
+        this.driver = driver;
+    }
+
+    void addAllEndpoints() {
+        <models:{m|model_<m.varName>.addAllEndpoints();}; separator="\n">
+    }
+
+    public String getAppName() {
+        return "<space.name>";
+    }
+
+    @Override
+    public int getAppId() {
+        return <space.id>;
+    }
+
+    @Override
+    public int getDeviceId() {
+        return ravelIdentity.id;
+    }
+
+    @Override
+    public RavelIdentity getIdentity(){
+        return ravelIdentity;
+        }
+
+    @Override
+    public Collection\<Endpoint> getEndpointsBySrc(int id) {
+        return driver.getEndpointsBySrc(id);
+    }
+   @Override
+    public Collection\<Endpoint> getEndpointsByTier(int id) {
+        return driver.getEndpointsByTier(id);
+    }
+    /***********************************************************************/
+    /************** AD callbacks to the models ****************************/
+    /***********************************************************************/
+
+    protected void models__notifyDeparted(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        switch (rp.model_id) {
+            <models:model_case_event("recordDeparted", "rp, endpoint"); separator="\n">
+        }
+    }
+
+    protected void models__notifyArrived(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        switch (rp.model_id) {
+            <models:model_case_event("recordArrived", "rp, endpoint"); separator="\n">
+        }
+    }
+
+    protected void models__notifySavedDurably(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Error error = event.error;
+        switch (rp.model_id) {
+            <models:model_case_event("recordSavedDurably", "rp, error"); separator="\n">
+        }
+    }
+
+    protected void models__notifyLoadFromStorage(NetworkEvent event){
+        RavelPacket rp = event.data;
+        switch (rp.model_id) {
+            <models:model_case_event("recordLoaded", "rp"); separator="\n">
+        }
+    }
+
+    protected void models__notifyFailedToSend(NetworkEvent event){
+        RavelPacket rp = event.data;
+        Endpoint endpoint = event.endpoint;
+        Error error = event.error;
+        switch (rp.model_id) {
+            <models:model_case_event("recordFailedToSend", "rp, endpoint, error"); separator="\n">
+        }
+    }
+
+    /***********************************************************************/
+    /************** AD Commands from model to AD ***************************/
+    /***********************************************************************/
+    public Error model__sendData(RavelPacket data, Endpoint ep) {
+        return driver.sendData(data, ep);
+    }
+
+    public void model__saveDurably(RavelPacket data) {
+        driver.saveDurably(data);
+    }
+
+    public void model__deleteFromStorage(int modelId, int recordId) {
+        driver.deleteFromDurableStorage(modelId, recordId);
+    }
+     @Override
+    public int deviceID() {
+        return getDeviceId();
+    }
+    /***********************************************************************/
+    /************** System callbacks from Driver to AD *********************/
+    /***********************************************************************/
+    @Override
+    public void started() {
+        <dispatch_event_single_instance(space.systemAPI.component, "started", [])>
+    }
+
+    @Override
+    public void stopped() {
+        <dispatch_event_single_instance(space.systemAPI.component, "stopped", [])>
+    }
+
+    @Override
+    public void restarted() {
+        <dispatch_event_single_instance(space.systemAPI.component, "restarted", [])>
+    }
+
+   @Override
+    public void connected(Endpoint endpoint) {
+        <dispatch_event_single_instance(space.systemAPI.component, "connected", ["endpoint"])>
+    }
+
+    @Override
+    public void disconnected(Endpoint endpoint) {
+        <dispatch_event_single_instance(space.systemAPI.component, "disconnected", ["endpoint"])>
+    }
+
+    @Override
+    public void battery(SystemEventAPI.BatteryLevel bl) {}
+
+};
+>>

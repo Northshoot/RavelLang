@@ -23,8 +23,8 @@ public class RavelIdentity {
 
     public static RavelIdentity identityFromBytes(byte[] data) throws IOException, ClassNotFoundException {
 
-        int tier = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 4,8));
-        int id = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0,4));
+        int tier = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 0,4));
+        int id = ByteWork.convertFourBytesToInt(ByteWork.getBytes(data, 4,8));
         System.out.println("From stream: tier " + tier + " ID " + id);
         return RavelIdentity.makeLocalIdentity(tier, id);
     }

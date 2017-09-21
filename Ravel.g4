@@ -1,9 +1,9 @@
 grammar Ravel;
 
 @header{
-import edu.stanford.ravel.compiler.scope.*;
-import edu.stanford.ravel.compiler.symbol.*;
-import edu.stanford.ravel.compiler.types.Type;
+import ai.harmony.ravel.compiler.scope.*;
+import ai.harmony.ravel.compiler.symbol.*;
+import ai.harmony.ravel.compiler.types.Type;
 }
 tokens { INDENT, DEDENT }
 
