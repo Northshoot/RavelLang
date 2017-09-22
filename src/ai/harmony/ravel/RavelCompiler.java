@@ -2,6 +2,7 @@ package ai.harmony.ravel;
 
 import ai.harmony.antlr4.RavelLexer;
 import ai.harmony.antlr4.RavelParser;
+import ai.harmony.director.Publisher;
 import ai.harmony.ravel.analysis.FlowAnalysis;
 import ai.harmony.ravel.analysis.ModelOperationAnalysis;
 import ai.harmony.ravel.analysis.ModelOwnershipAnalysis;
@@ -206,7 +207,7 @@ public class RavelCompiler {
             }
 
             logBuildStart();
-            //TODO: enalbe to define import path
+            //TODO: enable to define import path
             String[] path = options.getInputPath().split("/");
             this.mAppPath="";
             for(int i=0;i<path.length-1;i++){
@@ -232,7 +233,8 @@ public class RavelCompiler {
                     return;
                 ValidateScope.validate(globalScope);
 
-                RavelApplication app = new RavelApplication();
+                //TODO: need config file
+                RavelApplication app = new RavelApplication((path[path.length-1]));
 
                 // typecheck the models, assign types to the fields
                 modelCompiler = new ModelCompiler(this, options.hasFOption("dump-models"));
@@ -300,9 +302,16 @@ public class RavelCompiler {
                 LOGGER.info("Internal representation is created!");
 
                 generateCode(app);
+                //map application to json and push it to the cloud
+                System.out.println(app.toJsonString());
+                Publisher p = new Publisher();
+                p.post(app.toJsonString());
+
             } catch (FatalCompilerErrorException e) {
                 // do nothing, this exception is just a quick way to interrupt compilation
                 // if something really bad happens
+            } catch (IOException e) {
+                e.printStackTrace();
             } finally {
                 logBuildEnd();
             }

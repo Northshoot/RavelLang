@@ -1,5 +1,7 @@
 package ai.harmony.ravel;
 
+import org.apache.log4j.PropertyConfigurator;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
@@ -92,9 +94,9 @@ public class RavelProperties {
         InputStream input = null;
 
         try {
-            String propFileName = System.getProperty("user.dir")+"/default.properties";
-            properties.load(new FileInputStream(propFileName ));
-
+//            String propFileName = System.getProperty("user.dir")+"/default.properties";
+            properties.load(new FileInputStream(BUNDLE_NAME ));
+            PropertyConfigurator.configure(properties);
         } catch (Exception e) {
             System.out.println("Exception opening: " + e);
         }

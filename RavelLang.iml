@@ -33,5 +33,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib-jar" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="org.eclipse.ecf:org.apache.httpcomponents.httpclient:4.5.2.v20170210-0925" level="application" />
   </component>
 </module>

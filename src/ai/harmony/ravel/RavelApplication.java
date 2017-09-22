@@ -2,6 +2,9 @@ package ai.harmony.ravel;
 
 import ai.harmony.ravel.primitives.*;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 /**
@@ -12,8 +15,13 @@ import java.util.*;
  */
 public class RavelApplication  {
 
-    RavelApplication() {
+    RavelApplication(String name) {
+        mName = name;
     }
+
+    private String mName;
+
+    public String getmName(){ return this.mName;}
 
     private final Map<String, Model> mModels = new LinkedHashMap<>();
     public void addModel(String name, Model m){
@@ -58,8 +66,65 @@ public class RavelApplication  {
         return Collections.unmodifiableCollection(mFlow);
     }
 
+    /**
+     * creates are json
+     * @return
+     */
+    public JsonObject toJsonString(){
+        JsonObjectBuilder jsonApp = Json.createObjectBuilder();
+        jsonApp.add("App", getmName());
+        JsonObjectBuilder jsonModels = Json.createObjectBuilder();
+        if(mModels.size() >0) {
+            for (Map.Entry<String, Model> entry : mModels.entrySet()) {
+                jsonModels.add("name", entry.getValue().getName());
+            }
+        }
+        jsonApp.add("models", jsonModels);
+
+        JsonObjectBuilder jsonControllers = Json.createObjectBuilder();
+        if(mControllers.size() >0) {
+            for (Map.Entry<String, Controller> entry : mControllers.entrySet()) {
+                jsonControllers.add("name",  entry.getValue().getName());
+            }
+        }
+        jsonApp.add("controllers", jsonControllers);
+
+        JsonObjectBuilder jsonViews = Json.createObjectBuilder();
+        if(mViews.size() >0) {
+            for (Map.Entry<String, View> entry : mViews.entrySet()) {
+                jsonViews.add("name", entry.getValue().getName());
+            }
+        }
+        jsonApp.add("views",jsonViews);
+
+        JsonObjectBuilder jsonFlows = Json.createObjectBuilder();
+        if (mFlow.size() >0) {
+            for (Flow entry : mFlow) {
+                jsonFlows.add("flow", entry.toString());
+            }
+        }
+        jsonApp.add("flows", jsonFlows);
+
+        JsonObjectBuilder jsonInterfaces = Json.createObjectBuilder();
+        if(mInterfaces.size() >0) {
+            for (Map.Entry<String, Interface> entry : mInterfaces.entrySet()) {
+                jsonInterfaces.add("name", entry.getValue().getName());
+            }
+        }
+        jsonApp.add("interfaces", jsonInterfaces);
+
+        JsonObjectBuilder jsonSpaces = Json.createObjectBuilder();
+        if(mSpace.size() >0) {
+            for (Map.Entry<String, Space> entry : mSpace.entrySet()) {
+                jsonSpaces.add("name", entry.getValue().getName());
+            }
+        }
+        jsonApp.add("spaces", jsonSpaces);
+        return jsonApp.build();
+    }
+
     public String toString() {
-        String ret ="Ravel applications: \n";
+        String ret ="Ravel applications: " + getmName() + "\n";
         if(mModels.size() >0) {
             ret += "\tModels: \n\t";
             for (Map.Entry<String, Model> entry : mModels.entrySet()) {
