@@ -42,6 +42,10 @@ public class ConcreteController extends Primitive implements Iterable<LinkedEven
         return getLinkedComponents(ConcreteView.class);
     }
 
+    public Collection<LinkedEvent> getLinkedEvents() {
+        return mLinkedEvents;
+    }
+
     private <E extends EventComponent> Collection<E> getLinkedComponents(Class<E> ofClass) {
         Set<E> components = new HashSet<E>();
         for (EventComponent object : mEventComponents) {

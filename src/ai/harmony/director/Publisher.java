@@ -1,5 +1,6 @@
 package ai.harmony.director;
 
+import ai.harmony.ravel.RavelProperties;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
@@ -45,8 +46,6 @@ public class Publisher {
                 CookieStore cookieStore = new BasicCookieStore();
                 context.setCookieStore(cookieStore);
 
-
-
                 HttpGet get = new HttpGet(this.domain);
                 CloseableHttpClient httpClient = HttpClients.createDefault();
 
@@ -56,8 +55,8 @@ public class Publisher {
 
                 HttpPost post = new HttpPost(this.domain + this.urlpath);
                 List params = new ArrayList();
-                params.add(new BasicNameValuePair("username", "dev_compiler"));
-                params.add(new BasicNameValuePair("password", "qwertyuiop[]"));
+                params.add(new BasicNameValuePair("username", RavelProperties.getInstance().getUserName()));
+                params.add(new BasicNameValuePair("password", RavelProperties.getInstance().getPassword()));
                 params.add(new BasicNameValuePair("data", payload.toString()));
                 UrlEncodedFormEntity paramEntity = new UrlEncodedFormEntity(params);
                 post.setEntity(paramEntity);
@@ -67,7 +66,13 @@ public class Publisher {
                 RequestAddCookies addCookies = new RequestAddCookies();
                 addCookies.process(post, context);
                 response = httpClient.execute(post);
-                System.out.println("POST response: " + response.getStatusLine().getStatusCode() + " got " + readResponse(response));
+                int ok_code = response.getStatusLine().getStatusCode();
+                if(ok_code == 200 || ok_code == 203){
+                    jsonString.append(readResponse(response));
+                } else {
+                    throw new RuntimeException("Server error: response id" + ok_code);
+                }
+
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }

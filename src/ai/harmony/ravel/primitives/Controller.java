@@ -15,7 +15,9 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     private final List<VariableSymbol> mClassScopeVariables = new ArrayList<>();
     private final List<VariableSymbol> mArrayConstants = new ArrayList<>();
     private final List<VariableSymbol> mViews = new ArrayList<>();
+    //TODO: we need to save all models controller subscribes to
     private final Set<Model> mWrittenToModels = new HashSet<>();
+    private final Set<Model> mAllModels = new HashSet<>();
 
     public Controller(String name) {
         super(name);
@@ -41,6 +43,9 @@ public class Controller extends Primitive implements Iterable<EventHandler> {
     }
     public void addView(VariableSymbol sym) {
         mViews.add(sym);
+    }
+    public void addModel(VariableSymbol sym) {
+//        mViews.add(sym.);
     }
     public Type getParameterType(String name) {
         return mInterface.get(name);

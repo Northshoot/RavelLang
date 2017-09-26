@@ -2,9 +2,7 @@ package ai.harmony.ravel;
 
 import ai.harmony.ravel.primitives.*;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
 import java.util.*;
 
 /**
@@ -72,22 +70,52 @@ public class RavelApplication  {
      */
     public JsonObject toJsonString(){
         JsonObjectBuilder jsonApp = Json.createObjectBuilder();
-        jsonApp.add("App", getmName());
-        JsonObjectBuilder jsonModels = Json.createObjectBuilder();
-        if(mModels.size() >0) {
-            for (Map.Entry<String, Model> entry : mModels.entrySet()) {
-                jsonModels.add("name", entry.getValue().getName());
-            }
-        }
-        jsonApp.add("models", jsonModels);
+        jsonApp.add("app.name", getmName());
+        jsonApp.add("app.version", RavelProperties.getInstance().getVersion());
+        jsonApp.add("app.id", RavelProperties.getInstance().getID());
+        jsonApp.add("app.org", RavelProperties.getInstance().getOrg());
+        jsonApp.add("compiler.version", RavelProperties.getInstance().getCompilerVersion());
 
-        JsonObjectBuilder jsonControllers = Json.createObjectBuilder();
+
+
+        if(mModels.size() >0) {
+            JsonArrayBuilder modelArray = Json.createArrayBuilder();
+            for (Map.Entry<String, Model> entry : mModels.entrySet()) {
+                JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                jsonModel.add("name", entry.getValue().getName());
+                jsonModel.add("type", entry.getValue().getModelType().toString());
+                //Add flows
+                JsonObjectBuilder jsonModelFlows = Json.createObjectBuilder();
+                for(Flow flow: entry.getValue().getFlows()) {
+                    jsonModelFlows.add("source", flow.getSource().getName());
+                    jsonModelFlows.add("sink", flow.getSink().getName());
+                }
+                jsonModel.add("flows", jsonModelFlows);
+                //array of model fields
+                JsonArrayBuilder fieldsArray = Json.createArrayBuilder();
+                for( ModelField field : entry.getValue().getFields()){
+                    JsonObjectBuilder jsonModelFields = Json.createObjectBuilder();
+                    jsonModelFields.add("name", field.getName());
+                    jsonModelFields.add("type", field.getType().getName().toLowerCase());
+                    fieldsArray.add(jsonModelFields);
+                }
+                jsonModel.add("fields", fieldsArray);
+                modelArray.add(jsonModel);
+            }
+            jsonApp.add("models", modelArray);
+        }
+
+        //controllers
+        JsonArrayBuilder controllerArray = Json.createArrayBuilder();
         if(mControllers.size() >0) {
             for (Map.Entry<String, Controller> entry : mControllers.entrySet()) {
-                jsonControllers.add("name",  entry.getValue().getName());
+                JsonObjectBuilder jsonControllers = Json.createObjectBuilder();
+                Controller c = entry.getValue();
+                jsonControllers.add("name",  c.getName());
+                controllerArray.add(jsonControllers);
             }
         }
-        jsonApp.add("controllers", jsonControllers);
+        jsonApp.add("controllers", controllerArray);
 
         JsonObjectBuilder jsonViews = Json.createObjectBuilder();
         if(mViews.size() >0) {
@@ -96,7 +124,7 @@ public class RavelApplication  {
             }
         }
         jsonApp.add("views",jsonViews);
-
+//
         JsonObjectBuilder jsonFlows = Json.createObjectBuilder();
         if (mFlow.size() >0) {
             for (Flow entry : mFlow) {
@@ -104,22 +132,69 @@ public class RavelApplication  {
             }
         }
         jsonApp.add("flows", jsonFlows);
+//
+//        JsonObjectBuilder jsonInterfaces = Json.createObjectBuilder();
+//        if(mInterfaces.size() >0) {
+//            for (Map.Entry<String, Interface> entry : mInterfaces.entrySet()) {
+//                jsonInterfaces.add("name", entry.getValue().getName());
+//            }
+//        }
+//        jsonApp.add("interfaces", jsonInterfaces);
 
-        JsonObjectBuilder jsonInterfaces = Json.createObjectBuilder();
-        if(mInterfaces.size() >0) {
-            for (Map.Entry<String, Interface> entry : mInterfaces.entrySet()) {
-                jsonInterfaces.add("name", entry.getValue().getName());
-            }
-        }
-        jsonApp.add("interfaces", jsonInterfaces);
-
-        JsonObjectBuilder jsonSpaces = Json.createObjectBuilder();
+        //array of spaces
+        JsonArrayBuilder spaceArray = Json.createArrayBuilder();
         if(mSpace.size() >0) {
             for (Map.Entry<String, Space> entry : mSpace.entrySet()) {
-                jsonSpaces.add("name", entry.getValue().getName());
-            }
+                JsonObjectBuilder jsonSpaces = Json.createObjectBuilder();
+                Space s = entry.getValue();
+                //space name
+                jsonSpaces.add("name", s.getName());
+
+                //array of space controllers
+                JsonArrayBuilder jsonSpaceCntrArray = Json.createArrayBuilder();
+                //array of space processes
+                JsonArrayBuilder jsonProcess = Json.createArrayBuilder();
+                for(ConcreteController cc: s.getControllers()){
+                    JsonObjectBuilder cntr = Json.createObjectBuilder();
+                    cntr.add("name", cc.getName());
+                    jsonSpaceCntrArray.add(cntr);
+                    //populate array or processes
+                    //For each of the controller and model we create a new process
+                    for(ConcreteModel cm : cc.getLinkedModels()) {
+                        JsonObjectBuilder process = Json.createObjectBuilder();
+                        process.add("model", cm.getName());
+                        process.add("controller", cc.getName());
+                        jsonProcess.add(process);
+                        // TODO:  get the actual event that controller listens to
+                    }//end process
+                } //end array of controllers
+                jsonSpaces.add("controllers",jsonSpaceCntrArray);
+                jsonSpaces.add("processes",jsonProcess);
+
+                //array of space views
+
+                JsonArrayBuilder spaceViewArray = Json.createArrayBuilder();
+                //array of space displays
+                JsonArrayBuilder spaceDisplayArray = Json.createArrayBuilder();
+                for(ConcreteView cv: s.getViews()){
+                    JsonObjectBuilder jsonSpaceViews = Json.createObjectBuilder();
+                    jsonSpaceViews.add("name", cv.getName());
+                    spaceViewArray.add(jsonSpaceViews);
+                    //for each pair of a view and model create new display
+                    for(Map.Entry<String, Model> mEntry: cv.getBaseView().getModels().entrySet()){
+                        JsonObjectBuilder jsonDisplays = Json.createObjectBuilder();
+                        jsonDisplays.add("view", cv.getName());
+                        jsonDisplays.add("model", mEntry.getValue().getName());
+                        spaceDisplayArray.add(jsonDisplays);
+                    }//end loop for creating displays
+
+                }//end loop for creating views
+                jsonSpaces.add("views", spaceViewArray);
+                jsonSpaces.add("displays", spaceDisplayArray);
+                spaceArray.add(jsonSpaces);
+            } // end of spaces
         }
-        jsonApp.add("spaces", jsonSpaces);
+        jsonApp.add("spaces", spaceArray);
         return jsonApp.build();
     }
 

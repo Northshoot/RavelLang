@@ -24,9 +24,14 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -305,7 +310,22 @@ public class RavelCompiler {
                 //map application to json and push it to the cloud
                 System.out.println(app.toJsonString());
                 Publisher p = new Publisher();
-                p.post(app.toJsonString());
+                String response = p.post(app.toJsonString());
+
+                JsonReader reader = Json.createReader(new StringReader(response));
+                JsonObject responseObject = reader.readObject();
+                reader.close();
+                String new_app_id = responseObject.getString("app.id");
+                String old_app_id = RavelProperties.getInstance().getID();
+
+                if (new_app_id.equals(old_app_id)){
+                    System.out.println("Successfully updated application");
+                } else {
+                    RavelProperties.getInstance().setProperty("app.id", new_app_id);
+                    System.out.println("Successfully created new application with ID: " + new_app_id);
+
+                }
+
 
             } catch (FatalCompilerErrorException e) {
                 // do nothing, this exception is just a quick way to interrupt compilation

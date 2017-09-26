@@ -19,11 +19,17 @@ streaming model Counter(size : int32):
     schema:
         counter0 : int32
 
+local model CounterTwo(size : int32):
+    properties:
+        records = size
 
+    schema:
+        packets : int32
 
 controller EController(timer : TimerNRF,
                        #led_0 : Led,
-                       counter : Counter):
+                       counter : Counter,
+                       counter_two: CounterTwo):
     value = 0
 
     event system.started():
@@ -44,6 +50,9 @@ controller EController(timer : TimerNRF,
         timer.cancel()
 
     event counter.departed():
+        rec = counter_two.create()
+        rec.packets=value
+        counter_two.save(rec)
         system.print("Record is out")
 
     event counter.save_done():
@@ -63,8 +72,10 @@ controller GCtrl(counter: Counter):
 
 space EmbeddedSpace:
     platform:
-        language = CLang
-        system = Nrf52.v56
+        language = JLang
+        system = J2SE.v18
+        #language = CLang
+        #system = Nrf52.v56
         #system = Posix.v2008
 
     interfaces:
@@ -73,17 +84,19 @@ space EmbeddedSpace:
 
     models:
         cnt = Counter(size=100)
+        cnt2 = CounterTwo(size=100)
 
     controllers:
         main_ctrl = EController(timer = interfaces.timer,
-                                counter = models.cnt)
+                                counter = models.cnt,
+                                counter_two = models.cnt2)
 
 
 space Gateway:
     platform:
         language = JLang
-        #system = J2SE.v18
-        system = Android.v19
+        system = J2SE.v18
+        #system = Android.v19
 
     models:
         cnt = Counter(size=1000)

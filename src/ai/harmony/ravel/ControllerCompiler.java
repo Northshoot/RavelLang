@@ -9,6 +9,7 @@ import ai.harmony.ravel.compiler.symbol.ControllerSymbol;
 import ai.harmony.ravel.compiler.symbol.EventHandlerSymbol;
 import ai.harmony.ravel.compiler.symbol.Symbol;
 import ai.harmony.ravel.compiler.symbol.VariableSymbol;
+import ai.harmony.ravel.compiler.types.ModelType;
 import ai.harmony.ravel.compiler.types.ViewType;
 import ai.harmony.ravel.error.FatalCompilerErrorException;
 import ai.harmony.ravel.primitives.Controller;
@@ -49,6 +50,8 @@ class ControllerCompiler {
                 VariableSymbol var = (VariableSymbol)s;
                 if (var.getType() instanceof ViewType) {
                     controller.addView(var);
+                }else if (var.getType() instanceof ModelType){
+                    controller.addModel(var);
                 }
             }
         }
