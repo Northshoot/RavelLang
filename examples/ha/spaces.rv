@@ -1,0 +1,82 @@
+space Switch:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)
+
+space TemperatureSensor:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)
+
+space Thermostat:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)
+
+space PiGateway:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)
+
+space Cloud:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)
+space MobileApp:
+    platform:
+        language = CLang
+        system = Nrf52.v1
+
+    interfaces:
+        timer = Timer()
+        led0 = Led(led_num = 0)
+
+
+    controllers:
+        main_ctrl = EController(timer = interfaces.timer,
+                                led_0 = interfaces.led0)

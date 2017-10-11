@@ -1,0 +1,61 @@
+# describes the state of the light switch
+replicated model LightState(size: int32):
+    properties:
+            records = size
+
+    schema:
+        on : bool
+        time : int32
+        light_id: int32
+
+
+replicated model LightStateOnAlarm(size: int32):
+    properties:
+            records = size
+
+    schema:
+        on : bool
+        time : int32
+        light_id: int32
+
+
+# contains schema of outdoors temperature
+streaming model OutdoorTemperature(size: int32):
+    properties:
+        records = size
+        flow = TemperatureSensor -> PiGateway
+
+    schema:
+        timestamp : int32
+        temperature: int32
+
+#contains schema of air temperature around thermostat
+streaming model ThermostatTemperature(size: int32):
+    properties:
+        records = size
+        flow = EmbeddedSpace -> Gateway
+
+    schema:
+        timestamp : int32
+        temperature: int32
+
+# describes thermostat state
+replicated model SmokeAlarm(size: int32):
+    properties:
+        records = size
+
+    schema:
+        timestamp : int32
+        alarm: bool
+
+# describes thermostat state
+replicated model ThermostatState(size: int32):
+    properties:
+        records = size
+
+    schema:
+        timestamp : int32
+        # need emum?
+        heating: bool
+        deviation: int32
+        target_temperature: int32
