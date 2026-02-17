@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────────────────────
+# Collaborative Whiteboard — Real-time multiplayer in 55 lines
+# ──────────────────────────────────────────────────────────────
+# A Figma-like collaborative canvas where multiple users draw
+# simultaneously. Demonstrates streaming models for real-time
+# sync and websocket flows between clients and server.
+# ──────────────────────────────────────────────────────────────
+
+system Whiteboard:
+    description: "Real-time collaborative drawing canvas"
+    version: "1.0.0"
+
+streaming model Stroke:
+    schema:
+        id: uuid @primary
+        board_id: uuid -> Board.id
+        user_id: uuid
+        points: json
+        color: string
+        width: int
+        tool: enum("pen", "eraser", "highlighter", "shape")
+        timestamp: datetime
+    storage: postgres
+    flow: Client -> Server -> Client
+
+replicated model Board:
+    schema:
+        id: uuid @primary
+        name: string
+        owner_id: uuid
+        collaborators: string[]
+        created_at: datetime
+        thumbnail_url: string?
+    storage: postgres
+
+controller DrawController(strokes: Stroke, boards: Board):
+    event strokes.arrived(stroke: Stroke):
+        board = boards.get(stroke.board_id)
+        emit stroke
+
+view Canvas:
+    displays: Board
+    platform: [web]
+    behavior:
+        "Infinite zoomable canvas with pan gesture support"
+        "Drawing toolbar on the left: pen, eraser, highlighter, shapes"
+        "Color picker and stroke width slider"
+        "Show other users' cursors in real-time with name labels"
+        "Strokes appear instantly as they are drawn by any user"
+        "Undo/redo with Ctrl+Z / Ctrl+Shift+Z"
+
+view BoardList:
+    displays: Board[]
+    platform: [web]
+    behavior:
+        "Grid of board thumbnails with names"
+        "Plus button to create a new board"
+        "Share button copies invite link to clipboard"
+
+runtime Server:
+    platform: container
+    language: typescript
+    controllers: [DrawController]
+    models: [Stroke, Board]
+
+runtime Client:
+    platform: web
+    views: [Canvas, BoardList]
+
+flow RealtimeFlow:
+    Client -> Server:
+        protocol: websocket
+        auth: jwt
+    Server -> Client:
+        protocol: websocket
+        events: [stroke_added, user_joined, user_left, cursor_moved]

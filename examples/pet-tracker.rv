@@ -1,0 +1,94 @@
+# ──────────────────────────────────────────────────────────────
+# Pet Tracker — IoT heritage meets modern AI
+# ──────────────────────────────────────────────────────────────
+# A GPS collar for pets that streams location to your phone
+# and uses AI to detect unusual behavior (escape, inactivity).
+#
+# Shows Ravel's IoT lineage: an embedded device (the collar)
+# streams data through a cloud backend to a mobile app —
+# exactly the embedded-gateway-cloud pattern from the original
+# 2015 Stanford Ravel paper, now with AI and rich mobile views.
+# ──────────────────────────────────────────────────────────────
+
+system PetTracker:
+    description: "GPS pet collar with AI behavior alerts"
+    version: "1.0.0"
+
+streaming model Location:
+    schema:
+        id: uuid @primary
+        pet_id: uuid
+        lat: double
+        lon: double
+        battery: int
+        timestamp: datetime
+    storage: postgres
+    retention: 30d
+    flow: Collar -> Cloud -> Phone
+
+local model Pet:
+    schema:
+        id: uuid @primary
+        name: string
+        species: enum("dog", "cat", "other")
+        photo_url: string?
+        home_lat: double
+        home_lon: double
+        safe_radius_m: int = 200
+    storage: postgres
+
+controller TrackingController(locations: Location, pets: Pet):
+    event locations.arrived(loc: Location):
+        pet = pets.get(loc.pet_id)
+        distance = loc.lat - pet.home_lat
+        if loc.battery < 15:
+            emit loc
+
+agent EscapeDetector:
+    model: "gpt-4o-mini"
+    behavior:
+        "Detect if a pet has left its safe zone based on GPS trail"
+        "Distinguish between walks with owner vs actual escapes"
+        "Alert immediately for escapes, summarize walks afterward"
+    input: Location[], Pet
+    output: json
+    temperature: 0.2
+
+view PetMap:
+    displays: Location[]
+    platform: [ios, android]
+    behavior:
+        "Full-screen map centered on the pet's last known location"
+        "Animated breadcrumb trail showing the pet's path today"
+        "Safe zone shown as a translucent green circle around home"
+        "Red pulse animation if pet is outside the safe zone"
+        "Battery indicator in the top corner"
+        "Tap the pet avatar to see name, species, and stats"
+
+runtime Collar:
+    platform: container
+    language: go
+    controllers: [TrackingController]
+    config:
+        protocol: "ble_mqtt"
+        transmit_interval: 30s
+
+runtime Cloud:
+    platform: container
+    language: typescript
+    controllers: [TrackingController]
+    agents: [EscapeDetector]
+    models: [Location, Pet]
+
+runtime Phone:
+    platform: [ios, android]
+    views: [PetMap]
+
+flow TrackerFlow:
+    Collar -> Cloud:
+        protocol: mqtt
+        auth: tls_cert
+    Cloud -> Phone:
+        protocol: websocket
+        auth: jwt
+        events: [location_update, escape_alert, low_battery]

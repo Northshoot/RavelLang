@@ -1,0 +1,88 @@
+# ──────────────────────────────────────────────────────────────
+# AI Recipe App — Behavior-driven UI with zero layout code
+# ──────────────────────────────────────────────────────────────
+# Take a photo of your fridge → AI identifies ingredients →
+# suggests recipes → you cook. The entire UX is specified as
+# natural language behavior strings that LLM agents interpret
+# to generate platform-native UI code.
+# ──────────────────────────────────────────────────────────────
+
+system FridgeChef:
+    description: "Photograph your fridge, get recipe suggestions"
+    version: "1.0.0"
+
+model Recipe:
+    schema:
+        id: uuid @primary
+        title: string
+        ingredients: string[]
+        steps: string[]
+        cook_time_min: int
+        difficulty: enum("easy", "medium", "hard")
+        image_url: string?
+        rating: double = 0.0
+    storage: postgres
+
+model Ingredient:
+    schema:
+        id: uuid @primary
+        name: string
+        category: string
+        detected_at: datetime
+    storage: postgres
+
+agent VisionScanner:
+    model: "gpt-4o"
+    behavior:
+        "Analyze a photo of a fridge or pantry"
+        "Identify all visible food items and ingredients"
+        "Estimate quantities roughly (lots, some, little)"
+    input: bytes
+    output: Ingredient[]
+
+agent RecipeSuggester:
+    model: "claude-sonnet"
+    behavior:
+        "Given available ingredients, suggest 5 recipes"
+        "Prioritize recipes that use the most available ingredients"
+        "Include one adventurous option and one easy 15-minute option"
+        "Never suggest recipes requiring expensive missing ingredients"
+    input: Ingredient[]
+    output: Recipe[]
+    temperature: 0.8
+
+view CameraCapture:
+    displays: Ingredient[]
+    platform: [ios, android]
+    behavior:
+        "Full-screen camera viewfinder"
+        "Large circular capture button at the bottom"
+        "After capture, show detected ingredients as floating tags on the image"
+        "Swipe up to see recipe suggestions"
+
+view RecipeList:
+    displays: Recipe[]
+    platform: [ios, android]
+    behavior:
+        "Scrollable cards showing suggested recipes"
+        "Each card: photo, title, cook time, difficulty badge"
+        "Green checkmarks on ingredients you have, red X on missing ones"
+        "Tap to expand full recipe with step-by-step instructions"
+
+runtime Backend:
+    platform: container
+    language: typescript
+    agents: [VisionScanner, RecipeSuggester]
+    models: [Recipe, Ingredient]
+
+runtime App:
+    platform: [ios, android]
+    views: [CameraCapture, RecipeList]
+    config:
+        min_ios: 16
+        min_android: 26
+
+flow AppFlow:
+    App -> Backend:
+        protocol: https
+        auth: jwt
