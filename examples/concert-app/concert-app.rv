@@ -1,0 +1,278 @@
+# ──────────────────────────────────────────────────────────────────
+# Concert Ticketing Platform
+# ──────────────────────────────────────────────────────────────────
+# A full-stack concert discovery and ticketing platform.
+# Demonstrates: models, controllers, views, services, agents,
+#               runtimes (iOS + Android + Backend + Data), and flows.
+#
+# Compile:  ravel compile concert-app.rv --summary
+# ──────────────────────────────────────────────────────────────────
+
+system ConcertApp:
+    description: "Live concert discovery and ticketing platform"
+    version: "1.0.0"
+    author: "Ravel Examples"
+
+# ═══════════════════════════════════════════════════════════════════
+# Models — The data layer
+# ═══════════════════════════════════════════════════════════════════
+
+replicated model Concert:
+    schema:
+        id: uuid @primary
+        name: string
+        artist: string
+        venue: string
+        city: string
+        date: datetime
+        doors_open: datetime
+        capacity: int
+        tickets_sold: int = 0
+        price_cents: int
+        currency: string = "USD"
+        poster_url: string?
+        genre: enum("rock", "pop", "jazz", "electronic", "classical", "hiphop", "other")
+        status: enum("upcoming", "sold_out", "cancelled", "completed")
+    storage: postgres
+    cache: redis(ttl: 60s)
+    index: [city, date]
+
+streaming model Ticket:
+    schema:
+        id: uuid @primary
+        concert_id: uuid -> Concert.id
+        user_id: uuid -> User.id
+        seat_section: string
+        seat_number: string
+        status: enum("reserved", "confirmed", "cancelled", "used")
+        price_cents: int
+        purchased_at: datetime?
+        qr_code: string?
+    storage: postgres
+    flow: MobileApp -> Backend -> DataStore
+
+replicated model User:
+    schema:
+        id: uuid @primary
+        email: string @unique
+        display_name: string
+        avatar_url: string?
+        preferred_genres: string[]
+        city: string?
+        created_at: datetime
+    storage: postgres
+
+ephemeral model SeatMap:
+    schema:
+        concert_id: uuid -> Concert.id
+        sections: json
+        available_count: int
+    cache: redis(ttl: 5s)
+
+# ═══════════════════════════════════════════════════════════════════
+# Controllers — Business logic
+# ═══════════════════════════════════════════════════════════════════
+
+controller TicketController(tickets: Ticket, concerts: Concert):
+    max_tickets_per_user: int = 6
+
+    event tickets.purchase_requested(user_id: uuid, concert_id: uuid, seats: string[]):
+        concert = concerts.get(concert_id)
+        if concert.status == "sold_out" or concert.status == "cancelled":
+            return error("Concert is not available for ticket sales")
+
+        if len(seats) > max_tickets_per_user:
+            return error("Maximum 6 tickets per purchase")
+
+        if concert.tickets_sold + len(seats) > concert.capacity:
+            return error("Not enough seats available")
+
+        for seat in seats:
+            ticket = tickets.create(
+                concert_id: concert_id,
+                user_id: user_id,
+                seat_section: seat,
+                seat_number: seat,
+                status: "reserved",
+                price_cents: concert.price_cents
+            )
+            ticket.save()
+
+        concert.tickets_sold += len(seats)
+        if concert.tickets_sold >= concert.capacity:
+            concert.status = "sold_out"
+        concert.save()
+
+    event tickets.cancel_requested(ticket_id: uuid, user_id: uuid):
+        ticket = tickets.get(ticket_id)
+        if ticket.user_id != user_id:
+            return error("Unauthorized")
+        if ticket.status != "reserved" and ticket.status != "confirmed":
+            return error("Ticket cannot be cancelled")
+
+        ticket.status = "cancelled"
+        ticket.save()
+
+        concert = concerts.get(ticket.concert_id)
+        concert.tickets_sold -= 1
+        if concert.status == "sold_out":
+            concert.status = "upcoming"
+        concert.save()
+
+controller ConcertController(concerts: Concert):
+    event concerts.created(concert: Concert):
+        log concert.name
+        emit concert
+
+    def search(city: string, genre: string, date_from: datetime) -> Concert[]:
+        results = concerts.all()
+        return results
+
+# ═══════════════════════════════════════════════════════════════════
+# Views — Declarative UI with behavior specifications
+# ═══════════════════════════════════════════════════════════════════
+
+view ConcertDiscovery:
+    displays: Concert[]
+    platform: [ios, android]
+    behavior:
+        "Show a curated feed of upcoming concerts"
+        "Each concert card shows: poster, artist name, venue, date, price"
+        "Cards use large hero images with text overlay at the bottom"
+        "Tapping a card navigates to the concert detail view"
+        "Support pull-to-refresh and infinite scroll"
+        "Show a genre filter bar at the top (horizontally scrollable chips)"
+        "Highlight concerts recommended by the AI agent with a subtle glow"
+    style:
+        theme: material
+        dark_mode: auto
+        primary_color: "#6C5CE7"
+
+view ConcertDetail:
+    displays: Concert
+    platform: [ios, android]
+    behavior:
+        "Full-screen hero image with parallax scroll effect"
+        "Show artist, venue, date/time, price, and availability"
+        "Include an interactive seat map (rendered from SeatMap data)"
+        "Buy Tickets button fixed at the bottom"
+        "Show similar concerts from the recommendation agent"
+    components:
+        hero: ImageHeader(parallax: True)
+        seatmap: InteractiveSeatMap(zoomable: True)
+        action: StickyBottomButton(label: "Buy Tickets")
+
+view TicketWallet:
+    displays: Ticket[]
+    platform: [ios, android]
+    behavior:
+        "Show all user tickets as visual ticket cards"
+        "Each ticket shows concert name, date, seat, and a QR code"
+        "Upcoming tickets appear first, sorted by date"
+        "Past/cancelled tickets are grouped below with reduced opacity"
+        "Swipe left to cancel a ticket (with confirmation)"
+        "Tap a ticket to show the full-screen QR code for entry"
+
+# ═══════════════════════════════════════════════════════════════════
+# Services — External integrations
+# ═══════════════════════════════════════════════════════════════════
+
+service PaymentService:
+    provider: stripe
+    def charge(amount_cents: int, currency: string, token: string) -> json
+    def refund(payment_id: string) -> json
+    config:
+        webhook_endpoint: "/webhooks/stripe"
+
+service NotificationService:
+    provider: firebase
+    def send_push(user_id: uuid, title: string, body: string) -> bool
+    def send_email(user_id: uuid, subject: string, template: string) -> bool
+    event notification_received(user_id: uuid, payload: json)
+
+service ImageService:
+    provider: cloudinary
+    def upload(data: bytes, folder: string) -> string
+    def resize(url: string, width: int, height: int) -> string
+
+# ═══════════════════════════════════════════════════════════════════
+# Agents — AI-powered components
+# ═══════════════════════════════════════════════════════════════════
+
+agent ConcertRecommender:
+    model: "claude-sonnet"
+    behavior:
+        "Recommend concerts based on the user's listening history and preferences"
+        "Consider genre preferences, location proximity, and price sensitivity"
+        "Diversify recommendations — don't only show the most popular concerts"
+        "Explain why each concert was recommended in one sentence"
+    input: User, Concert[]
+    output: Concert[] @ranked
+    temperature: 0.7
+
+agent TicketPricingAgent:
+    model: "gpt-4o"
+    behavior:
+        "Analyze demand patterns and suggest dynamic pricing"
+        "Consider time until concert, current sales velocity, and venue capacity"
+        "Never exceed 2x the base price"
+    input: Concert, Ticket[]
+    output: int
+    tools: [analytics_api, pricing_model]
+
+# ═══════════════════════════════════════════════════════════════════
+# Runtimes — Where things run
+# ═══════════════════════════════════════════════════════════════════
+
+runtime MobileApp:
+    platform: [ios, android]
+    language: [swift, kotlin]
+    views: [ConcertDiscovery, ConcertDetail, TicketWallet]
+    controllers: [TicketController]
+    agents: [ConcertRecommender]
+    config:
+        min_ios: 16
+        min_android: 26
+        offline_mode: True
+
+runtime Backend:
+    platform: container
+    orchestration: kubernetes
+    language: typescript
+    controllers: [TicketController, ConcertController]
+    services: [PaymentService, NotificationService, ImageService]
+    agents: [ConcertRecommender, TicketPricingAgent]
+    scaling:
+        min_replicas: 3
+        max_replicas: 20
+        cpu_threshold: 70
+    env:
+        NODE_ENV: "production"
+        LOG_LEVEL: "info"
+
+runtime DataStore:
+    platform: managed
+    language: sql
+    models: [Concert, Ticket, User, SeatMap]
+    config:
+        provider: "aws_rds"
+        instance_type: "db.r6g.large"
+        multi_az: True
+
+# ═══════════════════════════════════════════════════════════════════
+# Flows — How data moves between runtimes
+# ═══════════════════════════════════════════════════════════════════
+
+flow AppFlow:
+    MobileApp -> Backend:
+        protocol: https
+        auth: jwt
+        rate_limit: 100/min
+
+    Backend -> DataStore:
+        protocol: postgres
+        pool_size: 20
+
+    Backend -> MobileApp:
+        protocol: websocket
+        events: [ticket_confirmed, seat_taken, concert_updated, price_changed]

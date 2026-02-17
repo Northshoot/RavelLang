@@ -1,0 +1,244 @@
+# ──────────────────────────────────────────────────────────────────
+# SaaS Analytics Platform
+# ──────────────────────────────────────────────────────────────────
+# A multi-tenant analytics SaaS with AI-powered insights.
+# Demonstrates: complex model relationships, multi-service backend,
+# web dashboard, API-first design, and AI agents for data analysis.
+# ──────────────────────────────────────────────────────────────────
+
+system AnalyticsPlatform:
+    description: "Multi-tenant analytics platform with AI-powered insights"
+    version: "2.0.0"
+
+# ═══════════════════════════ Models ═══════════════════════════════
+
+replicated model Organization:
+    schema:
+        id: uuid @primary
+        name: string
+        slug: string @unique
+        plan: enum("free", "pro", "enterprise")
+        created_at: datetime
+        settings: json
+    storage: postgres
+
+replicated model User:
+    schema:
+        id: uuid @primary
+        org_id: uuid -> Organization.id
+        email: string @unique
+        name: string
+        role: enum("owner", "admin", "member", "viewer")
+        created_at: datetime
+    storage: postgres
+
+streaming model Event:
+    schema:
+        id: uuid @primary
+        org_id: uuid -> Organization.id
+        name: string @index
+        properties: json
+        user_id: string
+        session_id: string
+        timestamp: datetime
+        source: string
+    storage: postgres
+    retention: 365d
+    index: [org_id, name, timestamp]
+
+local model Dashboard:
+    schema:
+        id: uuid @primary
+        org_id: uuid -> Organization.id
+        name: string
+        layout: json
+        widgets: json
+        shared: bool = False
+        created_by: uuid -> User.id
+    storage: postgres
+
+local model Report:
+    schema:
+        id: uuid @primary
+        org_id: uuid -> Organization.id
+        name: string
+        query: json
+        schedule: string?
+        last_run: datetime?
+        recipients: string[]
+    storage: postgres
+
+# ═══════════════════════════ Controllers ══════════════════════════
+
+controller EventIngestionController(events: Event, orgs: Organization):
+    event events.arrived(event: Event):
+        org = orgs.get(event.org_id)
+        if org.plan == "free":
+            pass
+        event.save()
+        log event.name
+
+    def ingest_batch(org_id: uuid, batch: json) -> int:
+        count: int = 0
+        return count
+
+controller AnalyticsController(events: Event, dashboards: Dashboard, reports: Report):
+    def query_events(org_id: uuid, filters: json) -> json:
+        results = events.all()
+        return results
+
+    def aggregate(org_id: uuid, metric: string, group_by: string, time_range: json) -> json:
+        return None
+
+    event reports.run_requested(report: Report):
+        log report.name
+
+# ═══════════════════════════ Views ════════════════════════════════
+
+view AnalyticsDashboard:
+    displays: Dashboard
+    platform: [web]
+    behavior:
+        "Drag-and-drop dashboard builder with customizable widgets"
+        "Widget types: line chart, bar chart, pie chart, number, table, funnel"
+        "Each widget is backed by a configurable query"
+        "Real-time data refresh with WebSocket updates"
+        "Date range picker with presets (today, 7d, 30d, 90d, custom)"
+        "Compare mode: overlay previous period data"
+        "Export to PDF or PNG"
+    style:
+        theme: material
+        dark_mode: auto
+        primary_color: "#0984E3"
+    components:
+        charts: ChartLibrary(type: "recharts")
+        grid: DragDropGrid(columns: 12)
+        datepicker: DateRangePicker(presets: True)
+
+view EventExplorer:
+    displays: Event[]
+    platform: [web]
+    behavior:
+        "Real-time event stream with filter/search"
+        "Searchable properties with autocomplete"
+        "Group events by name and show counts"
+        "Click an event to see full properties as JSON"
+        "AI natural language query: type a question, get a chart"
+
+view ReportBuilder:
+    displays: Report
+    platform: [web]
+    behavior:
+        "Visual query builder for creating reports"
+        "Step 1: Select events to analyze"
+        "Step 2: Choose metrics (count, sum, avg, unique)"
+        "Step 3: Group by properties or time"
+        "Step 4: Add filters"
+        "Step 5: Preview results and save"
+        "Schedule reports to run daily/weekly/monthly"
+
+# ═══════════════════════════ Services ═════════════════════════════
+
+service EmailService:
+    provider: sendgrid
+    def send(to: string, subject: string, html: string) -> bool
+    def send_template(to: string, template_id: string, data: json) -> bool
+
+service StorageService:
+    provider: s3
+    def upload(key: string, data: bytes, content_type: string) -> string
+    def get_signed_url(key: string, expires: int) -> string
+
+service AuthService:
+    provider: custom
+    def login(email: string, password: string) -> json
+    def register(email: string, password: string, org_name: string) -> json
+    def refresh_token(token: string) -> json
+    def verify_api_key(key: string) -> json
+
+# ═══════════════════════════ Agents ═══════════════════════════════
+
+agent InsightsAgent:
+    model: "claude-sonnet"
+    behavior:
+        "Analyze event data and surface actionable insights"
+        "Detect anomalies: sudden spikes/drops in key metrics"
+        "Identify trends: growing/declining user segments"
+        "Generate weekly insight summaries in plain English"
+        "Answer natural language questions about the data"
+    input: Event[], Organization
+    output: json
+    temperature: 0.4
+
+agent QueryTranslator:
+    model: "gpt-4o"
+    behavior:
+        "Translate natural language questions into SQL/aggregation queries"
+        "Questions like 'How many signups last week?' become structured queries"
+        "Validate that queries are safe and scoped to the user's organization"
+        "Never allow cross-tenant data access"
+    input: string, Organization
+    output: json
+    guardrails: [org_scope_check, sql_injection_prevention]
+
+# ═══════════════════════════ Runtimes ═════════════════════════════
+
+runtime APIServer:
+    platform: container
+    orchestration: kubernetes
+    language: typescript
+    controllers: [EventIngestionController, AnalyticsController]
+    services: [AuthService, EmailService, StorageService]
+    agents: [InsightsAgent, QueryTranslator]
+    scaling:
+        min_replicas: 3
+        max_replicas: 50
+        cpu_threshold: 65
+    config:
+        cors_origins: "*"
+        max_batch_size: 1000
+
+runtime WebApp:
+    platform: web
+    language: typescript
+    views: [AnalyticsDashboard, EventExplorer, ReportBuilder]
+
+runtime DataPipeline:
+    platform: container
+    orchestration: kubernetes
+    language: python
+    controllers: [EventIngestionController]
+    models: [Event]
+    config:
+        batch_window: 60s
+        max_batch_size: 10000
+
+runtime DataWarehouse:
+    platform: managed
+    models: [Organization, User, Event, Dashboard, Report]
+    config:
+        provider: "aws_rds"
+        read_replicas: 2
+
+# ═══════════════════════════ Flows ════════════════════════════════
+
+flow IngestionFlow:
+    WebApp -> APIServer:
+        protocol: https
+        auth: jwt
+
+    APIServer -> DataWarehouse:
+        protocol: postgres
+        pool_size: 30
+
+    APIServer -> DataPipeline:
+        protocol: kafka
+        events: [event_ingested]
+
+    DataPipeline -> DataWarehouse:
+        protocol: postgres
+
+    APIServer -> WebApp:
+        protocol: websocket
+        auth: jwt
+        events: [dashboard_update, insight_ready, report_complete]

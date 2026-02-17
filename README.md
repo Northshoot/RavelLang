@@ -1,275 +1,276 @@
-# Ravel Language #
+# Ravel v2
+
+**A language and compiler for orchestrating full-stack systems through LLM agents.**
 
-## Ravel Concepts ##
-
-##Programming with Ravel ##
-
-### Abstractions ###
-
-### Syntax ###
-
-### Keywords ###
-
-### Brief of API's ###
-
-#### Model API ####
-
-#### Runtime API ####
-
-#### System API ####
-
-
-### Programming with API'S 
-
-### Models API ###
-**Commands**
-
-model`.create()` : returns new record of type model
-
-model`.save(rec) `: save's current record `rec`, can only be done on the record creating tier
-
-for the replicated model: model`.save(rec, tier) `: saves to the flow
-
-model`.delete(rec) `: deletes current record `rec` deletes record in local buffer
-
-TODO: need global delete flag
-
-TODO: define behaviour of deleting record before save_done is received
-
-**Events**
-
-model`.arrived():` record arrived to the tier access `self.record`, can not happen on the record originating tier
-
-
-model`.departed():` record departed from the tier
-
-model`.save_done():`  record have been saved accross the flow
-
-TODO: make a table of save vs local etc
-
-model`.full():`  model buffer is full, no more records will be accepted until its cleaned up
-
-**Queries**
-
-mode`.first()`
-
-model`.last()`
-
-**Other notes**
-
-it is not implemented to have two models of the same type in the same space, and now you get a compile error if you try
-
-
-#### Space API ####
-
-#### View API ####
-
-#### System API ####
-`system.started()`
-
-`system.restarted()`
-
-`system.stopped()`
-
-`system.connected(Endpoint ep)`
-
-`system.disconnected(Endpoint ep)`
-
-
-#### Interface API ####
-1) interfaces now receive an "instance id" as the first argument to the constructor (after self in C) 
-2) interfaces must have a field in their struct called __id, and they must store the instance id in there in the constructor, if they have any event 
-3) interfaces must use the template <dispatch_event(interface, eventName, params)> (where params is a list of additional event parameters) to dispatch events
-4) interfaces (and models) receive additional parameters (as declared in ravel) as part of their constructors
-5) you can no longer rely on interfaces.configuration being made only of constants, as it could refer to one of the parameters, which are only available in the constructor (so you must copy the stuff over to the instance struct)
-6) same for model.size, but the templates have been updated
-7) you can now have two controllers of the same type, connected to different interfaces, in the same space
- 
-
-#### Template API ####
-Ravel uses StringTemplate developed by Terence Parr. Please refer http://www.stringtemplate.org/ for details.
-Below we elaborate on Ravel's template structure.
-
-TODO
-define template interface
-
-##### C Templates ######
-Includes and flags 
-<pre>
-<code> extra_cflags() </code>
-</pre>
- 
-<pre>
-<code> extra_ldflags() </code>
-</pre>
-  
-<pre>
-<code> extra_includes() </code>
-</pre>
-   
-
-<pre>
-<code> c_file(includes,name,interface)  </code>
-</pre>
- 
-<pre>
-<code> < interface.configuration.led_id; format="literal" > </code>
-</pre>
- 
-<pre>
-<code> < begin_source(name) > </code>
-</pre>
-
-<pre>
-<code> < includes:do_include(); separator="\n" > </code>
-</pre>
- 
-<pre>
-<code> < name; format="function" >_ </code>
-</pre>
- 
-<pre>
-<code> < begin_source(name) > </code>
-</pre>
- 
-
- 
-<pre>
-<code> < includes:do_include(); separator="\n" > </code>
-</pre>
- 
-Define the h file:
-<pre>
-<code> h_file(includes,name,interface)  </code>
-</pre>
-
-<pre>
-<code> < begin_header("LIBRARY", name) >  </code>
-</pre>
-
-Begin extern declaration:
-
-<pre>
-<code> < begin_extern_c() > </code>
-</pre>
- 
-Any functions same syntax as in C file template
- 
-<pre>
-<code> < end_extern_c() > </code>
-</pre>
-
-
-## Extending Ravel ##
-
-### Writing Interface ###
-Interface have two components: ravel code and template.
-
-The <code>Interface</code> implementation in Ravel has three scopes:
- + <code>configuration</code> any static parameter that is set
- + <code>implementation</code> path to implementation template
- + declarations:
-    * <code>def</code> command 
-    + <code>event</code>  event (callback)
- 
-Each interface has one (or more) corresponding templates with mandatory functions:
-+ <code>_init</code>  has initialization code
-+ <code>_finalize</code> has clean up code that is called from stopping event
-+ any other command/event that is declared in the interface
-
-Moreover, the template group has following mandatory templates:
-<pre><code>extra_cflags() ::=<<
->>
-extra_ldflags() ::=<<
->>
-extra_includes() ::=<<
->></code></pre>
-
-That define system dependencies.
-
-Interface is defined in Ravel language:
-
-<pre><code>
-interface Led(led_num: int32):
-    configuration:
-        led_id = led_num
-        
-    implementation:
-        c = "rlib/nrf52/led.stg"
-
-    def init()
-    def on()
-    def off()
-    def toggle()
-</code></pre>
-
-The corresponding 
-
-</pre>
-</code>
-
-
-#### Example Led ####
-Example interface for LED implemented for NRF52 device
-
-<pre><code>
-interface Led(led_num: int32):
-    configuration:
-        led_id = led_num
-    implementation:
-        c = "rlib/nrf52/led.stg"
-
-    def init()
-    def on()
-    def off()
-    def toggle()
-</code></pre>
-
-
-
-<pre><code></code></pre>
-<pre><code></code></pre>
-<pre><code></code></pre>
-
-### Writing Language Runtime ###
-
-### Writing Platform Runtime ###
-
-### Writing Driver ###
-
-# Running Example #
-
-## Ping Pong ##
-
-Java:
-
-<pre> <code>
-java -cp ../../../../../runtime/java/build/libs/java-0.9.jar:app.jar org.stanford.ravel.generated.Application ../../../../../examples/endpoint.txt ../../keys.txt
-
-</code> </pre>
-
-# Future Work #
-
-    Set timeout / number of retries on model.save
-    In order delivery
-    Replicated models versioned
-    Transactions
-    Consistence and conflict resolution protocols
-    Mechanism for time resolution between real time and the counter in embedded device
-    Add Ravel to Cooja, or re-invent Symphony with NS-3
-
-## Needed components ##
-    Keydistribution, security primitives
-    OS drivers - Contiki/RTOS
-    Database query
-    Cassandra as a high-scale database
-    Kafka for data pacturing and messaging
-    Storm for streaming data distribution
-    Spark for in-memory data processing
-    https://www.heroku.com/
-    
-    
-
- 
- 
- 
+Ravel is a declarative language where you describe *what* your system should do — the data, logic, views, services, AI agents, and infrastructure — and the compiler produces an **Agent Execution Plan** that LLM agents carry out to build the entire project.
+
+```
+.rv source
+  → Lexer → Parser → AST
+    → Analyzer → Validated Program
+      → IR Builder → System IR
+        → Planner → Agent Execution Plan (JSON)
+          → Orchestrator → LLM Agents build the system
+            ├── iOS (Swift/SwiftUI)
+            ├── Android (Kotlin/Compose)
+            ├── Web (React/TypeScript)
+            ├── Backend (TypeScript/Python/Go)
+            ├── Database (Postgres/Redis/Mongo)
+            ├── Infrastructure (Docker/K8s/Terraform)
+            └── Tests + Security + Documentation
+```
+
+## Heritage
+
+Ravel descends from the [Stanford Ravel IoT framework](https://iot.stanford.edu/pubs/ravel-riliskis-iotapp15.pdf) (Riliskis, Hong, Levis — 2015), which introduced distributed MVC for IoT applications across embedded devices, gateways, and cloud servers.
+
+| Original Ravel (2015)  | Modern Ravel (2025)          |
+|------------------------|------------------------------|
+| `model` (data + flow)  | `model` (data + storage + sync + cache) |
+| `controller` (events)  | `controller` (events + AI logic)        |
+| `view` (UI)            | `view` (declarative UI + behavior specs)|
+| `interface` (hw/sw)    | `service` (cloud APIs + providers)      |
+| `space` (platform)     | `runtime` (container, mobile, serverless, edge) |
+| *N/A*                  | `agent` (LLM-powered component)         |
+| `flow` (data pipes)    | `flow` (typed pipelines + protocols)    |
+| *N/A*                  | `system` (top-level composition)        |
+
+The original compiled `.rv` → C/Java source code via StringTemplate.
+Modern Ravel compiles `.rv` → Agent Execution Plans via LLM orchestration.
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Build the compiler
+npm run build
+
+# Compile an example
+node dist/cli.js compile examples/concert-app/concert-app.rv --summary
+
+# Dry-run the execution plan
+node dist/cli.js run examples/concert-app/concert-app.rv --dry-run
+
+# Output full JSON plan
+node dist/cli.js compile examples/concert-app/concert-app.rv -o plan.json
+
+# Scaffold a new project
+node dist/cli.js init my-app
+```
+
+## Language Overview
+
+### System
+
+Top-level declaration that names and describes the application:
+
+```ravel
+system ConcertApp:
+    description: "Live concert discovery and ticketing platform"
+    version: "1.0.0"
+```
+
+### Model
+
+Data schemas with storage semantics. Evolved from original Ravel models with modern storage backends:
+
+```ravel
+replicated model Concert:
+    schema:
+        id: uuid @primary
+        name: string
+        venue: string
+        date: datetime
+        capacity: int
+        genre: enum("rock", "pop", "jazz", "electronic")
+        status: enum("upcoming", "sold_out", "cancelled")
+    storage: postgres
+    cache: redis(ttl: 60s)
+    index: [venue, date]
+```
+
+Qualifiers: `local`, `streaming`, `replicated`, `ephemeral`
+
+### Controller
+
+Event-driven business logic. Same model as original Ravel — controllers bind to models and react to events:
+
+```ravel
+controller TicketController(tickets: Ticket, concerts: Concert):
+    max_per_user: int = 6
+
+    event tickets.purchase_requested(user_id: uuid, concert_id: uuid, seats: string[]):
+        concert = concerts.get(concert_id)
+        if concert.tickets_sold + len(seats) > concert.capacity:
+            return error("Not enough seats available")
+        for seat in seats:
+            ticket = tickets.create(
+                concert_id: concert_id,
+                user_id: user_id,
+                seat: seat,
+                status: "reserved",
+                price_cents: concert.price_cents
+            )
+            ticket.save()
+```
+
+### View
+
+Declarative UI with natural-language behavior specifications. The compiler sends these behavior specs as prompts to the appropriate agent (iOS, Android, or Web):
+
+```ravel
+view ConcertDiscovery:
+    displays: Concert[]
+    platform: [ios, android]
+    behavior:
+        "Show a curated feed of upcoming concerts"
+        "Each concert card shows: poster, artist name, venue, date, price"
+        "Support pull-to-refresh and infinite scroll"
+        "Show a genre filter bar at the top"
+    style:
+        theme: material
+        dark_mode: auto
+```
+
+### Service
+
+External integrations. Replaces original Ravel's `interface` concept, modernized for cloud APIs:
+
+```ravel
+service PaymentService:
+    provider: stripe
+    def charge(amount: int, currency: string, token: string) -> json
+    def refund(payment_id: string) -> json
+```
+
+### Runtime
+
+Deployment targets. Replaces original Ravel's `space` concept, supporting modern platforms:
+
+```ravel
+runtime Backend:
+    platform: container
+    orchestration: kubernetes
+    language: typescript
+    controllers: [TicketController]
+    services: [PaymentService]
+    scaling:
+        min_replicas: 3
+        max_replicas: 20
+        cpu_threshold: 70
+
+runtime MobileApp:
+    platform: [ios, android]
+    views: [ConcertDiscovery, TicketWallet]
+    config:
+        min_ios: 16
+        min_android: 26
+```
+
+### Agent
+
+LLM-powered components — the new primitive that makes modern Ravel uniquely powerful:
+
+```ravel
+agent ConcertRecommender:
+    model: "claude-sonnet"
+    behavior:
+        "Recommend concerts based on the user's listening history"
+        "Consider genre preferences, location, and price sensitivity"
+        "Diversify recommendations beyond just popular concerts"
+    input: User, Concert[]
+    output: Concert[] @ranked
+    temperature: 0.7
+```
+
+### Flow
+
+Data pipelines between runtimes. Evolved from original Ravel's flow declarations with protocol and auth specs:
+
+```ravel
+flow AppFlow:
+    MobileApp -> Backend:
+        protocol: https
+        auth: jwt
+        rate_limit: 100/min
+    Backend -> DataStore:
+        protocol: postgres
+    Backend -> MobileApp:
+        protocol: websocket
+        events: [ticket_confirmed, seat_taken]
+```
+
+## Type System
+
+**Primitives:** `int`, `int32`, `int64`, `float`, `double`, `decimal`, `string`, `bool`, `byte`, `bytes`, `uuid`, `datetime`, `timestamp`, `json`, `void`
+
+**Composite:** `Type[]` (array), `Type[N]` (fixed array), `Type?` (optional), `map<K,V>`, `enum("a","b")`, `(A, B)` (tuple)
+
+**Foreign keys:** `uuid -> Concert.id`
+
+**Annotations:** `@primary`, `@unique`, `@index`, `@ranked`
+
+## Compilation Output
+
+The compiler produces an **Agent Execution Plan** — a JSON document that describes every task needed to build the complete system. Phases execute sequentially; tasks within a phase can run in parallel:
+
+```
+Phase 1: Foundation  — API contracts, database schemas, shared types
+Phase 2: Core        — Backend services, business logic
+Phase 3: Clients     — iOS, Android, Web frontends
+Phase 4: Intelligence — AI agent integrations
+Phase 5: Infrastructure — Docker, K8s, CI/CD
+Phase 6: Quality     — Security audit, tests, docs
+```
+
+Each task includes structured instructions for a specialized LLM agent (database, backend, ios, android, web, infrastructure, security, testing).
+
+## CLI Reference
+
+```
+ravel compile <file.rv>              # Compile and output execution plan
+ravel compile <file.rv> --summary    # Print human-readable summary
+ravel compile <file.rv> --ir         # Output the System IR
+ravel compile <file.rv> --ast        # Output the parsed AST
+ravel compile <file.rv> --tokens     # Output the token stream
+ravel compile <file.rv> -o plan.json # Save plan to file
+ravel run <file.rv> --dry-run        # Simulate execution
+ravel run <plan.json>                # Execute a pre-compiled plan
+ravel init <name>                    # Create a new project
+```
+
+## Architecture
+
+```
+src/
+  compiler/
+    tokens.ts      Token definitions
+    lexer.ts       Tokenizer with Python-style indentation tracking
+    ast.ts         AST node types
+    parser.ts      Recursive descent parser
+    analyzer.ts    Semantic analysis (symbol resolution, validation, flow analysis)
+    ir.ts          System IR builder (the architectural description)
+    errors.ts      Compiler error types
+  agents/
+    types.ts       Agent type system and execution plan schema
+    planner.ts     IR → Agent Execution Plan transformation
+    orchestrator.ts  Plan execution and agent dispatch
+  cli.ts           CLI tool
+  index.ts         Public API
+
+grammar/
+  Ravel.g4         Formal ANTLR4 grammar specification
+
+examples/
+  concert-app/     Full-stack concert ticketing platform
+  smart-home/      IoT smart home with AI assistant
+  saas-platform/   Multi-tenant analytics SaaS
+
+legacy/            Original Ravel Java compiler (preserved)
+```
+
+## License
+
+MIT + Apache 2.0

@@ -1,0 +1,227 @@
+# ──────────────────────────────────────────────────────────────────
+# Smart Home Platform
+# ──────────────────────────────────────────────────────────────────
+# Demonstrates Ravel's IoT heritage (original Ravel was IoT-first)
+# evolved for the modern era: AI assistants, edge computing,
+# cloud backends, and mobile control.
+#
+# This example shows how the original Ravel concepts
+# (embedded devices, gateways, cloud) now extend to include
+# AI agents and rich mobile/web interfaces.
+# ──────────────────────────────────────────────────────────────────
+
+system SmartHome:
+    description: "AI-powered smart home automation platform"
+    version: "1.0.0"
+
+# ═══════════════════════════ Models ═══════════════════════════════
+
+replicated model Device:
+    schema:
+        id: uuid @primary
+        name: string
+        type: enum("light", "thermostat", "lock", "camera", "sensor", "speaker")
+        room: string
+        status: enum("online", "offline", "error")
+        last_seen: datetime
+        firmware_version: string?
+        capabilities: json
+    storage: postgres
+    sync: replicated
+
+streaming model SensorReading:
+    schema:
+        id: uuid @primary
+        device_id: uuid -> Device.id
+        metric: string
+        value: double
+        unit: string
+        timestamp: datetime
+    storage: postgres
+    retention: 90d
+    flow: EdgeHub -> Cloud -> Dashboard
+
+local model Automation:
+    schema:
+        id: uuid @primary
+        name: string
+        trigger_type: enum("time", "sensor", "event", "ai")
+        trigger_config: json
+        actions: json
+        enabled: bool = True
+        last_run: datetime?
+    storage: postgres
+
+ephemeral model DeviceCommand:
+    schema:
+        device_id: uuid -> Device.id
+        command: string
+        params: json
+        issued_at: datetime
+        issued_by: string
+
+# ═══════════════════════════ Controllers ══════════════════════════
+
+controller DeviceController(devices: Device, commands: DeviceCommand):
+    event devices.status_changed(device: Device):
+        if device.status == "offline":
+            log device.name
+            emit device
+
+    event commands.issued(cmd: DeviceCommand):
+        device = devices.get(cmd.device_id)
+        if device.status != "online":
+            return error("Device is not online")
+        emit cmd
+
+controller AutomationController(automations: Automation, readings: SensorReading, commands: DeviceCommand):
+    event readings.arrived(reading: SensorReading):
+        active_automations = automations.all()
+        for automation in active_automations:
+            if automation.enabled:
+                pass
+
+    def evaluate_trigger(automation: Automation, reading: SensorReading) -> bool:
+        return True
+
+    def execute_actions(automation: Automation):
+        pass
+
+# ═══════════════════════════ Views ════════════════════════════════
+
+view HomeDashboard:
+    displays: Device[]
+    platform: [ios, android, web]
+    behavior:
+        "Show a room-by-room overview of all smart devices"
+        "Each room is a collapsible card showing device tiles"
+        "Device tiles show name, status indicator (green/red/yellow), and current value"
+        "Quick-action buttons: lights toggle, thermostat +/- temp, lock/unlock"
+        "Top banner shows weather, time, and home status summary"
+        "Animated transitions when device states change"
+    style:
+        theme: material
+        dark_mode: auto
+        primary_color: "#00B894"
+
+view DeviceControl:
+    displays: Device
+    platform: [ios, android, web]
+    behavior:
+        "Full device control panel"
+        "Light: color picker wheel, brightness slider, scene presets"
+        "Thermostat: temperature dial, mode selector (heat/cool/auto/off), schedule"
+        "Lock: large lock/unlock button with status animation"
+        "Camera: live video feed with motion event timeline"
+        "Show last 24h of sensor data as a sparkline chart"
+
+view AutomationBuilder:
+    displays: Automation
+    platform: [web]
+    behavior:
+        "Visual automation builder with drag-and-drop blocks"
+        "IF (trigger) THEN (action) flow with connectors"
+        "Trigger options: time schedule, sensor threshold, device event"
+        "Action options: control device, send notification, run scene"
+        "AI suggestion panel that proposes automations based on usage patterns"
+
+# ═══════════════════════════ Services ═════════════════════════════
+
+service WeatherService:
+    provider: openweathermap
+    def get_current(lat: double, lon: double) -> json
+    def get_forecast(lat: double, lon: double, days: int) -> json
+
+service VoiceService:
+    provider: custom
+    def process_command(audio: bytes) -> string
+    event voice_command(text: string, confidence: double)
+
+# ═══════════════════════════ Agents ═══════════════════════════════
+
+agent HomeAssistant:
+    model: "claude-sonnet"
+    behavior:
+        "Act as a friendly, proactive smart home assistant"
+        "Understand natural language commands like 'make it cozy in the living room'"
+        "Translate vague requests into specific device commands"
+        "Learn household patterns and suggest automations"
+        "Provide energy usage insights and savings tips"
+    input: Device[], SensorReading[], Automation[]
+    output: DeviceCommand[]
+    tools: [device_control, automation_api, weather_api]
+    temperature: 0.3
+
+agent EnergyOptimizer:
+    model: "gpt-4o-mini"
+    behavior:
+        "Analyze energy consumption patterns from sensor data"
+        "Identify waste: lights left on, heating empty rooms, etc."
+        "Suggest schedule optimizations to reduce energy bills"
+        "Balance comfort and efficiency"
+    input: SensorReading[], Device[], Automation[]
+    output: json
+
+# ═══════════════════════════ Runtimes ═════════════════════════════
+
+runtime EdgeHub:
+    platform: container
+    language: go
+    controllers: [DeviceController]
+    models: [Device, SensorReading, DeviceCommand]
+    config:
+        device_protocols: "mqtt,zigbee,zwave,ble"
+        local_storage: True
+
+runtime Cloud:
+    platform: container
+    orchestration: kubernetes
+    language: typescript
+    controllers: [DeviceController, AutomationController]
+    services: [WeatherService, VoiceService]
+    agents: [HomeAssistant, EnergyOptimizer]
+    models: [Device, SensorReading, Automation]
+    scaling:
+        min_replicas: 2
+        max_replicas: 8
+        cpu_threshold: 60
+
+runtime MobileApp:
+    platform: [ios, android]
+    language: [swift, kotlin]
+    views: [HomeDashboard, DeviceControl]
+    config:
+        min_ios: 16
+        min_android: 26
+
+runtime Dashboard:
+    platform: web
+    language: typescript
+    views: [HomeDashboard, DeviceControl, AutomationBuilder]
+
+# ═══════════════════════════ Flows ════════════════════════════════
+
+flow SensorFlow:
+    EdgeHub -> Cloud:
+        protocol: mqtt
+        auth: tls_cert
+        events: [sensor_reading, device_status]
+
+    Cloud -> Dashboard:
+        protocol: websocket
+        auth: jwt
+        events: [device_update, sensor_update, automation_triggered]
+
+    Cloud -> MobileApp:
+        protocol: websocket
+        auth: jwt
+        events: [device_update, alert, automation_triggered]
+
+    MobileApp -> Cloud:
+        protocol: https
+        auth: jwt
+        rate_limit: 60/min
+
+    Dashboard -> Cloud:
+        protocol: https
+        auth: jwt
