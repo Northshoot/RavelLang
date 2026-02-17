@@ -3,6 +3,9 @@ Java.g4
 out/
 rout/*
 bin/
+dist/
+node_modules/
+ravel-output/
 
 .idea/*
 # Prerequisites
