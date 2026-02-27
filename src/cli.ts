@@ -294,6 +294,7 @@ LANGUAGE OVERVIEW:
   runtime      Deployment target (container, mobile, serverless, edge)
   agent        AI/LLM-powered component
   flow         Data pipeline between runtimes with protocol specs
+  feature      Ownership tracking and blast-radius analysis
 
 Learn more: https://github.com/Northshoot/RavelLang
 `);

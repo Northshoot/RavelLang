@@ -29,6 +29,7 @@ export type SymbolKind =
   | "runtime"
   | "agent"
   | "flow"
+  | "feature"
   | "field"
   | "parameter"
   | "variable"
@@ -90,6 +91,7 @@ export interface AnalyzedProgram {
   runtimes: Map<string, AST.RuntimeDecl>;
   agents: Map<string, AST.AgentDecl>;
   flows: Map<string, AST.FlowDecl>;
+  features: Map<string, AST.FeatureDecl>;
   system?: AST.SystemDecl;
   /** Which runtimes write to which models */
   modelWriters: Map<string, Set<string>>;
@@ -97,7 +99,34 @@ export interface AnalyzedProgram {
   modelReaders: Map<string, Set<string>>;
   /** Data flow graph: runtime → runtime edges with metadata */
   flowGraph: FlowEdge[];
+  /** Feature ownership analysis results */
+  featureOwnership: FeatureOwnershipMap;
   diagnostics: CompilerDiagnostics;
+}
+
+/**
+ * Feature Ownership Analysis
+ *
+ * Tracks which feature owns each symbol, which symbols are shared
+ * across features, and the blast-radius graph for safe code generation.
+ */
+export interface FeatureOwnershipMap {
+  /** symbol name → owning feature name (primary owner) */
+  symbolOwner: Map<string, string>;
+  /** symbol name → set of features that use (depend on) this symbol */
+  symbolUsers: Map<string, Set<string>>;
+  /** Symbols owned by multiple features (conflict — should be a warning) */
+  multiOwned: Map<string, string[]>;
+  /** Symbols used by 2+ features (shared boundary — require careful handling) */
+  sharedSymbols: Set<string>;
+  /** feature name → set of other features that could be affected by changes */
+  blastRadius: Map<string, Set<string>>;
+  /** feature name → symbols it owns */
+  featureSymbols: Map<string, Set<string>>;
+  /** feature name → symbols it uses but doesn't own */
+  featureDependencies: Map<string, Set<string>>;
+  /** Symbols with no feature assignment (unowned) */
+  unownedSymbols: Set<string>;
 }
 
 export interface FlowEdge {
@@ -123,6 +152,7 @@ export class Analyzer {
   private runtimes = new Map<string, AST.RuntimeDecl>();
   private agents = new Map<string, AST.AgentDecl>();
   private flows = new Map<string, AST.FlowDecl>();
+  private features = new Map<string, AST.FeatureDecl>();
   private system?: AST.SystemDecl;
 
   constructor() {
@@ -140,6 +170,9 @@ export class Analyzer {
     // ── Pass 3: Flow analysis ──
     const { modelWriters, modelReaders, flowGraph } = this.analyzeFlows();
 
+    // ── Pass 4: Feature ownership analysis ──
+    const featureOwnership = this.analyzeFeatureOwnership();
+
     return {
       ast: program,
       globalScope: this.globalScope,
@@ -150,10 +183,12 @@ export class Analyzer {
       runtimes: this.runtimes,
       agents: this.agents,
       flows: this.flows,
+      features: this.features,
       system: this.system,
       modelWriters,
       modelReaders,
       flowGraph,
+      featureOwnership,
       diagnostics: this.diagnostics,
     };
   }
@@ -244,6 +279,16 @@ export class Analyzer {
           });
           break;
 
+        case "FeatureDecl":
+          this.features.set(decl.name, decl);
+          this.globalScope.define({
+            name: decl.name,
+            kind: "feature",
+            node: decl,
+            scope: this.globalScope,
+          });
+          break;
+
         case "ImportDecl":
           // Imports are resolved at a higher level
           break;
@@ -325,6 +370,33 @@ export class Analyzer {
           this.diagnostics.warn(
             `Controller '${name}' parameter '${param.name}' references type '${typeName}' which is not a known model or service`,
             param.loc,
+          );
+        }
+      }
+    }
+
+    // Validate feature references
+    for (const [name, feature] of this.features) {
+      const allSymbols = new Set([
+        ...this.models.keys(),
+        ...this.controllers.keys(),
+        ...this.views.keys(),
+        ...this.services.keys(),
+        ...this.agents.keys(),
+      ]);
+      for (const owned of feature.owns) {
+        if (!allSymbols.has(owned)) {
+          this.diagnostics.error(
+            `Feature '${name}' owns unknown symbol '${owned}'`,
+            feature.loc,
+          );
+        }
+      }
+      for (const used of feature.uses) {
+        if (!allSymbols.has(used)) {
+          this.diagnostics.error(
+            `Feature '${name}' uses unknown symbol '${used}'`,
+            feature.loc,
           );
         }
       }
@@ -423,6 +495,149 @@ export class Analyzer {
     }
 
     return { modelWriters, modelReaders, flowGraph };
+  }
+
+  // ── Pass 4: Feature Ownership Analysis ──
+
+  private analyzeFeatureOwnership(): FeatureOwnershipMap {
+    const symbolOwner = new Map<string, string>();
+    const symbolUsers = new Map<string, Set<string>>();
+    const multiOwned = new Map<string, string[]>();
+    const sharedSymbols = new Set<string>();
+    const blastRadius = new Map<string, Set<string>>();
+    const featureSymbols = new Map<string, Set<string>>();
+    const featureDependencies = new Map<string, Set<string>>();
+
+    // Initialize per-feature tracking
+    for (const [featureName] of this.features) {
+      featureSymbols.set(featureName, new Set());
+      featureDependencies.set(featureName, new Set());
+      blastRadius.set(featureName, new Set());
+    }
+
+    // Build ownership map from `owns` declarations
+    for (const [featureName, feature] of this.features) {
+      for (const sym of feature.owns) {
+        featureSymbols.get(featureName)!.add(sym);
+
+        if (symbolOwner.has(sym)) {
+          // Multi-ownership conflict
+          if (!multiOwned.has(sym)) {
+            multiOwned.set(sym, [symbolOwner.get(sym)!]);
+          }
+          multiOwned.get(sym)!.push(featureName);
+          this.diagnostics.warn(
+            `Symbol '${sym}' is owned by multiple features: ${multiOwned.get(sym)!.join(", ")}. Consider splitting shared logic.`,
+            feature.loc,
+          );
+        } else {
+          symbolOwner.set(sym, featureName);
+        }
+      }
+    }
+
+    // Build usage map from `uses` declarations
+    for (const [featureName, feature] of this.features) {
+      for (const sym of feature.uses) {
+        featureDependencies.get(featureName)!.add(sym);
+
+        if (!symbolUsers.has(sym)) {
+          symbolUsers.set(sym, new Set());
+        }
+        symbolUsers.get(sym)!.add(featureName);
+      }
+    }
+
+    // Also add implicit ownership from `owns` to symbolUsers
+    // (the owning feature also "uses" the symbol)
+    for (const [featureName, feature] of this.features) {
+      for (const sym of feature.owns) {
+        if (!symbolUsers.has(sym)) {
+          symbolUsers.set(sym, new Set());
+        }
+        symbolUsers.get(sym)!.add(featureName);
+      }
+    }
+
+    // Infer additional cross-feature dependencies from controllers
+    // (if a controller references models owned by different features)
+    for (const [, ctrl] of this.controllers) {
+      const ctrlFeature = symbolOwner.get(ctrl.name);
+      if (!ctrlFeature) continue;
+
+      for (const param of ctrl.params) {
+        const modelName = this.resolveTypeName(param.typeExpr);
+        if (modelName && symbolOwner.has(modelName)) {
+          const modelFeature = symbolOwner.get(modelName)!;
+          if (modelFeature !== ctrlFeature) {
+            // This controller implicitly depends on another feature's model
+            featureDependencies.get(ctrlFeature)!.add(modelName);
+            if (!symbolUsers.has(modelName)) {
+              symbolUsers.set(modelName, new Set());
+            }
+            symbolUsers.get(modelName)!.add(ctrlFeature);
+          }
+        }
+      }
+    }
+
+    // Identify shared symbols (used by 2+ features)
+    for (const [sym, users] of symbolUsers) {
+      if (users.size >= 2) {
+        sharedSymbols.add(sym);
+      }
+    }
+
+    // Compute blast radius: if feature X changes a symbol, which
+    // other features could be affected?
+    for (const [featureName, feature] of this.features) {
+      const affected = blastRadius.get(featureName)!;
+      // Every symbol this feature owns could affect features that use it
+      for (const sym of feature.owns) {
+        const users = symbolUsers.get(sym);
+        if (users) {
+          for (const user of users) {
+            if (user !== featureName) {
+              affected.add(user);
+            }
+          }
+        }
+      }
+    }
+
+    // Find unowned symbols
+    const allDeclarationNames = new Set<string>([
+      ...this.models.keys(),
+      ...this.controllers.keys(),
+      ...this.views.keys(),
+      ...this.services.keys(),
+      ...this.agents.keys(),
+    ]);
+    const unownedSymbols = new Set<string>();
+    if (this.features.size > 0) {
+      for (const name of allDeclarationNames) {
+        if (!symbolOwner.has(name)) {
+          unownedSymbols.add(name);
+        }
+      }
+      if (unownedSymbols.size > 0) {
+        this.diagnostics.warn(
+          `Unowned symbols (not assigned to any feature): ${[...unownedSymbols].join(", ")}. Consider assigning them to a feature for blast-radius tracking.`,
+          this.system?.loc ?? { line: 1, column: 1 },
+        );
+      }
+    }
+
+    return {
+      symbolOwner,
+      symbolUsers,
+      multiOwned,
+      sharedSymbols,
+      blastRadius,
+      featureSymbols,
+      featureDependencies,
+      unownedSymbols,
+    };
   }
 
   private findPropValue(

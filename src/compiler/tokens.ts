@@ -33,6 +33,7 @@ export enum TokenType {
   RUNTIME = "RUNTIME",
   AGENT = "AGENT",
   FLOW = "FLOW",
+  FEATURE = "FEATURE",
 
   // ── Keywords: Model qualifiers ──
   LOCAL = "LOCAL",
@@ -169,6 +170,7 @@ export const KEYWORDS: ReadonlyMap<string, TokenType> = new Map([
   ["runtime", TokenType.RUNTIME],
   ["agent", TokenType.AGENT],
   ["flow", TokenType.FLOW],
+  ["feature", TokenType.FEATURE],
 
   // Model qualifiers
   ["local", TokenType.LOCAL],

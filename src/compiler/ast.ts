@@ -40,7 +40,8 @@ export type Declaration =
   | ServiceDecl
   | RuntimeDecl
   | AgentDecl
-  | FlowDecl;
+  | FlowDecl
+  | FeatureDecl;
 
 // ═══════════════════════════════════════════════════════════════════
 // Import
@@ -243,6 +244,21 @@ export interface FlowRule extends ASTNode {
   kind: "FlowRule";
   source: string;
   target: string;
+  properties: PropertyAssignment[];
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Feature (new in v2 — ownership tracking and blast-radius analysis)
+// ═══════════════════════════════════════════════════════════════════
+
+export interface FeatureDecl extends ASTNode {
+  kind: "FeatureDecl";
+  name: string;
+  description?: string;
+  /** Symbols this feature primarily owns (models, controllers, views, etc.) */
+  owns: string[];
+  /** Symbols this feature reads/depends on but does not own */
+  uses: string[];
   properties: PropertyAssignment[];
 }
 

@@ -17,7 +17,7 @@
  *   Phase 6: Quality      — Security audit, tests, docs
  */
 
-import type { SystemIR, RuntimeIR } from "../compiler/ir.js";
+import type { SystemIR, RuntimeIR, FeatureLayerIR } from "../compiler/ir.js";
 import type {
   AgentExecutionPlan,
   ExecutionPhase,
@@ -27,13 +27,17 @@ import type {
   ExpectedOutput,
   OutputType,
   TechStackRequirement,
+  FeatureScope,
+  SharedSymbolWarning,
 } from "./types.js";
 
 export class Planner {
   private taskCounter = 0;
+  private featureLayer!: FeatureLayerIR;
 
   plan(ir: SystemIR): AgentExecutionPlan {
     this.taskCounter = 0;
+    this.featureLayer = ir.featureLayer;
 
     const phases: ExecutionPhase[] = [
       this.planFoundationPhase(ir),
@@ -591,7 +595,8 @@ export class Planner {
     context: AgentContext,
     outputs: ExpectedOutput[],
   ): AgentTask {
-    return {
+    const featureScope = this.computeFeatureScope(context);
+    const task: AgentTask = {
       id: `task_${++this.taskCounter}`,
       agent,
       description,
@@ -599,6 +604,127 @@ export class Planner {
       outputs,
       priority: this.taskCounter,
     };
+
+    if (featureScope) {
+      task.featureScope = featureScope;
+
+      // Inject feature-awareness instructions into the context
+      if (featureScope.sharedSymbols.length > 0) {
+        context.constraints.push(
+          `FEATURE BOUNDARY WARNING: This task touches shared symbols. ` +
+          featureScope.sharedSymbols
+            .map((s) => `'${s.symbol}' is owned by [${s.owner}] and used by [${s.usedBy.join(", ")}]`)
+            .join("; ") +
+          `. Do NOT modify shared interfaces without considering all dependent features.`,
+        );
+      }
+      if (featureScope.blastRadius.length > 0) {
+        context.constraints.push(
+          `BLAST RADIUS: Changes in this task could affect features: [${featureScope.blastRadius.join(", ")}]. ` +
+          `Ensure backward compatibility for shared models, APIs, and contracts.`,
+        );
+      }
+    }
+
+    return task;
+  }
+
+  /**
+   * Compute which features a task touches based on the symbols in its IR slice.
+   * Returns null if no features are defined.
+   */
+  private computeFeatureScope(context: AgentContext): FeatureScope | null {
+    const fl = this.featureLayer;
+    if (!fl || fl.features.length === 0) return null;
+
+    // Collect all symbol names referenced in the task's relevant IR
+    const touchedSymbols = this.extractSymbolNames(context.relevantIR);
+
+    // Determine primary features
+    const primaryFeatures = new Set<string>();
+    const symbolOwnership: Record<string, string> = {};
+    for (const sym of touchedSymbols) {
+      const owner = fl.ownership[sym];
+      if (owner) {
+        primaryFeatures.add(owner);
+        symbolOwnership[sym] = owner;
+      }
+    }
+
+    // Identify shared symbols this task touches
+    const sharedSymbols: SharedSymbolWarning[] = [];
+    for (const shared of fl.sharedSymbols) {
+      if (touchedSymbols.has(shared.symbol)) {
+        sharedSymbols.push({
+          symbol: shared.symbol,
+          owner: shared.owner,
+          usedBy: shared.usedBy,
+          warning: `'${shared.symbol}' (${shared.kind}) is shared across features. ` +
+            `Owned by [${shared.owner}], also used by [${shared.usedBy.join(", ")}]. ` +
+            `Any changes to this ${shared.kind}'s interface require coordination.`,
+        });
+      }
+    }
+
+    // Compute blast radius for this task
+    const blastRadiusSet = new Set<string>();
+    for (const feature of primaryFeatures) {
+      const affected = fl.blastRadius[feature] ?? [];
+      for (const a of affected) {
+        blastRadiusSet.add(a);
+      }
+    }
+    // Remove primary features from blast radius (they're already in scope)
+    for (const f of primaryFeatures) {
+      blastRadiusSet.delete(f);
+    }
+
+    return {
+      primaryFeatures: [...primaryFeatures],
+      sharedSymbols,
+      blastRadius: [...blastRadiusSet],
+      symbolOwnership,
+    };
+  }
+
+  /**
+   * Extract all symbol names from a task's relevant IR slice.
+   * Walks the IR object looking for name fields.
+   */
+  private extractSymbolNames(ir: Record<string, unknown>): Set<string> {
+    const names = new Set<string>();
+    this.walkForNames(ir, names);
+    return names;
+  }
+
+  private walkForNames(obj: unknown, names: Set<string>): void {
+    if (!obj || typeof obj !== "object") return;
+    if (Array.isArray(obj)) {
+      for (const item of obj) this.walkForNames(item, names);
+      return;
+    }
+    const rec = obj as Record<string, unknown>;
+    // Collect "name" fields from IR objects (ModelIR, ControllerIR, ViewIR, etc.)
+    if (typeof rec["name"] === "string") {
+      names.add(rec["name"] as string);
+    }
+    // Also collect from assignments in RuntimeIR
+    if (rec["assignments"] && typeof rec["assignments"] === "object") {
+      const assignments = rec["assignments"] as Record<string, unknown>;
+      for (const key of Object.keys(assignments)) {
+        const val = assignments[key];
+        if (Array.isArray(val)) {
+          for (const item of val) {
+            if (typeof item === "string") names.add(item);
+          }
+        }
+      }
+    }
+    // Recurse into nested objects
+    for (const key of Object.keys(rec)) {
+      if (key === "name") continue;
+      this.walkForNames(rec[key], names);
+    }
   }
 
   private isBackendRuntime(r: RuntimeIR): boolean {

@@ -75,6 +75,31 @@ export interface AgentTask {
   outputs: ExpectedOutput[];
   /** Priority within the phase (lower = higher priority) */
   priority: number;
+  /** Feature ownership annotations — which features this task touches */
+  featureScope?: FeatureScope;
+}
+
+/**
+ * Feature scope annotations for a task.
+ * Tells the agent exactly which features it's working on,
+ * what's shared, and what it must not break.
+ */
+export interface FeatureScope {
+  /** Features this task primarily serves */
+  primaryFeatures: string[];
+  /** Symbols that are shared across features — handle with care */
+  sharedSymbols: SharedSymbolWarning[];
+  /** Other features that could break if this task's output changes shared code */
+  blastRadius: string[];
+  /** Per-symbol ownership: which feature owns each symbol this task touches */
+  symbolOwnership: Record<string, string>;
+}
+
+export interface SharedSymbolWarning {
+  symbol: string;
+  owner: string;
+  usedBy: string[];
+  warning: string;
 }
 
 export type AgentType =

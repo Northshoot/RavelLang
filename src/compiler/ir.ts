@@ -16,7 +16,7 @@
  *   - Where everything runs (runtimes → containers, devices, clouds)
  */
 
-import type { AnalyzedProgram, FlowEdge } from "./analyzer.js";
+import type { AnalyzedProgram, FlowEdge, FeatureOwnershipMap } from "./analyzer.js";
 import type * as AST from "./ast.js";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,6 +48,9 @@ export interface SystemIR {
 
   /** Communication layer: data flows, protocols, events */
   communicationLayer: CommunicationLayerIR;
+
+  /** Feature ownership layer: blast-radius tracking, cross-feature deps */
+  featureLayer: FeatureLayerIR;
 }
 
 // ── Data Layer ──
@@ -237,6 +240,40 @@ export interface FlowEdgeIR {
   sharedModels: string[];
 }
 
+// ── Feature Ownership Layer ──
+
+export interface FeatureLayerIR {
+  features: FeatureIR[];
+  /** symbol → owning feature (single owner) */
+  ownership: Record<string, string>;
+  /** Symbols used by 2+ features — agents must handle with care */
+  sharedSymbols: SharedSymbolIR[];
+  /** feature → features that would be affected by changes */
+  blastRadius: Record<string, string[]>;
+  /** Symbols not assigned to any feature */
+  unownedSymbols: string[];
+}
+
+export interface FeatureIR {
+  name: string;
+  description?: string;
+  /** Symbols this feature primarily owns */
+  owns: string[];
+  /** Symbols this feature reads from other features (cross-feature deps) */
+  uses: string[];
+  /** Other features that could break if this feature's code changes */
+  affectedFeatures: string[];
+}
+
+export interface SharedSymbolIR {
+  symbol: string;
+  owner: string;
+  /** Features that depend on this symbol (besides the owner) */
+  usedBy: string[];
+  /** The kind of declaration (model, controller, view, etc.) */
+  kind: string;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // IR Builder — Lowers AnalyzedProgram → SystemIR
 // ═══════════════════════════════════════════════════════════════════
@@ -265,6 +302,7 @@ export class IRBuilder {
       intelligenceLayer: this.buildIntelligenceLayer(program),
       infrastructureLayer: this.buildInfrastructureLayer(program),
       communicationLayer: this.buildCommunicationLayer(program),
+      featureLayer: this.buildFeatureLayer(program),
     };
   }
 
@@ -528,6 +566,61 @@ export class IRBuilder {
     }
 
     return { flows };
+  }
+
+  // ── Feature Ownership Layer ──
+
+  private buildFeatureLayer(program: AnalyzedProgram): FeatureLayerIR {
+    const fo = program.featureOwnership;
+
+    const features: FeatureIR[] = [];
+    for (const [name, feature] of program.features) {
+      features.push({
+        name,
+        description: feature.description,
+        owns: feature.owns,
+        uses: feature.uses,
+        affectedFeatures: [...(fo.blastRadius.get(name) ?? [])],
+      });
+    }
+
+    // Build ownership record
+    const ownership: Record<string, string> = {};
+    for (const [sym, owner] of fo.symbolOwner) {
+      ownership[sym] = owner;
+    }
+
+    // Build shared symbols list
+    const sharedSymbols: SharedSymbolIR[] = [];
+    for (const sym of fo.sharedSymbols) {
+      const owner = fo.symbolOwner.get(sym) ?? "unowned";
+      const users = fo.symbolUsers.get(sym) ?? new Set();
+      const usedBy = [...users].filter((u) => u !== owner);
+
+      // Determine symbol kind
+      let kind = "unknown";
+      if (program.models.has(sym)) kind = "model";
+      else if (program.controllers.has(sym)) kind = "controller";
+      else if (program.views.has(sym)) kind = "view";
+      else if (program.services.has(sym)) kind = "service";
+      else if (program.agents.has(sym)) kind = "agent";
+
+      sharedSymbols.push({ symbol: sym, owner, usedBy, kind });
+    }
+
+    // Build blast radius record
+    const blastRadius: Record<string, string[]> = {};
+    for (const [feature, affected] of fo.blastRadius) {
+      blastRadius[feature] = [...affected];
+    }
+
+    return {
+      features,
+      ownership,
+      sharedSymbols,
+      blastRadius,
+      unownedSymbols: [...fo.unownedSymbols],
+    };
   }
 
   // ─────────────────────── Utilities ─────────────────────────────

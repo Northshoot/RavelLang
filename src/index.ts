@@ -19,9 +19,9 @@
 export { Lexer } from "./compiler/lexer.js";
 export { Parser } from "./compiler/parser.js";
 export { Analyzer } from "./compiler/analyzer.js";
-export type { AnalyzedProgram, Scope, Symbol } from "./compiler/analyzer.js";
+export type { AnalyzedProgram, Scope, Symbol, FeatureOwnershipMap } from "./compiler/analyzer.js";
 export { IRBuilder } from "./compiler/ir.js";
-export type { SystemIR } from "./compiler/ir.js";
+export type { SystemIR, FeatureLayerIR, FeatureIR, SharedSymbolIR } from "./compiler/ir.js";
 
 // ── AST types ──
 export type * from "./compiler/ast.js";
@@ -52,6 +52,8 @@ export type {
   AgentTask,
   AgentType,
   ExecutionPhase,
+  FeatureScope,
+  SharedSymbolWarning,
 } from "./agents/types.js";
 export type {
   AgentRuntime,

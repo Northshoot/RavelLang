@@ -305,6 +305,33 @@ export function summarizePlan(plan: AgentExecutionPlan): string {
   lines.push(`  Compiler: Ravel v${plan.compilerVersion}`);
   lines.push("");
 
+  // Feature ownership summary (if features are defined)
+  const featureLayer = plan.ir?.featureLayer;
+  if (featureLayer && featureLayer.features.length > 0) {
+    lines.push("Feature Ownership:");
+    for (const feature of featureLayer.features) {
+      const desc = feature.description ? ` — ${feature.description}` : "";
+      lines.push(`  ${feature.name}${desc}`);
+      lines.push(`    Owns: [${feature.owns.join(", ")}]`);
+      if (feature.uses.length > 0) {
+        lines.push(`    Uses: [${feature.uses.join(", ")}]`);
+      }
+      if (feature.affectedFeatures.length > 0) {
+        lines.push(`    Blast radius: [${feature.affectedFeatures.join(", ")}]`);
+      }
+    }
+    if (featureLayer.sharedSymbols.length > 0) {
+      lines.push("  Shared symbols (cross-feature boundaries):");
+      for (const s of featureLayer.sharedSymbols) {
+        lines.push(`    ${s.symbol} (${s.kind}): owned by [${s.owner}], used by [${s.usedBy.join(", ")}]`);
+      }
+    }
+    if (featureLayer.unownedSymbols.length > 0) {
+      lines.push(`  Unowned: [${featureLayer.unownedSymbols.join(", ")}]`);
+    }
+    lines.push("");
+  }
+
   let totalTasks = 0;
   for (const phase of plan.phases) {
     lines.push(`Phase: ${phase.name}`);
@@ -318,6 +345,15 @@ export function summarizePlan(plan: AgentExecutionPlan): string {
       lines.push(`    [${task.agent}] ${task.description}`);
       for (const out of task.outputs) {
         lines.push(`      -> ${out.path} (${out.type})`);
+      }
+      if (task.featureScope) {
+        const fs = task.featureScope;
+        if (fs.primaryFeatures.length > 0) {
+          lines.push(`      Features: [${fs.primaryFeatures.join(", ")}]`);
+        }
+        if (fs.blastRadius.length > 0) {
+          lines.push(`      Blast radius: [${fs.blastRadius.join(", ")}]`);
+        }
       }
       totalTasks++;
     }

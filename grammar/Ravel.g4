@@ -42,6 +42,7 @@ declaration
     | runtimeDecl
     | agentDecl
     | flowDecl
+    | featureDecl
     ;
 
 // ─────────────────────────── Imports ────────────────────────────
@@ -341,6 +342,23 @@ flowProp
     | IDENT ':' expr
     ;
 
+// ──────────────────── Feature Declaration ────────────────────────
+
+featureDecl
+    : 'feature' IDENT ':' INDENT featureBody DEDENT
+    ;
+
+featureBody
+    : (featureSection NEWLINE*)*
+    ;
+
+featureSection
+    : 'description' ':' STRING
+    | 'owns' ':' listExpr
+    | 'uses' ':' listExpr
+    | IDENT ':' expr
+    ;
+
 // ───────────────────── Type Expressions ─────────────────────────
 
 typeExpr
@@ -527,6 +545,7 @@ SERVICE     : 'service';     // * (replaces 'interface')
 RUNTIME     : 'runtime';     // * (replaces 'space')
 AGENT       : 'agent';       // *
 FLOW        : 'flow';
+FEATURE     : 'feature';    // * (ownership and blast-radius tracking)
 SCHEMA      : 'schema';
 BEHAVIOR    : 'behavior';    // *
 STYLE       : 'style';       // *

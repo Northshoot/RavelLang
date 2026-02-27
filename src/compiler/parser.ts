@@ -53,9 +53,10 @@ export class Parser {
     if (this.check(TokenType.RUNTIME)) return this.parseRuntime();
     if (this.check(TokenType.AGENT)) return this.parseAgent();
     if (this.check(TokenType.FLOW)) return this.parseFlow();
+    if (this.check(TokenType.FEATURE)) return this.parseFeature();
 
     throw this.error(
-      `Expected declaration (system, model, controller, view, service, runtime, agent, flow), got '${this.peek().value}'`,
+      `Expected declaration (system, model, controller, view, service, runtime, agent, flow, feature), got '${this.peek().value}'`,
     );
   }
 
@@ -756,6 +757,62 @@ export class Parser {
     return { kind: "FlowDecl", name, rules, loc };
   }
 
+  // ── Feature ──
+
+  private parseFeature(): AST.FeatureDecl {
+    const loc = this.loc();
+    this.expect(TokenType.FEATURE);
+    const name = this.expectIdent();
+    this.expect(TokenType.COLON);
+    this.expectIndent();
+
+    let description: string | undefined;
+    const owns: string[] = [];
+    const uses: string[] = [];
+    const properties: AST.PropertyAssignment[] = [];
+
+    while (!this.check(TokenType.DEDENT) && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check(TokenType.DEDENT)) break;
+
+      const propName = this.expectIdent();
+
+      if (propName === "description") {
+        this.expect(TokenType.COLON);
+        description = this.expectString();
+      } else if (propName === "owns") {
+        this.expect(TokenType.COLON);
+        this.expect(TokenType.LBRACK);
+        owns.push(this.expectIdent());
+        while (this.match(TokenType.COMMA)) {
+          owns.push(this.expectIdent());
+        }
+        this.expect(TokenType.RBRACK);
+      } else if (propName === "uses") {
+        this.expect(TokenType.COLON);
+        this.expect(TokenType.LBRACK);
+        uses.push(this.expectIdent());
+        while (this.match(TokenType.COMMA)) {
+          uses.push(this.expectIdent());
+        }
+        this.expect(TokenType.RBRACK);
+      } else {
+        this.expect(TokenType.COLON);
+        const value = this.parseExpression();
+        properties.push({
+          kind: "PropertyAssignment",
+          name: propName,
+          value,
+          loc: this.loc(),
+        });
+      }
+      this.skipNewlines();
+    }
+
+    this.expect(TokenType.DEDENT);
+    return { kind: "FeatureDecl", name, description, owns, uses, properties, loc };
+  }
+
   // ─────────────────────── Type Expressions ──────────────────────
 
   private parseTypeExpr(): AST.TypeExpr {
@@ -1349,6 +1406,7 @@ export class Parser {
       // Other keywords used as values
       TokenType.EVENT, TokenType.DEF,
       TokenType.BEHAVIOR, TokenType.SCALING, TokenType.COMPONENTS,
+      TokenType.FEATURE,
     ]);
     if (EXPR_KEYWORDS.has(this.peek().type)) {
       const name = this.advance().value;
@@ -1522,7 +1580,7 @@ export class Parser {
       TokenType.DOUBLE, TokenType.BOOL, TokenType.STRING_TYPE,
       TokenType.BYTE, TokenType.BYTES, TokenType.UUID,
       TokenType.DATETIME, TokenType.TIMESTAMP, TokenType.VOID,
-      TokenType.EMIT, TokenType.LOG,
+      TokenType.EMIT, TokenType.LOG, TokenType.FEATURE,
     ]);
     if (IDENT_KEYWORDS.has(this.peek().type)) {
       return this.advance().value;

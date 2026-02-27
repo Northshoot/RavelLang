@@ -1,0 +1,182 @@
+# ──────────────────────────────────────────────────────────────
+# Concert App with Feature Ownership — Blast-Radius Tracking
+# ──────────────────────────────────────────────────────────────
+# The same concert ticketing platform, now with feature
+# annotations that tell AI agents exactly which symbols belong
+# to which feature, what's shared, and what could break.
+#
+# When an agent works on the Ticketing feature, it knows:
+#   - It owns Ticket, TicketController, CheckoutPage
+#   - It uses Concert and User (owned by Discovery and Auth)
+#   - Changing Ticket's schema won't break Auth
+#   - But changing Concert's interface would break Discovery
+#
+# This is the mechanism that prevents Feature X from breaking
+# Feature Y: every symbol has a clear owner, and the compiler
+# computes the blast radius automatically.
+# ──────────────────────────────────────────────────────────────
+
+system ConcertApp:
+    description: "Concert ticketing with feature-level blast-radius tracking"
+    version: "2.0.0"
+
+# ─── Features: who owns what, who depends on what ───────────
+
+feature Authentication:
+    description: "User accounts, login, sessions"
+    owns: [User, AuthController, LoginPage, SignupPage]
+
+feature Discovery:
+    description: "Concert browsing and search"
+    owns: [Concert, Venue, EventList, ConcertRecommender]
+    uses: [User]
+
+feature Ticketing:
+    description: "Ticket purchase and management"
+    owns: [Ticket, TicketController, CheckoutPage, SeatMap]
+    uses: [Concert, User]
+
+feature Pricing:
+    description: "Dynamic pricing and revenue optimization"
+    owns: [TicketPricingAgent]
+    uses: [Concert, Ticket]
+
+# ─── Data Models ─────────────────────────────────────────────
+
+model User:
+    schema:
+        id: uuid @primary
+        email: string @unique
+        name: string
+        created_at: datetime
+    storage: postgres
+
+model Concert:
+    schema:
+        id: uuid @primary
+        title: string
+        artist: string
+        venue_id: uuid -> Venue.id
+        date: datetime
+        total_seats: int
+        base_price: decimal
+    storage: postgres
+
+model Venue:
+    schema:
+        id: uuid @primary
+        name: string
+        city: string
+        capacity: int
+        lat: double
+        lon: double
+    storage: postgres
+
+model Ticket:
+    schema:
+        id: uuid @primary
+        concert_id: uuid -> Concert.id
+        user_id: uuid -> User.id
+        seat: string
+        price: decimal
+        status: enum("reserved", "purchased", "cancelled")
+        purchased_at: datetime?
+    storage: postgres
+
+# ─── Controllers ─────────────────────────────────────────────
+
+controller AuthController(users: User):
+    event users.created(user: User):
+        log user.email
+
+controller TicketController(tickets: Ticket, concerts: Concert):
+    event tickets.created(ticket: Ticket):
+        concert = concerts.get(ticket.concert_id)
+        if concert.total_seats < 1:
+            return error("Sold out")
+        concert.total_seats -= 1
+        concert.save()
+
+# ─── Views ───────────────────────────────────────────────────
+
+view LoginPage:
+    displays: User
+    platform: [ios, android]
+    behavior:
+        "Email and password fields with validation"
+        "Sign-in button, sign-up link, forgot password"
+
+view SignupPage:
+    displays: User
+    platform: [ios, android]
+    behavior:
+        "Name, email, password fields"
+        "Password strength indicator"
+
+view EventList:
+    displays: Concert[]
+    platform: [ios, android]
+    behavior:
+        "Scrollable cards showing upcoming concerts"
+        "Each card: artist image, title, venue, date, price"
+        "Filter by city, date, genre"
+        "Pull to refresh"
+
+view SeatMap:
+    displays: Concert
+    platform: [ios, android]
+    behavior:
+        "Interactive venue seat map"
+        "Color coded: available (green), taken (gray), selected (blue)"
+        "Tap to select, tap again to deselect"
+        "Running total at the bottom"
+
+view CheckoutPage:
+    displays: Ticket
+    platform: [ios, android]
+    behavior:
+        "Order summary: concert, seats, total price"
+        "Payment form with Apple Pay / Google Pay"
+        "Confirmation animation on success"
+
+# ─── AI Agents ───────────────────────────────────────────────
+
+agent ConcertRecommender:
+    model: "claude-sonnet"
+    behavior:
+        "Recommend concerts based on user listening history"
+        "Prioritize events in the user's city"
+        "Mix popular and niche suggestions"
+    input: User
+    output: Concert[]
+    temperature: 0.7
+
+agent TicketPricingAgent:
+    model: "gpt-4o-mini"
+    behavior:
+        "Adjust ticket prices based on demand and time to event"
+        "Surge pricing when demand exceeds 80% capacity"
+        "Early bird discount for purchases 30+ days before event"
+    input: Concert, Ticket[]
+    output: json
+    temperature: 0.1
+
+# ─── Runtimes ────────────────────────────────────────────────
+
+runtime Backend:
+    platform: container
+    language: typescript
+    controllers: [AuthController, TicketController]
+    models: [User, Concert, Venue, Ticket]
+    agents: [ConcertRecommender, TicketPricingAgent]
+
+runtime Mobile:
+    platform: [ios, android]
+    views: [LoginPage, SignupPage, EventList, SeatMap, CheckoutPage]
+
+# ─── Flows ───────────────────────────────────────────────────
+
+flow AppFlow:
+    Mobile -> Backend:
+        protocol: https
+        auth: jwt
