@@ -7,6 +7,7 @@ A minimal, no-fuss way to log who you see and how often. No app to build — jus
 1. **[01-notion-setup.md](./01-notion-setup.md)** — People + Events databases, dashboard views, how to grab the IDs you'll need.
 2. **[02-notion-form.md](./02-notion-form.md)** — Native Notion form for fast entry from any browser; add-to-home-screen instructions.
 3. **[03-ios-shortcut.md](./03-ios-shortcut.md)** — Step-by-step iOS Shortcut build with the exact Notion API payloads. Dictate notes, one-tap log.
+4. **[04-llm-prompt.md](./04-llm-prompt.md)** — A drop-in prompt for a Notion-connected LLM (Claude + Notion MCP, ChatGPT + Notion connector, etc.) that builds the whole workspace autonomously.
 
 ## Setup order
 
