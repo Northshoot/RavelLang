@@ -63,3 +63,7 @@ android/app/libs/
 android/src/main/gen/
 posix/.deps/
 /runtime/java/src/nbproject/private/
+
+# Python
+__pycache__/
+*.pyc
